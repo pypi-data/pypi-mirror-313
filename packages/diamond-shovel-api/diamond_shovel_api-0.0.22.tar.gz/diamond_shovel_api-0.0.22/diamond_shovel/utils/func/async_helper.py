@@ -1,0 +1,6 @@
+
+async def call_sync(func, *args, **kwargs):
+    ...
+
+def call_async(func, *args, **kwargs):
+    ...
