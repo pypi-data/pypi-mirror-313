@@ -1,0 +1,326 @@
+Metadata-Version: 2.1
+Name: relap-py
+Version: 0.0.35
+Summary: Module for RELAP post-processing
+Author: Jordi Freixa
+Author-email: <jordi.freixa-terradas@upc.edu>
+License: MIT
+Keywords: relap,trace
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+
+# General Information
+
+* Title: RELAP utilities
+* created: May 2020
+* last modified: 2024-10-30
+* Created by: Jordi Freixa
+* Description: This Module provides function tools for postprocessing RELAP data
+
+# INSTALLATION:
+
+* install with pip install relap_py
+* make a new system environmental variable called `RELAP_EXE_PATH` that contains
+the path to your relap executable.
+
+# CONFIGURATION AND DEFAULTS
+
+Use the following functions to set up the configuration of the module for the particular python project:
+
+* set_figures_type('pdf') the figures will be saved with this format
+* set_figures_loc('./figures/') location where the figures will be saved
+* set_show_plot(False) Boolean, show interactive python plot window?
+* set_unc_bands(False) is there a uncertainty file containing bands? set the name here and bands will be added to the variables plot
+* set_relap_scdap(False) Are you using the package for Relap/scdap cases?
+
+
+# TODO:
+
+- [ ] Adapt to TRACE plotting (basically reading data from csv files)
+- [ ] Make steady state table
+- [ ] Read and plot uncertainty bands
+- [ ] Just perform data extraction and write to file
+
+# TUTORIAL
+
+* Title: relap.py tutorial
+* Version: 1.0
+* Date: 2023-11-24
+* Created by: Jordi Freixa
+* Description: A quick tutorial for relap.py package
+
+Firstly import the package, for instance
+
+```
+import relap_py as rp
+```
+
+You may use the help function of Python to get info on the possible functions
+
+```
+help(rp) # to get info on the whole package
+help(rp.plot_var) # to get info on one specific function
+```
+
+## Changing defaults
+
+List of defaults. If you want to change them, you can do so by using the 
+following commands
+
+```
+rp.set_figures_type('pdf')
+rp.set_figures_loc('./my_best_figures/')
+rp.set_show_plot(True)
+rp.set_unc_bands('unc.dat')
+rp.set_relap_scdap(True)
+```
+
+## Variables file
+
+It is good to write a file to specify a list of variables that you want to extract.
+The structure is as follows:
+
+```
+alphanum   numeric     star   experiment_tag   figure_tag                    unit   timei   timee   ymin   ymax   general
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+mflowj     933020000   *      SGTR_MF          SGTR_Break_Mass_Flow          kg/s   -100    3500    0      0      no
+mflowj     545000000   *      REL_VLV_MF       Reliev_Valve_Flow_A           kg/s   -100    3500    0      0      mid_left
+```
+
+* `experiment_tag` will be used if you want to compare with experiment data
+* `figure_tag` will be used in the name of the variable, plot and axis
+* `temei` will be used as initial time for plots
+* `timee` will be used as the end time
+* `ymin` and `ymax` will be the limits in the plot, 0 means automatic
+* `general` indicates if you want to plot this in the general figure and in which position:
+    * `no` it will not be added
+    * `top_left` added to the top plot with the left y-axis
+    * `top_right` added to the top plot with the right y-axis
+    * `mid_left`
+    * `mid_right`
+    * `bottom_left`
+    * `bottom_right`
+
+## File structure
+
+The package works best when you adapt to the following structure when you 
+perform several calculations of the same scenario/case
+
+* Place each calculation in a different folder
+* In each folder, always use the same restart name
+
+```
+├── Test4
+│   ├── base
+│   │   ├── test4.i 
+│   │   ├── test4.o 
+│   │   ├── test4.r 
+│   ├── no_hpis
+│   │   ├── test4.i 
+│   │   ├── test4.o 
+│   │   ├── test4.r 
+│   ├── rcp_earlier 
+│   │   ├── test4.i 
+│   │   ├── test4.o 
+│   │   ├── test4.r 
+│   ├── figures
+│   ├── variables_test4.txt
+```
+
+I find this approach very convenient as it is very easy to generate new 
+sensitivities and it is clearly structured. It is also very easy to automatize a
+loop to run several cases at once as the commands will be the same for all folders.
+
+## Examples
+
+### Plot one single variable from a restart file (simple)
+
+```
+rp.set_show_plot(True) # Most probably you want to play with the plot
+rp.plot('voidfj', '993020000', 'your_restart')
+```
+
+> [!NOTE]
+>
+> remember that for more info, `help(rp.plot)`
+
+### Plot one single variable from a restart file (advanced)
+
+In this case you plot more than one variable and you want to store the data in 
+a variable. In this example the data of two cases is extracted and stored in `voidfj`
+the figure will be stored in pdf format but you can still play with the interactive plot
+
+```
+rp.set_show_plot(True) # Most probably you want to play with the plot
+voidfj = rp.plot('voidfj', '993020000', 'test4', ['base', 'no_hpis'], 'pdf')
+# ['base', 'no_hpis'] are restart cases you have calculated
+rp.set_show_plot(False) # I want to hide other plots created later
+```
+
+### Extract data for a restart case
+
+> [!NOTE]
+>
+>  You will need to first create the variables file, in this example `variables_test4.txt`
+
+With the following command the time trends specified in `variables_test4` will 
+be extracted from restart file `test4.r` which should be in the folder
+you are running the command
+
+```
+data, variables = rp.extract_data('variables_test4.txt', 'test4')
+```
+
+Once you have loaded the variable files you can change its contents if you need. For instance to change the final time for all
+
+```
+variables['timee'] = 4000.0 # 
+```
+
+Once you have loaded the variable files you can use it to extract other data:
+
+```
+data, _ = rp.extract_data(variables, 'test4')
+```
+
+
+### Extract data for a restart case
+
+
+> [!NOTE]
+>
+>  first declare the list of cases, it can be a single case or even empty and then it will read the restart in the folder
+
+> [!NOTE]
+>
+>  You will need to first create the variables file, in this example `variables_test4.txt`
+
+```
+cases_sgtr = ['base', 'no_hpis', 'rcp_earlier']
+cases_df_sgtr, variables = rp.extract_data('variables_test4.txt', 'test4', cases_sgtr )
+```
+
+Once you have loaded the variable files you can change its contents if you need. For instance to change the final time for all
+
+```
+variables['timee'] = 4000.0 # 
+```
+> [!TIP]
+> At this point you can do data manipulation if needed. For instance, to correct the time for all cases
+
+```
+for i, item in enumerate(cases_sgtr):
+    cases_df_sgtr[item]['time'] = cases_df_sgtr[item]['time'] - 4900
+```
+
+### Plot one single variable from the extracted data for all cases or a selected list of cases
+
+in this example only 'base' and 'no_offtake' will be plotted
+
+```
+rp.plot_var('SGTR_MF', variables, cases_df_sgtr, ['base', 'rcp_earlier'] )
+```
+
+### Plot all variables listed in variables file for the defined cases
+
+This one could be eliminated because it simply does a for loop
+over each variable and runs rp.plot_var
+
+```
+rp.plot_all(variables, cases_df_sgtr, cases_sgtr)
+```
+
+### Plot different variables from one case
+
+```
+vars_to_plot = ['core_level', 'SG_A_level']
+rp.plot_variables(vars_to_plot, variables, cases_df_sgtr['base'])
+```
+
+### Make a general plot for a single case
+
+A general figure is figure with three subfigures (top, mid and bottom) each figure
+may contain more than one time trend and you may use right or left Y-axes
+
+This figure is useful to generate a figure to explain the whole transient.
+
+```
+rp.general_fig(variables, cases_df_sgtr['base'])
+```
+
+Labels to each time trend are placed automatically, sometimes they are not placed
+in the best location and you may want to adjust them. When you run the command above 
+you will see that a list of numbers is shown, this list is the locations of each label
+ordered from top to bottom. You can copy the list, modify it and provide it as an input 
+for the command so you can manually set the locations of the labels 
+    (see `help(rp.general_fig)`for further details)
+
+### Add a new variable to the extracted data:
+
+    first calculate whatever new variable you want to do.
+    In this case I want to get the sgtr flow minus the HPIS flow
+```
+for elements in cases_df_sgtr:
+    new = cases_df_sgtr[elements]['core_level']
+    for i in range(0, len(new)):
+        new[i] = cases_df_sgtr[elements]['SGTR_MF'][i] - cases_df_sgtr[elements]['HPSI_A'][i]
+    # append the new line to each element in the dictionary
+    cases_df_sgtr[elements] = append_fields(cases_df_sgtr[elements], 'new_var', new , np.double)
+```
+
+> [!TIP]
+>
+> Additionally we may want to add one line to the variables dataframe
+
+```
+variables = rp.append_variable(variables, 'new_var', 'kg/s', 'mid_right')
+```
+
+> [!TIP]
+>
+> If I want to remove a variable from the general figure I can select it like this
+
+```
+variables.loc[23, 'general'] = 'no' # to change a single option
+```
+### Generate the general figure for several cases
+
+The general figure does not compare cases. If you want to generate one general figure
+for each of your cases, you should do the following.
+
+```
+for i, item in enumerate(cases_sgtr):
+    rp.general_fig(variables, cases_df_sgtr[item])
+    try : os.remove(rp.figures_loc + cases_sgtr[i] + '.pdf')
+    except : pass
+    os.rename(rp.figures_loc + 'general.pdf', rp.figures_loc + cases_sgtr[i] + '.pdf')
+```
+
+### Just read old dat files generated with the package
+
+If you have already generated .dat files and you just want to load them, 
+you can do so as follows:
+
+```
+new_case = np.genfromtxt('path/to/data.dat', delimiter=',',names= True)
+```
+
+The problem now is that you will need to load the variables file if you want
+to do run some of the functions of the package. You can do so by:
+
+```
+variables = rp.read_variables('path/to/variables.i')
+```
+
+### Some additional fucntions not used in this example are:
+
+* make_strip --> make a strip
+* read_variables --> just reads a file that lists all variables
+* read_stripf --> reads a stripf file
+* run_strip --> performs a strip
+* mypie --> makes a fancy pie chart
+* read_exp --> reads a experiment data file 
+* append_variable --> Append a variable to the variables dataframe.
+* print_ss --> Makes a table with the steady state data (in development) 
+
+
