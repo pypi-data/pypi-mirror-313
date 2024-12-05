@@ -1,0 +1,67 @@
+# Refer to: https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+# For pytest: https://docs.pytest.org/en/stable/reference/customize.html
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["version"]
+name = "finchnmr"
+description="[FI]tti[N]g 13[C] 1[H] HSQC [NMR]"
+authors = [
+    {name = "Nathan A. Mahynski", email = "nathan.mahynski@gmail.com"},
+    {name = "David A. Sheen", email = "david.sheen@nist.gov"}
+]
+maintainers = [
+    {name = "Nathan A. Mahynski", email = "nathan.mahynski@gmail.com"},
+    {name = "David A. Sheen", email = "david.sheen@nist.gov"}
+]
+keywords = []
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+readme = "README.md"
+license = {file = "LICENSE.md"}
+requires-python = ">=3.10"
+dependencies = [
+    "xml-python==0.4.3",
+    "nmrglue==0.11",
+    "tqdm>=4.66.1",
+    "numpy >= 1.23, <2.0.0",
+    "scikit-image==0.24.0",
+    "scipy>=1.14.1",
+    "scikit-learn",
+    "matplotlib>=3.7.2",
+    "pandas==2.2",
+    "pre-commit==3.3.3",
+    "pytest>=7.4.0",
+    "ipython<=8.21",
+    "ipykernel",
+    "nbformat>=4.2.0", # For plotly rendering in jupyter
+    "plotly>=5.24.1",
+    "mypy",
+    "sphinx"
+]
+
+[project.optional-dependencies]
+all = []
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["finchnmr*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "finchnmr.__version__"}
+
+[project.urls]
+Repository = "https://github.com/mahynski/finchnmr.git"
+Documentation = "https://finchnmr.readthedocs.io/"
+Issues = "https://github.com/mahynski/finchnmr/issues"
