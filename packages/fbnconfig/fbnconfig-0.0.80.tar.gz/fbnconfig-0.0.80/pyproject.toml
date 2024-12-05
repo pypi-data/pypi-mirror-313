@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "fbnconfig"
+version = "0.0.80"
+description = "fbnconfig is a python library (and commandline tool) to allow a declarative description of a LUSID environment"
+authors = ["FINBOURNE Technology <engineering@finbourne.com>"]
+readme = "fbnconfig.md"
+
+[tool.poetry.scripts]
+fbnconfig = 'fbnconfig.main:cli'
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = ">= 2.6.0, <= 2.8.2"
+httpx = ">= 0.25.2, <= 0.27.0"
+click = "^8.1.7"
+
+[tool.poetry.group.dev.dependencies]
+pytest-xdist = "^3.5.0"
+coverage= "^7.4.1"
+ruff = "^0.3.3"
+respx = "^0.20.2"
+pytest = "^8.1.1"
+pyright = "^1.1.355"
+pytest-cov = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+python_classes= ["Test", "Describe"]
+testpaths= ["tests"]
+
+[tool.ruff]
+line-length = 105
+
+[tool.ruff.lint]
+select = ["F", "Q", "W", "E"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
+multiline-quotes = "double"
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pyright]
+exclude = [
+     "**/__pycache__",
+    "build",
+    ".venv"
+]
