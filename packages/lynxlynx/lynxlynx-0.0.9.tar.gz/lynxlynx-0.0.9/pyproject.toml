@@ -1,0 +1,185 @@
+[project]
+	name = "lynxlynx"
+	version = "0.0.9"
+	authors = [
+		{ name="Martin Rys", email="martin@rys.rs" },
+	]
+	description = "Personal library for my scripts"
+	readme = "README.md"
+	# Probably works on lower versions too, but I explicitly won't support that, update your env instead
+	requires-python = ">=3.12"
+	classifiers = [
+		"Programming Language :: Python :: 3",
+		"License :: OSI Approved :: MIT License",
+		"Operating System :: OS Independent",
+		"Typing :: Typed",
+	]
+
+[project.urls]
+	Homepage = "https://gitlab.com/MartinRys/python-lynxlynx"
+	Issues = "https://gitlab.com/MartinRys/python-lynxlynx/issues"
+
+[build-system]
+	requires = ["hatchling"]
+	build-backend = "hatchling.build"
+
+[tool.pyright]
+	#defineConstant = { DEBUG = true }
+
+	pythonVersion = "3.12"
+
+	#   Pyright does not support this, needs to be defined via `__builtins__.pyi`, see https://github.com/microsoft/pyright/issues/9471
+	# Translations
+	#builtins = ["_"]
+
+	# Defaults: https://github.com/microsoft/pyright/blob/main/docs/configuration.md#diagnostic-settings-defaults
+	#enableExperimentalFeatures          = false
+	strictListInference                 = true
+	strictDictionaryInference           = true
+	strictSetInference                  = true
+	deprecateTypingAliases              = true
+	reportMissingTypeStubs              = "error"
+	reportConstantRedefinition          = "error"
+	reportDeprecated                    = "error"
+	reportDuplicateImport               = "error"
+	reportIncompleteStub                = "error"
+	reportInconsistentConstructor       = "error"
+	reportInvalidStubStatement          = "error"
+	reportMatchNotExhaustive            = "error"
+	reportMissingParameterType          = "error"
+	reportMissingTypeArgument           = "warning"
+	reportPrivateUsage                  = "error"
+	reportTypeCommentUsage              = "error"
+	reportUnknownArgumentType           = "warning"
+	reportUnknownLambdaType             = "error"
+	reportUnknownMemberType             = "warning"
+	reportUnknownParameterType          = "warning"
+	reportUnknownVariableType           = "warning"
+	reportUnnecessaryCast               = "error"
+	reportUnnecessaryComparison         = "error"
+	reportUnnecessaryContains           = "error"
+	reportUnnecessaryIsInstance         = "error"
+	reportUnusedClass                   = "error"
+	reportUnusedImport                  = "error"
+	reportUnusedFunction                = "error"
+	reportUnusedVariable                = "warning"
+	reportUntypedBaseClass              = "error"
+	reportUntypedClassDecorator         = "error"
+	reportUntypedFunctionDecorator      = "error"
+	reportUntypedNamedTuple             = "error"
+	reportCallInDefaultInitializer      = "warning"
+	reportImplicitOverride              = "warning"
+	reportImplicitStringConcatenation   = "warning"
+	reportImportCycles                  = "warning"
+	reportMissingSuperCall              = "warning"
+	reportPropertyTypeMismatch          = "warning"
+	reportShadowedImports               = "warning"
+	reportUninitializedInstanceVariable = "warning"
+	reportUnnecessaryTypeIgnoreComment  = "warning"
+	reportUnusedCallResult              = "warning"
+
+[tool.ruff]
+	# Exclude a variety of commonly ignored directories.
+	exclude = [
+		".bzr",
+		".direnv",
+		".eggs",
+		".git",
+		".git-rewrite",
+		".hg",
+		".ipynb_checkpoints",
+		".mypy_cache",
+		".nox",
+		".pants.d",
+		".pyenv",
+		".pytest_cache",
+		".pytype",
+		".ruff_cache",
+		".svn",
+		".tox",
+		".venv",
+		".vscode",
+		"__pypackages__",
+		"_build",
+		"buck-out",
+		"build",
+		"dist",
+		"node_modules",
+		"site-packages",
+		"venv",
+	]
+
+	line-length = 120
+	indent-width = 2
+
+	target-version = 'py312'
+
+# https://docs.astral.sh/ruff/rules/
+[tool.ruff.lint]
+	select = ['ALL']
+	ignore = [
+		'W191',   # tab-indentation                           - We use tabs for indents, disabling this PEP 8 recommendation
+		'D206',   # indent-with-spaces                        - ^
+	#	'D100',   # undocumented-public-module                - TODO(Martin): Let's care about undocumented functions/classes later
+	#	'D101',   # undocumented-public-class                 - ^
+	#	'D102',   # public-method                             - ^
+	#	'D103',   # undocumented-public-function              - ^
+	#	'D104',   # undocumented-public-package               - ^
+	#	'D105',   # undocumented-magic-method                 - ^ < This one is a bit more severe though
+	#	'D106',   # undocumented-public-nested-class          - ^
+	#	'D107',   # undocumented-public-init                  - ^
+		'D400',   # ends-in-period                            - We do not care if docstrings end with a period
+		'D415',   # ends-in-punctuation                       - ^
+		'D401',   # non-imperative-mood                       - Wants docstrings in imperative language but it's really not foolproof, disable
+		'EM101',  # raw-string-in-exception                   - We do not care about .format in exceptions, readability is not *our* problem, traceback should be colorized to avoid this instead
+		'EM102',  # f-string-in-exception                     - ^
+		'EM103',  # dot-format-in-exception                   - ^
+		'ERA001', # commented-out-code                        - Tests for commented out code, but it has way too many false positives, so disable
+		'FBT001', # boolean-type-hint-positional-argument     - Allow positional booleans in functions, it's not really that much of an issue
+		'FBT002', # boolean-default-value-positional-argument - ^
+		'FBT003', # boolean-positional-value-in-call          - ^
+		'G004',   # logging-f-string                          - TODO - We do want to deal with these, but for now silence them
+		'N802',   # invalid-function-name                     - We do not care about PEP8 forcing snake_case and use camelCase
+		'N803',   # invalid-argument-name                     - ^
+		'N806',   # non-lowercase-variable-in-function        - ^
+		'N816',   # mixed-case-variable-in-global-scope       - ^
+		'TD003',  # missing-todo-link                         - We're fine not linking existing issues in TODOs, it's fine to have them noted in code only
+	]
+
+	# Allow fix for all enabled rules (when `--fix`) is provided.
+	fixable = ["ALL"]
+	unfixable = []
+
+	# Allow unused variables when underscore-prefixed.
+	dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# https://docs.astral.sh/ruff/faq/#does-ruff-support-numpy-or-google-style-docstrings
+[tool.ruff.lint.pydocstyle]
+	convention = "google"
+
+[tool.ruff.lint.flake8-quotes]
+	inline-quotes = 'single'
+
+[tool.ruff.format]
+	quote-style = 'single'
+	indent-style = 'tab'
+
+	# Like Black, respect magic trailing commas
+	skip-magic-trailing-comma = false
+
+	# Like Black, automatically detect the appropriate line ending
+	line-ending = "auto"
+
+	# Enable auto-formatting of code examples in docstrings. Markdown,
+	# reStructuredText code/literal blocks and doctests are all supported.
+	#
+	# This is currently disabled by default, but it is planned for this
+	# to be opt-out in the future.
+	docstring-code-format = false
+
+	# Set the line length limit used when formatting code snippets in
+	# docstrings.
+	#
+	# This only has an effect when the `docstring-code-format` setting is
+	# enabled.
+	docstring-code-line-length = "dynamic"
