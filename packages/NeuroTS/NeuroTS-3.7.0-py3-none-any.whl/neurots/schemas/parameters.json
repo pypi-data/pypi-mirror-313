@@ -1,0 +1,377 @@
+{
+    "definitions": {
+        "empty_object": {
+            "additionalProperties": false,
+            "description": "An object without any property",
+            "title": "Empty object",
+            "type": "object"
+        },
+        "null_object": {
+            "description": "A null object",
+            "title": "Null object",
+            "type": "null"
+        },
+        "neurite": {
+            "additionalProperties": false,
+            "description": "The properties of a neurite",
+            "properties": {
+                "apical_distance": {
+                    "description": "The apical distance (NEVER USED)",
+                    "type": "number"
+                },
+                "bias": {
+                    "description": "The branches that are major inherit a bias towards the target orientation of the tree. Bias defines the weight. If bias = 0 the growth is isotropic, and if bias = 1 it goes straight along orientation.",
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                },
+                "bias_length": {
+                    "description": "The branches that are major inherit a bias towards the target orientation of the tree. Bias_length defines which branches are major and therefore will have a bias. Only branches of size greater than (bias_length * barcode length) are biased.",
+                    "minimum": 0,
+                    "type": "number"
+                },
+                "branching_method": {
+                    "description": "Defines the method that will be used for the bifurcation angles",
+                    "type": "string"
+                },
+                "growth_method": {
+                    "description": "Defines the method that will be used for the growth",
+                    "enum": [
+                        "tmd",
+                        "tmd_gradient",
+                        "tmd_apical",
+                        "axon_trunk",
+                        "trunk"
+                    ],
+                    "type": "string"
+                },
+                "major_termination_length": {
+                    "description": "Termination length of major branches, to use mostly for main axon to connect to long-range axon",
+                    "type": "number",
+                    "minimum": 0
+                },
+
+                "has_apical_tuft": {
+                    "description": "Select True if the tree is an apical and is expected to have a tuft",
+                    "type": "boolean"
+                },
+                "metric": {
+                    "description": "Defines the metric for the growth (only path distance is currently available)",
+                    "type": "string"
+                },
+                "modify": {
+                    "description": "A modification function to be applied to a TMD (barcode) before synthesis starts",
+                    "oneOf": [
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "$ref": "#/definitions/null_object"
+                        }
+                    ]
+                },
+                "num_seg": {
+                    "description": "Number of segments (used when an alternative to TMD, basic growth algorithm is chosen)",
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "orientation": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/null_object"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/point",
+                                "description": "The orientation vector"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "mode": {
+                                    "description": "The orientation mode to use",
+                                    "type": "string"
+                                },
+                                "values": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/definitions/null_object"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "orientations": {
+                                                    "items": {
+                                                        "$ref": "#/definitions/point",
+                                                        "description": "The orientation vector"
+                                                    },
+                                                    "type": "array"
+                                                }
+                                            },
+                                            "additionalProperties": false,
+                                            "required": ["orientations"]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "primary_orientation": {
+                                                    "$ref": "#/definitions/point",
+                                                    "description": "The primary orientation vector"
+                                                }
+                                            },
+                                            "additionalProperties": false,
+                                            "required": ["primary_orientation"]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "additionalProperties": false,
+                                                "direction": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "additionalProperties": false,
+                                                        "mean": {
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "number",
+                                                                    "minimum": 0,
+                                                                    "maximum": 3.1416
+                                                                },
+                                                                {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "number",
+                                                                        "minimum": 0,
+                                                                        "maximum": 3.1416
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        "std":{
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "number",
+                                                                    "minimum": 0
+                                                                },
+                                                                {
+                                                                    "type": "array",
+                                                                    "items": {
+                                                                        "type": "number",
+                                                                        "minimum": 0
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": ["mean", "std"]
+                                                }
+                                            },
+                                            "additionalProperties": false,
+                                            "required": ["direction"]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "form": {
+                                                    "description": "Form of the 3d angle fit",
+                                                    "type": "string"
+                                                },
+                                                "params": {
+                                                    "items": {
+                                                        "description": "The fit parameters"
+                                                    },
+                                                    "type": "array"
+                                                }
+                                            },
+                                            "additionalProperties": false,
+                                            "required": ["form", "params"]
+                                        }
+                                    ]
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    ],
+                    "description": "Defines the target orientation of a tree, as it emanates from the soma"
+                },
+                "radius": {
+                    "description": "[Deprecated] Defines the radius of the tree. If default diameter is chosen, diameter will be constant. If external diametrization is used, the radius value is not important",
+                    "minimum": 0,
+                    "type": "number"
+                },
+                "randomness": {
+                    "description": "Controls the percentage of randomness within a section of a neuron. 0.0: the path is straight, 1.0: the path is a random walk. Randomness + targeting + history should be normalized to 1.",
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                },
+                "step_size": {
+                    "description": "Defines the distribution from which the step size is sampled",
+                    "properties": {
+                        "norm": {
+                            "description": "The normal distribution used",
+                            "properties": {
+                                "mean": {
+                                    "description": "The mean of the distribution",
+                                    "minimum": 0,
+                                    "type": "number"
+                                },
+                                "std": {
+                                    "description": "The std of the distribution",
+                                    "minimum": 0,
+                                    "type": "number"
+                                }
+                            },
+                            "additionalProperties": false,
+                            "type": "object"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "type": "object"
+                },
+                "targeting": {
+                    "description": "Controls the percentage of targeting (complementary to the randomness). 1.0: the path is straight, 0.0: the path is a random walk. Randomness + targeting + history should be normalized to 1.",
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                },
+                "tree_type": {
+                    "description": "Defines the tree index that will be written to the file",
+                    "type": "integer"
+                },
+                "trunk_absolute_orientation": {
+                    "description": "Orientation of trunks emerging from the soma (on x-y plane).",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "branching_method",
+                "growth_method",
+                "metric",
+                "modify",
+                "orientation",
+                "randomness",
+                "targeting",
+                "tree_type"
+            ],
+            "title": "Neurite",
+            "type": "object"
+        },
+        "neurite_type": {
+            "description": "Type of neurite",
+            "enum": [
+                "basal_dendrite",
+                "apical_dendrite",
+                "axon"
+            ],
+            "type": "string"
+        },
+        "point": {
+            "description": "A point with 3 coordinates",
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Point",
+            "type": "array"
+        }
+    },
+    "description": "The parameters used to synthesize new cells",
+    "properties": {
+        "apical_dendrite": {
+            "description": "Specific parameters for apicals",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/empty_object"
+                },
+                {
+                    "$ref": "#/definitions/neurite"
+                }
+            ]
+        },
+        "axon": {
+            "description": "Specific parameters for axons",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/empty_object"
+                },
+                {
+                    "$ref": "#/definitions/neurite"
+                }
+            ]
+        },
+        "basal_dendrite": {
+            "description": "Specific parameters for basals",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/empty_object"
+                },
+                {
+                    "$ref": "#/definitions/neurite"
+                }
+            ]
+        },
+        "diameter_params": {
+            "description": "Parameters used to generate the diameters",
+            "oneOf": [
+                {
+                    "additionalProperties": true,
+                    "properties": {
+                        "method": {
+                            "enum": [
+                                "external", "default", "uniform"
+                            ],
+                            "description": "The method used to synthesize the diameters",
+                            "type": "string"
+                        }
+                    }
+                },
+                {
+                    "additionalProperties": false,
+                    "properties": {
+                        "method": {
+                            "description": "The method used to synthesize the diameters",
+                            "not": {
+                                "enum": [
+                                    "external", "default", "uniform"
+                                ]
+                            },
+                            "type": "string"
+                        }
+                    }
+                }
+            ],
+            "required": [
+                "method"
+            ],
+            "type": "object"
+        },
+        "grow_types": {
+            "description": "Select which tree types will be generated",
+            "items": {
+                "enum": [
+                    "basal_dendrite",
+                    "apical_dendrite",
+                    "axon"
+                ],
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "pia_direction":{
+            "$ref": "#/definitions/point",
+            "description": "Pia direction"
+        },
+        "origin": {
+            "$ref": "#/definitions/point",
+            "description": "Defines the center of the soma, from which the growth starts"
+        }
+    },
+    "required": [
+        "origin",
+        "diameter_params",
+        "grow_types"
+    ],
+    "title": "TMD parameters",
+    "type": "object"
+}
