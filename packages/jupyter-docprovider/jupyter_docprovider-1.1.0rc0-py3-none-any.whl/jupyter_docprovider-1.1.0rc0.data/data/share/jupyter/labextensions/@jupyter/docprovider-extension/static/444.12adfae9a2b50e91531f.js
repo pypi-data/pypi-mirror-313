@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_jupyter_docprovider_extension=self.webpackChunk_jupyter_docprovider_extension||[]).push([[444],{444:(e,o,r)=>{r.r(o),r.d(o,{ICollaborativeDrive:()=>a,IGlobalAwareness:()=>l});var n=r(262);const a=new n.Token("@jupyter/collaboration-extension:ICollaborativeDrive"),l=new n.Token("@jupyter/collaboration:IGlobalAwareness")}}]);
