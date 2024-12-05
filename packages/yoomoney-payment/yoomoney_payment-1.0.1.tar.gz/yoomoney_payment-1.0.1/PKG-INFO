@@ -1,0 +1,49 @@
+Metadata-Version: 2.1
+Name: yoomoney-payment
+Version: 1.0.1
+Summary: A library to provide payment gateway for YooMoney Payment
+Home-page: https://bitbucket.org/akinonteam/yoo-payment/
+Author: Akinon
+Author-email: dev@akinon.com
+Description-Content-Type: text/markdown
+Requires-Dist: Django<4.0,>=2.2.9
+Requires-Dist: requests
+Requires-Dist: djangorestframework<3.15,>=3.11.0
+Requires-Dist: orjson==3.7.2
+Requires-Dist: mock==4.0.3
+
+# YooMoney Payment Redirect View
+
+This app provides order related data to the YooMoney payment  extension when plugged-in to project zero.
+
+## Installation
+
+Add the package to requirements.txt file and install it via pip:
+
+    yoomoney-payment
+
+## Adding App
+
+Add the following lines in `omnife_base.settings`:
+
+    INSTALLED_APPS.append('yoomoney_payment')
+    PZ_SERVICE_CLASS = "omnife.core.service.Service"
+    HASH_SECRET_KEY = "your-hash-secret-key"
+    YOOMONEY_EXTENSION_URL = "extension url"
+
+Add url pattern to `omnife_base.urls` like below:
+
+    urlpatterns = [
+        ...
+        path('payment-gateway/yoomoney/', include('yoomoney_payment.urls')),
+    ]
+
+## Running Tests
+
+    python -m unittest discover
+
+## Python Version Compatibility
+
+This package is compatible with the following Python versions:
+  - Python 3.8
+  - Python 3.9
