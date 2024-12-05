@@ -1,0 +1,58 @@
+{
+  "scheduledAt": "2022-03-31T15:00:00-07:00",
+  "environment": {
+    "containerized": {
+      "container": "Singularity",
+      "version": "3.10.2",
+      "imagePath": "shub://GodloveD/lolcow"
+    }
+  },
+  "constraints": {
+    "jobConstraints": {
+      "computingDevice": "cpu",
+      "supportedCpuArchitectures": [
+        "x86-64",
+        "arm-64"
+      ],
+      "benchmarkingProfileName": "Default CPU",
+      "isSubjectToAvailableResources": false,
+      "enableHyperthreading": false,
+      "allowPreemptible": false,
+      "isResumableWorkload": false
+    },
+    "taskConstraints": {
+      "minvCpu": 1,
+      "maxvCpu": 192,
+      "minvCpuMemGiB": 1,
+      "minGpu": 0,
+      "maxGpu": 0,
+      "minGpuMemGiB": 0,
+      "storageGiB": 1,
+      "walltimeHours": 1,
+      "isSingleThreadedTask": false,
+      "scalableParallelism": false,
+      "parallelismOptimization": false
+    }
+  },
+  "objective": {
+    "timeToCostPriorityRatio": "0.9/0.1"
+  },
+  "workload": {
+    "parallelismConfigFiles": [
+      "config*/*.adm",
+      "input/*.config"
+    ],
+    "runCommand": "singularity exec --bind $PWD:/container_workspace --home /container_workspace --nv [user_options]  [user_cmd_to_run]",
+    "outputFileOption": "include",
+    "outputFileList": [
+      "*"
+    ]
+  },
+  "isPostProcessingIncluded": true,
+  "postProcessingInfo": {
+    "PostProcessingRunCommand": "./post.sh",
+    "PostProcessingStorageGiB": 1,
+    "PostProcessingTaskName": "Post Processing",
+    "PostProcessingWalltimeHours": 1
+  }
+}

@@ -1,0 +1,120 @@
+import os
+
+FOVUS_JOB_INFO_FOLDER = ".fovus"
+JOB_DATA_FILENAME = "job_data.json"
+DOWNLOAD_FILE_EXTENSION = ".fovusdownload"
+
+# Parsed argument keys
+JOB_ID = "job_id"
+JOB_NAME = "job_name"
+TIMESTAMP = "timestamp"
+
+# Job config overrides
+DEBUG_MODE = "debug_mode"
+BENCHMARKING_PROFILE_ID = "benchmarkingProfileId"
+BENCHMARKING_PROFILE_NAME = "benchmarkingProfileName"
+COMPUTING_DEVICE = "computingDevice"
+IS_SINGLE_THREADED_TASK = "isSingleThreadedTask"
+LICENSE_TIMEOUT_HOURS = "licenseTimeoutHours"
+MONOLITHIC_OVERRIDE = "monolithicOverride"
+MIN_GPU = "minGpu"
+MAX_GPU = "maxGpu"
+AUTO_DELETE_DAYS = "autoDeleteDays"
+MIN_GPU_MEM_GIB = "minGpuMemGiB"
+JOB_MAX_CLUSTER_SIZE_VCPU = "jobMaxClusterSizevCpu"
+MIN_VCPU = "minvCpu"
+MAX_VCPU = "maxvCpu"
+MIN_VCPU_MEM_GIB = "minvCpuMemGiB"
+OUTPUT_FILE_LIST = "outputFileList"
+OUTPUT_FILE_OPTION = "outputFileOption"
+REMOTE_INPUTS = "remoteInputsForAllTasks"
+PARALLELISM_CONFIG_FILES = "parallelismConfigFiles"
+PARALLELISM_OPTIMIZATION = "parallelismOptimization"
+RUN_COMMAND = "runCommand"
+SCALABLE_PARALLELISM = "scalableParallelism"
+SCALING_OUT = "scalingOut"
+SCHEDULED_AT = "scheduledAt"
+STORAGE_GIB = "storageGiB"
+IS_SUBJECT_TO_AVAILABLE_RESOURCES = "isSubjectToAvailableResources"
+ENABLE_HYPERTHREADING = "enableHyperthreading"
+SUPPORTED_CPU_ARCHITECTURES = "supportedCpuArchitectures"
+TIME_TO_COST_PRIORITY_RATIO = "timeToCostPriorityRatio"
+WALLTIME_HOURS = "walltimeHours"
+LICENSE_CONSUMPTION_PROFILE = "licenseConsumptionProfile"
+POST_PROCESSING_WALLTIME_HOURS = "PostProcessingWalltimeHours"
+POST_PROCESSING_STORAGE_GIB = "PostProcessingStorageGiB"
+POST_PROCESSING_RUN_COMMAND = "PostProcessingRunCommand"
+POST_PROCESSING_TASK_NAME = "PostProcessingTaskName"
+EMPTY_FOLDER_LIST = "emptyFolderList"
+ALLOW_PREEMPTIBLE = "allowPreemptible"
+IS_RESUMABLE_WORKLOAD = "isResumableWorkload"
+PROJECT_ID = "projectId"
+
+# Development overrides
+CLIENT_ID = "clientId"
+DOMAIN_NAME = "domainName"
+SKIP_CREATE_JOB_INFO_FOLDER = "skipCreateJobInfoFolder"
+USER_POOL_ID = "userPoolId"
+SSO_USER_POOL_ID = "ssoUserPoolId"
+WORKSPACE_SSO_CLIENT_ID = "workspaceSsoClientId"
+API_DOMAIN_NAME = "apiDomainName"
+AUTH_WS_API_URL = "authWsApiUrl"
+AWS_REGION = "awsRegion"
+
+# Job types
+CPU = "cpu"
+GPU = "cpu+gpu"
+GPU_INTERNAL_REPRESENTATION = "gpu"
+
+PATH_TO_CONFIG_ROOT = os.path.join(os.path.expanduser("~"), ".fovus")
+PATH_TO_JOB_CONFIGS = os.path.join(PATH_TO_CONFIG_ROOT, "job_configs")
+PATH_TO_USER_CONFIGS = os.path.join(PATH_TO_CONFIG_ROOT, "user_configs")
+PATH_TO_JOB_LOGS = os.path.join(PATH_TO_CONFIG_ROOT, "job_logs")
+PATH_TO_LOGS = os.path.join(PATH_TO_CONFIG_ROOT, "logs")
+PATH_TO_CREDENTIALS_FILE = os.path.join(PATH_TO_CONFIG_ROOT, ".credentials")
+PATH_TO_WORKSPACE_SSO_TOKENS_FILE = os.path.join(PATH_TO_CONFIG_ROOT, ".workspace_sso_tokens")
+PATH_TO_DEVICE_INFORMATION_FILE = os.path.join(PATH_TO_CONFIG_ROOT, ".device_information")
+UNIX_OPEN = "open"
+WINDOWS_EXPLORER = "explorer"
+
+FOVUS_PROVIDED_CONFIGS_FOLDER_REPO = "fovus_provided_configs"
+JOB_CONFIG_CONTAINERIZED_TEMPLATE_FILE_NAME = "FOVUS_job_template_containerized.json"
+JOB_CONFIG_MONOLITHIC_TEMPLATE_FILE_NAME = "FOVUS_job_template_monolithic.json"
+EXAMPLE_JOB_CONFIG_CONTAINERIZED_FILE_NAME = "FOVUS_example_job_config_containerized.json"
+EXAMPLE_JOB_CONFIG_MONOLITHIC_LIST_FILE_NAME = "FOVUS_example_job_config_monolithic.json"
+
+FILE_NAME = "FILE_NAME"
+PATH_TO_CONFIG_FILE_IN_REPO = "PATH_TO_CONFIG_FILE_IN_REPO"
+PATH_TO_CONFIG_FILE_LOCAL = "PATH_TO_CONFIG_FILE_LOCAL"
+
+JOB_CONFIG_CONTAINERIZED_TEMPLATE = "JOB_CONFIG_CONTAINERIZED"
+JOB_CONFIG_MONOLITHIC_TEMPLATE = "JOB_CONFIG_MONOLITHIC"
+EXAMPLE_JOB_CONFIG_CONTAINERIZED = "EXAMPLE_JOB_CONFIG_CONTAINERIZED"
+EXAMPLE_JOB_CONFIG_MONOLITHIC = "EXAMPLE_JOB_CONFIG_MONOLITHIC"
+USER_CONFIG = "USER_CONFIG"
+FOVUS_PROVIDED_CONFIGS = {
+    JOB_CONFIG_CONTAINERIZED_TEMPLATE: {
+        PATH_TO_CONFIG_FILE_IN_REPO: os.path.join(
+            FOVUS_PROVIDED_CONFIGS_FOLDER_REPO, JOB_CONFIG_CONTAINERIZED_TEMPLATE_FILE_NAME
+        ),
+        PATH_TO_CONFIG_FILE_LOCAL: os.path.join(PATH_TO_JOB_CONFIGS, JOB_CONFIG_CONTAINERIZED_TEMPLATE_FILE_NAME),
+    },
+    JOB_CONFIG_MONOLITHIC_TEMPLATE: {
+        PATH_TO_CONFIG_FILE_IN_REPO: os.path.join(
+            FOVUS_PROVIDED_CONFIGS_FOLDER_REPO, JOB_CONFIG_MONOLITHIC_TEMPLATE_FILE_NAME
+        ),
+        PATH_TO_CONFIG_FILE_LOCAL: os.path.join(PATH_TO_JOB_CONFIGS, JOB_CONFIG_MONOLITHIC_TEMPLATE_FILE_NAME),
+    },
+    EXAMPLE_JOB_CONFIG_CONTAINERIZED: {
+        PATH_TO_CONFIG_FILE_IN_REPO: os.path.join(
+            FOVUS_PROVIDED_CONFIGS_FOLDER_REPO, EXAMPLE_JOB_CONFIG_CONTAINERIZED_FILE_NAME
+        ),
+        PATH_TO_CONFIG_FILE_LOCAL: os.path.join(PATH_TO_JOB_CONFIGS, EXAMPLE_JOB_CONFIG_CONTAINERIZED_FILE_NAME),
+    },
+    EXAMPLE_JOB_CONFIG_MONOLITHIC: {
+        PATH_TO_CONFIG_FILE_IN_REPO: os.path.join(
+            FOVUS_PROVIDED_CONFIGS_FOLDER_REPO, EXAMPLE_JOB_CONFIG_MONOLITHIC_LIST_FILE_NAME
+        ),
+        PATH_TO_CONFIG_FILE_LOCAL: os.path.join(PATH_TO_JOB_CONFIGS, EXAMPLE_JOB_CONFIG_MONOLITHIC_LIST_FILE_NAME),
+    },
+}
