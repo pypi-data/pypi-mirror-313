@@ -1,0 +1,103 @@
+3.10.0:
+ Users:
+  - Add input tilt-series excluded views management.
+  - Add odd/even tomograms reconstruction,
+  - Fix: amplitude contrast is read from the tilt-series metadata and passed to AreTomo.
+  - Do not support old AreTomo versions.
+ Developers:
+  - Write new tests with a better characterized test dataset.
+  - Tests renewed with a better adapted (real dark frames) test dataset and with cases of TS with excluded views.
+  - Add needsgpu attribute to the steps generation.
+  - Aln file writer method added to adapt the plugin to the API of AreTomo2-1.1.3 when only reconstructing the tomograms.
+3.9.5: add aretomo2 1.1.3
+3.9.4: set aretomo2 1.0.0 as default, because 1.1.2 has broken remove dark option
+3.9.3: hotfix: _defineVariables method must be a class method to be compatible with scipion command config -p
+3.9.2:
+   - Aretomo does nos fail when closing its output when process is killed
+   - Listed protocol's names are defaults ones.
+   - Tolerate failed tilt-series, avoiding the protocol interruption and generating a specific output for the failed
+     tilt-series.
+   - Force enable DW when saving extra IMOD output
+  Developers:
+   - Steps now use the tsId instead of the objId.
+3.9.1:
+  Users:
+   - Add aretomo2 1.1.2
+   - Fix backwards compatibility.
+   - Add an option to specify AlignZ per TS.
+   - fix dose weighting bug related to the tilt angle file (aretomo2 only)
+  Developers:
+   - The tests now use the Test Centralization Layer update and expansion of the used test set definition
+     from em-tomo v3.6.0.
+   - Update the acquisition order in the CTFTomo objects (field added to that class in scipion-em-tomo v3.7.0).
+3.9.0:
+  Users:
+    - The protocol form now present CTF-related parameters, to choose if estimate it or
+      not and phase plate acquisition related params (estimate the phase shift).
+    - Generates the output SetOfCtfTomoSeries if the CTF files are found
+    - Add dataimport module to parse the CTF generated so it can be called from the
+      centralized protocol for importing CTFs.
+    - Fix the origin set by Scipion to the generated tomograms.
+    - Outputs are not stored in case the are not correctly generated.
+    - If dose-weighting active, the accumulated dose of the interpolated TS is set to zero  to avoid double dose
+      correction if using the interp TS for the PPPT.
+  Developers:
+    - Rewrite tests using the TCL from em-tomo and the reliontomo test dataset.
+3.8.3: typo bugfix
+3.8.2: bugfix: tomograms origin fixed and more robust
+3.8.1: bugfix for reading aln file with dark views removed
+3.8:
+    - add aretomo2 1.0.0
+    - fix output aln file parsing during local alignment
+    - add extra output option
+3.7.2:
+ - minor changes
+ - Fix origin of tomograms when there is binning.
+3.7.1: fix pw requirements
+3.7  : initial streaming support (@albertmena)
+3.6.5: allow unsorted tilt series
+3.6.4: adding type hints
+3.6.3: reduce number of Set[item] calls
+3.6.2:
+ - fix applyTransform in the convert step
+ - add interpolated flag
+3.6.1:
+ - add aretomo 1.3.4, remove support for versions < 1.1.0
+ - fix alignment matrix for excluded TS views
+3.6:
+ - set tilt axis angle to 0 for interpolated aligned TS (fixed issue #36)
+ - remove updateDim calls
+ - use Acquisition from TS for new tomo objs
+3.5.1: add aretomo 1.3.3
+3.5:
+ - get rid of xf file conversion, use aln directly
+ - add aretomo 1.3.0
+ - update citation
+3.4: always output stack with alignment info
+3.3: scaling should not be applied to transforms, as xf refers to original TS
+3.2:
+ - fixed output TS shifts scaling when using binning
+ - hide flip volume option when not making a tomo
+ - guess cuda version
+3.1:
+ - add possible outputs class
+ - two default TS outputs: aligned (interpolated) TS and original (with alignment metadata)
+ - added DarkTol parameter to GUI
+ - add AreTomo 1.2.5
+3.0.16 - add AreTomo 1.2.5
+3.0.15 - add possible outputs class
+3.0.14 - AreTomo 1.2.0 added
+3.0.13 - fix default installed version
+3.0.12 - AreTomo 1.1.1 added, now can use previous alignment as input
+3.0.11 - AreTomo 1.1.0 added
+3.0.10 - parse and save tilt angles correctly
+3.0.9 - remove tilt axis angle from GUI, fix validation, fix accum.dose and dose weighting
+3.0.8 - fix output TS file loc index
+3.0.7 - fix bug: writing output alignment info to an already aligned TS
+3.0.6 - fix dose-weighting error, update citation
+3.0.5 - added refine tilt angles param for 1.0.12+
+3.0.4 - added refine tilt axis param, switch off volume flip for v1.0.12+
+3.0.3 - bug fixes (reported by Bram Koster)
+3.0.2 - add version 1.0.12
+3.0.1 - add version 1.0.10
+3.0.0 - first version of the plugin
