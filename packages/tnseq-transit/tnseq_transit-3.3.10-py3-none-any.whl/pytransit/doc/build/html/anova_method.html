@@ -1,0 +1,605 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ANOVA &mdash; TRANSIT v4.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ZINB" href="zinb_method.html" />
+    <link rel="prev" title="Genetic Interactions" href="gi_method.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> TRANSIT
+          
+
+          
+            
+            <img src="_static/transit_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v4.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">TRANSIT MANUAL</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="transit_overview.html">TRANSIT Overview (4.0)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#typical-workflow">Typical Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#tpp-transit-pre-processor">TPP (Transit Pre-Processor)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#combined-wig-and-metadata-files">Combined_wig and Metadata Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#genome-annotations-prot-tables-and-gff-files">Genome Annotations (.prot_tables and .gff files)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#gui">GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#pre-processing-tasks">Pre-Processing Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#statistical-analysis-methods">Statistical Analysis Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#analyses-for-tn5-datasets">Analyses for Tn5 Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#results-and-post-processing">Results and Post-Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#command-line">Command Line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#developers">Developers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_overview.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transit_install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transit_install.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_install.html#python-3">Python 3:</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#additional-requirements-r-statistical-analysis-package">Additional Requirements: R (statistical analysis package)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transit_install.html#optional-install-bwa-to-use-with-tpp-pre-processor">Optional: Install BWA to use with TPP pre-processor</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#linux-osx-instructions">Linux &amp; OSX Instructions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#windows-instructions">Windows Instructions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transit_install.html#upgrading">Upgrading</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#method-1-upgrading-package-installation">Method 1: Upgrading package installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#method-2-upgrading-source-installation">Method 2: Upgrading source installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transit_install.html#installing-wxpython">Installing wxPython</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_install.html#troubleshooting">Troubleshooting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#no-window-appears-when-running-in-gui-mode">1. No window appears when running in GUI mode.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#pip3-systemerror-cannot-compile-python-h">2. pip3: SystemError: Cannot compile ‘Python.h’.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#pip-the-following-required-packages-can-not-be-built-freetype-png-etc">3. pip: “The following required packages can not be built: freetype,png,” etc.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#pip3-no-lapack-blas-resources-found">4. pip3: “No lapack/blas resources found”</a></li>
+<li class="toctree-l3"><a class="reference internal" href="transit_install.html#resources-contextualversionconflict-six-1-5-2">5. “resources.ContextualVersionConflict (six 1.5.2)…”</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transit_running.html">Running TRANSIT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transit_running.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit_running.html#command-line-mode">Command line Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="input_files.html">Input Files for Transit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="input_files.html#combined-wig-files">Combined_wig Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_files.html#samples-metadata-file">Samples Metadata File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_files.html#genome-annotations-prot-tables-and-gff-files">Genome Annotations (.prot_tables and .gff files)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quality_control.html">Quality Control</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quality_control.html#qc-metrics-table">QC Metrics Table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quality_control.html#qc-plots">QC Plots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quality_control.html#figure-1-read-count-distribution">Figure 1: Read-Count Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quality_control.html#figure-2-qq-plot-of-read-counts-vs-geometric-distribution">Figure 2: QQ-Plot of Read-Counts vs Geometric Distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quality_control.html#figure-3-ranked-plot-of-read-counts">Figure 3: Ranked plot of Read-Counts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quality_control.html#interpretation-of-data-quality">Interpretation of Data Quality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quality_control.html#what-to-do-about-skewed-samples">What to do about Skewed Samples?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quality_control.html#beta-geometric-correction">Beta-Geometric Correction</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">PRE-PROCESSING</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tnseq_stats_method.html">tnseq_stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scatterplot_method.html">Scatterplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scatterplot_method.html#command-line-usage">Command Line Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scatterplot_method.html#example-usage">Example Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scatterplot_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scatterplot_method.html#runtime">Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="corrplot_method.html">Corrplot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="corrplot_method.html#command-line-usage">Command Line Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corrplot_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corrplot_method.html#runtime">Runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="normalize_method.html">Normalization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="normalize_method.html#command-line">Command-line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="normalize_method.html#gui">GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="normalize_method.html#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gene_means_method.html">Gene Means</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ANALYSES of single conditions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gumbel_method.html">Gumbel</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gumbel_method.html#how-does-it-work">How does it work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gumbel_method.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gumbel_method.html#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gumbel_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gumbel_method.html#outputs-and-diagnostics">Outputs and diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gumbel_method.html#run-time">Run-time</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hmm_method.html">HMM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hmm_method.html#how-does-it-work">How does it work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hmm_method.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hmm_method.html#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hmm_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hmm_method.html#output-and-diagnostics">Output and Diagnostics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hmm_method.html#sites-output-file">Sites Output File:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hmm_method.html#genes-output-file">Genes Output File:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hmm_method.html#run-time">Run-time</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ttnfitness_method.html">TTN-Fitness</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ttnfitness_method.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ttnfitness_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ttnfitness_method.html#volcano-plot">Volcano Plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ttnfitness_method.html#output">Output</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="ttnfitness_method.html#genes-output-file">Genes Output File:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ttnfitness_method.html#sites-output-file">Sites Output File:</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="ttnfitness_method.html#example-of-running-the-ttn-fitness-methodology-on-the-sample-glycerol-data">Example of running the TTN-Fitness methodology on the sample glycerol data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ttnfitness_method.html#run-time">Run-time</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ANALYSES for pairwise comparisons</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="resampling_method.html">Resampling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#how-does-it-work">How does it work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#site-restricted-s-r-resampling">Site-Restricted (S-R) Resampling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#notes">Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#command-line-examples">Command Line Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#doing-resampling-with-datasets-from-different-libraries">Doing resampling with datasets from different libraries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#doing-resampling-between-different-strains">Doing resampling between different strains</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#output-and-diagnostics">Output and Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resampling_method.html#run-time">Run-time</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utest_method.html">Mann-Whitney U-test (utest)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="utest_method.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utest_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utest_method.html#output">Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utest_method.html#runtime">Runtime</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">ANALYSES for multiple conditions</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gi_method.html">Genetic Interactions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gi_method.html#how-does-it-work">How does it work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gi_method.html#statistical-significance">Statistical Significance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gi_method.html#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gi_method.html#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gi_method.html#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gi_method.html#gui-mode">Gui Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gi_method.html#output-and-diagnostics">Output and Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gi_method.html#run-time">Run-time</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ANOVA</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-does-it-work">How does it work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-files">Input files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-and-diagnostics">Output and Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-time">Run-time</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="zinb_method.html">ZINB</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#how-does-it-work">How does it work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#example">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#input-files">Input files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#covariates-and-interactions">Covariates and Interactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#categorical-vs-numeric-covariates">Categorical vs Numeric Covariates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#statistical-significance-what-the-p-values-mean-in-the-zinb-output">Statistical Significance - What the P-values Mean in the ZINB Output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#output-and-diagnostics">Output and Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="zinb_method.html#run-time">Run-time</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">POST-PROCESSING</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pathway_enrichment_method.html">Pathway Enrichment Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pathway_enrichment_method.html#command-line-usage">Command Line Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathway_enrichment_method.html#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathway_enrichment_method.html#auxilliary-pathway-files-in-transit-data-directory">Auxilliary Pathway Files in Transit Data Directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathway_enrichment_method.html#current-recommendations">Current Recommendations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathway_enrichment_method.html#examples">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathway_enrichment_method.html#gui-mode">GUI Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathway_enrichment_method.html#output-and-diagnostics">Output and Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pathway_enrichment_method.html#run-time">Run-time</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="heatmap_method.html">Heatmap</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="heatmap_method.html#command-line-usage">Command Line Usage:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="heatmap_method.html#gui">GUI:</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">TPP Manual</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html">TPP Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#running-tpp">Running TPP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#mapping-to-genomes-with-multiple-contigs">Mapping to Genomes with Multiple Contigs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#overview-of-data-processing-procedure">Overview of Data Processing Procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#statistics">Statistics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="transit.html">transit package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transit.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit.html#pytransit-norm-tools-module">pytransit.norm_tools module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit.html#pytransit-stat-tools-module">pytransit.stat_tools module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit.html#pytransit-tnseq-tools-module">pytransit.tnseq_tools module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit.html#pytransit-transit-tools-module">pytransit.transit_tools module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transit.html#module-pytransit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TRANSIT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>ANOVA</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/anova_method.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="anova">
+<span id="id1"></span><h1>ANOVA<a class="headerlink" href="#anova" title="Permalink to this headline">¶</a></h1>
+<p>The Anova (Analysis of variance) method is used to determine which genes
+exhibit statistically significant variability of insertion counts across multiple conditions.
+Unlike other methods which take a comma-separated list of wig files as input,
+the method takes a <em>combined_wig</em> file (which combined multiple datasets in one file)
+and a <em>samples_metadata</em> file (which describes which samples/replicates belong
+to which experimental conditions).</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="section" id="how-does-it-work">
+<h2>How does it work?<a class="headerlink" href="#how-does-it-work" title="Permalink to this headline">¶</a></h2>
+<p>The method performs the <a class="reference external" href="https://en.wikipedia.org/wiki/Analysis_of_variance?oldformat=true#The_F-test">One-way anova test</a> for each gene across conditions.
+It takes into account variability of normalized transposon insertion counts among TA sites
+and among replicates,
+to determine if the differences among the mean counts for each condition are significant.</p>
+</div>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">python3</span> <span class="n">transit</span><span class="o">.</span><span class="n">py</span> <span class="n">anova</span> <span class="o">&lt;</span><span class="n">combined_wig_file</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">metadata_file</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">annotation_file</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">output_file</span><span class="o">&gt;</span> <span class="p">[</span><span class="n">Optional</span> <span class="n">Arguments</span><span class="p">]</span>
+      <span class="n">Optional</span> <span class="n">Arguments</span><span class="p">:</span>
+       <span class="o">--</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>                     <span class="o">:=</span> <span class="n">Normalization</span> <span class="n">method</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="o">--</span><span class="n">n</span> <span class="n">TTR</span>
+       <span class="o">--</span><span class="n">exclude</span><span class="o">-</span><span class="n">conditions</span> <span class="o">&lt;</span><span class="n">cond1</span><span class="p">,</span><span class="o">...&gt;</span> <span class="o">:=</span> <span class="n">Comma</span> <span class="n">separated</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">conditions</span> <span class="n">to</span> <span class="n">ignore</span> <span class="k">for</span> <span class="n">the</span> <span class="n">analysis</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="kc">None</span>
+       <span class="o">--</span><span class="n">include</span><span class="o">-</span><span class="n">conditions</span> <span class="o">&lt;</span><span class="n">cond1</span><span class="p">,</span><span class="o">...&gt;</span> <span class="o">:=</span> <span class="n">Comma</span> <span class="n">separated</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">conditions</span> <span class="n">to</span> <span class="n">include</span> <span class="k">for</span> <span class="n">the</span> <span class="n">analysis</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="n">All</span>
+       <span class="o">--</span><span class="n">ref</span> <span class="o">&lt;</span><span class="n">cond</span><span class="o">&gt;</span>                     <span class="o">:=</span> <span class="n">which</span> <span class="n">condition</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">to</span> <span class="n">use</span> <span class="k">as</span> <span class="n">a</span> <span class="n">reference</span> <span class="k">for</span> <span class="n">calculating</span> <span class="n">LFCs</span> <span class="p">(</span><span class="n">comma</span><span class="o">-</span><span class="n">separated</span> <span class="k">if</span> <span class="n">multiple</span> <span class="n">conditions</span><span class="p">)</span> <span class="p">(</span><span class="n">by</span> <span class="n">default</span><span class="p">,</span> <span class="n">LFCs</span> <span class="k">for</span> <span class="n">each</span> <span class="n">condition</span> <span class="n">are</span> <span class="n">computed</span> <span class="n">relative</span> <span class="n">to</span> <span class="n">the</span> <span class="n">grandmean</span> <span class="n">across</span> <span class="nb">all</span> <span class="n">condintions</span><span class="p">)</span>
+       <span class="o">--</span><span class="n">iN</span> <span class="o">&lt;</span><span class="nb">float</span><span class="o">&gt;</span>                     <span class="o">:=</span> <span class="n">Ignore</span> <span class="n">TAs</span> <span class="n">occurring</span> <span class="n">within</span> <span class="n">given</span> <span class="n">percentage</span> <span class="p">(</span><span class="k">as</span> <span class="n">integer</span><span class="p">)</span> <span class="n">of</span> <span class="n">the</span> <span class="n">N</span> <span class="n">terminus</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="o">--</span><span class="n">iN</span> <span class="mi">0</span>
+       <span class="o">--</span><span class="n">iC</span> <span class="o">&lt;</span><span class="nb">float</span><span class="o">&gt;</span>                     <span class="o">:=</span> <span class="n">Ignore</span> <span class="n">TAs</span> <span class="n">occurring</span> <span class="n">within</span> <span class="n">given</span> <span class="n">percentage</span> <span class="p">(</span><span class="k">as</span> <span class="n">integer</span><span class="p">)</span> <span class="n">of</span> <span class="n">the</span> <span class="n">C</span> <span class="n">terminus</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="o">--</span><span class="n">iC</span> <span class="mi">0</span>
+       <span class="o">--</span><span class="n">PC</span> <span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span>                         <span class="o">:=</span> <span class="n">Pseudocounts</span> <span class="n">to</span> <span class="n">use</span> <span class="ow">in</span> <span class="n">calculating</span> <span class="n">LFCs</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="o">--</span><span class="n">PC</span> <span class="mi">5</span>
+       <span class="o">--</span><span class="n">alpha</span> <span class="o">&lt;</span><span class="n">N</span><span class="o">&gt;</span>                      <span class="o">:=</span> <span class="n">value</span> <span class="n">added</span> <span class="n">to</span> <span class="n">MSE</span> <span class="ow">in</span> <span class="n">F</span><span class="o">-</span><span class="n">test</span> <span class="k">for</span> <span class="n">moderated</span> <span class="n">anova</span> <span class="p">(</span><span class="n">makes</span> <span class="n">genes</span> <span class="k">with</span> <span class="n">low</span> <span class="n">counts</span> <span class="n">less</span> <span class="n">significant</span><span class="p">)</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="o">--</span><span class="n">alpha</span> <span class="mi">1000</span>
+       <span class="o">-</span><span class="n">winz</span>                            <span class="o">:=</span> <span class="n">winsorize</span> <span class="n">insertion</span> <span class="n">counts</span> <span class="k">for</span> <span class="n">each</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">each</span> <span class="n">condition</span>
+                                           <span class="p">(</span><span class="n">replace</span> <span class="nb">max</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">each</span> <span class="n">gene</span> <span class="k">with</span> <span class="mi">2</span><span class="n">nd</span> <span class="n">highest</span><span class="p">;</span> <span class="n">helps</span> <span class="n">mitigate</span> <span class="n">effect</span> <span class="n">of</span> <span class="n">outliers</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="input-files">
+<h2>Input files<a class="headerlink" href="#input-files" title="Permalink to this headline">¶</a></h2>
+<p>For description of input file formats, see documentation
+on <a class="reference internal" href="input_files.html#combined-wig-link"><span class="std std-ref">Combined wig files</span></a>
+and <a class="reference internal" href="input_files.html#metadata-files"><span class="std std-ref">Metadata files</span></a>.</p>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<p>The following parameters are available for the ANOVA method:</p>
+<ul class="simple">
+<li><p><strong>--include-conditions:</strong> Includes the given set of conditions from the ZINB test. Conditions not in this list are ignored. Note: this is useful for specifying the order in which the columns are listed in the output file.</p></li>
+<li><p><strong>--exclude-conditions:</strong> Can use this to drop conditions not of interest.</p></li>
+<li><p><strong>--ref:</strong> Specify which condition to use as a reference for computing LFCs.
+By default, LFCs for each gene in each condition are calculated with respect
+to the <em>grand mean</em> count across all conditions (so conditions with higher counts will be balanced
+with conditions with lower counts).  However, if there is a defined reference condition
+in the data, it may be specified using <strong>--ref</strong> (in which case LFCs for that condition will
+be around 0, and will be positive or negative for the other conditions, depending on whether
+counts are higher or lower than the reference condition.  If there is more than one
+condition to use as reference (i.e. pooled), they may be given as a comma-separated list.</p></li>
+<li><p><strong>–n</strong>: Normalization Method. Determines which normalization method to
+use when comparing datasets. Proper normalization is important as it
+ensures that other sources of variability are not mistakenly treated
+as real differences. See the <a class="reference internal" href="normalize_method.html#normalization"><span class="std std-ref">Normalization</span></a> section for a description
+of normalization method available in TRANSIT. Default: -n TTR</p></li>
+<li><p><strong>–PC &lt;N&gt;</strong>: Pseudocounts to use in calculating LFCs (see below). Default: -PC 5</p></li>
+<li><p><strong>–alpha &lt;N&gt;</strong>:  Value added to MSE in F-test for moderated ANOVA: F = MSR/(MSE+alpha).
+This is helpful because genes with very low counts are occasionally ranked as significant
+by traditional ANOVA, even though the apparent variability is probably due to noise.
+Setting alpha to a number like 1000 helps filter out these irrelevant genes
+by reducing their significance. If you want to emulate the
+standard ANOVA test, you can set alpha to 0.  Default: -alpha 1000</p></li>
+<li><p><strong>-winz</strong>: <a class="reference external" href="https://en.wikipedia.org/wiki/Winsorizing">winsorize</a> insertion counts for each gene in each condition.
+Replace max count in each gene with 2nd highest.  This can help mitigate effect of outliers.</p></li>
+</ul>
+</div>
+<div class="section" id="output-and-diagnostics">
+<h2>Output and Diagnostics<a class="headerlink" href="#output-and-diagnostics" title="Permalink to this headline">¶</a></h2>
+<p>The output file generated by ANOVA identifies which genes exhibit statistically
+significant variability in insertion counts across conditions.</p>
+<p>The ANOVA method outputs a tab-delimited file with results for each
+gene in the genome. P-values are adjusted for multiple comparisons using
+the Benjamini-Hochberg procedure (called “q-values” or “p-adj.”). A
+typical threshold for conditional essentiality on is q-value &lt; 0.05.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 82%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column Header</p></th>
+<th class="head"><p>Column Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Orf</p></td>
+<td><p>Gene ID.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Name of the gene.</p></td>
+</tr>
+<tr class="row-even"><td><p>TAs</p></td>
+<td><p>Number of TA sites in Gene</p></td>
+</tr>
+<tr class="row-odd"><td><p>Means…</p></td>
+<td><p>Mean readcounts for each condition</p></td>
+</tr>
+<tr class="row-even"><td><p>Log 2 FCs…</p></td>
+<td><p>Log-fold-changes of counts in each condition vs mean across all conditions</p></td>
+</tr>
+<tr class="row-odd"><td><p>MSR</p></td>
+<td><p>Mean-squared residual</p></td>
+</tr>
+<tr class="row-even"><td><p>MSE With Alpha</p></td>
+<td><p>Mean-squared error, plus moderation value</p></td>
+</tr>
+<tr class="row-odd"><td><p>Fstat</p></td>
+<td><p>Ratio of variance between groups vs. within groups (MSR/(MSE+alpha))</p></td>
+</tr>
+<tr class="row-even"><td><p>P Value</p></td>
+<td><p>P-value calculated by the Anova test.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Adj P Value</p></td>
+<td><p>Adjusted p-value controlling for the FDR (Benjamini-Hochberg)</p></td>
+</tr>
+<tr class="row-even"><td><p>Status</p></td>
+<td><p>Debug information (If any)</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>LFCs</strong> (log-fold-changes):
+For each condition, the LFC is calculated as the log-base-2 of the
+ratio of mean insertion count in that condition <strong>relative to the mean of means across all the conditions</strong>.
+You can use the <strong>‘--ref’ flag</strong> to designate a specific condition as a reference for computing LFCs.
+Pseudocount are incorporated to reduce the impact of noise on LFCs, based on the formula below.
+The pseudocounts can be adjusted using the ‘--PC’ flag.
+Changing the pseudocounts (via --PC) can reduce the artifactual appearance of genes with
+high-magnitude LFCs but that have small overall counts (which are susceptible to noise).
+Changing the pseudocounts will not affect the analysis of statistical significance and hence number of varying genes, however.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LFC</span> <span class="o">=</span> <span class="n">log2</span><span class="p">((</span><span class="n">mean_insertions_in_condition</span> <span class="o">+</span> <span class="n">PC</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">mean_of_means_across_all_conditions</span> <span class="o">+</span> <span class="n">PC</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="gui-mode">
+<h2>GUI Mode<a class="headerlink" href="#gui-mode" title="Permalink to this headline">¶</a></h2>
+<p>The Anova analysis method can be selected from the “Method” tab in the Menu Bar.</p>
+<a class="reference internal image-reference" href="_images/anova_method_tab.png"><img alt="_images/anova_method_tab.png" class="align-center" src="_images/anova_method_tab.png" style="width: 1000px;" /></a>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>The parameters to input through the parameter panel for the method is equivalent to the command line usage (see parameter descriptions above for full detail):</p>
+<a class="reference internal image-reference" href="_images/anova_parameter_panel.png"><img alt="_images/anova_parameter_panel.png" class="align-center" src="_images/anova_parameter_panel.png" style="width: 1000px;" /></a>
+</div>
+<div class="section" id="run-time">
+<h2>Run-time<a class="headerlink" href="#run-time" title="Permalink to this headline">¶</a></h2>
+<p>A typical run of the anova method takes less than 1 minute for a combined wig file with 6 conditions, 3 replicates per condition.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<hr class="transit-sectionend docutils" />
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="zinb_method.html" class="btn btn-neutral float-right" title="ZINB" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="gi_method.html" class="btn btn-neutral float-left" title="Genetic Interactions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015, Michael A. DeJesus &amp; Thomas R. Ioerger.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

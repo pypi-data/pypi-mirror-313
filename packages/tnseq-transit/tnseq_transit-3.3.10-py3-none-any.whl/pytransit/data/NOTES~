@@ -1,0 +1,76 @@
+9/14/24
+-------
+
+test case for anova:
+
+> python3 ../../transit.py anova cholesterol_glycerol_combined.dat samples_metadata_cg.txt ../genomes/H37Rv.prot_table temp
+
+1/28/24
+-------
+
+test --ref in ZINB (for Wael)
+
+> python3 ../../transit.py zinb cholesterol_glycerol_combined.dat samples_metadata_cg.txt ../genomes/H37Rv.prot_table temp1.txt
+> python3 ../../transit.py zinb cholesterol_glycerol_combined.dat samples_metadata_cg.txt ../genomes/H37Rv.prot_table temp1b.txt --ref Cholesterol
+problem! LFC does not invert (for k=2 conditions; where there is only 1 LFC)
+> python3 ../../transit.py zinb cholesterol_glycerol_combined.dat temp.meta ../genomes/H37Rv.prot_table temp1c.txt
+switch order of conditions in metadata file
+this just switches order of Glyc vs Chol, but doesn't fix LFCs
+> python3 ../../transit.py zinb cholesterol_glycerol_combined.dat temp.meta ../genomes/H37Rv.prot_table temp1d.txt --include-condtions Glycerol,Cholesterol
+
+
+> python3 ../../transit.py zinb iron_combined_wig4.txt iron_samples_metadata.txt ../genomes/H37Rv.prot_table temp2.txt
+
+> python3 ../../transit.py zinb iron_combined_wig4.txt iron_samples_metadata.txt ../genomes/H37Rv.prot_table temp3.txt --ref FeCMBT 
+
+> python3 ../../transit.py zinb iron_combined_wig4.txt iron_samples_metadata.txt ../genomes/H37Rv.prot_table temp4.txt --ref FeCMBT --prot_table ../genomes/H37Rv.prot_table
+
+
+1/9/24
+------
+
+> python3 ../../transit.py resampling glycerol_H37Rv_rep1.wig,glycerol_H37Rv_rep2.wig cholesterol_H37Rv_rep1.wig,cholesterol_H37Rv_rep2.wig,cholesterol_H37Rv_rep3.wig ../genomes/H37Rv.prot_table resampling_glyc_chol.txt -a
+74 hits
+
+SR resampling:
+
+> python3 ../../transit.py resampling glycerol_H37Rv_rep1.wig,glycerol_H37Rv_rep2.wig cholesterol_H37Rv_rep1.wig,cholesterol_H37Rv_rep2.wig,cholesterol_H37Rv_rep3.wig ../genomes/H37Rv.prot_table resampling_glyc_chol.SR.txt -sr -a
+147 hits
+
+
+11/24/21
+--------
+Michael Y Galperin, Yuri I Wolf, Kira S Makarova, Roberto Vera Alvarez, David Landsman, Eugene V Koonin (2021).
+COG database update: focus on microbial diversity, model organisms, and widespread pathogens. NAR.
+https://academic.oup.com/nar/article/49/D1/D274/5964069
+
+
+10/17/21
+--------
+
+extract cellular localization info as children of GO:0110165 cellular anatomical entity:
+  GO:0042597 periplasmic space
+  GO:0005737 cytoplasm
+  GO:0071944 cell periphery
+  GO:0016020 membrane
+  GO:0005615 extracellular space
+  and many more...
+
+I did this us /pacific/home/ioerger/U19/
+
+
+
+3/29/21
+-------
+
+made list of 53 iron-related genes for Sami Nelson (Sassetti lab)
+
+I think I did this:
+
+> python list_GO_terms.py > iron_related_GO_terms.txt
+
+12/20/20
+--------
+
+got smeg_GO_terms.txt from PATRIC
+4832/6716 genes have at least 1 GO term
