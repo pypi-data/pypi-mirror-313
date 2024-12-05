@@ -1,0 +1,64 @@
+Metadata-Version: 2.3
+Name: fm-weck
+Version: 1.4.5
+Author-email: Henrik Wachowitz <henrik.wachowitz@ifi.lmu.de>
+Maintainer-email: Henrik Wachowitz <henrik.wachowitz@ifi.lmu.de>
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Requires-Dist: fm-tools>=0.3.3
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: tomli>=2.0; python_version <= '3.10'
+Requires-Dist: yaspin>=3.0
+Description-Content-Type: text/markdown
+
+<!--
+This file is part of fm-weck: executing fm-tools in containerized environments.
+https://gitlab.com/sosy-lab/software/fm-weck
+
+SPDX-FileCopyrightText: 2024 Dirk Beyer <https://www.sosy-lab.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+# fm-weck: Run formal methods tools in containerized environments
+
+fm-weck is a command line tool and library that makes the execution of formal methods tools easy. fm-weck downloads the tools and caches them for later use.
+
+<!-- To get an impression check out the corresponding [FM '24 Paper](https://www.sosy-lab.org/research/pub/2024/). -->
+We provide a tutorial on how to use fm-weck [here](doc/Tutorial.md).
+
+## Install dependencies
+
+`fm-weck` requires Python 3.10 or higher. `fm-weck` relies on an available Podman installation. To install Podman on Ubuntu, run the following command:
+
+```
+sudo apt install podman
+```
+
+## Modes of Operation
+
+There are three modes of operation: `run`, `shell` and `expert`.
+
+- `expert`: executes a tool in it's containerized environment specified through the
+corresponding fm-tools YAML file: All arguments are passed verbatim to the tool.
+- `shell`: enters an interactive shell inside of the container specified by the given tool
+- `run`: enables plug-and-play execution of formal methods tools: it 
+downloads and unpacks a tool from the fm-tools metadata file into a user-specified cache directory on the host system and then runs the tool in the containerized environment
+
+## Development and Testing
+
+When using any command with the `fm-weck <cmd> toolname ...` syntax, the tool name is searched in `src/fm_weck/resources/fm_tools`.
+During the build process of the `.whl` file for `fm-weck`, the `fm_tools/data` directory is copied to that location.
+When running or developing `fm-weck` from the git repository, the user must make sure that the contents of `fm_tools/data` directory are
+available in the `src/fm_weck/resources/fm_tools` directory.
+
+In Linux this can be done by running the following command in the root directory of the project:
+
+```
+ln -s $(pwd)/fm_tools/data $(pwd)/src/fm_weck/resources/fm_tools
+```
