@@ -1,0 +1,118 @@
+[project]
+name = "satori-python-core"
+dynamic = []
+authors = [
+    { name = "RF-Tar-Railt", email = "rf_tar_railt@qq.com" },
+]
+dependencies = [
+    "loguru>=0.7.2",
+    "yarl>=1.9.4",
+    "typing-extensions>=4.7.0",
+]
+description = "Satori Protocol SDK for python, specify common part"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Typing :: Typed",
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+version = "0.15.2"
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+homepage = "https://github.com/RF-Tar-Railt/satori-python"
+repository = "https://github.com/RF-Tar-Railt/satori-python"
+
+[build-system]
+requires = [
+    "mina-build<0.6,>=0.5.1",
+    "pdm-backend<2.4.0",
+]
+build-backend = "mina.backend"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "isort>=5.13.2",
+    "black>=24.4.0",
+    "ruff>=0.4.1",
+    "pre-commit>=3.7.0",
+    "fix-future-annotations>=0.5.0",
+    "mina-build<0.6,>=0.5.1",
+    "pdm-mina>=0.3.2",
+]
+
+[tool.pdm.build]
+includes = [
+    "src/satori",
+    ".mina/core.toml",
+]
+excludes = [
+    "src/satori/client",
+    "src/satori/server",
+    "src/satori/adapters",
+]
+
+[tool.pdm.scripts.format]
+composite = [
+    "isort ./src/ ./example/",
+    "black ./src/ ./example/",
+    "ruff check ./src/ ./example/",
+]
+
+[tool.pdm.version]
+source = "file"
+path = "src/satori/__init__.py"
+
+[tool.black]
+line-length = 110
+include = "\\.pyi?$"
+extend-exclude = ""
+
+[tool.isort]
+profile = "black"
+line_length = 110
+skip_gitignore = true
+extra_standard_library = [
+    "typing_extensions",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py39"
+exclude = [
+    "exam.py",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "UP",
+    "C",
+    "T",
+    "Q",
+]
+ignore = [
+    "E402",
+    "F403",
+    "F405",
+    "C901",
+    "UP037",
+]
+
+[tool.pyright]
+pythonPlatform = "All"
+pythonVersion = "3.9"
+typeCheckingMode = "basic"
+reportShadowedImports = false
+disableBytesTypePromotions = true
