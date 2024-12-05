@@ -1,0 +1,1030 @@
+This document is the `change log`_ for this distribution. It is a
+record of all notable changes in each version released.
+
+Version strings conform to the `Semantic Versioning`_ specification,
+`version 2.0.0 <https://semver.org/spec/v2.0.0.html>`__.
+
+..  _change log: https://keepachangelog.com/
+..  _Semantic Versioning: https://semver.org/
+
+
+Version 3.1.2
+=============
+
+:Released: 2024-12-03
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* In wheel, distribute only the Python packages that should be installed.
+
+  Closes: Pagure #98.
+
+Changed:
+
+* Migrate project code base from “flat layout” to “src layout”.
+
+  This commits us to a build step for running the test suite, ensuring the
+  built package works.
+
+  See <URL:
+  https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/
+  > for more discussion.
+
+
+Version 3.1.1
+=============
+
+:Released: 2024-12-02
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Remove unused run-time dependency on Setuptools.
+
+  Closes: Pagure #97. Thanks to Michał Górny for the report.
+
+* Restore inclusion of documentation source in source distribution.
+
+Removed:
+
+* Cease signing releases, as GnuPG signatures no longer supported by PyPI.
+
+  See <URL: https://blog.pypi.org/posts/2023-05-23-removing-pgp/ > for the
+  announcement by PyPI maintainers.
+
+
+Version 3.1.0
+=============
+
+:Released: 2024-10-25
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Correct a non-deterministic test case that would sometimes fail.
+
+  Because of test data that was incorrectly choosing a random value for the
+  property being tested, the test case would succeed or fail unreliably.
+
+  Closes: Pagure #96. Thanks to Joseph Tate for the report and implementation.
+
+* Increase minimum Python version required, to “>= 3.7”.
+
+  The interface `setuptools.command.build`, introduced in Setuptools version
+  “62.4.0”, requires Python version >= 3.7.
+
+  Closes: Pagure #79. Thanks to Edison Wong for the report and implementation.
+
+* Get metadata from Change Log at build time only.
+
+  This removes the need for Setuptools “entry points” feature at build time.
+
+  Closes: Pagure #94. Thanks to Branch Vincent for assistance.
+  Closes: Pagure #86.
+  Closes: Pagure #85. Thanks to Attila Lendvai for the report.
+  Closes: Pagure #82.
+
+* Migrate optional dependencies to PEP 621 declarations.
+
+  This uses the named groups for developing and building the package, versus
+  the core requirements for installing and running the distribution.
+
+  Closes: Pagure #52. Thanks to Stoyan Nikolov, Neil Hanlon.
+  Closes: Pagure #93. Thanks to Michał Górny for the report.
+
+Changed:
+
+* Migrate all Setuptools-specific options to PEP 621 declarations.
+
+  The ‘pyproject.toml’ configuration file now contains explicit declaration of
+  all project configuration, ending the need to run ‘setup.py’ as a program.
+
+  Closes: Pagure #71.
+
+Removed:
+
+* Remove dynamically-constructed non-standard metadata attributes.
+
+  All these attributes are now met by the standard `“Core Metadata”
+  <https://packaging.python.org/en/latest/specifications/core-metadata/>`_
+  specification.
+
+
+Version 3.0.2
+=============
+
+:Released: 2024-07-27
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Migrate to use the explicitly-maintained ‘packaging’ library.
+
+  The package bundled in ‘setuptools.extern.packaging’ is to help make that
+  package self-contained, but is not a supported API.
+
+  Closes: Pagure #73. Thanks to Michał Górny for the report.
+
+Changed:
+
+* Clarify copyright and grants of license.
+
+  The new file `COPYING` now comprehensively describes grants of license to all
+  parts of this distribution.
+
+* Migrate to PEP 517 simple build system for Python distribution.
+
+  This makes it easier to de-couple from Setuptools-specific declarations; we
+  stop using the deprecated command-line invocations of ‘setup.py’ as a
+  program.
+
+  Closes: Pagure #87. Thanks to Attila Lendvai for the report.
+
+
+Version 3.0.1
+=============
+
+:Released: 2023-03-08
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Declare dependency on Setuptools >= 62.4.0.
+
+  This is necessary for establishing the version information via Setuptools. We
+  use ‘setuptools.command.build’, `introduced in Setuptools version 62.4.0
+  <https://setuptools.pypa.io/en/stable/history.html#v62-4-0>`_.
+
+  Closes: Pagure #74. Thanks to Edison Wong for the report.
+
+Added:
+
+* PyPA recommended Project URLs for the distribution.
+
+
+Version 3.0.0
+=============
+
+:Released: 2023-03-04
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Refactor calculation of file descriptor ranges to close.
+
+  When the range of candidate file descriptors is very large, the code that
+  computes file descriptors to close when the daemon starts attempted to
+  allocate a large amount of memory and took a long time to compute.
+
+  Thanks to Alex Pyrgiotis for the timing test case.
+
+  This change avoids that resource-intensive computation, and significantly
+  improves the performance when importing the module and when starting the
+  daemon.
+
+  Thanks to Igor Kholopov for the implementation.
+
+  Closes: Pagure #72. Thanks to Anton Anton for the report.
+
+Added:
+
+* Document a `ServiceRunner` class as an example of using `DaemonContext`.
+
+Changed:
+
+* Raise a TypeError if any `exclude` values are not valid file descriptors.
+
+  Formerly, an invalid value might be silently ignored.
+
+  Thanks to Igor Kholopov for the suggestion.
+
+* Migrate package version handling to use Setuptools API.
+
+  The Distutils library is deprecated for direct use; see
+  `<https://docs.python.org/3/whatsnew/3.10.html#distutils-deprecated>`_.
+
+  Closes: Pagure #70.
+
+Removed:
+
+* Remove redundant ‘wheel’ from the requirements specification.
+
+  As described by the Python Packaging Authority:
+
+      This [‘wheel’] dependency is exposed automatically by setuptools and the
+      users do not need to declare it explicitly — it will be installed by PEP
+      517 front-ends automatically, when building wheels.
+
+  Thanks to Michał Górny for the implementation.
+
+* Remove Setuptools ‘test’ command support.
+
+  The ‘test’ command is formally deprecated, in favour of dedicated test
+  runners. `<https://setuptools.pypa.io/en/stable/history.html#v41-5-0>`_
+
+* Remove Setuptools ‘register’ and ‘upload’ command support.
+
+  The commands to publish a distribution to PyPI are removed, in favour of the
+  Twine tool. `<https://setuptools.pypa.io/en/stable/history.html#v42-0-0>`_
+
+* Remove the obsolete `runner` module.
+
+  This module was deprecated starting in `python-daemon` version 2.1.2, and is
+  now removed as unmaintained.
+
+
+Version 2.3.2
+=============
+
+:Released: 2022-10-23
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Declare Twine as a development dependency (not a build dependency).
+
+  Closes: Pagure #55. Thanks to Jason Andryuk for the report.
+  Thanks to James Hilliard for the implementation.
+
+* Specify to build a wheel distribution for only Python 3 or later.
+
+* Specify the built package requires Python 3 or later.
+
+  Closes: Pagure #66. Thanks to Nick M. for the report and implementation.
+
+Removed:
+
+* The earlier version 2.3.1 is now “yanked” from PyPI (unlisted and not an
+  installation candidate), because that version incorrectly permitted
+  installation on Python 2. Thanks to Nick M. for the report.
+
+
+Version 2.3.1
+=============
+
+:Released: 2022-07-19
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Avoid operations on a closed stream file when detecting a socket.
+
+  Closes: Pagure #64. Thanks to Mark Richman for the report.
+
+* Correct use of names to allow `from daemon import *`.
+
+  Closes: Pagure #65. Thanks to July Tikhonov for the report.
+
+Changed:
+
+* Speed daemon start time by computing candidate file descriptors once.
+
+  Closes: Pagure #40. Thanks to Alex Pyrgiotis for the report.
+
+* Remove incorrect double-patch of objects in test cases.
+
+  Closes: Pagure #62. Thanks to Miro Hrončok for the report.
+
+* Deprecate helper function `is_socket`.
+
+  The function incorrectly causes `ValueError` when the file object is already
+  closed. Migrate to the new `is_socket_file` helper function instead.
+
+Removed:
+
+* Drop backward-compatible helpers that provided Python 2 support.
+
+  * declaration of source encoding ‘utf-8’
+  * absolute_import
+  * unicode_literals
+  * module-level metaclass `type`
+  * unification of str with unicode type
+  * renamed standard library exceptions and modules
+  * raise exception from context exception
+
+  All these are default behaviour in Python 3 and need no special
+  handling.
+
+
+Version 2.3.0
+=============
+
+:Released: 2021-02-21
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Removed:
+
+* Remove support for Python versions older than Python 3.
+
+  Python 2 has been unsupported by the Python project since 2020.
+
+* Remove dependency on back-ported `unittest2` and `mock`.
+  Depend instead on standard library `unittest` and `unittest.mock`.
+
+  Thanks to Michał Górny for the merge requests.
+
+
+Version 2.2.4
+=============
+
+:Released: 2019-10-27
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Run the Setuptools `egg-info` command as part of the `build`
+  command.
+
+  Closes: Pagure #31. Thanks to Stanislav Levin for the bug report and
+  diagnosis.
+
+* Create the socket and catch “non-socket” errors.
+
+  Closes: Pagure #34. Thanks to Miro Hrončok for the bug report and
+  patch.
+
+* Only deal with a range of file descriptors if the range is not empty.
+
+  Closes: Pagure #39. Thanks to Alex Pyrgiotis for the test scenario.
+
+* Declare Twine as a build dependency.
+
+* Reformat the change log entries with keepachangelog.com sub-sections.
+
+Changed:
+
+* Upgrade Tox dependency to version “3.7.0”.
+
+  Thanks to Miro Hrončok for the contribution.
+
+* Significant speed-up to discovery of file descriptors to close.
+
+  By using a native `tuple` for the heavily-used file descriptor range
+  representation, this gives approximately 5× faster calls to
+  `close_all_open_files` in the typical case. This partially addresses
+  Pagure #40.
+
+  Thanks to Alex Pyrgiotis for testing various alternative proposals.
+
+* Refactor the build system to use Makefile modules for each topic.
+
+
+Version 2.2.3
+=============
+
+:Released: 2019-01-21
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Use custom fake file type for testing `fileno` behaviour.
+
+  This works around an incompatibility in Python 2.7 `file` type that
+  caused test cases to fail.
+
+Deprecated:
+
+* Promote the warning for `runner` module to a `DeprecationWarning`.
+  This has been an unofficial example module from the beginning, and
+  it will be removed in a future version.
+
+
+Version 2.2.2
+=============
+
+:Released: 2019-01-19
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Remove from the build system specification a white space character
+  not permitted in TOML format.
+
+Added:
+
+* Implement test suite automation in virtualenvs, using Tox.
+
+
+Version 2.2.1
+=============
+
+:Released: 2019-01-18
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Add a :PEP:`518` conformant build system specification (the
+  ``pyproject.toml`` file).
+
+
+Version 2.2.0
+=============
+
+:Released: 2018-08-15
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Correct the description of the return value for
+  `daemon.is_detach_process_context_required`.
+
+  Closes: Pagure #6.
+
+* Set a sensible default for `Distribution.script_name`.
+
+  This works around a bug in Setuptools which calls commands before
+  the `Distribution` is initialised.
+
+  Closes: Pagure #2.
+
+Changed:
+
+* The test suite now relies on the test discovery feature in
+  ‘unittest’. This feature is in Python version 2.7 and later.
+
+* Improve performance of `daemon.close_all_open_files`.
+
+  Thanks to Darek Działak for the implementation.
+
+  Closes: Pagure #10.
+
+
+Version 2.1.2
+=============
+
+:Released: 2016-10-26
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Add a README document for the code base.
+
+Changed:
+
+* Migrate code project hosting to Pagure.
+  Record the change of homepage URL in PyPI metadata.
+
+Deprecated:
+
+* Raise a warning that the ‘runner’ module is pending deprecation.
+  This has been an unofficial example module from the beginning, and
+  it will be removed in a future version.
+
+Bugs Fixed:
+
+* Ensure custom types are part of the Python type hierarchy.
+* Avoid a circular dependency for the version string at install time.
+  Thanks to Maarten van Gompel for the reproducible test case.
+
+
+Version 2.1.1
+=============
+
+:Released: 2016-01-30
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Default ‘initgroups’ option to False. Using ‘os.initgroups’ requires
+  permission to set process GID, so this now needs to be explicitly
+  requested.
+
+
+Version 2.1.0
+=============
+
+:Released: 2015-11-26
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Add a DaemonContext option, ‘initgroups’, which specifies whether to
+  set the daemon process's supplementary groups.
+* Set the process groups using ‘os.initgroups’.
+  Thanks to Malcolm Purvis for contributing an implementation of this
+  feature.
+
+
+Version 2.0.6
+=============
+
+:Released: 2015-08-30
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Changed:
+
+* Lower dependency for ‘unittest2’, we can work with an earlier version.
+* Specify development status “Production/Stable” in Trove classifiers.
+* Migrate to ‘mock’ version 1.3 with corresponding API changes.
+
+Bugs Fixed:
+
+* Use current Python concept of “basestring” to test for an attribute name.
+  Thanks to Arthur de Jong for the bug report.
+
+
+Version 2.0.5
+=============
+
+:Released: 2015-02-02
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Refine compatibility of exceptions for file operations.
+* Specify the text encoding when opening the changelog file.
+
+
+Version 2.0.4
+=============
+
+:Released: 2015-01-23
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Changed:
+
+* Record version info via Setuptools commands.
+
+Removed:
+
+* Remove the custom Setuptools entry points.
+  This closes Alioth bug#314948.
+
+
+Version 2.0.3
+=============
+
+:Released: 2015-01-14
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Changed:
+
+* Refactor all initial metadata functionality to ‘daemon._metadata’.
+* Build a “universal” (Python 2 and Python 3) wheel.
+
+Removed:
+
+* Distribute ‘version’ (and its tests) only in source, not install.
+
+Bugs Fixed:
+
+* Break circular import dependency for ‘setup.py’.
+
+
+Version 2.0.2
+=============
+
+:Released: 2015-01-13
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Include unit tests for ‘version’ module with source distribution.
+* Record version info consistent with distribution metadata.
+
+Bugs Fixed:
+
+* Declare test-time dependency on recent ‘unittest2’.
+* Declare packaging-time dependency on ‘docutils’ library.
+
+
+Version 2.0.1
+=============
+
+:Released: 2015-01-11
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Include the ‘version’ module with source distribution.
+
+
+Version 2.0
+===========
+
+:Released: 2015-01-10
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Support both Python 3 (version 3.2 or later) and Python 2 (version
+  2.7 or later).
+* Document the API of all functions comprehensively in docstrings.
+* Add a hacking guide for developers.
+* Add explicit credit for contributors.
+* Document the security impact of the default umask.
+
+* Specify explicit text or binary mode when opening files.
+* Preserve exception context in custom exceptions.
+
+* Declare compatibility with current Python versions.
+* Use ‘pydoc.splitdoc’ to get package description text.
+* Include test suite with source distribution.
+* Add unit tests for metadata.
+* Store and retrieve version info in Setuptools metadata.
+
+Changed:
+
+* Depend on Python 3 compatible libraries.
+* Update package homepage to Alioth hosted project page.
+* Migrate to ‘str.format’ for interpolation of values into text.
+* Migrate to ‘mock’ library for mock objects in tests.
+* Migrate to ‘testscenarios’ library for unit test scenarios.
+* Migrate to ‘unittest2’ library for back-ported improvements.
+* Discriminate Python 2-and-3 compatible usage of dict methods.
+* Discriminate Python 2-and-3 compatible bytes versus text.
+* Declare explicit absolute and relative imports.
+* Discriminate between different ‘fileno’ method behaviours.
+  In Python 3, ‘StringIO.fileno’ is callable but raises an exception.
+* Migrate to built-in ‘next’ function.
+* Wrap the ‘fromlist’ parameter of ‘__import__’ for Python 3
+  compatibility.
+* Wrap function introspection for Python 3 compatibility.
+* Wrap standard library imports where names changed in Python 3.
+* Move package metadata to ‘daemon/_metadata.py’.
+* Migrate to JSON (instead of Python) for serialised version info.
+
+Removed:
+
+* Remove ASCII translation of package description, not needed now the
+  docstring is a proper Unicode text value.
+* Remove custom test suite creation.
+
+
+Version 1.6.1
+=============
+
+:Released: 2014-08-04
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Add editor hints for most files.
+
+Changed:
+
+* Distinguish continuation-line indentation versus block indentation.
+* Use unicode literals by default, specifying bytes where necessary.
+  This is to ease the port to Python 3, where the default string type
+  is unicode.
+* Update copyright notices.
+* Update the GPL license file to version 3, as declared in our
+  copyright notices.
+
+* Change license of library code to Apache License 2.0. Rationale at
+  `<http://wiki.python.org/moin/PythonSoftwareFoundationLicenseFaq#Contributing_Code_to_Python>`_.
+
+Bugs Fixed:
+
+* Use unambiguous “except FooType as foo” syntax.
+  This is to ease the port to Python 3, where the ambiguous comma
+  usage is an error.
+* Ensure a ‘basestring’ name bound to the base type for strings.
+  This is to allow checks to work on Python 2 and 3.
+* Specify versions of Python supported, as trove classifiers.
+
+
+Version 1.6
+===========
+
+:Released: 2010-05-10
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* FAQ: Add some entries and re-structure the document.
+* MANIFEST.in: Include the documentation in the distribution.
+
+Changed:
+
+* Use absolute imports to disambiguate provenance of names.
+* setup.py: Require ‘lockfile >=0.9’.
+
+* Use ‘unicode’ data type for all text values.
+* Prepare for Python 3 upgrade by tweaking some names and imports.
+
+Removed:
+
+* daemon/pidfile.py: Renamed from ‘daemon/pidlockfile.py’. Change
+  references elsewhere to use this new name.
+* test/test_pidfile.py: Renamed from ‘test/test_pidlockfile.py’.
+  Change references elsewhere to use this new name.
+* daemon/pidfile.py: Remove functionality now migrated to ‘lockfile’
+  library.
+
+
+Version 1.5.5
+=============
+
+:Released: 2010-03-02
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Stop using ‘pkg_resources’ and revert to pre-1.5.3 version-string
+  handling, until a better way that doesn't break everyone else's
+  installation can be found.
+
+
+Version 1.5.4
+=============
+
+:Released: 2010-02-27
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* MANIFEST.in: Explicitly include version data file, otherwise
+  everything breaks for users of the sdist.
+
+
+Version 1.5.3
+=============
+
+:Released: 2010-02-26
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* version: New plain-text data file to store project version string.
+* Add ‘pylint’ configuration for this project.
+
+Changed:
+
+* setup.py: Read version string from data file.
+* daemon/version/__init__.py: Query version string with ‘pkg_resources’.
+
+* Update copyright notices.
+
+Bugs Fixed:
+
+* daemon/daemon.py: Invoke the pidfile context manager's ‘__exit__’
+  method with the correct arguments (as per
+  `<http://docs.python.org/library/stdtypes.html#typecontextmanager>`_).
+  Thanks to Ludvig Ericson for the bug report.
+
+
+Version 1.5.2
+=============
+
+:Released: 2009-10-24
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Add initial Frequently Asked Questions document.
+
+Bugs Fixed:
+
+* Ensure we only prevent core dumps if ‘prevent_core’ is true.
+  Thanks to Denis Bilenko for reporting the lacking implementation of
+  this documented option.
+
+
+Version 1.5.1
+=============
+
+:Released: 2009-09-26
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Make a separate collection of DaemonRunner test scenarios.
+* Handle a start request with a timeout on the PID file lock acquire.
+
+* Implement ‘TimeoutPIDLockFile’ to specify a timeout in advance of
+  lock acquisition.
+* Use lock with timeout for ‘DaemonRunner’.
+
+
+Version 1.5
+===========
+
+:Released: 2009-09-24
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Make a separate collection of PIDLockFile test scenarios.
+
+Changed:
+
+* Refactor code to ‘_terminate_daemon_process’ method.
+* Improve explanations in comments and docstrings.
+* Don't set pidfile at all if no path specified to constructor.
+* Implement ‘PIDLockFile’ as subclass of ‘lockfile.LinkFileLock’.
+* Remove redundant checks for file existence.
+
+* Manage the excluded file descriptors as a set (not a list).
+
+Bugs Fixed:
+
+* Raise specific errors on ‘DaemonRunner’ failures.
+* Distinguish different conditions on reading and parsing PID file.
+* Write the PID file using correct OS locking and permissions.
+* Close the PID file after writing.
+* Only inspect the file descriptor of streams if they actually have
+  one (via a ‘fileno’ method) when determining which file descriptors
+  to close. Thanks to Ask Solem for revealing this bug.
+
+
+Version 1.4.8
+=============
+
+:Released: 2009-09-17
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Document requirement for ensuring any operating-system specific
+  signal handlers are considered.
+* Add specific license terms for unit test suite scaffold.
+
+Changed:
+
+* Refactor ‘fork_then_exit_parent’ functionality to avoid duplicate
+  code.
+
+Removed:
+
+* Remove redundant imports.
+* Remove unused code from unit test suite scaffold.
+
+Bugs Fixed:
+
+* Remove child-exit signal (‘SIGCLD’, ‘SIGCHLD’) from default signal
+  map. Thanks to Joel Martin for pinpointing this issue.
+
+
+Version 1.4.7
+=============
+
+:Released: 2009-09-03
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Removed:
+
+* Exclude ‘test’ package from distribution installation.
+
+Bugs Fixed:
+
+* Fix keywords argument for distribution setup.
+
+
+Version 1.4.6
+=============
+
+:Released: 2009-06-21
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Update documentation for changes from latest PEP 3143 revision.
+* Implement DaemonContext.is_open method.
+
+
+Version 1.4.5
+=============
+
+:Released: 2009-05-17
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Improve docstrings by reference to, and copy from, PEP 3143.
+* Use mock checking capabilities of newer ‘MiniMock’ library.
+* Automate building a versioned distribution tarball.
+* Include developer documentation files in source distribution.
+
+Bugs Fixed:
+
+* Register DaemonContext.close method for atexit processing.
+* Move PID file cleanup to close method.
+
+
+Version 1.4.4
+=============
+
+:Released: 2009-03-26
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Changed:
+
+* Conform to current PEP version, now released as PEP 3143 “Standard
+  daemon process library”.
+* Redirect standard streams to null device by default.
+
+Bugs Fixed:
+
+* Ensure UID and GID are set in correct order.
+* Delay closing all open files until just before re-binding standard
+  streams.
+
+
+Version 1.4.3
+=============
+
+:Released: 2009-03-19
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Bugs Fixed:
+
+* Close the PID file context on exit.
+
+
+Version 1.4.2
+=============
+
+:Released: 2009-03-18
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Context manager methods for DaemonContext.
+
+
+Version 1.4.1
+=============
+
+:Released: 2009-03-18
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Changed:
+
+* Improvements to docstrings.
+* Further conformance with draft PEP.
+
+
+Version 1.4
+===========
+
+:Released: 2009-03-17
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Complete statement coverage from unit test suite.
+
+Changed:
+
+* Implement the interface from a draft PEP for process daemonisation.
+
+
+Version 1.3
+===========
+
+:Released: 2009-03-12
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Huge increase in unit test suite.
+
+Changed:
+
+* Separate controller (now ‘DaemonRunner’) from daemon process
+  context (now ‘DaemonContext’).
+
+Bugs Fixed:
+
+* Fix many corner cases and bugs.
+
+
+Version 1.2
+===========
+
+:Released: 2009-01-27
+:Maintainer: Ben Finney <ben+python@benfinney.id.au>
+
+Added:
+
+* Begin unit test suite.
+
+Changed:
+
+* Initial release of this project forked from ‘bda.daemon’. Thanks,
+  Robert Niederreiter.
+* Refactor some functionality out to helper functions.
+
+
+..
+    This document is written using `reStructuredText`_ markup, and can
+    be rendered with `Docutils`_ to other formats.
+
+    ..  _Docutils: https://docutils.sourceforge.io/
+    ..  _reStructuredText: https://docutils.sourceforge.io/rst.html
+
+..
+    This is free software: you may copy, modify, and/or distribute this work
+    under the terms of the Apache License version 2.0 as published by the
+    Apache Software Foundation.
+    No warranty expressed or implied. See the file ‘LICENSE.ASF-2’ for details.
+
+..
+    Local variables:
+    coding: utf-8
+    mode: text
+    mode: rst
+    End:
+    vim: fileencoding=utf-8 filetype=rst :
