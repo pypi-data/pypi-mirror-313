@@ -1,0 +1,147 @@
+[tool.poetry]
+name = "spinta"
+version = "0.1.80"
+description = "A platform for describing, extracting, transforming, loading and serving open data."
+authors = ["Mantas Zimnickas <sirexas@gmail.com>"]
+license = "MIT"
+readme = "README.rst"
+homepage = "https://gitlab.com/atviriduomenys/spinta"
+repository = "https://gitlab.com/atviriduomenys/spinta"
+documentation = "https://spinta.readthedocs.io/"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Database",
+    "Topic :: Database :: Database Engines/Servers",
+    "Topic :: Database :: Front-Ends",
+]
+packages = [
+    { include = "spinta" },
+]
+
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://gitlab.com/atviriduomenys/spinta/-/issues"
+
+
+[tool.poetry.scripts]
+spinta = "spinta.cli.main:app"
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+aiofiles = "*"
+authlib = "~0.11"
+jinja2 = "*"
+jsonpatch = "*"
+lark-parser = "*"
+msgpack = "*"
+multipledispatch = "*"
+python-multipart = "*"
+pytz = "*"
+requests = "*"
+"ruamel.yaml" = "*"
+# FIXME: https://setuptools.readthedocs.io/en/latest/history.html#v58-0-0
+#        simpleeval package uses use_2to3 thus it is not compatbile with
+#        setuptools>=58
+setuptools = "*"
+setuptools-scm = "*"
+# https://github.com/encode/starlette/security/advisories/GHSA-f96h-pmfr-66vw
+starlette = ">=0.40"
+toposort = "*"
+tqdm = "*"
+ujson = "*"
+unidecode = "*"
+sqlparse = "*"
+pprintpp = "*"
+rdflib = "*"
+numpy = "*"
+
+# CLI tool
+click = "*"
+typer = { version = "*", extras = ["all"] }
+
+# API server dependencies
+gunicorn = "*"
+uvicorn = "*"
+
+# PostgreSQL backend dependencies
+alembic = "~1.11.0"
+asyncpg = "*"
+psycopg2-binary = "*"
+# FIXME: https://github.com/python-poetry/poetry/issues/4402
+# sqlalchemy = "~1.4"
+sqlalchemy = "~1.4"
+# https://github.com/kvesteri/sqlalchemy-utils/issues/472
+sqlalchemy-utils = "*"
+
+# Mongo backend dependendencies
+# https://github.com/atviriduomenys/spinta/issues/806
+pymongo = "<=4.8.0"
+
+# Excel dependencies
+xlrd = "*"
+
+# XML format dependencies
+lxml = "*"
+
+# PII (Person Identifiable Information) dependencies
+phonenumbers = "*"
+
+# Other dependencies
+XlsxWriter = "*"
+openpyxl = "*"
+GeoAlchemy2 = "*"
+Shapely = "*"
+aiohttp = "*"
+fsspec = "*"
+dask = { version = "*", extras = ["dataframe"] }
+psutil = "*"
+tabulate = "*"
+pyproj = "*"
+xmltodict = "*"
+sqlean-py = "*"
+
+
+[tool.poetry.group.dev.dependencies]
+ipdb = "*"
+ipython = "*"
+pp-ez = "*"
+pytest = "~7"
+pytest-asyncio = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+responses = "*"
+snoop = "*"
+python-dotenv = "*"
+
+# Starlette
+httpx = "*"
+
+# Docs
+sphinx = "*"
+sphinx-autobuild = "*"
+sphinxcontrib-httpdomain = "*"
+memory-profiler = "*"
+mypy = "*"
+cssselect = "*"
+objprint = "*"
+sphinx-rtd-theme = "*"
+sqlalchemy-stubs = "*"
+
+
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+# https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml-file
+[tool.mypy]
+disallow_any_unimported = true
+show_error_codes = true
+check_untyped_defs = true
+plugins = "sqlmypy"
