@@ -1,0 +1,137 @@
+Metadata-Version: 2.3
+Name: bukowski
+Version: 0.3.5
+Summary: A pyproject.toml conversion tool for Poetry to uv migration
+Project-URL: Repository, https://github.com/ninoseki/bukowski
+License: MIT License
+        
+        Copyright (c) 2024 Manabu Niseki
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Keywords: poetry,uv
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.10
+Requires-Dist: poetry<1.9.0,>=1.8.3
+Requires-Dist: returns~=0.23
+Requires-Dist: tomlkit~=0.13
+Requires-Dist: typer~=0.14
+Description-Content-Type: text/markdown
+
+# bukowski
+
+A `pyproject.toml` conversion tool for [Poetry](https://python-poetry.org/) to [uv](https://docs.astral.sh/uv/) migration.
+
+## Installation
+
+```bash
+pip install bukowski
+# or
+uv pip install bukowski
+```
+
+Alternatively, you can use [uvx](https://docs.astral.sh/uv/guides/tools/) to install and run from a self-contained virtual environment if you don't have a virtual environment ready:
+
+```bash
+uvx bukowski --help
+```
+
+## Usage
+
+```bash
+$ bukowski --help
+
+ Usage: bukowski [OPTIONS] [PATH]
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────╮
+│   path      [PATH]  path to pyproject.toml [default: pyproject.toml]         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --force-overwrite     -f        Whether to overwrite the existing            │
+│                                 pyproject.toml file or not                   │
+│ --install-completion            Install completion for the current shell.    │
+│ --show-completion               Show completion for the current shell, to    │
+│                                 copy it or customize the installation.       │
+│ --help                          Show this message and exit.                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+```
+
+For example, let's say you have the following `pyproject.toml`:
+
+```toml
+[tool.poetry]
+name = "foo"
+version = "0.1.0"
+description = "bar"
+authors = ["John Smith <johnsmith@example.org>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = { extras = ["all"], version = "^0.112.2" }
+requests = "2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+```
+
+`bukowski /path/to/pyproject.toml` converts it (outputs it to stdout when `-f` options is not set, otherwise overwrites the path) as follows:
+
+```toml
+[project]
+name = "foo"
+version = "0.1.0"
+description = "bar"
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+authors = [
+    { name = "John Smith", email = "johnsmith@example.org" },
+]
+dependencies = [
+    "fastapi[all]>=0.112.2,<0.113.0",
+    "requests==2.32.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.2,<9.0.0",
+]
+```
+
+Then you can do `uv sync` with the new `pyproject.toml`.
+
+## Known Issues
+
+- `packages` (`tool.poetry.packages`) is not supported.
+- `source` (`tool.poetry.source`) is supported, but the conversion may be lossy.
+
+## Alternatives
+
+- [PacificGilly/poetry_to_uv](https://github.com/PacificGilly/poetry_to_uv)

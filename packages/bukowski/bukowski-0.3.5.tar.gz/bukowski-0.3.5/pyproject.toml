@@ -1,0 +1,61 @@
+[project]
+name = "bukowski"
+dynamic = ["version"]
+description = "A pyproject.toml conversion tool for Poetry to uv migration"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+  "poetry>=1.8.3,<1.9.0",
+  "returns~=0.23",
+  "tomlkit~=0.13",
+  "typer~=0.14",
+]
+keywords = ["uv", "poetry"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Repository = "https://github.com/ninoseki/bukowski"
+
+[project.scripts]
+bukowski = "bukowski.cli:app"
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[dependency-groups]
+dev = [
+  "build>=1.2.2",
+  "pre-commit>=4.0.1",
+  "pytest>=8.3.3",
+  "pytest-pretty>=1.2.0",
+  "pytest-randomly>=3.16.0",
+  "ruff>=0.8.1",
+]
+
+[tool.ruff.lint]
+select = [
+  "B",   # flake8-bugbear
+  "C",   # flake8-comprehensions
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "PT",  # flake8-pytest-style
+  "RET", # flake8-return
+  "RUF", # Ruff-specific rules
+  "SIM", # flake8-simplify
+  "T20", # flake8-print
+  "UP",  # pypupgrade
+  "W",   # pycodestyle warnings
+]
