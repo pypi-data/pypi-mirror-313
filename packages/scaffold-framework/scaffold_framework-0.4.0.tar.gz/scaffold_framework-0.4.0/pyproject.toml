@@ -1,0 +1,84 @@
+[project]
+name = "scaffold-framework"
+description = "A web framework that makes it easy to build apps according to SOLID & DDD principles and with layered/onion architecture."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiosmtplib>=3.0.2",
+    "alembic>=1.13.3",
+    "argon2-cffi>=23.1.0",
+    "h11>=0.14.0",
+    "psycopg[binary,pool]>=3.2.3",
+    "pydantic>=2.9.2",
+    "quart>=0.19.9",
+    "sqlalchemy[asyncio]>=2.0.35",
+    "watchfiles>=0.24.0",
+    "wsproto>=1.2.0",
+    "wtforms>=3.1.2",
+]
+dynamic = ["version"]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs", "hatch-fancy-pypi-readme"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/scaffold"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest>=8.3.3",
+    "ruff>=0.8.0",
+    "black>=24.10.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--import-mode=importlib"]
+
+[tool.mypy]
+disable_error_code = "import-untyped"
+enable_error_code = "explicit-override"
+disallow_untyped_defs = true
+# disallow_any_generics = true
+warn_unreachable = true
+
+[tool.black]
+line-length = 120
+unstable = true
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = [
+    "ANN",
+    "ASYNC",
+    "S",
+    "BLE",
+    "B",
+    "A",
+    "COM",
+    "C4",
+    "T10",
+    "EM",
+    "RET",
+    "SLF",
+    "I",
+    "UP",
+]
+extend-ignore = ["A002", "ANN101", "ANN102", "B010", "S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["scaffold", "tests"]
