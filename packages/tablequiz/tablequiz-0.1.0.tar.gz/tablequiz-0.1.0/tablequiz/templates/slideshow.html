@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{quiz.title}}{% endblock %}
+
+{% block content %}
+<div class="reveal">
+  <div class="slides">
+    {{ quiz.slideshow | safe }}
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+  // More info about initialization & config:
+  // - https://revealjs.com/initialization/
+  // - https://revealjs.com/config/
+  Reveal.initialize({
+    autoSlide: 5000,
+    loop: true,
+    controls: false,  // hide the arrows
+    progress: false, // hide the progress bar
+    overview: false,  // don't accidentally reveal the questions!
+    hash: true,
+    // Learn about plugins: https://revealjs.com/plugins/
+    plugins: [RevealMarkdown, RevealHighlight]
+  });
+</script>
+{% endblock %}
