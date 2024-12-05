@@ -1,0 +1,3 @@
+"""Encoding definitions"""
+
+# not implemented
