@@ -1,0 +1,77 @@
+Metadata-Version: 2.1
+Name: imerit-ango
+Version: 1.3.27
+Summary: Ango-Hub SDK
+Author: Faruk Karakaya
+Author-email: <faruk@ango.ai>
+License: UNKNOWN
+Keywords: imerit_ango,ango-hub,imerit_ango sdk,Ango,Ango-hub
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python :: 3
+Description-Content-Type: text/markdown
+Requires-Dist: python-socketio (~=5.8.0)
+Requires-Dist: APScheduler (~=3.9.1)
+Requires-Dist: websocket-client
+Requires-Dist: flask-socketio (~=5.3.4)
+Requires-Dist: requests (~=2.28)
+Requires-Dist: tqdm
+Requires-Dist: validators (~=0.20.0)
+Requires-Dist: boto3 (==1.*)
+Requires-Dist: fastapi (~=0.105.0)
+Requires-Dist: uvicorn (~=0.24.0)
+Requires-Dist: python-dotenv (~=1.0.1)
+Requires-Dist: mangum (~=0.17.0)
+Requires-Dist: lxml (~=5.2.2)
+Requires-Dist: requests-toolbelt (~=1.0.0)
+
+
+We provide a Python SDK to interface programmatically with Ango Hub.
+
+### SDK Documentation
+
+The Documentation of imerit-ango is available in:
+
+https://docs.imerit.net/sdk/sdk-documentation
+
+--------------
+For using API functionalities of Ango-Hub platform.
+    
+    python3 setup.py bdist_wheel
+    twine upload dist/*
+
+
+## Local Development Guidelines
+The actively used branch is `imerit`. To develop a new feature, branch out from the `imerit` branch and then open a pull request to `imerit`.
+
+All the available `SDK` methods are under the `SDK` class in the `imerit_ango/sdk.py` file. To add a new method, simply create a new method inside the class definition.
+
+### Conventions
+Private methods are named with double underscore before their names (__). For example: 
+
+```python
+def __calculate_something():
+    pass
+```
+
+### Running Tests Locally
+For testing locally, create a file with a file name of your choice (lets say `test.py`). If the test file is at the root of the project, a sample code would look like this:
+
+```python
+from imerit_ango.sdk import SDK
+
+sdk = SDK(api_key="YOUR_API_KEY", host="ANGO_HUB_SERVER_IP")
+
+sdk.get_project("123456789")
+
+```
+
+
+"YOUR_API_KEY" can be obtained by [following the guide in the SDK docs](https://docs.imerit.net/sdk/sdk-documentation#obtaining-your-api-key).
+"ANGO_HUB_SERVER_IP" is the address of the [Ango Hub server instance](https://github.com/imerit-io/angohub-server) you would like to use. If you need
+to use the local version of the server, run the server locally and give the IP address of the local address of the
+server (which is `http://127.0.0.1:3001` by default). You may also use `http://test.ango.ai` or `http://imerit.ango.ai` based on what you
+need.
+
+
+
