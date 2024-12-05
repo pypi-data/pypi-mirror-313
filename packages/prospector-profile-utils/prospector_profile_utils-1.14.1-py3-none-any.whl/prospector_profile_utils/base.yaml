@@ -1,0 +1,46 @@
+inherits:
+  - utils:base-all
+
+strictness: none
+
+pylint:
+  enabled:
+    - useless-suppression
+    # By default disabled by Prospector
+    - no-member
+    - no-name-in-module
+
+mypy:
+  run: true
+  options:
+    python-version: '3.9'
+    ignore-missing-imports: true
+    warn-redundant-casts: true
+    warn-unused-ignores: true
+    strict: true
+
+bandit:
+  run: true
+  disable:
+    - B101 # Use of assert detected.
+    - B404 # Consider possible security implications associated with the subprocess module.
+
+pyroma:
+  run: true
+
+ruff:
+  options:
+    extend-select:
+      E: true # Pycodestyle
+      F: true # Pyflakes
+      SIM: true # flake8-simplify
+      D: true # pydocstyle
+  disable:
+    - D100 # Missing docstring in public module
+    - D104 # Missing docstring in public package
+    - D105 # Missing docstring in magic method
+    - E501 # Line too long (should be done by formatter, length not configurable in prospector)
+    # Multi-line docstring summary should start at the first line [See: https://docs.astral.sh/ruff/rules/multi-line-summary-first-line,
+    # Fix applicability: safe]
+    # Incompatible with pydocstyle D213 Multi-line docstring summary should start at the second line.
+    - D212
