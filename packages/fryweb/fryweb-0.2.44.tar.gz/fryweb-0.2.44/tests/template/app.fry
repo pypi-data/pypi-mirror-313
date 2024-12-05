@@ -1,0 +1,55 @@
+from fryweb import Element, html
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.get('/')
+def index():
+    return html(RefApp, title="test template", autoreload=False)
+
+def Log(value=''):
+    prefix = ''
+    <template>
+      <div>
+        <p ref=(log)>{value}</p>
+      </div>
+    </template>
+    <script {prefix}>
+        console.log(`prefix is ${prefix}`);
+        this.setValue = (value) => {
+          log.textContent = `${prefix}${value}`;
+        },
+        this.hello = () => {
+            console.log('hello hello')
+        }
+    </script>
+
+def RefApp():
+    count = 0
+    <template>
+      <div w-full h-100vh flex flex-col gap-y-10 items-center>
+        <p ref=(foo) text-primary-tx text-6xl transition-transform duration-1500>
+          [{count}](counter)
+        </p>
+        <button type="button" @click=(doclick) border rounded bg-primary w-3/4>
+          点我
+        </button>
+        <div ref=(logger)>
+          <Log frytemplate ref=(logline) />
+        </div>
+      </div>
+    </template>
+    <script {count}>
+      import { signal } from 'fryweb';
+      const counter = signal(count);
+      const doclick = async () => {
+        counter.value ++;
+        const log = await logline.create({prefix: `counter${counter.peek()}: `});
+        log.setValue(`counter is ${counter.peek()}`);
+        logger.appendChild(log.fryelement);
+      }
+    </script>
+
+
+if __name__ == '__main__':
+    print(html(RefApp))

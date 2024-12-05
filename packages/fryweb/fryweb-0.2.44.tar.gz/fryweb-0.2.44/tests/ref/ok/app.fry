@@ -1,0 +1,53 @@
+from fryweb import Element, html
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.get('/')
+def index():
+    return html(RefApp, title="test ref", autoreload=False)
+
+def Refed():
+    <template>
+      <div>
+        hello world
+      </div>
+    </template>
+    <script>
+        this.hello = () => {
+            console.log('hello hello')
+        }
+    </script>
+
+def RefApp():
+    <template>
+      <div w-full h-100vh flex flex-col gap-y-10 justify-center items-center>
+        <p ref=(foo) text-indigo-600 text-6xl transition-transform duration-1500>
+          Hello World!
+        </p>
+        <p ref=(bar) text-cyan-600 text-6xl transition-transform duration-1500>
+          Hello Fryweb!
+        </p>
+        {<p refall=(foobar)>foobar</p> for i in range(3)}
+        <Refed ref=(refed) refall=(refeds)/>
+        {<Refed refall=(refeds) /> for i in range(2)}
+      </div>
+    </template>
+    <script>
+      setTimeout(()=>{
+        foo.style.transform = "skewY(180deg)";
+      }, 1000);
+      setTimeout(()=>{
+        bar.style.transform = "skewY(180deg)";
+      }, 2500);
+      for (const fb of foobar) {
+        console.log(fb);
+      }
+      refed.hello()
+      for (const r of refeds) {
+          r.hello()
+      }
+    </script>
+
+if __name__ == '__main__':
+    print(html(RefApp))

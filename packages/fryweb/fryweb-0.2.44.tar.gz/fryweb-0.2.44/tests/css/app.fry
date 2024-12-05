@@ -1,0 +1,46 @@
+from fryweb import html, Element
+from flask import Flask
+from random import randint
+
+app = Flask(__name__)
+
+@app.get('/')
+def index():
+    return html(App, title="fryweb CSS test", autoreload=False)
+
+
+def App():
+    c = <Content class="text-cyan-600 h-500px"/>
+    print(c.get_style('color'))
+    print(c.get_style('height'))
+    <template>
+      <div flex flex-col gap-4 text-center h-sub,100vh,25px>
+        <Content value={randint(0,2)} class="mb-4 mt-8" />
+        <Content value={randint(0,2)} />
+        <Content value={randint(0,2)} />
+      </div>
+    </template>
+
+def Content(value=0):
+    if value == 0:
+        css = ["bg-indigo-300", 'text-xl', 'text-cyan-a9', 'hover:bg-indigo-600', 'hover:text-cyan-a10']
+    elif value == 1:
+        css = ["bg-sky-300", 'text-xl', 'text-pink-dark-5', 'hover:bg-sky-600', 'hover:text-pink-dark-a6']
+    elif value == 2:
+        css = ["bg-pink-300", 'text-xl', 'text-yellow-9', 'hover:bg-pink-600', 'hover:text-yellow-10']
+    else:
+        css = ["bg-purple-300", 'text-xl', 'text-green-600', 'hover:bg-purple-600', 'hover:text-green-300']
+
+    <template>
+      <span ref=(el) @click=(toggle) {*css}>hello hello fryweb({value})</span>
+    </template>
+
+    <script>
+      const toggle = () => {
+          el.classList.toggle('font-mono')
+      }
+    </script>
+
+if __name__ == '__main__':
+    from fryweb import render
+    print(render(App))
