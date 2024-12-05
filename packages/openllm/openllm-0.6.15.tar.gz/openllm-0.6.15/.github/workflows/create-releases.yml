@@ -1,0 +1,52 @@
+name: release
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # ratchet:actions/setup-python@v5
+        with:
+          python-version-file: .python-version-default
+      - name: Build
+        run: pipx run build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # ratchet:actions/upload-artifact@v4
+        with:
+          name: python-artefacts-openllm
+          path: dist/*
+          if-no-files-found: error
+  release:
+    if: github.repository_owner == 'bentoml'
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    name: Release
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Download Python artifacts
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # ratchet:actions/download-artifact@v4
+        with:
+          pattern: python-artefacts-*
+          merge-multiple: true
+          path: dist
+      - name: dry ls
+        run: ls -rthlaR
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@15c56dba361d8335944d31a2ecd17d700fc7bcbc # ratchet:pypa/gh-action-pypi-publish@release/v1
+        with:
+          print-hash: true
+      - name: Create release
+        uses: softprops/action-gh-release@01570a1f39cb168c169c802c3bceb9e93fb10974 # ratchet:softprops/action-gh-release@v2
+        with:
+          # Use GH feature to populate the changelog automatically
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |-
+            dist/*
