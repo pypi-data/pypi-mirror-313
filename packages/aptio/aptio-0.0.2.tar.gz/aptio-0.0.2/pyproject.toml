@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 140
+target-version = ['py310']
+
+[tool.mypy]
+python_version = "3.10"
+warn_unused_configs = true
+strict_optional = true
+warn_return_any = true
+disallow_untyped_defs = true
+exclude = "_tests$|volumes|venv-.*"
+
+
+[tool.pytest.ini_options]
+addopts = "--tb=line -rfEPxX --cov=aptio --cov-report html"
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+pythonpath = ["aptio"]
+testpaths = ["aptio"]
+
+[tool.coverage]
+[tool.coverage.run]
+omit = ['venv-*/**', '__init__.py', '*_interface.py', '*/tests/*']
+
+[tool.coverage.report]
+skip_empty = true
+show_missing = true
