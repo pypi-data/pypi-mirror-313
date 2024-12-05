@@ -1,0 +1,594 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>HMM &mdash; TRANSIT v3.3.9 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Resampling" href="method_resampling.html" />
+    <link rel="prev" title="Tn5Gaps" href="method_tn5gaps.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> TRANSIT
+          
+
+          
+            
+            <img src="_static/transit_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.3.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">TRANSIT MANUAL</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="transit_overview.html">TRANSIT Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_running.html">Running TRANSIT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_quality_control.html">Quality Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_formats.html">File Formats for Transit</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">TnSeq ANALYSIS METHODS</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="method_normalization.html">Normalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_tnseq_stats.html">tnseq_stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_gumbel.html">Gumbel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_griffin.html">Griffin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_ttnfitness.html">TTN-Fitness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_tn5gaps.html">Tn5Gaps</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HMM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-does-it-work">How does it work?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-and-diagnostics">Output and Diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-time">Run-time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hmm-confidence-scores-oct-2023">HMM Confidence Scores (Oct 2023)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="method_resampling.html">Resampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_Utest.html">Mann-Whitney U-test (utest)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_anova.html">ANOVA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_corrplot.html">corrplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_heatmap.html">heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_GI.html">Genetic Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_zinb.html">ZINB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_pathway_enrichment.html">Pathway Enrichment Analysis</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">TRANSIT Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="transit_interactions_tutorial.html">Tutorial: Genetic Interactions Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_normalization_tutorial.html">Tutorial: Normalize datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_export_tutorial.html">Tutorial: Export datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_console_cheatsheet.html">Console Mode Cheat-Sheet</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">TPP Manual</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html">TPP Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#running-tpp">Running TPP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#mapping-to-genomes-with-multiple-contigs">Mapping to Genomes with Multiple Contigs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#overview-of-data-processing-procedure">Overview of Data Processing Procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#statistics">Statistics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="transit.html">pytransit package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_scripts.html">Example Scripts (for Developers)</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TRANSIT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>HMM</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/method_HMM.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="hmm">
+<span id="id1"></span><h1>HMM<a class="headerlink" href="#hmm" title="Permalink to this headline">¶</a></h1>
+<p>The HMM method can be used to determine the essentiality of the entire genome, as opposed to gene-level analysis of the other methods. It is capable of identifying regions that have unusually high or unusually low read counts (i.e. growth advantage or growth defect regions), in addition to the more common categories of essential and non-essential.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Intended only for <strong>Himar1</strong> datasets.</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="section" id="how-does-it-work">
+<h2>How does it work?<a class="headerlink" href="#how-does-it-work" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">For a formal description of how this method works, see our paper <a class="reference internal" href="transit_overview.html#dejesus2013hmm" id="id2"><span>[DeJesus2013HMM]</span></a>:</div>
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">DeJesus, M.A., Ioerger, T.R. <a class="reference external" href="http://www.ncbi.nlm.nih.gov/pubmed/24103077">A Hidden Markov Model for identifying essential and growth-defect regions in bacterial genomes from transposon insertion sequencing data.</a> <em>BMC Bioinformatics.</em> 2013. 14:303</div>
+</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">python3</span> <span class="n">transit</span><span class="o">.</span><span class="n">py</span> <span class="n">hmm</span> <span class="o">&lt;</span><span class="n">comma</span><span class="o">-</span><span class="n">separated</span> <span class="o">.</span><span class="n">wig</span> <span class="n">files</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">annotation</span> <span class="o">.</span><span class="n">prot_table</span> <span class="ow">or</span> <span class="n">GFF3</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">output_BASE_filename</span><span class="o">&gt;</span>
+      <span class="p">(</span><span class="n">will</span> <span class="n">create</span> <span class="mi">2</span> <span class="n">output</span> <span class="n">files</span><span class="p">:</span> <span class="n">BASE</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">txt</span> <span class="ow">and</span> <span class="n">BASE</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">txt</span><span class="p">)</span>
+
+      <span class="n">Optional</span> <span class="n">Arguments</span><span class="p">:</span>
+          <span class="o">-</span><span class="n">r</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span>     <span class="o">:=</span>  <span class="n">How</span> <span class="n">to</span> <span class="n">handle</span> <span class="n">replicates</span><span class="o">.</span> <span class="n">Sum</span><span class="p">,</span> <span class="n">Mean</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="o">-</span><span class="n">r</span> <span class="n">Mean</span>
+          <span class="o">-</span><span class="n">l</span>              <span class="o">:=</span>  <span class="n">Perform</span> <span class="n">LOESS</span> <span class="n">Correction</span><span class="p">;</span> <span class="n">Helps</span> <span class="n">remove</span> <span class="n">possible</span> <span class="n">genomic</span> <span class="n">position</span> <span class="n">bias</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="n">Off</span><span class="o">.</span>
+          <span class="o">-</span><span class="n">iN</span> <span class="o">&lt;</span><span class="nb">float</span><span class="o">&gt;</span>     <span class="o">:=</span>  <span class="n">Ignore</span> <span class="n">TAs</span> <span class="n">occuring</span> <span class="n">at</span> <span class="n">given</span> <span class="n">percentage</span> <span class="p">(</span><span class="k">as</span> <span class="n">integer</span><span class="p">)</span> <span class="n">of</span> <span class="n">the</span> <span class="n">N</span> <span class="n">terminus</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="o">-</span><span class="n">iN</span> <span class="mi">0</span>
+          <span class="o">-</span><span class="n">iC</span> <span class="o">&lt;</span><span class="nb">float</span><span class="o">&gt;</span>     <span class="o">:=</span>  <span class="n">Ignore</span> <span class="n">TAs</span> <span class="n">occuring</span> <span class="n">at</span> <span class="n">given</span> <span class="n">percentage</span> <span class="p">(</span><span class="k">as</span> <span class="n">integer</span><span class="p">)</span> <span class="n">of</span> <span class="n">the</span> <span class="n">C</span> <span class="n">terminus</span><span class="o">.</span> <span class="n">Default</span><span class="p">:</span> <span class="o">-</span><span class="n">iC</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<p>The HMM method automatically estimates the necessary statistical
+parameters from the datasets. You can change how the method handles
+replicate datasets:</p>
+<ul class="simple">
+<li><p><strong>Replicates:</strong> Determines how the HMM deals with replicate datasets
+by either averaging the read-counts or summing read counts across
+datasets. For regular datasets (i.e. mean-read count &gt; 100) the
+recommended setting is to average read-counts together. For sparse
+datasets, it summing read-counts may produce more accurate results.</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="output-and-diagnostics">
+<h2>Output and Diagnostics<a class="headerlink" href="#output-and-diagnostics" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">The HMM method outputs two files. The first file (<strong>BASE.sites.txt</strong>) provides the most
+likely assignment of states for all the TA sites in the genome. Sites
+can belong to one of the following states: “E” (Essential), “GD”
+(Growth-Defect), “NE” (Non-Essential), or “GA” (Growth-Advantage). In
+addition, the output includes the probability of the particular site
+belonging to the given state. The columns of this file are defined as
+follows:</div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column #</p></th>
+<th class="head"><p>Column Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>Coordinate of TA site</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>Observed Read Counts</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>Probability for ES state</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>Probability for GD state</p></td>
+</tr>
+<tr class="row-even"><td><p>5</p></td>
+<td><p>Probability for NE state</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>Probability for GA state</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>State Classification (ES = Essential, GD = Growth Defect, NE = Non-Essential, GA = Growth-Defect)</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>Gene(s) that share(s) the TA site.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">The second file (<strong>BASE.genes.txt</strong>) provides a gene-level classification for all the
+genes in the genome. Genes are classified as “E” (Essential), “GD”
+(Growth-Defect), “NE” (Non-Essential), or “GA” (Growth-Advantage)
+depending on the number of sites within the gene that belong to those
+states.</div>
+</div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 84%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Column Header</p></th>
+<th class="head"><p>Column Definition</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Orf</p></td>
+<td><p>Gene ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>Name</p></td>
+<td><p>Gene Name</p></td>
+</tr>
+<tr class="row-even"><td><p>Desc</p></td>
+<td><p>Gene Description</p></td>
+</tr>
+<tr class="row-odd"><td><p>N</p></td>
+<td><p>Number of TA sites</p></td>
+</tr>
+<tr class="row-even"><td><p>n0</p></td>
+<td><p>Number of sites labeled ES (Essential)</p></td>
+</tr>
+<tr class="row-odd"><td><p>n1</p></td>
+<td><p>Number of sites labeled GD (Growth-Defect)</p></td>
+</tr>
+<tr class="row-even"><td><p>n2</p></td>
+<td><p>Number of sites labeled NE (Non-Essential)</p></td>
+</tr>
+<tr class="row-odd"><td><p>n3</p></td>
+<td><p>Number of sites labeled GA (Growth-Advantage)</p></td>
+</tr>
+<tr class="row-even"><td><p>Avg. Insertions</p></td>
+<td><p>Mean insertion rate within the gene</p></td>
+</tr>
+<tr class="row-odd"><td><p>Avg. Reads</p></td>
+<td><p>Mean read count within the gene</p></td>
+</tr>
+<tr class="row-even"><td><p>State Call</p></td>
+<td><p>State Classification (ES = Essential, GD = Growth Defect, NE = Non-Essential, GA = Growth-Defect)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line-block">
+<div class="line">Note: Libraries that are too sparse (e.g. &lt; 30%) or which contain
+very low read-counts may be problematic for the HMM method, causing it
+to label too many Growth-Defect genes.</div>
+</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="run-time">
+<h2>Run-time<a class="headerlink" href="#run-time" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">The HMM method takes less than 10 minutes to complete. The parameters
+of the method should not affect the running-time.</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="hmm-confidence-scores-oct-2023">
+<h2>HMM Confidence Scores (Oct 2023)<a class="headerlink" href="#hmm-confidence-scores-oct-2023" title="Permalink to this headline">¶</a></h2>
+<p>One of the difficulties in assessing the certainties of the HMM calls
+is that, while the formal state probabilities are calculated at
+individual TA sites, the essentiality calls at the gene level are made
+by taking a vote (the most frequent state among its TA sites), and
+this does not lend itself to such formal certainty quantification.
+However, we developed a novel
+approach to evaluating the confidence of the HMM calls for genes.
+We have sometimes noticed that short genes are
+susceptible to being influenced by the essentiality of an adjacent
+region, which is evident by examining the insertion statistics
+(saturation in gene, or percent of TA sites with insertion, and
+mean insertion count at those sites).  For
+example, consider a hypothetical gene with just 2 TA sites that is
+labeled as ES by the HMM but has insertions at both sites.  It might
+be explained by proximity to a large essential gene or region, due to
+the “smoothing” the HMM does across the sequence of TA sites.  Thus we
+can sometimes recognize inaccurate calls by the HMM if the insertion
+statistics of a gene are not consistent with the call
+(i.e. a gene labeled as NE that has no insertions, or conversely,
+a gene labeled ES that has many insertion).</p>
+<p>In our paper on the HMM in Transit <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/24103077/">(DeJesus et al, 2013)</a>, we showed a plot of
+random samples from the joint posterior distribution of local
+saturation and mean insertion counts (at non-zero sites) for the 4
+essentiality states, which nicely demonstrates that that ES genes have
+near-0 saturation and low counts at non-zero sites, NE genes have high
+saturation and counts, GD genes fall in between, and GA genes are
+almost fully saturated with excessively high counts.</p>
+<p>Following this idea, we can use the
+observed insertion counts in each gene to assess the
+confidence in each of the essentiality calls by the HMM.
+Rather than modeling them as 2D distributions, we <em>combine</em> them into
+1D (Gaussian) distributions over the <em>overall mean insertion count</em> in
+each gene, including sites with zeros.  The mean count for essential
+(ES) genes usually around 0, typically around 5-10 for growth-defect
+(GD) genes, around 100 for non-essential (NE) genes, and &gt;300 for
+growth-advantaged (GA) genes (assuming TTR normalization, by default).</p>
+<a class="reference internal image-reference" href="_images/HMM_1D_distributions.png"><img alt="_images/HMM_1D_distributions.png" class="align-center" src="_images/HMM_1D_distributions.png" style="width: 400px;" /></a>
+<p>We now calculate these conditional distributions empirically for each
+dataset on which the HMM is run, and use it to assess the confidence
+in each of the essentiality calls.  We start by calculating the mean
+and standard deviation of saturation and insertion count over all the
+genes in each of the 4 states (ES, GD, NE, and GA).  The empirical
+mean and standard deviation for each state are reported in the header
+of the output file (by HMM_conf.py, see below).  Then, for each gene,
+we compute the probability density (likelihood) of its mean count with
+respect to the Normal distribution for each of the 4 states. For
+example, suppose a gene g is called state s.  Then:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">P</span><span class="p">(</span><span class="n">g</span><span class="o">|</span><span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="n">N</span><span class="p">(</span><span class="n">cnt</span><span class="p">(</span><span class="n">g</span><span class="p">)</span><span class="o">|</span><span class="n">μ_cnt</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">σ_cnt</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The 4 probabilities are normalized to sum up to 1.
+The confidence in the HMM call for a gene is taken to be the normalized
+probability of the called state.</p>
+<p>This confidence score nicely identifies genes of low confidence, where
+the local saturation and mean insertion count seem inconsistent with
+the HMM call.  The low-confidence genes are biased toward short genes
+(with 1-3 TA sites), though they include some large genes with many TA
+sites as well.  Some of the former are cases where the call of a short
+gene is influenced by an adjacent region.  Some of the latter include
+ambiguous cases like multi-domain proteins, where one domain is
+essential and the other is not.  We observed that there are often
+“borderline” (or ambiguous) genes, where the
+called state has significant probability (&gt;0.2), but is not the most
+probable state (i.e. another state is more likely, based on the insertions in the gene).</p>
+<dl class="simple">
+<dt>Criteria (for gene g with called state c):</dt><dd><ul class="simple">
+<li><p>genes where the called state has the highest conditional probability (most likely, given their mean count) are ‘confident’</p></li>
+<li><p>genes where P(g|c)&gt;0.2, but there is another state that has higher probability are ‘ambiguous’</p></li>
+<li><p>genes with P(g|c)&lt;0.2 are ‘low-confidence’</p></li>
+</ul>
+</dd>
+</dl>
+<p>The ‘low-confidence’ and ‘ambiguous’ genes are now indicated in the
+‘flag’ field added by HMM_conf.py in the output files (see below).</p>
+<p>In genomes with thousands genes, it is not uncommon for there to be a
+few hundred low-confidence and ambiguous genes each, depending on the
+saturation of the input dataset (.wig file); less-saturated datasets
+tend to have more low-confidence genes.</p>
+<p>We implemented this procedure as a stand-alone <strong>post-processing script</strong>
+(called ‘<strong>HMM_conf.py</strong>’ in the src/ directory) which is run on HMM output files,
+calculates a “confidence” score for each gene
+and appends this information as extra columns to the HMM output file.
+(In the future, it will be integrated directly into the HMM output,
+obviating the need for a second step.)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">python3</span> <span class="n">src</span><span class="o">/</span><span class="n">HMM_conf</span><span class="o">.</span><span class="n">py</span> <span class="o">&lt;</span><span class="n">HMM_output</span><span class="o">.</span><span class="n">genes</span><span class="o">.</span><span class="n">txt</span><span class="o">&gt;</span>
+
+<span class="n">example</span><span class="p">:</span>
+
+<span class="o">&gt;</span> <span class="n">python</span> <span class="n">HMM_conf</span><span class="o">.</span><span class="n">py</span> <span class="n">HMM_Ref_sync3_genes</span><span class="o">.</span><span class="n">txt</span> <span class="o">&gt;</span> <span class="n">HMM_Ref_sync3_genes</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>The script adds the following columns:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>consis</strong> - consistency (proportion of TA sites representing the majority essentiality state)</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>If consistency&lt;1.0, it means not all the TA sites in the gene agree with the essentiality call, which is made by majority vote. It is OK if a small fraction of TA sites in a gene are labeled otherwise. If it is a large fraction (consistency close to 50%), it might be a ‘domain-essential’ (multi-domain gene where one domain is ES and the other is NE).</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p><strong>probES</strong> - conditional probability (normalized) of the mean insertion count if the gene were essential</p></li>
+<li><p><strong>probGD</strong> - conditional probability (normalized) of the mean insertion count if the gene were growth-defect (i.e. disruption of gene causes a growth defect)</p></li>
+<li><p><strong>probNE</strong> - conditional probability (normalized) of the mean insertion count if the gene were non-essential</p></li>
+<li><p><strong>probGA</strong> - conditional probability (normalized) of the mean insertion count if the gene were growth-advantaged</p></li>
+<li><p><strong>conf</strong> - confidence score (normalized conditional joint probability of the insertion statistics, given the actual essential call made by the HMM)</p></li>
+<li><p><strong>flag</strong> - genes that are ambiguous or have low confidence are labeled as such:</p></li>
+</ul>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>low-confidence</em> means the proability of the HMM call is &lt;0.2 based on the mean insertion counts in gene, so the HMM call should be ignored</p></li>
+<li><p><em>ambiguous</em> means the called state has prob&gt;0.2, but there is another state with higher probability; these could be borderline cases where the gene could be in either category</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<p>Here is an example to show what the additional columns look like.
+The Mean insertion counts for the 4 essentiality states can be seen in the header.
+Note that MAB_0005 was called NE, but only has insertions at 1 out of 4 TA sites
+(sat=25%) with a mean count of only 7, so it is more consistent with ES; hence it is
+flagged as low-confidence (and one should ignore the NE call).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#HMM - Genes</span>
+<span class="c1">#command line: python3 ../../transit/src/transit.py hmm TnSeq-Ref-1.wig,TnSeq-Ref-2.wig,TnSeq-Ref-3.wig abscessus.prot_table HMM_Ref_sync3.txt -iN 5 -iC 5</span>
+<span class="c1">#summary of gene calls: ES=364, GD=146, NE=3971, GA=419, N/A=23</span>
+<span class="c1">#key: ES=essential, GD=insertions cause growth-defect, NE=non-essential, GA=insertions confer growth-advantage, N/A=not analyzed (genes with 0 TA sites)</span>
+<span class="c1"># HMM confidence info:</span>
+<span class="c1"># avg gene-level consistency of HMM states: 0.9894</span>
+<span class="c1"># state posterior probability distributions:</span>
+<span class="c1">#   Mean[ES]:   Norm(mean=0.0,stdev=1.0)</span>
+<span class="c1">#   Mean[GD]:   Norm(mean=1.73,stdev=3.36)</span>
+<span class="c1">#   Mean[NE]:   Norm(mean=101.64,stdev=86.89)</span>
+<span class="c1">#   Mean[GA]:   Norm(mean=340.0,stdev=182.21)</span>
+<span class="c1"># num low-confidence genes=463, num ambiguous genes=448</span>
+<span class="c1">#ORF      gene  annotation                              TAs  ESsites  GDsites  NEsites GAsites saturation NZmean call Mean consis probES probGD probNE probGA  conf   flag</span>
+<span class="n">MAB_0001</span>  <span class="n">dnaA</span>  <span class="n">Chromosomal</span> <span class="n">replication</span> <span class="n">initiator</span>       <span class="mi">24</span>     <span class="mi">24</span>         <span class="mi">0</span>        <span class="mi">0</span>      <span class="mi">0</span>      <span class="mf">0.0417</span>     <span class="mf">1.00</span>  <span class="n">ES</span>   <span class="mf">0.0</span>   <span class="mf">1.0</span>  <span class="mf">0.7878</span> <span class="mf">0.2068</span> <span class="mf">0.0045</span> <span class="mf">0.0007</span>  <span class="mf">0.7878</span>
+<span class="n">MAB_0002</span>  <span class="n">dnaN</span>  <span class="n">DNA</span> <span class="n">polymerase</span> <span class="n">III</span><span class="p">,</span> <span class="n">beta</span> <span class="n">subunit</span> <span class="p">(</span><span class="n">DnaN</span><span class="p">)</span> <span class="mi">13</span>     <span class="mi">13</span>         <span class="mi">0</span>        <span class="mi">0</span>      <span class="mi">0</span>      <span class="mf">0.0769</span>     <span class="mf">1.00</span>  <span class="n">ES</span>   <span class="mf">0.1</span>   <span class="mf">1.0</span>  <span class="mf">0.7866</span> <span class="mf">0.2080</span> <span class="mf">0.0045</span> <span class="mf">0.0007</span>  <span class="mf">0.7866</span>
+<span class="n">MAB_0003</span>  <span class="n">gnD</span>   <span class="mi">6</span><span class="o">-</span><span class="n">phosphogluconate</span> <span class="n">dehydrogenase</span> <span class="n">Gnd</span>    <span class="mi">19</span>     <span class="mi">0</span>          <span class="mi">0</span>       <span class="mi">19</span>      <span class="mi">0</span>      <span class="mf">0.9474</span>    <span class="mf">81.33</span>  <span class="n">NE</span>  <span class="mf">77.1</span>   <span class="mf">1.0</span>  <span class="mf">0.0</span>    <span class="mf">0.0</span>    <span class="mf">0.8509</span> <span class="mf">0.1490</span>  <span class="mf">0.8509</span>
+<span class="n">MAB_0004</span>  <span class="n">recF</span>  <span class="n">DNA</span> <span class="n">replication</span> <span class="ow">and</span> <span class="n">repair</span> <span class="n">protein</span> <span class="n">RecF</span> <span class="mi">15</span>     <span class="mi">0</span>          <span class="mi">0</span>       <span class="mi">15</span>      <span class="mi">0</span>      <span class="mf">0.6667</span>    <span class="mf">80.80</span>  <span class="n">NE</span>  <span class="mf">53.9</span>   <span class="mf">1.0</span>  <span class="mf">0.0</span>    <span class="mf">0.0</span>    <span class="mf">0.8608</span> <span class="mf">0.1391</span>  <span class="mf">0.8608</span>
+<span class="n">MAB_0005</span>  <span class="o">-</span>     <span class="n">hypothetical</span> <span class="n">protein</span>                     <span class="mi">4</span>     <span class="mi">0</span>          <span class="mi">0</span>        <span class="mi">4</span>      <span class="mi">0</span>      <span class="mf">0.2500</span>     <span class="mf">7.00</span>  <span class="n">NE</span>   <span class="mf">1.8</span>   <span class="mf">1.0</span>  <span class="mf">0.4152</span> <span class="mf">0.5714</span> <span class="mf">0.0114</span> <span class="mf">0.0018</span>  <span class="mf">0.0114</span> <span class="n">low</span><span class="o">-</span><span class="n">confidence</span>
+<span class="n">MAB_0006</span>  <span class="o">-</span>     <span class="n">DNA</span> <span class="n">gyrase</span> <span class="p">(</span><span class="n">subunit</span> <span class="n">B</span><span class="p">)</span> <span class="n">GyrB</span> <span class="p">(</span><span class="n">DNA</span> <span class="n">topoi</span>  <span class="mi">30</span>     <span class="mi">30</span>         <span class="mi">0</span>        <span class="mi">0</span>      <span class="mi">0</span>      <span class="mf">0.0000</span>     <span class="mf">0.00</span>  <span class="n">ES</span>   <span class="mf">0.0</span>   <span class="mf">1.0</span>  <span class="mf">0.7889</span> <span class="mf">0.2056</span> <span class="mf">0.0045</span> <span class="mf">0.0007</span>  <span class="mf">0.789</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<hr class="transit-sectionend docutils" />
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="method_resampling.html" class="btn btn-neutral float-right" title="Resampling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="method_tn5gaps.html" class="btn btn-neutral float-left" title="Tn5Gaps" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015, Michael A. DeJesus &amp; Thomas R. Ioerger.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

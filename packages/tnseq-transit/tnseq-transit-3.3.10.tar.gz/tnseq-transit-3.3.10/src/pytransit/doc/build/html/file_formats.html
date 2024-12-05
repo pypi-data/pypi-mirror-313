@@ -1,0 +1,469 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>File Formats for Transit &mdash; TRANSIT v3.3.9 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Normalization" href="method_normalization.html" />
+    <link rel="prev" title="Quality Control" href="transit_quality_control.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> TRANSIT
+          
+
+          
+            
+            <img src="_static/transit_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.3.9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">TRANSIT MANUAL</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="transit_overview.html">TRANSIT Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_running.html">Running TRANSIT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_quality_control.html">Quality Control</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File Formats for Transit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#wig-files">Wig Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prot-tables-genome-annotations">Prot_Tables (Genome Annotations)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#combined-wig-files">Combined_wig Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#samples-metadata-file">Samples Metadata File</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">TnSeq ANALYSIS METHODS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="method_normalization.html">Normalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_tnseq_stats.html">tnseq_stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_gumbel.html">Gumbel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_griffin.html">Griffin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_ttnfitness.html">TTN-Fitness</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_tn5gaps.html">Tn5Gaps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_HMM.html">HMM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_resampling.html">Resampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_Utest.html">Mann-Whitney U-test (utest)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_anova.html">ANOVA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_corrplot.html">corrplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_heatmap.html">heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_GI.html">Genetic Interactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_zinb.html">ZINB</a></li>
+<li class="toctree-l1"><a class="reference internal" href="method_pathway_enrichment.html">Pathway Enrichment Analysis</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">TRANSIT Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="transit_interactions_tutorial.html">Tutorial: Genetic Interactions Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_normalization_tutorial.html">Tutorial: Normalize datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_export_tutorial.html">Tutorial: Export datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transit_console_cheatsheet.html">Console Mode Cheat-Sheet</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">TPP Manual</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html">TPP Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#running-tpp">Running TPP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#mapping-to-genomes-with-multiple-contigs">Mapping to Genomes with Multiple Contigs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#overview-of-data-processing-procedure">Overview of Data Processing Procedure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tpp.html#statistics">Statistics</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="transit.html">pytransit package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_scripts.html">Example Scripts (for Developers)</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">TRANSIT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>File Formats for Transit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/file_formats.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="file-formats-for-transit">
+<span id="input-files"></span><h1>File Formats for Transit<a class="headerlink" href="#file-formats-for-transit" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="wig-files">
+<h2>Wig Files<a class="headerlink" href="#wig-files" title="Permalink to this headline">¶</a></h2>
+<p>TPP processes raw sequencing files (.fastq) to extract transposon insertion counts
+at TA sites.
+These are stored as “.wig” files.
+Wig files primarily have 2 columns of data: a) coordinates of TA sites,
+and b) the number of insertions observed at those sites.
+By convention, there are also 2 header lines.
+The first header line can be arbitrary info, such as where the data came from.
+The second has to contain “variableStep chrom=” followed by the name of the
+reference genome used for mapping the reads (e.g. H37Rv.fna).
+Here is an example (transit/src/pytransit/data/glycerol_H37Rv_rep2.wig):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># from Griffin et al, (2011).  PLOS Pathogens, e1002251.</span>
+<span class="n">variableStep</span> <span class="n">chrom</span><span class="o">=</span><span class="n">H37Rv</span>
+<span class="mi">60</span> <span class="mi">0</span>
+<span class="mi">72</span> <span class="mi">0</span>
+<span class="mi">102</span> <span class="mi">0</span>
+<span class="o">...</span>
+<span class="mi">1522</span> <span class="mi">124</span>
+<span class="mi">1552</span> <span class="mi">0</span>
+<span class="mi">1635</span> <span class="mi">201</span>
+<span class="mi">1779</span> <span class="mi">0</span>
+<span class="mi">1782</span> <span class="mi">0</span>
+<span class="mi">1788</span> <span class="mi">0</span>
+<span class="mi">1847</span> <span class="mi">0</span>
+<span class="mi">1858</span> <span class="mi">342</span>
+<span class="mi">1921</span> <span class="mi">21</span>
+<span class="o">...</span>
+<span class="mi">4411440</span> <span class="mi">99</span>
+<span class="mi">4411479</span> <span class="mi">0</span>
+<span class="mi">4411508</span> <span class="mi">0</span>
+<span class="mi">4411526</span> <span class="mi">0</span>
+
+<span class="p">(</span><span class="n">full</span> <span class="n">file</span> <span class="n">has</span> <span class="o">~</span><span class="mi">75</span><span class="p">,</span><span class="mi">000</span> <span class="n">lines</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="prot-tables-genome-annotations">
+<span id="annotation-files"></span><h2>Prot_Tables (Genome Annotations)<a class="headerlink" href="#prot-tables-genome-annotations" title="Permalink to this headline">¶</a></h2>
+<p>The annotation of a genome contains information about genes, such as
+coordinates, strand, locus tag, gene name, and functional description.
+Transit uses a custom format for annotations called “prot_table”s,
+e.g. H37Rv.prot_table.  Prot_tables are <strong>tab-separated text files</strong>
+containing the gene information in 9 specific columns:</p>
+<p><strong>Prot_table file format:</strong></p>
+<ol class="arabic simple">
+<li><p>gene function description</p></li>
+<li><p>start coordinate</p></li>
+<li><p>end coordinate</p></li>
+<li><p>strand</p></li>
+<li><p>length of protein product (in amino acids)</p></li>
+<li><p>don’t care</p></li>
+<li><p>don’t care</p></li>
+<li><p>gene name (like “dnaA”)</p></li>
+<li><p>ORF id (like Rv0001)</p></li>
+</ol>
+<p>Here is an example (transit/src/pytransit/genomes/H37Rv.prot_table):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chromosomal</span> <span class="n">replication</span> <span class="n">initiation</span> <span class="n">protein</span>    <span class="mi">1</span>       <span class="mi">1524</span>    <span class="o">+</span>       <span class="mi">507</span>     <span class="mi">15607143</span>        <span class="mi">885041</span>  <span class="n">dnaA</span>    <span class="n">Rv0001</span>
+<span class="n">DNA</span> <span class="n">polymerase</span> <span class="n">III</span> <span class="n">subunit</span> <span class="n">beta</span>       <span class="mi">2052</span>    <span class="mi">3260</span>    <span class="o">+</span>       <span class="mi">402</span>     <span class="mi">15607144</span>        <span class="mi">887092</span>  <span class="n">dnaN</span>    <span class="n">Rv0002</span>
+<span class="n">recombination</span> <span class="n">protein</span> <span class="n">F</span>       <span class="mi">3280</span>    <span class="mi">4437</span>    <span class="o">+</span>       <span class="mi">385</span>     <span class="mi">15607145</span>        <span class="mi">887089</span>  <span class="n">recF</span>    <span class="n">Rv0003</span>
+<span class="n">hypothetical</span> <span class="n">protein</span> <span class="n">Rv0004</span>   <span class="mi">4434</span>    <span class="mi">4997</span>    <span class="o">+</span>       <span class="mi">187</span>     <span class="mi">15607146</span>        <span class="mi">887088</span>  <span class="o">-</span>       <span class="n">Rv0004</span>
+<span class="n">DNA</span> <span class="n">gyrase</span> <span class="n">subunit</span> <span class="n">B</span>  <span class="mi">5123</span>    <span class="mi">7267</span>    <span class="o">+</span>       <span class="mi">714</span>     <span class="mi">15607147</span>        <span class="mi">887081</span>  <span class="n">gyrB</span>    <span class="n">Rv0005</span>
+<span class="n">DNA</span> <span class="n">gyrase</span> <span class="n">subunit</span> <span class="n">A</span>  <span class="mi">7302</span>    <span class="mi">9818</span>    <span class="o">+</span>       <span class="mi">838</span>     <span class="mi">15607148</span>        <span class="mi">887105</span>  <span class="n">gyrA</span>    <span class="n">Rv0006</span>
+<span class="o">...</span>
+
+<span class="p">(</span><span class="n">full</span> <span class="n">file</span> <span class="n">has</span> <span class="o">~</span><span class="mi">4000</span> <span class="n">lines</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><em>It is crucial</em> that the annotation file (.prot_table) used for
+analyses in Transit corresponds to exactly the same genome sequence
+(.fasta or .fna) that was used to generate the .wig files with TPP,
+because it is used to determine which TA sites are contained in which
+genes (by coordinates). For example, H37Rv.fna is paired with
+H37Rv.prot_table, both derived from GenBank sequence NC_000962.3.</p>
+</div>
+<p>In many cases, users might often obtain annotations for their genome
+in <strong>.gff (or .gff3)</strong> file format, such as downloaded from NCBI.  .gff
+files contains essentially the same information about genes.  However,
+there is a bit more flexibility in the .gff file format (especially in
+the tags used in the right-most column), and the information about
+genes is not always encoded in a uniform way, making it difficult to
+use arbitrary .gff filess for analyses in Transit.
+Therefore, there is a
+simple procedure in Transit to convert a .gff file to .prot_table
+format (via GUI or command-line).  This
+step only has to be done once, and then the .prot_table can be used
+for all subsequent analyses in Transit.
+(The routine specifically looks for the ‘locus_tag’, ‘gene’, and ‘product’
+tags in info field of CDS records.)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">python3</span> <span class="n">transit</span><span class="o">.</span><span class="n">py</span> <span class="n">convert</span> <span class="n">gff_to_prot_table</span> <span class="o">&lt;</span><span class="nb">input</span><span class="o">.</span><span class="n">gff_file</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">output</span><span class="o">.</span><span class="n">prot_table</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="combined-wig-files">
+<span id="combined-wig"></span><h2>Combined_wig Files<a class="headerlink" href="#combined-wig-files" title="Permalink to this headline">¶</a></h2>
+<p>Transit now supports a new file format called ‘combined_wig’ which basically
+combines multiple wig files into one file (with multiple columns).  This is
+especially useful for managing larger collections of datasets.</p>
+<p>Combined_wig files can created through the Transit GUI
+(in the menu: <strong>File -&gt; Export -&gt; Selected Datasets -&gt; to_Combined_Wig</strong>), or via the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span>
+
+<span class="n">python3</span> <span class="n">transit</span><span class="o">.</span><span class="n">py</span> <span class="n">export</span> <span class="n">combined_wig</span> <span class="o">&lt;</span><span class="n">comma</span><span class="o">-</span><span class="n">separated</span> <span class="o">.</span><span class="n">wig</span> <span class="n">files</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">annotation</span> <span class="o">.</span><span class="n">prot_table</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">output</span> <span class="n">file</span><span class="o">&gt;</span> <span class="p">[</span><span class="o">-</span><span class="n">n</span> <span class="o">&lt;</span><span class="n">norm</span><span class="o">&gt;</span><span class="p">]</span>
+
+<span class="n">Example</span><span class="p">:</span>
+
+<span class="o">&gt;</span> <span class="n">cd</span> <span class="n">src</span><span class="o">/</span><span class="n">pytransit</span><span class="o">/</span><span class="n">data</span><span class="o">/</span>
+<span class="o">&gt;</span> <span class="n">python3</span> <span class="o">../../</span><span class="n">transit</span><span class="o">.</span><span class="n">py</span> <span class="n">export</span> <span class="n">combined_wig</span> <span class="n">glycerol_H37Rv_rep1</span><span class="o">.</span><span class="n">wig</span><span class="p">,</span><span class="n">glycerol_H37Rv_rep2</span><span class="o">.</span><span class="n">wig</span><span class="p">,</span><span class="n">cholesterol_H37Rv_rep1</span><span class="o">.</span><span class="n">wig</span><span class="p">,</span><span class="n">cholesterol_H37Rv_rep2</span><span class="o">.</span><span class="n">wig</span><span class="p">,</span><span class="n">cholesterol_H37Rv_rep3</span><span class="o">.</span><span class="n">wig</span> <span class="o">../</span><span class="n">genomes</span><span class="o">/</span><span class="n">H37Rv</span><span class="o">.</span><span class="n">prot_table</span> <span class="n">glyc_chol</span><span class="o">.</span><span class="n">combined_wig</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>You can specify the normalization method you want to use with a flag.
+TTR is the default, but other relevant normalization options would be ‘nonorm’
+(i.e. preserve raw counts) and ‘betageom’ (this corrects for skew, but is slow).</p>
+<p>The format of a combined_wig is simply a multi-column (tab-separated) file with
+the first column being the coordinates of TA sites, followed by
+N columns of counts (for N samples), possibly with a final column indicating
+the gene annotation information.
+A combined_wig file can have header lines, prefixed by ‘#’.</p>
+<p>Importantly, a combined_wig file must include sample identifiers
+(filenames) that are prefixed with <strong>“#File: “</strong>.  These header lines
+are automatically included by the ‘export combined_wig’ Transit
+command the creates a combined_wig from multiple .wig files.  These “#File:”
+header lines should be given in the same order as the sample columns,
+and the filenames are used as identifiers to cross-reference
+information about each sample in the metadata file (see below).</p>
+<p>Here is the output file from the example above (glyc_chol.combined_wig.txt):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#Converted to CombinedWig with TRANSIT.</span>
+<span class="c1">#normalization method: TTR</span>
+<span class="c1">#Normalization Factors: 2.286197257382532 1.4371695843583265 2.6365107688705036 3.2329912278198036 2.865270203473558</span>
+<span class="c1">#RefGenome: H37Rv</span>
+<span class="c1">#File: glycerol_H37Rv_rep1.wig</span>
+<span class="c1">#File: glycerol_H37Rv_rep2.wig</span>
+<span class="c1">#File: cholesterol_H37Rv_rep1.wig</span>
+<span class="c1">#File: cholesterol_H37Rv_rep2.wig</span>
+<span class="c1">#File: cholesterol_H37Rv_rep3.wig</span>
+<span class="c1">#TA_coord      glycerol_H37Rv_rep1.wig glycerol_H37Rv_rep2.wig cholesterol_H37Rv_rep1.wig      cholesterol_H37Rv_rep2.wig      cholesterol_H37Rv_rep3.wig</span>
+<span class="mi">60</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="n">Rv0001</span> <span class="p">(</span><span class="n">dnaA</span><span class="p">)</span>
+<span class="mi">72</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="n">Rv0001</span> <span class="p">(</span><span class="n">dnaA</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="mi">1345</span>   <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="n">Rv0001</span> <span class="p">(</span><span class="n">dnaA</span><span class="p">)</span>
+<span class="mi">1423</span>   <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="n">Rv0001</span> <span class="p">(</span><span class="n">dnaA</span><span class="p">)</span>
+<span class="mi">1522</span>   <span class="mf">0.0</span>     <span class="mf">178.2</span>   <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="n">Rv0001</span> <span class="p">(</span><span class="n">dnaA</span><span class="p">)</span>
+<span class="mi">1552</span>   <span class="mf">61.7</span>    <span class="mf">0.0</span>     <span class="mf">0.0</span>     <span class="mf">29.1</span>    <span class="mf">0.0</span>
+<span class="mi">1635</span>   <span class="mf">32.0</span>    <span class="mf">288.9</span>   <span class="mf">142.4</span>   <span class="mf">22.6</span>    <span class="mf">0.0</span>
+<span class="o">...</span>
+
+<span class="p">(</span><span class="n">full</span> <span class="n">file</span> <span class="n">has</span> <span class="o">~</span><span class="mi">75</span><span class="p">,</span><span class="mi">000</span> <span class="n">lines</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>(DnaA is essential, which is why there are no insertion counts in the first few TA sites)</p>
+<p>Note that the ORF id and gene names are appended for TA sites in CDS regions, for convenience.
+If you open a combined_wig file in Excel (with tab as separator character), you will
+see the last line of the header (starting with “TAcoord…”) provides the input wig filenames as column headers.</p>
+<p>The ‘#RefGenome’ is extracted from information in the individual .wig files,
+which records the reference genome sequence that was used with TPP;
+the coordinates of TA sites are determined from the genome sequence.
+The <strong>reference genome must be the same for all wigs</strong> being combined.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="samples-metadata-file">
+<span id="metadata-files"></span><h2>Samples Metadata File<a class="headerlink" href="#samples-metadata-file" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>metadata</strong> file describes the sample ids, filenames,
+and conditions they represent (e.g. different media, growth
+conditions, knockout strains, animal passaging, etc., or whatever
+treatments and controls your TnSeq experiment involves) for all the
+samples in a combined_wig file.</p>
+<p>Format of the <em>samples_metadata</em> file: a tab-separated file (which you
+can edit in Excel) with 3 columns: Id, Condition, and Filename (it
+must have these headers). The Condition column should be as specific
+as possible, indicating <strong>how to group replicates</strong>.
+You can include other columns of info, but
+do not include additional rows.  Individual rows can be commented out
+by prefixing them with a ‘#’.  Here is an example of a samples
+metadata file: The filenames should match what is shown in the header
+of the combined_wig (including pathnames, if present).</p>
+<p>Note: the Condition column should have a unique label for each
+distinct condition (the same label shared only among replicates).  If
+there are attributes that distinguish the conditions (such as strain,
+treatment, etc), they could be included as <strong>additional columns</strong>
+(e.g. covariates, like Carbon_source or Drug or Days or Strain…).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Id</span>      <span class="n">Condition</span>    <span class="n">Filename</span>
+<span class="n">glyc1</span>   <span class="n">glycerol</span>     <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">example_data</span><span class="o">/</span><span class="n">glycerol_rep1</span><span class="o">.</span><span class="n">wig</span>
+<span class="n">glyc2</span>   <span class="n">glycerol</span>     <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">example_data</span><span class="o">/</span><span class="n">glycerol_rep2</span><span class="o">.</span><span class="n">wig</span>
+<span class="n">chol1</span>   <span class="n">cholesterol</span>  <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">example_data</span><span class="o">/</span><span class="n">cholesterol_rep1</span><span class="o">.</span><span class="n">wig</span>
+<span class="n">chol2</span>   <span class="n">cholesterol</span>  <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">example_data</span><span class="o">/</span><span class="n">cholesterol_rep2</span><span class="o">.</span><span class="n">wig</span>
+<span class="n">chol2</span>   <span class="n">cholesterol</span>  <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">example_data</span><span class="o">/</span><span class="n">cholesterol_rep3</span><span class="o">.</span><span class="n">wig</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<hr class="transit-sectionend docutils" />
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="method_normalization.html" class="btn btn-neutral float-right" title="Normalization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="transit_quality_control.html" class="btn btn-neutral float-left" title="Quality Control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2015, Michael A. DeJesus &amp; Thomas R. Ioerger.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
