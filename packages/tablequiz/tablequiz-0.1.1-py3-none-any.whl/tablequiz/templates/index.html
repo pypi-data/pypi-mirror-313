@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Table Quiz{% endblock %}
+{% block content %}
+<div class="reveal">
+  <div class="slides">
+    <section>
+      <h1>{{quiz.title}}</h1>
+    </section>
+
+    <section>
+      <p><a href="/slideshow">Slideshow</a></p>
+    </section>
+
+    <section>
+      {% for round in quiz.rounds %}
+      <section>
+        <p><a href="/rounds/{{loop.index}}">{{round.title}}</a></p>
+        <ul>
+          <li><a href="/rounds/{{loop.index}}">questions</a> (<a href="/rounds/{{loop.index}}?print-pdf">print</a>)
+          </li>
+          <li><a href="/rounds/{{loop.index}}/answers">answers</a> (<a
+              href="/rounds/{{loop.index}}/answers?print-pdf">print</a>)</li>
+        </ul>
+      </section>
+      {% endfor %}
+    </section>
+
+
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{{ super() }}
+<script>
+  // More info about initialization & config:
+  // - https://revealjs.com/initialization/
+  // - https://revealjs.com/config/
+  Reveal.initialize({
+    controls: true,  // hide the arrows
+    progress: false, // hide the progress bar
+    overview: true,  // don't accidentally reveal the questions!
+
+    hash: true,
+
+  });
+</script>
+{% endblock %}
