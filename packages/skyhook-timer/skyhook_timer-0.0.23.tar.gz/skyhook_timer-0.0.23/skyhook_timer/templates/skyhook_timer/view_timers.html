@@ -1,0 +1,46 @@
+{% extends 'allianceauth/base.html' %}
+{% load i18n %}
+{% load navactive %}
+
+{% block content %}
+{% if user.is_superuser %}
+    <h1>Skyhook Timers</h1>
+    <ul>
+        {% for timer in timers %}
+        <tr>
+            <td>{{ timer.eve_system }}</td>
+            <td>{{ timer.planet_number }}</td>
+            <td>
+                {% if timer.time_remaining %}
+                {{ timer.time_remaining.days }}d {{ timer.time_remaining.seconds|divisibleby:3600 }}h
+                {% else %}
+                Timer expired
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'admin:skyhook_timer_skyhooktimer_add' %}">Add Timer</a>
+{% else %}
+<h1>Skyhook Timers</h1>
+<ul>
+    {% for timer in timers %}
+    <tr>
+        <td>{{ timer.eve_system }}</td>
+        <td>{{ timer.planet_number }}</td>
+        <td>
+            {% if timer.time_remaining %}
+            {{ timer.time_remaining.days }}d {{ timer.time_remaining.seconds|divisibleby:3600 }}h
+            {% else %}
+            Timer expired
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</ul>
+<p>You are a member and can only view the timers.</p>
+
+
+    <!-- <p>You do not have access to this plugin.</p> -->
+{% endif %}
+{% endblock %}
