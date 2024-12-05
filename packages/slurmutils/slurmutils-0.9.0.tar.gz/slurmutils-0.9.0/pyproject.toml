@@ -1,0 +1,91 @@
+# Copyright 2024 Canonical Ltd.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License version 3 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "slurmutils"
+version = "0.9.0"
+description = "Utilities and APIs for interfacing with the Slurm workload manager."
+repository = "https://github.com/charmed-hpc/slurmutils"
+authors = ["Jason C. Nucciarone <nuccitheboss@ubuntu.com>"]
+maintainers = [
+    "Jason C. Nucciarone <nuccitheboss@ubuntu.com>",
+    "Ubuntu High-Performance Computing <hpc-ubuntu-group@canonical.com>"
+]
+license = "LGPL-3.0-only"
+readme = "README.md"
+keywords = ["HPC", "administration", "orchestration", "utility"]
+classifiers=[
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/charmed-hpc/slurmutils/issues"
+
+# Testing tools configuration
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+log_cli_level = "INFO"
+
+# Spell checking tools configuration
+[tool.codespell]
+skip = "build,lib,venv,icon.svg,.tox,.git,.mypy_cache,.ruff_cache,.vscode,.coverage"
+
+# Formatting tools configuration
+[tool.black]
+line-length = 99
+target-version = ["py38"]
+
+# Linting tools configuration
+[tool.ruff]
+line-length = 99
+extend-exclude = ["__pycache__", "*.egg_info"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "C", "N", "D", "I001"]
+extend-ignore = [
+    "D203",
+    "D204",
+    "D213",
+    "D215",
+    "D400",
+    "D404",
+    "D406",
+    "D407",
+    "D408",
+    "D409",
+    "D413",
+]
+ignore = ["E501", "D107"]
+per-file-ignores = {"tests/*" = ["D100","D101","D102","D103","D104"]}
+mccabe = { "max-complexity" = 15 }
