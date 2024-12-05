@@ -1,0 +1,365 @@
+Metadata-Version: 2.1
+Name: fw-gear-qc-reporter
+Version: 0.3.2
+Summary: Gear to report on metadata qc results
+Home-page: https://gitlab.com/flywheel-io/scientific-solutions/gears/metadata-error-reporter
+License: MIT
+Keywords: Flywheel,Gears,Errors,QC,Report,Reporter
+Author: Flywheel
+Author-email: support@flywheel.io
+Requires-Python: >=3.11,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Scientific/Engineering
+Requires-Dist: backoff (>=2.2.1,<3.0.0)
+Requires-Dist: fw-client (>=0.8.6,<0.9.0)
+Requires-Dist: fw-gear (>=0.2.1,<0.3.0)
+Requires-Dist: pandas (>=2.2.3,<3.0.0)
+Requires-Dist: ruamel-yaml (>=0.17.21,<0.18.0)
+Project-URL: Repository, https://gitlab.com/flywheel-io/scientific-solutions/gears/metadata-error-reporter
+Description-Content-Type: text/markdown
+
+# metadata-error-reporter (Metadata Error Reporter)
+
+## Overview
+
+### Summary
+
+Gear to create report on qc values from metadata on various sections of the
+hierarchy.
+
+### Cite
+
+Developed by Flywheel.
+
+### License 
+
+[MIT](./LICENSE)
+
+### Classification
+
+Analysis gear.
+
+*Gear Level:*
+
+- [x] Project
+- [x] Subject
+- [x] Session
+- [ ] Acquisition
+- [ ] Analysis
+
+----
+
+[[_TOC_]]
+
+----
+
+### Inputs
+
+- *metadata-rules*
+  - __Type__: *YAML file*
+  - __Optional__: *True*
+  - __Description__: *A YAML file describing how to handle non-default QC values.*
+
+### Config
+
+- *debug*
+  - __Type__: *boolean*
+  - __Description__: *Log debug messages*
+  - __Default__: *False*
+
+- *report-on-success*
+  - __Type__: *boolean*
+  - __Description__: *If true, report on QC results that passed as well. Otherwise, report on only failed QC results.*
+  - __Default__: *False*
+  
+- *output-format*
+  - __Type__: *string* (Allowed values: {`csv`, `json`})
+  - __Description__: *Format of output report*
+  - __Default__: *csv*
+  
+- *intermediate-containers*
+  - __Type__: *boolean*
+  - __Description__: *If true, report on files attached to all containers under
+  the run level. Otherwise only report on files attached to acquisition.*
+  - __Default__: *False*
+
+- *skip-analyses*
+  - __Type__: *boolean*
+  - __Description__: *If true, skip analysis QC results. Otherwise include analyses*
+  - __Default__: *True*
+
+### Outputs
+
+#### Files
+
+- *report*
+  - __Name__: *{proj|sub|ses}-{id}-report.{csv|json}*
+  - __Type__: *CSV or JSON report*
+  - __Description__: *Consolidated report of configured QC results in hierarchy below run container*
+
+#### Metadata
+
+N/A
+
+### Pre-requisites
+
+
+#### Prerequisite Gear Runs
+
+All gears which create QC results and are desired to be reported on should be run before `metadata-error-reporter` is run.
+
+#### Prerequisite Files
+
+N/A
+
+#### Prerequisite Metadata
+
+N/A
+
+## Usage
+
+### Description
+
+`metadata-error-reporter` heavily relies upon Dataviews in Flywheel. The gear essentially does two things:
+
+1. Submits and waits for the completion of Dataviews which correspond to config options.
+  * The gear by default submits a dataview reporting on the `qc` namespace on all _acquisitions_ under the run level
+  * With `intermediate-containers == True` the gear will also submit dataviews for each intermediate run level, i.e. if the run level is project, the gear will submit dataviews at the subject and session level as well as at acquisition
+  * With `skip-analyses == False` the gear will also submit dataviews for analyses attached to each container level it runs at.  For example running at the subject level and `intermediate-containers == True`, the gear will submit 4 dataviews: session level, session-analysis level, acquistion level, and acquistion-analysis level.
+2. Post-processes the dataviews performing default and any custom operations to report on QC results see [Metadata Rules](#metadata-rules)
+  * By default, the gear reports on every key in the `qc` namespace.  Within each key, it reports on QC result (assumed to be a key), except `job_info`. Within each QC result, it reports the `state` and `data` keys, see [Output](#output) section.
+
+For example, with the following qc namespace structure:
+
+```python
+file.info.qc: {
+  "gear-name1": {
+    "job_info": {},
+    "qc_result1": {
+      "state": "FAIL",
+      "data": "invalid value"
+    }
+  },
+  "gear-name2": {
+    "job_info": {},
+    "qc_result1": {
+      "state": "FAIL",
+      "data": "invalid value"
+    }
+  }
+}
+```
+
+The gear would create 2 CSV lines for this particular file.
+
+```csvM
+
+```
+## Metadata Rules
+
+The `metadata-rules` input is an _optional_ YAML file that provides additional config globally or for individual qc-results
+
+### Global options
+
+* `top_level_namespace`: For if you want to report on qc results under a
+different key
+* `excluded_qc_results`: List of qc-result names to exclude added to the default
+list (`job_info` and `gear_info`).
+* `excluded_qc_results_override`: List of qc-results names to exclude overriding
+the default list.
+* `fail_names`: List of string values which will be interepreted to mean a failed qc-result (case-insensitive). Defaults to `["fail", "failure", "failed"]`.
+* `state_name`: Name of the key in each qc-result which provides the state (pass vs. fail) information.  Defaults to `state`
+* `true_means_fail`: For boolean valued qc-results, defines the mapping between the boolean and pass/fail.  If `True`, then a `True` valued boolean is defined as a failure, if `False`, then a `True` valued boolean is defined as a success.
+
+### Field options
+
+Use the `fields` key to define how to treat specific qc-results. The `fields` key should contain a mapping under it, where each key is a specific qc-result.  Each key should follow the format `<gear_name>.<qc_name>`. For example, to configure options for the qc-result `slice_consistency` generated by `dicom-qc`, you would use the key `dicom-qc.slice_consistency`.
+
+Under each key (qc-result) in the fields section, the global `state_name`, `true_means_fail`, and `fail_names` can be overriden. Additionally, supporting data within the qc-result can be configured by using the `data` key.
+
+Under the data key, each entry should be a key-value mapping where the `key` is the key of the data field you want extracted, and the value is one of either `unfold` or `default`:
+
+* **unfold**: Unfold lists or dictionaries. For a list value, create a row for
+each element in the list with item value represented as a string in
+description column. For a dictionary value, create a row for each item in the
+dictionary with item key represented in key column and item value represented
+in value column.
+* **default**: Represent everything as json object in description. For a list
+value, create one row for the whole list will be a json representation of the
+list, i.e. `[<item1>, <item2>]`. For a dictionary value, create one row for the
+whole dictionary will be a json representation of the list, i.e. 
+`[{"<key1>": "<value1>"}, {"<key2>": "<value2>"}]`
+
+**NOTE**: The `data` key under a field definition does _not_ support nested fields at this time.
+
+### Examples
+
+#### Boolean valued qc-results
+
+The qc-reporter gear is meant to report on qc-results created by the `GearToolkitContext`s [`add_qc_result` method](https://flywheel-io.gitlab.io/public/gear-toolkit/flywheel_gear_toolkit/context/#adding-a-qc-result-or-gear-info).
+
+If you have a qc-result that was produced a different way (and therefore looks different), you will need to add a field within the `metadata-rules` input file to define how to process that result.
+
+For example, if you have a gear called `boolean-reporter` that produces a single qc-result called `value`, such as this:
+
+```json
+{
+  ...
+  "qc": {
+    "boolean-reporter": {
+      "job_info": {...}
+      "value": {
+        "result": True
+      }
+    }
+  }
+}
+```
+
+You could write a `metadata-rules` like this:
+
+```yaml
+---
+fields:
+  boolean-reporter.value:
+    state_name: "result"
+    true_means_fail: True
+```
+
+This would tell the qc-reporter gear to look at the key `result` within the qc-result to determine state, and that a `True` value should be interpreted as a failure.
+
+### Expanding supporting data
+
+Dicom-qc reports on jsonschema validation, this can produce nested data such as this:
+
+```json
+{
+  ...
+  "qc": {
+    "dicom-qc": {
+      "job_info": {...}
+      "jsonschema-validation": {
+        "data": [{
+          "error_context": "",
+          "error_message": "'dicom' is a required property",
+          "error_type": "required",
+          "error_value": ["dicom", "dicom_array"],
+          "item": "file.info.header"
+        },
+        {
+          "error_context": "",
+          "error_message": "'dicom_array' is a required property",
+          "error_type": "required",
+          "error_value": ["dicom", "dicom_array"],
+          "item": "file.info.header"
+        }],
+        "state": "FAIL"
+      },
+    }
+  }
+}
+```
+
+By default if you ran qc-reporter on this, you would get a single row for this failed QC value, but `data` is a list of length 2, so if you wanted to get 2 rows (one for each failure), you could make a `metadata-rules` file that looked like this:
+
+```yaml
+---
+fields:
+  dicom-qc.jsonschema-validation:
+    data:
+      data: "unfold"
+```
+
+This will produce two rows for the one failed QC result with _all_ the supporting data as the `data` field in the output CSV.
+
+## Output
+
+If JSON output is selected the output will look like below.  Otherwise if CSV is selected, the output format will be the same, but with each object in the list being a row in the CSV.
+
+```json
+{
+  [
+      # Schema
+	  {
+      # Machine readable quick access
+      "file_id": <file id | None>,
+      "version": <file version | None>,
+      # Human readable quick access
+      "filename": <filename>,
+      "subject.label": <label>,
+      "session.label": <label | None>,
+      "acquisition.label": <label | None>,
+      "analysis.label": <label | None>,
+      # for easier nav, non-existent for subject
+      "session-url": <session-url>,
+      # QC result  
+      "state": <pass | fail>,
+      "qc-namespace": <top level key under file.info.qc>,
+      "qc": <key of the qc result>,
+      "data": <supporting-data>,
+      "key": <only used for “unfold” operation in custom optional input>,
+      "value": <only used for “unfold” operation in custom optional input>,
+	  },
+      ## Examples
+      # For specifically dicom-qc “jsonschema” and dicom-fixer “fixed” (both list types), unfold that list
+    {
+      …
+      "qc-namespace": “dicom-qc”,
+      "qc": “jsonschema”,
+      "state": PASS | FAIL,
+      "data": <error_messsage[0]>
+    },
+     …
+    {
+      …
+      "qc-namespace": “dicom-qc”,
+      "qc": “jsonschema”,
+      "state": PASS | FAIL,
+      "data": <error_messsage[n]>
+    },
+    {
+      …
+      "qc-namespace": “dicom-fixer”,
+      "qc": “fixed”,
+      "state": PASS | FAIL,
+      "data": <fix[1]>
+    },
+    {
+      …
+      "qc-namespace": “dicom-fixer”,
+      "qc": “fixed”,
+      "state": PASS | FAIL,
+      "data": <fix[n]>
+    },
+  ]
+}
+```
+
+### Workflow
+
+A general workflow:
+
+1. Upload data to project with gear rules enabled
+2. Gear rules run
+3. Run any custom QC gears across project
+4. Run metadata-error-reporter on project or subsection of project
+5. Use output report to correct QC errors.
+
+### Logging
+
+An overview/orientation of the logging and how to interpret it.
+
+## FAQ
+
+[FAQ.md](FAQ.md)
+
+## Contributing
+
+[For more information about how to get started contributing to that gear,
+checkout [CONTRIBUTING.md](CONTRIBUTING.md).]
+<!-- markdownlint-disable-file -->
+
