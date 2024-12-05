@@ -1,0 +1,228 @@
+---
+"on":
+  push:
+    paths-ignore:
+      - "**.md"
+      - docs/*
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - docs/*
+  workflow_dispatch:
+
+# https://github.com/softprops/action-gh-release/issues/236
+permissions:
+  contents: write
+
+env:
+  files: dist/*
+  python-version: 3.x
+  cache: pip
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs-on: ubuntu-latest
+            shell: bash
+          - runs-on: macos-latest
+            shell: bash
+          - runs-on: windows-latest
+            shell: msys2
+    runs-on: ${{matrix.runs-on}}
+    defaults:
+      run:
+        shell: ${{matrix.shell}} {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{env.python-version}}
+          cache: ${{env.cache}}
+      - uses: msys2/setup-msys2@v2
+        if: runner.os == 'Windows'
+      - name: Install dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install librime-dev
+      - name: Install dependencies
+        if: runner.os == 'Windows'
+        run: |
+          pacman -Sy --noconfirm mingw-w64-x86_64-pkg-config \
+          mingw-w64-x86_64-librime mingw-w64-x86_64-python-pip \
+          mingw-w64-x86_64-ninja mingw-w64-x86_64-gcc
+      - uses: cachix/install-nix-action@v24
+        if: runner.os == 'macOS'
+        with:
+          nix_path: nixpkgs=channel:nixpkgs-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      - name: Install dependencies
+        if: runner.os == 'macOS'
+        run: |
+          nix-env -if'<nixpkgs>' librime
+      - name: Test
+        run: |
+          PKG_CONFIG_PATH="$HOME/.nix-profile/lib/pkgconfig" pip install .[dev]
+          pytest --cov
+      - uses: codecov/codecov-action@v4
+
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs-on: ubuntu-latest
+            shell: bash
+          - runs-on: macos-latest
+            shell: bash
+          - runs-on: windows-latest
+            shell: msys2
+    runs-on: ${{matrix.runs-on}}
+    defaults:
+      run:
+        shell: ${{matrix.shell}} {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{env.python-version}}
+          cache: ${{env.cache}}
+      - uses: msys2/setup-msys2@v2
+        if: runner.os == 'Windows'
+      - name: Install dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install librime-dev
+      - name: Install dependencies
+        if: runner.os == 'Windows'
+        # Dist currently only works with Git or Mercurial repos
+        run: |
+          pacman -Sy --noconfirm mingw-w64-x86_64-gcc \
+          mingw-w64-x86_64-pkg-config \
+          mingw-w64-x86_64-ninja \
+          mingw-w64-x86_64-librime \
+          mingw-w64-x86_64-python-build git
+      - uses: cachix/install-nix-action@v24
+        if: runner.os == 'macOS'
+        with:
+          nix_path: nixpkgs=channel:nixpkgs-unstable
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      - name: Install dependencies
+        if: runner.os == 'macOS'
+        run: |
+          nix-env -if'<nixpkgs>' librime
+      - name: Upgrade version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          perl -pi -e"s/(?<=version: ')[^']+/$GITHUB_REF_NAME/g" meson.build
+          git add -A
+          git config --global user.name 'Github Actions'
+          git config --global user.email \
+          '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m ":bookmark: Dump version" || true
+      - name: Install common dependencies
+        if: runner.os != 'Windows'
+        # windows uses msys2's pip's python-build
+        # ERROR Command '['D:/a/_temp/msys64/mingw64/bin/python.exe', '-m',
+        # 'pip', '--python',
+        # 'D:/a/_temp/msys64/tmp/build-env-6w5hd7wi/bin/python.exe', 'install',
+        # '--use-pep517', '--no-warn-script-location', '--no-compile', '-r',
+        # 'D:/a/_temp/msys64/tmp/build-reqs-zy4dg0x1.txt']' returned non-zero
+        # exit status 1.
+        # ubuntu uses apt's pip's python-build
+        # ERROR Virtual environment creation failed, executable
+        # /tmp/build-env-c4hi79lc/local/bin/python missing
+        run: |
+          pip install build
+      - name: Build
+        run: |
+          PKG_CONFIG_PATH="$HOME/.nix-profile/lib/pkgconfig" pyproject-build -w
+      - if: runner.os == 'Linux'
+        run: |
+          pyproject-build -s
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artifact-${{matrix.runs-on}}
+          path: |
+            ${{env.files}}
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: artifact-*
+          merge-multiple: true
+          path: dist
+      - name: Rename
+        run: |
+          sudo apt-get -y update
+          sudo apt-get -y install rename
+          rename \
+            's/linux/manylinux_2_17/;s/mingw_x86_64_msvcrt_gnu/win_amd64/' \
+            dist/*
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{secrets.PYPI_API_TOKEN}}
+      - uses: softprops/action-gh-release@v2
+        with:
+          # body_path: build/CHANGELOG.md
+          files: |
+            ${{env.files}}
+
+  deploy-aur:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: Freed-Wu/update-aur-package@v1.0.11
+        with:
+          package_name: python-pyrime
+          ssh_private_key: ${{secrets.AUR_SSH_PRIVATE_KEY}}
+
+  deploy-nur:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Trigger Workflow
+        run: >
+          curl -X POST -d '{"ref": "main"}'
+          -H "Accept: application/vnd.github.v3+json"
+          -H "Authorization: Bearer ${{secrets.GH_TOKEN}}"
+          https://api.github.com/repos/Freed-Wu/nur-packages/actions/workflows/version.yml/dispatches
+
+  deploy-ppa:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: pyrime-${{github.ref_name}}
+      - name: Build
+        run: |
+          tar vcaf pyrime-${{github.ref_name}}.tar.gz \
+            pyrime-${{github.ref_name}}
+      - uses: yuezk/publish-ppa-package@main
+        with:
+          repository: freedwu/rime
+          series: jammy noble oracular plucky
+          extra_ppa: freedwu/backport
+          gpg_private_key: ${{secrets.GPG_PRIVATE_KEY}}
+          gpg_passphrase: ${{secrets.GPG_PASSPHRASE}}
+          tarball: ./*.tar.*
+          deb_email: ${{secrets.DEB_EMAIL}}
+          deb_fullname: freedwu
+          debmake_arguments: -bpyrime:python3
