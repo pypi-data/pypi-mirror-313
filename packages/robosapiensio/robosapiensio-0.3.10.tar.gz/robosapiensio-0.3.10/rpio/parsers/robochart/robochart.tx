@@ -1,0 +1,263 @@
+// xtext grammar url: https://github.com/UoY-RoboStar/robochart-textual/blob/master/circus.robocalc.robochart.textual/src/circus/robocalc/robochart/textual/RoboChart.xtext#L112
+// Definition of the global robochart model
+
+robochart:
+    'package' name=ID
+    ('diagram' diagramID=ID |types+=TypeDecl | imports+=Import | interfaces+=Interface | controllers+=Controller | comments+=Comment | machines+=StateMachineDef)*
+
+;
+
+// Definition of the controller element  -> currently, operations are not supported
+
+Controller:
+    'controller' name=ID '{'
+         (events+=Event | variables+=Var | references+=Reference | interfaces+=Use | pInterfaces+= Provide | rInterfaces+= Require | machines+=StateMachineDef | connections+= Connection)*
+    '}'
+;
+
+// Definition of the state machine
+
+StateMachineDef:
+'stm' name=ID '{'
+         ( references+=Reference | interfaces+=Use | pInterfaces+= Provide | rInterfaces+= Require |  variables+=Var | events+=Event | states+=Node | transitions+=Transition | clocks+= Clock)*
+    '}'
+;
+
+Node:
+    State | Initial | Junction | Final | ProbabilisticJunction
+;
+
+
+State:
+	'state' name=ID '{'
+		(nodes+=Node |transitions+=Transition |actions+=Action)*
+	'}'
+;
+
+ProbabilisticJunction:
+	'probabilistic' name=ID
+;
+
+Initial:
+	'initial' name=ID
+;
+
+Final:
+	'final' name=ID
+;
+
+Junction:
+	'junction' name=ID
+;
+
+//Transition:
+//	'transition' name=ID '{'
+//		'from' source=[Node]
+//		'to' target=[Node]
+//		('trigger' trigger=Communication |'probability' probability=Expression)?
+//		(reset+=ClockReset)* ('<{' deadline=Expression '}')?
+//		('condition' condition=(Expression|Else))?
+//		('action' action=Statement)?
+//	'}'
+//;
+
+// Basic implementation of trigger, action and condition
+Transition:
+    'transition' name=ID '{'
+        'from' source=ID
+        'to' destination=ID
+        (triggers+=TriggerType | actions+=ActionType | conditions+=ConditionType)*
+    '}'
+;
+
+
+// Definition of interfaces
+
+Interface:
+    'interface' name=ID '{'
+        (events+=Event | variables+=Var | operations+=OperationSig | clocks+=Clock)*
+    '}'
+;
+
+OperationSig:
+	'operation' name=ID '('
+		(parameters+=Parameter (',' parameters+=Parameter)*)?
+	')' ('[' terminates?='terminates' ']')?
+;
+
+Clock:
+	'clock' name=ID
+;
+
+
+// Definition of interfaces
+
+Connection:
+    'connection' sourceNode=ID 'on' eventFrom=ID 'to' destinationNode=ID 'on' eventTo=ID
+        (async?='_async')? (bidirec?='mult')?
+;
+
+// Definition of the imports
+
+Import:
+    'import' importedNamespace=QualifiedNameWithWildcard
+;
+
+
+QualifiedNameWithWildcard:
+    QualifiedName ('::*' | '')  // Allows either a specific element or all elements with '*'
+;
+
+QualifiedName:
+    ID ('::' ID)*  // Supports a qualified name with '::' as the separator
+;
+
+// Definition of the types
+
+TypeDecl:
+	PrimitiveType | RecordType | Enumeration
+;
+
+PrimitiveType:
+	'type' name=ID
+;
+
+RecordType:
+	('datatype'|'record') name=ID '{'
+		fields+=Field*
+	'}'
+;
+
+Field:
+	name=ID ':' type=Type
+;
+
+Type:
+    SeqType | SetType | anyType | TypeDecl | ID
+;
+
+SeqType:
+    'Seq('type=ID')'
+;
+
+SetType:
+    'Set('type=ID')'
+;
+
+anyType:
+    '?' type=ID
+;
+
+
+Enumeration:
+	'enumeration' name=ID '{'
+		literals+=Literal*
+	'}'
+;
+
+Literal:
+	name=ID ('(' types+=Type (',' types+=Type)*')')?
+;
+
+
+ActionType:
+    'action' actions*=Action
+;
+
+Action:
+    (';')? expression=Expression
+;
+
+TriggerType:
+    'trigger' name=ID ('?' data=ID)?
+;
+
+ConditionType:
+    'condition' expression=Expression
+;
+
+Expression:
+    Assignment | BooleanOperation
+;
+
+Assignment:
+    variable=ID operator=Operator value=Value
+;
+
+BooleanOperation:
+    operator=BooleanOperator? variable=ID
+;
+
+Value:
+    FLOAT | INT | STRING | BOOL | ID
+;
+
+Operator:
+    AssignmentOperator | BooleanOperator | UnknownOperator
+;
+
+BooleanOperator:
+    'not'
+;
+
+AssignmentOperator:
+    '=' | '!'
+;
+
+UnknownOperator:
+    '?'
+;
+
+
+Use:
+    'uses' interfaces= interfaceRef
+;
+
+Provide:
+    'provides' pInterfaces=interfaceRef
+;
+
+Require:
+    'requires' rInterfaces=interfaceRef
+;
+
+interfaceRef:
+    QualifiedName | Interface
+;
+
+
+Reference:
+    'sref' reference=ID '=' component=ID
+;
+
+Data:
+    name=ID':' type=Type
+;
+
+
+InterfaceData:
+    Event | Var
+;
+
+Event:
+    'event' name=ID (':' type=Type)?
+;
+
+Var:
+    'var' name=ID ':' type=Type ('=' initial=Expression)?
+;
+
+
+
+Comment:
+  /\/\/.*$/
+;
+
+
+
+// Definition of auxiliary elements
+
+Parameter:
+	name=ID ':' type=Type
+;
+
