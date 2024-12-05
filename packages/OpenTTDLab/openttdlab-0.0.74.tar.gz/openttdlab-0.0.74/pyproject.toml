@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "OpenTTDLab"
+version = "0.0.74"
+authors = [
+  { name="Michal Charemza", email="michal@charemza.name" },
+  # Author of https://github.com/TrueBrain/OpenTTD-savegame-reader, which OpenTTDLab is a fork of
+  { name="Patric Stout", email="truebrain@openttd.org" },
+]
+description = "Python framework for running reproducible experiments using OpenTTD"
+readme = "README.md"
+requires-python = ">=3.8.0"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "dill>=0.3.8",
+    "httpx>=0.26.0",
+    "platformdirs>=4.1.0",
+    "PyYAML>=6.0.1",
+    "rich>=13.7.1",
+]
+
+[project.urls]
+"Source" = "https://github.com/michalc/OpenTTDLab"
+
+[project.optional-dependencies]
+dev = [
+  "coverage>=7.4.0",
+  "pytest>=7.4.4",
+  "pytest-cov>=4.1.0",
+]
+ci = [
+  # Pinned dev dependencies
+  "coverage==7.4.0",
+  "pytest==7.4.4",
+  "pytest-cov==4.1.0",
+  # Pinned normal dependencies
+  "dill==0.3.8",
+  "httpx==0.26.0",
+  "platformdirs==4.1.0",
+  "PyYAML==6.0.1",
+  "rich==13.7.1",
+]
+
+[tool.hatch.build]
+include = [
+  "openttdlab.py"
+]
