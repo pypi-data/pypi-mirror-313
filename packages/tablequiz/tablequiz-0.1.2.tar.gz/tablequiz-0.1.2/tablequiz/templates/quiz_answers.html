@@ -1,0 +1,53 @@
+{% extends "quiz_base.html" %}
+{% import "macros.html" as macros %}
+{% block title %}{{round.title}}{% endblock %}
+
+{% block slides %}
+<section>
+  {{ round.title }}
+</section>
+{% for question in round.questions %}
+<section>
+  <p>Question {{loop.index}}</p>
+  {{macros.ask_question(question)}}
+</section>
+<section>
+  {% if question.notes %}
+  <section>
+    {% endif %}
+    <h2>{{question.answer.answer}}</h2>
+
+    {% if question.answer.image %}
+    <img class="r-stretch" data-src="/images/{{question.answer.image.url}}">
+    {% endif %}
+
+    <ul>
+      {% for source in question.sources %}
+      <li><a href="{{source.url}}">{{source.title if source.title else source.url}}</a></li>
+      {% endfor %}
+    </ul>
+
+    {% if question.notes %}
+  </section>
+  <section data-markdown>
+    <textarea data-template>
+      {{ question.notes }}
+    </textarea>
+  </section>
+  {% endif %}
+</section>
+{% endfor %}
+
+<section>
+  <ol class="answers">
+    {% for question in round.questions %}
+    <li>{{question.answer.answer}}</li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section>
+  <h2>Round Finished!</h2>
+  <p><a href="/">(Back to rounds)</a></p>
+</section>
+{% endblock %}
