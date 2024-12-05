@@ -1,0 +1,167 @@
+---
+image: ubuntu:focal
+
+stages:
+  - build
+  - test
+  - publish
+
+variables:
+  GIT_STRATEGY: clone
+  # Default Python version, for build stage(s). Should be included in test matrix.
+  PYTHON_VERSION: "3.12.4"
+
+.before_script_template: &build_module
+  before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get update && apt-get upgrade -y
+    - apt-get install -y --no-install-recommends --reinstall ca-certificates
+    - apt-get install -y --no-install-recommends git
+    - git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+    # Install pyenv dependencies, esp. for building python, and set up pyenv.
+    - apt-get install -y --no-install-recommends build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+    - export PYENV_ROOT="$HOME/.pyenv"
+    - command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+    - eval "$(pyenv init -)"
+    - pyenv install ${PYTHON_VERSION}
+    - pyenv global ${PYTHON_VERSION}
+    - python --version
+    # Install and activate venv.
+    - python -m venv ../venv
+    - . ../venv/bin/activate
+    # Install/upgrade build tools.
+    - export SETUPTOOLS_SCM_DEBUG=1
+    - python -m pip install --upgrade --progress-bar off pip setuptools
+    - python -m pip --version
+    # Install package.
+    - python -m pip install --progress-bar off .[dev]
+    - python -m pip list
+    - python -m build
+    - python -m check_manifest
+
+build-branch:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  <<: *build_module
+  script: echo Build artifact created. Expires in 1 week.
+  artifacts:
+    name: $CI_PROJECT_NAME-$CI_COMMIT_BRANCH-$CI_COMMIT_SHORT_SHA
+    when: always
+    paths:
+      - dist
+    expire_in: 1 week
+
+build-tag:
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/' # Enforce semver in tag.
+  <<: *build_module
+  script: echo Build artifact created. Expires never.
+  artifacts:
+    name: $CI_PROJECT_NAME-$CI_COMMIT_TAG
+    when: always
+    paths:
+      - dist
+    expire_in: never
+
+docs-branch:
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH
+  <<: *build_module
+  script:
+    - echo Creating documentation artifact that expires in 1 week.
+    - apt-get install -y --no-install-recommends zip
+    - cd docs
+    - mkdir dist
+    - mkdir dist/html
+    - make clean
+    - sphinx-build -W -b html source build/html
+    - cd build/html
+    - zip -r ../../dist/html/${CI_COMMIT_BRANCH}-${CI_COMMIT_SHORT_SHA}.zip *
+  artifacts:
+    name: ${CI_PROJECT_NAME}-docs-${CI_COMMIT_BRANCH}-${CI_COMMIT_SHORT_SHA}
+    when: always
+    paths:
+      - docs/dist
+    expire_in: 1 week
+
+docs-tag:
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/' # Enforce semver in tag.
+  <<: *build_module
+  script:
+    - echo Creating documentation artifact that expires never.
+    - apt-get install -y --no-install-recommends zip
+    - cd docs
+    - mkdir dist
+    - mkdir dist/html
+    - make clean
+    - sphinx-build -W -b html source build/html
+    - cd build/html
+    - zip -r ../../dist/html/${CI_COMMIT_TAG}.zip *
+  artifacts:
+    name: ${CI_PROJECT_NAME}-docs-${CI_COMMIT_TAG}
+    when: always
+    paths:
+      - docs/dist
+    expire_in: never
+
+code-check-semgrep:
+  stage: test
+  allow_failure: true
+  image: returntocorp/semgrep-agent:v1
+  variables:
+    SEMGREP_RULES: >-
+      p/security-audit
+      p/secrets
+  script: semgrep-agent
+
+code-check-trivy:
+  stage: test
+  <<: *build_module
+  script:
+    - export TRIVY_VER=$(curl --silent "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+    - curl -L -o trivy.tgz https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VER}/trivy_${TRIVY_VER}_Linux-64bit.tar.gz
+    - tar xzf trivy.tgz
+    - mv trivy /usr/local/bin/
+    - trivy fs --exit-code 1 .
+
+code-check-megalinter:
+  stage: test
+  image: oxsecurity/megalinter:v8
+  script:
+    - ["/bin/bash /entrypoint.sh"]
+  variables:
+    DEFAULT_WORKSPACE: $CI_PROJECT_DIR
+  artifacts:
+    when: always
+    paths:
+      - megalinter-reports
+    expire_in: 1 week
+
+tests:
+  stage: test
+  <<: *build_module
+  script:
+    # Do not run timiing tests which are fragile in CI environment.
+    # Tests require QCI_TOKEN and QCI_API_URL be set in environment.
+    - python -m coverage run --source=qci_client -m pytest -v -m "not timing"
+    # 100% coverage NOT yet required in pyproject.toml.
+    - python -m coverage report -m
+    # Python linters/autoformatters.
+    - python -m pylint .
+    - python -m black --check .
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ['3.8.19', '3.9.19', '3.10.14', '3.11.9', '3.12.4']
+
+publish-package-dev:
+  stage: publish
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v[0-9]+\.[0-9]+\.[0-9]+$/' # Enforce semver in tag.
+  <<: *build_module
+  script:
+    - twine upload --repository-url http://python.qci-dev.com -u ${PYPI_USERNAME} -p ${PYPI_PASSWORD} dist/*
