@@ -1,0 +1,65 @@
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "step-exec-lib"
+version = "0.4.1"
+description = "A library that helps execute pipeline of tasks using filters and simple composition"
+authors = ["Łukasz Piątkowski <lukasz@giantswarm.io>"]
+license = "Apache-2.0"
+repository = "https://github.com/giantswarm/step-exec-lib"
+readme = "README.md"
+keywords = ["composition", "steps"]
+include = ["CHANGELOG.md", "DCO"]
+packages = [{ include = "step_exec_lib/**/*.py" }]
+classifiers = [
+  'Development Status :: 4 - Beta',
+  'Intended Audience :: Developers',
+  'Programming Language :: Python',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: 3.11',
+  'Programming Language :: Python :: 3.12',
+  'Programming Language :: Python :: 3.13',
+  'Programming Language :: Python :: Implementation :: CPython',
+  'Operating System :: POSIX :: Linux',
+  'License :: OSI Approved :: Apache Software License',
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+configargparse = "^1.4.1"
+gitpython = "^3.1.41"
+semver = "^3.0.0"
+# mkdocs = {version = "^1.1.2", optional = true }
+# mkapi = {version = "^1.0.10", optional = true}
+
+[tool.poetry.dev-dependencies]
+pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+tox = "^4.0.0"
+
+# [tool.poetry.extras]
+# docs = ["mkdocs", "mkapi"]
+
+[tool.black]
+line-length = 120
+target-version = ['py310', 'py311', 'py312', 'py313']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
