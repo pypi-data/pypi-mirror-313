@@ -1,0 +1,113 @@
+import json
+import textwrap
+import random
+import string
+from snowflake.snowpark.types import StringType, IntegerType, StructField, StructType, FloatType, MapType, ArrayType, BooleanType, BinaryType, DateType, TimestampType
+
+from snowflake.snowpark.exceptions import SnowparkSQLException
+
+class RAIException(Exception):
+    pass
+
+def random_string():
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choice(chars) for _ in range(32))
+
+def run_sql(session, query, params=None, engine=""):
+    try:
+        return session.sql(query, params).collect()
+    except SnowparkSQLException as e:
+        if "engine not found" in e.message:
+            import sys
+            def exception_handler(exception_type, exception, traceback):
+                print(f"{exception_type.__name__}: {exception}")
+            sys.excepthook = exception_handler
+            raise RAIException(f"RelationalAI engine not found. Please create an engine called `{engine}` using `___RAI_APP___.api.create_engine`.") from None
+        else:
+            raise e
+
+def get_models(session, database, engine):
+    APP_NAME = {{ APP_NAME }}
+    tmp_name = f"tmp_{random_string()}"
+    query = textwrap.dedent(f"""
+        call {APP_NAME}.api.exec_into(
+            '{database}',
+            '{engine}',
+            'def pairs(name, model): rel(:catalog, :model, name, model) and not starts_with(name, "rel/") and not starts_with(name, "pkg/std")
+             def Export_Relation(:key, i, key): exists( (value) | sort(pairs, i, key, value) )
+             def Export_Relation(:value, i, value): exists( (key) | sort(pairs, i, key, value) )',
+            '{tmp_name}',
+            true
+        );
+    """)
+    try:
+        run_sql(session, query, engine=engine)
+    except Exception as e:
+        # this means that there are no models other than the ones in rel/
+        return
+    result = run_sql(session, f"select key, value from ___RAI_APP___.results.{tmp_name};", engine=engine)
+    run_sql(session, f"call {APP_NAME}.api.drop_result_table('{tmp_name}');", engine=engine)
+    for row in result:
+        if row["KEY"] == "catalog":
+            continue
+        yield row["KEY"], row["VALUE"]
+
+def get_engine(session, passed_engine):
+    if passed_engine:
+        return passed_engine
+    try:
+        APP_NAME = {{ APP_NAME }}
+        query = f"select * from {APP_NAME}.api.engines where created_by=current_user() order by created_on DESC;"
+        row = run_sql(session, query)[0]
+        return row["NAME"]
+    except:
+        return {{ engine }}
+
+def escape(code):
+    return (
+        code
+        .replace("\\", "\\\\\\\\")
+        .replace("'", "\\\'")
+        .replace('"', '\\\\"')
+        .replace("\n", "\\n")
+    )
+
+def get_installation_code(models):
+    lines = []
+    for (name, code) in models:
+        name = escape(name)
+        lines.append(textwrap.dedent(f"""
+            def delete[:rel, :catalog, :model, "{name}"]: rel[:catalog, :model, "{name}"]
+            def insert[:rel, :catalog, :model, "{name}"]: raw\"\"\"\"\"\"\"{code}\"\"\"\"\"\"\"
+        """))
+    rel_code = "\\n\\n".join(lines)
+    return rel_code
+
+def handle(session{{py_inputs}}, passed_engine=""):
+    {{clean_inputs}}
+    engine = get_engine(session, passed_engine)
+    rel_code = {{ rel_code }}
+    proc_database = {{ proc_database }}
+    APP_NAME = {{ APP_NAME }}
+    database = {{ database }}
+    sql_out_names = "{{ sql_out_names }}"
+    models = list(get_models(session, proc_database, engine))
+    installation_code = get_installation_code(models)
+    cloned_database = f"{database[:30]}_{random_string()}"
+    temp_table = f"temp_{cloned_database}"
+    try:
+        session.call(f"{APP_NAME}.api.clone_database", cloned_database, database, True)
+        run_sql(session, f"call {APP_NAME}.api.exec_async_v2('{cloned_database}', '{engine}', ?, NULL, FALSE, FALSE, NULL);", [
+            installation_code, # query
+        ], engine=engine)
+        run_sql(session, f"call {APP_NAME}.api.exec_into(?, ?, ?, ?, ?);", [cloned_database, engine, rel_code, cloned_database, True], engine=engine)
+        run_sql(session, f"create temporary table {APP_NAME}.results.{temp_table} as select {sql_out_names} from {APP_NAME}.results.{cloned_database};", [], engine=engine)
+        run_sql(session, f"call {APP_NAME}.api.drop_result_table(?)", [cloned_database], engine=engine)
+        return session.table(f"{APP_NAME}.results.{temp_table}")
+    except Exception as e:
+        msg = str(e).lower()
+        if f"No columns returned".lower() in msg or "Columns of results could not be determined".lower() in msg:
+            return session.createDataFrame([], StructType([{{ py_outs }}]))
+        raise e
+    finally:
+        run_sql(session, f"call {APP_NAME}.api.delete_database('{cloned_database}');")
