@@ -1,0 +1,261 @@
+Metadata-Version: 2.3
+Name: waldiez
+Version: 0.1.12
+Summary: waldiez
+Project-URL: homepage, https://waldiez.github.io/waldiez/
+Project-URL: repository, https://github.com/waldiez/waldiez.git
+Author-email: Panagiotis Kasnesis <pkasnesis@thingenious.io>, Lazaros Toumanidis <laztoum@protonmail.com>, Stella Ioannidou <stella@humancentered.gr>
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: <3.13,>=3.10
+Requires-Dist: ag2==0.4.1
+Requires-Dist: jupytext
+Requires-Dist: typer<0.13,>=0.9
+Provides-Extra: ag2-extras
+Requires-Dist: ag2[anthropic]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[bedrock]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[captainagent]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[gemini]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[groq]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[lmm]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[mistral]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[retrievechat-mongodb]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[retrievechat-pgvector]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[retrievechat-qdrant]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[retrievechat]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[together]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: ag2[websurfer]==0.4.1; extra == 'ag2-extras'
+Requires-Dist: fastembed==0.4.2; extra == 'ag2-extras'
+Requires-Dist: pgvector>=0.3.6; extra == 'ag2-extras'
+Requires-Dist: psycopg[binary]>=3.2.3; extra == 'ag2-extras'
+Requires-Dist: pymongo==4.10.1; extra == 'ag2-extras'
+Requires-Dist: qdrant-client==1.12.1; extra == 'ag2-extras'
+Provides-Extra: dev
+Requires-Dist: autoflake==2.3.1; extra == 'dev'
+Requires-Dist: bandit==1.8.0; extra == 'dev'
+Requires-Dist: black[jupyter]==24.10.0; extra == 'dev'
+Requires-Dist: flake8==7.1.1; extra == 'dev'
+Requires-Dist: isort==5.13.2; extra == 'dev'
+Requires-Dist: mypy==1.13.0; extra == 'dev'
+Requires-Dist: pre-commit==4.0.1; extra == 'dev'
+Requires-Dist: pydocstyle==6.3.0; extra == 'dev'
+Requires-Dist: pylint==3.3.2; extra == 'dev'
+Requires-Dist: python-dotenv==1.0.1; extra == 'dev'
+Requires-Dist: ruff==0.8.1; extra == 'dev'
+Requires-Dist: types-pyyaml==6.0.12.20240917; extra == 'dev'
+Requires-Dist: yamllint==1.35.1; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: mdx-include==1.4.2; extra == 'docs'
+Requires-Dist: mdx-truly-sane-lists==1.3; extra == 'docs'
+Requires-Dist: mkdocs-jupyter==0.25.1; extra == 'docs'
+Requires-Dist: mkdocs-macros-plugin==1.3.7; extra == 'docs'
+Requires-Dist: mkdocs-material==9.5.47; extra == 'docs'
+Requires-Dist: mkdocs-minify-html-plugin==0.2.3; extra == 'docs'
+Requires-Dist: mkdocs==1.6.1; extra == 'docs'
+Requires-Dist: mkdocstrings-python==1.12.2; extra == 'docs'
+Requires-Dist: mkdocstrings[crystal,python]==0.27.0; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: pytest-cov==6.0.0; extra == 'test'
+Requires-Dist: pytest-html==4.1.1; extra == 'test'
+Requires-Dist: pytest-sugar==1.0.0; extra == 'test'
+Requires-Dist: pytest-timeout==2.3.1; extra == 'test'
+Requires-Dist: pytest-xdist==3.6.1; extra == 'test'
+Requires-Dist: pytest==8.3.4; extra == 'test'
+Description-Content-Type: text/markdown
+
+# Waldiez
+
+![CI Build](https://github.com/waldiez/waldiez/actions/workflows/main.yaml/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/waldiez/waldiez/badge.svg)](https://coveralls.io/github/waldiez/waldiez) [![PyPI version](https://badge.fury.io/py/waldiez.svg?icon=si%3Apython)](https://badge.fury.io/py/waldiez)
+
+Translate a Waldiez flow:
+
+![Flow](https://raw.githubusercontent.com/waldiez/waldiez/refs/heads/main/docs/static/images/overview.webp)
+
+To a python script or a jupyter notebook with the corresponding [ag2](https://github.com/ag2ai/ag2/) agents and chats.
+
+## Features
+
+- Convert .waldiez flows to .py or .ipynb
+- Run a .waldiez flow
+- Provide a custom [IOSStream](https://ag2ai.github.io/ag2/docs/reference/io/base#iostream) to handle input and output.
+
+## Installation
+
+On PyPI:
+
+```bash
+python -m pip install waldiez
+```
+
+From the repository:
+
+```bash
+python -m pip install git+https://github.com/waldiez/waldiez.git
+```
+
+## Usage
+
+### CLI
+
+```bash
+# Convert a Waldiez flow to a python script or a jupyter notebook
+waldiez convert --file /path/to/a/flow.waldiez --output /path/to/an/output/flow[.py|.ipynb]
+# Convert and run the script, optionally force generation if the output file already exists
+waldiez run --file /path/to/a/flow.waldiez --output /path/to/an/output/flow[.py] [--force]
+```
+
+### Using docker/podman
+
+```shell
+CONTAINER_COMMAND=docker # or podman
+# pull the image
+$CONTAINER_COMMAND pull waldiez/waldiez
+# Convert a Waldiez flow to a python script or a jupyter notebook
+$CONTAINER_COMMAND run \
+  --rm \
+  -v /path/to/a/flow.waldiez:/flow.waldiez \
+  -v /path/to/an/output:/output \
+  waldiez/waldiez --export /flow.waldiez --output /output/flow[.py|.ipynb]
+
+# with selinux and/or podman, you might get permission (or file not found) errors, so you can try:
+$CONTAINER_COMMAND run \
+  --rm \
+  -v /path/to/a/flow.waldiez:/flow.waldiez \
+  -v /path/to/an/output:/output \
+  --userns=keep-id \
+  --security-opt label=disable \
+  waldiez/waldiez convert --file /flow.waldiez --output /output/flow[.py|.ipynb]
+```
+
+```shell
+# Convert and run the script
+$CONTAINER_COMMAND run \
+  --rm \
+  -v /path/to/a/flow.waldiez:/flow.waldiez \
+  -v /path/to/an/output:/output \
+  waldiez/waldiez run --file /flow.waldiez --output /output/output[.py]
+```
+
+### As a library
+
+#### Export a flow
+
+```python
+# Export a Waldiez flow to a python script or a jupyter notebook
+from waldiez import WaldiezExporter
+flow_path = "/path/to/a/flow.waldiez"
+output_path = "/path/to/an/output.py"  # or .ipynb
+exporter = WaldiezExporter.load(flow_path)
+exporter.export(output_path)
+```
+  
+#### Run a flow
+
+```python
+# Run a flow
+from waldiez import WaldiezRunner
+flow_path = "/path/to/a/flow.waldiez"
+output_path = "/path/to/an/output.py"
+runner = WaldiezRunner.load(flow_path)
+runner.run(output_path=output_path)
+```
+
+#### Run a flow with a custom IOStream
+
+```python
+# Run the flow with a custom IOStream
+# In case the standard 'input' and 'print' functions cannot be used
+import time
+import threading
+
+from typing import Any
+
+from waldiez import WaldiezRunner
+from waldiez.io import WaldiezIOStream
+
+flow_path = "/path/to/a/flow.waldiez"
+output_path = "/path/to/an/output.py"
+
+
+def custom_print_function(*args: Any, sep: str = " ", **kwargs: Any) -> None:
+    """Custom print function."""
+    print(*args, sep=sep, **kwargs)
+
+
+# Custom input handler
+class InputProcessorWrapper:
+    """Wrapper input processor.
+    
+    To manage the interaction between the custom input processor and IOStream.
+    """
+
+    def __init__(self):
+        self.stream = None  # Placeholder for the WaldiezIOStream instance
+        self.lock = threading.Lock()  # Ensure thread-safe operations
+
+    def custom_input_processor(self, prompt: str) -> None:
+        """Simulate external input and send it back to the IOStream."""
+        def external_input_simulation():
+            with self.lock:  # Ensure thread-safe access
+                time.sleep(2)  # Simulate delay for network input
+                if self.stream:
+                    self.stream.set_input("Simulated external input")
+                else:
+                    raise RuntimeError("Stream reference not set!")
+
+        threading.Thread(target=external_input_simulation, daemon=True).start()
+
+    def set_stream(self, stream: "WaldiezIOStream"):
+        """Set the WaldiezIOStream instance."""
+        with self.lock:  # Ensure thread-safe setting of the stream
+            self.stream = stream
+
+processor_wrapper = InputProcessorWrapper()
+
+stream = WaldiezIOStream(
+    input_timeout=30,
+    print_function=
+    on_prompt_input=processor_wrapper.custom_input_processor,
+)
+
+# Link the processor wrapper to the WaldiezIOStream instance
+processor_wrapper.set_stream(custom_stream)
+
+with WaldiezIOStream.set_default(io_stream):
+    runner = WaldiezRunner.load(flow_path)
+    runner.run(stream=io_stream, output_path=output_path)
+
+```
+
+### Tools
+
+- [ag2 (formerly AutoGen)](https://github.com/ag2ai/ag2)
+- [juptytext](https://github.com/mwouts/jupytext)
+- [pydantic](https://github.com/pydantic/pydantic)
+- [typer](https://github.com/fastapi/typer)
+
+## Known Conflicts
+
+- **autogen-agentchat**: This package conflicts with `ag2`. Ensure that `autogen-agentchat` is uninstalled before installing `waldiez`. If you have already installed `autogen-agentchat`, you can uninstall it with the following command:
+
+  ```shell
+  pip uninstall autogen-agentchat -y
+  ```
+
+  If already installed waldiez you might need to reinstall it after uninstalling `autogen-agentchat`:
+  
+    ```shell
+    pip install --force --no-cache waldiez
+    ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/waldiez/waldiez/blob/main/LICENSE) file for details.
