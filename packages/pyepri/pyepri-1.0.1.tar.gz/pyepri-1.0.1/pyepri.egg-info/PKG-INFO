@@ -1,0 +1,201 @@
+Metadata-Version: 2.1
+Name: pyepri
+Version: 1.0.1
+Summary: A CPU & GPU compatible Python package for Electron Paramagnetic Resonance Imaging
+Author-email: Rémy Abergel <Remy.Abergel@math.cnrs.fr>
+License: MIT License
+        
+        Copyright (c) 2024 Remy Abergel
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/remy-abergel/pyepri
+Project-URL: Issues, https://github.com/remy-abergel/pyepri/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: matplotlib
+Requires-Dist: pyvista
+Requires-Dist: finufft
+Requires-Dist: jupyter
+Requires-Dist: psutil
+Provides-Extra: cupy-cuda12x
+Requires-Dist: cupy-cuda12x; extra == "cupy-cuda12x"
+Requires-Dist: cufinufft; extra == "cupy-cuda12x"
+Provides-Extra: cupy-cuda11x
+Requires-Dist: cupy-cuda11x; extra == "cupy-cuda11x"
+Requires-Dist: cufinufft; extra == "cupy-cuda11x"
+Provides-Extra: cupy-rocm-5-0
+Requires-Dist: cupy-rocm-5-0; extra == "cupy-rocm-5-0"
+Requires-Dist: cufinufft; extra == "cupy-rocm-5-0"
+Provides-Extra: cupy-rocm-4-3
+Requires-Dist: cupy-rocm-4-3; extra == "cupy-rocm-4-3"
+Requires-Dist: cutensor; extra == "cupy-rocm-4-3"
+Requires-Dist: cufinufft; extra == "cupy-rocm-4-3"
+Provides-Extra: torch
+Requires-Dist: torch>=1.6; extra == "torch"
+Requires-Dist: torchinterp1d; extra == "torch"
+Requires-Dist: cufinufft; extra == "torch"
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Provides-Extra: doc
+Requires-Dist: myst_parser; extra == "doc"
+Requires-Dist: sphinx-rtd-theme>=0.4.2; extra == "doc"
+Requires-Dist: sphinx-autoapi; extra == "doc"
+Requires-Dist: sphinx-gallery; extra == "doc"
+Requires-Dist: sphinx-tabs; extra == "doc"
+Requires-Dist: sphinx-design; extra == "doc"
+Requires-Dist: pyvista[all,trame]; extra == "doc"
+Requires-Dist: memory_profiler; extra == "doc"
+Requires-Dist: ipywidgets; extra == "doc"
+Requires-Dist: ipyvtklink; extra == "doc"
+Requires-Dist: sphinxcontrib-bibtex; extra == "doc"
+
+# PyEPRI
+
+Advanced Algorithms and Low-Level Operators for Electron Paramagnetic
+Resonance Imaging.
+
+**Package documentation and tutorials are available
+[here](https://pyepri.math.cnrs.fr/)**.
+
+If you have any comments, questions, or suggestions regarding this
+code, don't hesitate to open a
+[discussion](https://github.com/remy-abergel/pyepri/discussions) or a
+[bug issue](https://github.com/remy-abergel/pyepri/issues). 
+
+## Installation
+### Install latest stable version using pip
+
+Assuming you have a compatible system with `python3` and `pip`
+installed, the following steps will create a virtual environment, and
+install the latest stable version of `pyepri`.
+
+```bash
+###################################################
+# Create and activate a fresh virtual environment #
+###################################################
+python3 -m venv ~/.venv/pyepri
+source ~/.venv/pyepri/bin/activate
+
+#########################################################
+# Install the `pyepri` package from the PyPi repository #
+#########################################################
+pip install pyepri
+
+################################################################
+# Optionally (and advised if you have a GPU device with CUDA   #
+# installed), you can enable `torch` and/or `cupy` backends by #
+# executing the following commands                             #
+################################################################
+
+# enable `torch` backend support
+pip install pyepri[torch] # for enabling `torch` backend support
+
+# enable `cupy` backend support: you need to select the 
+# appropriate line depending on your system 
+#
+# PLEASE BE CAREFUL NOT TO INSTALL MULTIPLE CUPY PACKAGES AT
+# THE SAME TIME TO AVOID INTERNAL CONFLICTS
+#
+pip install pyepri[cupy-cuda12x] # For CUDA 12.x
+pip install pyepri[cupy-cuda11x] # For CUDA 11.x
+```
+
+### Install latest stable version from sources
+
+Assuming you have a compatible system with `python3`, `pip` and `git`
+installed, the following steps will checkout current code release,
+create a virtual environment, and install `pyepri`.
+
+```bash
+##################
+# Clone the code #
+##################
+git clone https://github.com/remy-abergel/pyepri.git
+cd pyepri
+
+###################################################
+# Create and activate a fresh virtual environment #
+###################################################
+python3 -m venv ~/.venv/pyepri
+source ~/.venv/pyepri/bin/activate
+
+##########################################################
+# Install the `pyepri` package from the checked out code #
+# (do not forget the . at the end of the command line)   #
+##########################################################
+pip install -e .
+
+################################################################
+# Optionally (and advised if you have a GPU device with CUDA   #
+# installed), you can enable `torch` and/or `cupy` backends by #
+# executing the following commands                             #
+################################################################
+
+# enable `torch` backend support
+pip install ".[torch]" # for enabling `torch` backend support
+
+# enable `cupy` backend support: you need to select the 
+# appropriate line depending on your system 
+#
+# PLEASE BE CAREFUL NOT TO INSTALL MULTIPLE CUPY PACKAGES AT
+# THE SAME TIME TO AVOID INTERNAL CONFLICTS
+#
+pip install ".[cupy-cuda12x]" # For CUDA 12.x
+pip install ".[cupy-cuda11x]" # For CUDA 11.x
+
+################################################################
+# If you want to compile the documentation by yourself, you    #
+# must install the [doc] optional dependencies of the package, #
+# compilation instructions are provided next                   #
+################################################################
+pip install -e ".[doc]" # install some optional dependencies
+make -C docs html # build the documentation in html format
+firefox docs/_build/html/index.html # open the built documentation (you can replace firefox by any other browser)
+```
+
+Because this installation was done in *editable* mode (thanks to the
+``-e`` option of ``pip``), any further update of the repository (e.g.,
+using the syncing commang ``git pull``) will also update the current
+installation of the package.
+
+### Troubleshooting
+
++ If the installation of the package or one of its optional dependency
+  fails, you may have more chance with
+  [miniconda](https://docs.anaconda.com/miniconda/miniconda-install/)
+  (or [conda](https://anaconda.org/anaconda/conda)).
+
++ If you still encounter difficulties, feel free to open a [bug
+  issue](https://github.com/remy-abergel/pyepri/issues).
+
+## License
+
+PyEPRI was created by Rémy Abergel ([Centre National de la Recherche
+Scientifique](https://www.cnrs.fr/fr), [Université Paris
+Cité](https://u-paris.fr/), [Laboratoire
+MAP5](https://map5.mi.parisdescartes.fr/)). It is licensed under the
+terms of the [MIT license](LICENSE).
