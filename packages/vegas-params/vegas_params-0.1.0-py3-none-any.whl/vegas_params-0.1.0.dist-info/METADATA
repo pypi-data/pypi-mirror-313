@@ -1,0 +1,47 @@
+Metadata-Version: 2.1
+Name: vegas_params
+Version: 0.1.0
+Summary: A wrapper for the Vegas integrator
+Author-email: Andrey Sheshukov <ash@jinr.ru>
+Project-URL: Homepage, https://github.com/Sheshuk/vegas_param
+Project-URL: Issues, https://github.com/Sheshuk/vegas_param/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.20
+Requires-Dist: vegas>=5.6
+Provides-Extra: test
+Requires-Dist: pytest>=8; extra == "test"
+
+# vegas_params
+Wrapper package for [Vegas](https://vegas.readthedocs.io) integrator.
+
+## Installation
+
+You can install `vegas_params` via github link
+```shell
+pip install git+https://github.com/RTESolution/vegas_params.git
+```
+
+## Examples
+### Gaussian integral
+Let's caluclate integral 
+$$
+\int\limits_{-1000}^{1000}dx \int\limits_{-1000}^{1000}dy \; e^{-(x^2+y^2)}
+$$
+
+Here is how you can do it:
+```python
+@integral   
+@expression(x=Uniform([-1000,1000]),
+            y=Uniform([-1000,1000]))
+def gaussian(x, y):
+    return np.exp(-(x**2+y**2))
+```
+Now `gaussian` is a callable, where you can pass the parameters of the vegas integrator:
+```python
+gaussian(nitn=20, neval=100000)
+#3.13805(16) - close to expected Pi
+```
