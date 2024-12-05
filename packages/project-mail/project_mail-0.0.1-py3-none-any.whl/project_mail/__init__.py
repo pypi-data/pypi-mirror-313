@@ -1,0 +1,1 @@
+from .smail import smail
