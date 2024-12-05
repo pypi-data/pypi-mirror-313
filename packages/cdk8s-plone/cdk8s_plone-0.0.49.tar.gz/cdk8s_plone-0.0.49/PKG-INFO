@@ -1,0 +1,113 @@
+Metadata-Version: 2.1
+Name: cdk8s-plone
+Version: 0.0.49
+Summary: Provides a CMS Plone Backend and Frontend for Kubernetes with cdk8s
+Home-page: https://github.com/bluedynamics/cdk8s-plone.git
+Author: Jens W. Klein<jk@kleinundpartner.at>
+License: Apache-2.0
+Project-URL: Source, https://github.com/bluedynamics/cdk8s-plone.git
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: JavaScript
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Typing :: Typed
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: License :: OSI Approved
+Requires-Python: ~=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: cdk8s-plus-29<3.0.0,>=2.5.8
+Requires-Dist: cdk8s<3.0.0,>=2.69.23
+Requires-Dist: constructs<11.0.0,>=10.0.0
+Requires-Dist: jsii<2.0.0,>=1.105.0
+Requires-Dist: publication>=0.0.3
+Requires-Dist: typeguard<4.3.0,>=2.13.3
+
+# CMS Plone Chart for CDK8S
+
+This chart provides a library to bootstrap a Plone deployment on a Kubernetes cluster using the [CDK8S](https://cdk8s.io) framework.
+
+It provides
+
+* Backend (as API with `plone.volto` or as Classic-UI)
+* Frontend (Plone-Volto, a ReactJS based user interface)
+* Varnish using kube-httpcache. It includes a way to invalidate varnish cluster (optional)
+
+### Typescript
+
+To use this library, create a new CDK8S project (or use an existing one)
+
+```bash
+cdk8s init typescript-app
+```
+
+Then add the following dependency to `package.json`:
+
+```json
+{
+  "dependencies": {
+    "@bluedynamics/cdk8s-plone": "*"
+  }
+}
+```
+
+Run `npm install` to install the new dependency.
+
+### Python
+
+Todo: Document in details how to install.
+
+```bash
+cdk8s init python-app
+```
+
+Python package name is [cdk8s-plone](https://pypi.org/project/cdk8s-plone/).
+
+## Usage
+
+With `cdk8s-cli` installed, create a new project:
+
+```bash
+cdk8s sythn
+```
+
+Add the following code to your `main.ts`:
+
+```python
+...
+import { Plone } from '@bluedynamics/cdk8s-plone';
+...
+    super(scope, id, props);
+
+    // define resources here
+    new Plone(this, 'Plone', {});
+...
+```
+
+Run `npm run build ` to generate the Kubernetes manifests.
+The manifests are stored in the `dist` directory.
+
+For more have a look at the [example project](https://github.com/bluedynamics/cdk8s-plone-example).
+
+## Development
+
+Clone the repository and install the dependencies:
+
+```bash
+```
+
+nvm use lts/*
+corepack enable
+npx projen
+
+```
+
+Then run the following command to run the test:
+
+```bash
+npx projen test
+```
