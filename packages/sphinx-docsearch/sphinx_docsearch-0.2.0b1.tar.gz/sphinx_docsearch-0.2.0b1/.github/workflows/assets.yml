@@ -1,0 +1,41 @@
+name: Assets
+on:
+  schedule:
+    - cron: "37 3 * * 0"
+  workflow_dispatch:
+jobs:
+  update:
+    name: Update dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Update dependencies
+        run: |
+          uv sync -U
+      - name: Update assets
+        run: |
+          uv run --with httpx update_assets.py
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/update-docsearch-assets
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            git config --global user.name "algolia-ci"
+            git config --global user.email "noreply@algolia.com"
+            git checkout -b "${branch}"
+            git add .
+            git commit --message "chore: update dependencies"
+            git push --force --set-upstream origin "${branch}"
+            if ! [[ "$(gh pr list --base main --head ${branch})" ]]; then
+              gh pr create --title "Update dependencies" --body "Update dependencies"
+            fi
+          else
+            echo "Dependencies up to date."
+          fi

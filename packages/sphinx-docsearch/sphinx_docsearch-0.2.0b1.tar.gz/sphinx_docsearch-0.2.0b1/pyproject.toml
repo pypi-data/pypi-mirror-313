@@ -1,0 +1,93 @@
+[project]
+name = "sphinx-docsearch"
+version = "0.2.0b1"
+description = "A Sphinx extension for replacing the built-in search with Algolia DocSearch"
+readme = "README.md"
+authors = [
+  { name = "Algolia", email = "support@algolia.com" }
+]
+classifiers = [
+  "Programming Language :: Python",
+  "Framework :: Sphinx",
+  "Framework :: Sphinx :: Extension",
+  "Topic :: Documentation",
+  "Topic :: Documentation :: Sphinx",
+  "Topic :: Software Development :: Documentation",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13"
+]
+packages = [
+  {include = "sphinx_docsearch", from = "src"}
+]
+dependencies = [
+  "sphinx>7,<9"
+]
+requires-python = ">=3.9"
+
+[project.urls]
+homepage = "https://sphinx-docsearch.readthedocs.io/"
+documentation = "https://sphinx-docsearch.readthedocs.io/"
+repository = "https://github.com/algolia/sphinx-docsearch"
+issues = "https://github.com/algolia/sphinx-docsearch"
+
+[tool.coverage.path]
+source = ["src"]
+
+[tool.coverage.run]
+branch = true
+source = ["sphinx_docsearch"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "Q", "W", "I", "C90", "D", "UP", "YTT", "S", "ANN", "SIM", "N"]
+# Ignore conflicting rules
+ignore = ["D203", "D213", "E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.pyright]
+include = ["src", "tests", "noxfile.py", "update_assets.py"]
+exclude = ["tests/test_context.py"]
+reportUnnecessaryTypeIgnoreComment = "warning"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+docs = [
+    "myst-parser",
+    "python-dotenv",
+    "sphinx-autobuild",
+    "sphinxawesome-theme==6.0.0.b1",
+    "furo",
+    "pydata-sphinx-theme",
+    "sphinx-rtd-theme",
+]
+test = [
+    "pytest-cov",
+    "pytest",
+    "beautifulsoup4",
+    "furo",
+    "pydata-sphinx-theme",
+    "sphinx-rtd-theme",
+]
+typecheck = [
+    "pyright",
+    "nox",
+    "httpx",
+    "python-dotenv",
+    "beautifulsoup4",
+    "pytest",
+    "sphinxawesome-theme",
+]
+lint = [
+    "ruff",
+]
