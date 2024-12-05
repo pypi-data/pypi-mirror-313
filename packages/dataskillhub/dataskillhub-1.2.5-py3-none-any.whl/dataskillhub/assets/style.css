@@ -1,0 +1,472 @@
+:root {
+    --blue-datalyo: #009C9D;
+    --grey-datalyo: #4D4D4D;
+    --grey: #696969;
+    --lightgrey: #D3D3D3;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/* GENERAL */
+
+html{
+    background-color: var(--lightgrey);
+    font-size: 12px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    width: 800px;
+    margin: 1% auto;
+    background-color: white;
+    padding: 1% 4% 2% 4%;
+    box-shadow: var(--grey-datalyo) 0 0 10px;
+}
+
+@media screen and (max-width: 900px) {
+    html{
+        background-color: white;
+    }
+
+    body {
+        margin: 0;
+        width: 100%;
+        box-shadow: none;
+    }
+}
+
+section {
+    padding-top: 13px;
+}
+
+.topsect {
+    text-align: center;
+    font-size: 1.3em;
+    padding: 0;
+    color: var(--blue-datalyo);
+}
+
+h1 {
+    font-size: 3em;
+}
+
+h2 {
+    padding: 13px 0 7px 0;
+    color: var(--blue-datalyo);
+    text-transform: uppercase;
+    font-size: 1.8em;
+}
+
+h3 {
+    font-style: italic;
+    padding: 20px 0 5px 0;
+    color: var(--blue-datalyo);
+    text-align: justify;
+    text-transform: uppercase;
+    font-size: 1.3em;
+}
+
+h4 {
+    font-size: 1em;
+    font-weight: bold;
+}
+
+h3+h4 {
+    padding: 0 0 7px 0;
+}
+
+h5 {
+    color: var(--blue-datalyo);
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 0.8em;
+    background-color: transparent;
+    padding: 7px 0 0 0;
+    display: inline-block;
+}
+
+ul {
+    list-style-type: none;
+}
+
+li {
+    padding: 3px 0 2px 2vw;
+    text-align: justify;
+}
+
+li::before {
+    content: "\2713";
+    /* HTML : &#10003; */
+    /* Arrow: */
+    /* content: "\002B9A";  HTML : &#11162; */
+    padding-right: 1vw;
+}
+
+li p{
+    display: inline;
+}
+
+p {
+    text-align: justify;
+    padding: 3px 0;
+}
+
+ul~p {
+    padding: 2px 0 2px 3.7vw;
+    color: var(--grey);
+}
+
+h5+p {
+    display: inline;
+    padding-left: 0;
+}
+
+/* SPECIFIC INSIDE BODY */
+
+#identity {
+    height: 130px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0;
+}
+
+#identity h4 {
+    margin-left: 1px;
+    padding-top: 5px;
+    font-size: 1.5em;
+}
+
+#identity img {
+    height: 100%;
+}
+
+#identity #name {
+    align-self: center;
+}
+
+#value-added {
+    padding-top: 0;
+}
+
+#value-added h2 {
+    padding-top: 0;
+}
+
+#certif #img_certif {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    padding-left: 2vw;
+}
+
+#certif #img_certif>img {
+    height: 80px;
+    margin: 0 4px;
+}
+
+#footer-pdf {
+    display: none;
+}
+
+footer {
+    font-size: 0.8em;
+    padding-top: 50px;
+}
+
+footer #logo-html {
+    height: 50px;
+}
+
+footer ul {
+    text-align: center;
+}
+
+footer ul li {
+    display: inline;
+    color: var(--blue-datalyo);
+    font-weight: bold;
+}
+
+footer ul li::before {
+    content: none;
+}
+
+footer ul li:first-child {
+    padding: 0;
+}
+
+footer span {
+    font-size: 1.2em;
+}
+
+/* ICONS FOR h2 */
+
+h2::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    margin-right: 7px;
+}
+
+#value-added h2::before {
+    background-image: url('icones/icon_star.png');
+}
+
+#key-skills h2::before {
+    background-image: url('icones/icon_skill.png');
+}
+
+#diplomas h2::before {
+    background-image: url("icones/icon_diploma.png");
+}
+
+#certif h2::before {
+    background-image: url("icones/icon_diploma.png");
+}
+
+#languages h2::before {
+    background-image: url("icones/icon_chat.png");
+}
+
+#animations h2::before {
+    background-image: url("icones/icon_person.png");
+}
+
+#missions h2::before {
+    background-image: url("icones/icon_person.png");
+}
+
+/* IF CONTENT IS EMPTY */
+
+section:has(.content:empty) {
+    display: none;
+}
+
+/* IF DOC IS ANONYME */
+
+.anonyme {
+    display: none;
+}
+
+@media print {
+
+    @page {
+        size: A4 portrait;
+        margin: 1.2cm 1.5cm 1.2cm 1.5cm;
+
+        @bottom-center {
+            content: element(footer-pdf);
+        }
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* GENERAL */
+    html{
+        background-color: white;
+    }
+
+    body {
+        background-color: white;
+        font-family: Calibri;
+        font-size: 8pt;
+        width: 100%;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    section {
+        break-inside: avoid;
+        padding-top: 2mm;
+    }
+
+    .topsect {
+        font-size: 12pt;
+        padding: 0;
+    }
+
+    h1 {
+        font-size: 24pt;
+    }
+
+    h2 {
+        font-size: 14pt;
+        padding: 2mm 0 1.5mm 0;
+    }
+
+    h3 {
+        font-size: 11pt;
+        padding: 5mm 0 1mm 0;
+    }
+
+    h4 {
+        font-size: 8pt;
+    }
+
+    h3+h4 {
+        padding: 0 0 2mm 0;
+    }
+
+    h5 {
+        font-size: 7pt;
+        padding-top: 1.5mm;
+    }
+
+    li {
+        padding: 0.7mm 0 0.7mm 5mm;
+    }
+
+    li::before {
+        padding-right: 2mm;
+    }
+
+    p {
+        padding: 1mm 0;
+    }
+
+    ul~p {
+        padding: 0.7mm 0 0.7mm 1cm;
+    }
+
+    h5+p {
+        padding-left: 0;
+    }
+
+    /* SPECIFIC INSIDE BODY */
+
+    #identity {
+        height: 3cm;
+        padding: 0;
+        margin: 0;
+    }
+
+    #identity #name {
+        padding-top: 0;
+        display: inline-block;
+    }
+
+    #identity .normal {
+        width: 5cm;
+        text-align: right;
+        display: inline-block;
+    }
+
+    #identity h4 {
+        padding-top: 1mm;
+        font-size: 12pt;
+    }
+    
+    #identity img {
+        height: 3cm;
+    }
+
+    #value-added {
+        padding-top: 0;
+    }
+
+    #value-added h2 {
+        padding-top: 0;
+    }
+
+    #certif #img_certif {
+        padding: 0;
+        padding-top: 3mm;
+        width: 100%;
+        /* display: block;
+        text-align: center; */
+        padding-left: 5mm;
+    }
+
+    #certif #img_certif>img {
+        height: 2cm;
+    }
+
+    #missions {
+        break-inside: auto;
+    }
+
+    #missions h2,
+    #missions h4,
+    #missions p,
+    #missions ul,
+    #missions h5,
+    #missions h5+p {
+        break-before: avoid;
+    }
+
+    #missions ul {
+        break-inside: avoid;
+    }
+
+    #missions .topsect,
+    #missions h2,
+    #missions h3,
+    #missions h4,
+    #missions p,
+    #missions ul,
+    #missions h5 {
+        break-after: avoid;
+    }
+
+    #missions h5+p {
+        break-after: auto;
+    }
+
+    footer {
+        display: none;
+    }
+
+    #footer-pdf {
+        display: block;
+        position: running(footer);
+        padding: 0;
+        bottom: 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    #footer-pdf #logo-pdf{
+        height: 1cm;
+    }
+
+    #footer-pdf ul {
+        padding: 3mm 0;
+        text-align: center;
+    }
+
+    #footer-pdf ul li {
+        font-size: 6pt;
+        display: inline;
+        color: var(--blue-datalyo);
+        font-weight: bold;
+    }
+
+    #footer-pdf ul li::before {
+        content: none;
+    }
+
+    #footer-pdf ul li:first-child {
+        padding: 0;
+    }
+
+    #footer-pdf span {
+        font-size: 8pt;
+    }
+
+    /* ICONs FOR h2 */
+
+    h2::before {
+        width: 4.5mm;
+        height: 4.5mm;
+        margin-right: 2mm;
+    }
+}
