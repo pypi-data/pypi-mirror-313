@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Editor Example</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.6/jsoneditor.min.css">
+  <style>
+    #jsoneditor {
+      width: 100%;
+      height: 800px;
+      border: 1px solid #ccc;
+    }
+
+    .hidden {
+      display: none;
+      /* Class to hide elements */
+    }
+  </style>
+</head>
+
+<body>
+  <h1 id="title">VALIDATE CLOUD API KEY AND INSTANCE ID</h1>
+  <div>
+    <label for="apiKeyInput" id="inputLabel">Enter API key:<label>
+        <input type="text" id="apiKeyInput" />
+        <label for="instanceIdInput" id="instanceInputLabel">Enter Instance ID:<label>
+            <input type="text" id="instanceIdInput" />
+            <button id="validateButton">Validate</button>
+            <pre id="result"></pre>
+  </div>
+
+  <div id="jsoneditor" hidden=true></div>
+  <button id="update-config">Update Config</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/9.5.6/jsoneditor.min.js"></script>
+  <script async>
+    async function fetchJsonData() {
+      try {
+        const y = await fetch(`${location.origin}/get_config`)
+        const x = await y.text()
+        return JSON.parse(x);
+      } catch (error) {
+        console.error('error fetch data');
+      }
+    }
+
+    async function validate(api_key, instance_id) {
+      try {
+        const y = await fetch(`${location.origin}/validate`, {
+          method: "POST",
+          body: JSON.stringify({api_key: api_key, instance_id: instance_id})
+        });
+        const x = await y.text()
+        return x === "true";
+      } catch (error) {
+        console.error('error fetch data');
+      }
+    }
+
+    document.getElementById('validateButton').addEventListener('click', function () {
+      const apiKey = document.getElementById('apiKeyInput').value;
+      const instanceId = document.getElementById('instanceIdInput').value;
+      validate(apiKey, instanceId).then(function (resp) {
+        if (resp) {
+          fetchJsonData().then(function (resp) {
+            const initialJson = resp;
+            const container = document.getElementById('jsoneditor');
+            const options = {
+              mode: 'text'
+            };
+            const editor = new JSONEditor(container, options);
+            editor.set(initialJson);
+
+            document.getElementById('update-config').addEventListener('click', function () {
+              const json = editor.get();
+              fetch(`${location.origin}/update`, {
+                method: "POST",
+                body: JSON.stringify(json)
+              }).then(function (resp) {
+                if (resp.status === 200) alert('SUCCESSFULLY UPDATED JSON CONFIG');
+                else alert('FAILED TO UPDATE JSON CONFIG');
+              });
+            });
+          })
+          document.getElementById('jsoneditor').hidden = false;
+          document.querySelector('label[for="apiKeyInput"]').classList.add('hidden');
+          document.getElementById('title').innerText = 'CONFIG JSON EDITOR';
+        } else {
+          document.getElementById('result').innerText = 'Invalid API Key or Instance Id. Please try again.';
+        }
+      })
+    })
+  </script>
+</body>
+
+</html>

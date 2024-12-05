@@ -1,0 +1,93 @@
+Metadata-Version: 2.3
+Name: cybotrade
+Version: 1.4.32
+Classifier: Programming Language :: Rust
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Typing :: Typed
+License-File: LICENSE
+Summary: This library contains Cybotrade's core runtime, integrations with Exchanges API, historical and live market data collector and wrap them into a simple, easy-to-use Python SDK.
+Author: Marcus Lee <marcuslee@balaenaquant.com>, Lee Ian <ianlee@balaenaquant.com>
+Author-email: Marcus Lee <marcuslee@balaenaquant.com>, Lee Ze Lim <zelim@balaenaquant.com>, Lee Ian <ianlee@balaenaquant.com>
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown; charset=UTF-8; variant=GFM
+Project-URL: Homepage, https://app.cybotrade.rs
+Project-URL: Documentation, https://docs.cybotrade.rs
+
+# Cybotrade
+
+This is the Client SDK for building automated trading strategies on [Cybotrade](https://app.cybotrade.rs). This library provides the core runtime, integration with Exchanges API, historical and live market data collector and wrap them into a simple, easy-to-use and easy-to-learn Python SDK as a foundation users' strategies.
+
+## Documentation
+
+The documentation for the Cybotrade SDK can be found [here](https://docs.cybotrade.rs).
+
+## Installation
+
+```bash
+pip install cybotrade
+```
+
+## Usage
+
+The following example shows how to create a simple strategy that buys 0.01 BTC when the price goes up and sells 0.01 BTC when the price goes down. 
+
+For a more advanced usage, please refer to the [documentation](https://docs.cybotrade.rs).
+
+```python
+from cybotrade.strategy import Strategy as BaseStrategy
+from cybotrade.models import (
+    OrderParams, 
+    OrderSide,
+    RuntimeMode,
+    RuntimeConfig,
+    Exchange,
+)
+from datetime import datetime, timedelta, timezone
+
+import asyncio
+
+class Strategy(BaseStrategy):
+    async def on_candle_closed(self, strategy, topic, symbol, data_map):
+        # Get the currently closed candles
+        candles = data_map[topic] 
+
+        if candles[-1].close > candles[-2].close:
+            # Buy 0.01 BTC
+            await strategy.open(
+                side=OrderSide.Buy,
+                take_profit=None,
+                stop_loss=None,
+                quantity=0.01,
+                limit=None
+            )
+        else:
+            # Sell 0.01 BTC
+            await strategy.open(
+                side=OrderSide.Sell,
+                take_profit=None,
+                stop_loss=None,
+                quantity=0.01,
+                limit=None
+            )
+
+async def main():
+    runtime = await Runtime.connect(
+        RuntimeConfig(
+            mode=RuntimeMode.Backtest,
+            exchange=Exchange.BybitLinear,
+            datasource_topics=[],
+            candle_topics=["candles-1h-BTC/USDT-bybit"],
+            start_time=datetime.now(timezone.utc) - timedelta(minutes=10000),
+            end_time=datetime.now(timezone.utc),
+            api_key="YOUR_CYBOTRADE_API_KEY",
+            api_secret="YOUR_CYBOTRAD_API_SECRET",
+            data_count=100
+        ),
+        Strategy(),
+    )
+
+    await runtime.start()
+
+asyncio.run(main())
+```
+
