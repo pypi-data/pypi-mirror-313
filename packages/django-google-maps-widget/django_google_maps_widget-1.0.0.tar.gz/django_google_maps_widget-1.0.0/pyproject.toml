@@ -1,0 +1,78 @@
+[project]
+name = "django-google-maps-widget"
+version = "1.0.0"
+authors = [
+  { name="Aaron Madison", email="aaron.l.madison@gmail.com" },
+  { name="Andrei Mukamolau", email="amv@bamboogroup.eu" },
+]
+maintainers = [
+  { name="Andrei Mukamolau", email="amv@bamboogroup.eu" },
+]
+description = "Plugs Google Maps Platform API into Django admin."
+readme = "README.rst"
+requires-python = ">=3.9"
+dependencies = [
+    "Django>=4.2"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+license = {file = "LICENSE"}
+
+[project.urls]
+Homepage = "https://github.com/amv-bamboo/django-google-maps-widget"
+Issues = "https://github.com/amv-bamboo/django-google-maps-widget/issues"
+
+[tool.hatch.envs.test]
+dependencies = [
+    "ruff",
+    "coverage",
+    "mock",
+]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.11", "3.12", "3.13"]
+django = ["4.2.16", "5.0.9", "5.1.2"]
+
+[tool.hatch.envs.test.overrides]
+matrix.django.dependencies = [
+    { value = "Django==4.2.16", if = ["4.2.16"] },
+    { value = "Django==5.0.9", if = ["5.0.9"] },
+    { value = "Django==5.1.2", if = ["5.1.2"] }
+]
+
+[tool.hatch.envs.test.scripts]
+test = "python manage.py test"
+lint = "ruff check"
+test-cov = "coverage run --source=django_google_maps_widget manage.py test"
+cov-report = "coverage report --show-missing"
+cov = ["test-cov", "cov-report"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "C901", "W"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 4
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
