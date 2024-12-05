@@ -1,0 +1,71 @@
+[project]
+name = "mm-eth"
+version = "0.1.5"
+description = ""
+requires-python = ">=3.12"
+dependencies = [
+    "mm-std~=0.1.8",
+    "websocket-client~=1.8.0",
+    "web3~=7.6.0",
+    "loguru~=0.7.2",
+    "typer>=0.14.0",
+
+]
+[project.scripts]
+mm-eth = "mm_eth.cli.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest~=8.3.4",
+    "pytest-xdist~=3.6.1",
+    "ruff~=0.8.1",
+    "pip-audit~=2.7.3",
+    "bandit~=1.8.0",
+    "mypy~=1.13.0",
+    "types-PyYAML~=6.0.12.20240917",
+]
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "stubs"
+warn_no_return = false
+implicit_reexport = true
+strict = true
+enable_error_code = ["truthy-bool", "possibly-undefined"]
+exclude = ["^tests/", "^tmp/"]
+[[tool.mypy.overrides]]
+module = ["rlp", "rlp.sedes"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 130
+target-version = "py313"
+lint.select = [
+    "F", # Pyflakes
+    "E", "W", # pycodestyle
+    "UP", # pyupgrade
+    "B", # flake8-bugbear
+    "A", # flake8-builtins
+    "COM", # flake8-commas
+    "C40", # flake8-comprehensions
+    "G", # flake8-logging-format
+    "PIE", # flake8-pie
+    "T20", # flake8-print
+    "RUF", # Ruff-specific rules
+]
+lint.ignore = [
+    "A003", # builtin-attribute-shadowing
+    "B008", # function-call-argument-default
+    "COM812"
+]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = ["B311"]
+
+[tool.pytest.ini_options]
+markers = ["infura"]
