@@ -1,0 +1,292 @@
+
+
+subject = """(@rel="su" and parent::node[(@cat="smain" or @cat="sv1" or @cat="ssub")])"""
+questionmark = """(@pt="let" and @word="?")"""
+exclamationmark = """(@pt="let" and @word="!")"""
+periodmark = """(@pt="let" and @word=".")"""
+topcontainsquestionmark = """(ancestor::node[@cat="top" and node[%questionmark%]])"""
+topcontainsexclamationmark = """ (ancestor::node[@cat="top" and node[%exclamationmark%]])"""
+topcontainsperiodmark = """ (ancestor::node[@cat="top" and node[%periodmark%]])"""
+
+Ond = """node[%subject%]"""
+FullOnd = """(%subject% or %erx%)"""
+
+
+
+erx = """((@rel="mod" and @lemma="er" and ../node[@rel="su" and @begin>=../node[@rel="mod" and @lemma="er"]/@end]) or
+          (@rel="mod" and @lemma="er" and ../node[@rel="su" and not(@pt) and not(@cat)])
+         )
+      """
+
+impsubjectok = """(not(%Ond%) or (node[%subject% and %impsubject%] and (%impmodfound%  or %topcontainsexclamationmark%)))"""
+impsubject = """(@rel="su" and (@word="jij" or @word="u"))"""
+
+basicimperative = """(%normalimp% or %bareverbimp% )"""
+
+bareverbimp = """(%wwimpok% and  %imprelok%  and parent::node[@cat="top"] and not(%topcontainsquestionmark%) and not(%topcontainsperiodmark%)) """
+normalimp = """(@cat="sv1" and
+					  not(%topcontainsquestionmark%) and 	
+					  (not(%topcontainsperiodmark%) or %impmodfound%) and 	
+                      %imprelok% and
+ 					 %impsubjectok% and 
+					 node[%wwimpok%]
+)
+"""
+
+wwimpok = """( %wwimpfeatok% and
+         not(%modalframe%) and
+		 %zijnimpok%       and
+		 %potentialimpverb%
+        )"""
+		
+wwimpfeatok = """(%wwimpfin% or %wwimpinf%)"""
+wwimpfin = """(@rel="hd" and @pt="ww" and @pvtijd="tgw" and @pvagr="ev" and @wvorm="pv") """
+wwimpinf = """(@rel="hd" and @pt="ww" and @wvorm="inf") """
+modalframe = """(contains(@frame,"modal"))"""
+zijnimpok = """(not(@lemma="zijn") or @word="wees" or @word="weest")"""
+potentialimpverb = """(not(contains(@lemma,"moeten") or contains(@lemma,"hoeven") or
+              contains(@lemma,"zullen") or contains(@lemma,"kunnen") or
+              contains(@lemma,"mogen") or @lemma="hebben" or contains(@lemma, "_hebben") or contains(@lemma, "weten")
+             )
+         )"""
+     
+imprelok = """(@rel="--" or @rel="nucl")"""
+
+basicimpmod = """(node[@rel="mod" and (@lemma="maar" or @lemma="eens")])"""
+
+impmodfound = """(%basicimpmod% or node[%nonfinvc% and %basicimpmod%])"""
+nonfincat = """(@cat="inf" or @cat="ppart")"""
+
+
+nonfinvc = """(@rel="vc" and %nonfincat%) """
+
+realcomplormodnode = """node[%realcomplormod%]"""
+realcomplormod = """(not(%particlesvp%) and (not(%indexnode%) or %includeindexnode%) and not(%nonfinvc%) and not(@rel="hd"))"""
+indexnode = """(@index and not (@cat or @pt or @pos))"""
+indexnodecount = """(count(node[%indexnode%]))"""
+includeindexnode = """(%indexnode% and  parent::node[@cat="ssub" and parent::node[@cat="rel" ]])"""
+suindexnode = """(%indexnode% and @rel="su") """
+nonfinindexnode = """(%indexnode% and parent::node[%nonfinvc%])"""
+nonsuindexnode = """(%indexnode% and @rel!="su") """
+nonsuindexnodecount = """(count(node[%nonsuindexnode%]))"""
+
+fillednode = """node[not(%indexnode%)]"""
+
+particlesvp = """(@rel="svp" and @pt="vz")"""
+
+realcomplormodnodecount = """count(%realcomplormodnode% | node[%nonfinvc%]/%realcomplormodnode%)"""
+
+wx = """(%basicimperative%
+        and  %realcomplormodnodecount% <= 1)"""
+
+
+wxy = """(%basicimperative%
+        and  %realcomplormodnodecount% = 2) and not(node[%Tarsp_kijkVU%])"""
+
+
+wxyz = """(%basicimperative%
+        and  %realcomplormodnodecount% = 3)"""
+
+
+wxyz5 = """(%basicimperative%
+        and  %realcomplormodnodecount% = 4)"""
+
+
+ynquery = """@cat="sv1" and
+            (@rel="--" or @rel="dp") and
+            not(%topcontainsperiodmark%) and 
+			not(%topcontainsexclamationmark%) and 
+            node[@rel="hd" and @pt="ww" and @pvtijd !="conj" and (@stype="ynquestion" or %topcontainsquestionmark% ) ] and
+            (node[@rel="su"] or %topcontainsquestionmark%)    and
+            (not(%impmodfound%) or %topcontainsquestionmark% )			 
+		  """	 
+		  
+wondx = """(%ynquery% and %realcomplormodnodecount% <= 2 )"""
+
+wond4 = """(%ynquery% and %realcomplormodnodecount% = 3)"""
+
+wond5plus = """(%ynquery% and %realcomplormodnodecount% >= 4)"""
+
+partofwhquestion = """((@cat="sv1" or @cat="ssub") and @rel="body" and parent::node[@cat="whq" or @cat="whsub" ]) """
+declarative = """(@cat="smain" or (@cat="ssub" and not(%partofwhquestion%)) or (@cat="sv1" and not(%basicimperative%) and not(%ynquery%) and not(%partofwhquestion%)) )"""
+
+Tarsp_OndB = """(%Ond% and  node[%Tarsp_Basic_B%]  and count(node) = 2)"""	
+
+Tarsp_OndVC = """(%Ond% and  node[%Tarsp_Basic_VC%]  and count(node) = 2) """
+
+Tarsp_OndBVC = """(%Ond% and node[%Tarsp_Basic_B%]  and node[%Tarsp_Basic_VC%]  and count(node) = 3) """
+
+Tarsp_OndW = """(%declarative% and %Ond% and  
+                ((%Tarsp_W%  and node[%Tarsp_onlyWinVC%]) or 
+				 (%Tarsp_W% and not(node[@rel="vc"])) or 
+				 (not(node[%Tarsp_W%]) and node[%Tarsp_onlyWinVC%]) 
+				) and 
+                 (%realcomplormodnodecount% + %indexnodecount% = 1) and 
+                (@rel!="dp" or (count(descendant::node[%realwordnode%]) = count(ancestor::node[@cat="top"]/descendant::node[%realwordnode%]) ) )
+				
+				)"""
+
+Tarsp_onlyWinVC = """(@rel="vc" and node[@rel="hd" and @pt="ww"] and (%realcomplormodnodecount% + %nonsuindexnodecount% = 0) )"""
+
+
+Tarsp_OndWB = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X%  and %realcomplormodnodecount% = 2 )"""
+
+Tarsp_BasicVCW = """(node[@pt="ww" and @rel="hd"] and node[%Tarsp_Basic_VC%] and count(%fillednode%)=2)"""
+
+Tarsp_VCW_X = """(%Tarsp_BasicVCW% or (node[%nonfinvc% and %Tarsp_BasicVCW%] and count(node)=1) )""" 
+
+
+Tarsp_OndWBVC = """(%declarative% and %Ond% and  %Tarsp_W% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 3 )"""
+
+Tarsp_OndWBB = """(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_B_X_count% = 2 and %realcomplormodnodecount% = 3)"""
+
+Tarsp_VCWOndBB = """(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_B_X_count% = 2 and %Tarsp_VC_X% and %realcomplormodnodecount% = 4)"""
+
+Tarsp_OndWVCVCX = """(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_VC_X_count% = 2  and %realcomplormodnodecount% <= 4 )"""
+
+Tarsp_BWOndBB = """(%declarative% and %Ond% and %Tarsp_W% and %Tarsp_B_X_count% = 3 and %realcomplormodnodecount% = 4)"""
+
+Tarsp_OndWVC = """
+(%declarative% and %Ond% and  %Tarsp_W%  and %Tarsp_VC_X% and %realcomplormodnodecount% = 2 )
+"""
+
+Tarsp_WBVC = """(%declarative%  and  %Tarsp_W% and %Tarsp_B_X% and %Tarsp_VC_X% and %realcomplormodnodecount% = 2 )"""
+
+Tarsp_Ov4 = """(%declarative% and %realcomplormodnodecount% = 3 and not(%Tarsp_OndWBVC%) and not(%Tarsp_OndWBB%) and not(%Tarsp_OndWVCVCX%))"""
+
+Tarsp_Ov5 = """(%declarative% and %realcomplormodnodecount% = 4 and not(%Tarsp_VCWOndBB%) and not(%Tarsp_OndWVCVCX%) and not(%Tarsp_BWOndBB%) )"""
+
+Tarsp_B_X = """(node[%Tarsp_B%] or node[%nonfinvc%]/node[%Tarsp_B%])"""
+Tarsp_B_X_count = """count(node[%Tarsp_B%] | node[%nonfinvc%]/node[%Tarsp_B%]) """
+Tarsp_VC_X_count = """count(node[%Tarsp_VC%] | node[%nonfinvc%]/node[%Tarsp_VC%]) """
+Tarsp_VC_X = """(node[%Tarsp_VC%] or node[%nonfinvc%]/node[%Tarsp_VC%])"""
+Tarsp_W = """node[@rel="hd" and @pt="ww"]"""
+Tarsp_VCr1 = """node[%Tarsp_VC%] """
+Tarsp_VC = """((@rel="obj1" or (@rel="pc" and not(%Tarsp_pc_vc_exception%)) or @rel="predc" or @rel="ld" or @rel="obj2" or %Tarsp_finvc% or %Tarsp_vcvnw% or (@rel="svp" and @pt!="vz")) and not(%Tarsp_B%) )"""
+Tarsp_finvc = """(@rel="vc" and (@cat="cp" or @cat="whsub"))"""
+Tarsp_vcvnw = """(@rel="vc" and @pt="vnw")"""
+
+Tarsp_WOndX = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% <= 2)
+"""
+
+Tarsp_WOnd4 = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% = 3)
+"""
+
+Tarsp_WOnd5plus = """(%ynquery% and not(%basicimperative%) and %topcontainsquestionmark% and %Tarsp_W% and %Ond% and %realcomplormodnodecount% =4)
+"""
+
+Tarsp_whq = """((@cat="whq" and @rel="--") or (@cat="whsub") or (@cat="whrel" and @rel="--"))"""
+
+Tarsp_whqhead = """(@rel="whd" or @rel="rhd") """
+whqbody = """((@cat="sv1" or @cat="ssub") and @rel="body")"""
+Tarsp_VrXY = """(%Tarsp_whq% and
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%   and %realcomplormodnodecount% <= 1])"""
+
+Tarsp_Vr4 = """(%Tarsp_whq% and
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%  and %realcomplormodnodecount% = 2])"""
+
+Tarsp_Vr5plus = """(%Tarsp_whq% and
+        node[%Tarsp_whqhead%] and
+        node[%whqbody%  and %realcomplormodnodecount% > 2])"""
+		
+Tarsp_BBX = """((@cat="top" and
+   count(.//node[@pt!='let' and @pt!='vg'])=3 and 
+   count(.//node[@special="er_loc" or @pt="bw" or @pt="vz" or (@pt="adj" and @rel="dp" ) ])=2 and 
+   .//node[@pt="n" or (@pt="vnw" and not(@special="er_loc")) ]) or
+   ((@cat="sv1" or @cat="smain") and not(%basicimperative%) and not(%ynquery%) and not(%Ond%) and  %Tarsp_W% and count(.//node[%Tarsp_B%]) = 2 and %realcomplormodnodecount% = 2)
+   
+   )"""
+		
+Tarsp_Ov3 = """(%declarative% and 
+                not(%Tarsp_OndWVC%) and 
+				not(%Tarsp_OndWB%) and 
+				not(%Tarsp_BBX%)and 
+				not(%Tarsp_WBVC%) and 
+				not(%Tarsp_OndB%) and
+				not(%Tarsp_OndVC%) and
+				%realcomplormodnodecount% = 2) """
+
+
+onlywordinutt = """(ancestor::node[@cat="top" and count(.//node[@pt])=1] )"""
+
+Tarsp_kijkVU_old = """(@pt="ww" and @lemma="kijken" and @wvorm="pv" and @pvagr="ev" and @pvtijd="tgw" and count(ancestor::node[@cat="top"]/descendant::node[@pt!="let"])<=2)"""
+Tarsp_kijkVU_old2 = """(@pt="ww" and @lemma="kijken" and @wvorm="pv" and @pvagr="ev" and @pvtijd="tgw" and not(../node[%Tarsp_pporvc%]))"""
+Tarsp_kijkVU1 = """(@pt="ww" and @lemma="kijken" and (( @wvorm="pv" and @pvagr="ev" and @pvtijd="tgw") or @word = "kijke" or @word = "kij") and not(../node[@rel="vc" or @rel="su" or @cat="pp" or @lemma="maar" or @lemma="eens" or @lemma="dan" or @lemma="nou"])) """
+Tarsp_kijkVU2 = """(@lemma = "kijk" and (@pt="bw" or @pt="n")) """
+Tarsp_kijkVU3 = """(@pt="ww" and @lemma="kijken" and @wvorm="pv" and @pvagr="ev" and @pvtijd="tgw" and ../node[@rel="mod" and (@lemma="eens" or @lemma="hier")] and 
+                   (parent::node[count(node) = 2] or (parent::node[count(node) = 3] and ../node[@rel="obj1"]))  
+				   ) """
+Tarsp_kijkVU = """( %Tarsp_kijkVU1% or %Tarsp_kijkVU2% or %Tarsp_kijkVU3%)"""
+
+Tarsp_pporvc = """ (((@rel="pc" or @rel="mod" or @rel="ld") and @cat="pp")  or @rel="vc")"""
+
+Tarsp_coreW = """ ( @pt="ww" and (@wvorm="pv" or parent::node[@rel!="vc"] or %Tarsp_BarenonfinW%) and 
+        not(%Tarsp_kijkVU%) and
+        not((@lemma="zijn" or @lemma="worden") and 
+            parent::node[node[@rel="vc"]]) )"""
+
+Tarsp_BarenonfinW = """parent::node[@rel="vc" and  parent::node[@cat="smain" and count(node)=1]]"""
+
+Tarsp_coreHwwi = """ ( @pt="ww" and @rel="hd" and @wvorm="pv" and
+                       %Tarsp_hww% and
+                       ((parent::node[node[@cat="inf"and @rel="vc" and node[@rel="hd" and @pt="ww"]]]) or
+                        (parent::node[node[@pt="ww" and @rel="vc" and @wvorm="inf"]])
+                       )
+                     )
+"""
+
+Tarsp_Hwwi = """( %Tarsp_coreHwwi% or
+	              %robusthwwi%  
+	            )"""
+				
+
+robusthwwi = """((not(%Tarsp_coreHwwi%) and @pt="ww" and %Tarsp_hww% and @wvorm="pv" and ancestor::node[@cat="top" and descendant::node[@pt="ww" and @wvorm="inf" ]]))
+				
+			 """
+
+oldrobusthwwi = """ (@cat="top" and 
+                  .//node[@pt="ww" and %Tarsp_hww% and @wvorm="pv" and (@rel="--" or @rel="dp")] and
+				  .//node[@pt="ww" and @wvorm="inf" and (@rel="--" or @rel="dp")]
+				  )
+				  
+"""
+				
+	   
+Tarsp_hehe = """ (@lemma="hè" and @end = ancestor::node[@cat="top"]/descendant::node[@lemma="hè"]/@begin)"""
+
+simplevcw = """
+( node[@rel="hd" and @pt="ww" and not(%Tarsp_kijkVU%)] and
+  node[%Tarsp_Basic_VC%] and
+  count(node) = 2
+)
+"""
+
+vcvcw = """
+(node[@rel="vc" and @cat="inf" and %simplevcw%] and
+ count(node) = 1
+)
+"""
+
+suvcw = """
+( node[@rel="su"] and
+  node[@rel="vc" and @cat="inf" and node[@rel="su"] and node[@rel="hd" and @pt="ww"] and count(node)=2]
+  and count(node) =2
+)
+"""
+
+Tarsp_vcw = """
+( (@rel="--" or @rel="nucl")  and (count(descendant::node[%realwordnode%]) = count(ancestor::node[@cat="top"]/descendant::node[%realwordnode%]) ) and
+ ( %simplevcw% or
+   %vcvcw%    
+ )
+)
+"""
+
+realwordnode = """ ((@pt="ww" or @pt="n" or @pt="adj" or @pt="bw" or @pt="vz" or @pt="vg") and not(%Tarsp_kijkVU%))
+"""
+
+horenaux = """(@lemma="horen" and 
+               @pt="ww" and 
+			   ../node[@rel="ld" or @rel="mod"] and not(../node[@rel="obj1" or @rel="vc"]))"""
