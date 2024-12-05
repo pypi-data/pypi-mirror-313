@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "chef-recipes"
+version = "2.5.0"
+description = "Personal recipe management app."
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/xyzjonas/chef"
+keywords = ["food", "recipes", "culinary"]
+classifiers = ["Framework :: FastAPI"]
+
+packages = [
+    { include = "chef", from = "src/python" },
+    { include = "migrations", from = "src/python" }
+]
+
+include = [
+    { path = "src/js/chef/dist/*", format = ["sdist", "wheel"] },
+    { path = "src/js/chef/dist/assets/*", format = ["sdist", "wheel"] }
+]
+
+[tool.poetry.scripts]
+chef = "chef.main:app_entrypoint"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "0.*"
+uvicorn = "^0.22.0"
+loguru = "^0.7.0"
+sqlalchemy = "^2.0.16"
+alembic = "^1.11.1"
+python-multipart = "^0.0.6"
+pillow = "^10.2.0"
+pillow-avif-plugin = "^1.4.2"
+typer = {extras = ["all"], version = "^0.9.0"}
+pydantic-settings = "^2.1.0"
+httpx = "^0.27.0"
+sentry-sdk = {extras = ["fastapi"], version = "^2.12.0"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3.2"
+pytest-asyncio = "^0.23.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
