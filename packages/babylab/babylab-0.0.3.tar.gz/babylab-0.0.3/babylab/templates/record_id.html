@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<header>
+  <div class="jumbotron jumbotron-fluid">
+      <div class="container">
+        <h1 class="display-4">Participants ({{ ppt_id }})</h1>
+        <p class="lead">Showing details from participant {{ ppt_id }}.</p>
+      </div>
+    </div>
+  <hr class="my-4">
+</header>
+<body>
+  <div class="row">
+    <div class="col">
+      <div class="btn-group" role="group" aria-label="Basic example">
+        <a href="{{ url_for('appointment_new', ppt_id = ppt_id)}}"><button type="button" class="btn btn-primary" style="margin: 0.5em"><i
+              class="fa fa-plus"></i>&nbsp&nbspNew
+            appointment</button></a>
+        <a href="{{ url_for('participant_modify', ppt_id = ppt_id) }}"><button type="button" class="btn btn-warning" style="margin: 0.5em"><i
+              class="fa fa-pen"></i>&nbsp&nbspModify
+            participant</button></a>
+      </div>
+    </div>
+  </div>
+  <br>
+  <div style="text-align: left; width: 25%; float: left; margin-right: 2em;">
+    <h4>Participant information</h4>
+    <ul class="list-group">
+      <li class="list-group-item">Name: {{ data["data"]["name"] }}</li>
+      <li class="list-group-item">Added on: {{ data["data"]["date_added"]}}</li>
+      <li class="list-group-item">Age: {{ data["data"]["age_now_months"] + ":" + data["data"]["age_now_days"] }}</li>
+      <li class="list-group-item">Sex: {{ data["data"]["sex"]}}</li>
+      <li class="list-group-item">Comments: {{ data["data"]["comments"]}}</li>
+    </ul>
+  </div>
+  <div style="text-align: left; width: 25%; float: left; margin-right: 2em;">
+    <h4>Contact details</h4>
+    <ul class="list-group">
+      <li class="list-group-item">Phone: {{ data["data"]["phone1"] }}</li>
+      <li class="list-group-item">E-mail: {{ data["data"]["email1"]}}</li>
+      <li class="list-group-item">Phone (secondary): {{ data["data"]["phone2"] }}</li>
+      <li class="list-group-item">E-mail (secondary): {{ data["data"]["email2"]}}</li>
+      <li class="list-group-item">Address: {{ data["data"]["address"] }}</li>
+      <li class="list-group-item">Address: {{ data["data"]["postcode"] }}</li>
+      <li class="list-group-item">City: {{ data["data"]["City"]}}</li>
+    </ul>
+  </div>
+  <div style="text-align: left; width: 25%; float: left; margin-right: 2em; margin-bottom: 2em;">
+    <h4>Birth information</h4>
+    <ul class="list-group">
+      <li class="list-group-item">Delivery type: {{ data["data"]["birth_type"] }}</li>
+      <li class="list-group-item">Gestational weeks: {{ data["data"]["gest_weeks"]}}</li>
+      <li class="list-group-item">Weight (g): {{ data["data"]["birth_weight"] }}</li>
+      <li class="list-group-item">Head circunference (cm): {{ data["data"]["head_circumference"]}}</li>
+      <li class="list-group-item">Apgar 1: {{ data["data"]["apgar1"] }}</li>
+      <li class="list-group-item">Apgar 2: {{ data["data"]["apgar2"] }}</li>
+      <li class="list-group-item">Apgar 3: {{ data["data"]["apgar3"]}}</li>
+      <li class="list-group-item">Hearing: {{ data["data"]["hearing"]}}</li>
+      <li class="list-group-item">Diagnoses: {{ data["data"]["diagnoses"]}}</li>
+    </ul>
+  </div>
+  <br><br>
+  <div class="card" style="width: 100%; margin-top: 2em;">
+    <h5 class="card-header">Participants</h5>
+    <div class="card-body">
+      <h6 class="card-subtitle mb-2 text-muted">Click appointment IDs to see a appontment details</h6>
+      <div style="text-align: left" width="10%">
+        {{ data["table"] | safe }}
+      </div>
+    </div>
+  </div>
+</body>
+{% endblock %}
