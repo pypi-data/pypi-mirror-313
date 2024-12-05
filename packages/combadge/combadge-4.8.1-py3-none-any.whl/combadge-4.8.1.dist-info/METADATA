@@ -1,0 +1,98 @@
+Metadata-Version: 2.1
+Name: combadge
+Version: 4.8.1
+Summary: Generic API client based on Pydantic
+Home-page: https://github.com/kpn/combadge
+License: Apache-2.0
+Keywords: api,api-client,pydantic
+Author: Pavel Perestoronin
+Author-email: pavel.perestoronin@kpn.com
+Requires-Python: >=3.9.0,<4.0.0
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Topic :: Internet
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: System
+Classifier: Topic :: System :: Networking
+Classifier: Typing :: Typed
+Provides-Extra: httpx
+Provides-Extra: zeep
+Requires-Dist: get-annotations (>=0.1.2,<0.2.0) ; python_version < "3.10"
+Requires-Dist: httpx (>=0.23.3,<1.0.0) ; extra == "httpx"
+Requires-Dist: pydantic (>=2.0.0,<3.0.0)
+Requires-Dist: typing-extensions (>=4.5.0,<5.0.0)
+Requires-Dist: zeep (>=4.2.1,<5.0.0) ; extra == "zeep"
+Project-URL: Repository, https://github.com/kpn/combadge
+Description-Content-Type: text/markdown
+
+# Combadge
+
+Combadge generates a service client implementation from a user service interface
+declared by a [protocol](https://peps.python.org/pep-0544/) class or an abstract base class.
+
+[![Checks](https://img.shields.io/github/checks-status/kpn/combadge/main?logo=github)](https://github.com/kpn/combadge/actions/workflows/check.yaml)
+[![Coverage](https://codecov.io/gh/kpn/combadge/branch/main/graph/badge.svg?token=ZAqYAaTXwE)](https://codecov.io/gh/kpn/combadge)
+![Code style](https://img.shields.io/badge/code%20style-black-000000.svg)
+[![Python Version](https://img.shields.io/pypi/pyversions/combadge?logo=python&logoColor=yellow)](https://pypi.org/project/combadge/)
+[![License](https://img.shields.io/github/license/kpn/combadge)](LICENSE)
+
+## Documentation
+
+<a href="https://kpn.github.io/combadge/">
+    <img alt="Documentation" height="30em" src="https://img.shields.io/github/actions/workflow/status/kpn/combadge/docs.yml?label=documentation&logo=github">
+</a>
+
+## Sneak peek
+
+```python title="quickstart_httpx.py"
+from httpx import Client
+from pydantic import BaseModel, Field
+from typing_extensions import Annotated, Protocol
+
+from combadge.support.http.markers import QueryParam, http_method, path
+from combadge.support.httpx.backends.sync import HttpxBackend
+
+
+# 1️⃣ Declare the response models:
+class CurrentCondition(BaseModel):
+    humidity: int
+    temperature: Annotated[float, Field(alias="temp_C")]
+
+
+class Weather(BaseModel):
+    current: Annotated[list[CurrentCondition], Field(alias="current_condition")]
+
+
+# 2️⃣ Declare the protocol:
+class SupportsWttrIn(Protocol):
+    @http_method("GET")
+    @path("/{in_}")
+    def get_weather(
+        self,
+        *,
+        in_: str,
+        format_: Annotated[str, QueryParam("format")] = "j1",
+    ) -> Weather:
+        raise NotImplementedError
+
+
+# 3️⃣ Bind the service:
+with HttpxBackend(Client(base_url="https://wttr.in"))[SupportsWttrIn] as service:
+    # 🚀 Call the service:
+    response = service.get_weather(in_="amsterdam")
+
+assert response.current[0].humidity == 71
+assert response.current[0].temperature == 8.0
+```
+
