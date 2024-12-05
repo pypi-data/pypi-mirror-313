@@ -1,0 +1,162 @@
+[project]
+name = "pytest-elasticsearch"
+version = "4.1.1"
+description = "Elasticsearch fixtures and fixture factories for Pytest."
+readme = "README.rst"
+keywords = ["tests", "pytest", "fixture", "elasticsearch"]
+license = {file = "LICENSE"}
+authors = [
+    {name = "Grzegorz Śliwiński", email = "fizyk+pypi@fizyk.dev"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+    "Framework :: Pytest",
+]
+dependencies = [
+    "pytest >= 7.0",
+    "port-for >= 0.7.1",
+    "mirakuru",
+    "elasticsearch >= 7",
+]
+requires-python = ">= 3.9"
+
+[project.urls]
+"Source" = "https://github.com/ClearcodeHQ/pytest-elasticsearch"
+"Bug Tracker" = "https://github.com/ClearcodeHQ/pytest-elasticsearch/issues"
+"Changelog" = "https://github.com/ClearcodeHQ/pytest-elasticsearch/blob/v4.1.1/CHANGES.rst"
+
+[project.entry-points."pytest11"]
+pytest_elasticsearch = "pytest_elasticsearch.plugin"
+
+[build-system]
+requires = ["setuptools >= 61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+zip-safe = true
+
+[tool.setuptools.packages.find]
+include = ["pytest_elasticsearch*"]
+exclude = ["tests*"]
+namespaces = false
+
+[tool.pytest.ini_options]
+xfail_strict=true
+addopts = "--max-worker-restart=0 --showlocals --verbose --cov"
+testpaths = "tests"
+
+[tool.black]
+line-length = 100
+target-version = ['py39']
+include = '.*\.pyi?$'
+
+[tool.ruff]
+# Decrease the maximum line length to 79 characters.
+line-length = 100
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort
+    "D",   # pydocstyle
+]
+
+[tool.towncrier]
+directory = "newsfragments"
+single_file=true
+filename="CHANGES.rst"
+issue_format="`#{issue} <https://github.com/ClearcodeHQ/pytest-elasticsearch/issues/{issue}>`__"
+
+[[tool.towncrier.type]]
+directory = "break"
+name = "Breaking changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "depr"
+name = "Deprecations"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "feature"
+name = "Features"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Bugfixes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Miscellaneus"
+showcontent = false
+
+[tool.tbump.version]
+current = "4.1.1"
+
+# Example of a semver regexp.
+# Make sure this matches current_version before
+# using tbump
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  (\-
+    (?P<extra>.+)
+  )?
+  '''
+
+[tool.tbump.git]
+message_template = "Release {new_version}"
+tag_template = "v{new_version}"
+
+[[tool.tbump.field]]
+# the name of the field
+name = "extra"
+# the default value to use, if there is no match
+default = ""
+# For each file to patch, add a [[file]] config
+# section containing the path of the file, relative to the
+# tbump.toml location.
+
+[[tool.tbump.file]]
+src = "pytest_elasticsearch/__init__.py"
+
+[[tool.tbump.file]]
+src = "pyproject.toml"
+search = 'version = "{current_version}"'
+
+[[tool.tbump.file]]
+src = "pyproject.toml"
+search = '"Changelog" = "https://github.com/ClearcodeHQ/pytest-elasticsearch/blob/v{current_version}/CHANGES.rst"'
+
+# You can specify a list of commands to
+# run after the files have been patched
+# and before the git commit is made
+
+[[tool.tbump.before_commit]]
+name = "Build changelog"
+cmd = "pipenv run towncrier build --version {new_version} --yes"
+
+# Or run some commands after the git tag and the branch
+# have been pushed:
+#  [[tool.tbump.after_push]]
+#  name = "publish"
+#  cmd = "./publish.sh"
