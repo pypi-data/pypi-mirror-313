@@ -1,0 +1,103 @@
+Metadata-Version: 2.3
+Name: solop
+Version: 1.0.0
+Summary: A command line tool for generating and maintaining project development tasks
+Project-URL: Homepage, https://github.com/niallantony/SoloP
+Author-email: Niall Craven <craven.niall@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2024 Niall Craven
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Keywords: backlog,markdown,progress,project management,task,to do
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Topic :: Documentation
+Classifier: Topic :: File Formats :: JSON
+Classifier: Topic :: Software Development :: Documentation
+Requires-Python: >=3.8
+Requires-Dist: iniconfig
+Requires-Dist: packaging
+Requires-Dist: pluggy
+Requires-Dist: pytest
+Description-Content-Type: text/markdown
+
+# SoloP
+
+SoloP will be a tool that can be used to manage a Solo Developers tasks when working on small projects. Users can collect tasks into categories like "Done", "In Progress" or "To Do" and SoloP will generate a markdown file laying them out in a user-friendly way.
+ 
+Current Version: Version 1.0.0
+
+## Example
+
+Using SoloP will help you automatically manage a `SOLOP.md` file:
+
+SOLOP.md:
+```md
+# PROJECT NAME
+
+## BACKLOG
+
+- [1]: Task to do
+
+## IN PROGRESS
+
+- [2]: Task currently in progress
+
+## DONE
+
+- [3]: Task completed
+```
+
+## Using SoloP
+
+As of Version 1 *SoloP* is only accessible by the CLI. Tasks can be added, deleted and managed by executing `solop` from the command line.
+
+### Actions
+
+Calling `solop` with no flags will update the `SOLOP.md` file with any unsaved changes.
+
+Note: Including the `--xmake` flag in any action will not publish the action to the `SOLOP.md` file, but the action will be visible next time the file is made.
+
+| Action | Flag | Description |
+| -------| ---- | ----------- |
+| Add Task | `--add [Description]` | Adds a task to the Backlog with [Description]. Tasks are added with a `priority` of 1 by default. |
+| Delete Task | `--delete [Task ID(s)]` | Deletes the specified tasks |
+| Change Status | `--status [Status] [Task ID(s)]` | Moves the specified tasks into the [Status] section |
+| Nest Task | `--nest [Child] [Parent]` | Nests [Child] task under the [Parent] task. Note: If the tasks are of different statuses, they will appear un-nested in their respective sections. Nesting will occur again when both tasks are re-united. |
+| Un-nest Task | `--xchild [Child]` | Un-nests the [Child] task from all parents. Include the `--inherit` flag to move all [Child]'s children to any parents. When not included all children tasks follow [Child] |
+| Change Priority | `--priority [Priority] [Task ID(s)]` | Changes the priority of the given tasks. All tasks are sorted in their respective sections/nests by priority. |
+
+## Future Features
+
+Future features will include: 
+
+- Wrapping tasks up into versions
+- Customisation options for sorting/visibility and more
+- An interactive CLI for easier use
+- Integration with git commits, to automatically update the file when features are committed to git
+- Warnings and recommendations for too many bottlenecks, next tasks, etc...
+- Pulling from SOLOP.md files for sharing and direct manipulation
+- Development metrics to measure tasks done per session, etc...
+- Managing of dependencies among tasks, automatically organising which tasks are more critical
+- Automatic creation of a Change Log from git actions
+- Milestones, feature wishlists and progress markers
