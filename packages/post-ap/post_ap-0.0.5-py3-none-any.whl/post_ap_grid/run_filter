@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+#--------------------------------------
+set_vars()
+{
+    echo "Turning off multithreading"
+    export MKL_NUM_THREADS=1
+    export NUMEXPR_NUM_THREADS=1
+    export OMP_NUM_THREADS=1
+    export OPENBLAS_NUM_THREADS=1
+}
+#--------------------------------------
+rename_paths()
+{
+    ENVNAME=dcheck
+
+    echo "Renaming paths, searching for $VENV/$ENVNAME, in:"
+    ls $PWD/$ENVNAME
+
+    for FILEPATH in $(grep --files-with-matches --binary-files=without-match -r $VENV/$ENVNAME $PWD/$ENVNAME);do
+        echo ""
+        echo $VENV
+        echo "--->      in  "  $FILEPATH
+        echo $PWD
+        echo ""
+        sed -i "s|$VENV|$PWD|g" $FILEPATH
+    done
+    echo "Renamed paths"
+}
+#--------------------------------------
+DSET=$1
+CONF=$2
+NJOB=$3
+IJOB=$4
+VENV=$5
+
+set_vars
+rename_paths
+
+dcheck/run bash -c "filter_ntuples -d $DSET -c $CONF -n $NJOB -i $IJOB" -l 10
+
+echo "Sandbox: "
+ls
