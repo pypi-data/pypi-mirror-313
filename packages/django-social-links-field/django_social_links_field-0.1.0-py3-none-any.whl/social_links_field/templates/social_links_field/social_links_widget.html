@@ -1,0 +1,78 @@
+<style>
+    .social-links-widget button{
+        margin-top: 0.25rem;
+        margin-bottom: 0.25rem;
+        padding: 0.25rem 0.25rem;
+        background: var(--button-bg);
+        color: var(--button-fg);
+        border: none;
+        border-radius: 4px;
+        font-family: var(--font-family-primary);
+        font-weight: normal;
+        font-size: 0.8125rem;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+</style>
+<div id="{{ name }}_container" class="social-links-widget">
+    <div id="{{ name }}_links">
+        {% for link in links %}
+        <div class="social-link-row">
+            <select name="{{ name }}_type" required>
+                {% for type_value, type_label in social_media_types %}
+                <option value="{{ type_value }}" 
+                    {% if type_value == link.type %}selected{% endif %}>
+                    {{ type_label }}
+                </option>
+                {% endfor %}
+            </select>
+            <input type="text" name="{{ name }}_username" 
+                   value="{{ link.username }}" 
+                   placeholder="Username" required>
+            <input type="text" name="{{ name }}_label" 
+                   value="{{ link.label }}" 
+                   placeholder="Label (optional)">
+            <button type="button" class="remove-link">Remove</button>
+        </div>
+        {% endfor %}
+    </div>
+    <button type="button" id="{{ name }}_add_link" class="button">Add Social Link</button>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('{{ name }}_container');
+        const linksContainer = document.getElementById('{{ name }}_links');
+        const addButton = document.getElementById('{{ name }}_add_link');
+
+        addButton.addEventListener('click', function() {
+            const newRow = document.createElement('div');
+            newRow.className = 'social-link-row';
+            newRow.innerHTML = `
+                <select name="{{ name }}_type" required>
+                    {% for type_value, type_label in social_media_types %}
+                    <option value="{{ type_value }}">{{ type_label }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="{{ name }}_username" placeholder="Username" required>
+                <input type="text" name="{{ name }}_label" placeholder="Label (optional)">
+                <button type="button" class="remove-link">Remove</button>
+            `;
+            linksContainer.appendChild(newRow);
+
+            // Add remove functionality to new row
+            newRow.querySelector('.remove-link').addEventListener('click', function(e) {
+                e.stopPropagation();
+                linksContainer.removeChild(newRow);
+            });
+        });
+
+        // Delegate remove event for existing rows
+        linksContainer.addEventListener('click', function(event) {
+            if (event.target.classList.contains('remove-link')) {
+                event.stopPropagation();
+                linksContainer.removeChild(event.target.closest('.social-link-row'));
+            }
+        });
+    });
+    </script>
+</div>
