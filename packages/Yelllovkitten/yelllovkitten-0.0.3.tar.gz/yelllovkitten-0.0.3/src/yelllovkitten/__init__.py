@@ -1,0 +1,1 @@
+from yelllovkitten import text
