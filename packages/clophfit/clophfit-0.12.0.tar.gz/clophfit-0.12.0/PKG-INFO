@@ -1,0 +1,196 @@
+Metadata-Version: 2.3
+Name: clophfit
+Version: 0.12.0
+Summary: Cli for fitting macromolecule pH titration or binding assays data e.g. fluorescence spectra.
+Project-URL: Bug Tracker, https://github.com/darosio/ClopHfit/issues
+Project-URL: Changelog, https://github.com/darosio/ClopHfit/blob/main/CHANGELOG.md
+Project-URL: Documentation, https://clophfit.readthedocs.io
+Project-URL: Github releases, https://github.com/darosio/ClopHfit/releases
+Project-URL: Homepage, https://github.com/darosio/ClopHfit
+Author-email: daniele arosio <daniele.arosio@cnr.it>
+License: BSD-3-Clause
+Keywords: ClopHensor,data fitting,macromolecule binding,pH,svd
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Unix Shell
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.10
+Requires-Dist: arviz<=0.20.0
+Requires-Dist: click<=8.1.7
+Requires-Dist: corner<=2.2.3
+Requires-Dist: emcee<=3.1.6
+Requires-Dist: lmfit<=1.3.2
+Requires-Dist: matplotlib<=3.9.3
+Requires-Dist: numpy<=2.1.3
+Requires-Dist: openpyxl<=3.1.5
+Requires-Dist: pandas<=2.2.3
+Requires-Dist: pymc<=5.18.2
+Requires-Dist: scipy<=1.14.1
+Requires-Dist: seaborn<=0.13.2
+Requires-Dist: sympy<=1.13.3
+Requires-Dist: tqdm<=4.67.1
+Requires-Dist: xlrd<=2.0.1
+Provides-Extra: dev
+Requires-Dist: commitizen<=4.0.0; extra == 'dev'
+Requires-Dist: ipykernel; extra == 'dev'
+Requires-Dist: jupyter; extra == 'dev'
+Requires-Dist: jupyterlab; extra == 'dev'
+Requires-Dist: pre-commit<=4.0.1; extra == 'dev'
+Requires-Dist: pylsp-mypy; extra == 'dev'
+Requires-Dist: ruff-lsp; extra == 'dev'
+Requires-Dist: ruff<=0.8.1; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: autodocsumm<=0.2.14; extra == 'docs'
+Requires-Dist: graphviz; extra == 'docs'
+Requires-Dist: nbsphinx<=0.9.5; extra == 'docs'
+Requires-Dist: pydata-sphinx-theme<=0.16.0; extra == 'docs'
+Requires-Dist: sphinx-autodoc-typehints<=2.5.0; extra == 'docs'
+Requires-Dist: sphinx-click<=6.0.0; extra == 'docs'
+Requires-Dist: sphinx<=8.1.3; extra == 'docs'
+Requires-Dist: sphinxcontrib-plantuml<=0.30; extra == 'docs'
+Provides-Extra: tests
+Requires-Dist: coverage[toml]<=7.6.8; extra == 'tests'
+Requires-Dist: mypy<=1.13.0; extra == 'tests'
+Requires-Dist: pandas-stubs<=2.2.3.241126; extra == 'tests'
+Requires-Dist: pygments<=2.18.0; extra == 'tests'
+Requires-Dist: pytest<=8.3.4; extra == 'tests'
+Requires-Dist: types-click<=7.1.8; extra == 'tests'
+Requires-Dist: types-setuptools<=75.6.0.20241126; extra == 'tests'
+Requires-Dist: xdoctest<=1.2.0; extra == 'tests'
+Description-Content-Type: text/markdown
+
+# ClopHfit
+
+[![PyPI](https://img.shields.io/pypi/v/ClopHfit.svg)](https://pypi.org/project/ClopHfit/)
+[![CI](https://github.com/darosio/ClopHfit/actions/workflows/ci.yml/badge.svg)](https://github.com/darosio/ClopHfit/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/darosio/ClopHfit/branch/main/graph/badge.svg?token=OU6F9VFUQ6)](https://codecov.io/gh/darosio/ClopHfit)
+[![GitHub Pages](https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=github)](https://darosio.github.io/ClopHfit/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6354111.svg)](https://doi.org/10.5281/zenodo.6354111)
+
+This package provides a command line interface for fitting pH titration or
+binding assay data for macromolecules, such as fluorescence spectra. With this
+tool, users can easily analyze their data and obtain accurate fitting results.
+
+- Version: "0.12.0"
+
+## Installation
+
+You can get the library directly from [PyPI](https://pypi.org/project/ClopHfit/)
+using `pip`:
+
+    pip install clophfit
+
+Alternatively, you can use [pipx](https://pypa.github.io/pipx/) to install it in
+an isolated environment:
+
+    pipx install clophfit
+
+To enable auto completion for the `clop` command, follow these steps:
+
+1.  Generate the completion script by running the following command:
+
+        _CLOP_COMPLETE=bash_source clop > ~/.local/bin/clop-complete.bash
+
+2.  Source the generated completion script to enable auto completion:
+
+        source ~/.local/bin/clop-complete.bash
+
+## Usage
+
+You can check out the documentation on <https://darosio.github.io/ClopHfit> for
+up to date usage information and examples.
+
+### CLI
+
+ClopHfit provides several command line interface tools for fitting and
+processing data.
+
+#### prtecan
+
+Extract and fit titrations from a list of Tecan files collected at various pH or
+chloride concentrations:
+
+    ppr -o prova2 --is-ph tecan list.pH --scheme ../scheme.txt --norm
+        --dil additions.pH --Klim 6.8,8.4
+
+Use the --no-weight option to reproduce an older pr.tecan version.
+
+#### eq1
+
+Predict chloride dissociation constant K_d at a given pH:
+
+    clop eq1 --help
+
+#### prenspire
+
+Parser for EnSpire (PerkinElmer) file:
+
+    ppr -o folder enspire file.csv
+
+Destination folder (default: "./Meas-${version}") will contain for each Measurement:
+
+- a table (csv) in wide tabular form e.g. <lambda, A01, ..., H12>;
+- corresponding graphical (png) representation of spectra from all wells.
+
+By adding a note.csv file:
+
+    ppr -o folder enspire file.csv note.csv
+
+destination folder (default: "./Meas-${version}") will also contain:
+
+- a pdf for each titration and label;
+- a pdf for global (multiband) analysis pdfalong with global and all_SVD;
+- a pdf for SVD analysis of all concatenated spectra.
+
+#### note_to_csv
+
+    note_to_csv -t 37.0 -l "B E F" -o 37 NTT-G03-Cl_note
+    note_to_csv -t 20.0 -l "A C D" -o 20 NTT-G03-Cl_note
+    cat 20 37 > G03_Cl_note.csv
+
+### Python
+
+ClopHfit can be imported and used as a Python package. The following modules are
+available:
+
+    clophfit.prenspire - parser for EnSpire (PerkinElmer) files
+    clophfit.prtecan - perform fitting of pH titration or binding assay data
+    clophfit.binding - perform fitting of macromolecule binding assay data
+
+To use clophfit in your python:
+
+    from clophfit import prenspire, prtecan, binding
+
+## Features
+
+- Plate Reader data Parser.
+- Perform non-linear least square fitting.
+- Extract and fit pH and chloride titrations of GFP libraries.
+  - For 2 labelblocks (e.g. 400, 485 nm) fit data separately and globally.
+  - Estimate uncertainty using bootstrap.
+  - Subtract buffer for each titration point.
+  - Report controls e.g. S202N, E2 and V224Q.
+  - Correct for dilution of titration additions.
+  - Plot data when fitting fails and save txt file anyway.
+
+## License
+
+We use a shared copyright model that enables all contributors to maintain the
+copyright on their contributions.
+
+All code is licensed under the terms of the [revised BSD license](LICENSE.txt).
+
+## Contributing
+
+If you are interested in contributing to the project, please read our
+[contributing](https://darosio.github.io/ClopHfit/references/contributing.html)
+and
+[development environment](https://darosio.github.io/ClopHfit/references/development.html)
+guides, which outline the guidelines and conventions that we follow for
+contributing code, documentation, and other resources.
