@@ -1,0 +1,623 @@
+[{
+    "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd", 
+    "@type": "MacroTaskConfig", 
+    "UID": "0d1f35a002984549a7881b1a83ea537c", 
+    "activate_recurrency": true, 
+    "additional_delay": -20, 
+    "additional_delay_type": "absolute", 
+    "allow_discussion": false, 
+    "calculation_delay": [
+        "urban.schedule.delay.annonced_delay"
+    ], 
+    "created": "2016-08-22T03:44:52+00:00", 
+    "creation_conditions": [
+        {
+            "condition": "urban.schedule.condition.need_FD_opinion", 
+            "display_status": false, 
+            "operator": "OR"
+        }
+    ], 
+    "creation_state": [
+        "procedure_validated"
+    ], 
+    "default_assigned_group": "administrative_editors", 
+    "default_assigned_user": "to_assign", 
+    "description": "", 
+    "enabled": true, 
+    "end_conditions": [
+        {
+            "condition": "liege.urban.schedule.FD_opinion_asked", 
+            "display_status": true
+        }, 
+        {
+            "condition": "liege.urban.schedule.FD_opinion_received", 
+            "display_status": true, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "urban.schedule.licence_ended", 
+            "display_status": true
+        }
+    ], 
+    "ending_states": [], 
+    "freeze_conditions": null, 
+    "freeze_states": [], 
+    "id": "avis-fd", 
+    "is_folderish": true, 
+    "layout": "view", 
+    "marker_interfaces": [
+        "Products.urban.schedule.interfaces.ITaskWithSuspensionDelay"
+    ], 
+    "modified": "2022-10-14T11:38:37+00:00", 
+    "parent": {
+        "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule", 
+        "@type": "ScheduleConfig", 
+        "UID": "2cddcee8524d4a72ae896db6aed30388", 
+        "description": "", 
+        "review_state": "private", 
+        "title": "Configuration d'\u00e9ch\u00e9ances Permis d'urbanisme (CODT)"
+    }, 
+    "recurrence_conditions": [
+        {
+            "condition": "urban.schedule.condition.acknowledgment_done", 
+            "display_status": true
+        }, 
+        {
+            "condition": "urban.schedule.condition.need_FD_opinion", 
+            "display_status": false, 
+            "operator": "OR"
+        }
+    ], 
+    "recurrence_states": [
+        "procedure_choosen"
+    ], 
+    "review_state": "private", 
+    "round_to_day": "0", 
+    "start_conditions": null, 
+    "start_date": "urban.schedule.start_date.acknowledgment_date", 
+    "starting_states": [
+        "procedure_validated"
+    ], 
+    "thaw_conditions": null, 
+    "thaw_states": [], 
+    "title": "Avis du FD", 
+    "version": "current", 
+    "warning_delay": null, 
+    "workflow_history": {
+        "simple_publication_workflow": [
+            {
+                "action": null, 
+                "actor": "admin", 
+                "comments": "", 
+                "review_state": "private", 
+                "time": "2017-06-01T16:09:17+00:00"
+            }
+        ]
+    }
+},{
+    "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/envoyer-avis-FD", 
+    "@type": "TaskConfig", 
+    "UID": "b811baeaeb184969b5815ebd757c234e", 
+    "activate_recurrency": false, 
+    "additional_delay": 0, 
+    "additional_delay_type": "absolute", 
+    "allow_discussion": false, 
+    "calculation_delay": [
+        "urban.schedule.delay.annonced_delay"
+    ], 
+    "created": "2016-08-22T03:44:53+00:00", 
+    "creation_conditions": [
+        {
+            "condition": "urban.schedule.condition.need_FD_opinion", 
+            "display_status": true
+        }
+    ], 
+    "creation_state": [
+        "procedure_validated"
+    ], 
+    "default_assigned_group": "administrative_editors", 
+    "default_assigned_user": "liege.urban.schedule.assign_task_owner", 
+    "description": "", 
+    "enabled": true, 
+    "end_conditions": [
+        {
+            "condition": "liege.urban.schedule.FD_opinion_asked", 
+            "display_status": false, 
+            "operator": "OR"
+        }
+    ], 
+    "ending_states": [
+        "FD_opinion"
+    ], 
+    "freeze_conditions": null, 
+    "freeze_states": [], 
+    "id": "envoyer-avis-FD", 
+    "is_folderish": true, 
+    "layout": "view", 
+    "marker_interfaces": [
+        "Products.urban.schedule.interfaces.ITaskWithSuspensionDelay"
+    ], 
+    "modified": "2024-03-26T12:12:59+00:00", 
+    "parent": {
+        "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd", 
+        "@type": "MacroTaskConfig", 
+        "UID": "0d1f35a002984549a7881b1a83ea537c", 
+        "description": "", 
+        "review_state": "private", 
+        "title": "Avis du FD"
+    }, 
+    "recurrence_conditions": null, 
+    "recurrence_states": [], 
+    "review_state": "private", 
+    "round_to_day": "0", 
+    "start_conditions": [
+        {
+            "condition": "liege.urban.schedule.college_done", 
+            "display_status": true
+        }
+    ], 
+    "start_date": "urban.schedule.start_date.opinion_fd_limit_fd", 
+    "starting_states": [
+        "FD_opinion", 
+        "decision_in_progress", 
+        "procedure_validated"
+    ], 
+    "thaw_conditions": null, 
+    "thaw_states": [], 
+    "title": "Envoyer la demande d'avis", 
+    "version": "current", 
+    "warning_delay": null, 
+    "workflow_history": {
+        "simple_publication_workflow": [
+            {
+                "action": null, 
+                "actor": "admin", 
+                "comments": "", 
+                "review_state": "private", 
+                "time": "2017-06-01T16:09:17+00:00"
+            }
+        ]
+    }
+},{
+    "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage", 
+    "@type": "MacroTaskConfig", 
+    "UID": "ced5b472fae742d5bf5bb9a2ca0b4bfe", 
+    "activate_recurrency": true, 
+    "additional_delay": -60, 
+    "additional_delay_type": "absolute", 
+    "allow_discussion": false, 
+    "calculation_delay": [
+        "urban.schedule.delay.annonced_delay"
+    ], 
+    "created": "2016-08-22T03:44:52+00:00", 
+    "creation_conditions": [
+        {
+            "condition": "urban.schedule.condition.need_FD_opinion", 
+            "display_status": true
+        }
+    ], 
+    "creation_state": [
+        "procedure_validated"
+    ], 
+    "default_assigned_group": "administrative_editors", 
+    "default_assigned_user": "liege.urban.schedule.assign_task_owner", 
+    "description": "", 
+    "enabled": true, 
+    "end_conditions": [
+        {
+            "condition": "liege.urban.schedule.licence_ended", 
+            "display_status": false, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "liege.urban.schedule.FD_opinion_received", 
+            "display_status": false, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "liege.urban.schedule.college_event_closed", 
+            "display_status": true, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "urban.schedule.condition.refused", 
+            "display_status": true
+        }
+    ], 
+    "ending_states": [
+        "accepted", 
+        "FD_opinion", 
+        "refused"
+    ], 
+    "freeze_conditions": null, 
+    "freeze_states": [], 
+    "id": "premier-passage", 
+    "is_folderish": true, 
+    "layout": "view", 
+    "marker_interfaces": [
+        "Products.urban.schedule.interfaces.ITaskWithSuspensionDelay"
+    ], 
+    "modified": "2022-02-28T14:56:48+00:00", 
+    "parent": {
+        "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd", 
+        "@type": "MacroTaskConfig", 
+        "UID": "0d1f35a002984549a7881b1a83ea537c", 
+        "description": "", 
+        "review_state": "private", 
+        "title": "Avis du FD"
+    }, 
+    "recurrence_conditions": [
+        {
+            "condition": "urban.schedule.condition.acknowledgment_done", 
+            "display_status": true
+        }
+    ], 
+    "recurrence_states": [
+        "procedure_validated"
+    ], 
+    "review_state": "private", 
+    "round_to_day": "-5", 
+    "start_conditions": null, 
+    "start_date": "urban.schedule.start_date.acknowledgment_date", 
+    "starting_states": [
+        "procedure_validated"
+    ], 
+    "thaw_conditions": null, 
+    "thaw_states": [], 
+    "title": "Premier passage coll\u00e8ge", 
+    "version": "current", 
+    "warning_delay": null, 
+    "workflow_history": {
+        "simple_publication_workflow": [
+            {
+                "action": null, 
+                "actor": "admin", 
+                "comments": "", 
+                "review_state": "private", 
+                "time": "2017-06-01T16:09:17+00:00"
+            }
+        ]
+    }
+},{
+    "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage/college-en-cours", 
+    "@type": "TaskConfig", 
+    "UID": "fe17e80b8c664c53bdbf9444ec1b340b", 
+    "activate_recurrency": false, 
+    "additional_delay": -55, 
+    "additional_delay_type": "absolute", 
+    "allow_discussion": false, 
+    "calculation_delay": [
+        "urban.schedule.delay.annonced_delay"
+    ], 
+    "created": "2017-02-08T23:14:31+00:00", 
+    "creation_conditions": null, 
+    "creation_state": [
+        "FD_opinion"
+    ], 
+    "default_assigned_group": "administrative_editors", 
+    "default_assigned_user": "liege.urban.schedule.assign_task_owner", 
+    "description": "", 
+    "enabled": true, 
+    "end_conditions": [
+        {
+            "condition": "liege.urban.schedule.licence_ended", 
+            "display_status": false, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "liege.urban.schedule.college_done", 
+            "display_status": false
+        }
+    ], 
+    "ending_states": [
+        "FD_opinion"
+    ], 
+    "freeze_conditions": null, 
+    "freeze_states": [], 
+    "id": "college-en-cours", 
+    "is_folderish": true, 
+    "layout": "view", 
+    "marker_interfaces": [
+        "Products.urban.schedule.interfaces.ITaskToCheckDaily", 
+        "Products.urban.schedule.interfaces.ITaskWithSuspensionDelay"
+    ], 
+    "modified": "2020-02-11T12:34:48+00:00", 
+    "parent": {
+        "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage", 
+        "@type": "MacroTaskConfig", 
+        "UID": "ced5b472fae742d5bf5bb9a2ca0b4bfe", 
+        "description": "", 
+        "review_state": "private", 
+        "title": "Premier passage coll\u00e8ge"
+    }, 
+    "recurrence_conditions": null, 
+    "recurrence_states": [], 
+    "review_state": "private", 
+    "round_to_day": "5", 
+    "start_conditions": [
+        {
+            "condition": "liege.urban.schedule.project_sent_to_college", 
+            "display_status": true
+        }
+    ], 
+    "start_date": "urban.schedule.start_date.acknowledgment_date", 
+    "starting_states": [
+        "FD_opinion"
+    ], 
+    "thaw_conditions": null, 
+    "thaw_states": [], 
+    "title": "Coll\u00e8ge en cours", 
+    "version": "current", 
+    "warning_delay": null, 
+    "workflow_history": {
+        "simple_publication_workflow": [
+            {
+                "action": null, 
+                "actor": "admin", 
+                "comments": "", 
+                "review_state": "private", 
+                "time": "2017-06-01T16:09:16+00:00"
+            }
+        ]
+    }
+},{
+    "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage/college-termine", 
+    "@type": "TaskConfig", 
+    "UID": "438208491a4446d4adc9fa0dabf73c01", 
+    "activate_recurrency": false, 
+    "additional_delay": -55, 
+    "additional_delay_type": "absolute", 
+    "allow_discussion": false, 
+    "calculation_delay": [
+        "urban.schedule.delay.annonced_delay"
+    ], 
+    "created": "2017-02-08T23:17:19+00:00", 
+    "creation_conditions": null, 
+    "creation_state": [
+        "FD_opinion"
+    ], 
+    "default_assigned_group": "administrative_editors", 
+    "default_assigned_user": "liege.urban.schedule.assign_task_owner", 
+    "description": "", 
+    "enabled": true, 
+    "end_conditions": [
+        {
+            "condition": "liege.urban.schedule.licence_ended", 
+            "display_status": false, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "liege.urban.schedule.college_event_closed", 
+            "display_status": true
+        }
+    ], 
+    "ending_states": [
+        "FD_opinion"
+    ], 
+    "freeze_conditions": null, 
+    "freeze_states": null, 
+    "id": "college-termine", 
+    "is_folderish": true, 
+    "layout": "view", 
+    "marker_interfaces": [
+        "Products.urban.schedule.interfaces.ITaskWithSuspensionDelay"
+    ], 
+    "modified": "2017-11-28T14:12:03+00:00", 
+    "parent": {
+        "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage", 
+        "@type": "MacroTaskConfig", 
+        "UID": "ced5b472fae742d5bf5bb9a2ca0b4bfe", 
+        "description": "", 
+        "review_state": "private", 
+        "title": "Premier passage coll\u00e8ge"
+    }, 
+    "recurrence_conditions": null, 
+    "recurrence_states": [], 
+    "review_state": "private", 
+    "round_to_day": "0", 
+    "start_conditions": [
+        {
+            "condition": "liege.urban.schedule.college_done", 
+            "display_status": true
+        }
+    ], 
+    "start_date": "urban.schedule.start_date.acknowledgment_date", 
+    "starting_states": [
+        "FD_opinion"
+    ], 
+    "thaw_conditions": null, 
+    "thaw_states": null, 
+    "title": "Coll\u00e8ge termin\u00e9", 
+    "version": "current", 
+    "warning_delay": null, 
+    "workflow_history": {
+        "simple_publication_workflow": [
+            {
+                "action": null, 
+                "actor": "admin", 
+                "comments": "", 
+                "review_state": "private", 
+                "time": "2017-06-01T16:09:16+00:00"
+            }
+        ]
+    }
+},{
+    "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage/rediger-projet-avis", 
+    "@type": "TaskConfig", 
+    "UID": "3075b650e21c4152babaad7c5a5b733d", 
+    "activate_recurrency": false, 
+    "additional_delay": -70, 
+    "additional_delay_type": "absolute", 
+    "allow_discussion": false, 
+    "calculation_delay": [
+        "urban.schedule.delay.annonced_delay"
+    ], 
+    "created": "2016-08-22T03:44:52+00:00", 
+    "creation_conditions": [
+        {
+            "condition": "urban.schedule.condition.need_FD_opinion", 
+            "display_status": true
+        }
+    ], 
+    "creation_state": [
+        "procedure_validated"
+    ], 
+    "default_assigned_group": "administrative_editors", 
+    "default_assigned_user": "to_assign", 
+    "description": "", 
+    "enabled": true, 
+    "end_conditions": [
+        {
+            "condition": "liege.urban.schedule.licence_ended", 
+            "display_status": false, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "liege.urban.schedule.FD_opinion_asked", 
+            "display_status": false, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "liege.urban.schedule.college_project_writen", 
+            "display_status": false
+        }
+    ], 
+    "ending_states": [
+        "FD_opinion", 
+        "authorized", 
+        "refused"
+    ], 
+    "freeze_conditions": null, 
+    "freeze_states": null, 
+    "id": "rediger-projet-avis", 
+    "is_folderish": true, 
+    "layout": "view", 
+    "marker_interfaces": [
+        "Products.urban.schedule.interfaces.ITaskWithSuspensionDelay"
+    ], 
+    "modified": "2017-11-28T14:10:12+00:00", 
+    "parent": {
+        "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage", 
+        "@type": "MacroTaskConfig", 
+        "UID": "ced5b472fae742d5bf5bb9a2ca0b4bfe", 
+        "description": "", 
+        "review_state": "private", 
+        "title": "Premier passage coll\u00e8ge"
+    }, 
+    "recurrence_conditions": null, 
+    "recurrence_states": [], 
+    "review_state": "private", 
+    "round_to_day": "-4", 
+    "start_conditions": null, 
+    "start_date": "urban.schedule.start_date.acknowledgment_date", 
+    "starting_states": [
+        "procedure_validated"
+    ], 
+    "thaw_conditions": null, 
+    "thaw_states": null, 
+    "title": "R\u00e9diger le projet d'avis", 
+    "version": "current", 
+    "warning_delay": null, 
+    "workflow_history": {
+        "simple_publication_workflow": [
+            {
+                "action": null, 
+                "actor": "admin", 
+                "comments": "", 
+                "review_state": "private", 
+                "time": "2017-06-01T16:09:16+00:00"
+            }
+        ]
+    }
+},{
+    "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage/valider-projet-avis", 
+    "@type": "TaskConfig", 
+    "UID": "9940be24579b4ef69cf4777a832552f1", 
+    "activate_recurrency": false, 
+    "additional_delay": -70, 
+    "additional_delay_type": "absolute", 
+    "allow_discussion": false, 
+    "calculation_delay": [
+        "urban.schedule.delay.annonced_delay"
+    ], 
+    "created": "2016-08-22T03:44:53+00:00", 
+    "creation_conditions": [
+        {
+            "condition": "urban.schedule.condition.need_FD_opinion", 
+            "display_status": true
+        }
+    ], 
+    "creation_state": [
+        "report_written", 
+        "procedure_validated"
+    ], 
+    "default_assigned_group": "administrative_validators", 
+    "default_assigned_user": "to_assign", 
+    "description": "", 
+    "enabled": true, 
+    "end_conditions": [
+        {
+            "condition": "liege.urban.schedule.licence_ended", 
+            "display_status": false, 
+            "operator": "OR"
+        }, 
+        {
+            "condition": "liege.urban.schedule.college_project_validated", 
+            "display_status": false
+        }
+    ], 
+    "ending_states": [
+        "FD_opinion", 
+        "authorized", 
+        "decision_in_progress", 
+        "refused"
+    ], 
+    "freeze_conditions": null, 
+    "freeze_states": null, 
+    "id": "valider-projet-avis", 
+    "is_folderish": true, 
+    "layout": "view", 
+    "marker_interfaces": [
+        "Products.urban.schedule.interfaces.ITaskWithSuspensionDelay"
+    ], 
+    "modified": "2017-11-28T14:10:34+00:00", 
+    "parent": {
+        "@id": "http://localhost:8086/liege/liege/portal_urban/codt_buildlicence/schedule/avis-fd/premier-passage", 
+        "@type": "MacroTaskConfig", 
+        "UID": "ced5b472fae742d5bf5bb9a2ca0b4bfe", 
+        "description": "", 
+        "review_state": "private", 
+        "title": "Premier passage coll\u00e8ge"
+    }, 
+    "recurrence_conditions": null, 
+    "recurrence_states": [], 
+    "review_state": "private", 
+    "round_to_day": "-5", 
+    "start_conditions": [
+        {
+            "condition": "liege.urban.schedule.college_project_writen", 
+            "display_status": true
+        }
+    ], 
+    "start_date": "urban.schedule.start_date.acknowledgment_date", 
+    "starting_states": [
+        "report_written", 
+        "procedure_validated"
+    ], 
+    "thaw_conditions": null, 
+    "thaw_states": null, 
+    "title": "Valider le projet d'avis", 
+    "version": "current", 
+    "warning_delay": null, 
+    "workflow_history": {
+        "simple_publication_workflow": [
+            {
+                "action": null, 
+                "actor": "admin", 
+                "comments": "", 
+                "review_state": "private", 
+                "time": "2017-06-01T16:09:16+00:00"
+            }
+        ]
+    }
+}]

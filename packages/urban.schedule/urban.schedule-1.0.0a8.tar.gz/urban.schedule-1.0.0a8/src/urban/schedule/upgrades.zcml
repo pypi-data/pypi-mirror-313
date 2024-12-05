@@ -1,0 +1,51 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="urban.schedule">
+
+  <genericsetup:upgradeStep
+      title="Import schedule config"
+      description=""
+      source="1000"
+      destination="1001"
+      handler="urban.schedule.upgrades.import_schedule_config"
+      profile="urban.schedule:default"
+      />
+
+  <genericsetup:upgradeStep
+      title="Update schedule config for reception"
+      description=""
+      source="1001"
+      destination="1002"
+      handler="urban.schedule.upgrades.update_reception"
+      profile="urban.schedule:default"
+      />
+
+  <genericsetup:upgradeStep
+      title="Update schedule config for FD opinion"
+      description=""
+      source="1002"
+      destination="1003"
+      handler="urban.schedule.upgrades.update_fd_opinion"
+      profile="urban.schedule:default"
+      />
+
+  <genericsetup:upgradeStep
+      title="Update schedule config for reception (skip existing)"
+      description=""
+      source="1003"
+      destination="1004"
+      handler="urban.schedule.upgrades.update_reception_skip_existing"
+      profile="urban.schedule:default"
+      />
+
+  <genericsetup:upgradeStep
+    title="Import roaddecree schedule config"
+    description=""
+    source="1004"
+    destination="1005"
+    handler="urban.schedule.upgrades.import_roaddecree_schedule_config"
+    profile="urban.schedule:default"
+    />
+
+</configure>
