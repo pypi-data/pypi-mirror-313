@@ -1,0 +1,37 @@
+{% macro ask_question(question) %}
+
+{% if question.hint %}
+<section>
+  {% endif %}
+  {% if question.question.image %}
+  <div class="columns">
+
+    <div class="col">
+      {% endif %}
+      <h3>{{ question.question.question }}</h3>
+
+      {% if question.type == "multiple_choice" %}
+      <ol class="questions">
+        {% for choice in question.choices %}
+        <li>{{choice.choice}}</li>
+        {% endfor %}
+      </ol>
+      {% endif %}
+
+      {% if question.question.image %}
+    </div>
+
+    <div class="col">
+      <img data-src="/images/{{question.question.image.url}}">
+    </div>
+
+  </div>
+  {% endif %}
+
+  {% if question.hint %}
+</section>
+<section>
+  <p><b>Hint:</b> {{question.hint}}</p>
+</section>
+{% endif %}
+{% endmacro %}
