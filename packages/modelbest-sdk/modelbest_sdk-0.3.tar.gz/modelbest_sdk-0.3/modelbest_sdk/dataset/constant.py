@@ -1,0 +1,5 @@
+BASE_DOC = 'BaseDoc'
+MM_DOC_SEQ = 'MmDocSeq'
+MESSAGES = 'Messages'
+ZIP = 'Zip'
+RAW = 'Raw'

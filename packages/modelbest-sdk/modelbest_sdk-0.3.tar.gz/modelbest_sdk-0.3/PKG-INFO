@@ -1,0 +1,47 @@
+Metadata-Version: 2.1
+Name: modelbest_sdk
+Version: 0.3
+Summary: Everything about modelbest data include data format mbtable, dataset, dataloader, and tools
+Home-page: https://codeup.aliyun.com/64ddb0a87f62ff9b3d23ca15/modelbest_sdk
+Author: HankyZhao
+Author-email: zhq980115@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+
+## 项目名称
+> 设计文档: https://www.kdocs.cn/l/cvKBY8SqJoCC  
+> Release Note: https://www.kdocs.cn/l/cvR7iKFqYQqY  
+> 快速上手: https://modelbest.feishu.cn/docx/SfK7d4qSEoDKNgxEW38c8Nffnbf  
+> 使用样例: example/*.py  
+
+## Update repo
+
+```shell
+cd to modelbest_sdk dir
+
+git submodule update --init --recursive
+git submodule update --remote --recursive
+git submodule foreach --recursive git checkout master
+git submodule foreach --recursive git pull origin master
+
+```
+
+## 0.3版本升级
+1. 开放Segment的注册机制（同BatchPacker）。不局限于token level的切分，可以自行设计数据结构，将物理数据映射到自定义数据结构中并给DetailedDoc.udd赋值，在采样时返回单条，一个简单的例子：
+   - 参考example/custom/custom_udd_example.py （定义了Sentence，将多轮对话Messages拆分为单句，每个单句在采样时返回）
+2. DatasetInfo支持设置proto_type参数，用于指定数据集的格式，默认值为BaseDoc，支持的格式有BaseDoc、Messages、Zip、Raw
+    - Messages：sdk默认反序列化完整的Messages对象，目前proto仅更新到Audio。如果需要再Messages proto定义中添加自定义字段，请使用Raw格式
+    - Raw：sdk默认不做任何处理，直接返回原始数据bytes，请自行再自定义Segment和BatchPacker中处理
+    - Zip：将多个文件夹当做一个数据集读取，支持基础数据打标能力，需要自行控制多个数据集间的行级对应关系
+3. DatasetInfo新增name变量，不设置时默认为path。进而支持了更改DatasetInfoList顺序，包括删除一些不用的dataset信息，不会影响datasetcheckpoint的加载；也支持了同一个数据集通过设置不同name来当成多个数据集来用的能力
+3. 将chunk_size拆分为chunk_size何cache_size，
+    - chunk_size用于数据集拆分，明确每个卡的读取范围，建议设置为最接近sqrt(平均数据集行数)的2的幂，默认1024可以无需更改
+    - cache_size用于设置单卡单次缓存的数据量，默认500MB，无需更改
+4. 针对超大数据的报警（超过100MB）和跳过（超过500MB）
+5. 移除了cuda_prefetch参数，由默认pin_memory提供快速拷贝到gpu的能力
+6. 特定场景下有用的环境变量：
+    - CACHE_BASE_DIR：设置数据集元信息缓存目录，在知乎场景下可以避免初始化时加载缓存过久的问题
+    - RETRY_ON_NOT_EXIST：如果文件系统崩溃导致数据集找不到，可以通过设置该变量来重试直到文件系统恢复
