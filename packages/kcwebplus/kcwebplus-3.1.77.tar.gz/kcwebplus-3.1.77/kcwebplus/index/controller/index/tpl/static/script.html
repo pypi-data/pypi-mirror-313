@@ -1,0 +1,72 @@
+var lang=${lang};
+var h5url=${h5url};
+var otherconfig=${otherconfig};
+var interurl=${interurl};
+var staticurl="${staticurl}";
+function kcwebaddScript(url){
+    document.write("<script type='text/javascript' src='"+url+"'></script>");
+}
+function kcwebaddStyle(url){
+    document.write("<link type='text/css' rel='stylesheet' href='"+url+"'></link>");
+}
+function kcwebisMobile(){
+    var userAgentInfo = navigator.userAgent;var mobileAgents = [ "Android", "iPhone", "SymbianOS", "Windows Phone", "iPad","iPod"];var mobile_flag = false;
+    for (var v = 0; v < mobileAgents.length; v++) {if (userAgentInfo.indexOf(mobileAgents[v]) > 0) {mobile_flag = true;break;}
+    }return mobile_flag;
+}
+kcwebaddScript('${staticurl}vue/2.6.12/vue.min.js');
+kcwebaddScript('${staticurl}vue-router/3.0.1/vue-router.min.js');
+kcwebaddScript('${staticurl}vuex/3.6.2/vuex.min.js');
+kcwebaddScript('${staticurl}qs/6.5.2/qs.min.js');
+kcwebaddScript('${staticurl}axios/0.18.0/axios.min.js');
+kcwebaddScript('${staticurl}js/md5.min.js');
+kcwebaddScript('${staticurl}js/kcweb.js');
+% if pixelunit == 'px':
+kcwebaddStyle('${staticurl}vant/2.12/index.css');
+% else:
+kcwebaddStyle('${staticurl}vant/2.12/rem.css');
+% endif
+
+kcwebaddScript('${staticurl}vant/2.12/vant.min.js');
+if(!kcwebisMobile()){//引入PC端饿了么ul
+    kcwebaddStyle('${staticurl}element-ui/2.15.7/lib/theme-chalk/index.css');
+    kcwebaddScript('${staticurl}element-ui/2.15.7/lib/index.js');
+}
+if(window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == 'micromessenger'){//引入微信jsapi
+    kcwebaddScript('https://res.wx.qq.com/open/js/jweixin-1.3.2.js');
+    // 强制禁止用户修改微信客户端的字体大小
+    (function() {
+        if (typeof WeixinJSBridge == "object" && typeof WeixinJSBridge.invoke == "function") {
+            handleFontSize();
+        } else {
+            if (document.addEventListener) {
+                document.addEventListener("WeixinJSBridgeReady", handleFontSize, false);
+            } else if (document.attachEvent) {
+                document.attachEvent("WeixinJSBridgeReady", handleFontSize);
+                document.attachEvent("onWeixinJSBridgeReady", handleFontSize);
+            }
+        }
+        function handleFontSize() {
+            // 设置网页字体为默认大小
+            WeixinJSBridge.invoke('setFontSizeCallback', { 'fontSize' : 12 });
+            // 重写设置网页字体大小的事件
+            WeixinJSBridge.on('menu:setfont', function() {
+                WeixinJSBridge.invoke('setFontSizeCallback', { 'fontSize' : 12 });
+            });
+        }
+    })();
+}
+% for item in assembly:
+% if item == 'admin' or item == 'core':
+kcwebaddStyle('${staticurl}components/1.0.1/kc-${item}/index.css?r=${r}');
+% endif
+kcwebaddScript('${staticurl}components/1.0.1/kc-${item}/index.umd.min.js?r=${r}');
+% endfor
+
+
+% for item in cssarr:
+kcwebaddStyle('${item}');
+% endfor
+% for item in jsarr:
+kcwebaddScript('${item}');
+% endfor
