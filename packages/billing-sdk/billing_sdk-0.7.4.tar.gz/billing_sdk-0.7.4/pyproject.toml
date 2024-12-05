@@ -1,0 +1,149 @@
+[tool.poetry]
+name = "billing-sdk"
+version = "0.7.4"
+description = ""
+authors = ["Pavel Prokhorenko <p.prohorenko@mypath.group>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "billing" },
+    { include = "py.typed" },
+    { include = "README.md" }
+]
+homepage = "https://gitlab.mypath.group/my-path/billing-sdk"
+repository = "https://gitlab.mypath.group/my-path/billing-sdk"
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+    "Environment :: Web Environment",
+    "Framework :: AsyncIO",
+    "Framework :: Pydantic :: 1",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Internet :: WWW/HTTP",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+httpx = ">=0.24,<1.0"
+pydantic = ">=1.7,<3.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+isort = "^5.13.2"
+ruff = "^0.6.5"
+mypy = "^1.11.2"
+pytest = "^8.3.3"
+pytest-asyncio = "^0.24.0"
+faker = "^28.4.1"
+respx = "^0.21.1"
+types-ujson = "^5.10.0.20240515"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 120
+
+
+[tool.black]
+line_length = 120
+
+[tool.ruff]
+line-length = 120
+
+target-version = "py38"
+
+# set of rules
+lint.select = [
+  "E", # pycodestyle
+  "F", # Pyflakes
+  "N", # pep8-naming
+  "UP", # pyupgrade
+  "ASYNC", # flake8-async
+  "BLE", # flake8-blind-except
+  "B", # flake8-bugbear
+  "A", # flake8-builtins
+  "C4", # flake8-comprehensions
+  "DTZ", # flake8-datetimez
+  "EXE", # flake8-executable
+  "FA", # flake8-future-annotations
+  "ISC", # flake8-implicit-str-concat
+  "G", # flake8-logging-format
+  "INP", # flake8-logging-format
+  "PIE", # flake8-pie
+  "T20", # flake8-print
+  "PYI", # flake8-pyi
+  "PT", # flake8-pyi
+  "Q", # flake8-quotes
+  "SIM", # flake8-simplify
+  "TID", # flake8-tidy-imports
+  "INT", # flake8-gettext
+  "PTH", # flake8-use-pathlib
+  "FIX", # flake8-fixme
+  # Ruff-specific rules
+  "RUF008", # Do not use mutable default values for dataclass attributes
+  "RUF009", # Do not perform function call {name} in dataclass defaults
+  "RUF010", # Use explicit conversion flag
+  "B035", # Dictionary comprehension uses static key: {key}
+  "RUF013", # PEP 484 prohibits implicit Optional
+  "RUF015", # Prefer next({iterable}) over single element slice
+  "RUF016", # Slice in indexed access to type {value_type} uses type {index_type} instead of an integer.
+  "RUF100", # Unused noqa directive
+  "RUF200", # Failed to parse pyproject.toml
+]
+lint.ignore = [
+  "ANN002", # Missing type annotation for *{name}
+  "ANN003", # Missing type annotation for **{name}
+  "ANN401", # Dynamically typed expressions (typing.Any) are disallowed in {name}
+  "A003", # variable names that shadow builtins are not allowed
+  "INP001", # File `foo.py` is part of an implicit namespace package. Add an `__init__.py`
+  "SIM108", # Use ternary operator `var = valie if value else None` instead of `if`-`else`-block
+   "FA100", # Add `from __future__ import annotations` to simplify `typing.Optional`
+]
+
+fix = true
+
+extend-exclude = [
+  ".venv",
+  "venv",
+]
+
+[tool.mypy]
+python_version = 3.8
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_no_return = true
+namespace_packages = true
+explicit_package_bases = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_untyped_calls = false
+strict = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+python_files = "tests_*.py test_*.py"
+asyncio_mode = "auto"
