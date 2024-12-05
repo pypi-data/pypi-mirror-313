@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<header>
+  <div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">Dashboard</h1>
+      <p class="lead">Showing the current status of the project.</p>
+    </div>
+  </div>
+  <hr class="my-4">
+</header>
+
+<body>
+  <content>
+    <div class="card" style="width: 12rem; height: 15em; float: left; margin: 1em;">
+      <div class="card-header">Summary</div>
+      <div class="card-body">
+        <p class="card-text">Participants: {{ data["n_ppts"] }}</p>
+        <p class="card-text">Appointments: {{ data["n_apts"] }}</p>
+      </div>
+    </div>
+
+    <div class="card" style="width: 20rem; height: 15em; float:left; margin: 1em; background-color: transparent;">
+      <div class="card-header">Age distribution</div>
+      <div class="card-body">
+        <canvas id="ageDist" width="16em" height="9em">
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <script>
+            const ctx = document.getElementById("ageDist").getContext("2d")
+            new Chart(ctx, {
+              type: "scatter",
+              data: {
+                title: "",
+                labels: {{ data["age_dist_labels"] | safe }},
+              datasets: [{
+                data: {{ data["age_dist_values"] | safe }},
+              backgroundColor: '#ea6212',
+              borderColor: '#ea6212',
+            }]
+          },
+              options: {
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: "Age (days)",
+                  },
+                  ticks: {
+                    beginAtZero: false,
+                    stepSize: 10,
+                    suggestedMin: 'min-int-value',
+                    suggestedMax: 'max-int-value'
+                  }
+                },
+                y: {
+                  title: {
+                    display: true,
+                    text: "# of participants",
+                  },
+                  ticks: {
+                    beginAtZero: true,
+                    stepSize: 1,
+                    suggestedMin: 'min-int-value',
+                    suggestedMax: 'max-int-value'
+                  }
+                }
+              }
+            }
+        })
+          </script>
+        </canvas>
+      </div>
+    </div>
+    <div class="card" style="width: 15rem; height: 15em; float:left; margin: 1em; background-color: transparent;">
+      <div class="card-header">Sex distribution</div>
+      <div class="card-body">
+        <canvas id="sexDist" width="8em" height="6.5em">
+          <script>
+            const stx = document.getElementById("sexDist").getContext("2d")
+            new Chart(stx, {
+              type: "bar",
+              data: {
+                labels: {{ data["sex_dist_labels"] | safe }},
+              datasets: [{
+                label: "Sex",
+                data: {{ data["age_dist_values"] | safe }},
+              backgroundColor: '#ff001e',
+              borderColor: '#ff001e',
+            }]
+          },
+              options: {
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: "Sex",
+                  },
+                  ticks: {
+                    beginAtZero: false,
+                    stepSize: 10,
+                    suggestedMin: 'min-int-value',
+                    suggestedMax: 'max-int-value'
+                  }
+                },
+                y: {
+                  title: {
+                    display: true,
+                    text: "# participants",
+                  },
+                  ticks: {
+                    beginAtZero: true,
+                    stepSize: 1,
+                    suggestedMin: 'min-int-value',
+                    suggestedMax: 'max-int-value'
+                  }
+                }
+              }
+            }
+        })
+          </script>
+        </canvas>
+      </div>
+    </div>
+    <div class="card" style="width: 30rem; height: 15em; float:left; margin: 1em; background-color: transparent;">
+      <div class="card-header">Participant influx</div>
+      <div class="card-body">
+        <canvas id="influx" width="850" height="390">
+          <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.js"></script>
+          <script
+            src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+          <script>
+            const ttx = document.getElementById("influx").getContext("2d")
+            new Chart(ttx, {
+              type: "line",
+              data: {
+                labels: {{ data["date_added_labels"] | safe }},
+              datasets: [
+              {
+                label: "# participants",
+                data: {{ data["date_added_values"] | safe }},
+              backgroundColor: '#781478',
+              borderColor: '#781478',
+              tension: 0,
+              pointRadius: 0,
+          },
+            ]
+          },
+              options: {
+              plugins: {
+                legend: {
+                  display: true
+                }
+              },
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: '# participants'
+                  },
+                  ticks: {
+                    beginAtZero: true,
+                    stepSize: 1,
+                    suggestedMin: 'min-int-value',
+                    suggestedMax: 'max-int-value'
+                  }
+                },
+                x: {
+                  type: 'time',
+                  time: {
+                    unit: "week"
+                  },
+                  title: {
+                    display: true,
+                    text: 'Date'
+                  }
+                },
+              }
+            }
+        })
+          </script>
+        </canvas>
+      </div>
+    </div>
+    <div class="card" style="width: 30rem; height: 15em; float:left; background-color: transparent; margin: 1em;">
+      <div class="card-header">Appointments made</div>
+      <div class="card-body">
+        <canvas id="appointments" width="800" height="325">
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <script
+            src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+          <script>
+            const rtx = document.getElementById("appointments").getContext("2d")
+            new Chart(rtx, {
+              type: "line",
+              data: {
+                labels: {{ data["date_made_labels"] | safe }},
+              datasets: [{
+                label: "# appointments",
+                data: {{ data["date_made_values"] | safe }},
+              backgroundColor: '#ea6212',
+              borderColor: '#ea6212',
+              tension: 0,
+              pointRadius: 0,
+            }]
+          },
+              options: {
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: '# appointments'
+                  },
+                  ticks: {
+                    beginAtZero: true,
+                    stepSize: 1,
+                    suggestedMin: 'min-int-value',
+                    suggestedMax: 'max-int-value'
+                  }
+                },
+                x: {
+                  type: 'time',
+                  time: {
+                    unit: "week"
+                  },
+                  title: {
+                    display: true,
+                    text: 'Date'
+                  }
+                },
+              }
+            }
+    })
+          </script>
+        </canvas>
+      </div>
+    </div>
+  </content>
+</body>
+{% endblock %}

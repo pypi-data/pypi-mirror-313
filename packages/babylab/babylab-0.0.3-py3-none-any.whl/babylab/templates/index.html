@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+
+<body background="{{ url_for('static',filename='sjd.png' ) }}"
+    style="background-repeat: fill; background-color: #ffffff;">
+    <div class="row">
+        <div class="col">
+            <div class="jumbotron jumbotron-fluid" style="background-color: white; padding: 0.5em">
+                <div class="container" style="padding: 1em;">
+                    <div class="row">
+                        <img src="{{ url_for('static', filename='irsjd.svg')}}" width="50%" ,
+                            style="position: relative; float: right;">
+                    </div>
+                    <hr class="my-4">
+                    <p class="lead">This is the SJD Babylab database. It provides an interface with the REDCap database
+                        to consult
+                        participant and appointment information conveniently. This is a work in progress, feel free to
+                        report issues and
+                        provide feed-back (<a href=" mailto:gonzalo.garcia@sjd.es">gonzalo.garcia@sjd.es</a>).</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            {% if not redcap_version %}
+            <div class="alert alert-light" role="alert">
+                <h4 class="alert-heading">Log in</h4>
+                <p>Please, provide your API token to access the database:</p>
+                <form class="form" method="POST" action="/index">
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="apiToken" name="apiToken"
+                            placeholder="API token" style="width: 100%;">
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1em;">Submit</button>
+                    </div>
+                </form>
+                <hr>
+                <p class="mb-0">You can find yor API token at REDCap.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+{% endblock %}
