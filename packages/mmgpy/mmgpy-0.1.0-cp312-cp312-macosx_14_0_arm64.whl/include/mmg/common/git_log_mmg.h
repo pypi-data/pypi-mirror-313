@@ -1,0 +1,6 @@
+#ifndef _GIT_LOG_MMG_H
+#define _GIT_LOG_MMG_H
+#define MMG_GIT_BRANCH "HEAD"
+#define MMG_GIT_COMMIT "4d8232c8aebfed877935d75d4d4a67e850962422"
+#define MMG_GIT_DATE   "2024-10-29 11:41:45 +0100"
+#endif
