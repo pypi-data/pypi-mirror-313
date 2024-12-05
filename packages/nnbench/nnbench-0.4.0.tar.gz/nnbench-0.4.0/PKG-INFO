@@ -1,0 +1,128 @@
+Metadata-Version: 2.1
+Name: nnbench
+Version: 0.4.0
+Summary: A small framework for benchmarking machine learning models.
+Author-email: appliedAI Initiative <info+oss@appliedai.de>
+Maintainer-email: Nicholas Junge <n.junge@appliedai-institute.de>, Max Mynter <m.mynter@appliedai-institute.de>, Adrian Rumpold <a.rumpold@appliedai-institute.de>
+License: Apache-2.0
+Project-URL: Homepage, https://github.com/aai-institute/nnbench
+Project-URL: Repository, https://github.com/aai-institute/nnbench.git
+Project-URL: Issues, https://github.com/aai-institute/nnbench/issues
+Project-URL: Discussions, https://github.com/aai-institute/nnbench/discussions
+Keywords: Benchmarking,Machine Learning
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: System :: Benchmark
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: rich
+Requires-Dist: tomli>=1.1.0; python_version < "3.11"
+Requires-Dist: typing-extensions; python_version < "3.11"
+Provides-Extra: dev
+Requires-Dist: build>=1.0.0; extra == "dev"
+Requires-Dist: pre-commit>=3.3.3; extra == "dev"
+Requires-Dist: psutil; extra == "dev"
+Requires-Dist: pyarrow; extra == "dev"
+Requires-Dist: pytest>=7.4.0; extra == "dev"
+Requires-Dist: fsspec; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: black; extra == "docs"
+Requires-Dist: docstring-parser; extra == "docs"
+Requires-Dist: mike; extra == "docs"
+Requires-Dist: mkdocs; extra == "docs"
+Requires-Dist: mkdocs-callouts; extra == "docs"
+Requires-Dist: mkdocs-gen-files; extra == "docs"
+Requires-Dist: mkdocs-literate-nav; extra == "docs"
+Requires-Dist: mkdocs-section-index; extra == "docs"
+Requires-Dist: mkdocs-material; extra == "docs"
+Requires-Dist: mkdocstrings[python]; extra == "docs"
+Requires-Dist: mkdocs-include-dir-to-nav; extra == "docs"
+Requires-Dist: neoteroi-mkdocs; extra == "docs"
+
+# nnbench: A small framework for benchmarking machine learning models
+
+Welcome to nnbench, a framework for benchmarking machine learning models.
+The main goals of this project are
+
+1. To provide a portable, easy-to-use solution for model evaluation that leads to better ML experiment organization, and
+2. To integrate with experiment and metadata tracking solutions for easy adoption.
+
+On a high level, you can think of nnbench as "pytest for ML models" - you define benchmarks similarly to test cases, collect them, and selectively run them based on model type, markers, and environment info.
+
+What's new is that upon completion, you can stream the resulting data to any sink of your choice (including multiple at the same), which allows easy integration with experiment trackers and metadata stores.
+
+See the [quickstart](https://aai-institute.github.io/nnbench/latest/quickstart/) for a lightning-quick demo, or the [examples](https://aai-institute.github.io/nnbench/latest/tutorials/) for more advanced usages.
+
+## Installation
+
+⚠️ nnbench is an experimental project - expect bugs and sharp edges.
+
+Install it directly from source, for example either using `pip` or `poetry`:
+
+```shell
+pip install nnbench
+# or
+poetry add nnbench
+```
+
+## A ⚡️- quick demo
+
+To understand how nnbench works, you can run the following in your Python interpreter:
+
+```python
+# example.py
+import nnbench
+
+
+@nnbench.benchmark
+def product(a: int, b: int) -> int:
+    return a * b
+
+
+@nnbench.benchmark
+def power(a: int, b: int) -> int:
+    return a ** b
+
+
+runner = nnbench.BenchmarkRunner()
+reporter = nnbench.ConsoleReporter()
+# run the above benchmarks with the parameters `a=2, b=10`...
+record = runner.run("__main__", params={"a": 2, "b": 10})
+reporter.display(record)  # ...and print the results to the terminal.
+
+# results in a table look like the following:
+# ┏━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+# ┃ Benchmark ┃ Value ┃ Wall time (ns) ┃ Parameters        ┃
+# ┡━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━┩
+# │ product   │ 20    │ 1917           │ {'a': 2, 'b': 10} │
+# │ power     │ 1024  │ 583            │ {'a': 2, 'b': 10} │
+# └───────────┴───────┴────────────────┴───────────────────┘
+```
+Watch the following video for a high level overview of the capabilities and inner workings of nnbench.
+
+[![nnbench overview video thumbnail](https://img.youtube.com/vi/CT9bKq-U8ZQ/0.jpg)](https://www.youtube.com/watch?v=CT9bKq-U8ZQ)
+
+For a more realistic example of how to evaluate a trained model with a benchmark suite, check the [Quickstart](https://aai-institute.github.io/nnbench/latest/quickstart/).
+For even more advanced usages of the library, you can check out the [Examples](https://aai-institute.github.io/nnbench/latest/tutorials/) in the documentation.
+
+## Contributing
+
+We encourage and welcome contributions from the community to enhance the project.
+Please check [discussions](https://github.com/aai-institute/nnbench/discussions) or raise an [issue](https://github.com/aai-institute/nnbench/issues) on GitHub for any problems you encounter with the library.
+
+For information on the general development workflow, see the [contribution guide](CONTRIBUTING.md).
+
+## License
+
+The nnbench library is distributed under the [Apache-2 license](LICENSE).
