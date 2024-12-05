@@ -1,0 +1,320 @@
+<htsl>
+
+<head>
+  <title>Nodezator Manual | Defining your first node</title>
+</head>
+
+<body>
+
+<p><a href="index.htsl">Table of contents</a> &gt; Defining your first node</p>
+
+<h1>Defining your first node</h1>
+
+<p>Nodezator already comes with a lot of nodes out of the box. We call them <i>app-defined nodes</i>, because they are defined by the app. Such nodes are created from some of the existing functions/classes already included in Python, that is, built-in functions or functions from the standard library.</p>
+
+<p>To use all the power the app has to offer, though, we encourage you to define your own nodes. Such nodes are called <i>user nodes</i> or <i>user-defined nodes</i> or even <i>custom nodes</i>. To define your node, all you need to do is provide a function.</p> 
+
+<p>For instance, the function defined below, if passed to Nodezator, will result in the node depicted in the following image.</p>
+
+<python>
+### example function
+def function_name(param1, param2):
+    return param1 + param2
+
+main_callable = function_name
+</python>
+
+<img src="images/ch-defining-your-first_img00.png" alt="Node generated from example function" />
+
+<p>The number at the bottom of the node represents an unique id that each user-defined node instance has. For instance, if you instantiate 10 <i>function_name</i> nodes in a file, each of them will have a different id. It is defined automatically by the app, so you don't need to worry about it.</p>
+
+<p>Actually, any callable can be turned into a node. Classes and methods, for instance, can be turned into nodes as well. Additionally, some kind of callables might need extra steps before they can be turned into a node.</p> 
+
+<p>You can put the definition of your nodes anywhere you want in your disk and Nodezator will load them for you, as long as you store them in a certain way, that we'll present in the next section. In other words, <b>your write your node definitions in your disk using your favorite text editor or IDE and use Nodezator to load them</b>. Nodezator's interface is not used to define nodes (at least not for now), just to load them so you can create, edit and execute your graphs.</p>
+
+<p>So launch your favorite text editor/IDE and follow the instructions in the rest of this chapter in order to create your first node, then, once it is ready, launch Nodezator so you can load and use it.</p>
+
+<h2 id="node-pack">A node pack and its purpose</h2>
+
+<p>The first thing to do when defining one or more nodes is to think of the purpose for which you are creating the node(s). I'd like to create nodes to generate 2d points representing movement (for instance, for game characters).</p>
+
+<p>With that in mind, we'll create a folder wherein to store all the nodes we are going to create. Let's name it <i>points2d</i>. In Nodezator, we consider that folder to be a <i>node pack</i>. Think of a node pack like a set of cards for a specific kind of game. <b>You can create that node anywhere you want in your disk</b>.</p>
+
+<p>The same way a set of cards is suitable for playing specific kinds of games, node packs contain nodes used for a specific purpose. <a href="https://en.wikipedia.org/wiki/Uno_(card_game)">Uno</a> cards are designed for playing Uno, <a href="https://en.wikipedia.org/wiki/Yu-Gi-Oh!">Yugi-Oh</a> cards for playing fictional monster battles. Just like that, each node pack should be designed for a specific purpose.</p>
+
+<p>Also, avoid using names that are too generic for your node pack, or a name that is used by another library you plan to use. Node packs are treated like modules/packages inside Nodezator and may thus shadow existing libraries. For instance, if you are creating nodes for generating charts with <a href="https://matplotlib.org/">matplotlib</a>, please, <b>do not</b> call your node pack <code>matplotlib</code>, since it will cause you problems when loading your nodes.</p>
+
+<p>Additionally, the name of your node pack is used in <i>import</i> statements (it is treated like a package) whenever you want to export your graphs as pure Python code, so make sure the name of your node pack is a valid Python identifier, that is, it must be comprised only by letters, digits and underscores and it must start with either a letter or an underscore. You can verify that by checking whether the name returns True when passed to <a href="https://docs.python.org/3/library/stdtypes.html#str.isidentifier">str.isidentifier()</a>. Just fire your Python interpreter and type this, replacing <code>nameofmynodepack</code> by the name or your node pack:</p>
+
+<python>
+&gt;&gt;&gt; str.isidentifier('nameofmynodepack')
+True
+</python>
+
+<p>Finally, though not required, it is recommended that you use only lowercase letters and digits and no underscores at all, since this is how packages/modules are usually named in Python. It is just a convention though, so do what you like. The nodezator project itself has some example nodes packs that use underscores in their names. I actually use underscores for the names of node packs that are meant to be loaded from disk (for instance, <code>examples_node_pack</code>), whereas node packs meant to be installed from <a href="https://pypi.org/">PyPI</a> (with the <code>pip</code> command) follow the convention of not using underscores (like <code>mynodepack</code>). However, this is all personal choice.</p>
+
+
+<h2 id="category-folder">Categories within a node pack</h2>
+
+<p>Just like playing cards are organized in categories, your nodes must be too. In Uno, cards are categorized as Number cards, Draw 2 cards, Reverse cards, and so on. You can categorize your nodes as you see fit. Let's create another folder inside points2d called <i>point_creation</i> wherein we'll store nodes responsible for creating new points. This folder is what we call a <b>category folder</b></p>
+
+<p>The name of your category folders are also used in <i>import</i> statements whenever you want to export your graphs as pure Python code, so make sure they are valid Python identifiers as well (preferably comprised only of lowercase letters or lowercase letters and digits).</p>
+
+<h2 id="script-folder">The script folder</h2>
+
+<p>Within our point_creation category folder we'll finally create our node, which will be represented by a folder containing our node script, a <b>node script folder</b>. Why do we use an entire folder just to store our node script? Because this way you can guarantee that your node script has all the resources it needs in a single place.</p>
+
+<p>Even though a node is defined by a function (or other callable) it doesn't mean your node script will be comprised of just a single function in a Python file. It may need to define and import other local modules or load other files like images or databases, it all depends on what you want to do.</p>
+
+<p>That's why a whole folder is used to store your script. Internally, this folder is actually treated as a subpackage of your node pack. You can think of this folder as an entire package wherein you define your node even if it ends up only needing a single file containing a single function. Moreover, even if your node starts as a single file it may grow over time as you further extend it.</p>
+
+<p>You can go as simple or as complex as you'd need/like. Think of the folder containing your node script as the personal limitless playground of your node. In our case, though, the first node we'll create, due to its simplicity, will need just a single Python file inside its folder.</p>
+
+<p>Just like the names of node packs and category folders, the names of your script folders are also used in <i>import</i> statements whenever you want to export your graphs as pure Python code, so also make sure they are valid Python identifiers (preferably comprised only of lowercase letters or lowercase letters and digits).</p>
+
+
+<h2 id="defining-node">Defining the node</h2>
+
+<p>The python script referencing a callable used to define a node must always be named <i>__main__.py</i>. In case you are wondering why do we use such naming convention, the answer is that it is already used in Python to indicate the <a href="https://docs.python.org/3/library/__main__.html">main file in a package</a>, the file controlling the execution of a program.</p>
+
+<p>Our first node will <b>create the points of a circle</b>. This may be useful for instance, to define circular movements for game characters. We'll name its folder <i>get_circle</i>. Below is the code defining our node in the __main__.py file within our get_circle folder. Note that the name of the function to be turned into a node also is get_circle.</p>
+
+<python uselineno="true">
+### function defining the get_circle node
+### points2d/point_creation/get_circle/__main__.py file
+
+from math import pi, sin, cos
+
+def get_circle(
+      quantity : int          = 30,
+      radius   : (int, float) = 100,
+    ):
+    """Return points forming a circle.
+
+    Parameters
+    ==========
+    quantity (integer)
+        quantity of points forming the circle.
+    radius (int or float)
+        radius of the circle.
+    """
+    circle_points = []
+
+    for k in range(quantity):
+
+        value = (k * 2 * pi) / quantity
+
+        x = radius * cos(value)
+        y = radius * sin(value)
+
+        circle_points.append((x, y))
+
+    return circle_points
+
+main_callable = get_circle
+</python>
+
+<img src="images/ch-defining-your-first_img01.png" alt="Node resulting from function definition"/>
+
+<p>As you can see, our node is actually just a regular Python function. The only additional change required was the creation of the <i>main_callable</i> variable pointing to the callable to be used as a node.</p>
+
+<p>No other change is needed. No need to import a special node class or anything like that. In other words, your code is kept untouched and as free as possible from foreign code and is thus easier to read and maintain. It is just your own code, after all. Nodezator will do all the rest for you, turning your function into a node.</p>
+
+<p>Additionally, since the node script folder is treated like a Python package, remember to use <a href="https://docs.python.org/3/reference/import.html#package-relative-imports">relative local imports</a> in all your local Python modules/subpackages inside your folder, that is, if you have other Python modules inside your node script folder other than __main__.py.</p>
+
+<p>With all that explained, we just have to say "Congratulations!". You successfuly created your first node!</p>
+
+
+<h2 id="loading-testing-first-node">Loading and testing your first node</h2>
+
+<p>There's still a lot to learn about defining nodes and it is all explained in the next chapters. However, you might be itching to load and test your first node in Nodezator right away. If want to do so, just follow these quick steps:</p>
+
+<ol>
+
+    <li>go straight to the chapter about <a href="ch-loading-nodes.htsl">loading your nodes</a>;</li>
+    <li>open nodezator and, following the instructions in the chapter, create a new file and load your node;</li>
+    <li>instantiate your <i>get_circle</i>node by right-clicking the canvas and selecting <b>point_creation &gt; get_circle</b> in the popup menu that appears;</li>
+
+    <li>before executing the graph, we need a way to see the output of your node; the simplest way to do this is by printing it; here's how to do this:
+
+        <ol>
+
+            <li>right-click the canvas again and create a <i>print</i> node by navigating the popup menu and selecting the command <b>builtin picks &gt; P-S &gt; print</b>;</li>
+            <li>now connect the output of your <i>get_circle</i> node to the hollow socket at the topleft corner of the <i>print</i> node, right below where "*objects" is written.</li>
+
+        </ol>
+
+    </li>
+
+    <li>now execute the graph using the following method: press <b>&lt;Shift+F12&gt;</b> (or select the command <b>Graph &gt; Execute with custom stdout</b> on the menubar); this will cause the graph to execute, meaning your node will execute them send its output to the <i>print</i> node, which will then be executed as well, printing the output; when using the option to execute the graph with a custom output, all printed content is displayed on the screen, so the text printed is displayed right away, as soon as the execution of the graph finishes; all of this happens in a fraction of seconds and the text appears on the screen, which should consist of a list of points from a circle, generated from the <i>get_circle</i> node you created.</li>
+
+</ol>
+
+<p>Congratulations again on executing your first node!</p>
+
+<p>Well, this is fine, but don't you agree that 2D points forming a shape are better visualized as an image rather than text printed on the screen? Wouldn't it be better to see the circle itself rather than reading the text showing the points? This is the topic of the next chapter about <a href="ch-defining-viewer-nodes.htsl">defining viewer nodes</a>, where we'll create another node to help us visualize our data with custom graphics.</p>
+
+
+<h2 id="node-pack-anatomy">The anatomy of a node pack</h2>
+
+<p>Here's a review of the anatomy of a node pack so you don't forget it:</p>
+
+<surfdef width="460" height="285">
+
+<!-- folders -->
+
+<path d="M5 5 l2 -2 l5 0 l2 2 l7 0 l2 2 l0 10 l-2 2 l-14 0 l-2 -2" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+<path d="M9 19 l7 -7 l14 0 l-7 7" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+
+<path d="M55 35 l2 -2 l5 0 l2 2 l7 0 l2 2 l0 10 l-2 2 l-14 0 l-2 -2" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+<path d="M59 49 l7 -7 l14 0 l-7 7" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+
+<path d="M105 65 l2 -2 l5 0 l2 2 l7 0 l2 2 l0 10 l-2 2 l-14 0 l-2 -2" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+<path d="M109 79 l7 -7 l14 0 l-7 7" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+
+<path d="M181 136 l2 -2 l5 0 l2 2 l7 0 l2 2 l0 10 l-2 2 l-14 0 l-2 -2" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+<path d="M185 150 l7 -7 l14 0 l-7 7" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+
+
+<path d="M105 206 l2 -2 l5 0 l2 2 l7 0 l2 2 l0 10 l-2 2 l-14 0 l-2 -2" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+<path d="M109 220 l7 -7 l14 0 l-7 7" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+
+<path d="M55 256 l2 -2 l5 0 l2 2 l7 0 l2 2 l0 10 l-2 2 l-14 0 l-2 -2" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+<path d="M59 271 l7 -7 l14 0 l-7 7" fill="(255, 255, 0)" stroke="(0, 0, 0)" stroke-width="2" />
+
+<!-- files -->
+
+<path d="M155 97 l8 0 l7 7 l0 13 l-15 0" fill="(255, 255, 255)" stroke="(0, 0, 0)" stroke-width="2" />
+<polyline d="M163 97 l0 7 l7 0 l-7 -7" stroke="(0, 0, 0)" stroke-width="2" />
+
+<path d="M155 132 l8 0 l7 7 l0 13 l-15 0" fill="(255, 255, 255)" stroke="(0, 0, 0)" stroke-width="2" />
+<polyline d="M163 132 l0 7 l7 0 l-7 -7" stroke="(0, 0, 0)" stroke-width="2" />
+
+
+<!-- strokes -->
+
+<polyline d="M14 25 l0 15 l30 0 l-30 0 l0 220 l30 0" stroke="(0, 0, 0)" stroke-width="2" />
+
+<polyline d="M64 55 l0 15 l30 0 l-30 0 l0 140 l30 0" stroke="(0, 0, 0)" stroke-width="2" />
+
+<polyline d="M114 85 l0 20 l30 0 l-30 0 l0 40 l30 0" stroke="(0, 0, 0)" stroke-width="2" />
+
+
+<!-- text -->
+
+<text x="40" y="20">a_node_pack [1]</text>
+
+<text x="90" y="53">a_category_folder [2]</text>
+
+<text x="140" y="83">a_node_script_folder [3]</text>
+
+<text x="180" y="119">__main__.py [4] (the node script)</text>
+
+<text x="212" y="152">... (more files/folders, optionally)</text>
+
+<text x="140" y="210">... (as many node script folders as you</text>
+<text x="140" y="234">desire inside each category node)</text>
+
+<text x="90" y="276">... (as many category folders as you desire)</text>
+
+</surfdef>
+
+<table>
+
+  <thead>
+    <tr>
+      <th class="col-1">#</th>
+      <th class="col-3">Name</th>
+      <th class="col-8">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+    <tr>
+      <td><span class="big-icon">1</span></td>
+      <td>Node pack</td>
+      <td>single folder at top of hierarchy; holds all nodes within categories; must have at least one category folder; name must be a valid Python identifier</td>
+    </tr>
+
+    <tr>
+      <td><span class="big-icon">2</span></td>
+      <td>Category folder</td>
+      <td>node pack can have as many category folders as needed; each category folder must have at least one node script folder; name of category folder must be a valid Python identifier</td>
+    </tr>
+
+    <tr>
+      <td><span class="big-icon">3</span></td>
+      <td>Node script folder</td>
+      <td>category folder can have as many node script folders as needed; each node script folder represents a node; each node script folder must have a __main__.py script (and optionally other local modules as well); name of node script folder must be a valid Python identifier</td>
+    </tr>
+
+    <tr>
+      <td><span class="big-icon">4</span></td>
+      <td>__main__.py script</td>
+      <td>must have a 'main_callable' variable pointing to the callable to be turned into a node.</td>
+    </tr>
+
+  </tbody>
+
+</table>
+
+
+<h2 id="sharing-resources-among-nodes">Sharing resources among your nodes</h2>
+
+<p>In Nodezator each node is completely independent from one another. It means their scripts don't import/access values/objects from each other. This is something that is encouraged by the design of the node packs: each node is defined in its own dedicated script.</p>
+
+<p>However, it doesn't mean your nodes can't access external resources/data that is common to them. This is actually necessary in many cases. You accomplish this in the same way you would for any other Python project: with custom modules/libraries/packages. Just create a module containing the values/objects you want to share with your nodes and put it somewhere your Python interpreter can see, then import it from your node scripts.</p>
+
+<p>That location is usually where you put your user-installed packages: either in one of the paths provided by <a href="https://docs.python.org/3/library/site.html#site.getsitepackages">site.getsitepackages()</a> or the path provided by <a href="https://docs.python.org/3/library/site.html#site.getusersitepackages">site.getusersitepackages()</a>. Unless you know what you are doing, it is probably better to use one of the locations from <code>site.getsitepackages()</code>, because they are specific to the virtual environment of your interpreter (or main installation, if it is not using an environment), whereas the location from <code>site.getusersitepackages()</code> can be seen from any virtual environment and the main installation.</p>
+
+<p>For instance, if you have 02 (two) nodes with the signatures <code>change_contrast(image:MyImage, contrast:int=50)-&gt; MyImage</code> and <code>change_brightness(image:MyImage, brightness:int=50)-&gt; MyImage</code>, that is, nodes that use the same custom image class <code>MyImage</code>, then you'll want to put the definition of <code>MyImage</code> in a custom module/library. Then, in the scripts of both nodes, you may import that class as usual: <code>from mycustomlib import MyImage</code>.</p>
+
+<p>This mechanism can be used to share values (like constants, enums, etc.), custom classes (like the custom class we used in the previous examples) or custom functions and other callables used internally in your node scripts.</p>
+
+<p>You may even decide not to import these objects inside your node scripts, if you wish. Instead, you may want to access them directly in your graph by importing them from that custom library using the <code>importlib.import_module</code> node. For instance, if you have a custom library called <code>mycustomlib</code> and want to import a constant called <code>MY_CONSTANT</code> from it, you can do it like so:</p>
+
+<img src="images/ch-defining-your-first_import_module_node.png" alt="Same node in different modes" />
+
+<p>Finally, you can name your custom module/library/package whatever you want, but since it was created with the purpose of providing common resources for your node pack, we recommend that you pick a name that is related to your node pack. We are still pondering about naming conventions and experimenting with them for now. In the future we may pick some naming convention recommendations, but you don't need to worry about that: As long as you use names that are valid Python identifier as discussed previously and don't clash with names of existing libraries you'll be fine.</p>
+
+<p>And again, always avoid using names of libraries that already exist, in order to avoid name clashes.</p>
+
+
+<h2 id="expanded-collapsed-callable-modes">Expanded, collapsed and callable mode for nodes</h2>
+
+<p>Starting from Nodezator version 1.4.0, nodes related to callable objects, that is, <b>all user-defined nodes</b> and <b>some app-defined nodes</b> exist in 01 of 03 different modes:</p>
+
+<ul>
+    <li>Expanded signature mode;</li>
+    <li>Collapsed signature mode; and</li>
+    <li>Callable mode.</li>
+</ul>
+
+<p>The image below shows the same node in different modes:</p>
+
+<img src="images/ch-defining-your-first_img02.png" alt="Same node in different modes" />
+
+<p>The node to the left is in expanded signature mode. The one in the upper right corner is in collapsed signature mode and the one below it is in callable mode.</p>
+
+<p>Nodes are instantiated in <b>expanded signature mode</b> (<b>expanded mode</b> for short). In this mode, the node represents a function call, that is, it expects inputs and returns outputs when it is executed. It is said that the node is "expanded" because in this mode the node shows all of its signature elements, that is, the parameters and outputs defined in its signature. It is the largest representation among the existing modes.</p>
+
+<p>In <b>collapsed signature mode</b>, the node also represents a function call and works just like in expanded mode, but instead of showing all the signature elements, it only shows those which are connected via sockets, hiding everything else. This is why we say the node is "collapsed".</p>
+
+<p>Regardless of whether a node is in expanded or collapsed signature mode, widgets attached to parameters/subparameters that have a connection to their sockets will be hidden. This is so because incoming data via connections have priority over data provided by widgets. So widgets shadowed by connections are hidden, since they serve no purpose while the socket is connected. If the socket is disconnected, the widgets becomes visible again.</p>
+
+<p>Users can quickly switch between the two signature modes (expanded and collapsed) by clicking in the small arrow icon shown in the upper left corner of user-defined nodes.</p>
+
+<p>You can also switch modes by right-clicking a node and accessing the <b>Change mode to</b> submenu, from which you can pick the mode you desire. You must use this method if you want to switch into or from the <b>callable mode</b>, since the small arrow icon only switches between expanded and collapsed modes.</p>
+
+<p>In <b>callable mode</b>, rather than representing a call, the node represents the underlying callable itself. That is, when the graph is executed, instead of the node being executed directly, it just passes along a reference to its underlying callable. In other words, the node doesn't have inputs or outputs, since it is not a call. It has only a single socket beside its title that can be used to pass the reference to other nodes.</p>
+
+<p>Used wisely, this mode is quite powerful, since it brings a lot of versatility, allowing you to achieve complex tasks with a smaller amount of nodes while retaining total control over the end result. Understanding this requires extra knowledge on concepts such as <b>functions as first-class citizens</b> and <b>higher order functions</b> and on programming paradigms like <b>functional programming</b>. Though it is not the purpose/responsibility of this manual to teach/explain those concepts/paradigms, it is our desire to offer users as much useful knowledge as possible on how to make most out of Nodezator, so we intend to include an appendix to our manual dedicated to this sometime in the future.</p>
+
+<p>For now, the callable mode is mentioned in a few chapters further ahead regarding conditional execution and looping in Nodezator and also in the <a href="appendix-recipes.htsl">appendix with useful recipes</a> to execute common tasks in Nodezator, since its very useful for many purposes.</p>
+
+<p><a href="index.htsl">Table of contents</a> | <a href="ch-defining-viewer-nodes.htsl">Next chapter</a></p>
+
+</body>
+
+</htsl>
