@@ -1,0 +1,141 @@
+Metadata-Version: 2.1
+Name: nabu
+Version: 2024.2.0rc4
+Summary: Nabu - Tomography software
+Author-email: Pierre Paleo <pierre.paleo@esrf.fr>, Henri Payno <henri.payno@esrf.fr>, Alessandro Mirone <mirone@esrf.fr>, Jérôme Lesaint <jerome.lesaint@esrf.fr>
+Maintainer-email: Pierre Paleo <pierre.paleo@esrf.fr>
+License: MIT License
+        
+        Copyright (c) 2020-2024 ESRF
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://gitlab.esrf.fr/tomotools/nabu
+Project-URL: Documentation, http://www.silx.org/pub/nabu/doc
+Project-URL: Repository, https://gitlab.esrf.fr/tomotools/nabu/-/releases
+Project-URL: Changelog, https://gitlab.esrf.fr/tomotools/nabu/-/blob/master/CHANGELOG.md
+Keywords: tomography,reconstruction,X-ray imaging,synchrotron radiation,High Performance Computing,Parallel geometry,Conebeam geometry,Helical geometry,Ring artefact correction,Geometric calibration
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Environment :: Console
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: POSIX
+Classifier: Topic :: Scientific/Engineering :: Physics
+Classifier: Topic :: Scientific/Engineering :: Medical Science Apps.
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy <2,>1.9.0
+Requires-Dist: scipy
+Requires-Dist: h5py >=3.0
+Requires-Dist: silx >=0.15.0
+Requires-Dist: tomoscan >=2.1.0
+Requires-Dist: psutil
+Requires-Dist: pytest
+Requires-Dist: tifffile
+Requires-Dist: tqdm
+Provides-Extra: doc
+Requires-Dist: sphinx ; extra == 'doc'
+Requires-Dist: cloud-sptheme ; extra == 'doc'
+Requires-Dist: myst-parser ; extra == 'doc'
+Requires-Dist: nbsphinx ; extra == 'doc'
+Provides-Extra: full
+Requires-Dist: scikit-image ; extra == 'full'
+Requires-Dist: PyWavelets ; extra == 'full'
+Requires-Dist: glymur ; extra == 'full'
+Requires-Dist: pycuda !=2024.1.1 ; extra == 'full'
+Requires-Dist: scikit-cuda ; extra == 'full'
+Requires-Dist: pycudwt ; extra == 'full'
+Requires-Dist: sluurp >=0.3 ; extra == 'full'
+Requires-Dist: pyvkfft ; extra == 'full'
+Provides-Extra: full_nocuda
+Requires-Dist: scikit-image ; extra == 'full_nocuda'
+Requires-Dist: PyWavelets ; extra == 'full_nocuda'
+Requires-Dist: glymur ; extra == 'full_nocuda'
+Requires-Dist: sluurp >=0.3 ; extra == 'full_nocuda'
+Requires-Dist: pyvkfft ; extra == 'full_nocuda'
+
+# Nabu
+
+ESRF tomography processing software.
+
+## Installation
+
+To install the development version:
+
+```bash
+pip install [--user] git+https://gitlab.esrf.fr/tomotools/nabu.git
+```
+To install the stable version:
+
+```bash
+pip install [--user] nabu
+```
+
+## Usage
+
+Nabu can be used in several ways:
+  - As a Python library, by features like `Backprojector`, `FlatField`, etc
+  - As a standalone application with the command line interface
+  - From Tomwer ([https://gitlab.esrf.fr/tomotools/tomwer/](https://gitlab.esrf.fr/tomotools/tomwer/))
+
+To get quickly started, launch:
+```bash
+nabu-config 
+```
+Edit the generated configuration file (`nabu.conf`). Then:
+
+```bash
+nabu nabu.conf --slice 500-600
+```
+
+will reconstruct the slices 500 to 600, with processing steps depending on `nabu.conf` contents.
+
+## Documentation
+
+The documentation can be found on the silx.org page ([https://www.silx.org/pub/nabu/doc](http://www.silx.org/pub/nabu/doc)).
+
+The latest documentation built by continuous integration can be found here: [https://tomotools.gitlab-pages.esrf.fr/nabu/](https://tomotools.gitlab-pages.esrf.fr/nabu/)
+
+## Running the tests
+
+Once nabu is installed, running
+
+```bash
+nabu-test
+```
+will execute all the tests. You can also specify specific module(s) to test, for example:
+```bash
+nabu-test preproc misc
+```
+You can also provide more `pytest` options, for example increase verbosity with `-v`, exit at the first fail with `-x`, etc. Use `nabu-test --help` for displaying the complete options list.
+
+
+
+## Nabu - what's in a name ?
+
+Nabu was the Mesopotamian god of literacy, rational arts, scribes and wisdom.
