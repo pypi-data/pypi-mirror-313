@@ -1,0 +1,84 @@
+# Build configuration
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Project configuration
+
+[project]
+name = "GREOPy"
+version = "0.1.0"
+description = "Solve the general-relativistic Emitter-Observer problem."
+authors = [
+    {name = "Jan Patrick Hackstein", email = "jan.hackstein@zarm.uni-bremen.de"}
+]
+maintainers = [
+    {name = "Jan Patrick Hackstein", email = "jan.hackstein@zarm.uni-bremen.de"}
+]
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {file = "LICENSE"}
+requires-python = ">=3.10.12"
+dependencies = [
+    "pandas==2.2.3",
+    "numpy==2.1.1",
+    "scipy==1.14.1",
+    "sympy==1.13.3",
+    "matplotlib>=3.9.2",
+]
+
+[project.optional-dependencies]
+external_data = [
+    "tomli>=2.0.1",
+    "tables>=3.10.1",
+]
+docs = ["sphinx-gallery==0.17.1"]
+dev = [
+    "hatch",
+]
+
+# Tool configuration
+
+[tool.hatch.build]
+only-packages = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/greopy"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/greopy" = "greopy"
+
+[tool.hatch.envs.test]
+description = "Environment for running the test suite."
+extra-dependencies = [
+    'tables',
+    'tomli',
+]
+
+[[tool.hatch.envs.test.matrix]]
+python = ['3.10', '3.11']
+
+[tool.hatch.envs.test.scripts]
+test = 'python3 -m unittest'
+
+[tool.hatch.envs.lint]
+description = "Environment for code linting."
+extra-dependencies = [
+    'pylint',
+]
+
+[tool.hatch.envs.lint.scripts]
+lint_code = [
+    'pylint src/',
+]
+
+[tool.hatch.envs.type-check]
+description = "Environment for static type checking."
+extra-dependencies = [
+    'mypy',
+]
+
+[tool.hatch.envs.type-check.scripts]
+type_check = [
+    'mypy src/',
+]
