@@ -1,0 +1,34 @@
+trigger:
+  branches:
+    include:
+    - '*'
+  tags:
+    include:
+    - '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  PYTHON_VERSION: '3.12'
+
+steps:
+- checkout: self
+  displayName: 'Checkout repository'
+
+- task: UsePythonVersion@0
+  displayName: 'Use Python $(PYTHON_VERSION)'
+  inputs:
+    versionSpec: $(PYTHON_VERSION)
+
+- script: |
+    echo "Installing pipenv using pip..."
+    pip install pipenv
+
+    echo "Installing project dependencies using pipenv..."
+    pipenv install --dev --deploy
+  displayName: 'Install dependencies'
+
+- script: |
+    pipenv run ruff check --config ruff.toml src/
+  displayName: 'Run ruff lint tests'
