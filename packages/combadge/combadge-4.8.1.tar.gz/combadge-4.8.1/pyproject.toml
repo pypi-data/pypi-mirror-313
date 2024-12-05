@@ -1,0 +1,161 @@
+[project]
+requires-python = ">=3.9"
+
+[tool.poetry]
+authors = [
+    "Pavel Perestoronin <pavel.perestoronin@kpn.com>",
+]
+description = "Generic API client based on Pydantic"
+keywords = ["api", "api-client", "pydantic"]
+license = "Apache-2.0"
+name = "combadge"
+readme = "README.md"
+repository = "https://github.com/kpn/combadge"
+version = "4.8.1"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System",
+    "Topic :: System :: Networking",
+    "Typing :: Typed",
+]
+
+[tool.mypy]
+allow_redefinition = true
+allow_untyped_globals = true
+check_untyped_defs = true
+pretty = true
+warn_unused_configs = true
+warn_redundant_casts = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "ANN",
+    "B",
+    "C4",
+    "COM",
+    "D",
+    "E",
+    "F",
+    "I",
+    "N",
+    "PIE",
+    "PT",
+    "PTH",
+    "RET",
+    "SIM",
+    "T20",
+    "TRY",
+    "UP",
+    "W",
+    "YTT",
+]
+ignore = [
+    "ANN101",
+    "ANN102",
+    "ANN401",
+    "D100",
+    "D103",
+    "D104",
+    "D105",
+    "D202",
+    "D203",
+    "D212",  # alternative of D213
+    "D406",
+    "D407",
+    "D413",
+    "TRY003",
+    "UP006", # Python 3.9+
+]
+unfixable = ["B"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D101", "D102", "D106"]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.pytest.ini_options]
+addopts = "--block-network --cov=./ --cov-report=xml"
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*"]
+source = ["combadge"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "except ImportError",
+    "if TYPE_CHECKING:",
+]
+
+[build-system]
+requires = ["poetry-core", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[tool.poetry.dependencies]
+python = "^3.9.0"
+typing-extensions = "^4.5.0"
+pydantic = "^2.0.0"
+get-annotations = { version = "^0.1.2", python = "<3.10" }
+zeep = {version = "^4.2.1", optional = true}
+httpx = {version = ">=0.23.3, <1.0.0", optional = true}
+
+[tool.poetry.extras]
+httpx = ["httpx"]
+zeep = ["zeep"]
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+mypy = "1.13.0"
+pytest = "8.3.3"
+pytest-cov = "5.0.0"
+types-requests = "^2.28.11.8"
+ruff = "0.7.3"
+pytest-recording = "0.13.2"
+pytest-asyncio = "0.24.0"
+urllib3 = "1.26.20"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+black = "24.10.0"
+cairosvg = "2.7.1"
+mkdocs-autorefs = "1.2.0"
+mkdocs-git-committers-plugin-2 = "2.4.1"
+mkdocs-git-revision-date-localized-plugin = "1.3.0"
+mkdocs-material = "9.5.44"
+mkdocstrings = { version = "0.27.0", extras = ["python"] }
+pillow = "10.4.0"
+
+[tool.poetry-dynamic-versioning]
+enable = false
+vcs = "git"
+pattern = "default-unprefixed"
+style = "pep440"
+strict = true
+latest-tag = true
