@@ -1,0 +1,8 @@
+from .abstract_ngrams_feature_extractor import FeatureExtractorParameters
+from .idf_ngrams_feature_extractor import IdfNGramFeatureExtractor
+from .presence_ngrams_feature_extractor import PresenceNGramFeatureExtractor
+from .tf_ngram_feature_extractor import TfNGramFeatureExtractor
+from .tfidf_ngrams_feature_extractor import TfIdfNGramFeatureExtractor
+
+__all__ = [IdfNGramFeatureExtractor.__name__, PresenceNGramFeatureExtractor.__name__,
+           TfNGramFeatureExtractor.__name__, TfIdfNGramFeatureExtractor.__name__, FeatureExtractorParameters.__name__]

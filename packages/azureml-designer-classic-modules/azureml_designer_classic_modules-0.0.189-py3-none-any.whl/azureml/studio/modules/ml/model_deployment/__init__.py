@@ -1,0 +1,9 @@
+from azureml.studio.modules.ml.model_deployment.model_deployment_handler import BaseLearnerDeploymentHandler, \
+    ClusterModelDeploymentHandler, SVDRecommendationDeploymentHandler
+import azureml.studio.core.utils.model_deployment.model_deployment_handler as model_deployment_handler
+
+# This is for backward compatibility. BaseLearnerDeploymentHandler and the other two are previously located under
+# namespace azureml.studio.core.utils.model_deployment.model_deployment_handler.
+model_deployment_handler.BaseLearnerDeploymentHandler = BaseLearnerDeploymentHandler
+model_deployment_handler.ClusterModelDeploymentHandler = ClusterModelDeploymentHandler
+model_deployment_handler.SVDRecommendationDeploymentHandler = SVDRecommendationDeploymentHandler
