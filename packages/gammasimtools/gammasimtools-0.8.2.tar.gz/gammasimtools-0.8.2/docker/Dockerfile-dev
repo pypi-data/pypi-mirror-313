@@ -1,0 +1,30 @@
+ARG BUILD_OPT="prod6-baseline"
+ARG HADRONIC_MODEL="qgs2"
+ARG VERSION="240927"
+FROM ghcr.io/gammasim/simtools-corsika-sim-telarray-${HADRONIC_MODEL}-${BUILD_OPT}-${VERSION}
+WORKDIR /workdir
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN microdnf update -y && microdnf install -y \
+    findutils \
+    gcc-c++ \
+    git \
+    python3.11-pip \
+    python3.11-devel \
+    wget && \
+    microdnf clean all
+
+RUN wget --quiet https://raw.githubusercontent.com/gammasim/simtools/main/pyproject.toml && \
+    python3.11 -m venv env && \
+    source env/bin/activate && \
+    pip install -U pip && \
+    pip install toml-to-requirements && \
+    toml-to-req --toml-file pyproject.toml --optional-lists dev,doc,tests && \
+    pip uninstall -y toml-to-requirements && \
+    pip install --no-cache-dir -r requirements.txt
+
+ENV SIMTEL_PATH="/workdir/sim_telarray/"
+ENV PATH="/workdir/simtools/env/bin/:$PATH"
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /workdir/external
