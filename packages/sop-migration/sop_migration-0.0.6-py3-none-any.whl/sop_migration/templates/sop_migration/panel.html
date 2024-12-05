@@ -1,0 +1,16 @@
+{% load helpers %}
+
+<div class="col col-md-12">
+  <div class="card">
+    <h5 class="card-header">
+      <a href='{% url migration|viewname:"list" %}'>{{migration|meta:"verbose_name"}}</a>
+      <div class="card-actions">
+        <a href='{% url migration|viewname:"add" %}?object_type={{object|content_type_id}}&object_id={{object.pk}}' class="btn btn-ghost-primary btn-sm">
+          <i class="mdi mdi-plus-thick" aria-hidden="true"></i>Add a Migration
+        </a>
+      </div>
+    </h5>
+    {% htmx_table migration|viewname:"list" object_type=object|content_type_id object_id=object.pk %}
+  </div>
+</div>
+
