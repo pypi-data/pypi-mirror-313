@@ -1,0 +1,108 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+{% block extrastyle %}
+    {{ block.super }}
+    {% if cl.formset or action_form %}
+        <script src="{% url 'admin:jsi18n' %}"></script>
+    {% endif %}
+    {{ media.css }}
+{% endblock extrastyle %}
+{% block extrahead %}
+    {{ block.super }}
+    {{ media.js }}
+    <script src="{% static 'admin/js/filters.js' %}" defer></script>
+{% endblock extrahead %}
+{% if not is_popup %}
+    {% block breadcrumbs %}
+        <div class="page-pretitle">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'admin:index' %}">{% translate "Home" %}</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'admin:app_list' app_label=cl.opts.app_label %}">{{ cl.opts.app_config.verbose_name }}</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    <a href="#">{{ cl.opts.verbose_name_plural|capfirst }}</a>
+                </li>
+            </ol>
+        </div>
+    {% endblock breadcrumbs %}
+{% endif %}
+{% block object-tools %}
+    <ul class="object-tools">
+        {% block object-tools-items %}
+            {% change_list_object_tools %}
+        {% endblock object-tools-items %}
+    </ul>
+{% endblock object-tools %}
+{% block content %}
+    <div class="row" id="content-main">
+        <div class="mb-3 col-12 {% if cl.has_filters or cl.search_fields %}col-sm-6 col-md-7 col-xl-8 col-xxl-9{% endif %}">
+            <div class="card">
+                {% if cl.formset and cl.formset.errors %}
+                    <p class="errornote">{% translate "Please correct the errors below." %}</p>
+                    {{ cl.formset.non_form_errors }}
+                {% endif %}
+                <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
+                    <div class="changelist-form-container">
+                        <form id="changelist-form" method="post" {% if cl.formset and cl.formset.is_multipart %}enctype="multipart/form-data"{% endif %} novalidate>
+                            {% csrf_token %}
+                            {% if cl.formset %}<div>{{ cl.formset.management_form }}</div>{% endif %}
+                            {% block result_list %}
+                                {% if action_form and actions_on_top and cl.show_admin_actions %}
+                                    <div class="card-header d-block">
+                                        <h3 class="card-title">{% admin_actions %}</h3>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">{% result_list cl %}</div>
+                            {% endblock result_list %}
+                            <div class="card-footer d-flex align-items-center">
+                                {% block pagination %}
+                                    {% pagination cl %}
+                                {% endblock pagination %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ cl.has_search }}
+        {% if cl.has_filters or cl.search_fields %}
+            <div class="col-12 col-sm-6 col-md-5 col-xl-4 col-xxl-3">
+                <div class="card">
+                    <div class="card-body table-filter-card">
+                        <!-- Search -->
+                        {% block search %}
+                            {% search_form cl %}
+                        {% endblock search %}
+                        <!-- ./ Search -->
+                        <!-- Filters -->
+                        {% block filters %}
+                            {% if cl.has_filters %}
+                                <div id="changelist-filter">
+                                    {% if cl.has_active_filters %}
+                                        <div class="d-grid gap-2 mb-2" id="changelist-filter-clear">
+                                            <a href="{{ cl.clear_all_filters_qs }}" class="btn btn-secondary">{% translate "Clear all filters" %}</a>
+                                        </div>
+                                    {% endif %}
+                                    {% for spec in cl.filter_specs %}
+                                        {% admin_list_filter cl spec %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endblock filters %}
+                        <!-- ./ Filters -->
+                        <!-- Date Hierarchy -->
+                        {% block date_hierarchy %}
+                            {% if cl.date_hierarchy %}
+                                {% date_hierarchy cl %}
+                            {% endif %}
+                        {% endblock date_hierarchy %}
+                        <!-- ./ Date Hierarchy -->
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}

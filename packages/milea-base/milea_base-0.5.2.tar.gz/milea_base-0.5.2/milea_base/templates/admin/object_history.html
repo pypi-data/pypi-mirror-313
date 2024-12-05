@@ -1,0 +1,101 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+{% block breadcrumbs %}
+    <div class="page-pretitle">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'admin:index' %}">{% translate "Home" %}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url opts|admin_urlname:'changelist' %}">{{ module_name }}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url opts|admin_urlname:'change' object.pk|admin_urlquote %}">{{ object|truncatewords:"18" }}</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <a href="#">{% translate "History" %}</a>
+            </li>
+        </ol>
+    </div>
+{% endblock breadcrumbs %}
+{% block content %}
+    <div id="content-main" class="row justify-content-center">
+        <div id="change-history" class="module col-12 col-lg-8">
+            {% if action_list %}
+                <div class="card">
+                    <div class="card-header d-flex align-items-center">
+                        <p class="m-0 text-muted">
+                            {{ action_list.paginator.count }}
+                            {% if action_list.paginator.count == 1 %}
+                                {% translate "entry" %}
+                            {% else %}
+                                {% translate "entries" %}
+                            {% endif %}
+                        </p>
+                        <ul class="pagination m-0 ms-auto">
+                            {% if pagination_required %}
+                                {% for i in page_range %}
+                                    {% if i == action_list.paginator.ELLIPSIS %}
+                                        {{ action_list.paginator.ELLIPSIS }}
+                                    {% elif i == action_list.number %}
+                                        <li class="page-item active">
+                                            <a class="page-link" href="#">{{ i }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a href="?{{ page_var }}={{ i }}" class="page-link" {% if i == action_list.paginator.num_pages %}class="end"{% endif %}>{{ i }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="divide-y">
+                            {% for action in action_list %}
+                                <div>
+                                    <div class="row">
+                                        <div class="col-auto align-self-center">
+                                            {% if action.action_flag == 1 %}
+                                                <div class="badge bg-success"></div>
+                                            {% elif action.action_flag == 2 %}
+                                                <div class="badge bg-warning"></div>
+                                            {% elif action.action_flag == 3 %}
+                                                <div class="badge bg-danger"></div>
+                                            {% else %}
+                                                <div class="badge bg-secondary"></div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col">
+                                            <div class="text-truncate">{{ action.get_change_message }}</div>
+                                            <div class="text-muted">
+                                                {{ action.user.get_username }}
+                                                {% if action.user.get_full_name %}({{ action.user.get_full_name }}){% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <span class="text-secondary">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <rect x="4" y="5" width="16" height="16" rx="2"></rect><line x1="16" y1="3" x2="16" y2="7"></line><line x1="8" y1="3" x2="8" y2="7"></line><line x1="4" y1="11" x2="20" y2="11"></line><line x1="11" y1="15" x2="12" y2="15"></line><line x1="12" y1="15" x2="12" y2="18"></line>
+                                                </svg>
+                                                {{ action.action_time|date:"DATETIME_FORMAT" }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="card-footer">
+                        <p>{% translate "This object doesn’t have a change history. It probably wasn’t added via this admin site." %}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,76 @@
+{% extends "admin/base_auth.html" %}
+{% load i18n static milea_tags %}
+
+{% block content %}
+    <div class="row align-items-center g-4">
+        <div class="col-lg">
+            <div class="container-tight">
+                <div class="text-center mb-4">
+                    <a href="{% url "admin:index" %}" class="navbar-brand navbar-brand-autodark">
+                        <img src="{% static 'milea_base/img/logo.png' %}" width="auto" height="48" alt="Logo" />
+                    </a>
+                </div>
+                <div class="card card-md">
+                    <div class="card-body">
+                        <h2 class="h2 text-center mb-4">{% translate "Login to your account" %}</h2>
+                        {% if form.errors and not form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                <h4 class="alert-title">
+                                    {% blocktranslate count form.errors.items|length as counter %}
+                    Please correct the error below.
+                    {% plural %}
+                    Please correct the errors below.
+                {% endblocktranslate %}
+                                </h4>
+                            </div>
+                        {% endif %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.non_field_errors %}<div class="text-muted">{{ error }}</div>{% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if user.is_authenticated %}
+                            <div class="alert alert-warning" role="alert">
+                                <h4 class="alert-title">{% translate "Already logged in" %}</h4>
+                                <div class="text-muted">
+                                    {% blocktrans trimmed with user=request.user %}
+                                        You are authenticated as {{ user }}, but are not authorized to access this page. Would you like to login to a different account?
+                                    {% endblocktrans %}
+                                </div>
+                            </div>
+                        {% endif %}
+                        <form method="post" action="{{ app_path }}" id="login-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ next }}" />
+                            <div class="mb-3">
+                                {{ form.username.label_tag }}
+                                <input type="text"
+                                       value="{{ form.username.value|default:"" }}"
+                                       class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+                                       name="username"
+                                       {% if not form.username.value %}autofocus=""{% endif %}
+                                       autocomplete="username"
+                                       maxlength="254"
+                                       required=""
+                                       id="id_username" />
+                                <div class="invalid-feedback">{{ form.username.errors }}</div>
+                            </div>
+                            <div class="mb-2">
+                                {{ form.password.label_tag }}
+                                <input type="password" class="form-control {% if form.password.errors %}is-invalid{% endif %}" name="password" autocomplete="password" maxlength="254" required="" id="id_password" />
+                                <div class="invalid-feedback">{{ form.password.errors }}</div>
+                            </div>
+                            <div class="form-footer">
+                                <button type="submit" class="btn btn-primary w-100">{% translate "Log in" %}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center text-muted mt-3">{% get_setting "milea_base.NAME" %} v{% get_setting "milea_base.VERSION" %}</div>
+            </div>
+        </div>
+        <div class="col-lg d-none d-lg-block">
+            <img src="{% static 'milea_base/img/illustrations/login.svg' %}" height="300" width="auto" class="d-block mx-auto" alt="illustration" />
+        </div>
+    </div>
+{% endblock content %}

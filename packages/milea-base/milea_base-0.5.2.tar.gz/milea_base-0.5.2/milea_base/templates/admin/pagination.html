@@ -1,0 +1,30 @@
+{% load admin_list milea_tags %}
+{% load i18n %}
+
+<div class="col m-0 text-muted">
+    {{ cl.result_count }}
+    {% if cl.result_count == 1 %}
+        {{ cl.opts.verbose_name }}
+    {% else %}
+        {{ cl.opts.verbose_name_plural }}
+    {% endif %}
+    {% if show_all_url %}
+        <small><a href="{{ show_all_url }}" class="showall">{% translate "Show all" %}</a></small>
+    {% endif %}
+</div>
+
+{% if pagination_required %}
+    <div class="col-auto">
+        <ul class="pagination m-0 ms-auto">
+            {% for i in page_range %}
+                {% milea_paginator_number cl i %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+{% if cl.formset and cl.result_count %}
+    <div class="col-auto ms-4">
+        <input type="submit" name="_save" class="btn btn-primary" value="{% translate "Save" %}" />
+    </div>
+{% endif %}

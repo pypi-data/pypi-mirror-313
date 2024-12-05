@@ -1,0 +1,15 @@
+{% if widget.type == 'hidden' %}
+    <input type="hidden"
+           name="{{ widget.name }}"
+           {% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}"{% endif %}
+           {% include "django/forms/widgets/attrs.html" %}
+           {% include "django/forms/widgets/classes.html" %} />
+{% else %}
+    <div class="input-group {% if 'vDateField' in widget.attrs.class or 'vTimeField' in widget.attrs.class %}input-group-flat{% endif %}">
+        <input type="{{ widget.type }}"
+               name="{{ widget.name }}"
+               {% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}"{% endif %}
+               {% include "django/forms/widgets/attrs.html" %}
+               {% include "django/forms/widgets/classes.html" %} />
+    </div>
+{% endif %}

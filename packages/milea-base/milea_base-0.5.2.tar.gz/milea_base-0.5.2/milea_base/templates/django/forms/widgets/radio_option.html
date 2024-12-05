@@ -1,0 +1,27 @@
+<label class="form-selectgroup-item" {% if widget.attrs.id %}for="{{ widget.attrs.id }}"{% endif %}>
+    <input type="radio"
+           name="{{ widget.name }}"
+           class="form-selectgroup-input"
+           {% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}"{% endif %}
+           {% include "django/forms/widgets/attrs.html" %} />
+    <span class="form-selectgroup-label">
+        {% if widget.value == '' %}
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="icon icon-tabler icon-tabler-circle-x"
+                 width="24"
+                 height="24"
+                 viewBox="0 0 24 24"
+                 stroke-width="2"
+                 stroke="currentColor"
+                 fill="none"
+                 stroke-linecap="round"
+                 stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <circle cx="12" cy="12" r="9" />
+                <path d="M10 10l4 4m0 -4l-4 4" />
+            </svg>
+        {% else %}
+            {{ widget.label }}
+        {% endif %}
+    </span>
+</label>

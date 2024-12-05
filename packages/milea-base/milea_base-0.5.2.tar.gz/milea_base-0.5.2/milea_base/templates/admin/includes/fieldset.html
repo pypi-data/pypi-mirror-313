@@ -1,0 +1,41 @@
+{% load i18n %}
+    <fieldset class="card-body">
+        {% for line in fieldset %}
+            <div class="mb-3 form-row {% if not line.fields|length == 1 %}row{% endif %} {% if line.fields|length == 1 and line.errors %}errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+                {% for field in line %}
+                    <div {% if not line.fields|length == 1 %}class="col"{% endif %}>
+ 
+                        {% if field.is_checkbox %}
+                            <label class="form-check form-switch">
+                                {{ field.field }}
+                                <span class=" form-check-label">{{ field.field.label|capfirst }}</span>
+                            </label>
+                        {% else %}
+                            {% if field.is_readonly %}
+                                <label class="form-label ">{{ field.field.label|capfirst }}:</label>
+                                {% if field.contents|first == '<' %}
+                                    {{ field.contents }}
+                                {% elif field.contents|length > 50 %}
+                                    {{ field.contents }}
+                                {% else %}
+                                    <input type="text" class="form-control form-control-flush" value="{{ field.contents }}" readonly="readonly" />
+                                {% endif %}
+                            {% else %}
+                                {{ field.label_tag }}
+                                {{ field.field }}
+                            {% endif %}
+                        {% endif %}
+
+                        {% if not line.fields|length == 1 and not field.is_readonly %}{{ field.errors }}{% endif %}
+                        {% if line.fields|length == 1 %}{{ line.errors }}{% endif %}
+
+                        {% if field.field.help_text %}
+                            <small class="form-hint" {% if field.field.id_for_label %}id="{{ field.field.id_for_label }}_helptext"{% endif %}>{{ field.field.help_text|safe }}</small>
+                        {% endif %}
+ 
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </fieldset>
+

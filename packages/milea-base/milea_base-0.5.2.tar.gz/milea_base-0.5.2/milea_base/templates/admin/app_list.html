@@ -1,0 +1,90 @@
+{% load i18n static %}
+{% block extrahead %}
+    <script src="{% static 'milea/js/masonry.pkgd.min.js'%}"></script>
+    {{ media }}
+{% endblock extrahead %}
+{% if app_list %}
+    <div class="row row-cards" data-masonry='{"percentPosition": true }'>
+        {% for app in app_list %}
+            <div class="col-12 col-lg-6">
+                <div class="card table-responsive mb-3">
+                    <table class="table table-vcenter table-bordered table-nowrap card-table">
+                        <thead>
+                            <tr>
+                                <td class="w-100" colspan="3">
+                                    <a class="text-inherit" href="{{ app.app_url }}">
+                                        <h2>{{ app.name }}</h2>
+                                    </a>
+                                    <div class="text-muted text-wrap">{% blocktranslate with name=app.name %}Models in the {{ name }} application{% endblocktranslate %}</div>
+                                </td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for model in app.models %}
+                                <tr>
+                                    <td class="w-50">
+                                        <a class="text-inherit fs-3" href="{{ model.admin_url }}">{{ model.name }}</a>
+                                    </td>
+                                    <td class="text-center">
+                                        {% if model.add_url %}
+                                            <a href="{{ model.add_url }}" class="btn w-100 {% if model.add_url %}btn-success{% else %}disabled{% endif %}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                    <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+                                                </svg>
+                                                {% translate "Add" %}
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if model.admin_url and show_changelinks %}
+                                            {% if model.view_only %}
+                                                <a href="{{ model.admin_url }}" class="btn w-100 btn-primary">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                         class="icon icon-tabler icon-tabler-eye"
+                                                         width="24"
+                                                         height="24"
+                                                         viewBox="0 0 24 24"
+                                                         stroke-width="2"
+                                                         stroke="currentColor"
+                                                         fill="none"
+                                                         stroke-linecap="round"
+                                                         stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <circle cx="12" cy="12" r="2"></circle>
+                                                        <path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7" />
+                                                    </svg>
+                                                    {% translate "View" %}
+                                                </a>
+                                            {% else %}
+                                                <a href="{{ model.admin_url }}" class="btn w-100 btn-warning">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                         class="icon icon-tabler icon-tabler-pencil"
+                                                         width="24"
+                                                         height="24"
+                                                         viewBox="0 0 24 24"
+                                                         stroke-width="2"
+                                                         stroke="currentColor"
+                                                         fill="none"
+                                                         stroke-linecap="round"
+                                                         stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+                                                        <line x1="13.5" y1="6.5" x2="17.5" y2="10.5"></line>
+                                                    </svg>
+                                                    {% translate "Change" %}
+                                                </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>{% translate "You don’t have permission to view or edit anything." %}</p>
+{% endif %}

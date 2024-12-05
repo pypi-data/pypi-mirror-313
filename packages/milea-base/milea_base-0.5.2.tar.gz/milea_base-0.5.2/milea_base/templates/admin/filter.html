@@ -1,0 +1,15 @@
+{% load i18n milea_template %}
+<hr class="mb-3 mt-1" />
+<details data-filter-title="{{ title }}" open>
+    <summary class="subheader mb-2 text-blue">{% blocktranslate with filter_title=title %} By {{ filter_title }} {% endblocktranslate %}</summary>
+    <div class="list-group list-group-transparent mb-3">
+        {% for choice in choices %}
+            {% split_filter_value choice.display as val %}
+            <a class="list-group-item list-group-item-action d-flex align-items-center important {% if choice.selected %}active{% endif %}" href="{{ choice.query_string|iriencode }}">
+                
+                {{ val.0 }}
+                <small class="text-secondary ms-auto">{{ val.1 }}</small>
+            </a>
+        {% endfor %}
+    </div>
+</details>

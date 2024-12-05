@@ -1,0 +1,53 @@
+{% load i18n static milea_tags %}
+<!DOCTYPE html>
+<!--
+* The MILEA Framework
+* by Digitalfaktor Services - Webdesign und IT-Dienstleistungen aus Vorarlberg
+* @version {% get_setting "milea_base.VERSION" %}
+* @link https://www.digitalfaktor.at
+* Copyright 2024 Digitalfaktor Services e.U.
+-->
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" dir="{{ LANGUAGE_BIDI|yesno:'rtl,ltr,auto' }}">
+    <head>
+        <!-- Meta -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <meta name="description" content="{% get_setting "milea_base.NAME" %}" />
+        <meta name="keywords" content="" />
+        <link rel="icon" href="{% static 'milea_base/img/favicon.ico' %}" />
+        {% block blockbots %}
+            <meta name="robots" content="NONE,NOARCHIVE" />
+        {% endblock blockbots %}
+        {% block extrahead %}
+        {% endblock extrahead %}
+        <title>
+            {% block title %}
+                Login | {% get_setting "milea_base.NAME" %}
+            {% endblock title %}
+        </title>
+
+        <!-- CSS -->
+        <link rel="stylesheet" href="{% static 'milea_base/css/tabler.css' %}" />
+        <link rel="stylesheet" href="{% static 'milea_base/css/tabler-icons.css' %}" />
+        <link rel="stylesheet" href="{% static 'milea_base/css/custom.css' %}" />
+        {% block extrastyle %}
+        {% endblock extrastyle %}
+    </head>
+    <body class="border-top-wide border-primary d-flex flex-column theme-dark" data-admin-utc-offset="{% now "Z" %}">
+
+        <!-- Wrapper -->
+        <div class="page page-center">
+            <div class="container container-normal py-4">
+                <!-- Content -->
+                {% block content %}
+                    {{ content }}
+                {% endblock content %}
+            </div>
+        </div>
+
+        <!-- JS -->
+        <script src="{% static 'milea_base/js/tabler.js' %}"></script>
+    </body>
+</html>

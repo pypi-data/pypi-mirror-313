@@ -1,0 +1,21 @@
+{% load i18n %}
+{% if show %}
+    <hr class="mb-3 mt-1" />
+    <details data-filter-title="{{ title }}" open>
+        <summary class="subheader mb-2 text-blue">Datum Historie</summary>
+        <div class="list-group list-group-transparent mb-3">
+            {% block date-hierarchy-toplinks %}
+                {% block date-hierarchy-back %}
+                    {% if back %}<a class="list-group-item list-group-item-action d-flex align-items-center important" href="{{ back.link }}"><i class="ti ti-chevron-left"></i> {{ back.title }}</a>{% endif %}
+                {% endblock date-hierarchy-back %}
+                {% block date-hierarchy-choices %}
+                    {% for choice in choices %}
+                        {% if choice.link %}<a href="{{ choice.link }}" class="list-group-item list-group-item-action d-flex align-items-center important">{% endif %}
+                            {{ choice.title }}
+                            {% if choice.link %}</a>{% endif %}
+                    {% endfor %}
+                {% endblock date-hierarchy-choices %}
+            {% endblock date-hierarchy-toplinks %}
+        </div>
+    </details>
+{% endif %}

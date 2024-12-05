@@ -1,0 +1,26 @@
+{% with id=widget.attrs.id %}
+    {% if widget.attrs.class == 'radiolist' %}
+        <div {% if id %}id="{{ id }}"{% endif %} class="{% if widget.attrs.class == 'radiolist' %}form-selectgroup{% elif widget.attrs.class %}{{ widget.attrs.class }}{% endif %}">
+            {% for group, options, index in widget.optgroups %}
+                {% if group %}
+                    <div>
+                        <label>{{ group }}</label>
+                    {% endif %}
+                    {% for option in options %}
+                        <div>{% include option.template_name with widget=option %}</div>
+                    {% endfor %}
+                    {% if group %}</div>{% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        {# django multiselect field #}
+        <div>
+            {% for group, options, index in widget.optgroups %}
+                <label class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="{{ options.0.name }}" value="{{ options.0.value }}"{% if options.0.selected %} checked="checked"{% endif %}>
+                    <span class="form-check-label">{{ options.0.label }}</span>
+                </label>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
