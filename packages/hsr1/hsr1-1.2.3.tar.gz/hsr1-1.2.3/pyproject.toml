@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hsr1"
+dynamic = ["version"]
+requires-python = ">= 3.10"
+
+description = "graphing and data analysis for HSR-1 instruments"
+readme = "README.md"
+
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=1.5",
+    "matplotlib>=3.6",
+    "scipy>=1.10",
+    "lmfit>=1.1",
+    "ephem>=4.1",
+    "pvlib>=0.10"
+]
+
+
+[project.optional-dependencies]
+sg2 = ["sg2"]
+
+[tool.setuptools.package-data]
+"*" = ["*.txt"]
+
+[tool.setuptools.dynamic]
+version = {attr = "hsr1.__version__"}
+
+
+[tool.setuptools]
+packages = ["hsr1", "hsr1.db", "hsr1.read_txt", "hsr1.utils", "hsr1.utils.spectrum", "hsr1.plots", "hsr1.data", "hsr1.synthetic_dataset"]
