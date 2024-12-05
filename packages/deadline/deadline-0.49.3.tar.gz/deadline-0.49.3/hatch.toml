@@ -1,0 +1,77 @@
+[envs.default]
+pre-install-commands = [
+  "pip install -r requirements-testing.txt"
+]
+
+[envs.default.scripts]
+sync = "pip install -r requirements-testing.txt"
+test = "pytest --cov-config pyproject.toml {args:test/unit}"
+test_docker = "./scripts/run_sudo_tests.sh --build"
+typing = "mypy {args:src test} --always-false=PYQT5 --always-false=PYSIDE2 --always-false=PYQT6 --always-true=PYSIDE6"
+style = [
+  "ruff check {args:.}",
+  "black --check --diff {args:.}",
+]
+fmt = [
+  "black {args:.}",
+  "style",
+]
+lint = [
+  "style",
+  "typing",
+]
+quality = [
+  "black {args:.}",
+  "typing",
+  "style",
+]
+
+[[envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11"]
+
+[envs.default.env-vars]
+SKIP_BOOTSTRAP_TEST_RESOURCES="True"
+
+[envs.codebuild.scripts]
+build = "hatch build"
+
+[envs.codebuild.env-vars]
+SKIP_BOOTSTRAP_TEST_RESOURCES="True"
+
+[envs.codebuild-installer]
+pre-install-commands = [
+  "pip install -r requirements-installer.txt"
+]
+
+[envs.codebuild-installer.env-vars]
+SKIP_BOOTSTRAP_TEST_RESOURCES="True"
+
+[envs.codebuild-installer.scripts]
+build = "hatch build"
+make_exe = "python scripts/pyinstaller/make_exe.py --output {env:OUT_FILE}"
+
+[envs.integ]
+pre-install-commands = [
+  "pip install -r requirements-integ-testing.txt",
+  "pip install -r requirements-testing.txt"
+]
+
+[envs.integ.scripts]
+test = "pytest --no-cov {args:test/integ} -vvv --numprocesses=1"
+
+[envs.installer]
+pre-install-commands = [
+  "pip install -r requirements-installer.txt"
+]
+
+[envs.installer.scripts]
+build = "hatch build"
+make_exe = "python scripts/pyinstaller/make_exe.py --output {env:OUT_FILE}"
+
+[envs.release]
+detached = true
+
+[envs.release.scripts]
+deps = "pip install -r requirements-release.txt"
+bump = "semantic-release -v --strict version --no-push --no-commit --no-tag --skip-build {args}"
+version = "semantic-release -v --strict version --print {args}"
