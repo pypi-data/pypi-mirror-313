@@ -1,0 +1,760 @@
+<htsl>
+
+<head>
+  <title>Nodezator Manual | Defining a more complex viewer node</title>
+</head>
+
+<body>
+
+<p><a href="index.htsl">Table of contents</a> &gt; Defining a more complex viewer node</p>
+
+
+<h1>Defining a more complex viewer node</h1>
+
+<p>As we have been stressing so far, Nodezator doesn't require any kind of style or specific syntax to define nodes. As long as you point nodezator to the callable you want to use with the <i>main_callable</i> variable, it will take care of turning it into a node for you. As we also discussed, the callable doesn't even need to be a function. It can be a method, a class, or even a lambda. As long as you provide a callable, Nodezator can turn it into a node.</p>
+
+<p>Furthermore, because <a href="https://pyga.me">pygame-ce</a> (the library used for Nodezator's GUI) allows you to define and execute your own loop, you can actually go as complex as you want. You have complete control. For instance, you can make your viewer node responsive to window resizing and allow the user to scroll the visualization shown with both the keyboard and by dragging the mouse. None of this is related or dependent on Nodezator, it is all due to pygame-ce's versatility.</p>
+
+<p>In this chapter we'll present a more complex viewer node. That is, one that can handle keyboard and mouse events and is responsive to window resizing. We still won't worry about in-graph visuals, just focus on improving our custom visualization loop.</p>
+
+<p>As an example, we'll compare the <i>view_points()</i> node presented in the previous chapter with an alternative version of it.</p>
+
+<p>Before we start, let's revisit the version presented in the previous chapter. Here's the code:</p>
+
+<python>
+### points2d/viewer/view_points/__main__.py file
+
+### standard library import
+from collections import deque
+
+
+### third-party imports
+
+from pygame import (
+
+              QUIT,
+              KEYUP, K_ESCAPE,
+
+              Surface,
+
+            )
+
+from pygame.display import get_surface, update
+
+from pygame.event import get as get_events
+
+from pygame.time import Clock
+
+from pygame.draw import circle as draw_circle
+
+from pygame.math import Vector2
+
+
+### setup code: creation/reference of objects to be reused
+### by the node as needed
+
+## reference existing screen instance
+SCREEN = get_surface()
+
+## create a background filled with grey
+
+background = Surface(SCREEN.get_size()).convert()
+background.fill('grey')
+
+## create a clock and reference its tick() method which
+## will be used to maintain a steady framerate
+maintain_fps = Clock().tick
+
+## callable to offset points to center of the screen;
+##
+## this is needed because points are generated from the
+## origin of the 2d space, which is the topleft corner
+## of the screen, but we want them to appear near the
+## center
+move_to_center = Vector2(SCREEN.get_rect().center).__add__
+
+## define colors
+
+RED  = (255, 0,   0)
+BLUE = (  0, 0, 255)
+
+
+### below we define the function to be turned into our
+### viewer node
+
+def view_points(points):
+
+    ### create a special collection with the points
+    ### moved to the center
+
+    points_deque = deque(
+
+                     move_to_center(point)
+
+                     for point in points
+
+                   )
+
+    ### shift the points one position to the right;
+    ###
+    ### from now on the points will be continually shifted
+    ### to the left one position each loop; we shift them
+    ### here to the right only this once, so that the first
+    ### time they are shifted to the left they assume the
+    ### original order;
+    points_deque.rotate(1)
+
+    ### blit the background on the screen to clean it;
+    ###
+    ### we only need to this once in this case, because
+    ### the points don't actually move, only their colors
+    ### are changed to give the illusion of movement,
+    ### so we only need to clean the screen this time;
+    SCREEN.blit(background, (0, 0))
+
+    ### create a variable indicating to keep running the
+    ### loop
+    running = True
+
+    ### run the loop
+
+    while running:
+        
+        ### ensure framerate is kept at 60 fps
+        maintain_fps(60)
+        
+        ### handle inputs
+
+        for event in get_events():
+
+            ## if user tries to close the window
+            ## or presses the escape key we set the
+            ## 'running' variable to False, therefore
+            ## causing the loop to be exited
+
+            if (
+
+               event.type == QUIT
+
+               or (
+                     event.type == KEYUP
+                 and event.key  == K_ESCAPE
+               )
+
+            ):
+                running = False
+
+        ### shift points one position to the left
+        points_deque.rotate(-1)
+
+        ### draw objects
+
+        ## points
+
+        # draw all points with blue
+
+        for point in points_deque:
+
+            draw_circle(
+              SCREEN,
+              BLUE,
+              point,
+              3,
+            )
+
+        # then only the first point with red
+
+        draw_circle(
+          SCREEN,
+          RED,
+          points_deque[0],
+          3,
+        )
+
+        ### update the screen (pygame.display.update)
+        update()
+
+
+### setting view_point's dismiss_exec_time_tracking
+### attribute to True
+view_points.dismiss_exec_time_tracking = True
+
+### finally, alias our function as the 'main_callable'
+main_callable = view_points
+</python>
+
+<p>However, such version <b>has limitations</b>. The loop doesn't react to window resizing, which means resizing the window will leave some problems. The correct response to window resizing should be (depending on each case, of course) repositioning and redrawing objects. Another problem is that the points can't be moved, so if the area covered by the points is larger than the screen, you won't be able to see the points that are beyond the screen area.</p>
+
+<p>From now on we'll be looking into an alternative definition of this view_points node. I divided the code into smaller sections to help convey the different roles of each section of the code. As you look into each excerpt I'll provide brief comments, since the code itself is already commented in detail.</p>
+
+<p>Before you delve into the code, however, I'd like to point out that <b>there is no perfect or correct way of defining loops in pygame</b>. You can use functions or classes, but even when using classes there are different ways to do it. I could even have split the node script into different modules to make the separation between the different parts even more clear.</p>
+
+<p>Do not stress over the details. The code to be presented is just what I thought was the best solution for what was needed. As long as you understand the purpose of the individual pieces you'll be able to come up with your own solutions. You are also always welcome to ask on <a href="https://indiepython.com/discord">discord</a> or <a href="https://github.com/IndiePython/nodezator/discussions">github discussions</a> every time you have questions.</p>
+
+<p>First of all, we have the imports and the definition of constants:</p>
+
+<python>
+"""Facility for points visualization."""
+
+### standard library imports
+
+from collections.abc import Iterable
+
+from itertools import cycle
+
+
+
+### third-party imports
+
+## pygame
+
+from pygame import (
+
+              QUIT,
+
+              KEYUP,
+
+              K_ESCAPE,
+
+
+              K_w, K_a, K_s, K_d,
+              K_UP, K_LEFT, K_DOWN, K_RIGHT,
+              K_HOME,
+
+              MOUSEBUTTONUP,
+              MOUSEBUTTONDOWN,
+              MOUSEMOTION,
+
+              Surface, Rect
+
+            )
+
+from pygame.display import get_surface, update
+from pygame.time    import Clock
+from pygame.event   import get as get_events
+
+from pygame.key import get_pressed as get_pressed_keys
+
+from pygame.math import Vector2
+
+from pygame.draw import (
+    rect as draw_rect,
+    line as draw_line,
+)
+
+
+
+### get screen reference and a rect for it
+
+SCREEN      = get_surface()
+SCREEN_RECT = SCREEN.get_rect()
+
+### store center of the screen as origin of 2D space
+ORIGIN = Vector2(SCREEN_RECT.center)
+
+### create vector representing extra offset for points
+EXTRA_OFFSET = Vector2()
+
+### create rect representing a point
+POINT_RECT = Rect(0, 0, 5, 5)
+
+### create another representing a bigger point
+BIG_POINT_RECT = Rect(0, 0, 9, 9)
+
+### define scrolling speeds in different 2D axes
+
+X_SCROLLING_SPEED = 20
+Y_SCROLLING_SPEED = 20
+
+### obtain fps maintaining operation
+maintain_fps = Clock().tick
+
+### define colors for support elements
+BG_COLOR = (220, 220, 220)
+
+</python>
+
+<p>Then, we start defining a class. Yes, this time we'll use a class to hold all needed methods to manage our node and its loop, including the method we'll be using as the main callable for our viewer node.</p>
+
+<python uselineno="true" linenofrom="80">
+### now here comes the first big change on our script:
+###
+### rather than using a single function as our main
+### callable, we'll create a whole class to hold
+### several methods, one of which we'll be using
+### as the main callable for our node;
+###
+### why do we do that? Simply because we'll be dealing
+### with a lot state (different objects, values and
+### behaviours) and classes are a great tool for such job
+
+class PointsViewer:
+    """Manages the loop of the view_points() node."""
+
+    def __init__(self):
+        """Create support objects/flags."""
+        ### instantiate background
+
+        self.background = (
+          Surface(SCREEN.get_size()).convert()
+        )
+
+        self.background.fill(BG_COLOR)
+
+</python>
+
+<p>We then define the methods for the keyboard mode, that is, for when we use the keyboard to move the points around.</p>
+
+<python uselineno="true" linenofrom="104">
+    def keyboard_mode_event_handling(self):
+        """Event handling for the keyboard mode."""
+
+        for event in get_events():
+
+            if event.type == QUIT:
+                self.running = False
+
+            elif event.type == MOUSEBUTTONDOWN:
+
+                if event.button == 1:
+                    self.enable_mouse_mode()
+
+            elif event.type == KEYUP:
+
+                if event.key == K_HOME:
+                    EXTRA_OFFSET.xy = (0, 0)
+
+                elif event.key == K_ESCAPE:
+                    self.running = False
+
+    def keyboard_mode_key_state_handling(self):
+        """Handle pressed keys for keyboard mode."""
+
+        key_input = get_pressed_keys()
+
+        ### calculate x movement
+
+        ## check whether "go left" and "go right"
+        ## buttons were pressed
+
+        go_left = any(
+          key_input[key] for key in (K_a, K_LEFT)
+        )
+
+        go_right = any(
+          key_input[key] for key in (K_d, K_RIGHT)
+        )
+
+        ## assign amount of movement on x axis
+        ## depending on whether "go left" and "go right"
+        ## buttons were pressed
+
+        if go_left and not go_right:
+            dx = -1 * X_SCROLLING_SPEED
+
+        elif go_right and not go_left:
+            dx = 1 * X_SCROLLING_SPEED
+
+        else: dx = 0
+
+
+        ### perform the same checks/calculations for
+        ### the y axis
+
+        go_up = any(
+          key_input[key] for key in (K_w, K_UP)
+        )
+
+        go_down = any(
+          key_input[key] for key in (K_s, K_DOWN)
+        )
+
+        if (
+
+             (go_up and go_down)
+          or (not go_up and not go_down)
+
+        ):
+            dy = 0
+
+        elif go_up and not go_down:
+            dy = -1 * Y_SCROLLING_SPEED
+
+        elif go_down and not go_up:
+            dy = 1 * Y_SCROLLING_SPEED
+
+
+        ### if there is movement in the x or y
+        ### axis, increment the extra offset
+        if dx or dy:
+            EXTRA_OFFSET.xy += (dx, dy)
+
+</python>
+
+<p>Then comes the methods for the mouse mode, that is, for when we use the mouse to move the points around.</p>
+
+<python uselineno="true" linenofrom="187">
+    def mouse_mode_event_handling(self):
+        """Event handling for the mouse mode."""
+
+        for event in get_events():
+
+            if event.type == QUIT:
+                self.running = False
+
+            elif event.type == MOUSEMOTION:
+                EXTRA_OFFSET.xy += event.rel
+
+            elif event.type == MOUSEBUTTONUP:
+
+                if event.button == 1:
+                    self.enable_keyboard_mode()
+
+            elif event.type == KEYUP:
+
+                if event.key == K_ESCAPE:
+                    self.running = False
+
+    def mouse_mode_key_state_handling(self):
+        """Mouse mode doesn't handle key pressed state.
+
+        So this method does nothing.
+        """
+
+</python>
+
+<p>The <i>watch_window_size()</i> method is used on the loop to watch out for changes in the window (screen) size. When it is found that the screen changed size, it performs setups to ensure the points are repositioned correctly.</p>
+
+<python uselineno="true" linenofrom="214">
+    def watch_window_size(self):
+        """Perform setups if window was resized."""
+
+        ### if the screen and the background have the
+        ### same size, then no window resizing took place,
+        ### so we exit the function right away
+
+        if SCREEN.get_size() == self.background.get_size():
+            return
+
+        ### otherwise, we keep executing the function,
+        ### performing the needed setups
+
+        ## update the screen rect's size
+        SCREEN_RECT.size = SCREEN.get_size()
+
+        ## reset the extra offset
+        EXTRA_OFFSET.xy = (0, 0)
+
+        ## update the origin
+        ORIGIN.xy = SCREEN_RECT.center
+
+        ## recreate the background
+
+        self.background = (
+          Surface(SCREEN.get_size()).convert()
+        )
+
+        self.background.fill(BG_COLOR)
+</python>
+
+<p>We then have more support methods: to enable different modes, to start and manage the loop and to (re)draw the objects when the points are moved.</p>
+
+<python uselineno="true" linenofrom="244">
+    def enable_keyboard_mode(self):
+        """Set behaviours to move points with keyboard."""
+
+        self.handle_events = (
+          self.keyboard_mode_event_handling
+        )
+
+        self.handle_key_state = (
+          self.keyboard_mode_key_state_handling
+        )
+
+    def enable_mouse_mode(self):
+        """Set behaviours to move points with the mouse.
+
+        That is, by dragging.
+        """
+
+        self.handle_events = (
+          self.mouse_mode_event_handling
+        )
+
+        self.handle_key_state = (
+          self.mouse_mode_key_state_handling
+        )
+
+    def draw(self):
+        """If points area moved, redraw."""
+        ### background
+        SCREEN.blit(self.background, (0, 0))
+
+        ### define total offset
+        total_offset = ORIGIN + EXTRA_OFFSET
+
+        ### draw grid
+
+        ## define needed variables
+
+        x, y = total_offset
+
+        top = left = 0
+        right, bottom = SCREEN_RECT.bottomright
+
+        ## draw vertical grid lines
+
+        if x &gt;= right:
+
+            dx = x - right
+
+            t = dx // 80
+            nx = x - (t * 80)
+
+            while nx &gt; 0:
+
+                nx -= 80
+
+                draw_line(SCREEN, 'black', (nx, top), (nx, bottom), 1)
+
+        elif x &lt; 0:
+
+            dx = -x
+
+            t = dx // 80
+
+            nx = x + (t * 80)
+
+            while nx &lt; right:
+
+                nx += 80
+
+                draw_line(SCREEN, 'black', (nx, top), (nx, bottom), 1)
+
+        else:
+
+            nx = x
+
+            while nx &gt; 0:
+                nx -= 80
+                draw_line(SCREEN, 'black', (nx, top), (nx, bottom), 1)
+
+            nx = x
+
+            while nx &lt; right:
+                nx += 80
+                draw_line(SCREEN, 'black', (nx, top), (nx, bottom), 1)
+
+        ## draw horizontal grid lines
+
+        if y &gt;= bottom:
+
+            dy = y - bottom
+
+            t = dy // 80
+            ny = y - (t * 80)
+
+            while ny &gt; 0:
+
+                ny -= 80
+
+                draw_line(SCREEN, 'black', (left, ny), (right, ny), 1)
+
+        elif y &lt; 0:
+
+            dy = -y
+
+            t = dy // 80
+
+            ny = y + (t * 80)
+
+            while ny &lt; bottom:
+
+                ny += 80
+
+                draw_line(SCREEN, 'black', (left, ny), (right, ny), 1)
+
+        else:
+
+            ny = y
+
+            while ny &gt; 0:
+                ny -= 80
+                draw_line(SCREEN, 'black', (left, ny), (right, ny), 1)
+
+            ny = y
+
+            while ny &lt; bottom:
+                ny += 80
+                draw_line(SCREEN, 'black', (left, ny), (right, ny), 1)
+
+        ## draw axes lines
+
+        x_in = left &lt;= x &lt; right
+        y_in = top &lt;= y &lt; bottom
+
+        if x_in:
+            draw_line(SCREEN, 'red', (x, 0), (x, bottom), 1)
+
+        if y_in:
+            draw_line(SCREEN, 'red', (0, y), (right, y), 1)
+
+
+        ### draw points
+
+        ## all points
+
+        for point in self.points:
+
+            POINT_RECT.center = point + total_offset
+
+            draw_rect(SCREEN, 'blue', POINT_RECT)
+
+        ## one point
+
+        # if needed, update next point
+        if self.update_next_point():
+            self.next_point = self.get_next_point()
+
+        # draw it
+
+        BIG_POINT_RECT.center = self.next_point + total_offset
+
+        draw_rect(SCREEN, 'red', BIG_POINT_RECT)
+
+    def loop(self):
+        """Start and keep a loop.
+
+        The loop is only exited when the running flag
+        is set to False.
+        """
+        self.running = True
+
+        while self.running:
+
+            ## maintain a constant fps
+            maintain_fps(self.fps)
+
+            ## watch out for change in the window size,
+            ## performing needed setups if such change
+            ## happened
+            self.watch_window_size()
+
+            ## execute main operation of the loop,
+            ## that is, input handling and drawing
+
+            self.handle_events()
+            self.handle_key_state()
+            self.draw()
+
+            ## finally update the screen with
+            ## pygame.display.update()
+            update()
+</python>
+
+<p>Finally we define the method we'll be using as our main callable: the <i>view_points()</i> method. Note that once the method is defined and still in the body of our class definition we set the <i>dismiss_exec_time_tracking</i> attribute on the method. Also note that after leaving the class definition we instantiate the PointsViewer class and assign the view_points method as the main_callable.</p>
+
+<python uselineno="true" linenofrom="435">
+    ### the method below is the main callable we'll use
+    ### for our node;
+    ###
+    ### that is, we'll instantiate the PointsViewer class
+    ### and use this method from the instance as the
+    ### main callable;
+    ###
+    ### don't worry about the "self" parameter, Nodezator
+    ### is smart enough to ignore it (actually, the smart
+    ### one is inspect.signature(), the responsible for
+    ### such behaviour)
+
+    def view_points(
+        self,
+
+        points: Iterable,
+
+        framerate: {
+          'widget_name': 'int_float_entry',
+          'widget_kwargs' : {'min_value': 0},
+          'type': int
+        } = 30,
+
+        frames_delay: {
+          'widget_name'   : 'int_float_entry',
+          'widget_kwargs' : {'min_value': 0},
+          'type'          : int
+        } = 0,
+    ):
+        """Display points on screen.
+
+        To stop displaying the points just press &lt;Escape&gt;.
+        This will trigger the exit of the inner loop.
+        """
+        ### store points in a list
+        self.points = list(points)
+
+        ### store the framerate
+        self.fps = framerate
+
+        ### define an operation that tells when to
+        ### update the next point
+
+        self.update_next_point = (
+            cycle((True,) + ((False,) * frames_delay)).__next__
+        )
+
+        ### also store the __next__ operation of a cycle iterator
+        ### created from the points; this way you'll get a new
+        ### point whenever it is executed
+        self.get_next_point = cycle(self.points).__next__
+
+        ### reset the extra offset of the points
+        EXTRA_OFFSET.xy = (0, 0)
+
+        ### enable keyboard mode
+        self.enable_keyboard_mode()
+
+        ### loop
+        self.loop()
+
+
+    ### set attribute on view_points method so the
+    ### execution time tracking is dismissed for this
+    ### node;
+    ###
+    ### we need to do this here rather than after
+    ### instantiating PointsViewer because after
+    ### instantiating the class the view_points method
+    ### doesn't allow new attributes to be set on it
+    view_points.dismiss_exec_time_tracking = True
+
+
+### finally, we just need to instantiate the PointsViewer
+### and alias its view_points() method as the main callable
+###
+### note that we also make it so the callable can be found in
+### this module using its own name, that is, 'view_points';
+###
+### we do so because when the node layout is exported as a python
+### script, its name is used to find the callable
+main_callable = view_points = PointsViewer().view_points
+</python>
+
+
+<p>This new version of the node script has only <b>516 lines</b>, and that's because we are counting the comments as well. It is a small number of lines and yet with just that we defined a viewer tool that can display animated points, move them around using the keyboard and mouse and reposition them automatically when the window is resized. We could even have reduced this number even further by refactoring the <i>draw()</i> method to reduce the number of conditional blocks.</p>
+
+<p>Also note that in addition to referencing the main callable to be used in the <i>main_callable</i> variable, we also created a variable called <i>view_points</i> at the same time. As explained in the code comment, if we use this node in a .ndz file and we want to export the file as Python code, we must ensure the main callable can be found on the node script module <i>__main__.py</i> using its name (in this case, <i>view_points</i>). The first version using a function doesn't need this extra step because the <i>def</i> statement already stores the function in the module in a variable with its name.</p>
+
+<p>Moreover, no syntax or API is ever enforced by Nodezator, it is all plain pygame-ce and its power in action. Of all the 516 lines of code the only change required by Nodezator was to point out the main callable using the <i>main_callable</i> variable. We also set the <i>dismiss_exec_time_tracking</i> attribute on the view_image method, but even this is a very small change and optional. That is, you only had to add 02 lines, and one of them was optional.</p>
+
+<p>I hope this example gave you a tiny glimpse of pygame-ce's power to create real-time visualization tools that are easy to develop and maintain, combined with Nodezator to integrate all of this in a node editing interface.</p>
+
+<p>Also, just cause we are highlighting the small number of lines used to achieve this visualization, it doesn't mean you have to worry about keeping the line count of your viewer node scripts small (or any other kind of node). You should only focus on making things work. Only after that you should worry about refactoring. Again, remember that there's multiple ways to achieve things. Just do what's best for your use case.</p>
+
+<p>In the following chapters we'll learn how to improve integration of this custom visualization loop with Nodezator and revisit the topic about how to set a pygame surface to use as an in-graph visual. We'll also learn yet another way to provide in-graph visual and the full visual without having to return them from our viewer node. Finally, we'll also briefly discuss yet another optional improvement to our script to make our custom visualization loop even more versatile.</p>
+
+
+<p><a href="ch-viewer-nodes-with-custom-visualization-loops.htsl">Previous chapter</a> |  <a href="index.htsl">Table of contents</a> | <a href="ch-more-advanced-viewer-node-features-part1.htsl">Next chapter</a></p>
+
+</body>
+
+</htsl>
