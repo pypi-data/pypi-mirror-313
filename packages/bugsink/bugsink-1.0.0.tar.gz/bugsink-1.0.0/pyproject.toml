@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_file = "bugsink/_version.py"
+
+[project]
+name = "bugsink"
+authors = [
+    {name = "Bugsink B.V.", email = "info@bugsink.com"},
+]
+description = "Self-hosted Error Tracking"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dynamic = ["version", "dependencies"]
+
+[project.scripts]
+bugsink-show-version = "bugsink.scripts.show_version:main"
+bugsink-manage = "bugsink.scripts.manage:main"
+bugsink-create-conf = "bugsink.scripts.create_conf:main"
+bugsink-runsnappea = "bugsink.scripts.runsnappea:main"
+
+[project.urls]
+homepage = "https://www.bugsink.com/"
+documentation = "https://www.bugsink.com/docs/"
+issues = "https://github.com/bugsink/bugsink/issues"
+repository = "https://github.com/bugsink/bugsink"
+
+[tool.setuptools]
+include-package-data = true  # this is the default, but explicit is better than implicit
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "alerts*",
+    "api*",
+    "bugsink*",
+    "compat*",
+    "events*",
+    "ingest*",
+    "issues*",
+    "performance*",
+    "phonehome*",
+    "projects*",
+    "releases*",
+    "sentry*",
+    "sentry_sdk_extensions*",
+    "snappea*",
+    "static*",
+    "teams*",
+    "templates*",
+    "theme*",
+    "users*",
+]
+
+exclude = [
+    # This, or similar syntaxes, don't seem to actually work.
+    # https://stackoverflow.com/q/75091671/339144
+    # "bugsink/settings/development.py",
+]  # exclude packages matching these glob patterns (empty by default)
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
