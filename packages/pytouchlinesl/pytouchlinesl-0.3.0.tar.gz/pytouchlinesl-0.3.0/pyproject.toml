@@ -1,0 +1,60 @@
+[project]
+name = "pytouchlinesl"
+version = "0.3.0"
+authors = [{ name = "Jon Seager", email = "jon@sgrs.uk" }]
+description = "An API client for Roth's TouchlineSL control system."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = ["aiohttp", "pydantic"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ruff"]
+
+[project.urls]
+Homepage = "https://github.com/jnsgruk/pytouchlinesl"
+Issues = "https://github.com/jnsgruk/pytouchlinesl/issues"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+dev-dependencies = ["pytest>=8.3.2", "pytest-asyncio>=0.24.0", "ruff>=0.6.2"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "module"
+
+# Linting tools configuration
+[tool.ruff]
+line-length = 99
+extend-exclude = ["__pycache__", "*.egg_info"]
+
+[tool.ruff.lint]
+per-file-ignores = { "tests/**" = [
+    "D",
+], "__init__.py" = [
+    "F401",
+], "pytouchlinesl/client/models/models.py" = [
+    "D101",
+] }
+select = ["E", "W", "F", "C", "N", "D", "I001"]
+ignore = ["E501", "D107"]
+extend-ignore = [
+    "D203",
+    "D204",
+    "D213",
+    "D215",
+    "D400",
+    "D404",
+    "D406",
+    "D407",
+    "D408",
+    "D409",
+    "D413",
+]
