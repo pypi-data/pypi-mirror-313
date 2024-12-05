@@ -1,0 +1,156 @@
+[tool.poetry]
+name = "overhave"
+version = "5.2.1"
+description = "Overhave - web-framework for BDD"
+readme = "README.rst"
+authors = [
+    "Vladislav Mukhamatnurov <livestreamepidemz@yandex.ru>",
+    "Tinkoff Backend Dialog System Team <bds-dev@tinkoff.ru>"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: Apache Software License",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Testing :: BDD",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Framework :: Flask",
+    "Framework :: Pytest",
+]
+
+[tool.poetry.scripts]
+overhave = 'overhave.cli:overhave'
+overhave-demo = 'demo:overhave_demo'
+
+[tool.poetry.plugins.pytest11]
+overhave = "overhave.pytest_plugin.plugin"
+
+[tool.poetry.dependencies]
+python = ">=3.11, <3.13"
+psycopg2-binary = "^2.8"
+pydantic = ">=1.7"
+yarl = ">=1.1.1"
+WTForms = ">=2.2"
+python-ldap = "3.4.3"
+ldap3 = "^2.6"
+wsgi_intercept = "^1.8"
+redis = "^5.0.0"
+httptools = "^0.6.4"
+python-dateutil = "^2.8.1"
+alembic = "^1.4.3"
+boto3 = "^1.17.16"
+boto3-type-annotations = "^0.3.1"
+GitPython = "^3.1.15"
+python-gitlab = "^2.9.0"
+python-jose = "^3.3.0"
+python-multipart = "^0.0.5"
+aiofiles = "^0.8.0"
+httpx = "^0.23.0"
+walrus = "^0.9.2"
+flask-login = "^0.6.2"
+flask-wtf = "^1.1.1"
+flask = "^2.3.2"
+sqlalchemy-utils = "^0.41.1"
+sqlalchemy-utc = "^0.14.0"
+prometheus-client = ">=0.16.0"
+pydantic-settings = "^2.0.1"
+typer = "^0.7.0"
+tenacity = "^8.2.3"
+pytz = "^2020.1"
+fastapi = ">=0.99.0"
+sqlalchemy = "^2.0.17"
+flask-admin = "^1.6.1"
+orjson = "^3.9.10"
+
+[tool.poetry.group.dev.dependencies]
+flake8-awesome = "<1.3"
+flake8-docstrings = "^1.5"
+pytest-faker = "^2.0"
+pytest-cov = "^2.10.1"
+pytest-deadfixtures = "^2.2.1"
+pytest-random-order = "^1.0.4"
+alchemy-mock = "^0.4.3"
+coverage = {version = "^6.0.1", extras = ["toml"]}
+pytest-mock = "^3.6.1"
+allure-pytest = "^2.9.45"
+pytest-xdist = "^2.5.0"
+uvicorn = "^0.17.5"
+black = "^24.10.0"
+coverage-badge = "^1.1.0"
+pytest-bdd = "^6.0.1"
+docutils-stubs = "^0.0.22"
+pytest-redis = "^2.4.0"
+perflint = "^0.7.3"
+pytest = "^6.2.5"
+sphinx = "^7.0.0"
+mypy = "^1.3.0"
+tox = "^4.21"
+flake8 = "^6.1.0"
+flake8-bugbear = "^23.9.16"
+pycodestyle = "^2.11.0"
+docker = "^6.1.3"
+requests-mock = "^1.11.0"
+filelock = "^3.12.4"
+twine = "^5.1.1"
+
+[tool.pytest.ini_options]
+addopts = "-l -v --random-order-bucket=module --random-order-seed=$RANDOM -p no:overhave"
+testpaths = "tests"
+python_files = ["test_*.py"]
+python_classes = ["*Test", "Test*"]
+python_functions = ["test_*"]
+filterwarnings = [
+    "ignore::DeprecationWarning:sqlalchemy_utils.observer",
+]
+xfail_strict=true
+
+[tool.coverage.run]
+omit = [
+    "**/__main__.py",
+    "*_cache/*",
+    ".pytest_cache",
+    "overhave/cli/*"
+]
+
+[tool.isort]
+balanced_wrapping = true
+default_section = "THIRDPARTY"
+include_trailing_comma = true
+known_first_party = ["docker", "docs", "overhave", "tests", "demo"]
+line_length = 120
+multi_line_output = 3
+
+[tool.black]
+target-version = ['py312']
+line-length = 120
+
+[build-system]
+requires = ["poetry>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = true
+isolated_build_env = .package
+envlist = py312
+[testenv]
+allowlist_externals =
+    make
+    docker-compose
+venv = {toxworkdir}/{[tox]isolated_build_env}
+setenv =
+    VENV = {[testenv]venv}
+    WORK_DIR = {toxworkdir}
+passenv =
+    OVERHAVE_DB_URL
+    OVERHAVE_REDIS_URL
+    OVERHAVE_REDIS_SENTINEL_URLS
+    PACKAGE_BUILD_DIR
+commands =
+    make check
+"""
