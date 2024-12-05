@@ -1,0 +1,45 @@
+[project]
+name = "attackmate"
+authors = [
+    {name = "Wolfgang Hotwagner", email = "wolfgang.hotwagner@ait.ac.at"},
+]
+description = "AttackMate is an attack orchestration tool that executes full attack-chains based on playbooks."
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["Pentest", "Attack", "Orchestration", "Hacking", "Simulating", "Attackchain"]
+license = {text = "GPL-3.0"}
+dependencies = [
+    "pydantic ~= 2.5",
+    "colorlog",
+    "pymetasploit3",
+    "pyaml",
+    "paramiko",
+    "sliver-py",
+    "tabulate",
+    "python-magic",
+    "httpx",
+    "httpx[http2]"
+]
+dynamic = ["version"]
+
+[project.scripts]
+attackmate = "attackmate.__main__:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+# [tool.setuptools]
+# py-modules = []
+# packages = ["attackmate"]
+# include-package-data = true
+
+[tool.setuptools.packages.find]
+namespaces = true
+where = ["src"]
+
+[tool.setuptools.package-data]
+"attackmate.data" = ["*.tar.gz"]
+
+[tool.setuptools.dynamic]
+version = {attr = "attackmate.metadata.__version__"}
