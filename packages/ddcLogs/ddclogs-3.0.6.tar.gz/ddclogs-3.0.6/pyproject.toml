@@ -1,0 +1,52 @@
+[build-system]
+requires = ["poetry-core>=1.9.1"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "ddcLogs"
+version = "3.0.6"
+description = "Easy logs with rotations"
+license = "MIT"
+readme = "README.md"
+authors = ["Daniel Costa <danieldcsta@gmail.com>"]
+maintainers = ["Daniel Costa"]
+repository = "https://github.com/ddc/ddcLogs"
+homepage = "https://pypi.org/project/ddcLogs"
+packages = [{include = "ddcLogs"}]
+package-mode = true
+keywords = [
+    "python3", "python-3", "python",
+    "log", "logging", "logger",
+    "logutils", "log-utils", "ddcLogs"
+]
+classifiers = [
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent",
+    "Environment :: Other Environment",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+]
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.dependencies]
+python = ">=3.10,<=3.13"
+pydantic-settings = ">=2.6.1"
+python-dotenv = ">=1.0.1"
+pytz = ">=2024.2"
+
+[tool.poetry.group.test.dependencies]
+coverage = ">=7.6.8"
+poethepoet = ">=0.31.1"
+pytest = ">=8.3.3"
+
+[tool.poe.tasks]
+_test = "poetry run coverage run --omit=./tests/* --source=./ddcLogs -m pytest -v"
+_coverage_report = "poetry run coverage report"
+_coverage_xml = "poetry run coverage xml"
+tests = ["_test", "_coverage_report", "_coverage_xml"]
+test = ["tests"]
