@@ -1,0 +1,166 @@
+## Data Forge Template
+
+Welcome to the Data Forge Template — a powerful and flexible Cookiecutter template designed to streamline and standardize data engineering workflows across projects. This template is a part of the Data Forge initiative aimed at enhancing productivity, ensuring consistency, and promoting best practices within the data engineering and data science teams.
+
+### Key Features
+
+1. **Standardized Project Structure**: Provides a structured folder layout for data engineering projects, making it easy to navigate, understand, and collaborate effectively.
+
+2. **Pre-configured Tools**:
+
+    * **Poetry** for dependency management, with `virtualenvs.in-project = true` to store virtual environments in the project directory, keeping it self-contained.
+    * **Pre-commit hooks** for automated code checks.
+    * **Black** for code formatting, **Flake8** for linting, **isort** for import sorting, and **mypy** for type checking.
+    * **Prettier** for YAML formatting, ensuring config files are clean and readable.
+
+3. **Automated Setup:** Includes `Makefile` commands for setting up development and production environments, installing dependencies, and configuring Git hooks for consistent project initialization.
+
+4. **Integrated Git Hooks**: Hooks enforce code quality checks before committing changes, ensuring clean, well-formatted code is committed. Hooks also enforce a consistent commit message format using Conventional Commits.
+
+5. **Environment-Specific Installation Options**:
+
+   * **Development Setup** (`make setup`): Installs development dependencies, useful for testing and development.
+   * **Production Setup** (`make setup-no-dev`): Skips development dependencies, creating a lean environment for deployment.
+
+6. **Support for Data Tools**: Compatible with popular data engineering tools and libraries, including
+**Databricks** and **PySpark**, catering specifically to data-driven workflows.
+
+
+### Prerequisites
+
+Before starting, ensure that you have the following installed on your machine:
+
+1. **Python 3.9+**: Any Python version 3.9 or newer is required for this project.
+If you're still on Python 2.x... 🤔 well, it’s time to catch up with the cool kids! 😎
+2. **Cookiecutter**: To generate projects from the DataForge template. 🍪
+
+#### Install Homebrew (if you don't have it installed)
+Homebrew is a popular package manager for macOS that makes it easy to install software like Python, Poetry, or whatever else you might need to stay **sane**. If you don't have Homebrew installed, follow these steps:
+
+Open your terminal and run the following command to install Homebrew:
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+After the installation is complete, add Homebrew to your PATH by adding the following line to your .zshrc or .bash_profile (depending on your shell):
+```sh
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
+source ~/.zshrc
+```
+If you're using **Bash**:
+```sh
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.bash_profile
+source ~/.bash_profile
+```
+
+#### Install Python 3.12
+
+To install for example Python 3.12 using Homebrew, you can run:
+```sh
+brew install python@3.12
+```
+(Feel free to install a different version if you prefer. We're flexible like that.)
+
+#### Install Cookiecutter
+
+You can install it using pip
+
+```sh
+pip install cookiecutter
+```
+#### Using the DataForge Template
+To create a new project using this template, run the following command:
+
+```sh
+cookiecutter https://github.com/cloudIT4IPM/data-forge-template --no-input -o
+```
+This command will prompt you for information like the project name and author name, then generate a new project directory with the DataForge template structure.
+
+#### Initialize Git Repository
+If your project folder does not have a **.git** directory, initialize it by running:
+```sh
+git init
+```
+Make sure to run this in the **parent directory** of your project where the **.git** folder will be created.
+
+#### Project Setup
+
+To install all the dependencies for the project, run the following command:
+```sh
+make setup
+```
+
+This command will:
+1. Install all Python dependencies using Poetry. Think of it as your project's secret sauce. 🍝
+2. Set up Git hooks with pre-commit. It’s like having a little guardian angel watching over your commits. 👼
+
+#### Linting the Codebase
+To lint the entire codebase using the pre-configured tools (e.g., Black, Flake8, and others), use the following command always **FIRST** before pushing your changes:
+
+```sh
+make lint
+```
+
+This will run the pre-commit hooks on all files to ensure code consistency and quality. It’s like giving your code a quick shower before sending it out into the world.
+
+### Commit Message Guidelines [gist.github.com](https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13)
+#### This project uses Conventional Commits for commit messages. Below are the allowed types:
+
+- **feat**: When you’ve added something new and shiny! ✨
+- **fix:** When you’ve bravely squashed a bug. 🐞💥
+- **docs**: When you’ve decided to share your wisdom with the world. 📚
+- **style**: When you’re tidying up your code to make it look sharp and polished (think of it as refactoring for aesthetics). 🧹
+- **refactor**: When you’ve reimagined the code structure without adding or fixing anything (just making it better). 🔧
+- **perf**: When you’ve supercharged the performance of the code. 🚀
+- **test**: When you’re adding or improving tests (because you’re responsible like that). 🧪
+- **chore**: When you’re doing the behind-the-scenes work like updating build tasks or dependencies. 🛠️
+
+#### Example of a Proper Commit Message
+```sh
+git commit -m "feat: Unleash the power of a new data source 🚀"
+```
+#### Incorrect Commit Message Format (And your commit will be rudely rejected! 😜)
+```sh
+git commit -m "Added new data source (Oops, try again!)"
+```
+(Sorry, we’re strict. But it’s for your own good, we promise!)
+
+#### Running Tests
+Before creating a pull request, it's a good practice to run all tests to ensure that your code doesn't introduce any issues. (If you have them, if not, you really should get some! 😄)
+
+To run tests before creating a pull request:
+```sh
+make test-before-pr
+```
+This command will run all tests and stop if any test fails. Don’t worry, we won’t judge... much.
+
+#### Creating a Pull Request
+From develop to prod branch
+```sh
+make dev-to-prod
+```
+From prod to main branch
+```sh
+make prod-to-main
+```
+From develop to main branch
+```sh
+make dev-to-main
+```
+From staging to prod branch
+```sh
+make staging-to-prod
+```
+Don’t worry, it’s as easy as it sounds!
+
+#### Cleaning Up the Environment
+If you need to clean up your environment by removing temporary files and cached data, use the following command regularly (because no one likes clutter):
+```sh
+make clean
+```
+This will:
+1. Delete all .pyc files (no one likes leftover crumbs). 👎
+2. Remove all __pycache__ directories (because clean is beautiful). 🧼
+3. Clear the Poetry cache for PyPI dependencies (a fresh start, every time). 🤩
+
+#### And Now... Start Forging Your Project! 🔨🔥
+With everything set up, you’re ready to start forging your masterpiece. Let the data magic begin! ✨
