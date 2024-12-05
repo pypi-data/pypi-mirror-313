@@ -1,0 +1,39 @@
+[project]
+name = "retina-therm"
+version = "0.3.1"
+description = "A model for simulating retinal laser exposures."
+authors = [{name = "CD Clark III", email = "clifton.clark@gmail.com"}]
+dependencies = [
+    "numpy>=2.1.1",
+    "typer>=0.12.5",
+    "pyyaml>=6.0.2",
+    "pint>=0.24.3",
+    "fspathtree>=1.0",
+    "pydantic>=2.9.2",
+    "tissue-properties>=0.2.0",
+    "powerconf>=0.1.2",
+    "tqdm>=4.66.5",
+    "h5py>=3.11.0",
+]
+readme = "README.md"
+requires-python = ">= 3.10"
+
+[project.scripts]
+"retina-therm" = "retina_therm.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pytest>=8.3.3",
+    "pytest-benchmark>=4.0.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/retina_therm"]
