@@ -1,0 +1,102 @@
+logger:
+  endpoints:
+    - endpoint:
+        type: "logging"
+        name: "RemoteLog"
+        class: "LogMessage"
+        topic: "/RemoteLog"
+        QoS: 10
+
+knowledgeIn:
+  properties:
+  {% for feature in swc.features %}
+  {% if feature.featureType == 'inport'%}
+  {% if 'data' in feature.type%}
+    - property:
+        type: "data"
+        name: "{{feature.name}}"
+        class: "{{feature.name}}"
+        topic: "/{{feature.name}}"
+        QoS: 10
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+
+knowledgeOut:
+  properties:
+  {% for feature in swc.features %}
+  {% if feature.featureType == 'outport'%}
+  {% if 'data' in feature.type%}
+    - property:
+        type: "data"
+        name: "{{feature.name}}"
+        class: "{{feature.name}}"
+        topic: "/{{feature.name}}"
+        QoS: 10
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+
+eventIn:
+  properties:
+  {% for feature in swc.features %}
+  {% if feature.featureType == 'inport'%}
+  {% if 'event' in feature.type%}
+    - property:
+        type: "event"
+        name: "{{feature.name}}"
+        class: "-"
+        topic: "/{{feature.name}}"
+        QoS: 10
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+  {% for thread in swc.threads %}
+  {% if thread.eventTrigger != None%}
+    - property:
+        type: "event"
+        name: "{{thread.eventTrigger}}"
+        class: "-"
+        topic: "/{{thread.eventTrigger}}"
+        QoS: 10
+  {% endif %}
+  {% endfor %}
+
+eventOut:
+  properties:
+  {% for feature in swc.features %}
+  {% if feature.featureType == 'outport'%}
+  {% if 'event' in feature.type%}
+    - property:
+        type: "event"
+        name: "{{feature.name}}"
+        class: "-"
+        topic: "/{{feature.name}}"
+        QoS: 10
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+
+
+mqtt_broker: "{{IP}}"
+mqtt_port: 1883
+
+mqtt_subscribe_topics:
+  - "/Scan"
+
+mqtt_publish_topics:
+  - "monitor/event"
+
+redis_host: "{{IP}}"
+redis_port: 6379
+
+logging:
+  level: "DEBUG"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "MAPE_test.log"
+
+knowledge_config:
+  storage_type: "global"
+  redis_host: "{{IP}}"
+  redis_port: 6379
+  redis_db: 0
