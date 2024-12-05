@@ -1,0 +1,25 @@
+$id: https://jsonschemata.repodynamics.com/color/hsl-string
+$schema: https://json-schema.org/draft/2020-12/schema
+title: HSL Color String
+description: |
+  A CSS [`hsl()`/`hsla()`](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl)
+  functional notation expressing a
+  [CSS `color` property](https://developer.mozilla.org/en-US/docs/Web/CSS/color)
+  in the sRGB color space
+  according to its hue, saturation, and lightness components.
+  An optional alpha channel may be specified for transparency.
+type: string
+oneOf:
+  # New format
+  - pattern: ^hsla?\(\s*((([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)(deg|rad|grad|turn)?)|(none))\s*((\+?\d*\.?\d+(?:[eE][+-]?\d+)?%?)|(none))\s*((\+?\d*\.?\d+(?:[eE][+-]?\d+)?%?)|(none))\s*(/\s*((\+?\d*\.?\d+(?:[eE][+-]?\d+)?%?)|(none))\s*)?\)$
+  # Old format
+  - pattern: ^hsla?\(\s*(([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)(?P<h_unit>deg|rad|grad|turn)?)\s*,\s*(\+?\d*\.?\d+(?:[eE][+-]?\d+)?%)\s*,\s*(\+?\d*\.?\d+(?:[eE][+-]?\d+)?%)\s*(,\s*(\+?\d*\.?\d+(?:[eE][+-]?\d+)?%?)\s*)?\)$
+examples:
+  - 'hsl(0, 100%, 50%)'
+  - 'hsl(120, 100%, 50%)'
+  - 'hsl(240, 100%, 50%)'
+  - 'hsl(0, 0%, 0%)'
+  - 'hsla(0, 100%, 50%, 1)'
+  - 'hsla( 120, 100%, 50%, 0.5 )'
+  - 'hsla(240,100%,50%,0.25)'
+  - 'hsla( 10deg  0% 0%  0.5 )'
