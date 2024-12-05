@@ -1,0 +1,91 @@
+[build-system]
+requires = [
+  "setuptools >= 65.3.0", # required by pyproject+setuptools_scm integration
+  "setuptools_scm[toml] >= 7.0.5", # required for "no-local-version" scheme
+
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.10"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+name = "mkdocs-ansible"
+description = "Ansible MkDocs Theme based on mkdocs-material"
+readme = "docs/README.md"
+authors = [{ "name" = "Ansible by Red Hat", "email" = "info@ansible.com" }]
+maintainers = [{ "name" = "Ansible by Red Hat", "email" = "info@ansible.com" }]
+license = { text = "MIT" }
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Web Environment",
+  "Framework :: MkDocs",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: JavaScript",
+  "Programming Language :: Python",
+  'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: 3.11',
+  'Programming Language :: Python :: 3.12',
+  'Programming Language :: Python :: 3.13',
+  "Topic :: Documentation",
+  "Topic :: Software Development :: Documentation",
+  "Topic :: Text Processing :: Markup :: HTML",
+]
+keywords = ["ansible", "mkdocs", "theme"]
+
+[project.urls]
+homepage = "https://github.com/ansible/mkdocs-ansible"
+documentation = "https://ansible.readthedocs.io/projects/mkdocs-ansible/"
+repository = "https://github.com/ansible/mkdocs-ansible"
+changelog = "https://github.com/ansible/mkdocs-ansible/releases"
+
+
+[project.entry-points."mkdocs.themes"]
+ansible = "mkdocs_ansible"
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+omit = ["test/*", "src/mkdocs_ansible/_version.py"]
+# Increase it just so it would pass on any single-python run
+fail_under = 82
+skip_covered = true
+skip_empty = true
+# During development we might remove code (files) with coverage data, and we dont want to fail:
+ignore_errors = true
+show_missing = true
+
+[tool.coverage.run]
+source = ["src"]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+warn_unused_configs = true
+exclude = ['build']
+
+[[tool.mypy.overrides]]
+module = ["mkdocs_ansible._version"]
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
+module = ["mkdocs_ansible"]
+warn_unused_ignores = false # https://github.com/python/mypy/issues/13201
+
+[tool.pylint.MASTER]
+ignore-paths = "^src/.*/(_version|_vendor).*$"
+
+[tool.setuptools.dynamic]
+dependencies = { file = [".config/requirements.in"] }
+optional-dependencies.test = { file = [".config/requirements-test.in"] }
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"*" = ["*.css", "*.html", "*.js"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+write_to = "src/mkdocs_ansible/_version.py"
