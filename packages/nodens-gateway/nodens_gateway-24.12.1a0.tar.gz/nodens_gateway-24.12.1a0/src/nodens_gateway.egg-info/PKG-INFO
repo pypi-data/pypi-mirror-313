@@ -1,0 +1,95 @@
+Metadata-Version: 2.1
+Name: nodens-gateway
+Version: 24.12.1a0
+Summary: Run the NodeNs gateway
+Author-email: Khalid Z Rajab <khalid@nodens.eu>
+License: The MIT License (MIT)
+        
+        Copyright (c) 2024 Khalid Rajab and NodeNs Medical Ltd.
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Project-URL: Homepage, https://www.nodens.eu
+Keywords: nodens,gateway,radar
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: paho-mqtt==1.6.1
+Requires-Dist: tomli; python_version < "3.11"
+Requires-Dist: pyyaml
+Requires-Dist: numpy
+Requires-Dist: platformdirs
+
+The purpose of this program - NodeNs Gateway - is to operate an MQTT gateway for connection to NodeNs sensors. The gateway will detect NodeNs sensors connected to the MQTT host, process their data, and optionally publish to a Cloud service and/or save to local storage.
+
+## Installation
+NodeNs Gateway can be installed using pip:
+```
+pip install nodens.gateway
+```
+
+### Troubleshooting
+**Installing PyYaml**. Pip sometimes has trouble installing the PyYaml package. If you experience this, it may be easier to install it manually:
+```
+pip install pyyaml
+```
+
+## Operation
+NodeNs Gateway can be executed directly from the command line as follows:
+```
+python -m nodens.gateway
+```
+
+It can also be imported as a library into your own scripts:
+```import nodens.gateway```
+
+On execution, as a first step it will search for the configuration file ```config-gateway.yaml``` to define the MQTT broker and other basic settings. The program will first search for the config file in the User's (your) default config folder, and then in the folder you've executed the program from. If the config file is not found, it will create one based on a default configuration. [Click here for details of the Configuration](##Configuration).
+
+If a Cloud service operation has been specified, the script will also search for relevant access tokens or certificates.
+
+## Configuration
+### Location of configuration file 
+The program will search for the configuration file ```config-gateway.yaml``` in the following order:
+
+1.  In the user config folder, e.g.
+    - Windows: */Users/\<user>/AppData/Local/NodeNs/Gateway/*
+    - Unix:  *~/.config/Gateway/*
+2.  In the current working folder.
+3.  In *<System documents folder>/NodeNs/*
+4.  In *<System documents folder>/*
+5.  Otherwise, a default config file will be created in the user folder, and the program will print its location. Feel free to edit it as necessary!
+
+### Description of settings
+
+**Program**
+
+*WRITE_FLAG* : Set to *1* if you require sensor data to be saved to disk. Data will be saved in csv form to: *\<current folder>/Saved/*
+*CLOUD_WRITE_TIME* : How often data is saved to a Cloud service (if activated)
+
+**Sensor**
+
+*Sensor_IP* : IP address of the MQTT broker. _Default_: 10.3.141.1.
+
+
+# Thingsboard setup
+Thingsboard provisioning: https://thingsboard.io/docs/paas/getting-started-guides/helloworld/#step-1-provision-device
+
+
