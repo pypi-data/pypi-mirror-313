@@ -1,0 +1,29 @@
+$id: https://jsonschemata.repodynamics.com/color/rgb-string
+$schema: https://json-schema.org/draft/2020-12/schema
+title: RGB(A) Color String
+description: |
+  A CSS [`rgb()`/`rgba()`](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb)
+  functional notation expressing a
+  [CSS `color` property](https://developer.mozilla.org/en-US/docs/Web/CSS/color)
+  in the sRGB color space according to its red, green, and blue components.
+  An optional alpha channel may be specified for transparency.
+type: string
+oneOf:
+  # New format
+  - pattern: ^rgba?\(\s*(([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%?)|(none))\s*(([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%?)|(none))\s*(([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%?)|(none))\s*(/\s*(([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%?)|(none))\s*)?\)$
+  # Old format (numbers)
+  - pattern: ^rgba?\(\s*([+]?\d*\.?\d+(?:[eE][+-]?\d+)?)\s*,\s*([+]?\d*\.?\d+(?:[eE][+-]?\d+)?)\s*,\s*([+]?\d*\.?\d+(?:[eE][+-]?\d+)?)\s*(,\s*([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%?)\s*)?\)$
+  # Old format (percentages)
+  - pattern: ^rgba?\(\s*([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%)\s*,\s*([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%)\s*,\s*([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%)\s*(,\s*([+]?\d*\.?\d+(?:[eE][+-]?\d+)?%?)\s*)?\)$
+examples:
+  - 'rgb(255, 0, 0)'
+  - 'rgb(0,255,0)'
+  - 'rgb( 0, 0, 255 )'
+  - 'rgb( 255,255,255 )'
+  - 'rgb(100% 0% 0%)'
+  - 'rgb(0% 100% 0% / 10%)'
+  - 'rgb( 0 0 100 / 0.5 )'
+  - 'rgba(255, 0, 0, 1)'
+  - 'rgba(0,255,0,0.5)'
+  - 'rgba( 0, 0, 255, 0.25 )'
+  - 'rgba( 255,255,255,0 )'
