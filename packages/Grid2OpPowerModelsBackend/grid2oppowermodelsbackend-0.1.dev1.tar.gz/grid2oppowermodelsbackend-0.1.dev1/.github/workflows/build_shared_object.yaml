@@ -1,0 +1,61 @@
+name: Build Shared Library
+
+on:
+  push
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        arch: [x64]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: '1.11.1'
+
+      - name: Install dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update && sudo apt-get install -y build-essential libunwind-dev || true
+
+      - name: Install dependencies (Windows)
+        shell: powershell
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install llvm -y
+          choco install msys2 -y
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+          RefreshEnv
+
+      - name: Install Julia dependencies
+        run: |
+          cd PowerModelsLibrary
+          julia --project=. -e '
+            using Pkg
+            Pkg.instantiate()
+            Pkg.add("PackageCompiler")
+            Pkg.add("PowerModels")
+            Pkg.add("JSON")
+          '
+
+      - name: Compile shared library
+        run: |
+          cd PowerModelsLibrary
+          julia --project=. compile_library.jl
+
+      - name: Upload shared library artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-library-${{ matrix.os }}
+          path: |
+            PowerModelsLibrary/**/*.so
+            PowerModelsLibrary/**/*.dll
+            PowerModelsLibrary/**/*.dylib
