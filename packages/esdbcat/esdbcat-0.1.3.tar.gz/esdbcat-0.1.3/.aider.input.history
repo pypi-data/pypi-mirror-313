@@ -1,0 +1,330 @@
+
+# 2024-12-03 14:20:31.051626
++/add *
+
+# 2024-12-03 14:20:50.545612
++/add error.txt 
+
+# 2024-12-03 14:21:25.080974
++In testing I get this error: error.txt. I think this happens when a lot of very small events are added simultaneously. Anyway, we should recover from ConsumerTooSlow by resuming the read at the last event we saw.
+
+# 2024-12-03 14:22:09.290355
++/run esdbcat -f your-busy-stream
+
+# 2024-12-03 14:22:09.290792
++/run esdbcat -f your-busy-stream
+
+# 2024-12-03 14:22:12.953184
++n
+
+# 2024-12-03 14:26:01.435523
++I think it's looping -- can you add some more logging please? Also, replace the object output with the type and position temporarily.
+
+# 2024-12-03 14:29:40.213726
++/run esdbcat -f your-stream
+
+# 2024-12-03 14:29:40.213805
++/run esdbcat -f your-stream
+
+# 2024-12-03 14:29:41.433491
++n
+
+# 2024-12-03 15:24:06.752580
++Okay yeah commit position just doesn't work for \$all. Or idk. Maybe it's something with $all? I think I get the position in the original stream. --- Oh wait. The code doesn't support numeric positions at all! 
+
+# 2024-12-03 15:25:01.883562
++/run esdbcat -o 1234567 your-stream
+
+# 2024-12-03 15:25:01.883758
++/run esdbcat -o 1234567 your-stream
+
+# 2024-12-03 15:25:24.947838
++I think it's stream_position?
+
+# 2024-12-03 15:25:43.928317
++/run esdbcat -o 1234567 your-stream
+
+# 2024-12-03 15:25:43.928487
++/run esdbcat -o 1234567 your-stream
+
+# 2024-12-03 15:25:46.175997
++n
+
+# 2024-12-03 15:26:33.643942
++I checked the docs and actually it's commit_position for $all! That seems to indicate where it's supposed to come from. Also does this even need to be parsed as a number? 
+
+# 2024-12-03 15:27:15.128324
++/run esdbcat --offset 100 $all
+
+# 2024-12-03 15:27:15.128369
++/run esdbcat --offset 100 $all
+
+# 2024-12-03 15:29:08.476238
++I think there's still a few calls that use the wrong name. It's commit_position for everything involving \$all streams, and stream_position for everything else.
+
+# 2024-12-03 15:29:25.758627
++/run esdbcat --offset 100 '$all'
+
+# 2024-12-03 15:29:25.758831
++/run esdbcat --offset 100 '$all'
+
+# 2024-12-03 15:29:28.342426
++n
+
+# 2024-12-03 15:29:54.504688
++Hm, that also seems to indicate that it wants a number there. I thought a string was fine! Alright, back to number it is...
+
+# 2024-12-03 15:30:31.059652
++Hm, hang on one sec. Is there a way in Python to get "integer or None" instead of try/except? 
+
+# 2024-12-03 15:30:52.292487
++/run esdbcat --offset 100 '$all'
+
+# 2024-12-03 15:30:52.292681
++/run esdbcat --offset 100 '$all'
+
+# 2024-12-03 15:30:55.164826
++n
+
+# 2024-12-03 15:31:31.135706
++And finally, I'm pretty sure it really is always commit_position, not from_commit_position, for $all; and also always stream_position for normal streams.
+
+# 2024-12-03 15:31:44.912225
++/run esdbcat --offset 100 '$all'
+
+# 2024-12-03 15:31:44.912274
++/run esdbcat --offset 100 '$all'
+
+# 2024-12-03 15:31:46.153963
++n
+
+# 2024-12-03 15:41:42.247811
++Looks like it's working! Can you put the event handling back in and remove the debug statements please? 
+
+# 2024-12-03 15:41:59.267800
++/run esdbcat my-stream
+
+# 2024-12-03 15:41:59.267852
++/run esdbcat my-stream
+
+# 2024-12-03 15:42:01.403060
++m
+
+# 2024-12-03 15:42:02.562633
++n
+
+# 2024-12-03 16:00:59.975765
++Alright, I've rebased and cleaned things up a bit. Can you run (propose) the tests and audit steps please?
+
+# 2024-12-03 16:01:11.845786
++/run pip install -e ".[test,validate]"
+
+# 2024-12-03 16:01:11.845963
++/run pip install -e ".[test,validate]"
+
+# 2024-12-03 16:01:12.354168
++/run ruff check .
+
+# 2024-12-03 16:01:12.354354
++/run ruff check .
+
+# 2024-12-03 16:01:12.513398
++/run mypy .
+
+# 2024-12-03 16:01:12.513580
++/run mypy .
+
+# 2024-12-03 16:01:19.433902
++/run pytest tests/
+
+# 2024-12-03 16:01:19.433973
++/run pytest tests/
+
+# 2024-12-03 16:02:09.336616
++/run ./scripts/validate_package.sh
+
+# 2024-12-03 16:02:09.336681
++/run ./scripts/validate_package.sh
+
+# 2024-12-03 16:02:49.929582
++Oh yeah I removed 'last' because it wasn't doing much. Maybe drop that test or replace it with something else. Maybe a test for numeric offsets?
+
+# 2024-12-03 16:03:03.470329
++/run pytest tests/test_behavior.py -v
+
+# 2024-12-03 16:03:03.470503
++/run pytest tests/test_behavior.py -v
+
+# 2024-12-03 16:13:25.216660
++Ah, there we go. Found the issue; please rerun (repropose) tests?
+
+# 2024-12-03 16:13:40.281854
++/run pytest tests/test_behavior.py -v
+
+# 2024-12-03 16:13:40.282025
++/run pytest tests/test_behavior.py -v
+
+# 2024-12-03 16:13:58.327384
++Hooray! Now run (propose) audits?
+
+# 2024-12-03 16:14:03.158421
++/run ruff check .
+
+# 2024-12-03 16:14:03.158472
++/run ruff check .
+
+# 2024-12-03 16:14:03.287216
++/run mypy .
+
+# 2024-12-03 16:14:03.287454
++/run mypy .
+
+# 2024-12-03 16:14:08.283543
++/run ./scripts/validate_package.sh
+
+# 2024-12-03 16:14:08.283818
++/run ./scripts/validate_package.sh
+
+# 2024-12-03 16:14:45.078444
++Ah, fix the audit issues please? ... Or, honestly, mark as ignored as required.
+
+# 2024-12-03 16:15:13.403694
++/run ruff check .
+
+# 2024-12-03 16:15:13.403739
++/run ruff check .
+
+# 2024-12-03 16:15:13.530232
++/run mypy .
+
+# 2024-12-03 16:15:13.530405
++/run mypy .
+
+# 2024-12-03 16:15:52.207990
++Hm honestly, can you turn the line length check off globally? Also the == 3 should probably be noqad, that is a stupid warning.
+
+# 2024-12-03 16:16:05.011377
++/run ruff check .
+
+# 2024-12-03 16:16:05.011637
++/run ruff check .
+
+# 2024-12-03 16:17:00.114583
++I think removing the line-length just made it more aggressive. Also now that we have noqa the magic number, we can go back to using 3 as a "Magic" "number".
+
+# 2024-12-03 16:17:16.784577
++/run ruff check .
+
+# 2024-12-03 16:17:16.784667
++/run ruff check .
+
+# 2024-12-03 16:17:36.969536
++Alright, now we can probably raise the line-length limit to 120? Then we just have to fix the one line.
+
+# 2024-12-03 16:17:46.774423
++/run ruff check .
+
+# 2024-12-03 16:17:46.774458
++/run ruff check .
+
+# 2024-12-03 16:17:57.432197
++Almost there!
+
+# 2024-12-03 16:18:21.157919
++Hang on - please fix the "magic value" check by just turning that check off?
+
+# 2024-12-03 16:18:28.339320
++/run ruff check .
+
+# 2024-12-03 16:18:28.339377
++/run ruff check .
+
+# 2024-12-03 16:18:36.278879
++Nice! Okay, only one line length to fix.
+
+# 2024-12-03 16:18:42.961095
++/run ruff check .
+
+# 2024-12-03 16:18:42.961257
++/run ruff check .
+
+# 2024-12-03 16:18:45.794444
++One left..!
+
+# 2024-12-03 16:18:54.066051
++/run ruff check .
+
+# 2024-12-03 16:18:54.066098
++/run ruff check .
+
+# 2024-12-03 16:19:10.922572
++Nice, thanks! With that, no audit errors should remain; could you rerun (propose) audit please?
+
+# 2024-12-03 16:19:16.341860
++/run ruff check --select I,N,UP,B,A,C4,DTZ,T10,ERA,PL,RUF .
+
+# 2024-12-03 16:19:16.341900
++/run ruff check --select I,N,UP,B,A,C4,DTZ,T10,ERA,PL,RUF .
+
+# 2024-12-03 16:19:30.932670
++Sorry, rephrase: rerun all the audit commands? Ie. mypy, verify..
+
+# 2024-12-03 16:19:35.621459
++/run mypy esdbcat tests
+
+# 2024-12-03 16:19:35.621662
++/run mypy esdbcat tests
+
+# 2024-12-03 16:19:36.868040
++/run ruff check .
+
+# 2024-12-03 16:19:36.868098
++/run ruff check .
+
+# 2024-12-03 16:19:36.993327
++/run ./scripts/validate_package.sh
+
+# 2024-12-03 16:19:36.993524
++/run ./scripts/validate_package.sh
+
+# 2024-12-03 16:20:30.257257
++Alright, thanks. I've rebased; can you please tag as 0.1.3 and do the release process?
+
+# 2024-12-03 16:20:41.641001
++/run git tag -a v0.1.3 -m "Release version 0.1.3"
+
+# 2024-12-03 16:20:41.641038
++/run git tag -a v0.1.3 -m "Release version 0.1.3"
+
+# 2024-12-03 16:20:41.759632
++/run git push origin v0.1.3
+
+# 2024-12-03 16:20:41.759813
++/run git push origin v0.1.3
+
+# 2024-12-03 16:20:43.649062
++/run python -m build
+
+# 2024-12-03 16:20:43.649320
++/run python -m build
+
+# 2024-12-03 16:20:46.652090
++/run twine upload dist/*
+
+# 2024-12-03 16:20:46.652131
++/run twine upload dist/*
+
+# 2024-12-03 16:21:19.100293
++Oops - I think you have to delete dist/ first.
+
+# 2024-12-03 16:21:26.652308
++/run rm -rf dist/
+
+# 2024-12-03 16:21:26.652349
++/run rm -rf dist/
+
+# 2024-12-03 16:21:26.765520
++/run python -m build
+
+# 2024-12-03 16:21:26.765621
++/run python -m build
