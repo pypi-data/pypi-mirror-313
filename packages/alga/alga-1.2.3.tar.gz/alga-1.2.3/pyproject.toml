@@ -1,0 +1,90 @@
+[tool.poetry]
+name = "alga"
+version = "1.2.3"
+description = "CLI for remote controlling LG webOS TVs"
+authors = ["Jeppe Fihl-Pearson <jeppe@tenzer.dk>"]
+license = "MIT"
+repository = "https://github.com/Tenzer/alga"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Home Automation",
+    "Topic :: Multimedia",
+    "Typing :: Typed",
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+cfgs = ">= 0.13.0"
+getmac = ">= 0.9.0"
+rich = ">= 13.0.0"
+typer = ">= 0.15.0"
+wakeonlan = ">= 2.0.0"
+websocket-client = ">= 1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+coverage = "*"
+faker = "*"
+mypy = "*"
+pytest = "*"
+pytest-cov = "*"
+
+[tool.poetry.scripts]
+alga = "alga.__main__:app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle
+    "F",  # Pyflakes
+    "I",  # isort
+    "PL",  # Pylint
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # Line too long
+    "UP007",  # Use `X | Y` for type annotations"
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["alga"]
+lines-after-imports = 2
+split-on-trailing-comma = false
+
+[tool.ruff.format]
+skip-magic-trailing-comma = true
+
+[tool.pytest.ini_options]
+addopts = """
+    --cov
+    --cov-fail-under=100
+    --cov-report=term-missing:skip-covered
+    --no-cov-on-fail
+"""
+
+[tool.coverage.report]
+exclude_also = [
+    "if __name__ == .__main__.:",
+]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
