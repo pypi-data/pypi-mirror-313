@@ -1,0 +1,144 @@
+"""ModelCheckpoint that supports fsspec filesystems."""
+import logging
+from os.path import dirname, join
+from tempfile import TemporaryDirectory
+from typing import Optional, Union
+
+import onnx
+import tf2onnx
+from fsspec import AbstractFileSystem
+from keras.callbacks import ModelCheckpoint as ModelCheckpointKeras
+from keras.src.utils import io_utils, tf_utils
+
+from niceml.utilities.fsspec.locationutils import (
+    LocationConfig,
+    open_location,
+)
+
+
+class ModelCheckpoint(ModelCheckpointKeras):
+    """ModelCheckpoint that supports fsspec filesystems.
+    Subclassed and adapted from https://github.com/keras-team/keras/blob/master/keras/callbacks.py
+    """
+
+    def __init__(
+        self,
+        output_location: Union[dict, LocationConfig],
+        model_filename: Optional[str] = None,
+        file_formats: Optional[dict] = None,
+        save_as_onnx: bool = False,
+        **kwargs,
+    ):
+        """
+        Initializes a ModelCheckpoint to save the model files
+
+        Args:
+            output_location: location to save the model to
+            model_filename: filename of the model file without the file extension
+            file_formats: dictionary of parameters to complete the model file name
+            save_as_onnx: whether to save the model also in onnx file format
+            **kwargs: additional keyword arguments for initialization
+        """
+        super().__init__("", **kwargs)
+        self.output_location = output_location
+        self.model_filename = model_filename or "model"
+        self.file_formats = file_formats or {}
+        self.save_as_onnx = save_as_onnx
+
+    def _should_save(self, epoch, logs) -> bool:
+        """Determines whether the model should be saved."""
+        if self.save_best_only:
+            current = logs.get(self.monitor)
+            if current is None:
+                raise ValueError(
+                    "Can save best model only with %s available, "
+                    "got %s." % (self.monitor, list(logs.keys()))
+                )
+            else:
+                if self.monitor_op(current, self.best):
+                    if self.verbose > 0:
+                        io_utils.print_msg(
+                            f"\nEpoch {epoch + 1}: {self.monitor} improved "
+                            f"from {self.best:.5f} to {current:.5f}"
+                        )
+                    self.best = current
+                    return True
+                if self.verbose > 0:
+                    io_utils.print_msg(
+                        f"\nEpoch {epoch + 1}: "
+                        f"{self.monitor} did not improve from {self.best:.5f}"
+                    )
+        else:
+            if self.verbose > 0:
+                io_utils.print_msg(f"\nEpoch {epoch + 1}: saving model")
+            return True
+        return False
+
+    def _save_model(self, epoch, batch, logs):
+        """Saves the model.
+
+        Args:
+            epoch: the epoch this iteration is in.
+            batch: the batch this iteration is in. `None` if the `save_freq`
+              is set to `epoch`.
+            logs: the `logs` dict passed in to `on_batch_end` or `on_epoch_end`.
+        """
+        logs = logs or {}
+
+        if (
+            isinstance(self.save_freq, int)
+            or self.epochs_since_last_save >= self.period
+        ):
+            # Block only when saving interval is reached.
+            logs = tf_utils.sync_to_numpy_or_python_type(logs)
+            self.epochs_since_last_save = 0
+            if self._should_save(epoch, logs):
+                target_fs: AbstractFileSystem
+                with open_location(self.output_location) as (target_fs, target_path):
+                    target_fs.makedirs(target_path, exist_ok=True)
+                    model_path = join(target_path, f"{self.model_filename}.hdf5")
+                    model_path = model_path.format(
+                        epoch=epoch + 1, **self.file_formats, **logs
+                    )
+                    with target_fs.open(
+                        model_path, "wb"
+                    ) as model_file, TemporaryDirectory() as temp_dir:
+                        tmp_path = join(temp_dir, "model.h5")
+                        if self.save_weights_only:
+                            self.model.save_weights(
+                                tmp_path,
+                                overwrite=True,
+                                options=self._options,
+                                save_format="h5",
+                            )
+                        else:
+                            self.model.save(
+                                tmp_path,
+                                overwrite=True,
+                                options=self._options,
+                                save_format="h5",
+                            )
+                        with open(tmp_path, "rb") as tmp_model_file:
+                            model_file.write(tmp_model_file.read())
+                        logging.info("Saved model to %s", model_path)
+                if self.save_as_onnx:
+                    self._save_onnx_model(epoch, logs)
+
+    def _save_onnx_model(self, epoch, logs):
+        """Saves the model in onnx format.
+
+        Args:
+            epoch: the epoch this iteration is in.
+            logs: the `logs` dict passed in to `on_batch_end` or `on_epoch_end`.
+        """
+        logs = logs or tf_utils.sync_to_numpy_or_python_type(logs)
+
+        target_fs: AbstractFileSystem
+        with open_location(self.output_location) as (target_fs, target_path):
+            target_fs.makedirs(dirname(target_path), exist_ok=True)
+            model_path = join(target_path, f"{self.model_filename}.onnx")
+            model_path = model_path.format(epoch=epoch + 1, **self.file_formats, **logs)
+            with target_fs.open(model_path, "wb"):
+                onnx_model, _ = tf2onnx.convert.from_keras(self.model)
+                onnx.save(onnx_model, model_path)
+                logging.info("Saved model to %s", model_path)
