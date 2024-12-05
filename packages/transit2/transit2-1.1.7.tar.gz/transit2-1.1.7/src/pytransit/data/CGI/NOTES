@@ -1,0 +1,26 @@
+1/28/24
+-------
+
+command-line test case:
+
+# python3 ../../../transit.py cgi extract_counts <fastq file> <ids file> <output counts file>
+    
+# python3 ../../../transit.py cgi create_combined_counts <comma seperated headers> <counts file 1> <counts file 2> ... <counts file n> <combined counts file>
+    
+# python3 ../../../transit.py cgi extract_abund <combined counts file> <metadata file> <control condition> <sgRNA strength file> <uninduced ATC file> <drug> <days>  <fractional abundundance file>
+
+# python3 ../../../transit.py cgi run_model <fractional abundundance file>  <CRISPRi DR results file> [-use_negatives]
+
+
+
+> python3 ../../../transit.py cgi extract_abund RIF_D1_combined_counts.txt samples_metadata.txt DMSO sgRNA_info.txt uninduced_ATC_counts.txt RIF 1 RIF_D1.frac_abund.txt
+
+> python3 ../../../transit.py cgi run_model RIF_D1.frac_abund.txt CDR_results.RIF_D1.txt
+[cgi:run_model()] 185 Total Significant Gene Interactions 
+[cgi:run_model()] 112 Significant Gene Depletions 
+[cgi:run_model()] 73 Significant Gene Enrichments 
+
+> python3 ../../../transit.py cgi run_model RIF_D1.frac_abund.txt CDR_results.RIF_D1.negsatives.txt -use_negatives
+[cgi:run_model()] 2132 Total Significant Gene Interactions
+[cgi:run_model()] 1042 Significant Gene Depletions
+[cgi:run_model()] 1090 Significant Gene Enrichments
