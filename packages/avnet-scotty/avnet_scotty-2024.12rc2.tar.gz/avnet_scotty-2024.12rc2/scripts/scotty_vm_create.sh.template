@@ -1,0 +1,33 @@
+#!/bin/sh
+# SPDX-FileCopyrightText: (C) 2022 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+
+set -e
+
+VMNAME="@@VMNAME@@"
+KERNEL="@@KERNEL@@"
+DISK="@@DISK@@"
+APPSIMAGE="@@APPSIMAGE@@"
+OSINFO="$(virt-install --osinfo list | grep "^linux" | head -n 1)"
+
+while [ $# -gt 0 ]; do
+	case $1 in
+	*)
+		VMNAME="$1"
+		break
+		;;
+	esac
+done
+
+if [ -n "${OSINFO}" ]; then
+	APPSIMAGE=$(realpath "${APPSIMAGE}")
+	virt-install --name "${VMNAME}" --import --memory 4096 \
+					--boot kernel="${KERNEL}",cmdline=root=/dev/vda \
+					--disk "${DISK}" \
+					--disk "${APPSIMAGE},bus=scsi,format=raw" \
+					--import --noautoconsole --destroy-on-exit \
+					--osinfo "${OSINFO}"
+else
+	echo "Unable to create the VM. There is no linuxXXXX os in your osinfo-db, please update it."
+fi

@@ -1,0 +1,260 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: (C) 2024 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+"""Checks if there are any updates in used recipes."""
+
+import argparse
+import json
+import logging
+import os
+import urllib
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict
+
+import requests
+
+logging.getLogger().setLevel(logging.INFO)
+
+
+@dataclass
+class UpdateItem():
+    """Class representation of scotty recipe-update output items"""
+    broken: bool = field(default=False)
+    layer: str = field(default="")
+    recipe: str = field(default="")
+    current_version: str = field(default="")
+    next_version: str = field(default="")
+
+
+def generate_jira_link(item: UpdateItem, jira_base_url: str, jira_project_id: str) -> str:
+    """Generate a URL to a pre-filled issue in Jira with for the provided update.
+
+    Args:
+        item (UpdateItem): the update to include in the issue
+        jira_base_url (str): base url to your Jira instance (ie: https://jira.atlassian.net)
+        jira_project_id (str): Jira project id to which open the issue to
+
+    Returns:
+        str: the generated url
+    """
+
+    description = f"*Layer:* {item.layer}\n*Recipe:* {item.recipe}\n"
+    description += f"*Current:* {item.current_version}\n*Latest:* {item.next_version}"
+
+    ticket_properties = {
+        "issuetype": "3",  # 3 maps to Tasks in Jira
+        "labels": "update",
+        "pid": jira_project_id,
+        "priority": "7",  # 7 maps to Medium in Jira
+        "summary": f"New update on recipe {item.recipe}",
+        "description": description,
+    }
+    parameters = '&'.join([
+        '='.join((k, urllib.parse.quote(v)))
+        for k, v in ticket_properties.items()
+    ])
+    url = f"{jira_base_url}/secure/CreateIssueDetails!init.jspa?{parameters}"
+
+    return url
+
+
+def send_message(message: Dict, url: str) -> int:
+    """Send the passed message to Slack/Teams.
+
+    Args:
+        message (Dict): the message
+        url (str): URL to post it to
+
+    Returns:
+        int: the return code of the sending
+    """
+    if url:
+        logging.info("Sending notification")
+        notification_request: requests.Response = requests.post(
+            url,
+            json.dumps(message),
+        )
+        logging.info(json.dumps(message))
+        if notification_request.status_code != 200:
+            logging.error(
+                f"Couldn't POST the message: {notification_request.text}")
+            return notification_request.status_code
+        logging.info("Correctly sent notification")
+    else:
+        logging.warning("Didn't find a WebHook in environment variables")
+        return 1
+
+    return 0
+
+
+def generate_broken_report_teams(item: UpdateItem, url: str) -> Dict:
+    """Generate a broken upstream info message for teams.
+
+    Args:
+        item (UpdateItem): update info from check_recipe
+        url (str): link to workflow run
+
+    Returns:
+        Dict: JSON payload
+    """
+    return {
+        "type": "message",
+        "attachments": [
+            {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                    "type": "AdaptiveCard",
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "version": "1.4",
+                    "action": "type",
+                    "body": [
+                        {
+                            "type": "Container",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "text": f'**Layer**: {item.layer}'
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": f'**Recipe**: {item.recipe}'
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": 'Version check is broken!'
+                                },
+                                {
+                                    "type": "ActionSet",
+                                    "actions": [
+                                        {
+                                            "type": "Action.OpenUrl",
+                                            "title": "View workflow run artifacts",
+                                            "url": url
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+
+
+def generate_update_report_teams(item: UpdateItem, jira_base_url: str, jira_project_id: str) -> Dict:
+    """Generate an update info message for teams.
+
+    Args:
+        item (UpdateItem): update info from check_recipe
+
+    Returns:
+        Dict: JSON payload
+    """
+    return {
+        "type": "message",
+        "attachments": [
+            {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                    "type": "AdaptiveCard",
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "version": "1.4",
+                    "action": "type",
+                    "body": [
+                        {
+                            "type": "Container",
+                            "items": [
+                                {
+                                    "type": "TextBlock",
+                                    "text": f'**Layer** {item.layer}'
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": f'**Recipe**: {item.recipe}'
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": f'Update to {item.next_version} found'
+                                },
+                                {
+                                    "type": "ActionSet",
+                                    "actions": [
+                                        {
+                                            "type": "Action.OpenUrl",
+                                            "title": "Create JIRA Ticket",
+                                            "url": generate_jira_link(item, jira_base_url, jira_project_id)
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+
+
+def get_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(prog='scotty-update-recipes-notification',
+                                     description='Post update notifications')
+    parser.add_argument(
+        '-u',
+        '--url',
+        type=str,
+        help="name of the workflow run holding the artifacts",
+        default=None,
+    )
+    parser.add_argument(
+        '--notify',
+        choices=['no', 'teams'],
+        default='teams',
+        help="send the report as a notification to Teams",
+    )
+    parser.add_argument(
+        '--jira_base_url',
+        type=str,
+        help="base url to your Jira instance (ie: https://jira.atlassian.net)",
+        default=None,
+    )
+    parser.add_argument(
+        '--jira_project_id',
+        type=str,
+        help="Jira project id to which open the issue to",
+        default=None,
+    )
+    parser.add_argument(
+        'input',
+        type=Path,
+        help="Output of scotty recipe-update",
+    )
+
+    return parser.parse_args()
+
+
+def main():
+    """Launch the script."""
+    args = get_args()
+
+    items = [UpdateItem(**x) for x in json.load(open(args.input, 'r'))]
+
+    logging.info(f"Found {len(items)} notifications")
+    if args.notify == 'teams':
+        logging.info("Using Teams notifications")
+        for item in items:
+            if item.broken:
+                send_message(generate_broken_report_teams(item, args.url),
+                             os.environ.get("WEBHOOK_BROKEN"))
+            else:
+                send_message(generate_update_report_teams(item,
+                             args.jira_base_url, args.jira_project_id),
+                             os.environ.get("WEBHOOK_UPDATE"))
+    return 0
+
+
+if __name__ == "__main__":
+    exit(main())
