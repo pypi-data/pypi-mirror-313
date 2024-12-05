@@ -1,0 +1,66 @@
+name: doc to github pages
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update && \
+          sudo apt-get upgrade -y && \
+          sudo apt-get install -y --no-install-recommends \
+          gdb \
+          git \
+          make \
+          libeigen3-dev \
+          libgl1-mesa-dev \
+          libglew-dev \
+          libglfw3-dev \
+          libglu1-mesa-dev \
+          libpng-dev \
+          libusb-1.0-0 \
+          libgomp1 \
+          pybind11-dev \
+          pandoc \
+          software-properties-common \
+          mesa-utils && \
+          sudo rm -rf /var/lib/apt/lists/*
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev,doc]
+          pandoc --version
+
+      - name: Build documentation
+        run: make doc
+
+      - name: Add .nojekyll
+        run: touch doc/sphinx/build/html/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: doc/sphinx/build/html
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
