@@ -1,0 +1,17 @@
+SCHEMA >
+    `start_datetime` DateTime,
+    `request_id` String,
+    `user_id` String,
+    `pipe_id` String,
+    `pipe_name` String,
+    `params` Nullable(String),
+    `url` Nullable(String),
+    `status_code` Nullable(Int32),
+    `error` Nullable(String),
+    `resource_tags` Array(String)
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(toDate(start_datetime))"
+ENGINE_SORTING_KEY "start_datetime, user_id"
+ENGINE_TTL "start_datetime + toIntervalDay(30)"
+

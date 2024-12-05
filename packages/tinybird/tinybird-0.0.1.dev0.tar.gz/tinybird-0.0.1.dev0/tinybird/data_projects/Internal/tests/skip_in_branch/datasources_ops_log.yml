@@ -1,0 +1,8 @@
+- record_count_not_dropping_to_zero:
+    sql: |
+        select count() as count
+        from datasources_ops_log
+        where toDate(timestamp) == toDate(now() - interval 5 day)
+        having count == 0
+    max_time: null
+    max_bytes_read: null

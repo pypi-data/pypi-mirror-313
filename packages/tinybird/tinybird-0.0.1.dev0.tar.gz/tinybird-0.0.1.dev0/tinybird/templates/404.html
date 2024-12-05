@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block meta %}
+<title>Not found · Tinybird</title>
+{% end %}
+
+{% block content %}
+
+{% if not current_user %}
+{% include "partials/_header.html" %}
+{% end %}
+
+<div class="Wrapper">
+  <div class="full-space-center pv-8">
+    <div class="Inner is-shorter is-center">
+      {% if not current_user %}
+        <h2 class="as-font--title as-color--secondary">We are lost</h2>
+        <p class="mt-6" style="font-size:100px">🐣</p>
+      {% else %}
+        <div class="Inner pv-15 is-short is-center">
+          <h2 class="as-font--title as-color--secondary">We are lost</h2>
+          <p class="mv-6" style="font-size:80px">🐣</p>
+          <div class="inline mv-3">
+            <a href="{{ reverse_url('workspace_dashboard', current_user.id) }}" class="Button as-bkg--primary">
+              <span class="as-font--caption-bold as-color--light has-spacing">GO TO YOUR DASHBOARD</span>
+            </a>
+            <p class="as-font--small as-color--tuna mt-1">or <a class="Link as-color--primary underline"
+                href="{{ reverse_url('logout') }}">sign out</a></p>
+          </div>
+        </div>
+      {% end %}
+    </div>
+  </div>
+  {% include "partials/_footer.html" %}
+</div>
+{% end %}

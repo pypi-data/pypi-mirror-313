@@ -1,0 +1,19 @@
+NODE tokens_last_usage_0
+SQL >
+    SELECT
+        token,
+        workspace,
+        multiIf(
+            extractURLParameter(url, 'from') == 'ui',
+            'ui',
+            extractURLParameter(url, 'cli_version') != '',
+            'cli',
+            JSONExtractString(tags, 'user_agent')
+        ) as request_origin,
+        max(start_datetime) as last_request_time
+    FROM spans
+    WHERE token != ''
+    group by token, workspace, request_origin
+
+TYPE MATERIALIZED
+DATASOURCE tokens_last_usage

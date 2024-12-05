@@ -1,0 +1,227 @@
+{% extends "internal_base.html" %}
+
+{% block meta %}
+<title>Cheriff · Workspaces</title>
+{% end %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+{% end %}
+
+{% block content %}
+
+<style>
+    dl {
+        margin-top: 8px;
+    }
+    dt {
+        font-weight: bold;
+    }
+
+    tr.is-enabled:hover, tr.is-disabled:hover {
+      background-color: cornsilk;
+    }
+</style>
+
+<div class="Inner">
+  <div class="pv-5">
+    <div class="flex-between-center">
+      <h2 class="as-font--title as-color--secondary">
+        Workspaces
+      </h2>
+      <form class="ml-3" action="{{ reverse_url('workspaces_admin', 0) }}">
+        <input type="text" name="q" size="30" placeholder="Workspace name, cluster, id,..." value="{{q}}" autofocus />
+        {% if q %}<a href="{{ reverse_url('workspaces_admin', 0) }}">x</a>{% end %}
+        <input type="submit" value="Search" />
+      </form>
+    </div>
+    
+    <div class="as-font--small as-color--body mt-3">
+      {% if len(workspaces) == 0 %}
+        <table style="width: 100%;">
+          <thead>
+            <th>Message</th>
+          </thead>
+          <tbody>
+            <tr class="is-enabled">
+              <td>
+                {% if q %}
+                No active workspaces found
+                {% else %}
+                There is no active workspaces
+                {% end %}
+                {% if current_page > 0 %}
+                , <a href="{{ reverse_url('workspaces_admin', 0) }}">go to the first page</a>
+                {% end %}
+                {% if q %}
+                , <a href="{{ reverse_url('workspaces_admin', 0) }}">remove search</a>
+                {% end %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      {% else %}      
+        <table style="width: 100%;">
+          <thead>
+            <th>Email</th>
+            <th>Usage</th>
+            <th>Created</th>
+            <th>Database</th>
+          </thead>
+          <tbody>
+            {% for id, workspace in workspaces.items() %}
+            <tr class="is-enabled" id="workspace-{{workspace['id']}}">
+              <td>
+                  <a href="{{ reverse_url('workspace_admin', workspace['id']) }}">{{workspace['name']}}</a> {% if workspace.limits %}*{% end %}
+              </td>
+              <td>
+                <dl>
+                  <dt>Pipes</dt>
+                  <dd>{{len(workspace.pipes)}}</dd>
+                </dl>
+                <dl>
+                  <dt>Data Sources</dt>
+                  <dd>{{len(workspace.datasources)}}</dd>
+                </dl>
+                {% if workspace.enabled_pg %}
+                <dl>
+                  <dt>PostgreSQL</dt>
+                  <dd>{{ workspace.pg_server }} / {{ workspace.pg_foreign_server }}:{{ workspace.pg_foreign_server_port }}</dd>
+                </dl>
+                {% end %}
+              </td>
+              <td>{{workspace.created_at.date().isoformat()}}</td>
+              <td style="vertical-align: top;">
+                <dl>
+                  <dt>Server</dt>
+                  <dd>{{ workspace.database_server }}</dd>
+                </dl>
+                <dl>
+                  <dt>Name</dt>
+                  <dd>{{ workspace.database }}</dd>
+                </dl>
+                {% if workspace.clusters %}
+                <dl>
+                  <dt>Clusters</dt>
+                  <dd>{{ ', '.join(workspace.clusters) }}</dd>
+                </dl>
+                {% end %}
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      {% end %}
+
+      <div class="flex-between-center pv-3">
+        <div></div>
+        <div class="flex">
+          {% if current_page > 1  %}
+            <a class="mr-3" href="{{ reverse_url('workspaces_admin', 0) }}">Go to first page</a>
+          {% end %}
+          {% if prev_page > -1  %}
+            <a class="mr-3" href="{{ reverse_url('workspaces_admin', current_page - 1) }}">Prev page</a>
+          {% end %}
+          <span class="mh-3">Page {{current_page}}</span>
+          {% if next_page > -1  %}
+            <a href="{{ reverse_url('workspaces_admin', current_page + 1) }}">Next page</a>
+          {% end %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="Inner">
+  <div class="pv-5">
+    <h2 class="as-font--title as-color--secondary">
+      New Workspace
+    </h2>
+    <div class="as-font--small as-color--body mt-3">
+      {% include "partials/_register_workspace_form.html" %}
+    </div>
+  </div>
+</div>
+
+<div class="Inner">
+  <div class="pv-5">
+    <h2 class="as-font--title as-color--secondary">
+      Deleted workspaces
+    </h2>
+    <div class="as-font--small as-color--body mt-3">
+      {% if len(deleted_workspaces) == 0 %}
+        <table style="width: 100%;">
+          <thead>
+            <th>Message</th>
+          </thead>
+          <tbody>
+            <tr class="is-enabled">
+              <td>
+                {% if q %}
+                No deleted workspaces found
+                {% else %}
+                There is no deleted workspaces
+                {% end %}
+                {% if current_page > 0 %}
+                , <a href="{{ reverse_url('workspaces_admin', 0) }}">go to the first page</a>
+                {% end %}
+                {% if q %}
+                , <a href="{{ reverse_url('workspaces_admin', 0) }}">remove search</a>
+                {% end %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      {% else %}  
+        <table style="width: 100%;">
+          <thead>
+            <th>Email</th>
+            <th>Created</th>
+            <th>Last updated</th>
+            <th>Database</th>
+            <th>Hard delete</th>
+          </thead>
+          <tbody>
+            {% for workspace in sorted(deleted_workspaces, key = lambda user: user.updated_at, reverse=True) %}
+            <tr class="{{'is-enabled' if workspace.confirmed_account else 'is-disabled'}}" id="workspace-{{workspace['id']}}">
+              <td>
+                  <a href="{{ reverse_url('workspace_admin', workspace['id']) }}">{{workspace['name']}}</a> {% if workspace.limits %}*{% end %}
+              </td>
+              <td>{{workspace.created_at.date().isoformat()}}</td>
+              <td>{{workspace.updated_at.date().isoformat()}}</td>
+              <td style="vertical-align: top;">
+                <dl>
+                  <dt>Server</dt>
+                  <dd>{{ workspace.database_server }}</dd>
+                </dl>
+                <dl>
+                  <dt>Name</dt>
+                  <dd>{{ workspace.database }}</dd>
+                </dl>
+                {% if workspace.clusters %}
+                <dl>
+                  <dt>Clusters</dt>
+                  <dd>{{ ', '.join(workspace.clusters) }}</dd>
+                </dl>
+                {% end %}
+              </td>
+              <td>
+                <form method="POST">
+                  {% module xsrf_form_html() %}
+                  <input type="hidden" name="operation" value="delete_workspace">
+                  <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                  <input type="submit" formAction="{{ reverse_url('workspace_admin', workspace['id']) }}" value="Submit">
+                </form>
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      {% end %}
+    </div>
+  </div>
+</div>
+{% end %}

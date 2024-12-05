@@ -1,0 +1,44 @@
+NODE mv
+SQL >
+    SELECT
+        timestamp,
+        event as event_type,
+        datasource_id as datasource_id,
+        assumeNotNull(if(isNotNull(datasource_name), datasource_name, '')) as datasource_name,
+        workspace_id as user_id,
+        assumeNotNull(if(isNotNull(workspace_name), workspace_name, '')) as user_mail,
+        multiIf(status in ('FAILURE', 'ERROR'), 'error', status = 'SKIPPED', 'skipped', status = 'PARTIAL_SUCCESS', 'partial-ok', 'unknown') as result,
+        toFloat32(ended_at - started_at) as elapsed_time,
+        multiIf(
+            -- https://gitlab.com/tinybird/analytics/-/issues/14054
+            reason == 'Internal error' and internal_failure_details like '%SQL compilation error%', internal_failure_details,
+            -- https://gitlab.com/tinybird/analytics/-/issues/13979
+            reason like '%url=%', splitByString('url=', assumeNotNull(reason))[1],
+            -- https://gitlab.com/tinybird/analytics/-/issues/14956
+            reason is null and JSONExtractString(internal_failure_details, 'message') like '%connect ETIMEDOUT%', 'Connection Timeout. If this connector is scheduled it will be retried automatically.',
+            reason is null and JSONExtractString(internal_failure_details, 'message') not in [null, ''], JSONExtractString(internal_failure_details, 'message'),
+            reason
+        ) as error,
+        '' as request_id,
+        '' as import_id,
+        job_id,
+        0 as rows,
+        0 as rows_quarantine,
+        [''] as blocks_ids,
+        ['source'] as `Options.Names`,
+        [source] as `Options.Values`,
+        '' as operation_id,
+        0 as read_rows,
+        0 as read_bytes,
+        0 as written_rows,
+        0 as written_bytes,
+        0 as written_rows_quarantine,
+        0 as written_bytes_quarantine,
+        '' as pipe_id,
+        '' as pipe_name,
+        '' as release
+    FROM external_datasource_connector_ops_log
+    WHERE status != 'SUCCESS'
+
+TYPE MATERIALIZED
+DATASOURCE datasources_ops_log

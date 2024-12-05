@@ -1,0 +1,136 @@
+{% extends "internal_base.html" %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+<style>
+  ul {
+    padding: 0 20px;
+  }
+  li {
+    padding: 0 20px;
+  }
+</style>
+{% end %}
+
+{% block content %}
+<section class="Inner is-wider">
+  <div id="main"></div>
+</section>
+{% end %}
+
+{% block js %}
+<script src="/static/js/tinybird.js"></script>
+<script>
+  var None = null;
+  var JWT = '{{global_admin_token}}';
+  var HOST = '{{host}}';
+  var SPANS_TABLE = '{{spans_table}}'
+  var element = document.getElementById('main')
+
+  var tinyb = tinybird(JWT, HOST)
+
+  queries = {
+    errors_last_24h: `
+      select count() c from _
+      WHERE
+      user is not null and
+      url is not null and
+      error is not null and
+      start_datetime > yesterday()
+    `,
+    requests_last_24h: `
+      select count() c from _
+      WHERE
+      user is not null and
+      url is not null and
+      start_datetime > yesterday()
+    `,
+    requests_last_per_user_24h: `
+      select user_email, count() requests, countIf(error is not null) errors from _
+      WHERE
+      user is not null and
+      url is not null and
+      start_datetime > yesterday()
+      group by user_email
+      order by requests desc
+    `,
+    status_code: `
+      select 
+        toStartOfFifteenMinutes(start_datetime) time, 
+        status_code,
+        count() c,
+        quantilesTiming(0.25, 0.5, 0.75, 0.9, 0.99)(toUInt32(duration*1000)) quantiles
+      FROM _
+      WHERE
+      url is not null and
+      start_datetime > yesterday()
+      group by time, status_code
+      order by time, status_code
+    `,
+    top_urls: `
+      select
+        cutQueryString(url) url,
+        count() c,
+        quantilesTiming(0.25, 0.5, 0.75, 0.9, 0.99)(toUInt32(duration*1000)) quantiles
+      FROM _
+      WHERE
+      url is not null
+      and start_datetime > yesterday()
+      and url not like '/static/%'
+      group by url
+      order by c desc
+      limit 20
+    `
+  }
+
+  async function main() {
+    var pipe = tinybird(JWT, HOST).pipe(SPANS_TABLE)
+    var errors = await pipe.first(queries.errors_last_24h)
+    var requests = await pipe.first(queries.requests_last_24h)
+    var requests_per_user = await pipe.query(queries.requests_last_per_user_24h)
+    var top_urls = await pipe.query(queries.top_urls)
+
+    function table(data, columns) {
+      return `
+       <table>
+            <thead>
+              <tr>
+                ${columns.map(c => `<th>${c}</th>`).join('')}
+              </tr>
+            </thead>
+            ${data.map(u => `
+            <tbody>
+            <tr>
+              ${columns.map(c => `<td>${u[c]}</td>`).join('')}
+            </tr>
+            </tbody>
+          `).join('')}
+        </table>
+      `
+    }
+
+    element.innerHTML = `
+      <div class="Inner pv-10 mt-5">
+      <ul>
+          <li class="as-font--medium as-color--secondary">Errors last 24h: ${errors.c}</li>
+          <li class="as-font--medium as-color--secondary mt-3">Requests last 24h: ${requests.c}</li>
+          <li class="as-font--medium as-color--secondary mt-3">Requests per user:
+            ${table(requests_per_user.data, ['user_email', 'requests', 'errors'])}
+          </li>
+          <li>
+            <h3 class="as-font--medium as-color--secondary mt-4">Top URLs</h3>
+            ${table(top_urls.data, ['url', 'c', 'quantiles'])}
+          </li>
+          <div id="graph"></div>
+      </ul>
+      </div>
+    `
+    return true;
+  }
+
+  main();
+</script>
+{% end %}

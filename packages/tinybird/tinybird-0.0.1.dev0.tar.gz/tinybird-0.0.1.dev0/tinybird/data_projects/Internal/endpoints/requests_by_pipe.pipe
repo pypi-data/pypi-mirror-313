@@ -1,0 +1,17 @@
+TOKEN "requests_by_pipe_read" READ
+
+
+NODE requests_by_pipe_0
+SQL >
+
+    %
+    SELECT count() total, pipe_id
+    FROM pipe_stats_rt
+    WHERE
+        user_id = {{ String(workspace_id) }}
+        AND pipe_id in {{ Array(pipes, 'String') }}
+        AND start_datetime > now() - INTERVAL {{ UInt16(interval_minutes, 20) }} MINUTE
+        {% if defined(release) %}
+            AND release = {{ String(release) }}
+        {% end %}
+    GROUP BY pipe_id

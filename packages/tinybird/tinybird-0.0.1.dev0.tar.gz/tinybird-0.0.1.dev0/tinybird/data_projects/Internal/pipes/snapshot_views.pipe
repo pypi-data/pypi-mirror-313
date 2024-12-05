@@ -1,0 +1,14 @@
+VERSION 1
+
+NODE snapshot_views_0
+SQL >
+    SELECT
+        toDate(start_datetime) date,
+        splitByChar('/', cutQueryString(assumeNotNull(url)))[3] as snapshot_id,
+        count() views
+    from spans
+    where url like '/snapshot/%'
+    group by date, snapshot_id
+
+TYPE MATERIALIZED
+DATASOURCE snapshot_ds

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block meta %}
+<title>Login Error · Tinybird</title>
+{% end %}
+
+{% block content %}
+
+{% if not current_user %}
+{% include "partials/_header.html" %}
+{% end %}
+
+<div class="Wrapper">
+  <div class="full-space-center pv-8">
+    <div class="Inner is-shorter is-center">
+        {% if error == "access_denied" %}
+            <h2 class="as-font--title as-color--secondary">⚠️ Access denied</h2>
+            <p class="mt-2 as-font--small">Please, contact the <a class="Link as-color--primary underline" href="mailto:support@tinybird.co">support team</a> for more info.</p>
+        {% elif error == "connection_not_allowed" %}
+            <h2 class="as-font--title as-color--secondary">⚠️ Connection not allowed</h2>
+            <p class="mt-2 as-font--small">You are not allowed to use this connection to log in to Tinybird. Please try to log in using the connection assigned to you.</p>
+        {% else %}
+            <h2 class="as-font--title as-color--secondary">⚠️ Login error</h2>
+            <p class="mt-2 as-font--small">There has been an error on the login process</p>
+        {% end %}
+        <div class="inline mt-7">
+            <a href="{{ reverse_url('login') }}" class="Button as-bkg--primary">
+                <span class="as-font--caption-bold as-color--light has-spacing">BACK TO LOGIN PAGE</span>
+            </a>
+        </div>
+    </div>
+  </div>
+  {% include "partials/_footer.html" %}
+</div>
+{% end %}

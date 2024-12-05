@@ -1,0 +1,42 @@
+TOKEN "datasources_ops_log (Data Source append)" APPEND
+
+
+SCHEMA >
+    `timestamp` DateTime,
+    `event_type` String,
+    `datasource_id` String,
+    `datasource_name` String,
+    `user_id` String,
+    `user_mail` String,
+    `result` String,
+    `elapsed_time` Float32,
+    `error` Nullable(String),
+    `request_id` String,
+    `import_id` Nullable(String),
+    `job_id` Nullable(String),
+    `rows` Nullable(UInt64),
+    `rows_quarantine` Nullable(UInt64),
+    `blocks_ids` Array(String),
+    `Options.Names` Array(String),
+    `Options.Values` Array(String),
+    `operation_id` String,
+    `read_rows` UInt64,
+    `read_bytes` UInt64,
+    `written_rows` UInt64,
+    `written_bytes` UInt64,
+    `written_rows_quarantine` UInt64,
+    `written_bytes_quarantine` UInt64,
+    `pipe_id` String,
+    `pipe_name` String,
+    `release` String,
+    `cpu_time` Float32,
+    `resource_tags` Array(String)
+
+INDEXES >
+    datasource_name_set datasource_name TYPE set(100) GRANULARITY 1
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "user_id, datasource_id, timestamp"
+
+TAGS "backfill_column=timestamp"

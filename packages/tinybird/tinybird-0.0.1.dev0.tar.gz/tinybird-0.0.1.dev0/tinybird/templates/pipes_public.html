@@ -1,0 +1,67 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <title>{% raw workspace_name %} API Endpoints · Tinybird</title>
+    <link rel="icon" type="image/svg+xml" href="https://cdn.tinybird.co/static/images/logo.svg" sizes="any" />
+    {% try %}
+    {% module Template("webpack_templates/endpoint-styles.html") %}
+    {% except %}
+    {% end %}
+
+  </head>
+  <body>
+    {% module Template("partials/_public_header.html") %}
+
+    <main>
+      <section class="Content">
+        <div class="mt-7">
+          <h2 class="as-font--title-bold as-color--secondary">Available API Endpoints</h2>
+          <p class="as-font--medium as-color--text-01">Those are the API Endpoints available under the provided token.</p>
+          <p class="flex as-font--small mt-1">
+            <span class="as-color--text-01 mr-1">Built by</span>
+            <span class="Avatar is-small mr-1">
+              <span class="as-color--light as-font--small-bold">
+                {{ workspace_name[:2].upper() }}
+              </span>
+            </span>
+            <span class="as-color--secondary">{% raw workspace_name %}</span>
+          </p>
+        </div>
+      </section>
+
+      <section class="Content Content-public mt-5">
+        <table class="is-simple">
+          <tbody>
+            {% if len(pipes) > 0 %}
+              {% for pipe in pipes %}
+                <tr>
+                  <td class="needs-wrapping">
+                    <h3><a class="Link as-font--medium as-color--text" href="{{ reverse_url('pipe_endpoint', pipe.id) }}?token={{token}}">{{ pipe.name }}</a></h3>
+                    {% if pipe.description %}
+                      <div class="Markdown as-font--small as-color--text-01">
+                        {% apply markdown %}{{pipe.description}}{% end %}
+                      </div>
+                    {% end %}
+                  </td>
+                </tr>
+              {% end %}
+            {% else %}
+              <tr>
+                <td>
+                  <p class="as-font--small as-color--text-01">
+                    There isn't any available API endpoint
+                  </p>
+                </td>
+              </tr>
+            {% end %}
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    {% module Template("partials/_public_footer.html") %}
+
+    {% include "partials/_extra.html %}
+  </body>
+</html>

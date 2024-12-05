@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block meta %}
+<title>Integration Error · Tinybird</title>
+{% end %}
+
+{% block content %}
+<style>
+  .vercel-dashboard {
+    background: var(--primary-light-color);
+    color: var(--primary-color);
+  }
+
+  .buttons {
+    justify-content: center;
+    gap: 8px;
+  }
+</style>
+<div class="Wrapper">
+  <div class="full-space-center pv-8">
+    <div class="Inner is-center">
+      {% if integration_type == "vercel" %}
+      <h2 class="as-font--medium-bold as-color--secondary">Existing Vercel integration</h2>
+      <p class="mt-2 as-font--small">
+        {% if 'name' not in owner_info %}
+        You already have synced tokens with Vercel projects.
+        {% else %}
+        {% if 'id' in owner_info and 'team' in owner_info['id'] %}
+        You already have synced tokens with projects owned by team <strong class="as-font--small-bold">{{ owner_info['name'] }}</strong>.
+        {% else %}
+        You already have synced tokens with projects owned by user <strong class="as-font--small-bold">{{ owner_info['name'] }}</strong>.
+        {% end %}
+        {% end %}
+        <br>
+        Unlink all projects from your Vercel integration or remove the integration from your Vercel dashboard
+        {% end %}
+      <div class="flex buttons is-center mt-7">
+        <a href="https://vercel.com/dashboard/integrations" target="_blank" rel="noopener noreferrer" class="Button buttons is-smaller vercel-dashboard">
+          <span class="as-font--small-bold">Go to Vercel Dashboard </span>
+          <svg width="15" height="14" viewBox="0 0 15 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.4997 6.21337C11.3229 6.21337 11.1533 6.28361 11.0283 6.40864C10.9032 6.53366 10.833 6.70323 10.833 6.88004V11.6667C10.833 11.8435 10.7628 12.0131 10.6377 12.1381C10.5127 12.2631 10.3432 12.3334 10.1663 12.3334H2.83301C2.6562 12.3334 2.48663 12.2631 2.3616 12.1381C2.23658 12.0131 2.16634 11.8435 2.16634 11.6667V4.33337C2.16634 4.15656 2.23658 3.98699 2.3616 3.86197C2.48663 3.73695 2.6562 3.66671 2.83301 3.66671H7.61967C7.79649 3.66671 7.96605 3.59647 8.09108 3.47145C8.2161 3.34642 8.28634 3.17685 8.28634 3.00004C8.28634 2.82323 8.2161 2.65366 8.09108 2.52864C7.96605 2.40361 7.79649 2.33337 7.61967 2.33337H2.83301C2.30257 2.33337 1.79387 2.54409 1.41879 2.91916C1.04372 3.29423 0.833008 3.80294 0.833008 4.33337V11.6667C0.833008 12.1971 1.04372 12.7058 1.41879 13.0809C1.79387 13.456 2.30257 13.6667 2.83301 13.6667H10.1663C10.6968 13.6667 11.2055 13.456 11.5806 13.0809C11.9556 12.7058 12.1663 12.1971 12.1663 11.6667V6.88004C12.1663 6.70323 12.0961 6.53366 11.9711 6.40864C11.8461 6.28361 11.6765 6.21337 11.4997 6.21337ZM14.113 0.746707C14.0454 0.583808 13.9159 0.454357 13.753 0.386707C13.6729 0.352547 13.5868 0.334427 13.4997 0.333374H9.49967C9.32286 0.333374 9.15329 0.403612 9.02827 0.528636C8.90325 0.65366 8.83301 0.82323 8.83301 1.00004C8.83301 1.17685 8.90325 1.34642 9.02827 1.47145C9.15329 1.59647 9.32286 1.66671 9.49967 1.66671H11.893L5.02634 8.52671C4.96386 8.58868 4.91426 8.66242 4.88041 8.74366C4.84657 8.8249 4.82914 8.91203 4.82914 9.00004C4.82914 9.08805 4.84657 9.17519 4.88041 9.25643C4.91426 9.33766 4.96386 9.4114 5.02634 9.47337C5.08832 9.53586 5.16205 9.58546 5.24329 9.6193C5.32453 9.65315 5.41167 9.67057 5.49967 9.67057C5.58768 9.67057 5.67482 9.65315 5.75606 9.6193C5.8373 9.58546 5.91103 9.53586 5.97301 9.47337L12.833 2.60671V5.00004C12.833 5.17685 12.9032 5.34642 13.0283 5.47145C13.1533 5.59647 13.3229 5.66671 13.4997 5.66671C13.6765 5.66671 13.8461 5.59647 13.9711 5.47145C14.0961 5.34642 14.1663 5.17685 14.1663 5.00004V1.00004C14.1653 0.912923 14.1472 0.826856 14.113 0.746707Z" fill="#1fcc83" />
+          </svg>
+        </a>
+        <a href="{{ reverse_url('integrations_vercel_projects') }}" target="_blank" rel="noopener noreferrer" class="Button is-smaller as-bkg--primary">
+          <span class="as-font--small-bold as-color--light">Go to Integrations</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% end %}

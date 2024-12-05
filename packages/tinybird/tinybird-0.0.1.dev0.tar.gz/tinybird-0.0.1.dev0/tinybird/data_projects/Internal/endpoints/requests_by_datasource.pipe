@@ -1,0 +1,14 @@
+TOKEN "requests_by_datasource_read" READ
+
+
+NODE requests_by_datasource_0
+SQL >
+
+    %
+    SELECT count() total, datasource_id
+    FROM datasources_ops_log
+    WHERE
+        user_id = {{ String(workspace_id) }}
+        AND datasource_id in {{ Array(datasources, 'String') }}
+        AND timestamp > now() - INTERVAL {{ UInt8(interval_hours, 12) }} HOUR
+    GROUP BY datasource_id

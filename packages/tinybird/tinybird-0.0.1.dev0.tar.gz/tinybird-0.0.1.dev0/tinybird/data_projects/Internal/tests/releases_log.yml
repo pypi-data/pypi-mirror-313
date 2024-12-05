@@ -1,0 +1,19 @@
+- deploy_always_with_commit:
+    sql: |
+        SELECT count() as c
+        FROM releases_log
+        WHERE
+            event_type = 'deploy' and commit = ''
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+- semver_always:
+    sql: |
+        SELECT count() as c
+        FROM releases_log
+        WHERE
+          semver = ''
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1

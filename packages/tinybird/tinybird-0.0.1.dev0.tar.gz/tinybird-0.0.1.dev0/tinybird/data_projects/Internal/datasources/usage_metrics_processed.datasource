@@ -1,0 +1,13 @@
+TOKEN "usage_metrics_processed (Data Source append)" APPEND
+
+
+SCHEMA >
+    `date` Date,
+    `database` String,
+    `host` String,
+    `read_bytes` SimpleAggregateFunction(max, UInt64),
+    `written_bytes` SimpleAggregateFunction(max, UInt64)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(date)"
+ENGINE_SORTING_KEY "date, database, host"

@@ -1,0 +1,36 @@
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link rel="icon" type="image/svg+xml" href="https://cdn.tinybird.co/static/images/logo.svg" sizes="any" />
+  {% try %}
+  {% module Template("webpack_templates/app-styles.html") %}
+  {% except %}
+  {% end %}
+</head>
+
+<body>
+  <div id="root" />
+  <script type="text/javascript">
+    var userToken = '{{user_token}}';
+    var JWT = '{{jwt}}';
+    var host = '{{host}}';
+    var apiHost = '{{host}}';
+    var appHost = '{{app_host}}';
+    var isSessionRewindEnabled = '{{enabled_sessionrewind}}' === 'True';
+    var workspaceId = '{{workspace_id}}';
+    var workspaceName = '{{workspace_name}}';
+  </script>
+  <script async src="https://apis.google.com/js/api.js" type="text/javascript"></script>
+
+  {% block body %}
+  {% try %}
+  {% module Template("webpack_templates/app-scripts.html") %}
+  {% except %}
+  {% end %}
+  {% include "partials/_sessionrewind.html" %}
+  {% end %}
+</body>
+
+</html>

@@ -1,0 +1,30 @@
+- record_count_not_dropping_to_zero:
+    sql: |
+        select count() as count
+        from pipe_stats
+        where date == toDate(now() - interval 5 day)
+        having count == 0
+    max_time: null
+    max_bytes_read: null
+
+- view_count_matches_pipe_stats_rt:
+    sql: |
+        with
+        (
+            select
+                sum(view_count) as count
+            from pipe_stats
+            where
+                date = yesterday()
+        ) as agg,
+        (
+            select
+                count() as count
+            from pipe_stats_rt
+            where
+                toDate(start_datetime) = yesterday()
+        ) as rt
+        select agg, rt
+        where agg != rt
+    max_time: null
+    max_bytes_read: null

@@ -1,0 +1,19 @@
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `workspace_id` String `json:$.workspace_id`,
+    `datasource_id` String `json:$.datasource_id`,
+    `source` String `json:$.source`,
+    `event` String `json:$.event`,
+    `started_at` DateTime `json:$.timestamp`,
+    `ended_at` DateTime `json:$.timestamp`,
+    `status` LowCardinality(String) `json:$.status`,
+    `reason` Nullable(String) `json:$.reason`,
+    `internal_failure_details` Nullable(String) `json:$.internal_failure_details`,
+    `result` String `json:$.result`,
+    `workspace_name` Nullable(String) `json:$.workspace_name`,
+    `datasource_name` Nullable(String) `json:$.datasource_name`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(ended_at)"
+ENGINE_SORTING_KEY "ended_at, source, status, workspace_id"

@@ -1,0 +1,33 @@
+TOKEN "pipe_stats_rt (Data Source append)" APPEND
+
+SCHEMA >
+    `start_datetime` DateTime,
+    `user_id` String,
+    `request_id` String,
+    `url` Nullable(String),
+    `pipe_id` String,
+    `pipe_name` String,
+    `status_code` Int32,
+    `error` UInt8,
+    `token` String,
+    `token_name` String,
+    `duration` Float32,
+    `read_bytes` UInt64,
+    `read_rows` UInt64,
+    `billable` UInt8,
+    `result_rows` UInt64,
+    `parameters` Map(String, String),
+    `method` LowCardinality(String),
+    `release` String,
+    `user_agent` Nullable(String),
+    `resource_tags` Array(String),
+    `cpu_time` Float64
+
+INDEXES >
+    pipe_name_set pipe_name TYPE set(100) GRANULARITY 1
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toDate(start_datetime)
+ENGINE_SETTINGS ttl_only_drop_parts = 1
+ENGINE_SORTING_KEY user_id, pipe_id, start_datetime
+ENGINE_TTL toDate(start_datetime) + INTERVAL 7 DAY

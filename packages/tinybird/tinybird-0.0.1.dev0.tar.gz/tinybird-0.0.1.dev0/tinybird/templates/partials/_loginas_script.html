@@ -1,0 +1,15 @@
+<script>
+function loginAsInApp(event, email) {
+  event.preventDefault()
+  event.stopPropagation()
+  const params = new URLSearchParams({
+    loginAs: email,
+    loginAsFrom: window.location.origin
+  })
+  const isInditex = window.location.href.startsWith('https://inditex')
+  const isWadus = window.location.href.startsWith('https://ui.wadus')
+  window.location.href = `https://app.${
+    isInditex ? 'inditex.' : isWadus ? 'wadus.' : ''
+  }tinybird.co?${params}`
+}
+</script>

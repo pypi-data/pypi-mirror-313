@@ -1,0 +1,12 @@
+TOKEN "db_usage (Data Source append)" APPEND
+
+
+SCHEMA >
+    `timestamp` DateTime,
+    `database` String,
+    `rows` SimpleAggregateFunction(max, UInt64),
+    `bytes_on_disk` SimpleAggregateFunction(max, UInt64)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYear(timestamp)"
+ENGINE_SORTING_KEY "timestamp, database"

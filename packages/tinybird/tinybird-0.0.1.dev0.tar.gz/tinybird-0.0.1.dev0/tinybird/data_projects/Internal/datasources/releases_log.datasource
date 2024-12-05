@@ -1,0 +1,21 @@
+TOKEN "releases_log (Data Source append)" APPEND
+
+DESCRIPTION >
+    Logs related to Releases operations
+
+SCHEMA >
+    `timestamp` DateTime64(3),
+    `workspace_id` String,
+    `event_type` LowCardinality(String),
+    `commit` String,
+    `semver` String,
+    `token` String,
+    `token_name` String,
+    `result` LowCardinality(String),
+    `error` String
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SETTINGS ttl_only_drop_parts = 1
+ENGINE_SORTING_KEY workspace_id, semver, timestamp
+ENGINE_TTL "toStartOfMonth(timestamp) + toIntervalMonth(14)"

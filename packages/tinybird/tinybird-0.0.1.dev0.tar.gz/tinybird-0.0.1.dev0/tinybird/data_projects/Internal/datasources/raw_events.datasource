@@ -1,0 +1,20 @@
+TOKEN "raw_events (Data Source append)" APPEND
+
+DESCRIPTION >
+  Landing DataSource for Raw Events that will be later materialized into different DSs
+  - `timestamp`: Timestamp of the row insertion
+  - `workspace_id`: Identifier of the workspace which triggered the event
+  - `event_type`: Type of the event which generated the row. Should be `scope:type`, like `job:copy`
+  - `event_data`: Raw JSON String of the Event Properties
+
+SCHEMA >
+    `timestamp` DateTime64(3) `json:$.timestamp`,
+    `workspace_id` String `json:$.workspace_id`,
+    `request_id` Nullable(String) `json:$.request_id`,
+    `event_type` LowCardinality(String) `json:$.event_type`,
+    `event_data` String `json:$.event_data`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "event_type, workspace_id, timestamp"
+ENGINE_TTL "toStartOfMonth(timestamp) + toIntervalMonth(12)"

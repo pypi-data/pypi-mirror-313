@@ -1,0 +1,31 @@
+TOKEN "data_transfer (Data Source append)" APPEND
+
+DESCRIPTION >
+    Stats of data transfer per hour by a workspace. Related to an event and classified
+- `timestamp`: by hour.
+- `workspace_id`: the ID of the workspace
+- `event`: operation that generated the data (i.e sinks)
+- `origin_provider`: provider data was transferred from
+- `origin_region`: region data was transferred from
+- `destination_provider`: provider data was transferred to
+- `destination_region`: region data was transferred to
+- `kind`: intra | inter depending if the data moves from outside the region
+- `bytes`: sum of bytes transferred
+
+
+SCHEMA >
+    `timestamp` DateTime,
+    `workspace_id` String,
+    `event` LowCardinality(String),
+    `origin_provider` LowCardinality(String),
+    `origin_region` LowCardinality(String),
+    `destination_provider` LowCardinality(String),
+    `destination_region` LowCardinality(String),
+    `kind` LowCardinality(String),
+    `bytes` UInt64
+
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "workspace_id, event, kind, timestamp, origin_provider, origin_region, destination_provider, destination_region"
+ENGINE_PRIMARY_KEY "workspace_id, event, kind, timestamp"

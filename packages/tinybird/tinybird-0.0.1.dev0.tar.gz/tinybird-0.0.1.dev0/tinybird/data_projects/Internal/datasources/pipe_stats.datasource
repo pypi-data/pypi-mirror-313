@@ -1,0 +1,21 @@
+TOKEN "pipe_stats (Data Source append)" APPEND
+
+
+SCHEMA >
+    `date` Date,
+    `user_id` String,
+    `pipe_id` String,
+    `billable` UInt8,
+    `pipe_name` String,
+    `error_count` UInt64,
+    `view_count` UInt64,
+    `avg_duration_state` AggregateFunction(avg, Float32),
+    `quantile_timing_state` AggregateFunction(quantilesTiming(0.9, 0.95, 0.99), Float64),
+    `read_bytes_sum` UInt64,
+    `read_rows_sum` UInt64,
+    `resource_tags` Array(String),
+    `resource_tags_total` Array(String)
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(date)"
+ENGINE_SORTING_KEY "user_id, pipe_id, billable, date"

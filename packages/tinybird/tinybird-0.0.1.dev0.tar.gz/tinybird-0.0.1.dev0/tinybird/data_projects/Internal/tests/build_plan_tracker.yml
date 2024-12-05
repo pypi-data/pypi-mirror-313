@@ -1,0 +1,27 @@
+- not_negative_requests_limit:
+    pipe: 
+      name: build_plan_tracker_requests_limits
+    sql: select * from build_plan_tracker_requests_limits having api_request_done < 0
+    max_time: null
+    max_bytes_read: null
+
+- requests_workspace_id_always_with_value:
+    pipe: 
+      name: build_plan_tracker_requests_limits
+    sql: select count() from build_plan_tracker_requests_limits where workspace_id = '' having count() > 0
+    max_time: null
+    max_bytes_read: null
+
+- not_negative_storage_limit:
+    pipe: 
+      name: build_plan_tracker_storage_limits
+    sql: select workspace_id, total_bytes from build_plan_tracker_storage_limits having total_bytes < 0
+    max_time: null
+    max_bytes_read: null
+
+- storage_workspace_id_always_with_value:
+    pipe: 
+      name: build_plan_tracker_storage_limits
+    sql: select count() from build_plan_tracker_storage_limits where workspace_id = '' having count() > 0
+    max_time: null
+    max_bytes_read: null

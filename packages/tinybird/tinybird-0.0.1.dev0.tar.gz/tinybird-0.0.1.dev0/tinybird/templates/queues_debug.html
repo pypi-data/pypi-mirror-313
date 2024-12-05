@@ -1,0 +1,276 @@
+{% extends "internal_base.html" %}
+
+{% block meta %}
+<title>Cheriff · Queues</title>
+{% end %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+{% end %}
+
+{% block content %}
+
+  <div class="Inner pb-5 mt-5">
+    <h3 class="as-color--secondary as-font--huge pv-3">Queue processing status</h3>
+
+    <p style="font-style:italic; margin: 15px 0;">
+      `Mark as error` action will cancel the job in a similar way that the tinybird_tool does<br/>
+      Its use is intended mainly to the case of a WIP job blocking its queue b/c of an outage or incident<br/>
+      The job will include the message "Job cancelled by operator" in the `errors` information section<br/>
+    </p>
+
+    <h3 class="as-color--secondary as-font--big pv-3">{{ len(wip_jobs) }} wip jobs</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>API Job result</th>
+          <th>Created at</th>
+          <th>Updated at</th>
+          <th>Workspace</th>
+          <th>Kind</th>
+          <th>Queue</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for j in sorted(wip_jobs, key=lambda j: j.created_at) %}
+        <tr>
+          <td><a href="/v0/jobs/{{ j.id }}">{{ j.id }}</a></td>
+          <td>{{ j.created_at }}</td>
+          <td>{{ j.updated_at }}</td>
+          {% if hasattr(j, 'user') %}
+            <td><a href="{{ reverse_url('workspace_admin', j.user.id) }}">{{j.user.name}}</a></td>
+          {% else %}
+            <td>Job without User assigned</td>
+          {% end %}
+          <td>{{ j.kind }}</td>
+          <td>{{ f"{j.get_database_server()}-{j.kind}{f'-{j.format}' if hasattr(j, 'format') else ''}" if hasattr(j, 'user') and j.user else "unknown"}}</td>
+          <td>{{ j.status }}</td>
+          <td>
+            <form class="ml-3" method="post" action="{{ reverse_url('queues_debug') }}">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="job_id" value="{{ j.id }}" />
+              <input type="submit" value="Mark as error" />
+            </form>
+          </td>
+        </tr>
+      {% end %}
+      </tbody>
+    </table>
+
+    <h3 class="as-color--secondary as-font--big pv-3">{{ len(queued_jobs) }} queued jobs</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>API Job result</th>
+          <th>Created at</th>
+          <th>Workspace</th>
+          <th>Kind</th>
+          <th>Queue</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for j in sorted(queued_jobs, key=lambda j: j.created_at) %}
+        <tr>
+          <td><a href="/v0/jobs/{{ j.id }}">{{ j.id }}</a></td>
+          <td>{{ j.created_at }}</td>
+          {% if hasattr(j, 'user') %}
+            <td><a href="{{ reverse_url('workspace_admin', j.user.id) }}">{{j.user.name}}</a></td>
+          {% else %}
+            <td>Job without User assigned</td>
+          {% end %}
+          <td>{{ j.kind }}</td>
+          <td>{{ f"{j.get_database_server()}-{j.kind}{f'-{j.format}' if hasattr(j, 'format') else ''}" if hasattr(j, 'user') and j.user else "unknown"}}</td>
+          <td>{{ j.status }}</td>
+          <td>
+            <form class="ml-3" method="post" action="{{ reverse_url('queues_debug') }}">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="job_id" value="{{ j.id }}" />
+              <input type="submit" value="Mark as error" />
+            </form>
+          </td>
+        </tr>
+      {% end %}
+      </tbody>
+    </table>
+
+    <h2 class="as-font--title as-color--secondary pv-3">These aren't the jobs I'm looking for</h2>
+    <div>
+
+      <form class="ml-3" method="get">
+        Find another one:
+        <input type="text" name="job_id" placeholder="input job id..." />
+        <input type="submit" value="Search" />
+      </form>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>API Job result</th>
+          <th>Created at</th>
+          <th>Updated at</th>
+          <th>Workspace</th>
+          <th>Kind</th>
+          <th>Queue</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% if job %}
+        <tr>
+          <td><a href="/v0/jobs/{{ job.id }}">{{ job.id }}</a></td>
+          <td>{{ job.created_at }}</td>
+          <td>{{ job.updated_at }}</td>
+          {% if hasattr(job, 'user') %}
+            <td><a href="{{ reverse_url('workspace_admin', job.user.id) }}">{{job.user.name}}</a></td>
+          {% else %}
+            <td>Job without User assigned</td>
+          {% end %}
+          <td>{{ job.kind }}</td>
+          <td>{{ f"{job.get_database_server()}-{job.kind}{f'-{job.format}' if hasattr(job, 'format') else ''}" if hasattr(job, 'user') and job.user else "unknown"}}</td>
+          <td>{{ job.status }}</td>
+          <td>
+            <form class="ml-3" method="post" action="{{ reverse_url('queues_debug') }}">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="job_id" value="{{ job.id }}" />
+              <input type="submit" value="Mark as error" />
+            </form>
+          </td>
+        </tr>
+        {% end %}
+      </tbody>
+    </table>
+
+
+    <h3 class="as-color--secondary as-font--big pv-3">{{ blocks_waiting }} blocks waiting</h3>
+
+    <h3 class="as-color--secondary as-font--big pv-3">{{ len(processes) }} processes</h3>
+    <table>
+      <thead>
+        <tr>
+          <th colspan="3">basic</th>
+          <th colspan="2">cpu</th>
+          <th colspan="2">memory</th>
+          <th colspan="2">files</th>
+          <th>network</th>
+        </tr>
+        <tr>
+          <th>pid</th>
+          <th>name</th>
+          <th>status</th>
+
+          <th>%</th>
+          <th>threads</th>
+          
+          <th>%</th>
+          <th>MB</th>
+          
+          <th>open</th>
+          <th>fds</th>
+          
+          <th>connections</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for p in processes %}
+        <tr>
+          <td><a href="/cheriff/queues?pid={{ p.pid }}">{{ p.pid }}</a></td>
+          <td>{{ p.name() }}</td>
+          <td>{{ p.status() }}</td>
+
+          <td class="is-number">{{ '{0: >.2f}'.format(p.cpu_percent()) }}</td>
+          <td class="is-number">{{ p.num_threads() }}</td>
+
+          <td class="is-number">{{ '{0: >.2f}'.format(p.memory_percent()) }}</td>
+          <td class="is-number">{{ '{0: >.2f}'.format(p.memory_info().rss / 1024 ** 2) }}</td>
+
+          <td class="is-number">{% try %}{{ len(p.open_files()) }}{% except %}N/A{% end %}</td>
+          <td class="is-number">{% try %}{{ p.num_fds() }}{% except %}N/A{% end %}</td>
+
+          <td class="is-number">{% try %}{{ len(p.connections()) }}{% except %}N/A{% end %}</td>
+        </tr>
+      {% end %}
+      </tbody>
+    </table>
+
+    <h3 class="as-color--secondary as-font--big pv-3">{{ len(threads) }} threads</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>name</th>
+          <th>daemon</th>
+          <th>alive</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for t in threads %}
+        <tr>
+          <td>{{ t.ident }}</td>
+          <td>{{ t.name }}</td>
+          <td>{{ t.daemon }}</td>
+          <td>{{ t.is_alive() }}</td>
+        </tr>
+      {% end %}
+      </tbody>
+    </table>
+
+    <h3 class="as-color--secondary as-font--big pv-3">{{ len(queues) }} queues</h3>
+
+    {% for queue_id, queue in queues.items() %}
+    <h3 class="as-color--secondary as-font--title">queue &lt;{{ queue_id }}&gt;; {{ queue['size'] }} blocks </h3>
+
+    {% if queue['results'] %}
+    {% set headers = (queue['results'][0] or {}).get('process_return', [{}])[0].keys() %}
+    <table>
+      <thead>
+        <tr>
+          <th colspan="2">block</th>
+          <th>time</th>
+          <th colspan="{{ len(headers) }}">process result</th>
+        </tr>
+        <tr>
+            <th>id</th>
+            <th>error</th>
+            <th>elapsed</th>
+            {% for h in headers %}
+            <th>{{ h }}</th>
+            {% end %}
+          </tr>
+      </thead>
+      <tbody>
+      {% for result in queue['results'] %}
+        {% if result and result.get('block_id') %}
+        <tr>
+          <td class="is-number">{{ result['block_id'] }}</td>
+          <td>{{ result['processing_error'] }}</td>
+          <td class="is-number">{{ '{0: >.3f}'.format(result['processing_time']) }}</td>
+          {% for h in headers %}
+            <td class="is-number">
+              {% if h == 'time' %}
+                {{ '{0: >.3f}'.format(result['process_return'][0].get(h)) }}
+              {% else %}
+                {{ result['process_return'][0].get(h) }}
+              {% end %}
+            </td>
+          {% end %}
+        </tr>
+        {% end %}
+      {% end %}
+      </tbody>
+    </table>
+    {% end %}
+
+    {% end %}
+
+  </div>
+
+{% end %}
+

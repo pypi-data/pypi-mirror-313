@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block meta %}
+<title>Create Workspace · Tinybird</title>
+{% end %}
+
+{% block content %}
+{% include "partials/_header.html" %}
+<div class="Wrapper">
+  <div class="full-space-center pv-10">
+    {% if not current_user %}
+      <h2>No User</h2>
+    {% else %}
+    <div class="Inner pv-15 is-center">
+      <div class="inline">
+        <h2>Hi, {{user_email}}</h2>
+        <h3>Create Your Workspace:</h3>
+
+        <form action="{{ reverse_url('user_register_workspace') }}" method="post">
+          {% module xsrf_form_html() %}
+            <label>Workspace Name</label>
+            <input class="TextInput as-font--medium mv-2" type="text" placeholder="name" id="name" name="name" >
+            <label>Choose a Region</label>
+            <input class="TextInput as-font--medium mv-2" type="text" placeholder="localhost" id="cluster" name="cluster" >
+            <button type="submit" class="Button as-bkg--primary mt-4">
+              <span class="as-font--caption-bold as-color--light has-spacing">CREATE WORKSPACE</span>
+            </button>
+        </form>
+      </div>
+    </div>
+    {% end %}
+  </div>
+
+  {% set background="as-bkg--light" %}
+  {% include "partials/_footer.html" %}
+  <script>
+    var JWT = '{{jwt}}';
+    var host = '{{host}}';
+  </script>
+</div>
+{% end %}

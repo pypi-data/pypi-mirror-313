@@ -1,0 +1,24 @@
+DESCRIPTION >
+  Data from datasource_ops_log aggregated by day.
+
+SCHEMA >
+    `event_date` Date,
+    `workspace_id` String,
+    `event_type` LowCardinality(String),
+    `pipe_id` String,
+    `pipe_name` String,
+    `error_count` UInt64,
+    `executions` UInt64,
+    `avg_elapsed_time_state` AggregateFunction(avg, Float32),
+    `quantiles_state` AggregateFunction(quantiles(0.9, 0.95, 0.99), Float32),
+    `read_bytes` UInt64,
+    `read_rows` UInt64,
+    `written_bytes` UInt64,
+    `written_rows` UInt64,
+    `written_rows_quarantine` UInt64,
+    `written_bytes_quarantine` UInt64,
+    `resource_tags` Array(String)
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(event_date)"
+ENGINE_SORTING_KEY "event_date, workspace_id, event_type, pipe_id"

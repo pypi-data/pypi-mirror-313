@@ -1,0 +1,24 @@
+TOKEN "hook_log (Data Source append)" APPEND
+
+
+SCHEMA >
+    `timestamp` DateTime,
+    `request_id` String,
+    `import_id` Nullable(String),
+    `job_id` Nullable(String),
+    `source` String,
+    `hook_id` String,
+    `name` String,
+    `operation` String,
+    `status` String,
+    `user_id` String,
+    `user_mail` String,
+    `datasource_id` String,
+    `datasource_name` String,
+    `processing_time` Nullable(Float32),
+    `processing_error` Nullable(String)
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(timestamp)"
+ENGINE_SORTING_KEY "timestamp, cityHash64(datasource_name)"
+ENGINE_SAMPLING_KEY "cityHash64(datasource_name)"

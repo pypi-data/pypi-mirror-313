@@ -1,0 +1,135 @@
+TOKEN "read_orb_event_pipes" READ
+
+NODE relevant_dates
+SQL >
+    %
+    WITH
+        {% if defined(when) %} parseDateTimeBestEffort({{ String(when) }})
+        {% else %} now()
+        {% end %} AS request_time,
+        1 as interval_length,
+        toStartOfDay(request_time) - interval interval_length DAY AS interval_start,
+        toStartOfDay(request_time) AS interval_end
+    SELECT
+        interval_start,
+        interval_end,
+        interval_start + INTERVAL 23 HOUR AS orb_timestamp,
+        interval_length AS interval_duration_in_days
+
+NODE workspaces_with_infra_usage_org
+SQL >
+    %
+    SELECT
+        w.id,
+        w.name AS workspace_name,
+        if(o.orb_external_customer_id != '', o.orb_external_customer_id, o.id) AS external_customer_id,
+        o.name AS organization_name,
+        w.database_server,
+        w.plan,
+        has(o.dedicated_clusters_url, w.database_server) AS in_dedicated_cluster,
+        if(origin = '', 0, 1) AS is_branch_or_release
+    FROM workspaces_all_rt w
+    JOIN (SELECT * FROM organizations_all_rt FINAL) AS o ON w.organization_id = o.id
+    WHERE
+        w.organization_id != ''
+        {% if defined(organization_filter) %}
+            AND o.id = {{ String(organization_filter) }}
+        {% else %}
+            AND o.billing_plan IN ['infrastructure_usage', 'shared_infrastructure_usage']
+        {% end %}
+
+NODE storage_metrics_from_orgs_one_day
+SQL >
+    %
+    WITH
+        -- TODO(eclbg): would be nice to reuse the CTEs from the first node here. I didn't manage to
+        -- do so without paying a performance penalty
+        {% if defined(when) %} parseDateTimeBestEffort({{ String(when) }})
+        {% else %} now()
+        {% end %} AS request_time,
+        1 as interval_length,
+        toStartOfDay(request_time) - INTERVAL interval_length DAY AS interval_start,
+        toStartOfDay(request_time) AS interval_end
+    SELECT user_id, datasource_id, datasource_name, rows, bytes, rows_quarantine, bytes_quarantine
+    FROM usage_metrics_storage ums
+    WHERE
+        user_id IN (SELECT id FROM workspaces_with_infra_usage_org)
+        AND timestamp >= interval_start
+        AND timestamp < interval_end
+    ORDER BY timestamp
+
+NODE max_storage_per_datasource
+SQL >
+    SELECT
+        user_id AS workspace_id,
+        datasource_id,
+        last_value(datasource_name) AS datasource_name,
+        max(bytes + bytes_quarantine) AS max_total_bytes,
+        max(rows + rows_quarantine) AS max_total_rows
+    FROM storage_metrics_from_orgs_one_day
+    GROUP BY user_id, datasource_id
+
+NODE add_metadata
+SQL >
+    SELECT
+        orb_billing_region AS region,
+        'storage' AS event_name,
+        2 AS event_version,
+        hex(
+            SHA256(
+                concat(
+                    event_name,
+                    external_customer_id,
+                    workspace_id,
+                    datasource_id,
+                    datasource_name,
+                    interval_start,
+                    interval_end
+                )
+            )
+        ) AS idempotency_key,
+        orb_timestamp AS timestamp,
+        interval_start,
+        interval_end,
+        external_customer_id,
+        organization_name,
+        workspace_id,
+        workspace_name,
+        datasource_id,
+        datasource_name,
+        plan,
+        database_server,
+        in_dedicated_cluster,
+        is_branch_or_release,
+        max_total_rows,
+        max_total_bytes,
+        interval_duration_in_days
+    FROM max_storage_per_datasource ums
+    JOIN workspaces_with_infra_usage_org w ON ums.workspace_id = w.id
+    CROSS JOIN relevant_dates
+    CROSS JOIN region_metadata
+
+NODE format_dates
+SQL >
+    SELECT
+        region,
+        event_name,
+        event_version,
+        idempotency_key,
+        formatDateTime(timestamp, '%Y-%m-%dT%T.000Z') AS timestamp,
+        formatDateTime(interval_start, '%Y-%m-%dT%T.000Z') AS interval_start,
+        formatDateTime(interval_end, '%Y-%m-%dT%T.000Z') AS interval_end,
+        external_customer_id,
+        organization_name,
+        workspace_id,
+        workspace_name,
+        datasource_id,
+        datasource_name,
+        plan,
+        database_server,
+        in_dedicated_cluster,
+        is_branch_or_release,
+        max_total_rows,
+        max_total_bytes,
+        interval_duration_in_days
+    FROM add_metadata

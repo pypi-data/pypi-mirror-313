@@ -1,0 +1,3039 @@
+{% extends "internal_base.html" %}
+
+{% block meta %}
+<title>Cheriff · WS · {{ workspace['name'] }}</title>
+{% end %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+{% end %}
+
+{% block content %}
+
+<style>
+  main section {
+    padding: 0;
+  }
+  main section:first-child {
+    margin: 32px auto 0;
+  }
+  main section:not(:first-child) {
+    margin: 48px auto;
+  }
+  main section h2 {
+    margin-bottom: 8px;
+  }
+  code {
+    background-color: #E5E6E8;
+    padding: 0 .5rem;
+    font-family: monospace;
+    font-style: italic;
+  }
+
+  table.t-clean th, table.t-clean td {
+    border: 0 !important;
+  }
+  table.t-clean tr {
+    border-bottom: solid 1px #E5E6E8;
+  }
+  table.t-clean tr:last-child {
+    border-bottom: 0;
+  }
+  table.t-clean th {
+    text-align: left;
+  }
+  table.t-clean td {
+    text-align: right;
+  }
+
+  tr.error {
+    background-color: lightyellow;
+  }
+  td.error, li.error {
+    color: crimson;
+    font-weight: bold;
+  }
+
+  th, td {
+    font-family: monospace !important;
+  }
+
+  .grid-block {
+    border: dotted 1px grey;
+    display: inline-grid;
+    margin-right: 24px;
+    padding: 16px;
+  }
+  .grid-block:last-child {
+    margin-right: 0;
+  }
+
+  .grid-block h3:not(:first-child) {
+    margin-top: 16px;
+  }
+
+  form p {
+    margin: 8px 0;
+  }
+  form p label {
+    display: block;
+    margin: 8px 0 4px;
+  }
+
+  form select {
+    min-width: 160px;
+  }
+
+  dl {
+    margin-top: 8px;
+    padding-left: 24px;
+  }
+
+  dd {
+    margin-bottom: 8px;
+  }
+
+  input.limit_value {
+    text-align: right;
+  }
+
+  input.limit_value.small {
+    max-width: 32px;
+  }
+
+  ul.help li {
+    margin: 8px 0;
+    line-height: 1.5em;
+  }
+
+  ul.help li span {
+    border-bottom: 1px dotted;
+  }
+
+  .hide {
+    display: none;
+  }
+
+  #graph svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+</style>
+
+<div class="pv-5">
+  <header class="Inner is-wider">
+    <h2 class="as-font--title as-color--secondary">{% if workspace['deleted'] %}Deleted {% end %} Workspace > {{ workspace['name'] }}</h2>
+  </header>
+
+  <main>
+
+  <section class="Inner is-wider">
+    <div class="grid-block">
+      <table class="t-clean">
+        <tbody>
+          <tr>
+            <th>Database</th>
+            <td>{{workspace['database']}}</td>
+          </tr>
+          <tr>
+            <th>Members</th>
+            <td>{{len(workspace['members'])}}</td>
+          </tr>
+          <tr>
+            <th>Max seats</th>
+            <td>{{workspace['max_seats_limit']}}</td>
+          </tr>
+          <tr>
+            <th>Plan</th>
+            <td>{{workspace['plan']}}</td>
+          </tr>
+          <tr>
+            <th>Organization</th>
+            <td>{{ organization_name }}</td>
+          </tr>
+          {% if workspace['deleted'] or is_branch %}
+          <tr>
+            <th>Hard delete workspace</th>
+            <td>
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="operation" value="delete_workspace">
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="submit" value="Submit">
+              </form>
+            </td>
+          </tr>
+          {% end %}
+          {% if main %}
+          <tr>
+            <th>Main workspace</th>
+            <td><a href="{{ reverse_url('workspace_admin', main['id']) }}">{{ main['name'] }}</a></td>
+          </tr>
+          {% end %}
+          <tr>
+            <th>Created at</th>
+            <td>{{ workspace['created_at'] }}</td>
+          </tr>
+          {% if workspace['deleted'] %}
+          <tr>
+            <th>Deleted at</th>
+            <td>{{ workspace['deleted_date'] }}</td>
+          </tr>
+          {% end %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Settings</h2>
+      <div class="grid-block">
+        <h3 class="as-font--medium as-color--secondary">Seats</h3>
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="set_max_seats">
+
+          <p>
+            <label for="max_seats">Max seats</label>
+            <input id="max_seats" type="number" name="max_seats" value="{{ workspace['max_seats_limit'] }}" />
+          </p>
+          <p>
+            <input type="submit" value="Change" />
+          </p>
+        </form>
+      </div>
+      <div class="grid-block">
+        <h3 class="as-font--medium as-color--secondary">Add user to workspace</h3>
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="add_user_to_workspace">
+          <p>
+            <label for="admin_name">Who invites</label>
+            <input id="admin_name" type="text" name="admin_name" value="Tinybird" />
+          </p>
+          <p>
+            <label for="user_email">User email</label>
+            <input id="user_email" type="email" name="user_email" />
+          </p>
+          <p>
+            <input type="submit" value="Add" />
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Billing</h2>
+      <div class="grid-block">
+        <h3 class="as-font--medium as-color--secondary">Current plan: {{ workspace['plan']}}</h3>
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="change_plan">
+          <p>Please be careful to upgrade a Workspace to "pro" as that plan needs to have the proper Stripe configuration. If you need to do it for a test environment, use the Workspace upgrade flow with a test card from Stripe.</p>
+          <p>
+            <select name="plan" multiple size={{ len(billing_plans) + 1 }}>
+              {% for plan in billing_plans %}
+              <option value="{{ plan }}" {{ 'selected=personal' if plan == workspace['plan'] else '' }}>{{ plan }}</option>
+              {% end %}
+            </select>
+          </p>
+          <p>
+            <input type="submit" value="Change" />
+          </p>
+        </form>
+      </div>
+
+      <div class="grid-block">
+        <h3 class="as-font--medium as-color--secondary">Plan details</h3>
+          <pre>{{ plan_details }}</pre>
+      </div>
+
+      <div class="as-font--small as-color--body">
+        <h3 class="as-font--medium as-color--secondary">Override billing configs</h3>
+        <table style="width: 100%;">
+          <thead>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Actions</th>
+          </thead>
+          <tbody>
+            {% for name, value in current_billing_config_overrides %}
+            <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+              <input type="hidden" name="operation" value="change_billing_config">
+              <tr>
+                <td>
+                  {{ name }}
+                  <input type="hidden" name="limit_name" value="{{ name }}" />
+                </td>
+                <td>
+                  <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                </td>
+                <td>
+                  <input type="submit" name="change_action" value="Update">
+                  <input type="submit" name="change_action" value="Delete">
+                </td>
+              </tr>
+            </form>
+            {% end %}
+            {% if available_billing_config_overrides %}
+            <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+              <input type="hidden" name="operation" value="change_billing_config">
+              <tr>
+                <td>
+                  {% set limit_value = 5 %}
+                  <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('billing_value').value = option.dataset.value;">
+                    {% for i, (name, (value, t)) in enumerate(available_billing_config_overrides.items()) %}
+                    {% if i == 0 %}
+                      {% set limit_value = value %}
+                    {% end %}
+                    <option
+                      data-value="{{ value }}"
+                      value="{{ name }}">{{ name }} ({{ t }})</option>
+                    {% end %}
+                  </select>
+                </td>
+                <td>
+                  <input class="limit_value" type="text" name="limit_value" id="billing_value" value="{{ limit_value }}" />
+                </td>
+                <td>
+                  <input type="submit" name="change_action" value="Create">
+                </td>
+              </tr>
+            </form>
+            {% else %}
+            <tr>
+              <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+
+    <div class="Inner is-wider">
+      <div class="pv-5">
+        <h2 class="as-font--title as-color--secondary">Members</h2>
+        <div class="as-font--small as-color--body mt-3">
+          <table style="width: 100%;">
+            <thead>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+            {% for u in sorted(users, key = lambda user: user['created_at'], reverse=True) %}
+              <tr id="user-{{u['id']}}">
+                <td>
+                  <a href="{{ reverse_url('user_account_admin', u['id']) }}">{{u['email']}}</a>
+                </td>
+                <td>
+                  {{ u['role'] }}
+                </td>
+                <td>
+                  <form method="POST" class="mb-2">
+                    {% module xsrf_form_html() %}
+                    <input type="hidden" name="user_id" value="{{u['id']}}">
+                    <input type="hidden" name="operation" value="change_user_workspace_relationship">
+                    {% set relationship = u['role'] %}
+
+                    <select name="relationship">
+                      {% for i, relationship_value in enumerate(user_workspace_relationships) %}
+                        {% if relationship_value != u['role'] %}
+                        <option value="{{ relationship_value }}">{{ relationship_value }}</option>
+                        {% end %}
+                      {% end %}
+                    </select>
+                    <input type="submit" value="Change role">
+                  </form>
+
+                  <form method="POST">
+                    {% module xsrf_form_html() %}
+                    <input type="hidden" name="user_email" value="{{u['email']}}">
+                    <input type="hidden" name="operation" value="remove_user_from_workspace">
+                    <input type="submit" value="Remove from workspace">
+                  </form>
+                </td>
+              </tr>
+            {% end %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <section class="Inner is-wider">
+      <div class="pv-5">
+        <h2 class="as-font--title as-color--secondary">Branches</h2>
+        <div class="as-font--small as-color--body mt-3">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Database</th>
+              <th>Created at</th>
+            </thead>
+            <tbody>
+            {% for branch in sorted(branches, key = lambda branch: branch['created_at'], reverse=True) %}
+              <tr id="user-{{branch['id']}}">
+                <td>
+                  <a href="{{ reverse_url('workspace_admin', branch['id']) }}">{{branch['name']}}</a>
+                </td>
+                <td>
+                  {{branch['database']}}
+                </td>
+                <td>
+                  {{branch['created_at']}}
+                </td>
+              </tr>
+            {% end %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <div class="pv-5">
+        <h2 class="as-font--title as-color--secondary">Releases</h2>
+        <div class="as-font--small as-color--body mt-3">
+          <table style="width: 100%;">
+            <thead>
+              <th>id</th>
+              <th>Semver</th>
+              <th>Commit</th>
+              <th>Status</th>
+              <th>Metadata</th>
+              <th>Change status</th>
+            </thead>
+            <tbody>
+            {% for release in sorted(releases, key = lambda release: release['semver'], reverse=True) %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="operation" value="update_release">
+                <input type="hidden" name="semver" value="{{release['semver']}}">
+                <tr id="release-{{release['metadata_id']}}">
+                  <td>
+                    <a href="{{ reverse_url('workspace_admin', release['id']) }}">{{release['id']}}</a>
+                  </td>
+                  <td>
+                    {{release['semver']}}
+                  </td>
+                  <td>
+                    {{release['commit']}}
+                  </td>
+                  <td>
+                    {{release['status']}}
+                  </td>
+                  <td>
+                    <a href="{{ reverse_url('workspace_admin', release['metadata_id']) }}">{{release['metadata_id']}}</a>
+                  </td>
+                  {% if release['status'] == 'preview' %}
+                    <td>
+                      <p>
+                        <input type="submit" name="status" value="promote" />
+                      </p>
+                    </td>
+                  {% end %}
+                  {% if release['status'] == 'live' %}
+                    <td>
+                      <p>
+                        <input type="submit" name="status" value="rollback" />
+                      </p>
+                    </td>
+                  {% end %}
+                  {% if release['status'] in ['rollback','failed', 'deploying'] %}
+                    <td>
+                      <p>
+                        <input type="submit" name="status" value="delete" />
+                      </p>
+                    </td>
+                  {% end %}
+                </tr>
+              </form>
+            {% end %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Remote settings</h2>
+      <div class="grid-block" style="width: 400px;">
+          <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+              <input type="hidden" name="operation" value="change_workspace_remote">
+              <p>
+                <label for="remote_remote">Remote url</label>
+                <input id="remote_remote" name="remote_remote" value="{{ remote.get('remote', '') }}" class="w-full">
+              </p>
+              <p>
+                <label for="remote_branch">Branch</label>
+                <input id="remote_branch" name="remote_branch" value="{{ remote.get('branch','') }}" class="w-full">
+              </p>
+              <p>
+                <label for="remote_provider">Provider</label>
+                <input id="remote_provider" name="remote_provider" value="{{ remote.get('provider','') }}" class="w-full">
+              </p>
+              <p>
+                <label for="remote_owner">Owner</label>
+                <input id="remote_owner" name="remote_owner" value="{{ remote.get('owner', '') }}" class="w-full">
+              </p>
+              <p>
+                <label for="remote_owner_type">Owner type</label>
+                <select id="remote_owner_type" name="remote_owner_type">
+                  {% for owner_type in ['user','organization'] %}
+                    <option value="{{ owner_type }}" {{ 'selected' if remote.get('owner_type') == owner_type else '' }}>{{ owner_type }}</option>
+                  {% end %}
+                </select>
+              </p>
+              <p>
+                <label for="remote_project_path">Project path</label>
+                <input id="remote_project_path" name="remote_project_path" value="{{ remote.get('project_path', '') }}" class="w-full">
+              </p>
+              <p>
+                <label for="remote_status">Status</label>
+                <select id="remote_status" name="remote_status">
+                  {% for status in remote_statuses %}
+                    <option value="{{ status }}" {{ 'selected' if remote.get('status') == status else '' }}>{{ status }}</option>
+                  {% end %}
+                </select>
+              </p>
+              <p>
+                <input type="submit" value="Change">
+              </p>
+            </form>
+      </div>
+    </section>
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Database settings</h2>
+      <div class="grid-block">
+          <h3 class="as-font--medium as-color--secondary">Change server</h3>
+          <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+              <input type="hidden" name="operation" value="change_database_server">
+
+              <p>
+                <label for="db_server_{{ workspace['database'] }}">Server</label>
+                <input id="db_server_{{ workspace['database'] }}" name="new_database_server" value="{{ workspace['database_server'] }}"/>
+              </p>
+              <p>
+                <label for="db_server_confirm_{{ workspace['database'] }}">Confirm server</label>
+                <input id="db_server_confirm_{{ workspace['database'] }}" name="new_database_server_confirm" value="{{ workspace['database_server'] }}"/>
+              </p>
+              <p>
+                <input type="submit" value="Change" />
+              </p>
+            </form>
+      </div>
+
+      <div class="grid-block">
+        <h3 class="as-font--medium as-color--secondary">Enabled clusters</h3>
+        {% if available_clusters_error is not None %}
+          <p style="width: 320px; color: red;">Could not list available clusters.<br/> Reason: {{ available_clusters_error }}</p>
+        {% else %}
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="enable_clusters">
+            <p>
+              <select name="enabled_clusters" multiple size={{ len(available_clusters) + 1 }}>
+                {% for c in available_clusters %}
+                <option value="{{ c }}" {{ 'selected' if 'clusters' in workspace and workspace['clusters'] and c in workspace['clusters'] else '' }}>{{ c }}</option>
+                {% end %}
+              </select>
+            </p>
+            <p>
+              <input type="submit" value="Change" />
+            </p>
+          </form>
+        {% end %}
+      </div>
+      <div class="grid-block">
+        <h3 class="as-font--medium as-color--secondary">Create datatabase</h3>
+        <p>Use this action to create the database if the Workspace's server or the Workspace's cluster has been changed.</p>
+        <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="create_database">
+            <p>
+              <input type="submit" value="Create Database" />
+            </p>
+          </form>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Query API limits</h2>
+      <p style="font-style:italic; margin: 15px 0;">
+        If you want to set a limit to an endpoint use Endpoint Limits.<br>
+        For Workspace rate limits use Rate Limits or change the Workspace plan.<br>
+        To limit concurrency in the CH cluster enable DISTRIBUTED_ENDPOINT_CONCURRENCY FF and use `max_concurrency_queries`, the number is global, so to limit to 10 concurrent queries, set it to 10.<br>
+        Setting max concurrency queries to 0 means we will not limit the concurrency of the endpoint.<br>
+      </p>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Query API</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, config in current_query_api_limits.items() %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_query_api_limit">
+                <tr>
+                  <td>
+                    {{ config['endpoint_name']}} - {{ config['limit_setting'] }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                    <input type="hidden" name="endpoint_name" value="{{ config['endpoint_name'] }}" />
+                    <input type="hidden" name="limit_setting" value="{{ config['limit_setting'] }}" />
+                  </td>
+                  <td>
+                    <input type="text" name="limit_value" value="{{ config['limit_value'] }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_query_api_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_query_api_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 0 %}
+                    {% set limit_endpoint_name = "" %}
+                    {% set limit_setting = "" %}
+                    <select
+                      name="limit_name"
+                      onchange="var option = this.selectedOptions[0]; document.getElementById('query_limit_value_endpoint').value = option.dataset.value; document.getElementById('query_limit_endpoint_name').value = option.dataset.endpoint_name; document.getElementById('query_limit_setting_endpoint').value = option.dataset.limit_setting;"
+                    >
+                      {% for i, (name, config) in enumerate(available_query_api_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = config['limit_value'] %}
+                        {% set limit_endpoint_name = config['endpoint_name'] %}
+                        {% set limit_setting = config['limit_setting'] %}
+                      {% end %}
+                      <option
+                        data-value="{{ config['limit_value'] }}"
+                        data-endpoint_name="{{ config['endpoint_name'] }}"
+                        data-limit_setting="{{ config['limit_setting'] }}"
+                        value="{{ name }}">{{ config['endpoint_name']}} - {{ config['limit_setting'] }}</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input type="hidden" name="endpoint_name" id="query_limit_endpoint_name"  value="{{ limit_endpoint_name }}" />
+                    <input type="hidden" name="limit_setting" id="query_limit_setting_endpoint" value="{{ limit_setting }}" />
+                    <input class="limit_value" type="text" name="limit_value" id="query_limit_value_endpoint" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new Query API limits.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Endpoint Limits</h2>
+      <p style="font-style:italic; margin: 15px 0;">
+        If you want to set a limit to a new endpoint, you need to publish it first.<br>
+        To limit concurrency in the CH cluster enable DISTRIBUTED_ENDPOINT_CONCURRENCY FF and use `max_concurrency_queries`, the number is global, so to limit to 10 concurrent queries, set it to 10.<br>
+        Setting max concurrency queries to 0 means we will not limit the concurrency of the endpoint.<br>
+        Setting max threads to 0 means we will use the default value. <br>
+        Setting backend hint to 1 will disable the default sticky behaviour. It forces the endpoint to backend_hint = None. <br>
+        Setting max rps to 0 means we will not limit the amount of requests per second for the endpoint.<br>
+        Do not use max_rps to limit concurrency, use max_concurrent_queries, or use max_rps and set max_execution_time to 1s both together.
+        <span style="font-weight: 700"></span>For max threads and backend hint, the priority setting is: Workspace Limit > Query template setting > Endpoint Limit > Default setting.</span>
+      </p>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Endpoint</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, config in current_endpoint_limits.items() %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_endpoint_limit">
+                <tr>
+                  <td>
+                    {{ config['endpoint_name']}} - {{ config['limit_setting'] }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                    <input type="hidden" name="endpoint_name" value="{{ config['endpoint_name'] }}" />
+                    <input type="hidden" name="limit_setting" value="{{ config['limit_setting'] }}" />
+                  </td>
+                  <td>
+                    <input type="text" name="limit_value" value="{{ config['limit_value'] }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_endpoint_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_endpoint_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 0 %}
+                    {% set limit_endpoint_name = "" %}
+                    {% set limit_setting = "" %}
+                    <select
+                      name="limit_name"
+                      onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_endpoint').value = option.dataset.value; document.getElementById('limit_endpoint_name').value = option.dataset.endpoint_name; document.getElementById('limit_setting_endpoint').value = option.dataset.limit_setting;"
+                    >
+                      {% for i, (name, config) in enumerate(available_endpoint_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = config['limit_value'] %}
+                        {% set limit_endpoint_name = config['endpoint_name'] %}
+                        {% set limit_setting = config['limit_setting'] %}
+                      {% end %}
+                      <option
+                        data-value="{{ config['limit_value'] }}"
+                        data-endpoint_name="{{ config['endpoint_name'] }}"
+                        data-limit_setting="{{ config['limit_setting'] }}"
+                        value="{{ name }}">{{ config['endpoint_name']}} - {{ config['limit_setting'] }}</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input type="hidden" name="endpoint_name" id="limit_endpoint_name"  value="{{ limit_endpoint_name }}" />
+                    <input type="hidden" name="limit_setting" id="limit_setting_endpoint" value="{{ limit_setting }}" />
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_endpoint" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new endpoint limits: All the endpoints has all limits defined or there is not endpoint published.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">ClickHouse Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_ch_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_ch_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_ch_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_ch_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value').value = option.dataset.value;">
+                      {% for i, (name, (value, t)) in enumerate(available_ch_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">HFI Configuration</h2>
+      <table style="width: 100%;">
+        <thead>
+          <th>Name</th>
+          <th>Value</th>
+          <th>Actions</th>
+        </thead>
+        <tbody>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_hfi_frequency">
+            <tr>
+              <td>
+                HFI frequency (CH pushes/second/worker. Empty for default value: {{default_hfi_frequency}})
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="hfi_frequency" value="{{ workspace['hfi_frequency'] }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+              </td>
+            </tr>
+          </form>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_hfi_frequency_gatherer">
+            <tr>
+              <td>
+                HFI frequency through the Gatherer (CH pushes/second/worker. Empty for default value: {{default_hfi_frequency_gatherer}})
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="hfi_frequency_gatherer" value="{{ workspace['hfi_frequency_gatherer'] }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+              </td>
+            </tr>
+          </form>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_hfi_database_server">
+            <tr>
+              <td>
+                HFI database server (empty to default to the "normal" database server)
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="hfi_database_server" value="{{ workspace['hfi_database_server'] }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+              </td>
+            </tr>
+          </form>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_hfi_concurrency_limit">
+            <tr>
+              <td>
+                HFI concurrency limit (Per datasource. Empty for default value: {{default_hfi_semaphore_counter}})
+              </td>
+              <td>
+                <input class="limit_value" type="number" name="hfi_concurrency_limit" min="1" value="{{workspace['hfi_concurrency_limit']}}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+              </td>
+            </tr>
+          </form>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_hfi_concurrency_timeout">
+            <tr>
+              <td>
+                HFI concurrency timeout limit (Per Datasource. Empty for default value: {{default_hfi_semaphore_timeout}})
+              </td>
+              <td>
+                <input class="limit_value" type="number" name="hfi_concurrency_timeout" min="1" value="{{workspace['hfi_concurrency_timeout']}}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+              </td>
+            </tr>
+          </form>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_hfi_max_request_mb">
+            <tr>
+              <td>
+                HFI max request size (in MB, empty for default value: {{default_hfi_max_request_mb}})
+              </td>
+              <td>
+                <input class="limit_value" type="number" name="hfi_max_request_mb" min="1" value="{{workspace['hfi_max_request_mb']}}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+              </td>
+            </tr>
+          </form>
+          <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+              <input type="hidden" name="operation" value="change_gatherer_wait_false_traffic">
+              <tr>
+                  <td>
+                      Ratio of wait=false traffic through the Gatherer [0-1]: (Empty for default value: {{default_gatherer_wait_false_traffic}})
+                  </td>
+                  <td>
+                      <input class="limit_value" type="text" name="gatherer_wait_false_traffic" value="{{ workspace['gatherer_wait_false_traffic'] }}" />
+                  </td>
+                  <td>
+                      <input type="submit" name="change_action" value="Update">
+                  </td>
+              </tr>
+          </form>
+          <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+              <input type="hidden" name="operation" value="change_gatherer_wait_true_traffic">
+              <tr>
+                  <td>
+                      Ratio of wait=true traffic through the Gatherer [0-1]: (Empty for default value: {{default_gatherer_wait_true_traffic}})
+                  </td>
+                  <td>
+                      <input class="limit_value" type="text" name="gatherer_wait_true_traffic" value="{{ workspace['gatherer_wait_true_traffic'] }}" />
+                  </td>
+                  <td>
+                      <input type="submit" name="change_action" value="Update">
+                  </td>
+              </tr>
+          </form>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Gatherer Configuration</h2>
+        {% if workspace['use_gatherer'] %}
+        <p>
+            Use of Gatherer for HFI and Kafka is <span style="color: green">enabled</span>
+        </p>
+        {% else %}
+        <p>
+            Use of Gatherer for HFI and Kafka is <span style="color: red">disabled</span>
+        </p>
+        {% end %}
+        {% if workspace['allow_gatherer_fallback'] %}
+        <p>
+            Allow HFI to insert directly into the landing when no Gatherer is present is <span style="color: green">enabled</span>
+        </p>
+        {% else %}
+        <p>
+            Allow inserting directly into the landing when no Gatherer is present is <span style="color: red">disabled</span>
+        </p>
+        {% end %}
+        {% if workspace['gatherer_allow_s3_backup_on_user_errors'] %}
+        <p>
+            Allow S3 backups on user errors is <span style="color: green">enabled</span>
+        </p>
+        {% else %}
+        <p>
+          Allow S3 backups on user errors is <span style="color: red">disabled</span>
+        </p>
+        {% end %}
+      <table style="width: 100%;">
+        <thead>
+          <th>Name</th>
+          <th>Value</th>
+          <th>Actions</th>
+        </thead>
+        <tbody>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_gatherer_flush_interval">
+            <tr>
+              <td>
+                Gatherer Flush Interval: (default: {{default_gatherer_flush_interval}} seconds)
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="gatherer_flush_interval" value="{{ workspace['gatherer_flush_interval'] }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+              </td>
+            </tr>
+          </form>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_gatherer_deduplication">
+            <tr>
+              <td>
+                  Gatherer Deduplication: (default: Value set in the Gatherer at gatherer.ini})
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="gatherer_deduplication" value="{{ workspace['gatherer_deduplication'] }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+              </td>
+            </tr>
+          </form>
+
+          <thead>
+            <th colspan="3">Gatherer flush time per table</td>
+          </thead>
+          {% for name, value in current_gatherer_flush_time_ds %}
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_gatherer_flush_time_ds">
+            <tr>
+              <td>
+                {{ name }}
+                <input type="hidden" name="limit_name" value="{{ name }}" />
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+                <input type="submit" name="change_action" value="Delete">
+              </td>
+            </tr>
+          </form>
+          {% end %}
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_gatherer_flush_time_ds">
+            <tr>
+              <td>
+                DS id: <input class="limit_value" width="300px" type="text" name="limit_name" id="limit_name" value="" />
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="limit_value" id="limit_value" value="4" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Create">
+              </td>
+            </tr>
+          </form>
+
+          <thead>
+            <th colspan="3">ClickHouse configuration</td>
+          </thead>
+
+          {% for name, value in current_gatherer_ch_limits %}
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_gatherer_ch_limit">
+            <tr>
+              <td>
+                {{ name }}
+                <input type="hidden" name="limit_name" value="{{ name }}" />
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+                <input type="submit" name="change_action" value="Delete">
+              </td>
+            </tr>
+          </form>
+          {% end %}
+          {% if available_gatherer_ch_limits %}
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_gatherer_ch_limit">
+            <tr>
+              <td>
+                {% set limit_value = 5 %}
+                <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_gatherer_ch').value = option.dataset.value;">
+                  {% for i, (name, (value, t)) in enumerate(available_gatherer_ch_limits.items()) %}
+                  {% if i == 0 %}
+                    {% set limit_value = value %}
+                  {% end %}
+                  <option
+                    data-value="{{ value }}"
+                    value="{{ name }}">{{ name }} ({{ t }})</option>
+                  {% end %}
+                </select>
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="limit_value" id="limit_value_gatherer_ch" value="{{ limit_value }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Create">
+              </td>
+            </tr>
+          </form>
+          {% else %}
+          <tr>
+            <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+          </tr>
+          {% end %}
+
+          <thead>
+            <th colspan="3">Multiwriter configuration</td>
+          </thead>
+
+
+          {% for name, value in current_gatherer_multiwriter_limits %}
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_gatherer_multiwriter_limit">
+            <tr>
+              <td>
+                {{ name }}
+                <input type="hidden" name="limit_name" value="{{ name }}" />
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+                <input type="submit" name="change_action" value="Delete">
+              </td>
+            </tr>
+          </form>
+          {% end %}
+          {% if available_gatherer_multiwriter_limits %}
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="change_gatherer_multiwriter_limit">
+            <tr>
+              <td>
+                {% set limit_value = 5 %}
+                <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_gatherer_multiwriter').value = option.dataset.value;">
+                  {% for i, (name, (value, t)) in enumerate(available_gatherer_multiwriter_limits.items()) %}
+                  {% if i == 0 %}
+                    {% set limit_value = value %}
+                  {% end %}
+                  <option
+                    data-value="{{ value }}"
+                    value="{{ name }}">{{ name }} ({{ t }})</option>
+                  {% end %}
+                </select>
+              </td>
+              <td>
+                <input class="limit_value" type="text" name="limit_value" id="limit_value_gatherer_multiwriter" value="{{ limit_value }}" />
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Create">
+              </td>
+            </tr>
+          </form>
+          {% else %}
+          <tr>
+            <td colspan="3">You cannot set new multiwriter limits: the user already has all limits defined.</td>
+          </tr>
+          {% end %}
+
+
+      </tbody>
+      </table>
+    </section>
+
+    {% if len(storage_policies) %}
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">S3 Configuration</h2>
+      <table style="width: 100%;">
+        <thead>
+          <th>Name</th>
+          <th>Value</th>
+          <th>Actions</th>
+        </thead>
+        <tbody>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+            <input type="hidden" name="operation" value="set_storage_policy">
+            <tr>
+              <td>
+                S3 Storage Policy: {{ workspace['storage_policy'] if workspace['storage_policy'] else 'No policy applied' }}
+              </td>
+              <td>
+                <select name="storage_policy">
+                  {% for storage_policy in storage_policies %}
+                  <option value="{{ storage_policy }}" {{ 'selected' if storage_policy == workspace['storage_policy'] else '' }}>{{ storage_policy }}</option>
+                  {% end %}
+                </select>
+              </td>
+              <td>
+                <input type="submit" name="change_action" value="Update">
+                <input type="submit" name="change_action" value="Delete">
+              </td>
+            </tr>
+          </form>
+        </tbody>
+      </table>
+    </section>
+    {% end %}
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Kafka Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_kafka_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_kafka_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_kafka_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_kafka_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value').value = option.dataset.value;">
+                      {% for i, (name, value) in enumerate(available_kafka_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }}</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Populate Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_populate_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_populate_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_populate_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_populate_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_populate').value = option.dataset.value;">
+                      {% for i, (name, (value, t)) in enumerate(available_populate_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_populate" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Copy Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_copy_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_copy_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_copy_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_copy_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_copy').value = option.dataset.value;">
+                      {% for i, (name, (value, t)) in enumerate(available_copy_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_copy" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Branch Copy Limits</h2>
+      <p style="font-style:italic; margin: 15px 0;">To override a branch copy limit, it should exist as a copy limit. If you need to override a default value in the branch, add the limit in the Copy Limits section with the same value as the default.</p>
+      <p style="font-style:italic; margin: 15px 0;">These limits are only automatically applied on branch creation, not in branches that already exist. For existing branches, you can go to the Cheriff page of the branch.</p>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_copy_branch_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_copy_branch_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_copy_branch_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_copy_branch_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_copy_branch').value = option.dataset.value;">
+                      {% for i, (name, (value, t)) in enumerate(available_copy_branch_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_copy_branch" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Data Sinks Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_sinks_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_sinks_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_sinks_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_sinks_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_sinks').value = option.dataset.value;">
+                      {% for i, (name, (value, t)) in enumerate(available_sinks_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_sinks" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">DynamoDB Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_dynamodb_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_dynamodb_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_sinks_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_dynamodb_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_dynamodb').value = option.dataset.value;">
+                      {% for i, (name, (value, t)) in enumerate(available_dynamodb_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_dynamodb" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+      <section class="Inner is-wider">
+          <h2 class="as-font--title as-color--secondary">Delete Limits</h2>
+
+          <div class="as-font--small as-color--body">
+              <table style="width: 100%;">
+                  <thead>
+                  <th>Name</th>
+                  <th>Value</th>
+                  <th>Actions</th>
+                  </thead>
+                  <tbody>
+                  {% for name, value in current_delete_limits %}
+                  <form method="POST">
+                      {% module xsrf_form_html() %}
+                      <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                      <input type="hidden" name="operation" value="change_delete_limit">
+                      <tr>
+                          <td>
+                              {{ name }}
+                              <input type="hidden" name="limit_name" value="{{ name }}" />
+                          </td>
+                          <td>
+                              <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                          </td>
+                          <td>
+                              <input type="submit" name="change_action" value="Update">
+                              <input type="submit" name="change_action" value="Delete">
+                          </td>
+                      </tr>
+                  </form>
+                  {% end %}
+                  {% if available_delete_limits %}
+                  <form method="POST">
+                      {% module xsrf_form_html() %}
+                      <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                      <input type="hidden" name="operation" value="change_delete_limit">
+                      <tr>
+                          <td>
+                              {% set limit_value = 5 %}
+                              <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_delete').value = option.dataset.value;">
+                                  {% for i, (name, (value, t)) in enumerate(available_delete_limits.items()) %}
+                                  {% if i == 0 %}
+                                  {% set limit_value = value %}
+                                  {% end %}
+                                  <option
+                                          data-value="{{ value }}"
+                                          value="{{ name }}">{{ name }} ({{ t }})</option>
+                                  {% end %}
+                              </select>
+                          </td>
+                          <td>
+                              <input class="limit_value" type="text" name="limit_value" id="limit_value_delete" value="{{ limit_value }}" />
+                          </td>
+                          <td>
+                              <input type="submit" name="change_action" value="Create">
+                          </td>
+                      </tr>
+                  </form>
+                  {% else %}
+                  <tr>
+                      <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+                  </tr>
+                  {% end %}
+                  </tbody>
+              </table>
+          </div>
+      </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Iterating Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_iterating_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_iterating_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_iterating_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_iterating_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 3 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_iterating').value = option.dataset.value;">
+                      {% for i, (name, value) in enumerate(available_iterating_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }}</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_iterating" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Rate Limits <button class="as-font--title" style="cursor: help; color: blue;" onclick="document.querySelector('#rl_help').classList.toggle('hide')" title="Toggle help">?</button></h2>
+      <div id="rl_help" class="mv-2 hide">
+        <h3 class="as-font--medium as-color--secondary">Options</h3>
+        <ul class="help">
+          <li><span>Count</span>: Number of requests allowed per time <span>period</span>.<br>Must be greater than zero.</li>
+          <li><span>Period</span>: The time extent in seconds of the check.<br>Must be greater than zero.</li>
+          <li><span>Max Burst</span>: Number of requests that will be allowed to exceed the rate in a single burst.<br>Must be greater than or equal to zero.<br>To allow some momentary flexibility, you have to set this value higher than 0. Think about this as if you were consuming tokens from the future <span>count</span>. When in doubt, set the <span>max burst</span> value to match the <span>count</span> value.</li>
+        </ul>
+        <h3 class="as-font--medium as-color--secondary">Examples</h4>
+        <ul class="help">
+          <li><code>count=6, period=60, burst=0</code>: allow 6 requests per minute.<br>With burst set to zero, you will have to wait 10 seconds between requests.<br>This is equivalent to <code>count=1, period=10, burst=0</code> or 1 request every 10 seconds.</li>
+          <li><code>count=5, period=60, burst=3</code>: allow 5 requests per minute but momentary bursts of 3 requests.<br>This means that you will not have to wait 12 seconds between requests as you are allowed to do 3 consecutive requests.</li>
+        </ul>
+      </div>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Count</th>
+              <th>Period (seconds)</th>
+              <th>Max Burst</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, rl_config in current_rate_limit_config %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_rate_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value small" type="text" name="limit_count" value="{{ rl_config.count_per_period }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value small" type="text" name="limit_period" value="{{ rl_config.period }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value small" type="text" name="limit_max_burst" value="{{ rl_config.max_burst }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_rate_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_rate_limit">
+                <tr>
+                  <td>
+                    {% set limit_count = 5 %}
+                    {% set limit_period = 60 %}
+                    {% set limit_max_burst = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_count').value = option.dataset.count; document.getElementById('limit_period').value = option.dataset.period; document.getElementById('limit_max_burst').value = option.dataset.max_burst;">
+                      {% for i, (name, rl_config) in enumerate(available_rate_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_count = rl_config.count_per_period %}
+                        {% set limit_period = rl_config.period %}
+                        {% set limit_max_burst = rl_config.max_burst %}
+                      {% end %}
+                      <option
+                        data-count="{{ rl_config.count_per_period }}"
+                        data-period="{{ rl_config.period }}"
+                        data-max_burst="{{ rl_config.max_burst }}"
+                        value="{{ rl_config.key }}">{{ name }}</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value small" type="text" name="limit_count" id="limit_count" value="{{ limit_count }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value small" type="text" name="limit_period" id="limit_period" value="{{ limit_period }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value small" type="text" name="limit_max_burst" id="limit_max_burst" value="{{ limit_max_burst }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="5">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Import Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_import_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_import_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_import_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_import_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_import').value = option.dataset.value;">
+                      {% for i, (name, (value, t)) in enumerate(available_import_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_import" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">CDK Limits</h2>
+      <h3><b>⚠️ The change of any of these limits will only affect connections created from that moment forward</b></h3>
+      <br>
+      <div class="as-font--small as-color--body">
+        <table style="width: 100%;">
+          <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+              </thead>
+          <tbody>
+              {% for name, value in current_cdk_limits %}
+              <form method="POST">
+                  {% module xsrf_form_html() %}
+                  <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                  <input type="hidden" name="operation" value="change_cdk_limit">
+                  <tr>
+                      <td>
+                          {{ name }}
+                          <input type="hidden" name="limit_name" value="{{ name }}" />
+                      </td>
+                      <td>
+                          <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                      </td>
+                      <td>
+                          <input type="submit" name="change_action" value="Update">
+                          <input type="submit" name="change_action" value="Delete">
+                      </td>
+                  </tr>
+              </form>
+              {% end %}
+              {% if available_cdk_limits %}
+              <form method="POST">
+                  {% module xsrf_form_html() %}
+                  <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                  <input type="hidden" name="operation" value="change_cdk_limit">
+                  <tr>
+                      <td>
+                          {% set limit_value = 5 %}
+                          <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_cdk').value = option.dataset.value;">
+                              {% for i, (name, (value, t)) in enumerate(available_cdk_limits.items()) %}
+                              {% if i == 0 %}
+                              {% set limit_value = value %}
+                              {% end %}
+                              <option
+                                      data-value="{{ value }}"
+                                      value="{{ name }}">{{ name }} ({{ t }})</option>
+                              {% end %}
+                          </select>
+                      </td>
+                      <td>
+                          <input class="limit_value" type="text" name="limit_value" id="limit_value_cdk" value="{{ limit_value }}" />
+                      </td>
+                      <td>
+                          <input type="submit" name="change_action" value="Create">
+                      </td>
+                  </tr>
+              </form>
+                  {% else %}
+                  <tr>
+                      <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+                  </tr>
+                {% end %}
+              </tbody>
+            </table>
+        </div>
+      </section>
+
+      <section class="Inner is-wider">
+        <h2 class="as-font--title as-color--secondary">Workspace Limits</h2>
+        <br>
+        <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+                <th>Name</th>
+                <th>Value</th>
+                <th>Actions</th>
+                </thead>
+            <tbody>
+                {% for name, value in current_workspace_limits %}
+                <form method="POST">
+                    {% module xsrf_form_html() %}
+                    <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                    <input type="hidden" name="operation" value="change_workspace_limit">
+                    <tr>
+                        <td>
+                            {{ name }}
+                            <input type="hidden" name="limit_name" value="{{ name }}" />
+                        </td>
+                        <td>
+                            <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                        </td>
+                        <td>
+                            <input type="submit" name="change_action" value="Update">
+                            <input type="submit" name="change_action" value="Delete">
+                        </td>
+                    </tr>
+                </form>
+                {% end %}
+                {% if available_workspace_limits %}
+                <form method="POST">
+                    {% module xsrf_form_html() %}
+                    <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                    <input type="hidden" name="operation" value="change_workspace_limit">
+                    <tr>
+                        <td>
+                            {% set limit_value = 5 %}
+                            <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_workspace').value = option.dataset.value;">
+                                {% for i, (name, (value, t)) in enumerate(available_workspace_limits.items()) %}
+                                {% if i == 0 %}
+                                {% set limit_value = value %}
+                                {% end %}
+                                <option
+                                        data-value="{{ value }}"
+                                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                                {% end %}
+                            </select>
+                        </td>
+                        <td>
+                            <input class="limit_value" type="text" name="limit_value" id="limit_value_workspace" value="{{ limit_value }}" />
+                        </td>
+                        <td>
+                            <input type="submit" name="change_action" value="Create">
+                        </td>
+                    </tr>
+                </form>
+                    {% else %}
+                    <tr>
+                        <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+                    </tr>
+                  {% end %}
+                </tbody>
+              </table>
+          </div>
+        </section>
+
+    <section class="Inner is-wider">
+
+      <h2 class="as-font--title as-color--secondary">Release Limits</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in current_release_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_release_limit">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="limit_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+              {% if available_release_limits %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="change_release_limit">
+                <tr>
+                  <td>
+                    {% set limit_value = 5 %}
+                    <select name="limit_name" onchange="var option = this.selectedOptions[0]; document.getElementById('limit_value_release').value = option.dataset.value;">
+                      {% for i, (name, (value, t)) in enumerate(available_release_limits.items()) %}
+                      {% if i == 0 %}
+                        {% set limit_value = value %}
+                      {% end %}
+                      <option
+                        data-value="{{ value }}"
+                        value="{{ name }}">{{ name }} ({{ t }})</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="limit_value" type="text" name="limit_value" id="limit_value_release" value="{{ limit_value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+              {% else %}
+              <tr>
+                <td colspan="3">You cannot set new limits: the user already has all limits defined.</td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <div class="as-font--small as-color--body mt-5">
+        <h2 class="as-font--title as-color--secondary mv-3">Feature Flags</h2>
+
+        <table style="width: 100%;" class="mt-3">
+          <thead>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </thead>
+          <tbody>
+            {% for flag, value, is_override in workspace_feature_flags %}
+            <tr id="feature-flag-{{ flag['name'] }}">
+              <td>
+                {{ flag['name'] }}
+                <br><span style="font-style:italic; font-size:80%">{% raw flag['description'] %}</span>
+              </td>
+              <td>
+                {% if value %}
+                  <span style="color: green">Activated{% if is_override %}*{% end %}</span>
+                {% else %}
+                  <span style="color: red">Deactivated{% if is_override %}*{% end %}</span>
+                {% end %}
+              </td>
+              <td>
+                <form method="POST" class="mb-2">
+                  {% module xsrf_form_html() %}
+                  <input type="hidden" name="workspace_id" value="{{ workspace['id'] }}">
+                  <input type="hidden" name="feature_flag_name" value="{{ flag['name'] }}">
+                  {% if value %}
+                    <input type="hidden" name="operation" value="deactivate_feature_flag">
+                    <input type="submit" value="Deactivate">
+                  {% else %}
+                    <input type="hidden" name="operation" value="activate_feature_flag">
+                    <input type="submit" value="Activate">
+                  {% end %}
+                </form>
+
+                {% if is_override %}
+                  <form method="POST">
+                    {% module xsrf_form_html() %}
+
+                    <input type="hidden" name="workspace_id" value="{{ workspace['id'] }}">
+                    <input type="hidden" name="feature_flag_name" value="{{ flag['name'] }}">
+                    <input type="hidden" name="operation" value="remove_feature_flag">
+                    <input type="submit" value="Reset to default">
+                  </form>
+                {% end %}
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Postgres connector settings</h2>
+      <div class="grid-block">
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="change_pg_server">
+
+          <p>
+            <label for="pg_db_server_{{ workspace['pg_server'] }}">Postgres Server</label>
+            <input id="pg_db_server_{{ workspace['pg_server'] }}" name="new_pg_database_server" value="{{ workspace['pg_server'] }}"/>
+          </p>
+          <p>
+            <label for="pg_db_server_confirm_{{ workspace['pg_foreign_server'] }}">ClickHouse server HOST</label>
+            <input id="pg_db_server_confirm_{{ workspace['pg_foreign_server'] }}" name="new_pg_foreign_database_server" value="{{ workspace['pg_foreign_server'] }}"/>
+          </p>
+          <p>
+            <label for="pg_db_server_confirm_{{ workspace['pg_foreign_server_port'] }}">ClickHouse server HTTP PORT</label>
+            <input id="pg_db_server_confirm_{{ workspace['pg_foreign_server_port'] }}" name="new_pg_foreign_database_server_port" value="{{ workspace['pg_foreign_server_port'] }}"/>
+          </p>
+          <p>
+            <input type="submit" value="Change" />
+          </p>
+        </form>
+        <table class="t-clean">
+          <tbody>
+            <tr>
+              <th>Database</th>
+              <td><code>{{workspace['database']}}</code></td>
+            </tr>
+            <tr>
+              <th>User</th>
+              <td><code>user_{{workspace['database']}}</code></td>
+            </tr>
+          </tbody>
+        </table>
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="enable_pg">
+          {% if workspace['enabled_pg'] %}
+          <p>
+            Postgres connector is <span style="color: green">enabled</span>
+          </p>
+          <p>
+            <input type="submit" name="enabling_pg" value="Deactivate">
+          </p>
+          {% else %}
+          <p>
+            Postgres connector is <span style="color: red">deactivated</span>
+          </p>
+          <p>
+            <input type="submit" name="enabling_pg" value="Activate">
+          </p>
+          {% end %}
+        </form>
+      </div>
+
+      <div class="grid-block" style="max-width: 200px">
+        <h3 class="as-font--medium as-color--secondary">Database operations</h3>
+        <p style="color:#444; font-size: 13px">After clicking on "Create database" make sure to change the password</p>
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="create_pg_database">
+          <p>
+            <input type="submit" value="Create database" />
+          </p>
+        </form>
+
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="sync_pg_database">
+          <p>
+            <input type="submit" value="Force sync database" />
+          </p>
+        </form>
+
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="drop_pg_database">
+          <p>
+            <input type="submit" value="Drop database" />
+          </p>
+        </form>
+      </div>
+
+      <div class="grid-block" style="max-width: 200px">
+        <h3 class="as-font--medium as-color--secondary">Change password</h3>
+        <p style="color:#444; font-size: 13px">This runs an "ALTER ROLE" in the PostgreSQL instance. Once changed, the connector is ready and the user and password can be shared with the customer.</p>
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="change_pg_password">
+          <p>
+            <label for="pg_password_{{ workspace['database'] }}">New password</label>
+            <input id="pg_password_{{ workspace['database'] }}" type="password" name="new_pg_password"/>
+          </p>
+          <p>
+            <label for="pg_password_confirm{{ workspace['database'] }}">Confirm password</label>
+            <input id="pg_password_confirm{{ workspace['database'] }}" type="password" name="new_pg_password_confirm"/>
+          </p>
+          <p>
+            <input type="submit" value="Change" />
+          </p>
+        </form>
+      </div>
+      <div class="grid-block" style="max-width: 500px">
+        <h3 class="as-font--title as-color--secondary">ClickHouse BI Connector</h2>
+        <p style="color:#444; font-size: 13px">
+          Mirror DataSources and Endpoints to a ClickHouse BI Connector machine. It might not account for all cases.
+          If you want to try, we'll need to provide you with the CH BI Server Address. Let us know in #tmp-bi-connector.
+        </p>
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="enable_clickhouse_bi_connector">
+          <p>
+            <label for="ch_bi_server_address">BI ClickHouse Server Address</label>
+            <input id="ch_bi_server_address" name="ch_bi_server_address" value=""/>
+          </p>
+          <p>
+            <label for="ch_bi_server_port">BI ClickHouse Server Port</label>
+            <input id="ch_bi_server_port" name="ch_bi_server_port" value="8123"/>
+          </p>
+          <p>
+            <label for="ch_bi_user_password">BI User Password</label>
+            <input id="ch_bi_user_password" name="ch_bi_user_password" value=""/>
+          </p>
+          <p>
+            <input type="submit" value="I'm feeling lucky" />
+          </p>
+        </form>
+        <table class="t-clean">
+          <tbody>
+            <tr>
+              <th>Database</th>
+              <td><code>{{workspace['database']}}</code></td>
+            </tr>
+            <tr>
+              <th>User</th>
+              <td><code>user_{{workspace['name']}}</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Data Connectors</h2>
+
+      <div class="grid-block">
+      {% if data_connectors %}
+        {% for connector in data_connectors %}
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>ID</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{connector['name']}}</td>
+                <td>{{connector['id']}}</td>
+                <td>{{connector['service']}}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <details>
+          <summary class="as-color--secondary as-font--medium pv-1">Connector settings</summary>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="operation" value="update_connector_settings">
+            <input type="hidden" name="connector_id" value="{{connector['id']}}">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Setting</th>
+                    <th>Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for setting in connector['settings'] %}
+                  <tr>
+                    <td>{{ setting }}</td>
+                    <td>
+                      <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                        <input style="width: 100%;" name="{{setting}}" value="{{ connector['settings'][setting] }}">
+                      </div>
+                    </td>
+                  </tr>
+                {% end %}
+              </tbody>
+              </table>
+              <input type="submit" value="Update" class="mv-2">
+            </form>
+          </details>
+
+          <details>
+          <summary class="as-color--secondary as-font--medium pv-1">Linkers</summary>
+            {% if connector['linkers'] %}
+            <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="operation" value="update_all_linkers">
+              <input type="hidden" name="connector_id" value="{{connector['id']}}">
+
+              <input type="submit" value="Refresh all linkers (useful for toggling FF)" class="mv-2">
+            </form>
+            {% end %}
+
+            {% for linker in connector['linkers'] %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="operation" value="update_linker_settings">
+                <input type="hidden" name="linker_id" value="{{linker['id']}}">
+
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Setting</th>
+                      <th>Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>id</td>
+                      <td>{{ linker['id'] }}</td>
+                    </tr>
+                    <tr>
+                      <td>name</td>
+                      <td>{{ linker['name'] }}</td>
+                    </tr>
+                  {% for linker_setting in linker['settings'] %}
+                    {# Deprecated settings that we don't use anymore but still can exist in Redis #}
+                    {% if linker_setting not in ['token', 'json_deserialization', 'gatherer_enabled'] %}
+                    <tr>
+                      <td>{{ linker_setting }}</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="{{linker_setting}}" value="{{ linker['settings'][linker_setting] }}">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                  {% end %}
+                  {% if connector['service']== 'kafka' %}
+                    {% if 'kafka_store_raw_value' not in linker['settings'] %}
+                    <tr>
+                      <td>kafka_store_raw_value</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="kafka_store_raw_value" value="True">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                    {% if 'kafka_store_binary_headers' not in linker['settings'] %}
+                    <tr>
+                      <td>kafka_store_binary_headers</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="kafka_store_binary_headers" value="False">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                  {% end %}
+                  {% if connector['service']== 'dynamodb' %}
+                    {% if 'linker_workers' not in linker['settings'] %}
+                    <tr>
+                      <td>linker_workers</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="linker_workers" value="1">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                    {% if 'dynamodb_min_time_between_iterations' not in linker['settings'] %}
+                    <tr>
+                      <td>dynamodb_min_time_between_iterations</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="dynamodb_min_time_between_iterations" value="1.5">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                    {% if 'dynamodb_sleep_closed_shards' not in linker['settings'] %}
+                    <tr>
+                      <td>dynamodb_sleep_closed_shards</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="dynamodb_sleep_closed_shards" value="0.1">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                    {% if 'dynamodb_sleep_open_shards' not in linker['settings'] %}
+                    <tr>
+                      <td>dynamodb_sleep_open_shards</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="dynamodb_sleep_open_shards" value="0.1">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                    {% if 'dynamodb_sleep_closed_shard_cursor' not in linker['settings'] %}
+                    <tr>
+                      <td>dynamodb_sleep_closed_shard_cursor</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="dynamodb_sleep_closed_shard_cursor" value="0">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                    {% if 'dynamodb_sleep_open_shard_cursor' not in linker['settings'] %}
+                    <tr>
+                      <td>dynamodb_sleep_open_shard_cursor</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="dynamodb_sleep_open_shard_cursor" value="0">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                    {% if 'dynamodb_max_records_read' not in linker['settings'] %}
+                    <tr>
+                      <td>dynamodb_max_records_read</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="dynamodb_max_records_read" value="100">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                    {% if 'dynamodb_max_shards_read_from_redis' not in linker['settings'] %}
+                    <tr>
+                      <td>dynamodb_max_shards_read_from_redis</td>
+                      <td>
+                        <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                          <input style="width: 100%;" name="dynamodb_max_shards_read_from_redis" value="15000">
+                        </div>
+                      </td>
+                    </tr>
+                    {% end %}
+                  {% end %}
+                  <tr>
+                    <td>json_deserialization</td>
+                    <td>
+                      <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                        <textarea style="width: 100%; height: 192px" name="json_deserialization">{% raw json_encode(linker['settings'].get('json_deserialization', [])) %}</textarea>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>data_connector_id</td>
+                    <td>
+                      <div style="max-width: 600px; height: 100%; overflow-wrap: break-word; word-wrap: break-word; white-space: normal;">
+                        <input style="width: 100%;" name="data_connector_id" value="{{ linker['data_connector_id'] }}">
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+                </table>
+
+                <input type="submit" value="Update" class="mv-2">
+              </form>
+            {% end %}
+          </details>
+        {% end %}
+      {% else %}
+        <p>No settings</p>
+      {% end %}
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Kafka</h2>
+      <div class="grid-block">
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="update_kafka_server_group">
+          <p>
+            <label for="kafka_server_group">Kafka Server Group</label>
+            <input type="text" id="kafka_server_group" name="kafka_server_group" size="100" value="{{ workspace['kafka_server_group'] or '' }}" />
+              <br>
+              <em>This value will sent kafka traffic of this workspace to tbakafka cluster labeled with the kafka server group value.</em></br>
+              <em> Empty to use default cluster</em>
+          </p>
+
+          <p>
+            <input type="submit" value="Update" />
+          </p>
+        </form>
+      </div>
+    </section>
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">External Datasources Integration</h2>
+      <div class="grid-block">
+        {% if workspace.cdk_gcp_service_account %}
+        <h3 class="as-font--medium as-color--secondary">Hard-delete GCP Service account</h3>
+        <p style="color:#f00; font-size: 13px">Panic button to delete the workspace's service account in case there is some leak. WARNING: Once this is used all permissions granted by the user to the account will be lost and all schedules in the workspace will lose access to BQ.</p>
+        <form method="POST">
+          {% module xsrf_form_html() %}
+          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+          <input type="hidden" name="operation" value="delete_gcp_account">
+          <p>
+            <input type="submit" name="delete_gcp_account" value="Delete GCP account">
+          </p>
+        </form>
+        {% else %}
+        <p>No GCP service account provisioned</p>
+        {% end %}
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Token restoration</h2>
+
+      <form method="POST">
+        {% module xsrf_form_html() %}
+        <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+        <input type="hidden" name="operation" value="restore_token">
+
+        <p>This section allows you to restore a token with a previous one in the case of an accidental "refresh" by a customer.</p>
+
+        <hr>
+        <ul>
+          <li>Please be extra careful when using this feature!</li>
+          <li><strong style="color:red">Beware of social engineering!</strong> If a customer asked you for this, try to get verification using an alternate channel (phone or video call, for example)</li>
+        </ul>
+        <hr>
+
+        <p>
+          <label for="current_token">Current token (to get rid of):</label>
+          <input type="text" id="current_token" name="current_token" size="100" value="<current token>" />
+            <br>
+            <em>Note: this token will be <strong style="color:red">erased</strong>.</em>
+        </p>
+
+        <p>
+          <label for="old_token">Token you want to restore</label>
+          <input type="text" id="old_token" name="old_token" size="100" value="<old token here>" />
+            <br>
+            <em>Note: this token will be <strong style="color:green">restored</strong>.</em>
+        </p>
+
+        <p>
+          <label for="workspace_name">Safety requirement</label>
+          <input type="text" id="workspace_name" name="workspace_name" size="100" value="<workspace name>" />
+            <br>
+            <em>As a safety measure, please, write the name of the workspace where you want to make the change.</em>
+        </p>
+
+        <p>
+          <input type="submit" value="Restore tokens" />
+        </p>
+      </form>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Query Profiles</h2>
+
+      <div class="as-font--small as-color--body">
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, value in profiles.items() %}
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="update_profile">
+                <tr>
+                  <td>
+                    {{ name }}
+                    <input type="hidden" name="profile_name" value="{{ name }}" />
+                  </td>
+                  <td>
+                    <input class="profile_value" type="text" name="profile_value" value="{{ value }}" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Update">
+                    <input type="submit" name="change_action" value="Delete">
+                  </td>
+                </tr>
+              </form>
+              {% end %}
+
+              <form method="POST">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                <input type="hidden" name="operation" value="update_profile">
+                <tr>
+                  <td>
+                    <select name="profile_name">
+                      {% for profile in workspace_profiles_available %}
+                      <option data-value="{{ profile }}" value="{{ profile }}">{{ profile }}</option>
+                      {% end %}
+                    </select>
+                  </td>
+                  <td>
+                    <input class="profile_value" type="text" name="profile_value" id="profile_value" />
+                  </td>
+                  <td>
+                    <input type="submit" name="change_action" value="Create">
+                  </td>
+                </tr>
+              </form>
+            </tbody>
+          </table>
+      </div>
+    </section>
+
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Tags</h2>
+
+      {% if tags_error %}
+        <div class="as-font--small as-color--body">
+          <p>{{ tags_error }}</p>
+        </div>
+      {% else %}
+        {% if len(tags) > 0 %}
+          {% try %}
+            <div class="as-font--small as-color--body">
+              <table style="width: 100%;" class="mt-3">
+                <thead>
+                  <th>Tag</th>
+                  <th>Resources</th>
+                </thead>
+                <tbody>
+                  {% for tag in tags %}
+                    <tr>
+                      <td>
+                        {{ tag.name }}
+                      </td>
+                      <td>
+                        {% for resource in tag.resources %}
+                          {{ resource.get('name', '') }} - {{ resource.get('id') }}<br>
+                        {% end %}
+                      </td>
+                    </tr>
+                  {% end %}
+                </tbody>
+              </table>
+            </div>
+          {% except %}
+            <span>There was an exception while rendering the tags</span>
+          {% end %}
+        {% else %}
+          <div class="as-font--small as-color--body">
+            <p>No tags found</p>
+          </div>
+        {% end %}
+      {% end %}
+    </section>
+
+
+    {% set resources, edges = graph %}
+    <section style="width: 80%; max-width: 1280px;">
+      <header class="Inner is-wider">
+        <h2 class="as-font--title as-color--secondary">Tables and Materialized Views</h2>
+      </header>
+      <table>
+        <thead>
+          <tr>
+            <th>Data Source</th>
+            <th>Table</th>
+            <th>Engine</th>
+            <th>Disk usage</th>
+            <th>Hosts</th>
+            <th>Clusters</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in sorted(resources, key=lambda r: r.name) %}
+            {% if r.resource in ('Datasource', 'OrphanTable', 'MaterializedNode') %}
+              <tr class="{{'error' if r.resource == 'OrphanTable' else ''}}">
+                <td>{{ r.name }}</td>
+                <td>{{ r.id }}</td>
+                <td>{{ tables.get(r.id, {}).get('engine', 'Unknown') }}</td>
+                <td>{{ tables.get(r.id, {}).get('disk_usage', 'Unknown') }}</td>
+                <td>
+                  {% set hosts = tables.get(r.id, {}).get('hosts', {}) %}
+                  <ul>
+                    {% for h in available_hosts %}
+                    <li class="{{'' if h in hosts else 'error'}}">
+                      {{ h }}
+                    </li>
+                    {% end %}
+                  </ul>
+                </td>
+                <td>
+                  {% set clusters = tables.get(r.id, {}).get('clusters', {}) %}
+                  {{ clusters if clusters else 'None' }}
+                </td>
+              </tr>
+            {% end %}
+          {% end %}
+        </tbody>
+      </table>
+    </section>
+    <section class="Inner is-wider">
+      <h2 class="as-font--title as-color--secondary">Data lineage</h2>
+      <div style="width: 100%; height: 480px;">
+        <div id="graph">
+          <div id="error"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  </div>
+
+  <script src="https://storage.googleapis.com/tinybird-assets/js/svg-pan-zoom.min.js"></script>
+
+  <script>
+    var dot = `digraph g {
+        graph [
+            rankdir = "LR"
+        ];
+        node [
+            fontsize = "12"
+            shape = "none"
+        ];
+        edge [
+            fontsize = "8"
+        ];
+
+        {% for r in resources %}
+          {% if r.resource in ('Datasource', 'OrphanTable') %}
+            "{{r.id}}" [
+                label = <<table border="0" cellspacing="0">
+                    <tr>
+                        <td border="1" port="head" bgcolor="{{'indigo' if r.resource == 'Datasource' else 'red'}}" colspan="{{ len(available_hosts) + 1 }}">
+                            <font point-size="24" color="white">
+                                {{r.name}}
+                            </font>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td border="1" align="left" colspan="{{ len(available_hosts) + 1 }}">
+                          <font point-size="20">
+                            Table: {{r.id}}
+                          </font>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td border="1" align="left" colspan="{{ len(available_hosts) + 1 }}">
+                          Clusters: {{ tables.get(r.id, {}).get('clusters', {}) }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td border="1" align="left">Hosts</td>
+                        {% set hosts = tables.get(r.id, {}).get('hosts', {}) %}
+                        {% for h in available_hosts %}
+                        <td border="1" bgcolor="{{'white' if h in hosts else 'red'}}">
+                          {{ h }}
+                        </td>
+                        {% end %}
+                    </tr>
+                    <tr>
+                        <td border="1" align="left" colspan="{{ len(available_hosts) + 1 }}">
+                          Engine: {{ tables.get(r.id, {}).get('engine', 'Unknown') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td border="1" align="left" colspan="{{ len(available_hosts) + 1 }}">
+                          Disk usage: {{ tables.get(r.id, {}).get('disk_usage', 'Unknown') }}
+                        </td>
+                    </tr>
+                </table>>
+            ]
+          {% elif r.resource == 'Pipe' %}
+            "{{r.id}}" [
+                label = <<table border="0" cellspacing="0">
+                    <tr>
+                        <td border="1" port="head" bgcolor="gold">
+                            <font point-size="24">
+                                {{r.name}}
+                            </font>
+                        </td>
+                    </tr>
+
+                    {% for n in r.pipeline.nodes %}
+                    <tr>
+                      {% if n.materialized %}
+                        <td border="1" port="{{n.id}}" bgcolor="indigo">
+                            <font point-size="20" color="white">
+                                {{n.name}}<br/>{{n.id}}
+                            </font>
+                        </td>
+                      {% else %}
+                        <td border="1" port="{{n.id}}" bgcolor="{{'chartreuse3' if r.endpoint == n.id else 'white'}}">
+                            <font color="black">
+                                {{n.name}}
+                            </font>
+                        </td>
+                      {% end %}
+                    </tr>
+                    {% end %}
+                </table>>
+            ]
+          {% end %}
+        {% end %}
+
+        {% for edge in edges %}
+            "{{edge[0][0]}}":"{{edge[0][1]}}" -> "{{edge[1][0]}}":"{{edge[1][1]}}" [
+                label=""
+                color={{'red' if edge[2] else 'black'}}
+            ]
+        {% end %}
+    }`;
+
+    var parser = new DOMParser();
+    var worker;
+    var result;
+    var outputEl = document.querySelector("#graph")
+
+    function updateGraph() {
+      if (worker) {
+        worker.terminate();
+      }
+
+      outputEl.classList.add("working");
+      outputEl.classList.remove("error");
+
+
+      var blob = new Blob([`
+        importScripts("https://storage.googleapis.com/tinybird-assets/js/viz.js");
+
+        onmessage = function(e) {
+          var result = Viz(e.data.src, e.data.options);
+          postMessage(result);
+        }
+      `], { type: "text/javascript" })
+
+
+
+      worker = new Worker(window.URL.createObjectURL(blob));
+
+      worker.onmessage = function(e) {
+        outputEl.classList.remove("working");
+        outputEl.classList.remove("error");
+
+        result = e.data;
+
+        updateOutput();
+      }
+
+      worker.onerror = function(e) {
+        outputEl.classList.remove("working");
+        outputEl.classList.add("error");
+
+        var message = e.message === undefined ? "An error occurred while processing the graph input." : e.message;
+
+        var error = document.querySelector("#error");
+        while (error.firstChild) {
+          error.removeChild(error.firstChild);
+        }
+
+        document.querySelector("#error").appendChild(document.createTextNode(message));
+
+        console.error(e);
+        e.preventDefault();
+      }
+
+      var params = {
+        src: dot,
+        options: {
+          engine: 'dot',
+          format: 'svg'
+        }
+      };
+
+      // Instead of asking for png-image-element directly, which we can't do in a worker,
+      // ask for SVG and convert when updating the output.
+
+      worker.postMessage(params);
+    }
+
+    function updateOutput() {
+      var graph = outputEl;
+
+      var svg = graph.querySelector("svg");
+      if (svg) {
+        graph.removeChild(svg);
+      }
+
+      if (!result) {
+        return;
+      }
+
+      var svg = parser.parseFromString(result, "image/svg+xml").documentElement;
+      svg.id = "svg_output";
+      graph.appendChild(svg);
+
+      panZoom = svgPanZoom(svg, {
+        zoomEnabled: true,
+        controlIconsEnabled: true,
+        fit: true,
+        center: true,
+        minZoom: 0.1
+      });
+
+      svg.addEventListener('paneresize', function(e) {
+        panZoom.resize();
+      }, false);
+      window.addEventListener('resize', function(e) {
+        panZoom.resize();
+      });
+    }
+
+    updateGraph();
+  </script>
+
+{% end %}

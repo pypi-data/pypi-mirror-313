@@ -1,0 +1,30 @@
+NODE materialize_into_jobslog
+DESCRIPTION >
+    Transform data from `raw_events` DS to ingest it into `jobs_log`
+
+SQL >
+
+  WITH (
+    JSONExtractString(event_data, 'pipe_id') AS string_pipe_id,
+    JSONExtractString(event_data, 'datasource_id') AS string_datasource_id,
+    JSONExtractString(event_data, 'started_at') AS string_started_at,
+    JSONExtractString(event_data, 'error') AS string_error
+  )
+    SELECT
+      workspace_id,
+      request_id,
+      replaceOne(event_type, 'job:', '') as job_type,
+      JSONExtractString(event_data, 'job_id') AS job_id,
+      if(string_pipe_id != '', string_pipe_id, NULL) as pipe_id,
+      if(string_datasource_id != '', string_datasource_id, NULL) as datasource_id,
+      parseDateTime64BestEffort(JSONExtractString(event_data, 'created_at')) as created_at,
+      if(string_started_at != '', parseDateTime64BestEffort(string_started_at), NULL) as started_at,
+      parseDateTime64BestEffort(JSONExtractString(event_data, 'updated_at')) as last_updated_at,
+      JSONExtractString(event_data, 'status') as status,
+      if(string_error != '', string_error, NULL) as error,
+      JSONExtractString(event_data, 'job_metadata') as job_metadata
+    FROM raw_events
+    WHERE startsWith(event_type, 'job:')
+
+TYPE materialized
+DATASOURCE jobs_log

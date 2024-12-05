@@ -1,0 +1,67 @@
+NODE pipe_stats_rt_view_0
+SQL >
+    SELECT
+        start_datetime,
+        workspace AS user_id,
+        span_id AS request_id,
+        cutURLParameter(url, 'token') AS url,
+        if(JSONHas(tags, 'pipe_id'), JSONExtractString(tags, 'pipe_id'), if(JSONHas(tags, 'pipe_name'), 'unknown', 'query_api')) AS pipe_id,
+        CASE
+            -- New span
+            WHEN JSONHas(tags, 'pipe_name')
+            THEN JSONExtractString(tags, 'pipe_name')
+            -- Legacy span (kept to avoid data migrations and so on)
+            WHEN JSONHas(tags, 'pipe_id')
+            THEN extract(assumeNotNull(path(url)), '/v0/pipes/(.*)[.]')
+            -- last resort
+            ELSE
+                'query_api'
+        END AS pipe_name,
+        assumeNotNull(status_code) AS status_code,
+        if(status_code > 399, 1, 0) AS error,
+        token,
+        token_name,
+        duration,
+        if(
+            JSONHas(tags, 'read_bytes'),
+            toUInt64OrZero(JSONExtractString(tags, 'read_bytes')),
+            0
+        ) AS read_bytes,
+        if(
+            JSONHas(tags, 'read_rows'), toUInt64OrZero(JSONExtractString(tags, 'read_rows')), 0
+        ) AS read_rows,
+        if(
+            JSONHas(tags, 'billable') AND (JSONExtractString(tags, 'billable') = 'false'), 0, 1
+        ) AS billable,
+        if(
+            JSONHas(tags, 'result_rows'), toUInt64OrZero(JSONExtractString(tags, 'result_rows')), 0
+        ) AS result_rows,
+        if (
+            JSONHas(tags, 'parameters'),
+                CAST(
+                    (
+                        JSONExtractKeysAndValues(tags, 'parameters', 'String').1,
+                        JSONExtractKeysAndValues(tags, 'parameters', 'String').2
+                    ),
+                    'Map(String, String)'
+                ),
+                map()
+        ) AS parameters,
+        assumeNotNull(if(isNotNull(method), method, '')) AS method,
+        JSONExtractString(tags, 'release') as release,
+        JSONExtractString(tags, 'user_agent') as user_agent,
+        if(JSONHas(tags, 'resource_tags'), JSONExtract(tags, 'resource_tags', 'Array(String)'), []) AS resource_tags,
+        if(
+            JSONHas(tags, 'virtual_cpu_time_microseconds'),
+            toUInt64OrZero(JSONExtractString(tags, 'virtual_cpu_time_microseconds')) / 1e6,
+            0
+        ) AS cpu_time
+    FROM spans
+    WHERE
+        (
+            ((operation_name = 'APIPipeDataHandler') AND (JSONHas(tags, 'pipe_id') OR JSONHas(tags, 'pipe_name')))
+            OR (operation_name = 'APIQueryHandler')
+        )
+
+TYPE MATERIALIZED
+DATASOURCE pipe_stats_rt

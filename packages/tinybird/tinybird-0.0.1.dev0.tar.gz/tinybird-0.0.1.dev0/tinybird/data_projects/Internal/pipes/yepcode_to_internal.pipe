@@ -1,0 +1,21 @@
+NODE yepcode_to_internal_node
+SQL >
+    SELECT
+        timestamp,
+        workspace_id,
+        datasource_id,
+        source,
+        event,
+        started_at,
+        ended_at,
+        status,
+        substring(reason, 1, 2500) as reason,
+        internal_failure_details,
+        '' as job_id,
+        assumeNotNull(if(isNotNull(result), result, '')) as result,
+        assumeNotNull(if(isNotNull(datasource_name), datasource_name, '')) as datasource_name,
+        assumeNotNull(if(isNotNull(workspace_name), workspace_name, '')) as workspace_name
+    FROM yepcode_integration.external_datasource_connector_ops_log
+
+TYPE MATERIALIZED
+DATASOURCE external_datasource_connector_ops_log

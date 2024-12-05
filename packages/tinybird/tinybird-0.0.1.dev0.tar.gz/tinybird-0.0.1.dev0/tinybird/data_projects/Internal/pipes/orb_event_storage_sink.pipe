@@ -1,0 +1,32 @@
+NODE storage_event_sink_0
+DESCRIPTION >
+    This pipe has "sink" in its name but doesn't sink in all regions. It uses env vars and include datafiles to set if it has to sink and with which config.
+
+SQL >
+    SELECT
+        region,
+        event_name,
+        event_version,
+        idempotency_key,
+        timestamp,
+        interval_start,
+        interval_end,
+        external_customer_id,
+        organization_name,
+        workspace_id,
+        workspace_name,
+        datasource_id,
+        datasource_name,
+        plan,
+        database_server,
+        in_dedicated_cluster,
+        is_branch_or_release,
+        max_total_rows,
+        max_total_bytes,
+        interval_duration_in_days,
+        -- We need this to be able to use a date in the filename until the date_time_output_format
+        -- setting is enabled in the chtoolset
+        toDate(parseDateTimeBestEffort(interval_start)) as date_for_sink_filename
+    FROM orb_event_storage_endpoint
+
+INCLUDE "./includes/orb_sinks_config/orb_event_storage_sink_${ORB_EVENTS_SINK_DEST}.incl"

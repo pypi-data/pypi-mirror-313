@@ -1,0 +1,25 @@
+NODE cluster_size_event_sink_0
+DESCRIPTION >
+    This pipe has "sink" in its name but doesn't sink in all regions. It uses env vars and include datafiles to set if it has to sink and with which config.
+
+SQL >
+    select
+        region,
+        event_name,
+        event_version,
+        idempotency_key,
+        timestamp,
+        interval_start,
+        interval_end,
+        external_customer_id,
+        organization_name,
+        cluster,
+        cluster_size,
+        cpu_cores,
+        total_memory,
+        num_hosts,
+        usage_in_seconds,
+        parseDateTimeBestEffort(timestamp) as datetime_for_sink_filename
+    from orb_event_cluster_size_endpoint
+
+INCLUDE "./includes/orb_sinks_config/orb_event_cluster_size_sink_${ORB_EVENTS_SINK_DEST}.incl"

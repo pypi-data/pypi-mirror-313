@@ -1,0 +1,13 @@
+TOKEN "data_transfer_per_day_read" READ
+
+NODE data_transfer_per_day_0
+SQL >
+    %
+    SELECT toDate(timestamp) as date, sum(bytes) as bytes, workspace_id, kind
+    from data_transfer
+    where
+        toDate(timestamp) = {% if defined(date) %}{{ Date(date) }}{% else %} today() {% end %}
+        {% if defined(kind) %} and kind = {{ String(kind)}} {% end %}
+        {% if defined(workspace) %} and workspace_id = {{ String(workspace) }} {% end %}
+    group by date, workspace_id, kind
+    order by date desc

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>Tinybird Integration</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="https://cdn.tinybird.co/static/images/logo.svg"
+      sizes="any"
+    />
+    {% try %}
+    {% module Template("webpack_templates/integrations-region-styles.html") %}
+    {% except %}
+    {% end %}
+  </head>
+  <body>
+    <div id="integrations" />
+    <script>
+      var userEmail = '{{user_name}}';
+      var userId = '{{user_id}}';
+      var userToken = '{{user_token}}';
+      var userRegionSelected = '{{user_region_selected}}' === 'True'
+      var region = '{{region}}';
+      var JWT = '{{jwt}}';
+      var host = '{{host}}';
+      var users = [];
+      var workspaces = {% raw json_encode(workspaces) %};
+      var featureFlags = {% raw json_encode(feature_flags) %};
+      var accessCode = '{{access_code}}';
+    </script>
+    {% try %}
+    {% module Template("webpack_templates/integrations-region-scripts.html") %}
+    {% except %}
+    {% end %}
+  </body>
+</html>

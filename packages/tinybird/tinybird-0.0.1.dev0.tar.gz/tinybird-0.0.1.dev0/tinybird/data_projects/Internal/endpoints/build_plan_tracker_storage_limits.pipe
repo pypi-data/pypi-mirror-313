@@ -1,0 +1,67 @@
+TOKEN "build_plan_tracker_storage_limits_read" READ
+
+
+NODE today_build_plan_storage_detailed_per_datasource
+SQL >
+
+    %
+    SELECT
+        max(bytes) as max_bytes,
+        max(bytes_quarantine) as max_bytes_quarantine,
+        user_id as workspace_id,
+        datasource_id
+    FROM usage_metrics_storage as u
+    INNER JOIN (
+            SELECT *
+            FROM workspaces_all FINAL
+            WHERE 
+                plan = 'dev'
+                AND origin = ''
+        ) as wss
+        ON u.user_id = wss.id
+        AND wss.plan = 'dev'
+        AND wss.origin = ''
+    WHERE 
+        toDate(timestamp) = {% if defined(date_to_check) %} {{Date(date_to_check, description="Date when the check is done. Only useful for testing purposes")}} {% else %} today() {% end %}  
+        AND database != 'public'
+    GROUP BY workspace_id, datasource_id, toStartOfDay(timestamp) as date
+
+
+NODE build_plan_storage_detailed_per_workspace
+SQL >
+
+    SELECT
+        workspace_id,
+        sum(max_bytes) as sum_bytes,
+        sum(max_bytes_quarantine) as sum_bytes_quarantine
+    FROM today_build_plan_storage_detailed_per_datasource
+    GROUP BY workspace_id
+
+
+
+NODE build_plan_tracker_storage_totals
+SQL >
+
+    %
+    SELECT workspace_id, (sum_bytes + sum_bytes_quarantine) as total_bytes
+    FROM build_plan_storage_detailed_per_workspace
+    WHERE
+        (sum_bytes + sum_bytes_quarantine)
+        > {{
+            Float32(
+                threshold_limit,
+                0.75,
+                description="Storage threshold we start warning",
+                required=True,
+            )
+        }}
+        * {{
+            Int64(
+                max_storage_limit,
+                10000000000,
+                description="Storage limit",
+                required=True,
+            )
+        }}
+
+

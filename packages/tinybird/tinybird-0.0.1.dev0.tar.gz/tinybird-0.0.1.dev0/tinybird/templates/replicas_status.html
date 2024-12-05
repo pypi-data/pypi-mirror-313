@@ -1,0 +1,146 @@
+{% extends "internal_base.html" %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+{% end %}
+
+{% block content %}
+
+  <style>
+    main section {
+      padding: 0;
+    }
+    main section:first-child {
+      margin: 32px auto 0;
+    }
+    main section:not(:first-child) {
+      margin: 48px auto;
+    }
+    main section h2 {
+      margin-bottom: 8px;
+    }
+    code {
+      background-color: #E5E6E8;
+      padding: 0 .5rem;
+      font-family: monospace;
+      font-style: italic;
+    }
+
+    table.t-clean th, table.t-clean td {
+      border: 0 !important;
+    }
+    table.t-clean tr {
+      border-bottom: solid 1px #E5E6E8;
+    }
+    table.t-clean tr:last-child {
+      border-bottom: 0;
+    }
+    table.t-clean th {
+      text-align: left;
+    }
+    table.t-clean td {
+      text-align: right;
+    }
+
+    tr.error {
+      background-color: lightyellow;
+    }
+    td.error, li.error {
+      color: crimson;
+      font-weight: bold;
+    }
+
+    th, td {
+      font-family: monospace !important;
+      text-align: left;
+      padding: 1em;
+    }
+
+    .table-container {
+      height: 100%;
+      overflow-x: scroll;
+    }
+  </style>
+  <div class="Inner pb-5 mt-5">
+    <h3 class="as-color--secondary as-font--huge pv-3">Zookeeper</h3>
+
+    {% if len(zookeeper_replicas_problems) %}
+      <h4 class="as-color--secondary as-font--huge pv-3">Problems</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>name</th>
+            <th>path</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for zookeeper_replica in zookeeper_replicas_problems %}
+            <tr>
+              <th>{{ zookeeper_replica["name"] }}</th>
+              <th>{{ zookeeper_replica["path"] }}</th>
+            </tr>
+          {% end %}
+        </tbody>
+      </table>
+    {% else %}
+      <h3 class="as-color--secondary as-font--big pv-3">No problems found</h3>
+    {% end %}
+
+    <h3 class="as-color--secondary as-font--huge pv-3">Replicas</h3>
+
+    {% if len(replicas_problems) %}
+      {% for cluster_host, rows in replicas_problems.items() %}
+        {% if len(rows) %}
+        <h4 class="as-color--secondary as-font--huge pv-3">{{cluster_host}} problems</h4>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>cluster</th>
+                <th>host_name</th>
+                <th>database</th>
+                <th>table</th>
+                <th>is_leader</th>
+                <th>is_readonly</th>
+                <th>is_session_expired</th>
+                <th>future_parts</th>
+                <th>parts_to_check</th>
+                <th>queue_size</th>
+                <th>inserts_in_queue</th>
+                <th>merges_in_queue</th>
+                <th>part_mutations_in_queue</th>
+                <th>absolute_delay</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  <td>{{ row["cluster"] }}</td>
+                  <td>{{ row["host_name"] }}</td>
+                  <td>{{ row["database"] }}</td>
+                  <td>{{ row["table"] }}</td>
+                  <td>{{ row["is_leader"] }}</td>
+                  <td>{{ row["is_readonly"] }}</td>
+                  <td>{{ row["is_session_expired"] }}</td>
+                  <td>{{ row["future_parts"] }}</td>
+                  <td>{{ row["parts_to_check"] }}</td>
+                  <td>{{ row["queue_size"] }}</td>
+                  <td>{{ row["inserts_in_queue"] }}</td>
+                  <td>{{ row["merges_in_queue"] }}</td>
+                  <td>{{ row["part_mutations_in_queue"] }}</td>
+                  <td>{{ row["absolute_delay"] }}</td>
+                </tr>
+              {% end %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <h3 class="as-color--secondary as-font--big pv-3">{{cluster_host}}: No problems found</h3>
+        {% end %}
+      {% end %}
+    {% end %}
+  </div>
+{% end %}

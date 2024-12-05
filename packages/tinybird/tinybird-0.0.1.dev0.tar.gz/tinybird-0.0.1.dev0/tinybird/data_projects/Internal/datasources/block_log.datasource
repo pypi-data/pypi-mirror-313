@@ -1,0 +1,30 @@
+TOKEN "block_log (Data Source append)" APPEND
+
+
+SCHEMA >
+    `timestamp` DateTime,
+    `request_id` String,
+    `import_id` String,
+    `job_id` Nullable(String),
+    `source` String,
+    `token_id` String,
+    `block_id` String,
+    `status` String,
+    `user_id` String,
+    `user_mail` String,
+    `datasource_id` String,
+    `datasource_name` String,
+    `start_offset` Nullable(Int64),
+    `end_offset` Nullable(Int64),
+    `rows` Nullable(Int32),
+    `parser` Nullable(String),
+    `quarantine_lines` Nullable(UInt32),
+    `empty_lines` Nullable(UInt32),
+    `bytes` Nullable(UInt32),
+    `processing_time` Nullable(Float32),
+    `processing_error` Nullable(String)
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(timestamp)"
+ENGINE_SORTING_KEY "timestamp, cityHash64(datasource_name)"
+ENGINE_SAMPLING_KEY "cityHash64(datasource_name)"

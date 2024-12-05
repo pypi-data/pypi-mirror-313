@@ -1,0 +1,17 @@
+VERSION 2
+TOKEN "usage_metrics_storage__v2 (Data Source append)" APPEND
+
+
+SCHEMA >
+    `timestamp` DateTime,
+    `user_id` String,
+    `datasource_id` String,
+    `datasource_name` String,
+    `rows` SimpleAggregateFunction(max, UInt64),
+    `bytes` SimpleAggregateFunction(max, UInt64),
+    `rows_quarantine` SimpleAggregateFunction(max, UInt64),
+    `bytes_quarantine` SimpleAggregateFunction(max, UInt64)
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "user_id, datasource_id, timestamp"

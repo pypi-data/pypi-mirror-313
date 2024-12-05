@@ -1,0 +1,102 @@
+TOKEN "read_event_pipes" READ
+
+NODE clusters_instance_size_by_host_node
+DESCRIPTION >
+    **This description is for the whole pipe**
+    It's not there due to issues with the `test_data_project_and_internal_workspace_synced` test
+    Endpoint to get cluster size events for organizations with infra-based pricing into Orb.
+    Takes two optional params:
+    * when: it dictates which 15 minute slot is used, it's always the 15min slot previous to the when timestamp.
+    * organization_filter is used to filter by an organization
+
+SQL >
+    %
+    WITH
+        {% if defined(when) %} parseDateTimeBestEffort({{ String(when) }})
+        {% else %} now()
+        {% end %} AS request_time,
+        -- interval length hardcoded to 15 minutes because we use toStartOfFifteenMinutes
+        15 AS interval_length,
+        toStartOfFifteenMinutes(request_time) - interval interval_length MINUTE AS interval_start,
+        toStartOfFifteenMinutes(request_time) AS interval_end,
+        -- Orb recommends setting the timestamp for aggregated periods to the mid point of the period.
+        interval_start + (interval_end - interval_start) / 2 AS interval_mid_point
+    SELECT
+        interval_mid_point,
+        interval_start,
+        interval_end,
+        if(o.orb_external_customer_id != '', o.orb_external_customer_id, o.id) AS external_customer_id,
+        o.name AS organization_name,
+        m.cluster,
+        m.host,
+        max(if(m.metric == 'InstanceType', value, '')) AS instance_size,
+        max(if(m.metric == 'NumberCPU', toInt8(value), 0)) AS host_cpu_cores,
+        max(if(m.metric == 'OSMemoryTotal', toFloat32(value), 0)) AS host_total_memory
+    FROM dedicated_infrastructure_metrics_logs m
+    JOIN (SELECT * FROM organizations_all_rt FINAL) o ON m.organization_id = o.id
+    WHERE
+        1
+        AND m.organization_id != ''
+        AND m.metric in ['InstanceType', 'NumberCPU', 'OSMemoryTotal']
+        AND interval_start <= m.timestamp
+        AND m.timestamp < interval_end
+        {% if defined(organization_filter) %}
+            AND m.organization_id = {{ String(organization_filter) }}
+        {% else %}
+            AND o.billing_plan = 'infrastructure_usage'
+        {% end %}
+    GROUP BY external_customer_id, o.name, m.cluster, m.host
+
+NODE clusters_instance_size_by_cluster_node
+DESCRIPTION >
+    Aggregate metrics from instances in the same cluster
+
+SQL >
+    %
+    WITH
+        'cluster_size' AS event_name,
+        1 AS event_version
+    SELECT
+        event_name,
+        event_version,
+        -- We'd have to be careful if we change the interval length as the idempotency key would
+        -- change and we could duplicate data if old periods overlap with new periods.
+        hex(
+            SHA256(concat(event_name, external_customer_id, cluster, interval_start, interval_end))
+        ) AS idempotency_key,
+        min(interval_mid_point) AS interval_mid_point,
+        min(interval_start) AS interval_start,
+        max(interval_end) AS interval_end,
+        external_customer_id,
+        organization_name,
+        cluster,
+        max(instance_size) AS cluster_size,
+        sum(host_cpu_cores) AS cpu_cores,
+        sum(host_total_memory) AS total_memory,
+        count(distinct(host)) AS num_hosts,
+        15 * 60 AS usage_in_seconds
+    FROM clusters_instance_size_by_host_node
+    GROUP BY external_customer_id, organization_name, cluster
+
+NODE clusters_instance_size_endpoint_node
+DESCRIPTION >
+    Add region, format datetimes as iso8601
+
+SQL >
+    SELECT
+        region_metadata.orb_billing_region AS region,
+        event_name,
+        event_version,
+        idempotency_key,
+        formatDateTime(interval_mid_point, '%Y-%m-%dT%T.000Z') AS timestamp,
+        formatDateTime(interval_start, '%Y-%m-%dT%T.000Z') AS interval_start,
+        formatDateTime(interval_end, '%Y-%m-%dT%T.000Z') AS interval_end,
+        external_customer_id,
+        organization_name,
+        cluster,
+        cluster_size,
+        cpu_cores,
+        total_memory,
+        num_hosts,
+        usage_in_seconds
+    FROM clusters_instance_size_by_cluster_node, region_metadata

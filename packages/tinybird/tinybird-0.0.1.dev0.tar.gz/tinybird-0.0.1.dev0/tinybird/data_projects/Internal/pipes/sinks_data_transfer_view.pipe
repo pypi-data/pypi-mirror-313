@@ -1,0 +1,24 @@
+NODE sinks_ops_log_to_data_transfer
+SQL >
+    SELECT
+        toStartOfHour(timestamp) as timestamp,
+        workspace_id,
+        'sink' as event,
+        sum(written_bytes) as bytes,
+        options['origin_provider'] as origin_provider,
+        options['origin_region'] as origin_region,
+        options['destination_provider'] as destination_provider,
+        options['destination_region'] as destination_region,
+        multiIf(origin_provider != destination_provider and not (origin_provider = 'aws' and destination_provider = 's3'),
+                'inter',
+                origin_region != destination_region,
+                'inter',
+                'intra') as kind
+    FROM sinks_ops_log
+    WHERE written_bytes > 0 
+    -- drop not s3 as destination as its the only provider supported now
+    AND destination_provider = 's3'
+    GROUP BY workspace_id, event, kind, timestamp, origin_provider, origin_region, destination_provider, destination_region
+
+TYPE MATERIALIZED
+DATASOURCE data_transfer

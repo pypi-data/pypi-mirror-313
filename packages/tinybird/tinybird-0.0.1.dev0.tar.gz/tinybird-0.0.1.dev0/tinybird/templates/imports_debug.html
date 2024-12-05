@@ -1,0 +1,313 @@
+{% extends "internal_base.html" %}
+
+{% block meta %}
+<title>Cheriff · Imports</title>
+{% end %}
+
+{% block style %}
+  {% try %}
+  {% module Template("webpack_templates/cheriff-styles.html") %}
+  {% except %}
+  {% end %}
+
+    <style>
+      body {
+        font-family: monospace;
+      }
+      h2 {
+        margin: 2em 0 2em 0;
+        font-size: 2em;
+      }
+      h3 {
+        margin: 1em 0 1em 0;
+        font-size: 1.5em;
+      }
+      ul {
+        padding: 0 20px;
+      }
+      li {
+        padding: 0 20px;
+      }
+      /* #C9DB74,#8BE0A4,#B497E7,#D3B484,#B3B3B3 */
+      div.guessing { background-color: #66C5CC; border-color: #66C5CC; }
+      div.queued { background-color: #F6CF71;  border-color:#F6CF71;}
+      div.fetching { background-color: #F89C74; border-color:#F89C74; }
+      div.inserting_chunk { background-color: #DCB0F2; border-color:#DCB0F2; }
+      div.done_inserting_chunk { background-color: #87C55F; border-color:#87C55F; }
+      div.guessing { background-color: #9EB9F3; border-color:#9EB9F3; }
+      div.idle { background-color: #FE88B1; border-color:#FE88B1; }
+
+      td {
+        padding: 0.2em 0.5em;
+      }
+      th {
+        padding: 0.5em 0.5em;
+        font-weight: bold;
+        text-align: left;
+      }
+
+      /* https://chrisbracco.com/a-simple-css-tooltip/ */
+
+      [tooltip] {
+        position: relative;
+        z-index: 2;
+        cursor: pointer;
+      }
+
+      /* Hide the tooltip content by default */
+      [tooltip]:before,
+      [tooltip]:after {
+        visibility: hidden;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+        filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=0);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Position tooltip above the element */
+      [tooltip]:before {
+        position: absolute;
+        bottom: 150%;
+        left: 50%;
+        margin-bottom: 5px;
+        margin-left: -80px;
+        padding: 7px;
+        width: 160px;
+        -webkit-border-radius: 3px;
+        -moz-border-radius: 3px;
+        border-radius: 3px;
+        background-color: #000;
+        background-color: hsla(0, 0%, 20%, 0.9);
+        color: #fff;
+        content: attr(tooltip);
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+
+      /* Triangle hack to make tooltip look like a speech bubble */
+      [tooltip]:after {
+        position: absolute;
+        bottom: 150%;
+        left: 50%;
+        margin-left: -5px;
+        width: 0;
+        border-top: 5px solid #000;
+        border-top: 5px solid hsla(0, 0%, 20%, 0.9);
+        border-right: 5px solid transparent;
+        border-left: 5px solid transparent;
+        content: " ";
+        font-size: 0;
+        line-height: 0;
+      }
+
+      /* Show tooltip content on hover */
+      [tooltip]:hover:before,
+      [tooltip]:hover:after {
+        visibility: visible;
+        -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+        filter: progid: DXImageTransform.Microsoft.Alpha(Opacity=100);
+        opacity: 1;
+      }
+    </style>
+{% end %}
+
+{% block content %}
+<section class="Inner is-wider">
+  <div id="main"></div>
+</section>
+{% end %}
+
+{% block js %}
+
+<script src="{{cdn_host}}/static/js/tinybird.js"></script>
+<script>
+  var None = null;
+  var JWT = '{{global_admin_token}}';
+  var HOST = '{{host}}';
+  var BLOCKS_TABLE = '{{blocks_table}}';
+  var tinyb = tinybird(JWT, HOST);
+  var element = document.getElementById('main')
+
+  async function latest_imports_component(table, limit) {
+    var latest = await tinybird(JWT, HOST).query(`
+      select user_mail, import_id, job_id, datasource_id, min(timestamp) start_date, count() block_num, countIf(status = 'processing_error') errors, argMax(datasource_name, timestamp) ds_name, argMax(source, timestamp) source,
+      formatReadableSize(sum(end_offset - start_offset)) size,
+      sum(quarantine_lines) quarantine
+      from ${BLOCKS_TABLE}
+      where user_mail != 'r@localhost' and user_mail not like '%@tinybird.co' 
+      ${table ? `and datasource_name = '${table}'`: ''}
+      group by user_mail, import_id, job_id, datasource_id
+      order by start_date desc
+      limit ${limit ? limit : 100}
+    `)
+    return `
+    <h3>Latests imports</h3>
+    <table>
+         <tr>
+           <th>date</th>
+           <th>email</th>
+           <th>data source</th>
+           <th>source</th>
+           <th>block num</th>
+           <th>block err</th>
+           <th>size</th>
+           <th>quarantine</th>
+           <th>API Job result</th>
+         </tr>
+          ${foreach(latest.data, imp => `
+          <tr>
+            <td> 
+              <a href="#" onclick="( async () => await show_import('${imp.import_id}') )()">
+                ${imp.start_date}
+              </a>
+            </td>
+            <td> ${imp.user_mail} </td>
+            <td>
+              <a href="#" onclick="( async () => await imports_by_datasource('${imp.ds_name}'))()">${imp.ds_name}</a>
+            </td>
+            <td> ${imp.source.startsWith('http') ? `<a href="${imp.source}">url</a>`: imp.source} </td>
+            <td> ${imp.block_num} </td>
+            <td> ${imp.errors}</td>
+            <td> ${imp.size}</td>
+            <td> ${imp.quarantine}</td>
+            <td>
+              ${imp.source.startsWith('http')
+                ? `<a href="/v0/jobs/${imp.import_id}">${imp.import_id}</a>`
+                : 'None'
+              }
+            </td>
+          </tr>
+          `)}
+    <table>
+    `
+  }
+
+  async function imports_by_datasource(ds) {
+    setRoute(`imports_by_datasource('${ds}')`)
+    var imp = await tinyb.query(`
+        select import_id imports, min(timestamp) start_date
+        from ${BLOCKS_TABLE}
+        where datasource_name == '${ds}'
+        group by import_id
+        order by start_date desc
+    `)
+    element.innerHTML = ` 
+      <h2>latest imports for ${ds}</h2>
+      ${await latest_imports_component(ds, 200)}
+    `
+    return false;
+  }
+
+  async function show_import(imp_id) {
+    setRoute(`show_import('${imp_id}')`)
+    var imp = await tinyb.query(`
+        select block_id, minIf(timestamp, status='fetching') start, groupArray(tuple(timestamp, status)) states from ${BLOCKS_TABLE} 
+        where import_id == '${imp_id}' 
+        group by block_id
+        order by start
+    `)
+
+    var max_date = 0,
+        min_date = Number.MAX_SAFE_INTEGER;
+
+    // prepare to show
+    for (var block of imp.data) {
+      block.states.sort((a, b) => a[0] - b[0])
+      for (var states of block.states) {
+        max_date = Math.max(+new Date(states[0]), max_date)
+        min_date = Math.min(+new Date(states[0]), min_date)
+      }
+    }
+    imp.data.sort((a, b) => new Date(a.states[0][0]).getTime() - new Date(b.states[0][0]).getTime())
+    // normalize
+    for (var block of imp.data) {
+      for (var i = 0; i < block.states.length - 1; ++i) {
+        var state = block.states[i]
+        state[0] = (+new Date(state[0]) - min_date)/(max_date - min_date)
+      }
+      for (var i = 0; i < block.states.length - 1; ++i) {
+        var state = block.states[i]
+        state[2] = block.states[i+1][0] - state[0]
+        if (state[1].indexOf(':') !== -1) {
+          state[3] = state[1].split(':')[0]
+        }else {
+          state[3] = state[1]
+        }
+      }
+      delete block.states[block.states.length - 1]
+    }
+
+    const SCALE = (max_date - min_date)/1000
+    const SECOND_TO_PIXELS = 10*(max_date - min_date)/1000;
+    element.innerHTML = ` 
+      <a href="#" onclick="( async () => await main() )()">&larr;</a>
+      total seconds: ${SCALE}s
+      <ul> 
+        ${imp.data.map((i) => `
+          <li style="position: relative; height: 40px;"> 
+            <div style="">${i.block_id}</div>
+          <div>
+            ${i.states.map((s) => `
+              <div class="${s[3]}" tooltip="${s[1]}- ${(SCALE*s[2]).toFixed(1)}s" style="border: 1px solid black;position: absolute; left: ${SECOND_TO_PIXELS*s[0]}px; width: ${SECOND_TO_PIXELS*s[2]}px;">&nbsp;</div>
+            `).join('')}
+
+</div>
+          </li>`
+        ).join('')} 
+      </ul> 
+    `
+    return false;
+
+  }
+
+  function foreach(v, f) {
+    return v.map(f).join('')
+  }
+
+  function setRoute(a) {
+    setTimeout(() => location.hash = a, 1)
+  }
+
+  async function main() {
+    setRoute("main()")
+    var per_user = await tinybird(JWT, HOST).query(`
+      select user_mail, groupArray(tuple(ds_name, start_date)) imports from (
+        select user_mail, datasource_id, min(timestamp) start_date , argMax(datasource_name, timestamp) ds_name
+        from ${BLOCKS_TABLE}
+        group by user_mail, datasource_id
+        order by start_date desc
+      )
+      group by user_mail
+    `)
+
+
+    element.innerHTML = `
+      <h2>Import dashboard</h2>
+      ${await latest_imports_component()}
+      <h3>Imports by user</h3>
+      <ul>
+      ${per_user.data.map(user => {
+        return `<li>
+          ${user.user_mail}
+          <ul>
+            ${foreach(user.imports, imp => `
+                <li><a href="#" onclick="( async () => await imports_by_datasource('${imp[0]}'))()">${imp[0]}</a> - ${imp[1]}</li>
+            `)}
+          </ul>
+          </li>
+        `
+      }).join('')
+      }
+      </ul>
+    `
+        return true;
+  }
+  if (location.hash) {
+    //A VERY NICE XSS
+    eval(location.hash.slice(1))
+  } else {
+    main();
+  }
+</script>
+{% end %}

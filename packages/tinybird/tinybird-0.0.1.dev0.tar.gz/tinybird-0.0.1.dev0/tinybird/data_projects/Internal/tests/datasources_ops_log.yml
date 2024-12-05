@@ -1,0 +1,44 @@
+- duration_always_positive:
+    sql: |
+        SELECT count() as c
+        FROM datasources_ops_log
+        WHERE 
+            elapsed_time < 0
+            AND timestamp > now() - INTERVAL 24 HOUR
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+
+- processed_bytes_always_positive:
+    sql: |
+        SELECT count() as c
+        FROM datasources_ops_log
+        WHERE 
+            timestamp > now() - INTERVAL 24 HOUR
+            AND (read_bytes < 0 or written_bytes < 0)
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+- user_id_must_be_uuid:
+    sql: |
+        SELECT user_id, count() as c
+        FROM datasources_ops_log
+        WHERE 
+            timestamp > now() - INTERVAL 24 HOUR
+            AND toUUIDOrNull(user_id) IS  NULL
+        GROUP BY user_id
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+# Commented out until we fix the duplicated records we have in datasources_ops_log.csv fixture
+#- no_duplicated_records:
+#    sql: |
+#        SELECT timestamp, datasource_id, event_type, operation_id, pipe_id, count() as c
+#        FROM datasources_ops_log
+#        WHERE
+#            timestamp > now() - INTERVAL 24 HOUR
+#        GROUP BY ALL
+#        HAVING c > 1

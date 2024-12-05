@@ -1,0 +1,8 @@
+- record_count_not_dropping_to_zero:
+    sql: |
+        select count() as count
+        from pipe_stats_rt
+        where toDate(start_datetime) == toDate(now() - interval 5 day)
+        having count == 0
+    max_time: null
+    max_bytes_read: null

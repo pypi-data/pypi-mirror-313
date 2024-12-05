@@ -1,0 +1,463 @@
+{% extends "internal_base.html" %}
+
+{% block meta %}
+<title>Cheriff · User · {{ user_account['email'] }}</title>
+{% end %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+{% end %}
+
+{% block content %}
+
+<style>
+  main section {
+    padding: 0;
+  }
+  main section:first-child {
+    margin: 32px auto 0;
+  }
+  main section:not(:first-child) {
+    margin: 48px auto;
+  }
+  main section h2 {
+    margin-bottom: 8px;
+  }
+  code {
+    background-color: #E5E6E8;
+    padding: 0 .5rem;
+    font-family: monospace;
+    font-style: italic;
+  }
+
+  table.t-clean th, table.t-clean td {
+    border: 0 !important;
+  }
+  table.t-clean tr {
+    border-bottom: solid 1px #E5E6E8;
+  }
+  table.t-clean tr:last-child {
+    border-bottom: 0;
+  }
+  table.t-clean th {
+    text-align: left;
+  }
+  table.t-clean td {
+    text-align: right;
+  }
+
+  tr.error {
+    background-color: lightyellow;
+  }
+  td.error, li.error {
+    color: crimson;
+    font-weight: bold;
+  }
+
+  th, td {
+    font-family: monospace !important;
+  }
+
+  .grid-block {
+    border: dotted 1px grey;
+    display: inline-grid;
+    margin-right: 24px;
+    padding: 16px;
+  }
+  .grid-block:last-child {
+    margin-right: 0;
+  }
+
+  .grid-block h3:not(:first-child) {
+    margin-top: 16px;
+  }
+
+  form p {
+    margin: 8px 0;
+  }
+  form p label {
+    display: block;
+    margin: 8px 0 4px;
+  }
+
+  form select {
+    min-width: 160px;
+  }
+
+  dl {
+    margin-top: 8px;
+    padding-left: 24px;
+  }
+
+  dd {
+    margin-bottom: 8px;
+  }
+
+  input.limit_value {
+    text-align: right;
+  }
+
+  input.limit_value.small {
+    max-width: 32px;
+  }
+
+  ul.help li {
+    margin: 8px 0;
+    line-height: 1.5em;
+  }
+
+  ul.help li span {
+    border-bottom: 1px dotted;
+  }
+
+  .hide {
+    display: none;
+  }
+
+  #graph svg {
+    width: 100%;
+    height: 100%;
+  }
+  .button-copy {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 2px 4px;
+    margin: 2px 0 10px 0;
+  }
+
+  .button-copy:hover {
+    background-color: silver;
+  }
+
+  .button-copy:active {
+    background-color: gray;
+  }
+</style>
+<script>
+  function copyToClipboard(element) {
+    var copyText = document.getElementById(element);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+
+    navigator.clipboard.writeText(copyText.value);
+  }
+</script>
+
+<div class="Inner">
+  <div class="pv-5">
+    <h2 class="as-font--title as-color--secondary">User Account - {{ user_account['email'] }}</h2>
+    <div class="as-font--small as-color--body mt-3">
+      <section class="is-wider">
+        <div class="grid-block">
+          <table class="t-clean">
+            <tbody>
+              <tr>
+                <th>Created</th>
+                <td>{{user_account['created_at'].date().isoformat()}}</td>
+              </tr>
+              <tr>
+                <th>Auth token</th>
+                <td style="max-width: 72px;">{{ admin_token }}</td>
+              </tr>
+              <tr>
+                <th>Organization</th>
+                <td>{{ organization_name }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {% if len(workspaces) == 0 %}
+          <div>No workspaces</div>
+          {% elif len(workspaces) and (current_user['email'] in allowed_loginas_users) %}
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="email" value="{{user_account['email']}}">
+            <input type="hidden" name="operation" value="login_as">
+            <input type="submit" value="Login as">
+            <input type="submit" onclick="loginAsInApp(event, `{{user_account['email']}}`)" value="Login as in app">
+          </form>
+          {% end %}
+        </div>
+        <div class="grid-block">
+          <h3 class="as-font--medium as-color--secondary">Status</h3>
+  
+          {% if user_account.confirmed_account %}
+            <p>
+              User is <span style="color: green">activated</span>
+            </p>
+            
+            <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="email" value="{{user_account['email']}}">
+              <input type="hidden" name="operation" value="disable_account">
+              <p>
+                <input type="submit" name="enabling_action" value="🚷 Deactivate account">
+
+                <span style="color:red">
+                  <span style="float:left">⚠️</span>
+                  <span style="float:right">
+                    ⚡ Beware: if you disable this user, all their tokens will be refreshed. This can cause downtimes in case the customer
+                       is using any of these tokens for production. Please, make sure the customer knows the dangers of this and use the "Token restoration"
+                       form in the workspace administration page if you need to restore an old token.<br>
+                  </span>
+                </span>
+                <br>
+              </p>
+
+              {% if has_uniquely_shared_datasources %}
+              <p>
+                <span style="color:red">
+                  <span style="float:left">⚠️</span>
+                  <span style="float:right">
+                    Beware: this user has shared datasources with workspaces owned by other users.<br>
+                  </span>
+                </span>
+                <br>
+
+                <input type="checkbox" id="unshare_datasources" name="unshare_datasources" value="true">
+                Unshare shared datasources.
+              </p>
+              {% end %}
+          </form>
+          {% else %}
+            <p>
+              User is <span style="color: red">deactivated</span>
+            </p>
+  
+            <form action="{{ reverse_url('user_account_admin_activate') }}" method="post">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="id" value="{{user_account['id']}}">
+              <p>
+                <input type="submit" value="♻️ Activate account">
+              </p>
+            </form>
+          {% end %}
+          </div>
+          <div class="grid-block">
+            <h3 class="as-font--medium as-color--secondary">Flags</h3>
+            
+            <form method="POST">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="email" value="{{user_account['email']}}">
+              <input type="hidden" name="operation" value="enable_sessionrewind">
+              {% if user_account.enabled_sessionrewind or user_account.enabled_fullstory %}
+              <p>
+                <a href="https://www.sessionrewind.com/">SessionRewind</a> is <span style="color: green">enabled</span>
+              </p>
+              <p>
+                <input type="submit" name="enabling_sessionrewind" value="Deactivate">
+              </p>
+              {% else %}
+              <p>
+                <a href="https://www.sessionrewind.com/">SessionRewind</a> is <span style="color: red">deactivated</span>
+              </p>
+              <p>
+                <input type="submit" name="enabling_sessionrewind" value="Activate">
+              </p>
+              {% end %}
+            </form>
+        </div>
+      </section>
+      <section class="is-wider mt-3">
+        <div class="grid-block">
+          <h3 class="as-font--medium as-color--secondary">Change password</h3>
+          <p>In case the user uses email+password authentication,<br/>you can change the password from Auth0</p>
+        </div>
+        <div class="grid-block">
+          <h2 class="as-font--medium as-color--secondary">Change max workspaces</h2>
+          <form method="POST">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="email" value="{{user_account['email']}}">
+            <input type="hidden" name="operation" value="change_max_owned_workspaces">
+            <p>
+              <label for="max_seats">Max owned workspaces</label>
+              <input id="max_seats" type="number" name="max_owned_workspaces" value="{{ user_account['max_owned_limit'] }}" />
+            </p>
+            <p>
+              <input type="submit" value="Change" />
+            </p>
+          </form>
+        </div>
+      </section>
+      <section class="is-wider">
+        <div class="as-font--small as-color--body mt-3">
+          <h2 class="as-font--title as-color--secondary mv-3">Workspaces ({{len(workspaces)}})</h2>
+          <table style="width: 100%;">
+            <thead>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Token</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for w in sorted(workspaces, key = lambda w: w['role'], reverse=True) %}
+              {% set wksp_token = w.get('token', '') %}
+              {% set token_id = "token-" + w['id'] %}
+              <tr id="user-{{w['id']}}">
+                <td>
+                  <a href="{{ reverse_url('workspace_admin', w['id']) }}">{{w['name']}}</a>
+                </td>
+                <td>
+                  {{w['role']}}
+                </td>
+                <td style="max-width: 100px;">
+                  {{wksp_token}}
+                  <input type="text" value="{{wksp_token}}" id="{{token_id}}" disabled hidden>
+                </td>
+                <td>
+                  <button class="button-copy" onclick="copyToClipboard('{{token_id}}')">Copy token</button>
+                </td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="is-wider">
+        <div class="as-font--small as-color--body mt-5">
+          <h2 class="as-font--title as-color--secondary mv-3">Feature Flags</h2>
+
+          <table style="width: 100%;" class="mt-3">
+            <thead>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for flag, value, is_override in user_feature_flags %}
+              <tr id="feature-flag-{{ flag['name'] }}">
+                <td>
+                  {{ flag['name'] }}
+                  <br><span style="font-style:italic; font-size:80%">{{ flag['description'] }}</span>
+                </td>
+                <td>
+                  {% if value %}
+                    <span style="color: green">Activated{% if is_override %}*{% end %}</span>
+                  {% else %}
+                    <span style="color: red">Deactivated{% if is_override %}*{% end %}</span>
+                  {% end %}
+                </td>
+                <td>
+                  <form method="POST" class="mb-2">
+                    {% module xsrf_form_html() %}
+                    <input type="hidden" name="email" value="{{ user_account['email'] }}">
+                    <input type="hidden" name="feature_flag_name" value="{{ flag['name'] }}">
+                    {% if value %}
+                      <input type="hidden" name="operation" value="deactivate_feature_flag">
+                      <input type="submit" value="Deactivate">
+                    {% else %}
+                      <input type="hidden" name="operation" value="activate_feature_flag">
+                      <input type="submit" value="Activate">
+                    {% end %}
+                  </form>
+
+                  {% if is_override %}
+                    <form method="POST">
+                      {% module xsrf_form_html() %}
+                      <input type="hidden" name="email" value="{{ user_account['email'] }}">
+                      <input type="hidden" name="feature_flag_name" value="{{ flag['name'] }}">
+                      <input type="hidden" name="operation" value="remove_feature_flag">
+                      <input type="submit" value="Reset to default">
+                    </form>
+                  {% end %}
+                </td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <section class="is-wider">
+        <div class="as-font--small as-color--body mt-5">
+          <h2 class="as-font--title as-color--secondary mv-3">Integrations</h2>
+
+          <table style="width: 100%;" class="mt-3">
+            <thead>
+              <th>Type</th>
+              <th>Id</th>
+              <th>Date created</th>
+              <th>Operations</th>
+            </thead>
+            <tbody>
+              {% for integration in integrations %}
+              <tr id="feature-flag-{{ flag['name'] }}">
+                <td>
+                  {{ integration.integration_type }}
+                </td>
+                <td>
+                  {{ integration.integration_id }}
+                </td>
+                <td>
+                  {{ integration.date_created.isoformat() }}
+                </td>
+                <td>
+                  <form method="POST" class="mb-2">
+                    {% module xsrf_form_html() %}
+                    <input type="hidden" name="operation" value="unlink_integration">
+                    <input type="hidden" name="integration_type" value="{{ integration.integration_type }}">
+                    <input type="hidden" name="integration_id" value="{{ integration.integration_id }}">
+                    <input type="submit" value="Unlink">
+                  </form>
+                </td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <section class="is-wider">
+        <div class="as-font--small as-color--body mt-5">
+          <h2 class="as-font--title as-color--secondary mv-3">Marketing campaigns</h2>
+
+          <table style="width: 100%;" class="mt-3">
+            <thead>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </thead>
+            <tbody>
+              {% for name, viewed in user_campaigns %}
+              <tr id="campaign-{{ name }}">
+                <td>
+                  {{ name }}
+                </td>
+                <td>
+                  {% if viewed %}
+                    <span style="color: green">Viewed</span>
+                  {% else %}
+                    <span>-</span>
+                  {% end %}
+                </td>
+                <td>
+                  <form method="POST" class="mb-2">
+                    {% module xsrf_form_html() %}
+                    <input type="hidden" name="email" value="{{ user_account['email'] }}">
+                    <input type="hidden" name="campaign" value="{{ name }}">
+                    {% if viewed %}
+                      <input type="hidden" name="operation" value="unview_campaign">
+                      <input type="submit" value="Mark as unviewed">
+                    {% else %}
+                      <input type="hidden" name="operation" value="view_campaign">
+                      <input type="submit" value="Mark as viewed">
+                    {% end %}
+                  </form>
+                </td>
+              </tr>
+              {% end %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+{% include "partials/_loginas_script.html" %}
+{% end %}

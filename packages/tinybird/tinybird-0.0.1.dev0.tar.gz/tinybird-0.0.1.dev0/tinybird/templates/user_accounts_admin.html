@@ -1,0 +1,197 @@
+{% extends "internal_base.html" %}
+
+{% block meta %}
+<title>Cheriff · Users</title>
+{% end %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+{% end %}
+
+{% block content %}
+
+<style>
+    dl {
+        margin-top: 8px;
+    }
+    dt {
+        font-weight: bold;
+    }
+
+    tr.is-enabled:hover, tr.is-disabled:hover {
+      background-color: cornsilk;
+    }
+</style>
+
+<div class="Inner">
+  <div class="pv-5">
+    <div class="flex-between-center">
+      <h2 class="as-font--title as-color--secondary">
+        User Accounts
+      </h2>
+      <form class="ml-3" action="{{ reverse_url('user_accounts_admin', 0) }}">
+        <input type="text" name="q" size="30" placeholder="User name, id,..." value="{{q}}" autofocus />
+        {% if q %}<a href="{{ reverse_url('user_accounts_admin', 0) }}">x</a>{% end %}
+        <input type="submit" value="Search" />
+      </form>
+    </div>
+    <div class="as-font--small as-color--body mt-3">
+      {% if len(user_accounts) == 0 %}
+        <table style="width: 100%;">
+          <thead>
+            <th>Message</th>
+          </thead>
+          <tbody>
+            <tr class="is-enabled">
+              <td>
+                {% if q %}
+                No user accounts found
+                {% else %}
+                There is no user accounts
+                {% end %}
+                {% if current_page > 0 %}
+                , <a href="{{ reverse_url('user_accounts_admin', 0) }}">go to the first page</a>
+                {% end %}
+                {% if q %}
+                , <a href="{{ reverse_url('user_accounts_admin', 0) }}">remove search</a>
+                {% end %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      {% else %}
+        <table style="width: 100%;">
+          <thead>
+            <th>Email</th>
+            <th>Workspaces</th>
+            <th>Feature Flags</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </thead>
+          <tbody>
+            {% for u in user_accounts %}
+            <tr class="{{'is-enabled' if u.email.endswith(domain) or u.confirmed_account else 'is-disabled'}}" id="user-{{u['id']}}">
+              <td>
+                <a href="{{ reverse_url('user_account_admin', u['id']) }}">{{u['email']}}</a>
+              </td>
+              <td>
+                <dl>
+                  <dt>Workspaces</dt>
+                  <dd>{{u.number_of_workspaces}}</dd>
+                </dl>
+              </td>
+              <td>
+                {% set flags = [flag for flag in u.feature_flags.items() if flag[0] in all_feature_flags] %}
+                {% if len(flags)%}
+                  <ul>
+                    {% for feature_flag, value in flags %}
+                      <li>{{feature_flag}}: {{value}}</li>
+                    {% end %}
+                  </ul>
+                {% end %}
+              </td>
+              <td>{{u.created_at.date().isoformat()}}</td>
+              <td>
+                {% if u.number_of_workspaces and (current_user['email'] in allowed_loginas_users) %}
+                <form method="POST" action="{{ reverse_url('user_account_admin', u['id']) }}">
+                  {% module xsrf_form_html() %}
+                  <input type="hidden" name="email" value="{{u['email']}}">
+                  <input type="hidden" name="operation" value="login_as">
+                  <input type="submit" value="Login as">
+                  <input type="submit" onclick="loginAsInApp(event, `{{u['email']}}`)" value="Login as in app">
+                </form>
+                {% else %}
+                <div>-</div>
+                {% end %}
+              </td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      {% end %}
+
+      <div class="flex-between-center pv-3">
+        <div></div>
+        <div class="flex">
+          {% if current_page > 1  %}
+            <a class="mr-3" href="{{ reverse_url('user_accounts_admin', 0) }}">Go to first page</a>
+          {% end %}
+          {% if prev_page > -1  %}
+            <a class="mr-3" href="{{ reverse_url('user_accounts_admin', current_page - 1) }}">Prev page</a>
+          {% end %}
+          <span class="mh-3">Page {{current_page}}</span>
+          {% if next_page > -1  %}
+            <a href="{{ reverse_url('user_accounts_admin', current_page + 1) }}">Next page</a>
+          {% end %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="Inner">
+  <div class="pv-5">
+    <h2 class="as-font--title as-color--secondary">
+      Deleted users
+    </h2>
+    <div class="as-font--small as-color--body mt-3">
+      {% if len(deleted_user_accounts) == 0 %}
+        <table style="width: 100%;">
+          <thead>
+            <th>Message</th>
+          </thead>
+          <tbody>
+            <tr class="is-enabled">
+              <td>
+                {% if q %}
+                No deleted user accounts found
+                {% else %}
+                There is no deleted user accounts
+                {% end %}
+                {% if current_page > 0 %}
+                , <a href="{{ reverse_url('user_accounts_admin', 0) }}">go to the first page</a>
+                {% end %}
+                {% if q %}
+                , <a href="{{ reverse_url('user_accounts_admin', 0) }}">remove search</a>
+                {% end %}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      {% else %}
+        <table style="width: 100%;">
+          <thead>
+            <th>Email</th>
+            <th>Created</th>
+            <th>Last updated</th>
+          </thead>
+          <tbody>
+            {% for u in sorted(deleted_user_accounts, key = lambda user: user.updated_at, reverse=True) %}
+            <tr class="{{'is-enabled' if u.email.endswith(domain) or u.confirmed_account else 'is-disabled'}}" id="user-{{u['id']}}">
+              <td>
+                  <a href="{{ reverse_url('user_account_admin', u['id']) }}">{{u['email']}}</a>
+              </td>
+              <td>{{u.created_at.date().isoformat()}}</td>
+              <td>{{u.updated_at.date().isoformat()}}</td>
+            </tr>
+            {% end %}
+          </tbody>
+        </table>
+      {% end %}
+    </div>
+  </div>
+</div>
+
+<div class="Inner pv-5">
+  <h2 class="as-font--title as-color--secondary">
+    New user
+  </h2>
+  <div class="pv-2">
+    {% include "partials/_register_form.html" %}
+  </div>
+</div>
+{% include "partials/_loginas_script.html" %}
+{% end %}

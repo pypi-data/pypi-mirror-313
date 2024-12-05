@@ -1,0 +1,49 @@
+TOKEN "sinks_ops_log (Data Source append)" APPEND
+
+DESCRIPTION >
+    Logs related to Sinks operations
+- `timestamp`: when the Sink operation finished.
+- `pipe_id`: the ID of the Sink Pipe.
+- `pipe_name`: the name of the Sink Pipe
+- `service`: the type of Sink (GCS, S3, ...)
+- `result`: `ok` or `error`
+- `elapsed_time`: the duration of the operation in seconds.
+- `error`: detailed error message if the result was error
+- `job_id`: ID of the job that performed the operation, if any.
+- `read_rows`: read rows in the Sink operation.
+- `written_rows`: written rows in the Sink operation.
+- `read_bytes`: read bytes in the operation.
+- `written_bytes`: written bytes in the operation.
+- `output`: the outputs of the operation. In the case of writing to a bucket, the name of the written files.
+- `parameters`: the parameters used. Useful to debug the parameter query values.
+- `token_name`: token name used for the operation.
+- `options`: extra information.
+- `cpu_time`: CPU time used in the operation.
+- `resource_tags`: tags associated to the pipe.
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `workspace_id` String `json:$.workspace_id`,
+    `workspace_name` String `json:$.workspace_name`,
+    `service` LowCardinality(String) `json:$.service`,
+    `pipe_id` String `json:$.pipe_id`,
+    `pipe_name` String `json:$.pipe_name`,
+    `result` LowCardinality(String) `json:$.result`,
+    `error` Nullable(String) `json:$.error`,
+    `elapsed_time` Float64 `json:$.elapsed_time`,
+    `job_id` Nullable(String) `json:$.job_id`,
+    `read_rows` UInt64 `json:$.read_rows`,
+    `written_rows` UInt64 `json:$.written_rows`,
+    `read_bytes` UInt64 `json:$.read_bytes`,
+    `written_bytes` UInt64 `json:$.written_bytes`,
+    `output` Array(String) `json:$.output[:]`,
+    `parameters` Map(String, String) `json:$.parameters`,
+    `options` Map(String, String) `json:$.options`,
+    `token_name` String `json:$.token_name`,
+    `cpu_time` Float32 `json:$.cpu_time` DEFAULT 0,
+    `resource_tags` Array(String) `json:$.resource_tags[:]`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "workspace_id, pipe_id, timestamp"
+ENGINE_TTL "toStartOfMonth(timestamp) + toIntervalMonth(14)"

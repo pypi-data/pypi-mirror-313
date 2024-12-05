@@ -1,0 +1,51 @@
+NODE pipe_stats_view_0
+SQL >
+    SELECT
+        toDate(start_datetime) date,
+        workspace user_id,
+        if(JSONHas(tags, 'pipe_id'), JSONExtractString(tags, 'pipe_id'), if(JSONHas(tags, 'pipe_name'), 'unknown', 'query_api')) AS pipe_id,
+        if(JSONHas(tags, 'billable') and JSONExtractString(tags, 'billable') == 'false', 0, 1) billable,
+        anyLast(
+            multiIf(
+                JSONHas(tags, 'pipe_name'),
+                JSONExtractString(tags, 'pipe_name'),
+                JSONHas(tags, 'pipe_id'),
+                extract(assumeNotNull(path(url)), '/v0/pipes/(.*)[.]'),
+                'query_api'
+            )
+        ) pipe_name,
+        countIf(status_code > 399) error_count,
+        count() view_count,
+        avgState(duration) avg_duration_state,
+        quantilesTimingState(0.9, 0.95, 0.99)
+        (1000 * duration) quantile_timing_state,
+        sum(
+            if(JSONHas(tags, 'read_bytes'), toUInt64OrZero(JSONExtractString(tags, 'read_bytes')), 0)
+        ) read_bytes_sum,
+        sum(
+            if(JSONHas(tags, 'read_rows'), toUInt64OrZero(JSONExtractString(tags, 'read_rows')), 0)
+        ) read_rows_sum,
+        arrayDistinct(
+            arrayFlatten(
+                groupArray(
+                    if(
+                        JSONHas(tags, 'resource_tags'),
+                        JSONExtract(tags, 'resource_tags', 'Array(String)'),
+                        []
+                    )
+                )
+            )
+        ) AS resource_tags,
+        groupUniqArrayArray(
+            if(JSONHas(tags, 'resource_tags'), JSONExtract(tags, 'resource_tags', 'Array(String)'), [])
+        ) AS resource_tags_total
+    FROM spans
+    WHERE
+        (
+            ((operation_name = 'APIPipeDataHandler') AND (JSONHas(tags, 'pipe_id') OR JSONHas(tags, 'pipe_name')))
+            OR (operation_name = 'APIQueryHandler')
+        )
+    GROUP BY user_id, pipe_id, billable, date
+
+TYPE MATERIALIZED
+DATASOURCE pipe_stats

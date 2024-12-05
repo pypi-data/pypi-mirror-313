@@ -1,0 +1,19 @@
+NODE workspaces_all_rt_view_0
+SQL >
+
+    SELECT
+      workspace as id,
+      workspace_name as name,
+      JSONExtractString(tags, 'database') as database,
+      JSONExtractString(tags, 'database_server') as database_server,
+      JSONExtractString(tags, 'plan') as plan,
+      if(JSONHas(tags, 'organization_id'), JSONExtractString(tags, 'organization_id'), '') as organization_id,
+      if(JSONHas(tags, 'origin'), JSONExtractString(tags, 'origin'), '') as origin,
+      toDateTime(JSONExtractString(tags, 'created_at')) as created_at,
+      if(JSONHas(tags, 'deleted_at'), toDateTime(JSONExtractString(tags, 'deleted_at')), null) as deleted_at
+    FROM spans
+    WHERE operation_name in ['NewWorkspaceCreated', 'WorkspaceRenamed', 'WorkspaceDeleted', 'PlanChanged', 'WorkspaceOrgChanged']
+    AND workspace != ''
+
+TYPE MATERIALIZED
+DATASOURCE workspaces_all_rt

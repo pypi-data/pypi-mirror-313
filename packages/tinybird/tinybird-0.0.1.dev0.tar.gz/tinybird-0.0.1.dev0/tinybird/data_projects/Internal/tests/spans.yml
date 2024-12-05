@@ -1,0 +1,11 @@
+- no_duplicated_span_id:
+    sql: |
+        SELECT span_id, count() as c
+        FROM spans
+        WHERE 
+            operation_name NOT IN ('GET', 'POST') 
+            AND start_datetime > now() - INTERVAL 6 HOUR
+        GROUP BY span_id
+        HAVING c > 1
+    max_time: 0.00000001
+    max_bytes_read: -1

@@ -1,0 +1,9 @@
+- no_null_endpoint_errors:
+    sql: select * from endpoint_errors_ds where (error is null or empty(error)) and start_datetime > now() - interval 1 day
+    max_time: null
+    max_bytes_read: null
+
+- not_using_pipe_id_as_pipe_name_in_endpoint_errors:
+    sql: select count() from endpoint_errors_ds where pipe_id = pipe_name and pipe_id != 'query_api' and status_code != 429 having count() > 0
+    max_time: 0.00000001
+    max_bytes_read: -1

@@ -1,0 +1,42 @@
+- bytes_always_positive:
+    sql: |
+        SELECT count() as c
+        FROM data_transfer
+        WHERE 
+            bytes <= 0
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+- intra_in_aws:
+    sql: |
+        SELECT count() as c
+        FROM data_transfer
+        WHERE 
+            kind = 'inter' and origin_provider = 'aws' and destination_provider = 's3' and origin_region = destination_region
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+- intra_in_gcs:
+    sql: |
+        SELECT count() as c
+        FROM data_transfer
+        WHERE 
+            kind = 'inter' and origin_provider = 'gcs' and origin_provider = destination_provider and origin_region = destination_region
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+- intra_never_with_different_regions:
+    sql: |
+        SELECT count() as c
+        FROM data_transfer
+        WHERE 
+            kind = 'intra' and origin_region != destination_region
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+
+

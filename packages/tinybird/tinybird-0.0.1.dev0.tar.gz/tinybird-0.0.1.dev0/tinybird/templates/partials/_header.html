@@ -1,0 +1,38 @@
+<header class="header flex-between-center p-2">
+  <a href="{{ commercial_host }}" class="header-logo Link no-underline">
+    <h1 class="flex">
+      <svg width="24" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path opacity="0.6" d="M40.0001 3.42494L27.513 0L23.1194 9.81817L40.0001 3.42494Z" fill="#25283D" />
+        <path opacity="0.6" d="M28.2568 27.5282L16.876 22.9091L9.9082 40L28.2568 27.5282Z" fill="#25283D" />
+        <path d="M0.000122956 17.5941L28.0589 27.6364L32.6606 6.18183L0.000122956 17.5941Z" fill="#25283D" />
+      </svg>
+      <span class="as-font--medium-semi as-color--secondary ml-1">
+        tinybird
+      </span>
+    </h1>
+  </a>
+  <nav class="flex">
+    {% try %}
+    {%if auth_type=="signup" %}
+    <p class="as-font--small as-color--tuna-200">
+      Already have an account?
+      <a class="Link as-color--light" href="{{ reverse_url('login') }}">Sign in</a>
+    </p>    
+    {% else %}
+    <p class="as-font--small as-color--tuna-200">
+      Don't have an account?
+      <a class="Link as-color--light" href="{{ reverse_url('signup') }}">Sign up</a>
+    </p>
+    {% end %}
+    {% except %}
+    <a href="{{ reverse_url('login') }}" class="Link as-font--label as-color--body">
+      <span>Login</span>
+    </a>
+    <a
+      href="{{ reverse_url('signup') }}"
+      class="Button is-small as-bkg--secondary ml-3">
+      <span class="as-font--caption-bold as-color--light has-spacing">SIGN UP</span>
+    </a>
+    {% end %}
+  </nav>
+</header>

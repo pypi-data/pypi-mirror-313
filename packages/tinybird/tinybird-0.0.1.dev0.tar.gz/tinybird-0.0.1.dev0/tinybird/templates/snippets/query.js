@@ -1,0 +1,24 @@
+{% whitespace all %}let url = new URL(`{% if api_host != 'https://api.tinybird.co' %}{{api_host}}{% else %}https://api.tinybird.co{% end %}/v0/pipes/{{pipe}}.{{format}}`)
+{% if sql %}url.searchParams.append('q', '{% raw sql %}'){% end %}
+{% for i, p in enumerate(params) %}url.searchParams.append('{{p['name']}}', {% if p.get('default', None) %}'{{p['default']}}'{% else %}''{% end %})
+{% end %}{% if semver %}url.searchParams.append('__tb__semver','{{semver}}'){% end %}
+const result = await fetch(url, {
+  headers: {
+    Authorization: 'Bearer {{jwt_read}}'
+  }
+}) 
+  .then(r => r.{% if format == 'json'%}json{% else %}text{% end %}())
+  .then(r => r)
+  .catch(e => e.toString())
+
+{% if format == 'json'%}if (!result.data) {
+  console.error(`there is a problem running the query: ${result}`);
+} else {
+  console.table(result.data)
+  console.log("** Query columns **")
+  for (let column of result.meta) {
+    console.log(`${column.name} -> ${column.type}`)
+  }
+}{% else %}
+console.log(result)
+{% end %}

@@ -1,0 +1,27 @@
+TOKEN "billing_workspace_storage_per_day_endpoint_read" READ
+
+NODE billing_workspace_storage_per_day_detailed
+SQL >
+    %
+    SELECT
+        toDate(timestamp) as day,
+        datasource_id,
+        max(bytes) as max_bytes,
+        max(bytes_quarantine) as max_bytes_quarantine
+    FROM usage_metrics_storage
+    WHERE
+        timestamp
+        >=
+        {{ DateTime(start_datetime, description="Starting day time for filtering a date time range") }}
+        AND timestamp
+        <= {{ DateTime(end_datetime, description="Finishing day time for filtering a date time range") }}
+        AND user_id = {{ String(workspace_id) }}
+    GROUP BY day, datasource_id
+    ORDER BY day DESC
+
+NODE billing_workspace_storage_per_day_total
+SQL >
+    SELECT day, sum(max_bytes) + sum(max_bytes_quarantine) AS total
+    FROM billing_workspace_storage_per_day_detailed
+    GROUP BY day
+    ORDER BY day ASC

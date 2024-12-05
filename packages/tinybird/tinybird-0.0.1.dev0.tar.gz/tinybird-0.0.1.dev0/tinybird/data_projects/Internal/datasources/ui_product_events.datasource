@@ -1,0 +1,15 @@
+TOKEN "ui product events (Data Source append)" APPEND
+
+
+SCHEMA >
+    `event` LowCardinality(String) `json:$.event`,
+    `timestamp` DateTime `json:$.timestamp`,
+    `session_start` DateTime `json:$.session_start`,
+    `user_id` LowCardinality(String) `json:$.user_id`,
+    `url` String `json:$.url`,
+    `workspace_id` String `json:$.workspace_id`,
+    `meta` String `json:$.meta`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toMonth(timestamp)"
+ENGINE_SORTING_KEY "user_id, event, timestamp"

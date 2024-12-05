@@ -1,0 +1,94 @@
+{% extends "internal_base.html" %}
+
+{% block meta %}
+<title>Cheriff · Organizations</title>
+{% end %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+{% end %}
+
+{% block content %}
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  input, button {
+    display: flex;
+    align-items: center;
+    padding: 0px 8px;
+    height: 32px;
+    border-radius: 4px;
+  }
+
+  input {
+    width: 100%;
+    border: 1px solid #636679;
+  }
+
+  button {
+    color: white !important;
+    background-color: royalblue !important;
+  }
+
+</style>
+
+<div class="Inner">
+  <div class="pv-5">
+    <div class="flex-between-center">
+      <h2 class="as-font--title as-color--secondary">
+        Organizations
+      </h2>
+    </div>
+
+    <div class="as-font--small as-color--body mt-3">
+      <strong>Add a new organization</strong>
+      <form method="post" id="addOrganizationForm">
+      {% module xsrf_form_html() %}
+      <input type="hidden" name="operation" value="new_organization">
+      <div class="flex">
+        <input id="name" name="name" placeholder="Name">
+        <button type="submit" class="Button ml-1" form="addOrganizationForm">
+          <span class="as-font--caption has-spacing">Add organization</span>
+        </button>  
+      </div>
+    </form> 
+    </div>
+
+    <div class="as-font--small as-color--body mt-3">
+      <table style="width: 100%;">
+        <thead>
+          <th>Organization</th>
+          <th>Domain</th>
+          <th>Dedicated clusters</th>
+          <th>Billing plan</th>
+          <th>Contract term</th>
+          <th>PD</th>
+          <th>Storage</th>
+        </thead>
+        <tbody>
+          {% for organization in organizations %}
+          <tr id="organization-{{organization['id']}}">
+            <td>
+              <a href="{{ reverse_url('organization_admin', organization['id']) }}">{{organization['name']}}</a>
+            </td>
+            <td>{{organization['domain']}}</td>
+            <td>{{organization['dedicated_clusters']}}</td>
+            <td>{{organization['billing_plan']}}</td>
+            <td>{{organization['contract_term']}}</td>
+            <td>{{organization['processed_data']}}</td>
+            <td>{{organization['storage']}}</td>
+          </tr>
+          {% end %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% end %}

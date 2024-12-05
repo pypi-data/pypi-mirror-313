@@ -1,0 +1,86 @@
+NODE releases_ops_to_event_types
+SQL >
+    SELECT
+        start_datetime,
+        ULIDStringToDateTime(span_id) span_id,
+        workspace,
+        CASE
+            -- create releases
+            WHEN operation_name = 'APIWorkspaceRelease' and method = 'POST'
+            THEN multiIf(release = '' and tb_semver = '',
+                         'init',
+                         semver = '' and release != '' and tb_semver = '',
+                         'override',
+                         'deploy')
+            -- update releases
+            WHEN operation_name = 'APIWorkspaceReleaseHandler' and method = 'PUT'
+            THEN multiIf(status = 'preview',
+                        'preview',
+                         status = 'live',
+                        'promote',
+                         status = 'rollback',
+                         'rollback',
+                         status = 'failed',
+                         'fail',
+                         new_semver != '',
+                         'post',
+                         '')
+            -- delete releases
+            WHEN operation_name = 'APIWorkspaceReleaseHandler' and method = 'DELETE' and confirmation != '' 
+                 and dry_run != 'true' and status_code != 204  -- ignore if not to delete
+            THEN 'delete'
+            ELSE ''
+        END event_type,
+        extractURLParameter(assumeNotNull(url), 'status') status,
+        extractURLParameter(assumeNotNull(url), 'commit') commit,
+        extractURLParameter(assumeNotNull(url), 'semver') semver,
+        extractURLParameter(assumeNotNull(url), 'confirmation') confirmation,
+        extractURLParameter(assumeNotNull(url), 'dry_run') dry_run,
+        extractURLParameter(assumeNotNull(url), 'new_semver') new_semver,
+        extractURLParameter(assumeNotNull(url), '__tb__semver') tb_semver,
+        JSONExtractString(tags, 'release') release,
+        JSONExtractString(tags, 'new_release') new_release,
+        extract(path(assumeNotNull(url)), '/v0/workspaces/.*/releases/(.*)') as semver_path,
+        token,
+        token_name,
+        status_code,        
+        error,
+        tb_semver
+    FROM spans
+    WHERE
+        operation_name in (
+            'APIWorkspaceRelease',
+            'APIWorkspaceReleaseHandler',
+        )
+        AND method not in ('GET', 'OPTIONS')
+
+
+NODE releases_event_types_to_releases_log
+SQL >
+    SELECT
+        span_id as timestamp,
+        workspace as workspace_id,
+        event_type,
+        commit,
+        multiIf(event_type = 'init' and semver = '',
+                '0.0.0',
+                event_type = 'deploy' and semver = '' and tb_semver != '',
+                tb_semver,
+                event_type = 'post',
+                new_semver,
+                event_type = 'override' and release != '',
+                release,
+                event_type = 'rollback' and new_release != '',
+                new_release,
+                semver = '' and semver_path != '',
+                semver_path,
+                semver) semver,
+        token,
+        token_name,
+        if(status_code > 399, 'error', 'ok') as result,
+        coalesce(error, '') as error
+    FROM releases_ops_to_event_types
+    WHERE event_type != ''
+
+TYPE MATERIALIZED
+DATASOURCE releases_log

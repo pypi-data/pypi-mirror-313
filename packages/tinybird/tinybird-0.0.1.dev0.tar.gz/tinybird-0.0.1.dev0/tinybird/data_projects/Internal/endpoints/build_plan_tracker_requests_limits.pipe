@@ -1,0 +1,55 @@
+TOKEN "build_plan_tracker_requests_limits_read" READ
+
+NODE today_build_plan_billable_requests
+SQL >
+
+    %
+    SELECT user_id, view_count, date
+    FROM pipe_stats
+    INNER JOIN (
+        SELECT * 
+        from workspaces_all FINAL
+        WHERE
+            plan = 'dev'
+            AND origin = ''
+    ) as wss
+        ON pipe_stats.user_id
+        = wss.id
+
+    WHERE
+        date = {% if defined(date_to_check) %} {{Date(date_to_check, description='Date when the check is done. Only useful for testing purposes')}} {% else %} today() {% end %}
+        AND billable = 1
+
+
+NODE requests_sum_per_workspace
+SQL >
+
+    SELECT sum(view_count) as api_request_done, user_id as workspace_id FROM today_build_plan_billable_requests
+    GROUP BY user_id
+
+
+
+NODE workspaces_exceeding_requests_limits
+SQL >
+
+    %
+    SELECT *
+    FROM requests_sum_per_workspace
+    where
+        api_request_done
+        > {{
+            Float32(
+                threshold_limit,
+                0.75,
+                description="Percentage threshold we start warning",
+            )
+        }}
+        * {{
+            Int16(
+                max_requests_per_day_limit,
+                1000,
+                description="Max number of requests per day for build plan",
+            )
+        }}
+
+

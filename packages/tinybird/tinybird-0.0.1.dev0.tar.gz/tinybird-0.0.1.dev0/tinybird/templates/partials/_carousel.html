@@ -1,0 +1,87 @@
+<div class="Carousel">
+  <div id="item1" class="Carousel-item full-space-center">
+    <div>
+      <h2 class="as-font--title">Easily ingest data</h1>
+      <p class="as-font--medium as-color--tuna-200 mt-1">
+        Ingest millions of rows per second from your Data Streams, Data Warehouses
+        or directly via our HTTPS API.
+      </p>
+    </div>
+    <div class="is-center mt-5">
+      <img height="355" src="https://cdn.tinybird.co/static/images/carousel/connectors.png" />
+    </div>
+  </div>
+  <div id="item2" class="Carousel-item full-space-center">
+    <div>
+      <h2 class="as-font--title">Transform using SQL</h1>
+      <p class="as-font--medium as-color--tuna-200 mt-1">
+        Query and shape your data using Pipes, a new way to chain SQL queries inspired by 
+        Python Notebooks. Designed to reduce complexity without sacrificing performance.
+      </p>
+    </div>
+    <div class="is-center ">
+      <img height="333" src="https://cdn.tinybird.co/static/images/carousel/pipeline.png" />
+    </div>
+  </div>
+  <div id="item3" class="Carousel-item full-space-center">
+    <div>
+      <h2 class="as-font--title">Publish scalable API endpoints</h1>
+      <p class="as-font--medium as-color--tuna-200 mt-1">
+        Share access securely to your data in one click and get fast and consistent 
+        results.
+      </p>
+    </div>
+    <div class="is-center ">
+      <img height="428" src="https://cdn.tinybird.co/static/images/carousel/api-endpoint.png" />
+    </div>
+  </div>
+</div>
+<ol class="Carousel-indicators">
+  <li><input index="0" class="Carousel-indicators__item m-1" onclick="location.href='#item1'" type="radio" name="carousel" checked /></li>
+  <li><input index="1" class="Carousel-indicators__item m-1" onclick="location.href='#item2'" type="radio" name="carousel" /></li>
+  <li><input index="2"class="Carousel-indicators__item m-1" onclick="location.href='#item3'" type="radio" name="carousel"/></li>
+</ol>
+
+{% block js %}
+<script>
+  (function() {
+    var current = 0,
+      slides = document.getElementsByClassName('Carousel-item')
+      indicators = document.getElementsByClassName('Carousel-indicators__item')
+      interval = null
+    
+    function changeSlide(index) {
+      current = index
+
+      for (var i = 0; i < slides.length; i++) {
+        slides[i].style.opacity = 0
+        slides[i].style.transition= 'opacity 0.5s ease-in'
+      }
+
+      slides[index].style.opacity = 1
+      indicators[index].checked = true
+    }
+
+    function restartAutoSlider() {
+      clearInterval(interval);    
+
+      interval = setInterval(function() {
+        const newIndex = (current != slides.length - 1) ? current + 1 : 0
+        changeSlide(newIndex)
+      }, 6000)
+    }
+
+    for (var i = 0; i < indicators.length; i++) {
+      indicators[i].addEventListener('change', function(event) {
+        if (event.currentTarget.checked) {
+          const newIndex = parseInt(event.currentTarget.getAttribute('index'))
+          changeSlide(newIndex)
+          restartAutoSlider()
+        } 
+      })
+    }
+
+    restartAutoSlider()
+  })()
+</script>
+{% end %}

@@ -1,0 +1,19 @@
+class DynamoDBLimit:
+    max_table_size_bytes = 500 * 1024**3  # 500 GB
+    max_table_write_capacity_units = 250
+    max_threads = 2
+    max_insert_threads = 2
+    max_insert_block_size = None
+    min_insert_block_size_rows = None
+    min_insert_block_size_bytes = None
+    max_memory_usage = None
+    max_execution_time = 600
+    input_format_parquet_max_block_size = None
+    input_format_parquet_allow_missing_columns = 1
+    input_format_null_as_default = 1
+    max_partitions_per_insert_block = 100
+    insert_deduplicate = 1
+    enable_url_encoding = 0
+    input_format_try_infer_datetimes = 0
+    input_format_try_infer_dates = 0
+    file_processing_workers_in_ddb_sync = 2

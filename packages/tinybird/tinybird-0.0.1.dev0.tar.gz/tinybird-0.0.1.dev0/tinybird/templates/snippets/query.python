@@ -1,0 +1,16 @@
+import requests
+
+params = {
+    'token': '{{jwt_read}}'{% if len(params) > 0 %},{% end %}{% for i, p in enumerate(params) %}{% if i %},{% end %}
+    '{{p['name']}}': {% if p.get('default', None) %}'{{p['default']}}'{% else %}''{% end %}{% end %}{% if semver %},
+    '__tb__semver': '{{semver}}'{% end %}
+}
+{% if format == 'json' %}
+url = f'{{api_host}}/v0/pipes/{{pipe}}.json'
+response = requests.get(url, params=params)
+print(response.json())
+{% else %}
+url = f'{{api_host}}/v0/pipes/{{pipe}}.{{format}}'
+response = requests.get(url, params=params)
+print(response.text)
+{% end %}

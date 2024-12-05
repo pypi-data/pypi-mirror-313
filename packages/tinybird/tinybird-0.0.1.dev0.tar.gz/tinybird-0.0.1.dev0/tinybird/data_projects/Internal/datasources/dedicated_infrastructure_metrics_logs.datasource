@@ -1,0 +1,18 @@
+TOKEN "dedicated_infrastructure_metrics_logs (Data Source append)" APPEND
+
+DESCRIPTION >
+    This table contains historical metrics from dedicated infrastructure.
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `organization_id` String `json:$.organization_id`,
+    `metric` LowCardinality(String) `json:$.metric`,
+    `cluster` LowCardinality(String) `json:$.cluster` DEFAULT '',
+    `host` LowCardinality(String) `json:$.host`,
+    `value` String `json:$.value`,
+    `description` LowCardinality(String) `json:$.description`
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMMDD(timestamp)"
+ENGINE_SORTING_KEY "organization_id, timestamp"
+ENGINE_TTL "toDate(timestamp) + toIntervalDay(30)"

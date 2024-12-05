@@ -1,0 +1,145 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <title>{{name}} · Pipe</title>
+    <link rel="icon" type="image/svg+xml" href="https://cdn.tinybird.co/static/images/logo.svg" sizes="any" />
+    {% try %}
+    {% module Template("webpack_templates/snapshot-styles.html") %}
+    {% except %}
+    {% end %}
+
+  </head>
+  <body>
+    {% module Template("partials/_public_header.html") %}
+    <main>
+      <div class="Pipeline-contentNodes">
+        <div class="mt-2">
+          <div class="Content">
+            <div class="pt-5">
+              <div class="flex">
+                <span class="Avatar is-small mr-2">
+                    <span class="as-color--light as-font--small-bold">
+                      {{ username.split('@')[0][:2].upper() }}
+                    </span>
+                </span>
+                <h2 class="Pipeline-title as-font--title overflow ">
+                  {% raw username %} / {{name}}
+                </h2>
+              </div>
+
+              {% if pipe.description %}
+                <div class="Pipeline-desc mt-1">
+                  <div class="Markdown as-font--medium as-color--body">
+                    {% apply markdown %}{{pipe.description}}{% end %}
+                  </div>
+                </div>
+              {% end %}
+
+              <p class="Pipeline-info flex as-font--small as-color--text-01 overflow mt-2">
+                <svg class="mr-1" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 2C4.691 2 2 4.691 2 8s2.691 6 6 6 6-2.691 6-6-2.691-6-6-6zm0 .828A5.166 5.166 0 0113.172 8 5.166 5.166 0 018 13.172 5.166 5.166 0 012.828 8 5.166 5.166 0 018 2.828zm0 1.241a.414.414 0 00-.414.414V8a.41.41 0 00.123.29l2.192 2.2a.418.418 0 00.588 0 .418.418 0 000-.59L8.414 7.833v-3.35A.414.414 0 008 4.07z" fill="var(--text-01-color)"/></svg>
+                <span>Last updated <time datetime="{{pipe.created_at}}">{{time_ago(pipe.created_at)}}</time></span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <ul class="Nodes mb-10">
+          {% for node in pipe.pipeline.nodes %}
+          <li id="{{ node.id }}" class="Node pv-2">
+
+            <div class="Node-header">
+              <div class="Content">
+                <div class="NodeInfo">
+                  <h3 class="Node-title as-font--medium as-color--secondary">{{node.name}}</h3>
+                {% if node.description %}
+                  <div class="Node-description as-font--small as-color--body Markdown">
+                    {% apply markdown %}{{node.description}}{% end %}
+                  </div>
+                {% end %}
+                </div>
+                <div class="NodeEditor mt-2">
+                  <pre class="sql-editor">{{node.sql}}</pre>
+                </div>
+                <div class="NodeStats">
+                  {% if node.result['error'] %}
+                    <div class="NodeStats-error">
+                      <svg class="NodeStats-errorIcon" width="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#F76363" opacity="1" d="M15.707 11.022l-5.908-10A2.102 2.102 0 008 0c-.74 0-1.41.388-1.799 1.023l-5.908 10a2.014 2.014 0 00-.017 2.063c.388.67 1.058 1.058 1.798 1.058h11.852a2.04 2.04 0 001.798-1.058c.37-.635.37-1.429-.017-2.064zm-.688 1.658a1.26 1.26 0 01-1.076.635H2.057c-.441 0-.864-.23-1.076-.635a1.194 1.194 0 010-1.235L6.924 1.428c.23-.387.635-.6 1.076-.6.44 0 .864.23 1.076.6l5.943 10c.212.388.212.864 0 1.252z"></path><path fill="#F76363" opacity="1" d="M8.05 3.81c-.384 0-.7.246-.7.546v4.427c0 .3.316.546.7.546.384 0 .7-.247.7-.546V4.356c0-.3-.316-.547-.7-.547zM8.05 10.335c-.384 0-.7.246-.7.546v.282c0 .3.316.547.7.547.384 0 .7-.247.7-.547v-.282c0-.335-.316-.546-.7-.546z"></path></svg>
+                      <span class="as-font-code--caption as-color--error ml-1">{{node.result['error']}}</span>
+                    </div>
+                  {% else %}
+                    <div class="NodeStats-info as-font-code--caption as-color--body flex pt-1 mb-2">
+                      {{format_size(node.result["data"]["statistics"]["bytes_read"])}} processed,  {{node.result["data"]["statistics"]["rows_read"]}} rows x {{len(node.result["data"]["meta"])}} columns. This query took {{round(node.result["data"]["statistics"]["elapsed"] * 1000, 2)}}ms
+                      <div id="{{node.id}}-chart" class="graph">
+                        <span class="NodeStats-separator as-color--text-01">·</span>
+                        <a class="Link as-color--alternative" id="{{node.id}}-vega">View chart</a>
+                      </div>
+                    </div>
+                  {% end %}
+                </div>
+              </div>
+            </div>
+            <div class="Node-content">
+              {% if not node.result['error'] %}
+                {% if is_a_graph(node.result['data']['meta']) %}
+                  <div style="overflow: auto; margin: 0 auto; text-align: center;">
+                    <div id="vega_graph_{{node.id}}" style="padding: 20px" class="vega_lite_graph"></div>
+                  </div>
+                {% else %}
+                  <div class="Content">
+                    <div class="NodeResult">
+                      <div class="result-wrapper">
+                        <table>
+                          <thead>
+                          {% for x in node.result['data']['meta'] %}
+                            <th class="is-light">
+                              <div>
+                                <div class="Table-columnName">{{x['name']}}</div>
+                                <div class="Table-columnType">{{x['type']}}</div>
+                              </div>
+                            </th>
+                          {% end %}
+                          </thead>
+                          <tbody>
+                          {% for row in node.result['data']['data'] %}
+                            <tr>
+                            {% for x in row.values() %}
+                              <td>{{x}}</td>
+                            {% end %}
+                            </tr>
+                          {% end %}
+                          </tbody>
+                        </table>
+                      </div>
+                      {% if len(node.result['data']['data']) == 342 %}
+                      <div class="Content">
+                        <div class="flex-between-center">
+                          <br>
+                          <p class="as-color--tuna-200 as-font--label mv-1">Loaded first 342 rows</p>
+                        </div>
+                      </div>
+                      {% end %}
+                    </div>
+                  </div>
+                {% end %}
+              {% end %}
+            </div>  
+          </li>
+          {% end %}
+        </ul>
+      </div>
+    </main>
+    {% module Template("partials/_public_footer.html") %}
+
+    <script>
+      var nodes = {% raw json_encode(pipe.pipeline.to_json()) %};
+    </script>
+
+    {% try %}
+    {% module Template("webpack_templates/snapshot-scripts.html") %}
+    {% except %}
+    {% end %}
+
+    {% include "partials/_extra.html %}
+  </body>
+</html>

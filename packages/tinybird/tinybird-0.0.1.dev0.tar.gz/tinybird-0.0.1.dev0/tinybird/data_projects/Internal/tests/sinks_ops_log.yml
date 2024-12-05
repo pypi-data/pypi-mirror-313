@@ -1,0 +1,22 @@
+- duration_always_positive:
+    sql: |
+        SELECT count() as c
+        FROM sinks_ops_log
+        WHERE
+            elapsed_time < 0
+            AND timestamp > now() - INTERVAL 24 HOUR
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1
+
+
+- processed_bytes_always_positive:
+    sql: |
+        SELECT count() as c
+        FROM sinks_ops_log
+        WHERE
+            timestamp > now() - INTERVAL 24 HOUR
+            AND (read_bytes < 0 or written_bytes < 0)
+        HAVING c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1

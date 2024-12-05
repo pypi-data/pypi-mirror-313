@@ -1,0 +1,8 @@
+- not_using_pipe_id_as_pipe_name:
+    sql: |
+        select count() as c
+        from pipe_stats_rt 
+        where pipe_id = pipe_name and pipe_id != 'query_api' and status_code != 429
+        having c > 0
+    max_time: 0.00000001
+    max_bytes_read: -1

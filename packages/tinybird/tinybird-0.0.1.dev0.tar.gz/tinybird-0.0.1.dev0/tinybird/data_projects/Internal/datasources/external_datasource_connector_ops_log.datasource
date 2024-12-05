@@ -1,0 +1,22 @@
+TOKEN "append_external_datasource_connector_ops_log" APPEND
+
+SCHEMA >
+    `timestamp` DateTime `json:$.timestamp`,
+    `workspace_id` String `json:$.workspace_id`,
+    `datasource_id` String `json:$.datasource_id`,
+    `source` String `json:$.source`,
+    `event` String `json:$.event`,
+    `started_at` DateTime `json:$.timestamp`,
+    `ended_at` DateTime `json:$.timestamp`,
+    `status` LowCardinality(String) `json:$.status`,
+    `reason` Nullable(String) `json:$.reason`,
+    `internal_failure_details` Nullable(String) `json:$.internal_failure_details`,
+    `job_id` Nullable(String) `json:$.job_id`,
+    `result` String `json:$.result`,
+    `workspace_name` Nullable(String) `json:$.workspace_name`,
+    `datasource_name` Nullable(String) `json:$.datasource_name`
+
+ENGINE MergeTree
+ENGINE_PARTITION_KEY toYYYYMMDD(timestamp)
+ENGINE_SORTING_KEY workspace_id, datasource_id, timestamp
+ENGINE_TTL "toStartOfMonth(timestamp) + toIntervalMonth(14)"

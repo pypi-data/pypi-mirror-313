@@ -1,0 +1,31 @@
+TOKEN "spans (Data Source append)" APPEND
+
+
+SCHEMA >
+    `span_id` String,
+    `operation_name` String,
+    `start_datetime` DateTime,
+    `start_time` Float32,
+    `duration` Float32,
+    `parent_id` Nullable(String),
+    `component` String,
+    `kind` String,
+    `user` Nullable(String),
+    `user_email` Nullable(String),
+    `workspace` String,
+    `workspace_name` String,
+    `token` String,
+    `token_name` String,
+    `url` Nullable(String),
+    `method` Nullable(String),
+    `status_code` Nullable(Int32),
+    `error` Nullable(String),
+    `logs` Array(String),
+    `tags` String
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(start_datetime)"
+ENGINE_SORTING_KEY "operation_name, workspace, start_datetime"
+ENGINE_TTL "toStartOfMonth(start_datetime) + toIntervalMonth(4)"
+
+TAGS "backfill_column=start_datetime"

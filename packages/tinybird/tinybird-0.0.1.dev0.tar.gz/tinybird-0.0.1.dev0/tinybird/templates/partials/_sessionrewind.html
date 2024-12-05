@@ -1,0 +1,33 @@
+{% if enabled_sessionrewind or enabled_fullstory %}
+<script>
+  !function (o) {
+    var w = window;
+    w.SessionRewindConfig = o;
+    var f = document.createElement("script");
+    f.async = 1, f.crossOrigin = "anonymous",
+      f.src = "https://rec.sessionrewind.com/srloader.js";
+    var g = document.getElementsByTagName("head")[0];
+    g.insertBefore(f, g.firstChild);
+  }({
+    // Required
+    apiKey: 'PiIQRIgZPv8N3rHQZk5f547pbmhV8M0UaZfbmuCT',
+
+    // Optional but if false or undefined the recording will need to be initialized later via window.sessionRewind.startSession()
+    startRecording: true,
+
+    // OPTIONAL: If set to true, resets the session recording ID on page load
+    createNewSession: false,
+
+    // OPTIONAL: Custom session metadata
+    // sessionInfo: {
+    //   customFieldA: 'This is a custom field' // Example custom field
+    // },
+
+    // OPTIONAL: Custom user metadata
+    userInfo: {
+      userId: '{{sessionrewind_display_name}}', // This field is required when using userInfo
+      userName: '{{sessionrewind_email}}', // Optional, user name
+    }
+  });
+</script>
+{% end %}

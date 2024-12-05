@@ -1,0 +1,410 @@
+{% extends "internal_base.html" %}
+
+{% block meta %}
+<title>Cheriff · Org · {{ organization['name'] }}</title>
+{% end %}
+
+{% block style %}
+{% try %}
+{% module Template("webpack_templates/cheriff-styles.html") %}
+{% except %}
+{% end %}
+{% end %}
+
+{% block content %}
+<script>
+  function validateDeleteOrganization() {
+    return confirm("Are you sure you want to remove the Organization? The access to the monitoring API Endpoints will be stopped.")
+  }
+</script>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  .group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 4px;
+  }
+  .fields {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .grid-block {
+    border: dotted 1px grey;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    flex: 1;
+  }
+  .flex-block {
+    border: dotted 1px grey;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    padding: 16px;
+  }
+  .column:first-child{
+    padding-right: 32px
+  }
+  .column:last-child{
+    padding-left: 32px
+  }
+  .flex-block > * {
+    flex: 1;
+  }
+  .gap {
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  button {
+    width: fit-content;
+    align-self: flex-end;
+  }
+
+  input, button {
+    display: flex;
+    align-items: center;
+    padding: 0px 8px;
+    height: 24px;
+    border-radius: 4px;
+  }
+
+  input,select{
+    width: 100%;
+    border: 1px solid #636679;
+  }
+
+  select:not([multiple]) {
+    border: 1px solid #636679;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    height: 24px;
+    width: 68px;
+  }
+
+  form {
+    height: 100%;
+  }
+  .column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 4px;
+  }
+  .flex-1 {
+    flex: 1;
+    flex-shrink: 0;
+  }
+
+</style>
+
+<div class="Inner">
+  <div class="pv-5">
+    <div>
+      <div class="flex-between-center">
+        <h2 class="as-font--title as-color--secondary">Organization - {{ organization['name'] }}</h2>
+      </div>
+      <div class="as-font--small as-color--body mt-3">
+        <div class="fields">
+          <form method="post" class="flex-block">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="operation" value="update_general_and_commitment">
+            <div class="column">
+              <h3 class="as-font--medium as-color--secondary">General</h3>
+              <div class="group">
+                <label class="flex mr-1 as-font--small" for="name">Name</label>
+                <input id="name" name="name" value="{{ organization['name'] }}">
+              </div>
+              <div class="group">
+                <label class="flex mr-1 as-font--small" for="domain">Domain(s)</label>
+                <input id="domain" name="domain" value="{{ organization['domain'] }}">
+              </div>
+            </div>
+            <div class="column">
+              <h3 class="as-font--medium as-color--secondary">Commitment</h3>
+              <div class="flex">
+                <div class="group">
+                  <label class="flex mr-1 as-font--small" for="start_commitment">Start of commitment</label>
+                  <input id="start_commitment" name="start_commitment" type="date" value="{{ organization['plan_details']['start_date'] }}" required>
+                </div>
+                <div class="group ml-3">
+                  <label class="flex mr-1 as-font--small" for="end_commitment">End of commitment</label>
+                  <input id="end_commitment" name="end_commitment" type="date" value="{{ organization['plan_details']['end_date'] }}">
+                </div>
+              </div>
+              <div class="flex">
+                <div class="group">
+                  <label class="flex mr-1 as-font--small" for="processed_data">Processed data</label>
+                  <div class="flex">
+                    <input id="processed_data" type="number" name="processed_data" value="{{ organization['plan_details']['processed_data'] }}">
+                    <select id="processed_data_unit" name="processed_data_unit" class="ml-1">
+                      {% set units = ['mb', 'gb', 'tb', 'pb'] %}
+                      {% for unit in units %}
+                      <option value="{{ unit }}" {{ 'selected' if unit == organization['plan_details']['processed_data_unit'] else '' }}>{{ unit.upper() }}</option>
+                      {% end %}
+                    </select>
+                  </div>
+                </div>
+                <div class="group ml-3">
+                  <label class="flex mr-1 as-font--small" for="storage_data">Storage</label>
+                  <div class="flex">
+                    <input id="storage_data" name="storage_data" type="number" value="{{ organization['plan_details']['storage_data'] }}">
+                    <select id="storage_data_unit" name="storage_data_unit" class="ml-1">
+                      {% set units = ['mb', 'gb', 'tb', 'pb'] %}
+                      {% for unit in units %}
+                      <option value="{{ unit }}" {{ 'selected' if unit == organization['plan_details']['storage_data_unit'] else '' }}>{{ unit.upper() }}</option>
+                      {% end %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="flex" style="gap: 24px;">
+                <div class="group flex-1">
+                    <label class="flex mr-1 as-font--small" for="data_transfer_intra_data">Data Transfer Intra</label>
+                    <div class="flex">
+                      <input id="data_transfer_intra_data" type="number" name="data_transfer_intra_data" value="{{ organization['plan_details']['data_transfer_intra_data'] }}">
+                      <select id="data_transfer_intra_data_unit" name="data_transfer_intra_data_unit" class="ml-1">
+                        {% set units = ['mb', 'gb', 'tb', 'pb'] %}
+                        {% for unit in units %}
+                        <option value="{{ unit }}" {{ 'selected' if unit == organization['plan_details']['data_transfer_intra_data_unit'] else '' }}>{{ unit.upper() }}</option>
+                        {% end %}
+                      </select>
+                    </div>
+                </div>
+                <div class="group flex-1">
+                    <label class="flex mr-1 as-font--small" for="data_transfer_inter_data">Data Transfer Inter</label>
+                    <div class="flex">
+                      <input id="data_transfer_inter_data" type="number" name="data_transfer_inter_data" value="{{ organization['plan_details']['data_transfer_inter_data'] }}">
+                      <select id="data_transfer_inter_data_unit" name="data_transfer_inter_data_unit" class="ml-1">
+                        {% set units = ['mb', 'gb', 'tb', 'pb'] %}
+                        {% for unit in units %}
+                        <option value="{{ unit }}" {{ 'selected' if unit == organization['plan_details']['data_transfer_inter_data_unit'] else '' }}>{{ unit.upper() }}</option>
+                        {% end %}
+                      </select>
+                    </div>
+                </div>
+              </div>
+              <div class="flex" style="gap: 24px;">
+                <div class="group flex-1">
+                    <div class="flex mr-1 as-font--small">
+                      <label for="orb_external_customer_id">
+                          <span>Orb's external customer ID</span>
+                          <br><span style="font-style:italic; font-size:80%">Empty for org ID</span>
+                      </label>
+                    </div>
+                    <input id="orb_external_customer_id" type="text" name="orb_external_customer_id" value="{{ organization['plan_details'].get('orb_external_customer_id', '') }}">
+                </div>
+              </div>
+              <div class="group flex-1">
+                <label class="flex mr-1 as-font--small" for="billing_plan">Billing plan</label>
+                <select id="billing_plan" name="billing_plan" style="width: 186px;">
+                  {% for plan in commitment_plans.items() %}
+                  <option value="{{ plan[0] }}" {{ 'selected' if plan[0] == organization['plan_details'].get('billing', '') else '' }}>{{ plan[1] }}</option>
+                  {% end %}
+                </select>
+              </div>
+              <div class="form-group">
+                  <label for="max_qps">Max QPS</label>
+                  <input type="number" 
+                         class="form-control" 
+                         id="max_qps" 
+                         name="max_qps" 
+                         value="{{ organization['plan_details'].get('max_qps') or '' }}"
+                         placeholder="Maximum queries per second">
+                  <small class="form-text text-muted">Maximum number of queries per second allowed for the organization</small>
+              </div>
+              <button type="submit" class="Button as-bkg--neutral-200">
+                <span class="as-font--caption as-color--secondary has-spacing">Change</span>
+              </button>
+            </div>
+          </form>
+        <div class="grid-block">
+          <h3 class="as-font--medium as-color--secondary">Dedicated Clusters</h3>
+            <form method="post" id="addDedicatedClusterForm">
+              {% module xsrf_form_html() %}
+              <input type="hidden" name="operation" value="add_dedicated_cluster">
+              <div class="group">
+                <label class="flex mr-1 as-font--small" for="cluster_name">Cluster Name</label>
+                <input id="cluster_name" name="cluster_name" type="text">
+                <label class="flex mr-1 as-font--small" for="server_url">Server URL</label>
+                <input id="server_url" name="server_url" type="text">
+                <label class="flex mr-1 as-font--small" for="expose_metrics">Expose metrics</label>
+                <div>
+                  {% if organization['plan_details']['billing'] == 'infrastructure_usage' %}
+                    <input id="expose_metrics" name="expose_metrics" type="checkbox" value="True" checked>
+                  {% else %}
+                    <input id="expose_metrics" name="expose_metrics" type="checkbox" value="True">
+                  {% end %}
+                </div>
+                <button type="submit" class="Button as-bkg--neutral-200 mt-1">
+                  <span class="as-font--caption as-color--secondary has-spacing">Add</span>
+                </button>
+              </div>
+            </form>
+            <div class="as-font--small as-color--body">
+              <table style="width: 100%;">
+                <thead>
+                  <th>Name</th>
+                  <th>Server URL</th>
+                  <th>Expose metrics</th>
+                  <th></th>
+                </thead>
+                <tbody>
+                  {% for dedicated_cluster in organization['dedicated_clusters'] %}
+                  <tr>
+                    <td>
+                      {{ dedicated_cluster.cluster.name }}
+                    </td>
+                    <td>
+                      {{ dedicated_cluster.cluster.server_url }}
+                    </td>
+                    <td>
+                      <div class="flex">
+                        {% if dedicated_cluster.expose_metrics %}
+                          <span style="color: green">Enabled</span>
+                        {% else %}
+                          <span style="color: red">Disabled</span>
+                        {% end %}
+                        <form method="post" class="ml-2">
+                          {% module xsrf_form_html() %}
+                          <input type="hidden" name="operation" value="toggle_cluster_expose_metrics">
+                          <input type="hidden" name="cluster_name" value="{{ dedicated_cluster.cluster.name }}">
+                          <input type="hidden" name="server_url" value="{{ dedicated_cluster.cluster.server_url }}">
+                          {% if dedicated_cluster.expose_metrics %}
+                            <input type="hidden" name="expose_metrics" value="False">
+                            <input type="submit" value="Disable">
+                          {% else %}
+                            <input type="hidden" name="expose_metrics" value="True">
+                            <input type="submit" value="Enable">
+                          {% end %}
+                        </form>
+                      </div>
+                    </td>
+                    <td style="display: flex; justify-content: center;">
+                      <form method="post">
+                        {% module xsrf_form_html() %}
+                        <input type="hidden" name="operation" value="remove_dedicated_cluster">
+                        <input type="hidden" name="cluster_name" value="{{ dedicated_cluster.cluster.name }}">
+                        <input type="hidden" name="server_url" value="{{ dedicated_cluster.cluster.server_url }}">
+                        <input type="hidden" name="expose_metrics" value="{{ dedicated_cluster.expose_metrics }}">
+                        <button type="submit" class="Button as-bkg--neutral-200">
+                          <span class="as-font--caption as-color--secondary has-spacing">Remove</span>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% end %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="flex gap" style="width: 100%;">
+            <div class="grid-block">
+              <h3 class="as-font--medium as-color--secondary">Org Admins</h3>
+              <form method="post" id="addAdminForm">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="operation" value="add_admin">
+                <div class="group">
+                  <label class="flex mr-1 as-font--small" for="user_email">User email</label>
+                  <input id="user_email" name="user_email" type="email">
+                  <button type="submit" class="Button as-bkg--neutral-200 mt-1">
+                    <span class="as-font--caption as-color--secondary has-spacing">Add</span>
+                  </button>
+                </div>
+              </form>
+              <div class="as-font--small as-color--body">
+                <table style="width: 100%;">
+                  <thead>
+                    <th>Email</th>
+                    <th></th>
+                  </thead>
+                  <tbody>
+                    {% for member in organization['members'] %}
+                    <tr id="member-{{member['id']}}">
+                      <td>
+                        <a href="{{ reverse_url('user_account_admin', member['id']) }}">{{member['email']}}</a>
+                      </td>
+                      <td style="display: flex; justify-content: center;">
+                        <form method="post">
+                          {% module xsrf_form_html() %}
+                          <input type="hidden" name="operation" value="remove_admin">
+                          <input type="hidden" name="user_email" value="{{member['email']}}">
+                          <button type="submit" class="Button as-bkg--neutral-200">
+                            <span class="as-font--caption as-color--secondary has-spacing">Remove</span>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                    {% end %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="grid-block">
+              <h3 class="as-font--medium as-color--secondary">Workspaces ({{ len(organization['workspaces']) }})</h3>
+              <form method="post" id="addWorkspaceForm">
+                {% module xsrf_form_html() %}
+                <input type="hidden" name="operation" value="add_workspace">
+                <div class="group">
+                  <label class="flex mr-1 as-font--small" for="workspace_id">Workspace id</label>
+                  <input id="workspace_id" name="workspace_id" type="text">
+                  <button type="submit" class="Button as-bkg--neutral-200 mt-1">
+                    <span class="as-font--caption as-color--secondary has-spacing">Add</span>
+                  </button>
+                </div>
+              </form>
+              <div class="as-font--small as-color--body">
+                <table style="width: 100%;">
+                  <thead>
+                    <th>Name</th>
+                    <th></th>
+                  </thead>
+                  <tbody>
+                    {% for workspace in organization['workspaces'] %}
+                    <tr id="workspace-{{workspace['id']}}">
+                      <td>
+                        <a href="{{ reverse_url('workspace_admin', workspace['id']) }}">{{workspace['name']}}</a>
+                      </td>
+                      <td style="display: flex; justify-content: center;">
+                        <form method="post">
+                          {% module xsrf_form_html() %}
+                          <input type="hidden" name="operation" value="remove_workspace">
+                          <input type="hidden" name="workspace_id" value="{{workspace['id']}}">
+                          <button type="submit" class="Button as-bkg--neutral-200">
+                            <span class="as-font--caption as-color--secondary has-spacing">Remove</span>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                    {% end %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5">
+          <form method="post" onsubmit="return validateDeleteOrganization(this)">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="operation" value="remove_organization">
+            <button class="Link as-color--error as-font--small">Delete organization?</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% end %}

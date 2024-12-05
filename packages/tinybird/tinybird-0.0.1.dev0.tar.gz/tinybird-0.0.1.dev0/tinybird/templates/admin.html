@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block js %}
+
+<script src="{{cdn_host}}/static/js/tinybird.js"></script>
+<script>
+  var None = null;
+  var JWT = '{{global_admin_token}}';
+  var HOST = '{{host}}';
+
+  async function run() {
+    /**
+    this is a placeholder to create an admin dashboard. The following tables are availabel:
+
+     * tracker table looks like this
+         timestamp DateTime,
+         session DateTime,
+         account_name String,
+         user_id String,
+         location String,
+         attr0 Nullable(String),
+         attr1 Nullable(String),
+         attr2 Nullable(String),
+         attr3 Nullable(String),
+         attr4 Nullable(String),
+         attr5 Nullable(String),
+         attr6 Nullable(String),
+         attr7 Nullable(String),
+         attr8 Nullable(String)
+
+         - timestamp is the date where the event was registered
+         - session is the date when the session started
+         - user_id is a unique id assigned to the user the first time they visit the site and is always the same (it they don't clean cookies)
+         - account_name is the string sent when initialize the tracker (usually to split analytics for different sites
+         - then attrX are the params to the `ga` function
+    */
+    var latests = await tinybird(JWT, HOST).query('select * from tracker order by timestamp desc limit 10')
+    for (var s of latests.data) {
+      document.write(Object.values(s).join(','))
+    }
+  }
+  run();
+</script>
+{% end %}
