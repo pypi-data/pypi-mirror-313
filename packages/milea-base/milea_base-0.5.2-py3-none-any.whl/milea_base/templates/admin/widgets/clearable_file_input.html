@@ -1,0 +1,26 @@
+{% load static %}
+<div class="input-group">
+    <input type="{{ widget.type }}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %} {% include "django/forms/widgets/classes.html" %} />
+    {% if widget.is_initial %}
+        {% if not widget.required %}
+            <span class="input-group-text py-0">
+                <label class="form-check mb-0" for="{{ widget.checkbox_id }}">
+                    <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}" class="form-check-input" {% if widget.attrs.disabled %}disabled{% endif %} />
+                    <span class="form-check-label">{{ widget.clear_checkbox_label }}</span>
+                </label>
+            </span>
+        {% endif %}
+        {% if '.jpg' in widget.value.url or '.png' in widget.value.url %}
+            <span class="input-group-text p-0">
+                <span class="avatar" style="background-image: url({{ widget.value.url }}); height:34px"></span>
+            </span>
+        {% else %}
+            <span class="input-group-text p-0">
+                <span class="avatar" style="background-image: url({% static 'milea/img/file-icon.jpg' %}); height:34px"></span>
+            </span>
+        {% endif %}
+    {% endif %}
+</div>
+{% if widget.is_initial %}
+    <small class="ms-1">{{ widget.initial_text }}: <a target="popup" href="#" onclick="window.open('{{ widget.value.url }}','popup','width=600,height=600'); return false;">{{ widget.value }}</a></small>
+{% endif %}

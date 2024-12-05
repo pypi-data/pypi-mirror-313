@@ -1,0 +1,41 @@
+{% load i18n static %}
+{% if cl.search_fields %}
+    <form id="changelist-search" method="get">
+        <div class="subheader mb-2 text-blue">Suche</div>
+        <div class="row g-2 align-items-center mb-3">
+            <div class="col">
+                <div class="input-group">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="{% translate "Search" %}"
+                           size="40"
+                           name="{{ search_var }}"
+                           value="{{ cl.query }}"
+                           id="searchbar"
+                           {% if cl.search_help_text %}aria-describedby="searchbar_helptext"{% endif %} />
+                </div>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-icon">
+                    <!-- Download SVG icon from http://tabler-icons.io/i/search -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <circle cx="10" cy="10" r="7"></circle><line x1="21" y1="21" x2="15" y2="15"></line>
+                    </svg>
+                </button>
+            </div>
+            {% if show_result_count %}
+                <small>{% blocktranslate count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktranslate %} (<a href="?{% if cl.is_popup %}{{ is_popup_var }}=1{% endif %}">
+                    {% if cl.show_full_result_count %}
+                        {% blocktranslate with full_result_count=cl.full_result_count %}{{ full_result_count }} total{% endblocktranslate %}
+                    {% else %}
+                        {% translate "Show all" %}
+                    {% endif %}
+                </a>)</small>
+            {% endif %}
+        </div>
+        {% for pair in cl.params.items %}
+            {% if pair.0 != search_var %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}" />{% endif %}
+        {% endfor %}
+    </form>
+{% endif %}

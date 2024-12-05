@@ -1,0 +1,144 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+{% block extrahead %}
+    {{ block.super }}
+    <script src="{% url 'admin:jsi18n' %}"></script>
+    <script src="{% static 'milea_base/js/tom-select.complete.min.js'%}"></script>
+    {{ media }}
+{% endblock extrahead %}
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin/css/widgets.css' %}" />
+    <link rel="stylesheet" href="{% static 'milea_base/css/form.css' %}" />
+    <link rel="stylesheet" href="{% static 'milea_base/css/select2.css' %}" />
+{% endblock extrastyle %}
+{% if not is_popup %}
+    {% block breadcrumbs %}
+        <div class="page-pretitle">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'admin:index' %}">{% translate "Home" %}</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+                </li>
+                <li class="breadcrumb-item {% if not has_view_permission %}active{% endif %}">
+                    <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    {% if add %}
+                        <a href="#">{% blocktranslate with name=opts.verbose_name %}Add {{ name }}{% endblocktranslate %}</a>
+                    {% else %}
+                        <a href="#">{{ original|truncatewords:"18" }}</a>
+                    {% endif %}
+                </li>
+            </ol>
+        </div>
+    {% endblock breadcrumbs %}
+{% endif %}
+{% block object-tools %}
+    {% if change %}
+        {% if not is_popup %}
+            <ul class="object-tools">
+                {% block object-tools-items %}
+                    {% change_form_object_tools %}
+                {% endblock object-tools-items %}
+            </ul>
+        {% endif %}
+    {% endif %}
+{% endblock object-tools %}
+{% block content %}
+    <div id="content-main">
+        {% block form_top %}
+        {% endblock form_top %}
+        <form {% if has_file_field %}enctype="multipart/form-data"{% endif %} {% if form_url %}action="{{ form_url }}"{% endif %} method="post" id="{{ opts.model_name }}_form" novalidate>
+            {% csrf_token %}
+            <div>
+                {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1" />{% endif %}
+                {% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}" />{% endif %}
+                {% if errors %}
+                    <div class="row g-2 align-items-center">
+                        <div class="col alert-messages">
+                            <div class="alert alert-dismissible alert-danger" role="alert">
+                                <div class="d-flex">
+                                    <div>
+                                        <i class="ti ti-alert-circle alert-icon display-6"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="alert-title fs-3">
+                                            {% blocktranslate count errors|length as counter %}
+                                                Please correct the error below.
+                                                {% plural %}
+                                                Please correct the errors below.
+                                            {% endblocktranslate %}
+                                        </h4>
+                                        <div class="text-muted">{{ adminform.form.non_field_errors }}</div>
+                                    </div>
+                                </div>
+                                <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                {% block field_sets %}
+                    <div class="row row-cards">
+                        {% for fieldset in adminform %}
+                            <div class="card">
+                                <div class="card-status-top bg-primary">
+                                    <div class="ribbon ribbon-top ribbon-unsaved-changes bg-yellow d-none">{% translate "Unsaved changes" %}</div>
+                                </div>
+                                {% if fieldset.name %}
+                                    <div class="card-header">
+                                        <h3 class="card-title">{{ fieldset.name }}</h3>
+                                        {% if 'collapse in' in fieldset.classes %}
+                                            <div class="card-actions btn-actions">
+                                                <a href="#" class="btn-action" data-bs-toggle="collapse" data-bs-target="#colcard-{{ forloop.counter }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                         width="24"
+                                                         height="24"
+                                                         viewBox="0 0 24 24"
+                                                         fill="none"
+                                                         stroke="currentColor"
+                                                         stroke-width="2"
+                                                         stroke-linecap="round"
+                                                         stroke-linejoin="round"
+                                                         class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-down">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <path d="M4 11l8 3l8 -3" />
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                        {% if fieldset.description %}<p class="card-subtitle">{{ fieldset.description|safe }}</p>{% endif %}
+                                    </div>
+                                {% endif %}
+                                <div id="colcard-{{ forloop.counter }}" class="col-12 {{ fieldset.classes }}">{% include "admin/includes/fieldset.html" %}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endblock field_sets %}
+                {% block after_field_sets %}
+                {% endblock after_field_sets %}
+                {% block inline_field_sets %}
+                    {% for inline_admin_formset in inline_admin_formsets %}
+                        {% include inline_admin_formset.opts.template %}
+                    {% endfor %}
+                {% endblock inline_field_sets %}
+                {% block after_related_objects %}
+                {% endblock after_related_objects %}
+                {% block admin_change_form_document_ready %}
+                    <script id="django-admin-form-add-constants" src="{% static 'admin/js/change_form.js' %}" {% if adminform and add %}data-model-name="{{ opts.model_name }}"{% endif %} async></script>
+                {% endblock admin_change_form_document_ready %}
+                {# JavaScript for prepopulated fields #}
+                {% prepopulated_fields_js %}
+            </div>
+            <div class="card mt-3">
+                <div class="card-body">
+                    {% block submit_buttons_bottom %}
+                        {% submit_row %}
+                    {% endblock submit_buttons_bottom %}
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

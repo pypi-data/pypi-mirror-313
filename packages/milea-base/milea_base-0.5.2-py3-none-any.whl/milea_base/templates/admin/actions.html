@@ -1,0 +1,42 @@
+{% load i18n %}
+<div class="row text-center align-items-center flex-row">
+    <div class="actions col-12 col-lg-auto mt-3 mt-lg-0">
+        {% block actions %}
+            <div class="row g-2">
+                {% block actions-form %}
+                    {% for field in action_form %}
+                        {% if field.label %}
+                            <div class="col">
+                                <div class="input-group">
+                                    <span class="input-group-text">{{ field.label }}</span>
+                                    {{ field }}
+                                </div>
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                    {% endfor %}
+                {% endblock actions-form %}
+                {% block actions-submit %}
+                    <div class="col-auto">
+                        <button type="submit" class="btn" title="{% translate "Run the selected action" %}" name="index" value="{{ action_index|default:0 }}">{% translate "Go" %}</button>
+                    </div>
+                {% endblock actions-submit %}
+            </div>
+        </div>
+        <div class="actions col-lg-auto ms-lg-auto">
+            {% block actions-counter %}
+                {% if actions_selection_counter %}
+                    <span class="action-counter text-muted" data-actions-icnt="{{ cl.result_list|length }}">{{ selection_note }}</span>
+                    {% if cl.result_count != cl.result_list|length %}
+                        <span class="all text-warning hidden">{{ selection_note_all }}</span>
+                        <span class="question hidden"> -
+                            <a href="#" class="text-info" title="{% translate "Click here to select the objects across all pages" %}">{% blocktranslate with cl.result_count as total_count %}Select all {{ total_count }} {{ module_name }}{% endblocktranslate %}</a>
+                        </span>
+                        <span class="clear hidden"> - <a href="#" class="text-info">{% translate "Clear selection" %}</a></span>
+                    {% endif %}
+                {% endif %}
+            {% endblock actions-counter %}
+        {% endblock actions %}
+    </div>
+</div>

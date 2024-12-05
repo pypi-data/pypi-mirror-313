@@ -1,0 +1,91 @@
+{% load i18n %}
+{% load milea_menu %}
+{% if app_list %}
+
+    {% sort_app_list app_list as app_list_sorted %}
+
+    <!-- Default Menu -->
+    {% for app in app_list_sorted %}
+        {% app_additional_config app as app_infos %}
+        {% if not app_infos.menu_others %}
+
+            <li class="nav-item dropdown {% if app.app_url in request.path|urlencode %}active{% endif %}">
+                <a class="nav-link dropdown-toggle" href="#navbar-help" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block">
+                        <i class="{{ app_infos.menu_icon }} fs-2"></i>
+                    </span>
+                    <span class="nav-link-title">{{ app.name }}</span>
+                </a>
+                <div class="dropdown-menu">
+
+                    <!-- Firstlevel Menu -->
+                    {% for model in app_infos.menu_firstlevel %}
+                        {% if model.admin_url %}
+                            <a class="dropdown-item {% if model.admin_url in request.path|urlencode %}active{% endif %}" href="{{ model.admin_url }}">{{ model.name }}</a>
+                        {% else %}
+                            <a class="dropdown-item disabled" href="#">{{ model.name }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Secondlevel Menu = menu_dropend -->
+                    {% for secondlevel in app_infos.menu_secondlevel %}
+                        <div class="dropend">
+                            <a class="dropdown-item dropdown-toggle" href="#secondlevel-{{ secondlevel.key }}" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                                {{ secondlevel.name }}
+                            </a>
+                            <div class="dropdown-menu">
+                                {% for model in secondlevel.models %}
+                                    {% if model.admin_url %}
+                                        <a class="dropdown-item {% if model.admin_url in request.path|urlencode %}active{% endif %}" href="{{ model.admin_url }}">{{ model.name }}</a>
+                                    {% else %}
+                                        <a class="dropdown-item disabled" href="#">{{ model.name }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </li>
+        {% endif %}
+    {% endfor %}
+
+    <!-- Config Menu -->
+    {% has_others app_list as ho %}
+    {% if ho %}
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#navbar-help" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">
+                <span class="nav-link-icon d-md-none d-lg-inline-block">
+                    <i class="ti ti-settings fs-2"></i>
+                </span>
+                <span class="nav-link-title">{% trans "Others" %}</span>
+            </a>
+            <div class="dropdown-menu">
+
+                {% for app in app_list_sorted %}
+                    {% app_additional_config app as app_infos %}
+                    {% if app_infos.menu_others %}
+
+                        <div class="dropend">
+                            <a class="dropdown-item dropdown-toggle" href="#secondlevel-{{ app.app_label }}" data-bs-toggle="dropdown" data-bs-auto-close="outside" role="button" aria-expanded="false">{{ app.name }}</a>
+                            <div class="dropdown-menu">
+                                {% for model in app_infos.menu_firstlevel %}
+                                    {% if model.admin_url %}
+                                        <a class="dropdown-item {% if model.admin_url in request.path|urlencode %}active{% endif %}" href="{{ model.admin_url }}">{{ model.name }}</a>
+                                    {% else %}
+                                        <a class="dropdown-item disabled" href="#">{{ model.name }}</a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+ 
+                    {% endif %}
+                {% endfor %}
+
+            </div>
+        </li>
+    {% endif %}
+
+{% else %}
+    <p>{% translate "You don’t have permission to view or edit anything." %}</p>
+{% endif %}

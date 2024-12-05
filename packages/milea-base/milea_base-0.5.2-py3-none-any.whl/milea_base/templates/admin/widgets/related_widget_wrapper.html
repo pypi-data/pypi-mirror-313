@@ -1,0 +1,53 @@
+{% load i18n static %}
+<div class="related-widget-wrapper row g-2" {% if not model_has_limit_choices_to %}data-model-ref="{{ model }}"{% endif %}>
+    <div class="col">{{ rendered_widget }}</div>
+    {% block links %}
+        {% spaceless %}
+            {% if not is_hidden %}
+                {% if can_change_related %}
+                    <div class="col-auto">
+                        <a class="related-widget-wrapper-link btn btn-icon change-related"
+                           id="change_id_{{ name }}"
+                           data-href-template="{{ change_related_template_url }}?{{ url_params }}"
+                           data-popup="yes"
+                           title="{% blocktranslate %}Change selected {{ model }}{% endblocktranslate %}">
+                            <img width="13" height="13" src="{% static "admin/img/icon-changelink.svg" %}" alt="{% translate "Change" %}" />
+                        </a>
+                    </div>
+                {% endif %}
+                {% if can_add_related %}
+                    <div class="col-auto">
+                        <a class="related-widget-wrapper-link btn btn-icon add-related"
+                           id="add_id_{{ name }}"
+                           data-popup="yes"
+                           href="{{ add_related_url }}?{{ url_params }}"
+                           title="{% blocktranslate %}Add another {{ model }}{% endblocktranslate %}">
+                            <img width="13" height="13" src="{% static "admin/img/icon-addlink.svg" %}" alt="{% translate "Add" %}" />
+                        </a>
+                    </div>
+                {% endif %}
+                {% if can_delete_related %}
+                    <div class="col-auto">
+                        <a class="related-widget-wrapper-link btn btn-icon delete-related"
+                           id="delete_id_{{ name }}"
+                           data-href-template="{{ delete_related_template_url }}?{{ url_params }}"
+                           data-popup="yes"
+                           title="{% blocktranslate %}Delete selected {{ model }}{% endblocktranslate %}">
+                            <img width="13" height="13" src="{% static "admin/img/icon-deletelink.svg" %}" alt="{% translate "Delete" %}" />
+                        </a>
+                    </div>
+                {% endif %}
+                {% if can_view_related %}
+                    <div class="col-auto">
+                        <a class="related-widget-wrapper-link btn btn-icon view-related"
+                           id="view_id_{{ name }}"
+                           data-href-template="{{ change_related_template_url }}?{{ view_related_url_params }}"
+                           title="{% blocktranslate %}View selected {{ model }}{% endblocktranslate %}">
+                            <img width="13" height="13" src="{% static "admin/img/icon-viewlink.svg" %}" alt="{% translate "View" %}" />
+                        </a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endspaceless %}
+    {% endblock links %}
+</div>

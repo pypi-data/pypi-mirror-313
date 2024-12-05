@@ -1,0 +1,15 @@
+{% extends "admin/change_form.html" %}
+{% load add_preserved_filters from admin_urls %}
+
+{% block object-tools-items %}
+    {% for tool in objectactions %}
+
+        {% url tools_view_name pk=object_id tool=tool.name as action_url %}
+        <a id="btn_{{ tool.name }}" href="{% add_preserved_filters action_url %}" title="{{ tool.standard_attrs.title }}" class="btn btn-primary {{ tool.standard_attrs.class }}" {% for k, v in tool.custom_attrs.items %}{{ k }}="{{ v }}"{% endfor %}>
+            {% if tool.custom_attrs.icon %}<i class="icon {{ tool.custom_attrs.icon }}"> </i>{% endif %}
+            {{ tool.label|capfirst }}
+        </a>
+
+    {% endfor %}
+    {{ block.super }}
+{% endblock object-tools-items %}
