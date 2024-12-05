@@ -1,0 +1,72 @@
+[project]
+name = "ocpiupdate"
+version = "0.3.0"
+description = "An updater for OpenCPI Projects"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "tree_sitter_languages; python_version < '3.9'",
+    "tree-sitter-language-pack; python_version >= '3.9'",
+    "toml; python_version < '3.11'",
+]
+maintainers = [
+    { name = "Dom Walters" },
+]
+keywords = ["ocpi", "opencpi"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy",
+    "ruff",
+    "types-toml",
+    "types-tree-sitter",
+    "types-tree-sitter-languages; python_version < '3.9'",
+    "typing_extensions; python_version < '3.11'",
+]
+
+[project.scripts]
+ocpiupdate = "ocpiupdate.__main__:main"
+ocpiparsemake = "ocpiupdate.ocpiparsemake:main"
+
+[project.urls]
+Repository = "https://gitlab.com/dawalters/ocpiupdate"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+    "src/ocpiupdate/ocpiupdate.toml",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ocpiupdate"]
+
+[tool.mypy]
+exclude = "opencpi"
+python_version = "3.8"
+strict = true
+warn_unreachable = true
+
+[tool.ruff.lint]
+ignore = [
+    "D203", "D212", "D415",
+]
+preview = true
+select = [
+    "F", "E", "W", "I", "N", "D", "UP", "YTT", "ANN", "ASYNC", "BLE", "FBT",
+    "B", "A", "COM812", "C4", "DTZ", "T10", "DJ", "EM", "EXE", "FA", "ISC",
+    "ICN", "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "Q", "RSE", "RET",
+    "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "PTH", "TD001", "TD004",
+    "TD005", "TD006", "TD007", "ERA", "PD", "PGH", "PLC", "PLE", "PLW", "TRY",
+    "FLY", "NPY", "AIR", "PERF", "FURB", "RUF",
+]

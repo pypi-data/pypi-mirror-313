@@ -1,0 +1,230 @@
+[ocpiupdate]
+
+# Settings common to all migrations.
+[ocpiupdate.migrate]
+
+# Settings common to all makefile migrations.
+[ocpiupdate.migrate.makefile]
+applications = ["translate-to", "xml", "applications"]
+hdl-adapters = ["translate-to", "xml", "hdl-adapters"]
+hdl-assemblies = ["translate-to", "xml", "hdl-assemblies"]
+hdl-cards = ["translate-to", "xml", "hdl-cards"]
+hdl-devices = ["translate-to", "xml", "hdl-devices"]
+hdl-platforms = ["translate-to", "xml", "hdl-platforms"]
+hdl-primitives = ["translate-to", "xml", "hdl-primitives"]
+project = ["translate-to", "xml", "project"]
+
+# Settings common to all parses.
+[ocpiupdate.parse]
+
+# Settings common to all makefile parses.
+[ocpiupdate.parse.makefile]
+
+# The file identifier that this file identifier should inherit from.
+# WARNING: This occurrence of the setting should not be used.
+inherit = ""
+
+# Code snippets to ignore if they are found during a parse. The file will be
+# allowed to be deleted if it contains these. These are checked for using the
+# structural equality of their treesitter parse tree. This means that
+# whitespace is largely ignored. Each entry in this table must resolve to a
+# single treesitter node. Also allowed in any subcategory of this setting
+# starting `makefile-` or `mk-`.
+node-fragments-to-ignore = [
+    # Common checks for OCPI_CDK_DIR being set
+    """\
+    $(if $(realpath $(OCPI_CDK_DIR)),,\\\n\
+    \t$(error The OCPI_CDK_DIR environment variable is not set correctly.))\n\
+    """,
+    """\
+    $(if $(OCPI_CDK_DIR),,$(error The OCPI_CDK_DIR environment variable must be set for this Makefile.))\n\
+    """,
+]
+
+# Treesitter node types to ignore during a parse. The file will be allowed to
+# be deleted if it contains these. Also allowed in any subcategory of this
+# setting starting `makefile-` or `mk-`.
+node-types-to-ignore = [
+    "comment",
+]
+
+# The paths that the file identifier is found at.
+# WARNING: This occurrence of the setting should not be used.
+paths = []
+
+# Settings used when parsing "Makefile" at the project level
+[ocpiupdate.parse.makefile.applications]
+node-fragments-to-ignore = [
+    "include $(OCPI_CDK_DIR)/include/applications.mk\n",
+]
+node-types-to-ignore = []
+paths = ["applications/Makefile"]
+
+[ocpiupdate.parse.makefile.hdl-adapters]
+inherit = "library"
+node-fragments-to-ignore = []
+node-types-to-ignore = []
+paths = ["hdl/adapters/Library.mk", "hdl/adapters/Makefile"]
+
+[ocpiupdate.parse.makefile.hdl-assemblies]
+node-fragments-to-ignore = [
+    "include $(OCPI_CDK_DIR)/include/hdl/hdl-assemblies.mk\n",
+]
+node-types-to-ignore = []
+paths = ["hdl/assemblies/Makefile"]
+
+[ocpiupdate.parse.makefile.hdl-cards]
+inherit = "library"
+node-fragments-to-ignore = []
+node-types-to-ignore = []
+paths = ["hdl/cards/Library.mk", "hdl/cards/Makefile"]
+
+[ocpiupdate.parse.makefile.hdl-devices]
+inherit = "library"
+node-fragments-to-ignore = []
+node-types-to-ignore = []
+paths = ["hdl/devices/Library.mk", "hdl/devices/Makefile"]
+
+[ocpiupdate.parse.makefile.hdl-platforms]
+node-fragments-to-ignore = [
+    "include $(OCPI_CDK_DIR)/include/hdl/hdl-platforms.mk\n",
+]
+node-types-to-ignore = []
+paths = ["hdl/platforms/Makefile"]
+
+[ocpiupdate.parse.makefile.hdl-primitives]
+node-fragments-to-ignore = [
+    "include $(OCPI_CDK_DIR)/include/hdl/hdl-primitives.mk\n",
+]
+node-types-to-ignore = []
+paths = ["hdl/primitives/Makefile"]
+
+[ocpiupdate.parse.makefile.library]
+node-fragments-to-ignore = [
+    "include $(OCPI_CDK_DIR)/include/library.mk\n",
+]
+node-types-to-ignore = []
+
+[ocpiupdate.parse.makefile.project]
+node-fragments-to-ignore = [
+    "include $(OCPI_CDK_DIR)/include/project.mk\n",
+]
+node-types-to-ignore = []
+paths = ["Project.mk", "Makefile"]
+
+# Settings common to all XML parses.
+[ocpiupdate.parse.xml]
+
+# Variables that the XML file is allowed to contain.
+# WARNING: This occurrence of the setting should not be used.
+accepted-variables = []
+
+# Variables that the XML file is allowed to contain, but which will cause a
+# warning. Keys of this table MUST NOT be in `accepted-variables`.
+# WARNING: This occurrence of the setting should not be used.
+not-recommended-variables = {}
+
+# The path that the file identifier is found at.
+# WARNING: This occurrence of the setting should not be used.
+path = ""
+
+# Variables that the XML file should contain, but which will cause a warning
+# if they aren't included. Keys of this table MUST be in `accepted-variables`.
+# WARNING: This occurrence of the setting should not be used.
+recommended-variables = {}
+
+# The XML element tag that the file identifier uses.
+# WARNING: This occurrence of the setting should not be used.
+tag = ""
+
+# A table of variables that are different between makefile and xml. Keys are
+# the makefile variable, values are the required xml value. Keys of this table
+# MUST be in `accepted-variables` for file identifiers that use it.
+# WARNING: This occurrence of the setting should not be used.
+translated-from-makefile-variables = {}
+
+[ocpiupdate.parse.xml.applications]
+path = "applications/applications.xml"
+tag = "applications"
+
+[ocpiupdate.parse.xml.hdl-adapters]
+inherit = "library"
+path = "hdl/adapters/adapters.xml"
+
+[ocpiupdate.parse.xml.hdl-assemblies]
+path = "hdl/assemblies/assemblies.xml"
+tag = "assemblies"
+
+[ocpiupdate.parse.xml.hdl-cards]
+inherit = "library"
+path = "hdl/cards/cards.xml"
+
+[ocpiupdate.parse.xml.hdl-devices]
+inherit = "library"
+path = "hdl/devices/devices.xml"
+
+[ocpiupdate.parse.xml.hdl-platforms]
+path = "hdl/platforms/platforms.xml"
+tag = "hdlplatforms"
+
+[ocpiupdate.parse.xml.hdl-primitives]
+accepted-variables = [
+    "libraries",
+]
+path = "hdl/primitives/primitives.xml"
+tag = "hdlprimitives"
+
+[ocpiupdate.parse.xml.hdl-primitives.recommended-variables]
+libraries = """\
+    `libraries` is used to determine the order of compilation of primitive \
+    libraries. If you have any dependencies between libraries, you should define \
+    it.\
+"""
+
+[ocpiupdate.parse.xml.hdl-primitives.translated-from-makefile-variables]
+primitivelibraries = "libraries"
+
+[ocpiupdate.parse.xml.library]
+accepted-variables = [
+    "tests",
+    "workers",
+]
+tag = "library"
+
+[ocpiupdate.parse.xml.library.not-recommended-variables]
+hdllibraries = """\
+    `hdllibraries` imports a list of primitive libraries for all assets in this \
+    component library. This import should be performed on each worker as necessary \
+    not on the collection as a whole\
+"""
+package = """\
+    `package` directs the asset to pretend it is located somewhere else. If this \
+    is intended, the asset should be moved to that other location. If its \
+    inclusion is redundant (e.g. the asset is already located in the place that \
+    matches `package`), then `package` should be removed\
+"""
+
+[ocpiupdate.parse.xml.project]
+accepted-variables = [
+    "packageprefix",
+    "packagename",
+    "projectdependencies",
+]
+path = "Project.xml"
+tag = "project"
+
+[ocpiupdate.parse.xml.project.not-recommended-variables]
+componentlibraries = """\
+    `componentlibraries` should be specified on the particular asset that \
+    requires the library to be imported, not on collections\
+"""
+
+[ocpiupdate.parse.xml.project.recommended-variables]
+packageprefix = """\
+    `packageprefix` defaults to 'local' if not defined. If this is intended, \
+    explicitly assign it to 'local'\
+"""
+packagename = """\
+    `packagename` defaults to the name of the directory this file is in if \
+    not defined. It should always be defined to avoid confusion\
+"""
