@@ -1,0 +1,97 @@
+Metadata-Version: 2.1
+Name: ploosh-core
+Version: 0.2.29
+Summary: A framework to automatize your tests for data projects
+Home-page: https://github.com/CSharplie/ploosh/
+Download-URL: https://pypi.org/project/ploosh/
+License: Apache License 2.0
+Project-URL: Say Thanks!, https://ploosh.io
+Project-URL: Bug Tracker, https://github.com/CSharplie/ploosh/issues
+Project-URL: CI, https://github.com/CSharplie/ploosh/actions
+Project-URL: Documentation, https://github.com/CSharplie/ploosh
+Project-URL: Source Code, https://github.com/CSharplie/ploosh
+Platform: Any
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: colorama ==0.4.6
+Requires-Dist: PyYAML ==6.0.1
+Requires-Dist: Pyjeb ==0.2.1
+Requires-Dist: numpy ==1.26.3
+Requires-Dist: pandas ==2.1.4
+Requires-Dist: openpyxl ==3.1.2
+Requires-Dist: sqlalchemy ==1.4.51
+Requires-Dist: pyspark ==3.5.1
+
+# Ploosh
+
+Ploosh is yaml based framework used to automatized the testing process in data projects. 
+
+# Get started
+Go to the [ploosh wiki](https://github.com/CSharplie/ploosh/wiki) to find the get started tutorial.
+
+## Steps
+1. Install ploosh package
+2. Run tests
+3. Analyse results
+
+## Install Ploosh
+
+Install from [PyPi](https://pypi.org/project/ploosh/) package manager:
+``` shell
+pip install ploosh
+```
+
+## Run tests
+``` shell
+ploosh --connections "connections.yml" --cases "test_cases" --export "JSON" --p_my_sql_server_password "mypassword"
+```
+
+![Execution result](https://raw.githubusercontent.com/wiki/CSharplie/ploosh/images/execution.png)
+
+## Test results
+``` json
+[
+  {
+    "name": "Test aggregated data",
+    "state": "passed",
+    "source": {
+      "start": "2024-02-05T17:08:36Z",
+      "end": "2024-02-05T17:08:36Z",
+      "duration": 0.0032982
+    },
+    "expected": {
+      "start": "2024-02-05T17:08:36Z",
+      "end": "2024-02-05T17:08:36Z",
+      "duration": 6.0933333333333335e-05
+    },
+    "compare": {
+      "start": "2024-02-05T17:08:36Z",
+      "end": "2024-02-05T17:08:36Z",
+      "duration": 0.00046468333333333334
+    }
+  },
+  {
+    "name": "Test unvalid data",
+    "state": "failed",
+    "source": {
+      "start": "2024-02-05T17:08:36Z",
+      "end": "2024-02-05T17:08:36Z",
+      "duration": 0.00178865
+    },
+    "expected": {
+      "start": "2024-02-05T17:08:36Z",
+      "end": "2024-02-05T17:08:36Z",
+      "duration": 1.49e-05
+    },
+    "compare": {
+      "start": "2024-02-05T17:08:36Z",
+      "end": "2024-02-05T17:08:36Z",
+      "duration": 1.8333333333333333e-07
+    },
+    "error": {
+      "type": "count",
+      "message": "The count in source dataset (55) is differant than the count the in expected dataset (0)"
+    }
+  }
+]
+```
