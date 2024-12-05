@@ -1,0 +1,3407 @@
+{
+  "tests": [
+    {
+      "input": "SELECT * FROM (src1 s1 INNER JOIN src2 s2 ON s1.id = s2.id) dst(a, b, c, d)",
+      "output": {
+        "failure": "not implemented: nested join"
+      }
+    },
+    {
+      "input": "select * from a join b join c right join d",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "join": {
+                      "left": {
+                        "join": {
+                          "left": {
+                            "read": {
+                              "namedTable": {
+                                "name": [
+                                  "a"
+                                ],
+                                "options": []
+                              },
+                              "isStreaming": false
+                            },
+                            "planId": null,
+                            "sourceInfo": null
+                          },
+                          "right": {
+                            "read": {
+                              "namedTable": {
+                                "name": [
+                                  "b"
+                                ],
+                                "options": []
+                              },
+                              "isStreaming": false
+                            },
+                            "planId": null,
+                            "sourceInfo": null
+                          },
+                          "joinCondition": null,
+                          "joinType": "inner",
+                          "usingColumns": [],
+                          "joinDataType": null
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "right": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "c"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "joinCondition": null,
+                      "joinType": "inner",
+                      "usingColumns": [],
+                      "joinDataType": null
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "d"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "rightOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from a natural cross join b",
+      "exception": "\n[INCOMPATIBLE_JOIN_TYPES] The join types NATURAL and CROSS are incompatible.(line 1, pos 16)\n\n== SQL ==\nselect * from a natural cross join b\n----------------^^^\n",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: a join type after NATURAL, found: cross at Line: 1, Column: 25"
+      }
+    },
+    {
+      "input": "select * from a natural join b on a.id = b.id",
+      "exception": "\n[PARSE_SYNTAX_ERROR] Syntax error at or near 'on'.(line 1, pos 31)\n\n== SQL ==\nselect * from a natural join b on a.id = b.id\n-------------------------------^^^\n",
+      "output": {
+        "failure": "invalid argument: extra tokens after statement: on"
+      }
+    },
+    {
+      "input": "select * from t anti join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "anti",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "inner",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t anti join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "anti",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "inner",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt anti join u",
+      "output": {
+        "failure": "invalid argument: extra tokens after statement: anti"
+      }
+    },
+    {
+      "input": "select * from t as tt cross join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "cross",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt full join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "fullOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt full outer join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "fullOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt inner join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "inner",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "inner",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt left anti join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "leftAnti",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt left join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "leftOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt left outer join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "leftOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt left semi join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "leftSemi",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt right join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "rightOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt right outer join u",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "tt",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "rightOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t as tt semi join u",
+      "output": {
+        "failure": "invalid argument: extra tokens after statement: semi"
+      }
+    },
+    {
+      "input": "select * from t cross join lateral (select * from u) uu",
+      "output": {
+        "failure": "not supported: LATERAL in derived table factor"
+      }
+    },
+    {
+      "input": "select * from t full join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "fullOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t full join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "fullOuter",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t full outer join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "fullOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t full outer join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "fullOuter",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t inner join lateral (select * from u) uu",
+      "output": {
+        "failure": "not supported: LATERAL in derived table factor"
+      }
+    },
+    {
+      "input": "select * from t inner join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "inner",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t inner join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "inner",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t join lateral (select * from u) uu",
+      "output": {
+        "failure": "not supported: LATERAL in derived table factor"
+      }
+    },
+    {
+      "input": "select * from t join lateral (select * from u) uu on true",
+      "output": {
+        "failure": "not supported: LATERAL in derived table factor"
+      }
+    },
+    {
+      "input": "select * from t join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "inner",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "inner",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t left anti join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "leftAnti",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t left anti join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "leftAnti",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t left join lateral (select * from u) uu",
+      "output": {
+        "failure": "not supported: LATERAL in derived table factor"
+      }
+    },
+    {
+      "input": "select * from t left join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "leftOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t left join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "leftOuter",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t left outer join lateral (select * from u) uu",
+      "output": {
+        "failure": "not supported: LATERAL in derived table factor"
+      }
+    },
+    {
+      "input": "select * from t left outer join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "leftOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t left outer join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "leftOuter",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t left semi join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "leftSemi",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t left semi join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "leftSemi",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t right join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "rightOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t right join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "rightOuter",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t right outer join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "rightOuter",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t right outer join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "rightOuter",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t semi join u as uu on a = b",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "semi",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "u"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "uu",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "a"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "b"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "inner",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t semi join u using(a, b)",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "tableAlias": {
+                      "input": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "name": "semi",
+                      "columns": []
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "u"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "inner",
+                  "usingColumns": [
+                    "a",
+                    "b"
+                  ],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t tt natural full join u as uu",
+      "output": {
+        "failure": "not supported: natural join"
+      }
+    },
+    {
+      "input": "select * from t tt natural full outer join u as uu",
+      "output": {
+        "failure": "not supported: natural join"
+      }
+    },
+    {
+      "input": "select * from t tt natural inner join u as uu",
+      "output": {
+        "failure": "not supported: natural join"
+      }
+    },
+    {
+      "input": "select * from t tt natural join u as uu",
+      "output": {
+        "failure": "not supported: natural join"
+      }
+    },
+    {
+      "input": "select * from t tt natural left join u as uu",
+      "output": {
+        "failure": "not supported: natural join"
+      }
+    },
+    {
+      "input": "select * from t tt natural left outer join u as uu",
+      "output": {
+        "failure": "not supported: natural join"
+      }
+    },
+    {
+      "input": "select * from t tt natural right join u as uu",
+      "output": {
+        "failure": "not supported: natural join"
+      }
+    },
+    {
+      "input": "select * from t tt natural right outer join u as uu",
+      "output": {
+        "failure": "not supported: natural join"
+      }
+    },
+    {
+      "input": "select * from t1 JOIN t2, t3 join t2 on t1.col1 = t2.col2",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "join": {
+                      "left": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t1"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "right": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t2"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "joinCondition": null,
+                      "joinType": "inner",
+                      "usingColumns": [],
+                      "joinDataType": null
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "join": {
+                      "left": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t3"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "right": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t2"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "joinCondition": {
+                        "unresolvedFunction": {
+                          "functionName": "==",
+                          "arguments": [
+                            {
+                              "unresolvedAttribute": {
+                                "name": [
+                                  "t1",
+                                  "col1"
+                                ],
+                                "planId": null
+                              }
+                            },
+                            {
+                              "unresolvedAttribute": {
+                                "name": [
+                                  "t2",
+                                  "col2"
+                                ],
+                                "planId": null
+                              }
+                            }
+                          ],
+                          "isDistinct": false,
+                          "isUserDefinedFunction": false
+                        }
+                      },
+                      "joinType": "inner",
+                      "usingColumns": [],
+                      "joinDataType": null
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "cross",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t1 cross join t2 join t3 on t3.id = t1.id join t4 on t4.id = t1.id",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "join": {
+                      "left": {
+                        "join": {
+                          "left": {
+                            "read": {
+                              "namedTable": {
+                                "name": [
+                                  "t1"
+                                ],
+                                "options": []
+                              },
+                              "isStreaming": false
+                            },
+                            "planId": null,
+                            "sourceInfo": null
+                          },
+                          "right": {
+                            "read": {
+                              "namedTable": {
+                                "name": [
+                                  "t2"
+                                ],
+                                "options": []
+                              },
+                              "isStreaming": false
+                            },
+                            "planId": null,
+                            "sourceInfo": null
+                          },
+                          "joinCondition": null,
+                          "joinType": "cross",
+                          "usingColumns": [],
+                          "joinDataType": null
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "right": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t3"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "joinCondition": {
+                        "unresolvedFunction": {
+                          "functionName": "==",
+                          "arguments": [
+                            {
+                              "unresolvedAttribute": {
+                                "name": [
+                                  "t3",
+                                  "id"
+                                ],
+                                "planId": null
+                              }
+                            },
+                            {
+                              "unresolvedAttribute": {
+                                "name": [
+                                  "t1",
+                                  "id"
+                                ],
+                                "planId": null
+                              }
+                            }
+                          ],
+                          "isDistinct": false,
+                          "isUserDefinedFunction": false
+                        }
+                      },
+                      "joinType": "inner",
+                      "usingColumns": [],
+                      "joinDataType": null
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t4"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": {
+                    "unresolvedFunction": {
+                      "functionName": "==",
+                      "arguments": [
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "t4",
+                              "id"
+                            ],
+                            "planId": null
+                          }
+                        },
+                        {
+                          "unresolvedAttribute": {
+                            "name": [
+                              "t1",
+                              "id"
+                            ],
+                            "planId": null
+                          }
+                        }
+                      ],
+                      "isDistinct": false,
+                      "isUserDefinedFunction": false
+                    }
+                  },
+                  "joinType": "inner",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "select * from t1 inner join (t2 inner join t3 on col3 = col2)",
+      "output": {
+        "failure": "not implemented: nested join"
+      }
+    },
+    {
+      "input": "select * from t1 inner join (t2 inner join t3 on col3 = col2) on col3 = col1",
+      "output": {
+        "failure": "not implemented: nested join"
+      }
+    },
+    {
+      "input": "select * from t1 inner join (t2 inner join t3) on col3 = col2",
+      "output": {
+        "failure": "not implemented: nested join"
+      }
+    },
+    {
+      "input": "select * from t1 inner join t2 inner join t3 on col3 = col2 on col3 = col1",
+      "exception": "\n[PARSE_SYNTAX_ERROR] Syntax error at or near 'on'.(line 1, pos 60)\n\n== SQL ==\nselect * from t1 inner join t2 inner join t3 on col3 = col2 on col3 = col1\n------------------------------------------------------------^^^\n",
+      "output": {
+        "failure": "invalid argument: extra tokens after statement: on"
+      }
+    },
+    {
+      "input": "select * from t1, t3 join t2 on t1.col1 = t2.col2",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "join": {
+                  "left": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t1"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "right": {
+                    "join": {
+                      "left": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t3"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "right": {
+                        "read": {
+                          "namedTable": {
+                            "name": [
+                              "t2"
+                            ],
+                            "options": []
+                          },
+                          "isStreaming": false
+                        },
+                        "planId": null,
+                        "sourceInfo": null
+                      },
+                      "joinCondition": {
+                        "unresolvedFunction": {
+                          "functionName": "==",
+                          "arguments": [
+                            {
+                              "unresolvedAttribute": {
+                                "name": [
+                                  "t1",
+                                  "col1"
+                                ],
+                                "planId": null
+                              }
+                            },
+                            {
+                              "unresolvedAttribute": {
+                                "name": [
+                                  "t2",
+                                  "col2"
+                                ],
+                                "planId": null
+                              }
+                            }
+                          ],
+                          "isDistinct": false,
+                          "isUserDefinedFunction": false
+                        }
+                      },
+                      "joinType": "inner",
+                      "usingColumns": [],
+                      "joinDataType": null
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "joinCondition": null,
+                  "joinType": "cross",
+                  "usingColumns": [],
+                  "joinDataType": null
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    }
+  ]
+}

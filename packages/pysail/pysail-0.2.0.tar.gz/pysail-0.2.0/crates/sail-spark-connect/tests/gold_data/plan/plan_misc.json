@@ -1,0 +1,420 @@
+{
+  "tests": [
+    {
+      "input": "\n/*\nSELECT 'trailing' as x1; -- inside block comment\n*/\nSELECT * FROM a\n      ",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "read": {
+                  "namedTable": {
+                    "name": [
+                      "a"
+                    ],
+                    "options": []
+                  },
+                  "isStreaming": false
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "\n/* This block comment surrounds a query which itself has a block comment...\n//* I am a nested bracketed comment.\n*/\n*/\nSELECT * FROM a\n      ",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "read": {
+                  "namedTable": {
+                    "name": [
+                      "a"
+                    ],
+                    "options": []
+                  },
+                  "isStreaming": false
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "\n/* This block comment surrounds a query which itself has a block comment...\nSELECT /* embedded single line */ 'embedded' AS x2;\n*/\nSELECT * FROM a\n      ",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "read": {
+                  "namedTable": {
+                    "name": [
+                      "a"
+                    ],
+                    "options": []
+                  },
+                  "isStreaming": false
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "\n/* This is an example of SQL which should not execute:\n * select 'multi-line';\n */\nSELECT * FROM a\n      ",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "read": {
+                  "namedTable": {
+                    "name": [
+                      "a"
+                    ],
+                    "options": []
+                  },
+                  "isStreaming": false
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "unresolvedStar": {
+                    "target": null,
+                    "wildcardOptions": {
+                      "ilikePattern": null,
+                      "excludeColumns": null,
+                      "exceptColumns": null,
+                      "replaceColumns": null,
+                      "renameColumns": null
+                    }
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "\n/*/**/*/\nSELECT * FROM a\n      ",
+      "output": {
+        "failure": "invalid argument: sql parser error: Unexpected EOF while in a multi-line comment at Line: 4, Column: 7"
+      }
+    },
+    {
+      "input": "\n/*/*abc*/*/\nSELECT * FROM a\n      ",
+      "output": {
+        "failure": "invalid argument: sql parser error: Unexpected EOF while in a multi-line comment at Line: 4, Column: 7"
+      }
+    },
+    {
+      "input": "\n/*/*foo*//*bar*/*/\nSELECT * FROM a\n      ",
+      "output": {
+        "failure": "invalid argument: sql parser error: Unexpected EOF while in a multi-line comment at Line: 4, Column: 7"
+      }
+    },
+    {
+      "input": "\n/*abc*/\nselect 1 as a\n/*\n\n2 as b\n/*abc */\n, 3 as c\n\n/**/\n*/\n      ",
+      "output": {
+        "success": {
+          "query": {
+            "project": {
+              "input": {
+                "empty": {
+                  "produceOneRow": true
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "expressions": [
+                {
+                  "alias": {
+                    "expr": {
+                      "literal": {
+                        "integer": 1
+                      }
+                    },
+                    "name": [
+                      "a"
+                    ],
+                    "metadata": null
+                  }
+                }
+              ]
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "(select * from t1) union distinct (select * from t2)",
+      "output": {
+        "success": {
+          "query": {
+            "setOperation": {
+              "left": {
+                "project": {
+                  "input": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t1"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "expressions": [
+                    {
+                      "unresolvedStar": {
+                        "target": null,
+                        "wildcardOptions": {
+                          "ilikePattern": null,
+                          "excludeColumns": null,
+                          "exceptColumns": null,
+                          "replaceColumns": null,
+                          "renameColumns": null
+                        }
+                      }
+                    }
+                  ]
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "right": {
+                "project": {
+                  "input": {
+                    "read": {
+                      "namedTable": {
+                        "name": [
+                          "t2"
+                        ],
+                        "options": []
+                      },
+                      "isStreaming": false
+                    },
+                    "planId": null,
+                    "sourceInfo": null
+                  },
+                  "expressions": [
+                    {
+                      "unresolvedStar": {
+                        "target": null,
+                        "wildcardOptions": {
+                          "ilikePattern": null,
+                          "excludeColumns": null,
+                          "exceptColumns": null,
+                          "replaceColumns": null,
+                          "renameColumns": null
+                        }
+                      }
+                    }
+                  ]
+                },
+                "planId": null,
+                "sourceInfo": null
+              },
+              "setOpType": "union",
+              "isAll": false,
+              "byName": false,
+              "allowMissingColumns": false
+            },
+            "planId": null,
+            "sourceInfo": null
+          }
+        }
+      }
+    },
+    {
+      "input": "-- single comment\\\nwith line continuity\nSELECT * FROM a",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: AS, found: continuity at Line: 2, Column: 11"
+      }
+    },
+    {
+      "input": "/*abc*/\nselect 1 as a\n/*\n\n2 as b\n/*abc */\n, 3 as c\n\n/**/\n",
+      "exception": "\n[UNCLOSED_BRACKETED_COMMENT] Found an unclosed bracketed comment. Please, append */ at the end of the comment.\n== SQL ==\n/*abc*/\nselect 1 as a\n/*\n\n2 as b\n/*abc */\n, 3 as c\n\n/**/\n",
+      "output": {
+        "failure": "invalid argument: sql parser error: Unexpected EOF while in a multi-line comment at Line: 10, Column: 1"
+      }
+    },
+    {
+      "input": "/*abc*/\nselect 1 as a\n/*\n\n2 as b\n/*abc */\n, 3 as c\n\n/**/\nselect 4 as d\n",
+      "exception": "\n[UNCLOSED_BRACKETED_COMMENT] Found an unclosed bracketed comment. Please, append */ at the end of the comment.\n== SQL ==\n/*abc*/\nselect 1 as a\n/*\n\n2 as b\n/*abc */\n, 3 as c\n\n/**/\nselect 4 as d\n",
+      "output": {
+        "failure": "invalid argument: sql parser error: Unexpected EOF while in a multi-line comment at Line: 11, Column: 1"
+      }
+    },
+    {
+      "input": "TABLE testcat.db.tab",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: TABLE at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from (from a union all from b) c select *",
+      "exception": "\n[PARSE_SYNTAX_ERROR] Syntax error at or near 'union'.(line 1, pos 13)\n\n== SQL ==\nfrom (from a union all from b) c select *\n-------------^^^\n",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from a",
+      "exception": "\n[PARSE_SYNTAX_ERROR] Syntax error at or near end of input.(line 1, pos 6)\n\n== SQL ==\nfrom a\n------^^^\n",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from a insert into tbl1 select * insert into tbl2 select * where s < 10",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from a select * from b",
+      "exception": "\n[PARSE_SYNTAX_ERROR] Syntax error at or near 'from'.(line 1, pos 16)\n\n== SQL ==\nfrom a select * from b\n----------------^^^\n",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from a select * select * from x where a.s < 10",
+      "exception": "\n[PARSE_SYNTAX_ERROR] Syntax error at or near 'from'.(line 1, pos 25)\n\n== SQL ==\nfrom a select * select * from x where a.s < 10\n-------------------------^^^\n",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from a select * select * where s < 10",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from a select b, c",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from a select distinct b, c",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from db.a select b, c where d < 1",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from t insert into s select * limit 1 insert into u select * where x > 5",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "from t1\nlateral view explode(x) expl as x\ninsert into t2\nselect *\nlateral view json_tuple(x, y) jtup q, z\ninsert into t3\nselect *\nwhere s < 10\n      ",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: from at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "table d.t",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: table at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "table t",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: an SQL statement, found: table at Line: 1, Column: 1"
+      }
+    },
+    {
+      "input": "values (1, 'a'), (2, 'b') as tbl(a, b)",
+      "output": {
+        "failure": "invalid argument: extra tokens after statement: as"
+      }
+    },
+    {
+      "input": "values 1, 2, 3, 4",
+      "output": {
+        "failure": "invalid argument: sql parser error: Expected: (, found: 1 at Line: 1, Column: 8"
+      }
+    }
+  ]
+}

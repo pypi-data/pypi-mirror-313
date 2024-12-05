@@ -1,0 +1,91 @@
+{
+  "tests": [
+    {
+      "input": "cast(a as array<int>)",
+      "output": {
+        "success": {
+          "cast": {
+            "expr": {
+              "unresolvedAttribute": {
+                "name": [
+                  "a"
+                ],
+                "planId": null
+              }
+            },
+            "castToType": {
+              "array": {
+                "elementType": "integer",
+                "containsNull": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "input": "cast(a as int)",
+      "output": {
+        "success": {
+          "cast": {
+            "expr": {
+              "unresolvedAttribute": {
+                "name": [
+                  "a"
+                ],
+                "planId": null
+              }
+            },
+            "castToType": "integer"
+          }
+        }
+      }
+    },
+    {
+      "input": "cast(a as timestamp)",
+      "output": {
+        "success": {
+          "cast": {
+            "expr": {
+              "unresolvedAttribute": {
+                "name": [
+                  "a"
+                ],
+                "planId": null
+              }
+            },
+            "castToType": {
+              "timestamp": [
+                "microsecond",
+                null
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "input": "cast(cast(a as int) as long)",
+      "output": {
+        "success": {
+          "cast": {
+            "expr": {
+              "cast": {
+                "expr": {
+                  "unresolvedAttribute": {
+                    "name": [
+                      "a"
+                    ],
+                    "planId": null
+                  }
+                },
+                "castToType": "integer"
+              }
+            },
+            "castToType": "long"
+          }
+        }
+      }
+    }
+  ]
+}
