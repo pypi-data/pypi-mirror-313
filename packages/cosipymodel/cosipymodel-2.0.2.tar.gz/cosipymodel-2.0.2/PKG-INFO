@@ -1,0 +1,175 @@
+Metadata-Version: 2.3
+Name: cosipymodel
+Version: 2.0.2
+Summary: Coupled snowpack and ice surface energy and mass balance model in Python.
+Project-URL: Homepage, https://github.com/cryotools/cosipy
+Project-URL: Bug Tracker, https://github.com/cryotools/cosipy/issues
+Project-URL: Documentation, https://cosipy.readthedocs.io/en/latest/
+Author: COSIPY Contributors
+License: GPL-3.0
+Keywords: energy balance model,glacier modelling,glaciers,glaciology,mass balance
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Atmospheric Science
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Requires-Python: >=3.9
+Requires-Dist: cartopy
+Requires-Dist: cdo
+Requires-Dist: dask
+Requires-Dist: dask-jobqueue
+Requires-Dist: distributed; python_version > '3.11'
+Requires-Dist: distributed<=2024.2.0; python_version < '3.11'
+Requires-Dist: matplotlib
+Requires-Dist: metpy
+Requires-Dist: nco
+Requires-Dist: netcdf4>=1.5.1.2
+Requires-Dist: numba
+Requires-Dist: numpy>=2.0
+Requires-Dist: pandas>2.0
+Requires-Dist: richdem; python_version < '3.11'
+Requires-Dist: scipy>=1.1.0
+Requires-Dist: tomli; python_version < '3.11'
+Requires-Dist: vtk
+Requires-Dist: xarray-spatial
+Requires-Dist: xarray>=0.18.0
+Provides-Extra: dev
+Requires-Dist: black>=23.1; extra == 'dev'
+Requires-Dist: build>=0.7; extra == 'dev'
+Requires-Dist: codecov; extra == 'dev'
+Requires-Dist: coveralls; extra == 'dev'
+Requires-Dist: flake8>=6.0; extra == 'dev'
+Requires-Dist: hatchling>=1.12; extra == 'dev'
+Requires-Dist: isort; extra == 'dev'
+Requires-Dist: pylint>=2.16.1; extra == 'dev'
+Requires-Dist: pytest; extra == 'dev'
+Requires-Dist: pytest-dependency; extra == 'dev'
+Requires-Dist: sphinx; extra == 'dev'
+Requires-Dist: sphinx-rtd-theme>=1.1; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: sphinx; extra == 'docs'
+Requires-Dist: sphinx-rtd-theme>=1.1; extra == 'docs'
+Provides-Extra: tests
+Requires-Dist: codecov; extra == 'tests'
+Requires-Dist: coveralls; extra == 'tests'
+Requires-Dist: pytest; extra == 'tests'
+Requires-Dist: pytest-dependency; extra == 'tests'
+Description-Content-Type: text/x-rst
+
+.. image:: https://cryo-tools.org/wp-content/uploads/2019/11/COSIPY-logo-2500px.png
+
+The coupled snowpack and ice surface energy and mass balance model in Python COSIPY solves the energy balance at the surface and is coupled to an adaptive vertical multi-layer subsurface module.
+
+Documentation
+-------------
+The documentation for COSIPY is available at the following link:
+https://cosipy.readthedocs.io/en/latest/
+
+**Confused about migrating to the new .toml configuration system?**
+The documentation contains an in-depth tutorial and a guide on upgrading.
+
+Convert your existing configuration files before merging the latest update:
+
+.. code-block:: console
+
+    pip install toml
+    git fetch --all
+    git checkout master -- convert_config.py
+    python convert_config.py  # generate .toml files
+
+This works on any branch regardless of local changes.
+Alternatively you can copy and run ``convert_config.py`` into any older COSIPY source tree.
+
+This will preserve your configuration for ``config.py``, ``constants.py``, ``aws2cosipyConfig.py`` and ``wrf2cosipyConfig.py``.
+Parameters for ``create_static`` must still be added manually to the generated ``utilities_config.toml``.
+
+Checkout a new branch with a clean version of COSIPY and merge your modifications.
+This minimises the number of merge conflicts.
+After updating to the latest version of COSIPY, run ``python COSIPY.py --help`` to see how to specify paths to configuration files.
+COSIPY will default to ``./config.toml``, ``./constants.toml``, ``./slurm_config.toml``, ``./utilities_config.toml`` in the current working directory.
+
+Installation
+------------
+
+Install GDAL:
+
+.. code-block:: console
+
+    sudo apt-get install gdal-bin libgdal-dev
+    pip install --upgrade gdal==`gdal-config --version` pybind11  # with pip
+    conda install gdal  # with conda
+
+Install COSIPY with pip (for general use):
+
+.. code-block:: console
+
+    pip install cosipymodel
+    cosipy-setup  # generate template configuration files
+    cosipy-help   # view help
+
+Install COSIPY as an editable (recommended for development):
+
+.. code-block:: console
+
+    git clone https://github.com/cryotools/cosipy.git
+    cd cosipy    
+    make install          # using conda/mamba
+    make install-pip-dev  # using pip
+
+    cosipy-help           # view help
+
+Install COSIPY from source (for development):
+
+.. code-block:: console
+
+    git clone https://github.com/cryotools/cosipy.git
+    cd cosipy
+    make install-conda-envs                      # install using conda/mamba
+    conda install --file conda_requirements.txt  # install with conda
+
+    pip install -r requirements.txt              # install default environment
+    pip install -r dev_requirements.txt          # install dev environment
+
+    python3 COSIPY.py -h
+    make commands
+
+Communication and Support
+-------------------------
+We are using the groupware slack for communication (inform about new releases, bugs, features, ...) and support:
+https://cosipy.slack.com
+
+About
+-----
+
+:Tests:
+    .. image:: https://github.com/cryotools/cosipy/actions/workflows/python-app.yml/badge.svg?branch=master
+        :target: https://github.com/cryotools/cosipy/actions/workflows/python-app.yml
+
+    .. image:: https://readthedocs.org/projects/cosipy/badge/?version=latest
+        :target: https://cosipy.readthedocs.io/en/latest/
+
+    .. image:: http://www.repostatus.org/badges/latest/active.svg
+        :target: http://www.repostatus.org/#active
+
+    .. image:: https://travis-ci.org/cryotools/cosipy.svg?branch=master
+        :target: https://travis-ci.org/cryotools/cosipy
+
+    .. image:: https://codecov.io/gh/cryotools/cosipy/branch/master/graph/badge.svg
+        :target: https://codecov.io/gh/cryotools/cosipy
+
+:Citation:
+    .. image:: https://img.shields.io/badge/Citation-GMD%20paper-orange.svg
+        :target: https://gmd.copernicus.org/articles/13/5645/2020/
+
+    .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3902191.svg
+        :target: https://doi.org/10.5281/zenodo.2579668
+
+:License:
+    .. image:: https://img.shields.io/badge/License-GPLv3-blue.svg
+        :target: http://www.gnu.org/licenses/gpl-3.0.en.html
