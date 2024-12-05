@@ -1,0 +1,62 @@
+{% extends "beam/list.html" %}
+{% load i18n %}
+{% load beam_tags %}
+
+
+{% block title %}
+    {% if heading %}
+        {{ heading }}
+    {% else %}
+        {{ object }}
+        | {% trans "history"|capfirst %}
+        | {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+
+{% block heading %}
+    {% if heading %}
+        {{ heading }}
+    {% else %}
+        {{ object }}
+        <small class="text-muted">{% trans "history"|capfirst %}</small>
+    {% endif %}
+{% endblock %}
+
+
+{% block table %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>{% trans "date"|capfirst %}</th>
+            <th>{% trans "user"|capfirst %}</th>
+            <th>{% trans "action"|capfirst %}</th>
+        </tr>
+        </thead>
+        {% for version in versions %}
+            <tr>
+                {% get_link_url viewset.links.version_detail version.object version_id=version.pk as version_detail_url %}
+                <th scope="row"><a href="{{ version_detail_url }}">{{version.revision.date_created|date:"DATETIME_FORMAT"}}</a></th>
+                <td>
+                    {% if version.revision.user %}
+                        {{version.revision.user.get_username}}
+                        {% if version.revision.user.get_full_name %} ({{version.revision.user.get_full_name}}){% endif %}
+                    {% else %}
+                        &mdash;
+                    {% endif %}
+                </td>
+                <td>
+                    {{version.revision.get_comment|linebreaksbr|default:""}}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+
+{% block no_results %}
+    {% if not versions %}
+        <p class="alert alert-info" role="alert">
+            {% translate 'This object doesn’t have a change history. It probably wasn’t added via this interface.' %}
+        </p>
+    {% endif %}
+{% endblock %}

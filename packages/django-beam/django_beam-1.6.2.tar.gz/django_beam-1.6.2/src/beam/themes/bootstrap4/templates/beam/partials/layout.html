@@ -1,0 +1,68 @@
+{% load beam_tags %}
+
+
+{% if not layout %}
+    {% fields_to_layout fields as layout %}
+{% endif %}
+
+
+{% block layout %}
+{% for row in layout %}
+
+    {% block row %}
+    <div class="row">
+        {% block columns %}
+        {% for col in row %}
+
+            {% block column %}
+            <div class="col">
+                {% block fields %}
+                {% for field in col %}
+
+                    {% block field %}
+                    {% if field.is_html %}
+
+                        {% block html_field_container %}
+                        <div class="beam-field mb-3 beam-html-field beam-field-{{ field.name|default:"html" }}">
+                            {% block html_field %}
+                                {{ field.content|safe }}
+                            {% endblock %}
+                        </div>
+                        {% endblock %}
+
+                    {% else %}
+
+                        {% block detail_field_container %}
+                        <div class="row field-group mb-3">
+                            <div class="col-sm-4 text-md-right font-weight-bold beam-field-label beam-detail-field-label beam-field-label-{{ field }}">
+
+                                {% block detail_field_label %}
+                                    {{ object|field_verbose_name:field|capfirst }}
+                                {% endblock %}
+
+                            </div>
+                            <div class="col-sm-8 beam-field beam-detail-field beam-field-{{ field }}">
+
+                                {% block detail_field %}
+                                    {% include "beam/partials/detail_field.html" with object=object field=field %}
+                                {% endblock %}
+
+                            </div>
+                        </div>
+                        {% endblock %}
+
+                    {% endif %}
+                    {% endblock %}
+
+                {% endfor %}
+                {% endblock %}
+            </div>
+            {% endblock %}
+
+        {% endfor %}
+        {% endblock %}
+    </div>
+    {% endblock %}
+
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "beam/detail.html" %}
+{% load i18n %}
+{% load beam_tags %}
+
+
+{% block title %}
+    {% if heading %}
+        {{ heading }}
+    {% else %}
+        {{ version }}
+        | {% blocktrans with date=version.revision.date_created %}Version as of {{ date }}{% endblocktrans %}
+        | {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+
+{% block heading %}
+    {% if heading %}
+        {{ heading }}
+    {% else %}
+        {{ version }}
+        <small class="text-muted">{% blocktrans with date=version.revision.date_created %}Version as of {{ date }}{% endblocktrans %}</small>
+    {% endif %}
+{% endblock %}
+
+
+{% block below_inlines %}
+    <section class="border-top">
+        <div class="container">
+            {% get_url_for_related object "version_restore" version_id=version.pk as restore_url %}
+            {% if restore_url %}
+            <form method="post" action="{{ restore_url }}">
+                {% csrf_token %}
+                <input class="btn btn-danger float-right" type="submit" value="{% trans "Revert to this version" %}">
+            </form>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}
