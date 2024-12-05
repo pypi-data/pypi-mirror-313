@@ -1,0 +1,37 @@
+[package]
+authors = ["GoRules Team <bot@gorules.io>"]
+description = "Business rules engine"
+name = "zen-engine"
+license = "MIT"
+version = "0.35.1"
+edition = "2021"
+repository = "https://github.com/gorules/zen.git"
+
+[lib]
+doctest = false
+
+[dependencies]
+ahash = "0.8.11"
+anyhow = "1.0.86"
+thiserror = "1.0.63"
+bincode = { version = "2.0.0-rc.3", optional = true }
+petgraph = "0.6.5"
+serde_json = { version = "1.0.126", features = ["arbitrary_precision"] }
+serde = { version = "1.0.208", features = ["derive", "rc"] }
+once_cell = "1.19.0"
+json_dotpath = "1.1.0"
+rust_decimal = { version = "1.33.1", features = ["maths-nopanic"] }
+fixedbitset = "0.4.2"
+tokio = { version = "1.39.3", features = ["sync", "time"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+rquickjs = { version = "0.8.1", features = ["macro", "loader", "rust-alloc", "futures", "either", "properties"] }
+itertools = "0.13.0"
+zen-expression = { path = "../zen-expression", version = "0.35.1" }
+zen-tmpl = { path = "../zen-tmpl", version = "0.35.1" }
+
+[features]
+bincode = ["dep:bincode"]
+
+[[bench]]
+harness = false
+name = "engine"
