@@ -1,0 +1,44 @@
+# run-it
+
+一个用于标记和运行示例函数的装饰器。
+
+设计目的：方便测试和学习小代码块。
+
+使用@run_it装饰器标记的函数将被视为可执行的示例函数。在主程序中，我们会遍历当前文件的所有函数，如果函数被@run_it装饰，则会执行该函数。主程序将负责执行这些函数。
+
+## 构建并发布
+
+poetry publish --build
+
+## 安装
+
+pip install run-it-for-test
+
+在项目中使用：
+
+```python
+from run_it import run_it, run_examples
+
+
+@run_it
+def example1() -> None:
+    """示例函数1"""
+    print("Running example 1")
+
+
+@run_it
+def example2() -> None:
+    """示例函数2"""
+    print("Running example 2")
+
+
+def normal_function() -> None:
+    """普通函数，不会被执行"""
+    print("This won't run")
+
+
+if __name__ == "__main__":
+    # 自动执行所有被 @run_it 标记的函数
+    run_examples()
+
+```
