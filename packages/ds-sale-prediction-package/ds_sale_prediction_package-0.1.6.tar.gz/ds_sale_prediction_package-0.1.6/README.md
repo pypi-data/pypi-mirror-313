@@ -1,0 +1,49 @@
+# ds_sales_prediction_package
+
+The package is designed to optimize the machine learning pipeline for time-series sales prediction task  for the Kaggle competition **Predict Future Sales**. It includes the following key components:
+
+**DataPreparation**
+Prepares a combined dataset from both training and test data.
+    - Processes training data after DQL and EDA steps. It includes target
+    value clipping, dataset expansion using a Cartesian product, and base
+    feature selection.
+    - Processes test data by assigning the `date_block_num` value equal 34
+    and merges it
+    with the preprocessed train data.
+    - Optimizes data types based on feature values to reduce memory usage.
+
+**FeatureExtractor**
+Generates a diverse set of features to enhance predictive model performance.
+    - Descriptive features: (e.g. item_category_id, city, shop_type,
+    shop_cluster_umap, shop_cluster_pca)
+    from dict based on csv files (items, and train dataset after EDA)
+    - One-hot encoded features (item_category_id).
+    - TF-IDF encoded features (shop_type).
+    - Binary features (e.g. is_moscow)
+    - Time-based features (e.g., months_since_last_sale,
+    months_since_first_sale).
+    - Lag features, including lagged item_cnt_month and item_price
+
+**ModelValidator**
+Facilitates model validation and training using time-series cross-validation.
+    - Split the dataset into training and validation sets based on
+    time-series cross-validation with either expanding or sliding windows.
+    - Train and evaluate models across multiple folds, calculating RMSE
+    for both training and validation sets.
+    - Retrain the model on the combined training and validation data, and
+    make predictions on the test set.
+
+**ExplainabilityLayer**
+Explains the results of model predictions through various plots.
+    - Supports various scikit-learn, LightGBM, XGBoost, and CatBoost models.
+    - Includes tools for error analysis, visualizing true vs. predicted values, and identifying patterns in residuals.
+
+**optimize_model**
+Utilizes hyperopt for hyperparameter optimization, enabling efficient model tuning to achieve optimal performance.
+
+## License
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+
+## Installation
+```bash
+pip install ds_sales_prediction_package
