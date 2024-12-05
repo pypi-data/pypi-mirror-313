@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stardiceonline"
+dynamic = ["version"]
+authors = [
+  {name="Marc Betoule", email="marc.betoule@lpnhe.in2p3.fr" },
+  {name="Sébastien Bongard", email="sebastien.bongard@lpnhe.in2p3.fr"},
+  {name="Jérémy Neveu", email="jeremy.neveu@lpnhe.in2p3.fr"},
+  {name="Thierry Souverin", email="thierry.souverin@lpnhe.in2p3.fr"},
+]
+description = "Data reduction chain for the StarDICE experiment"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = ["platformdirs",
+		"argparse",
+		"argcomplete",
+		"ssh_agent_setup",
+		"bokeh<3.4", # bug in 3.4 prevents colormapper to update
+		"astropy",
+		"watchdog",
+		"tqdm",
+		"requests",
+		"scipy",
+		"jax[cpu]",
+		"getcalspec",
+		"psutil",
+		"skyfield",
+		"bcrypt",
+		"pytest",
+		"pytest-cov",
+		]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://gitlab.in2p3.fr/stardice/stardiceonline"
+"Bug Tracker" = "https://gitlab.in2p3.fr/stardice/stardiceonline/-/issues"
+
+
+[project.scripts]
+stardiceonline = "stardiceonline.tools.main:main"
+fancywebcam_server = "stardiceonline.web.fancywebcam_server:main"
+
+[tool.setuptools]
+packages = ["stardiceonline", "pipelet3", "stardiceonline.tools", "stardiceonline.archive", "stardiceonline.web", "stardiceonline.processing", "stardiceonline.simulation"]
+package-dir = {"" = "./"}
+ext-modules = [
+  {name = "stardiceonline.ctools", sources = ["stardiceonline/processing/segment.c", "stardiceonline/processing/inpaint.c", "stardiceonline/processing/psftools.c", "stardiceonline/processing/aperture.c", "stardiceonline/processing/minimap.c"]}
+]
+
+[tool.setuptools_scm]
+# This can be left empty if you want to use the default behavior
+# But you might want to add some configurations:
+write_to = "stardiceonline/_version.py"  # Optional, this will write the version to a file in your package
+local_scheme = "no-local-version"  # Optional, to avoid local versions like .dev0+<commit_hash>
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = "tests"
+python_files = ["tests/test_*.py"]
+addopts = [
+    "--ignore=tests/test_rpc_speed.py",
+    "--ignore=tests/test_watchdog.py",
+    "--cov=pipelet3",
+    "--cov=stardiceonline",
+]

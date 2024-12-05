@@ -1,0 +1,29 @@
+# Adapted from https://docs.gitlab.com/ee/ci/caching/#cache-python-dependencies.
+default:
+  image: python:3.12
+
+test-demo:
+  stage: test
+  script:
+    - pip install -v .
+    - pytest -v
+
+sdist:
+  stage: deploy
+  script:
+    - pip install build
+    - python -m build --sdist --outdir dist
+  artifacts:
+    paths:
+      - dist/*.tar.gz
+
+pypi:
+  # publish the source distribution on https://pypi.org/project/stardiceonline/, only when
+  # a new tag
+  stage: deploy
+  needs: ["sdist"]
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - pip install twine
+    - twine upload --non-interactive --repository pypi dist/*
