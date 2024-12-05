@@ -1,0 +1,60 @@
+base_dir: ~/.memos
+database_path: database.db
+default_library: screenshots
+screenshots_dir: screenshots
+
+server_host: 0.0.0.0
+server_port: 8839
+
+# Enable authentication by uncommenting the following lines
+# auth_username: admin
+# auth_password: changeme
+
+default_plugins:
+- builtin_ocr
+# - builtin_vlm
+
+# using ollama as the vlm server
+vlm:
+  concurrency: 8
+  endpoint: http://localhost:11434
+  force_jpeg: true
+  modelname: minicpm-v
+  # 中文版本
+  prompt: 请帮描述这个图片中的内容，包括画面格局、出现的视觉元素等
+  # English version
+  prompt: Please describe the content of this image, including the layout and visual elements.
+  token: ''
+
+# using local ocr
+ocr:
+  concurrency: 8
+  # this is not used if use_local is true
+  endpoint: http://localhost:5555/predict
+  force_jpeg: false
+  token: ''
+  use_local: true
+
+# using local embedding for English as the main language
+embedding:
+  model: arkohut/jina-embeddings-v2-base-en
+  num_dim: 768
+  use_local: true
+  use_modelscope: false
+
+# using local embedding for Chinese as the main language
+# embedding:
+#   model: arkohut/jina-embeddings-v2-base-zh
+#   num_dim: 768
+#   use_local: true
+#   use_modelscope: true
+
+# using ollama embedding
+# embedding:
+#   endpoint: http://localhost:11434/v1/embeddings # this is not used
+#   model: arkohut/gte-qwen2-1.5b-instruct:q8_0
+#   num_dim: 1536
+#   use_local: false
+#   use_modelscope: false
+
+record_interval: 4 # seconds
