@@ -1,0 +1,90 @@
+#!python
+# SPDX-FileCopyrightText: (C) 2022 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+'''Documentation link checker'''
+
+import argparse
+import csv
+import os
+import subprocess
+
+config_file = next(
+    iter(x for x in [
+        os.path.join(os.environ.get('HOME'), '.local',
+                     '.doc-links-check.scotty.ini'),
+        os.path.join(os.environ.get('HOME'), '.doc-links-check.scotty.ini'),
+        '/usr/local/.doc-links-check.scotty.ini',
+        os.path.join(os.path.dirname(__file__), '.doc-links-check.scotty.ini'),
+        os.path.join(os.path.dirname(__file__),
+                     '../.doc-links-check.scotty.ini')
+    ] if os.path.exists(x)),
+    None
+)
+
+if config_file is None:
+    raise Exception(
+        "Can't find .doc-links-check.scotty.ini anywhere, please make sure to have it available")
+
+
+def get_args() -> argparse.Namespace:
+    '''Parse command-line arguments.'''
+    script_description = 'doc-link-checker: check the links in generated documentation'
+    parser = argparse.ArgumentParser(prog='doc-link-checker',
+                                     description=script_description)
+    parser.add_argument('dir', help='Documenation directory')
+    parser.add_argument('output', help='Output file')
+    return parser.parse_args()
+
+
+def run_linkchecker(args: argparse.Namespace) -> str:
+    if os.environ.get('PYTHONPATH', ''):
+        # if PYTHONPATH was accidentally set to a non standard
+        # path, unset it first before call the app
+        os.unsetenv('PYTHONPATH')
+    try:
+        return subprocess.check_output(
+            ['linkchecker '
+             f'-f {config_file} '
+             '--no-status '
+             '--check-extern '
+             f'-o csv {args.dir}'],
+            shell=True,
+            universal_newlines=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        return e.stdout
+
+
+def report_dead_links(args: argparse.Namespace, input: str) -> str:
+    cnt = [x for x in input.splitlines() if ';' in x]
+    reader = csv.DictReader(cnt, delimiter=';')
+    result = [
+        '## Broken links in documentation',
+        '',
+    ]
+
+    any_issues = False
+
+    for row in reader:
+        if row.get('valid', '').lower() == 'false':
+            if row.get('urlname', '').startswith('{{'):
+                continue
+            any_issues = True
+            path = row['parentname'].replace(
+                'file://', '', 1).replace(os.path.abspath(args.dir), '', 1).lstrip('/')
+            result.append(
+                f'- Link in {path}::"{row["name"]}":{row["urlname"]} at line {row["line"]} is broken\n  {row["result"]}')
+    if not any_issues:
+        result.append('✅ No problems detected')
+    return '\n'.join(result)
+
+
+def main():
+    '''Check documentation links.'''
+    args = get_args()
+    with open(args.output, 'w') as o:
+        o.write(report_dead_links(args, run_linkchecker(args)))
+
+
+if __name__ == '__main__':
+    main()

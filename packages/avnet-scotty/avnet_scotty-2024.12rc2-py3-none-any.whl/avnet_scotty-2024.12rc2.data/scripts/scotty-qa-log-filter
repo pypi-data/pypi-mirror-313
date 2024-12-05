@@ -1,0 +1,29 @@
+#!python
+# SPDX-FileCopyrightText: (C) 2022 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+import argparse
+import re
+
+
+def get_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(prog="qa-log-filter",
+                                     description="Filter bitbake log for warnings")
+    parser.add_argument('file', type=str,
+                        help="File to filter")
+
+    return parser.parse_args()
+
+
+def main():
+    """Filter log"""
+    args = get_args()
+
+    with open(args.file) as i:
+        for m in re.finditer(r'^(WARNING:.+|ERROR:.+)(\n  .*)*', i.read(), re.MULTILINE):
+            print(m.group(0))
+
+
+if __name__ == "__main__":
+    main()

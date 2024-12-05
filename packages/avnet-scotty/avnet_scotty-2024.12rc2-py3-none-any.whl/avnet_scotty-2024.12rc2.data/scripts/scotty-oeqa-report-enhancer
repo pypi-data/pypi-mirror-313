@@ -1,0 +1,224 @@
+#!python
+# SPDX-FileCopyrightText: (C) 2023 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+'''Enhance OEQA test reports.'''
+
+import argparse
+import importlib
+import importlib.util
+import json
+import logging
+import os
+import re
+import sys
+import textwrap
+from types import ModuleType
+from typing import Dict, List, Tuple
+
+_keys_to_remove = ['DATETIME', 'duration',
+                   'STARTTIME', 'HOST_DISTRO', 'LAYERS']
+
+
+def get_args() -> argparse.Namespace:
+    '''Parse command-line arguments.'''
+    script_description = 'oeqa-report-enhancer: enhance oeqa test reports'
+    parser = argparse.ArgumentParser(prog='oeqa-report-enhancer',
+                                     description=script_description)
+    parser.add_argument('version', help='release used')
+    parser.add_argument('builddir', help='path to builddir')
+    parser.add_argument('sources', help='path to sources')
+    parser.add_argument('outputdir', help='output directory')
+
+    return parser.parse_args()
+
+
+def map_to_hash(map_version: str, map: dict) -> str:
+    res = f'v{map_version}_'
+    for _, v in sorted(map.items()):
+        if v == -1:
+            res += "x"
+        elif v == 0:
+            res += "0"
+        else:
+            res += "1"
+    return res
+
+
+def find_files_and_folders(args: argparse.Namespace) -> Tuple[List[str], List[str], str]:
+    test_classes = set()
+    lib_paths = set()
+    poky_lib_path = ''
+    for root, dirs, _ in os.walk(args.sources or '/does/not/exit'):
+        for d in dirs:
+            fullpath = os.path.join(root, d)
+            if fullpath.endswith('/lib/oeqa/runtime/cases'):
+                test_classes.add(fullpath)
+            elif fullpath.endswith('/lib/oeqa/sdk/cases'):
+                lib_paths.add(os.path.abspath(fullpath + '/../../'))
+                lib_paths.add(os.path.abspath(fullpath + '/../'))
+                test_classes.add(fullpath)
+            elif fullpath.endswith('/lib'):
+                if fullpath.endswith('/meta/lib'):
+                    poky_lib_path = fullpath
+                lib_paths.add(fullpath)
+    return (sorted(test_classes), sorted(lib_paths), poky_lib_path)
+
+
+def get_description_from_docstring(testname: str, test_classes: List[str], lib_paths: List[str], poky_path: str) -> str:
+    sys_path_old = sys.path
+
+    for path in lib_paths + test_classes:
+        sys.path.insert(0, path)
+
+    if poky_path:
+        sys.path.insert(0, poky_path)
+
+    # generate mock modules
+    for k, v in {
+        'PIL': ['Image', 'ImageFilter'],
+        'imagehash': [],
+        'numato_gpio': [],
+        'numpy': [],
+    }.items():
+        m = ModuleType(k)
+        for item in v:
+            setattr(m, item, True)
+        sys.modules[k] = m
+
+    res = ''
+    for path in test_classes:
+        p, c, f = testname.split('.')
+        if os.path.exists(os.path.join(path, f'{p}.py')):
+            try:
+                spec = importlib.util.spec_from_file_location(
+                    p, os.path.join(path, f'{p}.py'))
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[p] = module
+                spec.loader.exec_module(module)
+                res = textwrap.dedent(
+                    (getattr(getattr(importlib.import_module(p), c), f).__doc__) or '').strip('\n').rstrip('.')
+            except Exception as e:
+                logging.exception(e)
+    sys.path = sys_path_old
+    return res
+
+
+def get_description_from_file(testname: str, input_file: str) -> str:
+    if not hasattr(get_description_from_file, "map"):
+        with open(input_file) as i:
+            get_description_from_file.map = json.load(i)
+    return get_description_from_file.map.get(testname, '')
+
+
+def store_enhanced_report(args: argparse.Namespace, arch: str, image: str, result: Dict, config: Dict) -> None:
+    hw_map = json.loads(config.get('HW_TESTING_MAP', '{}'))
+    _file_name = f'{arch}/{image}_{map_to_hash(config.get("HW_TESTING_MAP_VERSION", "1"), hw_map)}_testresults.json'
+    _path = os.path.join(args.outputdir, _file_name)
+    if not os.path.exists(os.path.dirname(_path)):
+        os.makedirs(os.path.dirname(_path), exist_ok=True)
+    logging.info(f'Creating {_path}')
+    with open(_path, 'w') as o:
+        result['configuration']['VERSION'] = args.version
+        json.dump({**result, **{'environment': hw_map}},
+                  o, sort_keys=True, indent=2)
+
+
+def enhance_test_data(in_: Dict, func: callable, args: List) -> Dict:
+    out_ = {**in_}
+    out_['result'] = {}
+    for k, v in in_.get('result', {}).items():
+        out_['result'][k] = {
+            **v,
+            'description': func(k, *args)
+        }
+    return out_
+
+
+def get_testdata(args: argparse.Namespace, image: str, arch: str) -> Dict:
+    if not hasattr(get_testdata, "map"):
+        get_testdata.map = {}
+    if not get_testdata.map.get((image, arch)):
+        pattern = re.compile(
+            f'.*{image}-.*{arch}' + r'(.*-toolchain-.*)*\.testdata.json')
+        for root, _, files in os.walk(args.builddir):
+            for f in files:
+                if pattern.match(f) or f == 'testdata.json':
+                    with open(os.path.join(root, f)) as i:
+                        get_testdata.map[(image, arch)] = json.load(i)
+    return get_testdata.map.get((image, arch), {})
+
+
+def filter_run(in_: Dict, secrets: List[str]) -> Dict:
+    if isinstance(in_, dict):
+        for key in _keys_to_remove:
+            try:
+                del in_[key]
+            except Exception:
+                pass
+        for k, v in in_.items():
+            if isinstance(v, str):
+                for s in secrets:
+                    in_[k] = v.replace(s or '', '****')
+            if isinstance(v, dict):
+                in_[k] = filter_run(v, secrets)
+    return in_
+
+
+def configure_secrets(config: Dict) -> List[str]:
+    _secrets = [config.get('TOPDIR', '/does/not/exist')]
+    for _, v in json.loads(os.environ.get('GITHUB_SECRETS', '{}')).items():
+        _secrets.append(v)
+    return _secrets
+
+
+def walk_build_dir(args: argparse.Namespace):
+    if os.path.isdir(args.sources):
+        docstring_extract_func = get_description_from_docstring
+        docstring_extract_args = list(find_files_and_folders(args))
+    elif os.path.isfile(args.sources):
+        docstring_extract_func = get_description_from_file
+        docstring_extract_args = [args.sources]
+    else:
+        raise Exception('sources needs to be a directory or a file')
+    print(docstring_extract_func)
+    print(docstring_extract_args)
+    for root, _, files in os.walk(args.builddir):
+        for f in files:
+            if os.path.basename(f).endswith('testresults.json'):
+                item = os.path.join(root, f)
+                if '/poky/' in item:
+                    continue
+                logging.info(f'Reading {item}')
+                with open(item) as i:
+                    cnt = json.load(i)
+                    if 'environment' in cnt:
+                        # this is already a converted report
+                        continue
+                    for image, run in cnt.items():
+                        image = image.split('_')[1]
+                        arch = run.get('configuration', {}).get('MACHINE', '')
+                        if not arch:
+                            continue
+                        config = get_testdata(args, image, arch)
+                        if not config:
+                            logging.warning(
+                                f'No config found for {image}/{arch}')
+                        run = enhance_test_data(
+                            run, docstring_extract_func, docstring_extract_args)
+                        run = filter_run(run, configure_secrets(config))
+                        store_enhanced_report(args, arch, image, run, config)
+
+
+def main():
+    '''Main function.'''
+    logging.getLogger().setLevel(logging.INFO)
+    args = get_args()
+    try:
+        walk_build_dir(args)
+    except Exception as e:
+        logging.exception(e)
+        sys.exit(-1)
+
+
+if __name__ == '__main__':
+    main()
