@@ -1,0 +1,58 @@
+[project]
+name = "segmock"
+version = "0.1.2"
+description = "7-segment clock (segmock)"
+readme = "README.md"
+authors = [
+    { name = "sou-san", email = "sou887867@gmail.com" }
+]
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+keywords = ["segmock", "7segment", "clock", "stopwatch", "cli", "tui", "terminal", "simple", "tool"]
+dependencies = [
+    "textual>=0.88.1",
+    "textual-pyfiglet>=0.5.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/sou-san/segmock"
+Repository = "https://github.com/sou-san/segmock"
+Issues = "https://github.com/sou-san/segmock/issues"
+Documentation = "https://github.com/sou-san/segmock/blob/main/README.md"
+
+[project.scripts]
+segmock = "segmock.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13.0",
+    "ruff>=0.7.1",
+    "textual-dev>=1.6.1",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 90
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "F", # Pyflakes
+    "B", # flake8-bugbear
+    "I", # isort
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "N", # pep8-naming
+    "C901", # mccabe linter (複雑度チェック)
+]
+
+ignore = [
+    "D103", # docstring が無い関数やクラスを許す
+    "E501", # 行あたりの文字数制限を無視する
+]
