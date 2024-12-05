@@ -1,0 +1,104 @@
+[tool.poetry]
+name = "cognite_toolkit"
+version = "0.3.18"
+description = "Official Cognite Data Fusion tool for project templates and configuration deployment"
+authors = ["Cognite AS <support@cognite.com>"]
+license = "Apache-2"
+readme = "README.md"
+documentation = "https://developer.cognite.com/sdks/toolkit/"
+homepage = "https://developer.cognite.com/sdks/toolkit/"
+repository = "https://github.com/cognitedata/toolkit"
+packages = [{include = "cognite_toolkit", from = "."}]
+include = ["cognite_toolkit/*", "cognite_toolkit/**/*"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^1.0.0"
+cognite-sdk = {version = "^7.68.0", extras = ["pandas"]}
+pandas = ">=1.5.3, <3.0"
+pyyaml = "^6.0.1"
+typer = ">=0.12.0, <1.0"
+rich = "^13.9.4"
+questionary = "^2.0.1"
+tomli = { version = "^2.0.1", python = "<3.11" }
+# 22.0 was when explicit support for 3.11 was added.
+packaging = ">=22.0,<25.0"
+typing-extensions = "^4.0"
+toml = "^0.10.2"
+sentry-sdk = "^2.1.0"
+mixpanel = "^4.10.1"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.8.0"
+pre-commit = "^4.0.0"
+pytest = "^8.0.0"
+pytest-icdiff = "*"  # Used for better diffs in pytest
+pytest-regressions = "^2.4.2"
+pytest-xdist = "^3.6.1"
+pytest-rerunfailures = "^14.0"
+types-PyYAML = "^6"
+types-toml = "^0.10.8.20240310"
+twine = "^5.0.0"
+toml = { version = "^0.10.2", python = ">=3.11" }
+pytest-freezegun = "^0.4.2"
+pytest-cov = "^6.0.0"
+setuptools = "^75.0.0"
+fastparquet = "^2024.5.0"
+pyperclip = "^1.9.0"
+pydantic = "^2.9.0"
+types-requests = "^2.32.0.20241016"
+
+[tool.poetry.scripts]
+cdf-tk = "cognite_toolkit._cdf:app"
+cdf = "cognite_toolkit._cdf:app"
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.pytest.ini_options]
+minversion = 8.0
+testpaths = [
+    "tests",
+    # In the case of doctests.
+    "cognite_toolkit",
+]
+norecursedirs = "cognite_toolkit/_builtin_modules"
+
+markers = [
+    "toolkit: big smoke tests",
+]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+follow_imports = "normal"
+ignore_missing_imports = true
+exclude = [
+    "cognite_toolkit/_builtin_modules/examples/*",
+    "cognite_toolkit/_builtin_modules/inrobot/*",
+    "cognite_toolkit/_builtin_modules/bootcamp/*",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+exclude = [
+    # Ruff messes up the docstrings which are expected to be in Markdown format
+    "cognite_toolkit/_cdf_tk/commands/_changes.py",
+    "cognite_toolkit/_builtin_modules/inrobot/*",
+    "cognite_toolkit/_builtin_modules/examples/*",
+    "cognite_toolkit/_builtin_modules/bootcamp/*",
+]
+
+[tool.ruff.lint]
+exclude = [
+    "cognite_toolkit/_builtin_modules/inrobot/*",
+    "cognite_toolkit/_builtin_modules/examples/*",
+    "cognite_toolkit/_builtin_modules/bootcamp/*",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
