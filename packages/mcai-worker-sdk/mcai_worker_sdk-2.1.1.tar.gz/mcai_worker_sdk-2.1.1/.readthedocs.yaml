@@ -1,0 +1,21 @@
+# .readthedocs.yaml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# Set the version of Python and other tools you might need
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+  python:
+    install:
+      # This env var is defined directly on Read The Docs.
+      # It allows generating doc for media and non media version.
+      # value is either docs/requirements.txt or docs/requirements.media.txt
+      - requirements: ${REQUIREMENTS_PATH}
+
+sphinx:
+   configuration: docs/conf.py

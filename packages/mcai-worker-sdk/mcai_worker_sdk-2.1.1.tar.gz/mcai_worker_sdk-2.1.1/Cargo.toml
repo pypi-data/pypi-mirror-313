@@ -1,0 +1,43 @@
+[package]
+name = "py_mcai_worker_sdk"
+version = "2.1.1"
+authors = [
+    "Valentin NOEL <valentin.noel@media-io.com>",
+    "Marc-Antoine Arnaud <maarnaud@media-io.com>",
+    "Thibaud Le Graverend <thibaud.legraverend@luminvent.com>",
+    "Nicolas Pierre <nico.pierre@icloud.com>",
+]
+description = "MCAI SDK to develop Python worker"
+keywords = ["AMQP", "micro-service", "python"]
+license = "MIT"
+repository = "https://gitlab.com/media-cloud-ai/sdks/py_mcai_worker_sdk"
+homepage = "https://gitlab.com/media-cloud-ai/sdks/py_mcai_worker_sdk"
+documentation = "https://docs.rs/py_mcai_worker_sdk"
+readme = "README.md"
+edition = "2018"
+
+[lib]
+name = "mcai_worker_sdk"
+crate-type = ["cdylib"]
+
+[features]
+default = []
+media = ["mcai_worker_sdk/media", "stainless_ffmpeg"]
+extension-module = ["pyo3/extension-module"]
+
+[dependencies]
+async-std = "1.12.0"
+jsonschema = "0.16.0"
+mcai_worker_sdk = "2.2.1"
+regex = "1.8.4"
+pyo3 = { version = "^0.22.1", features = ["multiple-pymethods", "py-clone"] }
+pyproject-toml = "0.3"
+schemars = "0.8.0"
+serde = "^1.0"
+serde_derive = "^1.0"
+serde_json = "^1.0"
+stainless_ffmpeg = { version = "0.3.5", optional = true }
+
+[build-dependencies]
+serde = "^1.0"
+toml = "0.5.9"

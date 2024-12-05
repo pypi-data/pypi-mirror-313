@@ -1,0 +1,74 @@
+stages:
+  - test
+  - publish
+  - doc_build
+  - doc_publish
+
+default:
+  image: registry.gitlab.com/media-cloud-ai/ci/rust:1.76.0-media
+  tags:
+    - mcai
+  before_script:
+    - apt update && apt install -y libpython3-dev
+    - apt install -y pip
+    - pip install json-strong-typing
+
+build:format:
+  stage: test
+  script: cargo fmt --all -- --check
+
+build:clippy:
+  stage: test
+  script: cargo clippy --all-targets -- -D warnings
+
+build:test:
+  stage: test
+  script:
+    - cargo test
+
+build:test:media:
+  stage: test
+  script:
+    - cargo test --features media
+
+build:clippy:media:
+  stage: test
+  script:
+    - cargo clippy --all-targets --features media -- -D warnings
+
+build:coverage:
+  stage: test
+  script:
+    - cargo tarpaulin --features media
+  after_script:
+    - apt install -y curl
+    - bash <(curl -s https://codecov.io/bash)
+  coverage: '/^\d+.\d+% coverage/'
+
+publish:registry:
+  stage: publish
+  image: registry.gitlab.com/media-cloud-ai/ci/sdk-python:0.2.1
+  before_script: []
+  script:
+    - export VERSION=`cargo pkgid | cut -d# -f2 | cut -d':' -f2`
+    - if ! [[ "$VERSION" == "$CI_COMMIT_TAG" || "v$VERSION" == "$CI_COMMIT_TAG" ]]; then exit -1; fi
+    - cargo build --features extension-module
+    - maturin build --release --find-interpreter --sdist --out ./dist --features extension-module
+    - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
+    - TWINE_PASSWORD=${PYPI_API_KEY} TWINE_USERNAME=__token__ twine upload dist/*
+  only:
+    - tags
+
+publish:registry:media:
+  stage: publish
+  image: registry.gitlab.com/media-cloud-ai/ci/sdk-python:0.2.1-media
+  before_script: []
+  script:
+    - export VERSION=`cargo pkgid | cut -d# -f2 | cut -d':' -f2`
+    - if ! [[ "$VERSION" == "$CI_COMMIT_TAG" || "v$VERSION" == "$CI_COMMIT_TAG" ]]; then exit -1; fi
+    - cargo build --features "media,extension-module"
+    - maturin build --release --find-interpreter --sdist --out ./dist --features "media,extension-module"
+    - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
+    - TWINE_PASSWORD=${PYPI_API_KEY} TWINE_USERNAME=__token__ twine upload dist/*
+  only:
+    - tags
