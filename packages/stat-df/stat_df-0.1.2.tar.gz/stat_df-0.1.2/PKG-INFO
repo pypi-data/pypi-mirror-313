@@ -1,0 +1,68 @@
+Metadata-Version: 2.1
+Name: stat_df
+Version: 0.1.2
+Summary: A library for advanced DataFrame statistics analysis.
+Author-email: Andrew Romanov <romanoffnv@gmail.com>
+License: MIT
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+
+# My Statistics Library
+
+A library for advanced DataFrame statistics analysis, returns:
+
+=========================== df_name ============================
+
+##### Leading Zeros in Columns
+
+| col1         | col2 |
+|--------------|------|
+| 0000000000   | 0D2  |
+| 0000001999   | 0D4  |
+| 0000006669   | 0D1  |
+
+##### General Stats
+
+| Columns      | DTypes       | NaNs | 0_values | Unique | Duplicates | Totals          | Min    | Max        | Mean        | Median      | STD         | STD(%)   | Outliers |
+|--------------|--------------|------|----------|--------|------------|------------------|--------|------------|-------------|-------------|-------------|----------|----------|
+| col_1        | str          | 0    | 0        | 5000   | 0          | NaN              | NaN    | NaN        | NaN         | NaN         | NaN         | NaN      | NaN      |
+| col_2        | str          | 0    | 0        | 5000   | 0          | NaN              | NaN    | NaN        | NaN         | NaN         | NaN         | NaN      | NaN      |
+| col_3        | str, float   | 1254 | 0        | 9      | 4991       | NaN              | NaN    | NaN        | NaN         | NaN         | NaN         | NaN      | NaN      |
+| col_4        | str, float   | 1254 | 0        | 9      | 4991       | NaN              | NaN    | NaN        | NaN         | NaN         | NaN         | NaN      | NaN      |
+| col_5    | float       | 0    | 74       | 4884   | 116        | 863.66           | -66    | 79.36      | 172.73      | 23.08       | 1.62       | 938.89   | 613.00   |
+| col_6        | str          | 0    | 0        | 6      | 4994       | NaN              |
+
+
+
+![Scatter plot on a column](img/output.png)
+
+
+## Installation
+
+You can install the library using pip:
+
+```bash
+pip install stat-df 
+```
+
+## Importing the Library
+```python
+from stat_df import statistics 
+```
+## Usage
+```python
+statistics.show_stats(<df_name>) 
+statistics.show_stats(my_df) 
+```
+will return "Leading Zeros in Columns" and "General Stats" tables.
+
+```python
+statistics.show_sctplot(<df_name>, <"column name">)
+statistics.show_sctplot(my_df, "SPENDINGS_RUR")
+```
+will return a scatter plot on desired column.
