@@ -1,0 +1,89 @@
+v4.0.1:
+  Users:
+    - Ensure that the pseudo-subtomograms of the initial model protocol have even dimensions.
+    - Post-process: the FSC generated contain the path to the postprocess.star file.
+    - CTF refinement and bayesian polishing: form adapted to admit FSC as input and get the postprocess.star
+      file from it.
+  Developers:
+    - Fix in the convert transformation matrix for negative rotation angles.
+    - Add binThreads and needsGpu to the protocols.
+    - Replace the setup.py + requirements.txt files by the new pyproject.toml.
+v4.0.0:
+  Users:
+    - Relion 5.0.
+    - Adapted to scipion-em-relion deprecation of relion3.
+    - Add warning preventing to set the box size and the cropped box size to the same value as it may cause an
+      internal error in relion (Thanks to DSheperd).
+  Developers:
+    - Fix inspect in buildbot: Tkagg not set in wizard module.
+    - Protocols CTF refine and Bayesian polising get the postprocess.star the introduced post-processed volume, as an
+      extended attribute.
+    - Fix convert for 3D particles in Relion 5.
+    - Improve the validations in protocols autorefine and classify 3d.
+v3.4.0:
+  Note: this was supposed to be 3.3.0, but was published as 3.4.0
+  Users:
+    - After having performed a refine or classification of particles, fields _rlnLogLikeliContribution,
+      _rlnMaxValueProbDistribution and _rlnNrOfSignificantSamples are registered, so they can be plotted versus the
+      no. particles using the data viewer and used as quality control metrics.
+   - Add extra params to some more protocols apart from refine subtomograms.
+   - Fix some initial MPI/Threads combinations (Thanks to Bram Koster).
+   - Rename the protocols the same as in native Relion.
+   - Enhancing the helps and use of RelionTomo4 (Thanks to J. L. Vilas).
+   - Validation conditions have been release and checked (Thanks to J. L. Vilas).
+  Developers:
+    - Tests rewritten using the test dataset relion40_sta_tutorial_data, using the Test Centralization Layer (TCL), and
+      decoupled in independent tests.
+    - Remove BETA status
+v3.2.2:
+ Users:
+  - Hotfix: the protocol visualization on the left panel was fixed.
+  - Call the tlt file generation method considering the excluded views.
+  - Fix the 3d classification Scipion Classes objects generation (previous bad particle assignment).
+ Developers:
+  - Fix: the coordinates generated in the convert input step of the prepare data protocol are now float instead of
+    integer.
+v3.2.1:
+  - Installation requirements better managed.
+  - Fix: Relion output now copies the acquisition.
+  - Fix: The sampling rate displayed for the initial volume was incorrect.
+  - Fix: FSC object stored unused data for the FSC viewer. That data was removed.
+  - Tests updated.
+v3.2.0:
+  - Wizard to apply operation in relion particles
+  - 3D Classification defines its possible outputs
+  - An initio fixed (not using optimization set)
+  - Other FSCs are plotted in the refine and postprocess protocols
+v3.1.6:
+  - 3D Classification more completed/standard
+  - 3D classes can be fed to mapback or others
+  - Refine and 3D classification use and register optimisation_set.star files
+
+v3.1.5:
+  - Prepare more robust and optimized to subsets of coordinates and Tilt series. Still ctf could be added to the ecuation.
+
+v3.1.4:
+  - GroupId is not lost through reliontomo processing
+  - Fix shifts conversion in subsets: Scipion-Relion and viceversa
+  - Export pseudo to coordinates removed completely
+  - Apply operation works on non extracted pseudo subtomograms
+  - Dataviewer shows Pseudosubtomograms better.
+  - Import coordinates from star: fix scheduling (indirect pointer to precedents)
+  - Prepare data:
+      Fix scheduling (indirect pointer to ts from fiducials)
+      Shifts in z and x are now taken from tomogram origin and into imod files
+      Tilt series input is now mandatory until we manage to get the right one though the other inputs.
+  - Fix refine: uses now the latest star file and priors are produced without a subset
+
+v3.1.3:
+  - Fix: Use one of the halves map in auto-refine if it exists
+  - Fix: LandMark model generation in prepare when a join coordinates has happened. Sorting issue.
+  - Reconstruct does not generate PseudoSubtomograms.
+  - Option to "consider angles as priors" in refine and 3d classification
+  - Takes into account tomogram shift (X,  Z) in prepare
+v3.1.2:
+  - Fix: Fiducial size in prepare is now correct (in Å)
+  - Make pseudo subtomograms: float 16 is False by default and hidden. Prevents manual subsets.
+v3.1.0:
+  - First plugin release
+
