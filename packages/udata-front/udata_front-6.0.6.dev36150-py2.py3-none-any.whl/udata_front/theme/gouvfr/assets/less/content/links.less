@@ -1,0 +1,85 @@
+/*
+---
+name: Links
+category: 2 - Content
+---
+
+## Anchors
+Simple anchors can be used with a simple `<a>` tag.
+
+```link.html
+<a href="#">Environnement, Énergie, Logement</a>
+```
+
+# Unstyled
+If you need to use a link with no styling (no color or text-decoration), you can use the specially crafted class `.unstyled`.
+This behaviour might be inversed at some point (normal `<a>` having no style by default and a special "styled" class available for colored links) if the current way proves to be too cumbersome.
+
+```link-unstyled.html
+<a href="#" class="unstyled">Unstyled link (useful to wrap other elements)</a>
+```
+
+# Nav Links
+Some links are intented to be used as a secondary navigation within the website, you can use them with `.nav-link`. Their sizes can be tweaked.
+
+```navlink.html
+<p><a href="#" class="nav-link">toutes les actualités</a></p>
+<p class="small"><a href="#" class="nav-link small">toutes les actualités</a></p>
+```
+
+# Nav Lists
+Sometimes you really want more than one link, that's what `.nav-list` are for.
+
+```navlist.html
+<ul class="nav-list">
+    <li><a href="#" class="nav-link">toutes les actualités</a></li>
+    <li><a href="#" class="nav-link">toutes les actualités</a></li>
+    <li><a href="#" class="nav-link">toutes les actualités</a></li>
+</ul>
+```
+
+## From DSFR
+
+You can use links from DSFR. It uses DSFR colors and conventions. It allows you to choose an optional icon to show :
+- on the left
+- on the right
+- an icon alone (bad practice)
+
+```dsfr-links.html
+<a class="fr-link" href="#">lien simple</a>
+<a class="fr-link fr-icon-arrow-right-s-line fr-link--icon-right" href="#">lien simple avec icône à droite</a>
+<a class="fr-link fr-icon-arrow-right-s-line fr-link--icon-left" href="#">lien simple avec icône à gauche</a>
+```
+
+*/
+a {
+
+    &:focus {
+        outline: 5px auto -webkit-focus-ring-color;
+    }
+
+    &:active {
+        outline: none;
+    }
+
+    &.unstyled {
+        color: unset;
+
+        &:hover {
+            text-decoration: none;
+        }
+    }
+
+    &.no-icon-after::after, &.fr-link[target=_blank].no-icon-after::after {
+        content: none;
+    }
+}
+
+.fr-link {
+    --text-action-high-blue-france: @blue-400;
+    display: inline;
+}
+
+.fr-link.rounded-0 {
+    .rounded-0;
+}
