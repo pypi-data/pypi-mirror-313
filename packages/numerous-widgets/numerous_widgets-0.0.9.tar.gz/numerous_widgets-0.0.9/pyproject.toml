@@ -1,0 +1,69 @@
+[project]
+name = "numerous-widgets"
+version = "0.0.9"
+dependencies = ["anywidget", "pydantic"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers"
+]
+readme = "README.md"
+authors = [
+  { name="Lasse Thomsen, Numerous ApS", email="lasse.thomsen@numerous.com" },
+]
+description = "Widgets and patterns for building apps using frameworks like Panel, Marimo, and Jupyter based on the AnyWidget library."
+requires-python = ">=3.11"
+
+[tool.setuptools]
+package-dir = {"" = "python/src"}
+packages.find = {where = ["python/src"], include = ["numerous.*"]}
+
+[tool.setuptools.package-data]
+"numerous.widgets" = ["static/*.mjs", "static/*.css"]
+
+[project.optional-dependencies]
+dev = [
+    "anywidget[dev]",
+    "python-dotenv",
+    "numerous",
+    "pytest",
+    "ruff==0.6.4",
+    "mypy==1.11.2",
+    "coverage==7.6.1",
+    "twine==5.1.1",
+    "mkdocs==1.6.0",
+    "mkdocstrings==0.26.2",
+    "mkdocstrings-python==1.12.2",
+    "mkdocs_snippet_plugin==1.0.2",
+    # for testing related to frameworks
+    "marimo",
+    "panel"
+]
+
+[tool.poetry.dependencies]
+python-dotenv = "^1.0.0"
+
+[tool.semantic_release]
+branch = "main"
+commit_parser = "angular"
+version_toml = ["pyproject.toml:project.version"]
+template_dir = "templates"
+
+[tool.semantic_release.remote.token]
+env = "GH_TOKEN"
+
+[tool.semantic_release.changelog]
+exclude_commit_patterns = [
+    '''chore(?:\([^)]*?\))?: .+''',
+    '''ci(?:\([^)]*?\))?: .+''',
+    '''refactor(?:\([^)]*?\))?: .+''',
+    '''style(?:\([^)]*?\))?: .+''',
+    '''test(?:\([^)]*?\))?: .+''',
+    '''build\((?!deps\): .+)''',
+    '''Merged? .*''',
+    '''initial commit''',
+]
+
+[project.urls]
+Homepage = "https://github.com/pypa/sampleproject"
+Issues = "https://github.com/pypa/sampleproject/issues"
