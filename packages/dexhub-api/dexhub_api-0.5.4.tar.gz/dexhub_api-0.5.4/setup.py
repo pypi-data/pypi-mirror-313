@@ -1,0 +1,27 @@
+# setup.py 
+
+from setuptools import setup, find_packages
+
+setup(
+    name='dexhub-api',
+    version='0.5.4',
+    packages=find_packages(),
+    install_requires=[
+        'requests',
+        "numpy >= 1.14.0",
+        'scipy', 
+        'mujoco', 
+        'dm_control', 
+        "ipython >= 5",
+        "u-msgpack-python >= 2.4.1",
+        "tornado >= 4.0.0",
+        "pyzmq >= 17.0.0",
+        "pyngrok >= 4.1.6",
+        "pillow >= 7.0.0", 
+        "imageio", 
+        "matplotlib",
+        "ffmpeg", 
+        "imageio-ffmpeg",
+    ],
+)
+
