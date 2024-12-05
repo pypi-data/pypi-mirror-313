@@ -1,0 +1,94 @@
+{% extends "richie/fullwidth.html" %}
+{% load cms_tags extra_tags i18n thumbnail %}
+
+{% block head_title %}
+    {% page_attribute "page_title" as program_title %}
+    {% blocktrans with program_title=program_title %}{{ program_title }} - Program{% endblocktrans %}
+{% endblock head_title %}
+
+{% block meta_html_default %}
+    {% if not current_page|is_empty_placeholder:"program_excerpt" %}
+        <meta name="description" content="{% filter slice:":160" %}{% show_placeholder 'program_excerpt' current_page %}{% endfilter %}" />
+    {% endif %}
+{% endblock meta_html_default %}
+
+{% block meta_rdfa_context %}
+    <meta property="og:type" content="website" />
+
+    {% get_placeholder_plugins "program_cover" as og_image_plugins %}
+    {% if og_image_plugins.0 %}
+        {% thumbnail og_image_plugins.0.picture 1200x630 replace_alpha='#FFFFFF' crop upscale subject_location=og_image_plugins.0.picture.subject_location as thumb %}
+        <meta property="og:image" content="{{ MEDIA_URL_PREFIX }}{{ thumb.url }}" />
+        <meta property="og:image:width" content="{{ thumb.width }}" />
+        <meta property="og:image:height" content="{{ thumb.height }}" />  
+    {% endif %}
+    {% if not current_page|is_empty_placeholder:"program_excerpt" %}
+        <meta property="og:description" content="{% filter slice:":200" %}{% show_placeholder 'program_excerpt' current_page %}{% endfilter %}" />
+    {% endif %}
+{% endblock meta_rdfa_context %}
+
+{% block body_rdfa %} vocab="https://schema.org/" typeof="EducationalOccupationalProgram"{% endblock body_rdfa %}
+
+{% block subheader_content %}
+<div class="subheader__container">
+    <h1 class="subheader__title">{% render_model current_page "title" %}</h1>
+</div>
+{% endblock subheader_content %}
+
+
+{% block content %}{% spaceless %}
+<div class="program-detail">
+    <div class="program-detail__block">
+    {% if current_page.publisher_is_draft %}
+        <div class="program-detail__cover program-detail__row">
+            {% placeholder_as_plugins "program_cover" as plugins or %}
+                <p class="program-detail__empty">{% trans "Cover" %}</p>
+            {% endplaceholder_as_plugins %}
+            {% blockplugin plugins.0 %}
+                <img
+                    src="{% thumbnail instance.picture 500x500 replace_alpha='#FFFFFF' subject_location=instance.picture.subject_location %}"
+                    srcset="
+                        {% thumbnail instance.picture 500x500 replace_alpha='#FFFFFF' subject_location=instance.picture.subject_location %} 500w
+                        {% if instance.picture.width >= 1000 %},{% thumbnail instance.picture 1000x1000 replace_alpha='#FFFFFF' subject_location=instance.picture.subject_location %} 1000w{% endif %}
+                        {% if instance.picture.width >= 2000 %},{% thumbnail instance.picture 2000x2000 replace_alpha='#FFFFFF' subject_location=instance.picture.subject_location %} 2000w{% endif %}
+                    "
+                    sizes="500px"
+                    alt="{% trans 'program cover image' %}"
+                />
+            {% endblockplugin %}
+        </div>
+    {% endif %}
+
+        <div class="program-detail__excerpt program-detail__row">
+            {% placeholder "program_excerpt" or %}
+                <p class="program-detail__empty">
+                    {% trans "No excerpt content" %}
+                </p>
+            {% endplaceholder %}
+        </div>
+
+        <div class="program-detail__body program-detail__row">
+            {% placeholder "program_body" or %}
+                <p class="program-detail__empty">
+                    {% trans "No body content" %}
+                </p>
+            {% endplaceholder %}
+        </div>
+    </div>
+
+    {% if current_page.publisher_is_draft or not current_page|is_empty_placeholder:"program_courses" %}
+        <div class="program-detail__courses program-detail__block">
+            <div class="program-detail__row">
+                <section class="course-glimpse-list">
+                    <div class="course-glimpse-list__header">
+                        <h2 class="program-detail__title">{% trans "Related courses" %}</h2>
+                    </div>
+                    <div class="course-glimpse-list__content">
+                        {% placeholder "program_courses" %}
+                    </div>
+                </section>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endspaceless %}{% endblock content %}
