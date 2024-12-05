@@ -1,0 +1,288 @@
+site_name: Dynamiqs
+site_url: "https://www.dynamiqs.org"
+use_directory_urls: false
+repo_url: https://github.com/dynamiqs/dynamiqs
+repo_name: dynamiqs
+docs_dir: docs
+theme:
+  name: material
+  custom_dir: docs/overrides
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - search.suggest
+    - content.code.copy
+    - content.tooltips
+  icon:
+    repo: fontawesome/brands/github
+    admonition:
+      example: material/human-male-board
+      see-also: material/book-open-variant
+    annotation: material/plus-circle
+  logo: media/logo.png
+  favicon: media/favicon.svg
+  palette:
+    # palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # palette toggle for dark mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+copyright: "&copy Copyright 2023-2024, Dynamiqs developers."
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/dynamiqs/dynamiqs
+    - icon: fontawesome/brands/slack
+      link: https://join.slack.com/t/dynamiqs-org/shared_invite/zt-1z4mw08mo-qDLoNx19JBRtKzXlmlFYLA
+  version:
+    provider: mike
+    alias: true
+    default: stable
+extra_css:
+  - stylesheets/extra.css
+  - stylesheets/theme.css
+  - stylesheets/home.css
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.css
+plugins:
+  - search
+  - exclude:
+      glob:
+        - glossary.md
+  - glightbox:
+      effect: fade
+      slide_effect: slide
+      width: 70%
+      zoomable: false
+      draggable: false
+  - mkdocs-simple-hooks:
+      hooks:
+        on_env: "docs.hooks:on_env"
+  - gen-files:
+      scripts:
+        - docs/generate_python_api.py
+  - mkdocstrings:
+      default_handler: python
+      custom_templates: docs/templates
+      handlers:
+        python:
+          options:
+            show_source: false
+            show_root_heading: true
+            show_root_toc_entry: false
+            show_root_full_path: false
+            heading_level: 1
+            members_order: source
+            docstring_section_style: list
+            show_signature_annotations: true
+            separate_signature: true
+            line_length: 88
+            show_bases: false
+            merge_init_into_class: true
+  - mike:
+      canonical_version: stable
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.caret
+  - pymdownx.snippets:
+      auto_append:
+        - docs/glossary.md
+  - abbr
+  - attr_list
+  - footnotes
+  - md_in_html
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+extra_javascript:
+  - javascripts/katex.js
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js
+  - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js
+watch:
+  - dynamiqs
+  - docs/glossary.md
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: ignore
+    unrecognized_links: warn
+nav:
+  - Home: index.md
+  - Documentation:
+      - documentation/index.md
+      - Getting started:
+          - What is Dynamiqs?: documentation/getting_started/whatis.md
+          - Installation: documentation/getting_started/installation.md
+          - Basic examples: documentation/getting_started/examples.md
+          - The sharp bits 🔪: documentation/getting_started/sharp-bits.md
+      - Learn the basics:
+          - Workflow in Dynamiqs: documentation/basics/workflow.md
+          - Time-dependent operators: documentation/basics/time-dependent-operators.md
+          - Closed systems: documentation/basics/closed-systems.md
+          - Open systems: documentation/basics/open-systems.md
+          - Batching simulations: documentation/basics/batching-simulations.md
+          - Computing gradients: documentation/basics/computing-gradients.md
+      - Advanced examples:
+          - Driven-dissipative Kerr oscillator: documentation/advanced_examples/kerr-oscillator.md
+  - Python API:
+      - python_api/index.md
+      - Quantum solvers:
+          - sesolve: python_api/integrators/sesolve.md
+          - mesolve: python_api/integrators/mesolve.md
+          - smesolve: python_api/integrators/smesolve.md
+          - sepropagator: python_api/integrators/sepropagator.md
+          - mepropagator: python_api/integrators/mepropagator.md
+          - floquet: python_api/integrators/floquet.md
+      - Core:
+          - Time-dependent arrays:
+              - TimeArray: python_api/time_array/TimeArray.md
+              - constant: python_api/time_array/constant.md
+              - pwc: python_api/time_array/pwc.md
+              - modulated: python_api/time_array/modulated.md
+              - timecallable: python_api/time_array/timecallable.md
+          - Solvers (dq.solver):
+              - Tsit5: python_api/solver/Tsit5.md
+              - Dopri5: python_api/solver/Dopri5.md
+              - Dopri8: python_api/solver/Dopri8.md
+              - Kvaerno3: python_api/solver/Kvaerno3.md
+              - Kvaerno5: python_api/solver/Kvaerno5.md
+              - Euler: python_api/solver/Euler.md
+              - Rouchon1: python_api/solver/Rouchon1.md
+              - Rouchon2: python_api/solver/Rouchon2.md
+              - Expm: python_api/solver/Expm.md
+          - Gradients (dq.gradient):
+              - Autograd: python_api/gradient/Autograd.md
+              - CheckpointAutograd: python_api/gradient/CheckpointAutograd.md
+          - Options: python_api/options/Options.md
+          - Results:
+              - SESolveResult: python_api/result/SESolveResult.md
+              - MESolveResult: python_api/result/MESolveResult.md
+              - SEPropagatorResult: python_api/result/SEPropagatorResult.md
+              - MEPropagatorResult: python_api/result/MEPropagatorResult.md
+              - FloquetResult: python_api/result/FloquetResult.md
+      - Utilities:
+          - Operators:
+              - eye: python_api/utils/operators/eye.md
+              - zero: python_api/utils/operators/zero.md
+              - destroy: python_api/utils/operators/destroy.md
+              - create: python_api/utils/operators/create.md
+              - number: python_api/utils/operators/number.md
+              - parity: python_api/utils/operators/parity.md
+              - displace: python_api/utils/operators/displace.md
+              - squeeze: python_api/utils/operators/squeeze.md
+              - quadrature: python_api/utils/operators/quadrature.md
+              - position: python_api/utils/operators/position.md
+              - momentum: python_api/utils/operators/momentum.md
+              - sigmax: python_api/utils/operators/sigmax.md
+              - sigmay: python_api/utils/operators/sigmay.md
+              - sigmaz: python_api/utils/operators/sigmaz.md
+              - sigmap: python_api/utils/operators/sigmap.md
+              - sigmam: python_api/utils/operators/sigmam.md
+              - hadamard: python_api/utils/operators/hadamard.md
+              - rx: python_api/utils/operators/rx.md
+              - ry: python_api/utils/operators/ry.md
+              - rz: python_api/utils/operators/rz.md
+              - sgate: python_api/utils/operators/sgate.md
+              - tgate: python_api/utils/operators/tgate.md
+              - cnot: python_api/utils/operators/cnot.md
+              - toffoli: python_api/utils/operators/toffoli.md
+          - States:
+              - fock: python_api/utils/states/fock.md
+              - fock_dm: python_api/utils/states/fock_dm.md
+              - basis: python_api/utils/states/basis.md
+              - basis_dm: python_api/utils/states/basis_dm.md
+              - coherent: python_api/utils/states/coherent.md
+              - coherent_dm: python_api/utils/states/coherent_dm.md
+              - ground: python_api/utils/states/ground.md
+              - excited: python_api/utils/states/excited.md
+          - Quantum utilities:
+              - dag: python_api/utils/quantum_utils/dag.md
+              - powm: python_api/utils/quantum_utils/powm.md
+              - expm: python_api/utils/quantum_utils/expm.md
+              - cosm: python_api/utils/quantum_utils/cosm.md
+              - sinm: python_api/utils/quantum_utils/sinm.md
+              - trace: python_api/utils/quantum_utils/trace.md
+              - tracemm: python_api/utils/quantum_utils/tracemm.md
+              - ptrace: python_api/utils/quantum_utils/ptrace.md
+              - tensor: python_api/utils/quantum_utils/tensor.md
+              - expect: python_api/utils/quantum_utils/expect.md
+              - norm: python_api/utils/quantum_utils/norm.md
+              - unit: python_api/utils/quantum_utils/unit.md
+              - dissipator: python_api/utils/quantum_utils/dissipator.md
+              - lindbladian: python_api/utils/quantum_utils/lindbladian.md
+              - isket: python_api/utils/quantum_utils/isket.md
+              - isbra: python_api/utils/quantum_utils/isbra.md
+              - isdm: python_api/utils/quantum_utils/isdm.md
+              - isop: python_api/utils/quantum_utils/isop.md
+              - isherm: python_api/utils/quantum_utils/isherm.md
+              - toket: python_api/utils/quantum_utils/toket.md
+              - tobra: python_api/utils/quantum_utils/tobra.md
+              - todm: python_api/utils/quantum_utils/todm.md
+              - proj: python_api/utils/quantum_utils/proj.md
+              - braket: python_api/utils/quantum_utils/braket.md
+              - overlap: python_api/utils/quantum_utils/overlap.md
+              - fidelity: python_api/utils/quantum_utils/fidelity.md
+              - entropy_vn: python_api/utils/quantum_utils/entropy_vn.md
+              - bloch_coordinates: python_api/utils/quantum_utils/bloch_coordinates.md
+              - wigner: python_api/utils/quantum_utils/wigner.md
+          - JAX-related utilities:
+              - to_qutip: python_api/utils/jax_utils/to_qutip.md
+              - set_device: python_api/utils/jax_utils/set_device.md
+              - set_precision: python_api/utils/jax_utils/set_precision.md
+              - set_matmul_precision: python_api/utils/jax_utils/set_matmul_precision.md
+          - Vectorization:
+              - operator_to_vector: python_api/utils/vectorization/operator_to_vector.md
+              - vector_to_operator: python_api/utils/vectorization/vector_to_operator.md
+              - spre: python_api/utils/vectorization/spre.md
+              - spost: python_api/utils/vectorization/spost.md
+              - sprepost: python_api/utils/vectorization/sprepost.md
+              - sdissipator: python_api/utils/vectorization/sdissipator.md
+              - slindbladian: python_api/utils/vectorization/slindbladian.md
+          - Quantum optimal control:
+              - snap_gate: python_api/utils/optimal_control/snap_gate.md
+              - cd_gate: python_api/utils/optimal_control/cd_gate.md
+          - Random arrays (dq.random):
+              - real: python_api/random/real.md
+              - complex: python_api/random/complex.md
+              - herm: python_api/random/herm.md
+              - psd: python_api/random/psd.md
+              - dm: python_api/random/dm.md
+              - ket: python_api/random/ket.md
+          - Plotting (dq.plot):
+              - wigner: python_api/plot/wigner.md
+              - wigner_mosaic: python_api/plot/wigner_mosaic.md
+              - wigner_gif: python_api/plot/wigner_gif.md
+              - pwc_pulse: python_api/plot/pwc_pulse.md
+              - fock: python_api/plot/fock.md
+              - fock_evolution: python_api/plot/fock_evolution.md
+              - hinton: python_api/plot/hinton.md
+              - gifit: python_api/plot/gifit.md
+              - grid: python_api/plot/grid.md
+              - mplstyle: python_api/plot/mplstyle.md
+  - Community:
+      - community/index.md
+      - Contributing: community/contributing.md
+      - Let's talk!: community/lets-talk.md
+      - Citing Dynamiqs: community/citing.md
