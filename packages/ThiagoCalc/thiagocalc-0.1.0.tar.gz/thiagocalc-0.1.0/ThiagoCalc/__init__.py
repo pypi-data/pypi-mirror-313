@@ -1,0 +1,1 @@
+from .ThiagoCalc import Calculadora
