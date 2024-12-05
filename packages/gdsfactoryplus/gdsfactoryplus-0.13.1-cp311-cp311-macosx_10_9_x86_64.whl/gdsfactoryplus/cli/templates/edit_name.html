@@ -1,0 +1,32 @@
+{% set id='edit-setting' %}
+
+<!--prettier-ignore-->
+<p id="{{ id }}" class="parent2">
+  {% set form_width = 200 %}
+  {% if allowed and allowed.__len__() > 0 %}
+    <select
+      id="edit_key"
+      name="k"
+      style="height: 30px; width: {{ form_width }}px; padding: 0px"
+    >
+    {% for option in allowed %}
+      {% if option == name %}
+        <option style="padding: 0px" selected>{{ option }}</option>
+      {% else %}
+        <option style="padding: 0px">{{ option }}</option>
+      {% endif %}
+    {% endfor %}
+    </select>
+  {% else %}
+  <input
+    id="edit_key"
+    type="text"
+    name="k"
+    placeholder="{{ name }}"
+    style="height: 30px; width: {{ form_width }}px;"
+  />:
+  {% endif %}
+{% include "accept.html" %}
+{% include "cancel.html" %}
+
+</p>
