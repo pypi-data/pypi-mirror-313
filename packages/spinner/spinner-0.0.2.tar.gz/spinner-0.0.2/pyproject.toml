@@ -1,0 +1,61 @@
+[project]
+name = "spinner"
+authors = [
+    {name = "Rodrigo Ceccato de Freitas", email = "rodrigoceccatodefreitas@gmail.com"},
+    {name = "Jhonatan Cléto", email="j256444@dac.unicamp.br"}
+]
+
+dynamic = ["version"]
+
+requires-python = ">=3.9.12, <4"
+dependencies = [
+    "click==8.1.7",
+    "pandas==2.2.2",
+    "matplotlib==3.9.0",
+    "rich==13.7.1",
+    "seaborn==0.13.2",
+    "jupyter==1.0.0",
+    "jinja2==3.1.4",
+    "numpy==2.0.0",
+    "ipykernel==6.29.4",
+    "tokenize-rt==5.2.0",
+    "seaborn==0.13.2",
+    "scipy==1.13.1"
+]
+
+[project.optional-dependencies]
+dev = [
+    "black==24.4.2",
+    "black[jupyter]==24.4.2",
+    "isort==5.13.2",
+    "taskipy==1.13.0"
+]
+
+[project.scripts]
+spinner = "cli.main:cli"
+
+[tool.setuptools.packages.find]
+where = ["spinner"]
+include = ["*"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.data-files]
+"spinner" = ["spinner/exporter/reporter.ipynb"]
+
+[tool.isort]
+profile = "black"
+line_length = 79
+
+[tool.taskipy.tasks]
+lint = "black --check --diff . && isort --check --diff ."
+format = "black . && isort ."
+
+[build-system]
+requires = ["setuptools>=42", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_scheme = "release-branch-semver"
+local_scheme = "no-local-version"
