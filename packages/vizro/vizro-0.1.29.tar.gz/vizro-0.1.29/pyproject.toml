@@ -1,0 +1,98 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[project]
+authors = [
+  {name = "Vizro Team"}
+]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13"
+]
+dependencies = [
+  "dash>=2.17.1,<3",  # 2.17.1 needed for no_output fix in clientside_callback
+  "dash_bootstrap_components",
+  "dash-ag-grid>=31.0.0",
+  "pandas>=2",
+  "plotly>=5.12.0",
+  "pydantic>=1.10.16",  # must be synced with pre-commit mypy hook manually
+  "dash_mantine_components<0.13.0",  # 0.13.0 is not compatible with 0.12,
+  "flask_caching>=2",
+  "wrapt>=1",
+  "black",
+  "autoflake"
+]
+description = "Vizro is a package to facilitate visual analytics."
+dynamic = ["version"]
+license-files = {paths = ["LICENSE.txt"]}
+name = "vizro"
+readme = "README.md"
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+kedro = [
+  "kedro>=0.17.3",
+  "kedro-datasets"  # no longer a dependency of kedro for kedro>=0.19.2
+]
+
+[project.urls]
+Documentation = "https://github.com/mckinsey/vizro#readme"
+Issues = "https://github.com/mckinsey/vizro/issues"
+Source = "https://github.com/mckinsey/vizro"
+
+[tool.coverage.paths]
+vizro = ["src/vizro"]  # omit tests for clarity, although this can be useful to see what test lines DID NOT run
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:"
+]
+fail_under = 92
+show_missing = true
+skip_covered = true
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source_pkgs = ["vizro"]
+
+[tool.pytest.ini_options]
+addopts = [
+  # Allow test files to have the same name in different directories.
+  "--import-mode=importlib"
+]
+filterwarnings = [
+  "error",
+  # Ignore until pandas is made compatible with Python 3.12:
+  "ignore:.*utcfromtimestamp:DeprecationWarning",
+  # Ignore until pandas 3 is released:
+  "ignore:(?s).*Pyarrow will become a required dependency of pandas:DeprecationWarning",
+  # Ignore until plotly fixes so the warning is no longer raised:
+  "ignore:When grouping with a length-1 list-like, you will need to pass a length-1 tuple to get_group:FutureWarning",
+  # Ignore warning when using the fig.layout.title inside examples:
+  "ignore:Using the `title` argument in your Plotly chart function may cause misalignment:UserWarning",
+  # Ignore warning for Pydantic v1 API and Python 3.13:
+  "ignore:Failing to pass a value to the 'type_params' parameter of 'typing.ForwardRef._evaluate' is deprecated:DeprecationWarning",
+  # Ignore deprecation warning until this is solved: https://github.com/plotly/dash/issues/2590:
+  "ignore:HTTPResponse.getheader():DeprecationWarning"
+]
+norecursedirs = ["tests/tests_utils", "tests/js"]
+pythonpath = ["tests/tests_utils"]
+
+[tool.ruff]
+extend = "../pyproject.toml"
+src = ["src"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+# Ignore current false positives for pydantic models subclassing across files
+# See: https://github.com/astral-sh/ruff/issues/5243#issuecomment-1860776975
+"**/models/**" = ["RUF012"]
+# Ignore missing docstrings in visual-vocabulary examples to keep them succinct.
+"examples/visual-vocabulary/pages/examples/**" = ["D100", "D103"]
