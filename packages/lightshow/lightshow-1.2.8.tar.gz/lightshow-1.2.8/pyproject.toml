@@ -1,0 +1,85 @@
+[project]
+name = "lightshow"
+authors = [
+    {"name" = "Matthew R. Carbone", "email" = "mcarbone@bnl.gov"},
+    {"name" = "Fanchen Meng"},
+    {"name" = "Deyu Lu"},
+    {"name" = "Benedikt Maurer"},
+    {"name" = "Fabien Peschel"},
+    {"name" = "Eli Stavitski"},
+    {"name" = "Xiaohui Qu", "email" = "xiaqu@bnl.gov"},
+    {"name" = "John T. Vinson"},
+    {"name" = "Christian Vorwerk"}
+]
+dynamic = ["version"]
+maintainers = [
+    {"name" = "Matthew R. Carbone", "email" = "mcarbone@bnl.gov"},
+    {"name" = "Xiaohui Qu", "email" = "xiaqu@bnl.gov"},
+]
+description = "A one-stop-shop for computational spectroscopy"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "ase>=3.23.0",
+    "monty>=2024.10.21",
+    "mp-api==0.41.2",
+    "numpy>=1.26.4",
+    "pydantic-core<=2.23.4",
+    "pydantic<=2.9.2",
+    "pymatgen==2024.3.1",
+    "tqdm>=4.67.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "lightshow/_version.py"
+
+[project.optional-dependencies]
+test = [
+    "coverage>=7.6.7",
+    "flake8>=7.1.1",
+    "nbstripout>=0.8.1",
+    "pytest>=8.3.3",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.7.4",
+]
+doc = [
+    "myst-parser>=3.0.1",
+    "numpydoc>=1.8.0",
+    "sphinx>=7.4.7",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-autobuild>=2024.10.3",
+]
+extras = [
+    "dunamai>=1.23.0",
+    "ipython>=8.18.1",
+    "jupyterlab>=4.3.1",
+    "matplotlib>=3.9.2",
+]
+all = [
+    "lightshow[test]",
+    "lightshow[doc]",
+    "lightshow[extras]",
+]
+
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = 60
