@@ -1,0 +1,165 @@
+Metadata-Version: 2.1
+Name: collective.volto.blocksfield
+Version: 2.2.0
+Summary: Field that allows to use blocks instead rich text
+Home-page: https://github.com/collective/collective.volto.blocksfield
+Author: RedTurtle Technology
+Author-email: sviluppo@redturtle.it
+License: GPL version 2
+Project-URL: PyPI, https://pypi.python.org/pypi/collective.volto.blocksfield
+Project-URL: Source, https://github.com/collective/collective.volto.blocksfield
+Project-URL: Tracker, https://github.com/collective/collective.volto.blocksfield/issues
+Keywords: Python Plone
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Plone :: Addon
+Classifier: Framework :: Plone :: 5.2
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Requires-Python: >3.6
+Provides-Extra: test
+License-File: LICENSE.GPL
+License-File: LICENSE.rst
+
+============================
+collective.volto.blocksfield
+============================
+
+Custom z3c.form field that allows to use Volto blocks.
+
+This field can replace RichText fields in your custom content-types.
+
+Features
+--------
+
+- store a json object with all blocks informations (data and order)
+- restapi serializer/deserializer to manage internal links
+- registered custom indexer for `collective.dexteritytextindexer` (if installed)
+
+How to use
+----------
+
+Import it and use as a normal field::
+
+    from collective.volto.blocksfield.field import BlocksField
+
+    class IMySchema(Interface):
+
+        my_field = BlocksField(
+            title="A field with blocks",
+        )
+
+Upgrade to 2.2.0
+----------------
+
+From 2.2.0 version, objects with BlocksField are marked with a marker interface and blocks are indexed in block_types index.
+
+To update contents already created in the site, you need to create an updgrade-step or call "@@mark_contents_and_reindex" view.
+
+
+Installation
+------------
+
+Install collective.volto.blocksfield by adding it to your buildout::
+
+    [buildout]
+
+    ...
+
+    eggs =
+        collective.volto.blocksfield
+
+
+and then running ``bin/buildout``
+
+You don't need to install it.
+
+TODO
+----
+
+- Tests
+
+Contribute
+----------
+
+- Issue Tracker: https://github.com/collective/collective.volto.blocksfield/issues
+- Source Code: https://github.com/collective/collective.volto.blocksfield
+
+
+License
+-------
+
+The project is licensed under the GPLv2.
+
+Authors
+-------
+
+This product was developed by **RedTurtle Technology** team.
+
+.. image:: https://avatars1.githubusercontent.com/u/1087171?s=100&v=4
+   :alt: RedTurtle Technology Site
+   :target: http://www.redturtle.it/
+
+
+Contributors
+============
+
+- RedTurtle Technology, sviluppo@redturtle.it
+
+
+Changelog
+=========
+
+2.2.0 (2024-12-03)
+------------------
+
+- Add marker interface to objects that have at least one BlockField in their schema.
+  [cekk]
+- Add block_types indexer customization for contents with IBlocksFieldEnabled interface to allow index also these blocks.
+  [cekk]
+- Make package installable: on install, mark already created contents as IBlocksFieldEnabled and reindex them.
+  [cekk]
+
+2.1.0 (2024-08-09)
+------------------
+- Add serializers and deserializer for slate blocks.
+  [cekk]
+- Add indexer for slate blocks.
+  [cekk]
+
+2.0.0 (2023-07-03)
+------------------
+
+- Drop support for Plone 5.2 and collective.dexteritytextindexer; in Plone6
+  we use core functions in plone.app.dexterity.textindexer
+  [lucabel]
+
+1.0.3 (2022-05-31)
+------------------
+
+- Fix required python version.
+  [cekk]
+
+1.0.2 (2022-05-25)
+------------------
+
+- add check if value is a dict in SearchableText indexer.
+  [eikichi18]
+
+
+1.0.1 (2021-03-25)
+------------------
+
+- Register standard blocks serializers/deserializer for IDexterityContent. Otherwise they don't work.
+  [cekk]
+
+
+1.0.0 (2021-02-24)
+------------------
+
+- Initial release.
+  [cekk]
