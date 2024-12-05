@@ -1,0 +1,100 @@
+[project]
+name = "focustui"
+version = "0.1.20"
+authors = [
+  { name="Simon Piechutowski", email="szymonpiechutowski@gmail.com" },
+]
+dependencies = [
+    "textual>=0.73.0",
+    "pygame-ce~=2.5.0",
+    "platformdirs~=4.2.2",
+    "python-dotenv~=1.0.1",
+    "pydantic>=2.8.2, <3.0.0",
+    "click~=8.1.7",
+]
+description = "Your Deep Focus Session Buddy."
+readme = "readme.md"
+requires-python = ">=3.12"
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Utilities",
+    "Topic :: Office/Business :: Scheduling",
+    "Topic :: Terminals",
+    "Topic :: Education",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "textual-dev~=1.5.1",
+    "ruff>=0.6.1",
+    "pytest~=8.3.2",
+    "pytest-asyncio~=0.24.0",
+    "pytest-env~=1.1.3",
+    "pytest-mock~=3.14.0",
+    "pre-commit~=4.0.1"
+]
+
+[project.urls]
+Homepage = "https://github.com/Zimzozaur/focus-tui"
+Issues = "https://github.com/Zimzozaur/focus-tui/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+paths = ["src/focustui/static/**"]
+
+[tool.hatch.build.targets.wheel]
+paths = ["src/focustui/static/**"]
+
+[project.scripts]
+focustui = "focustui.__main__:main"
+
+[tool.ruff]
+exclude = ["src/focustui/assets.py", "tests"]
+
+[tool.ruff.lint]
+select = [
+    'ALL'
+]
+ignore = [
+    "A002",
+    "ARG002",
+    "ANN00",
+    "ANN201",
+    "D100",
+    "D101",
+    "D102",
+    "D104",
+    "D105",
+    "D107",
+    "D203",
+    "D205",
+    "D213",
+    "DTZ005",
+    "FBT001",
+    "FBT003",
+    "N805",
+    "RUF012",
+    "SIM117"
+]
+
+
+[tool.pytest_env]
+FOCUSTUI_DEBUG = "False"
+
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+testpaths = ["tests"]
