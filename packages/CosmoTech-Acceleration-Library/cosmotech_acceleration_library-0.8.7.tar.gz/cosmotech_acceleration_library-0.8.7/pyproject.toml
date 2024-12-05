@@ -1,0 +1,45 @@
+[metadata]
+licence_files = ["LICENSE"]
+
+[project]
+name = "CosmoTech_Acceleration_Library"
+authors = [{ name = "Cosmo Tech", email = "platform@cosmotech.com" }]
+description = "Acceleration libraries for CosmoTech cloud based solution development"
+urls.Homepage = "https://www.cosmotech.com"
+urls.Source = "https://github.com/Cosmo-Tech/CosmoTech-Acceleration-Library"
+urls.Documentation = "https://cosmo-tech.github.io/CosmoTech-Acceleration-Library"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+readme = { file = "README.md", content-type = "text/markdown" }
+
+
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "--cov-report term-missing:skip-covered --cov=CosmoTech_Acceleration_Library"
+
+[tool.setuptools]
+include-package-data = true
+package-data."*" = [
+    "requirements.txt",
+    "requirements.doc.txt",
+    "requirements.test.txt",
+    "requirements.extra.txt"
+]
+zip-safe = false
+
+[project.scripts]
+csm-data = "cosmotech.coal.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["CosmoTech_Acceleration_Library*", "cosmotech.*"]
+
+[tool.setuptools.dynamic]
+version.attr = "CosmoTech_Acceleration_Library.__version__"
+dependencies.file = "requirements.txt"
+optional-dependencies.doc.file = "requirements.doc.txt"
+optional-dependencies.test.file = "requirements.test.txt"
+optional-dependencies.extra.file = "requirements.extra.txt"
+optional-dependencies.all.file = "requirements.all.txt"
