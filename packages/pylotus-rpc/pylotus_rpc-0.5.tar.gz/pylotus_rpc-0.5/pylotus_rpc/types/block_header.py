@@ -1,0 +1,86 @@
+from dataclasses import dataclass
+from typing import List, Dict, Union
+from .cid import Cid
+from .signature import Signature
+
+@dataclass
+class BlockHeader:
+    """
+    Represents the block header in the blockchain.
+
+    Attributes:
+    - miner: The address of the block miner.
+    - ticket: Lottery ticket for leader election.
+    - election_proof: Proof of leader election.
+    - beacon_entries: Randomness beacon for the block.
+    - win_post_proof: Winning post proof.
+    - parents: CIDs of the block's parent blocks.
+    - parent_weight: Parent weight of the block.
+    - height: Height of the block in the blockchain.
+    - parent_state_root: CID for the state tree of this block's parent.
+    - parent_message_receipts: CID of the receipt tree for the parent.
+    - messages: CID of the message list for this block.
+    - bls_aggregate: Aggregated BLS signature.
+    - timestamp: Block creation time.
+    - block_sig: Block signature.
+    - fork_signaling: Fork signaling number.
+    - parent_base_fee: Parent base fee.
+    """
+    miner: str
+    ticket: Dict[str, str]
+    election_proof: Dict[str, Union[int, str]]
+    beacon_entries: List[Dict[str, Union[int, str]]]
+    win_post_proof: List[Dict[str, Union[int, str]]]
+    parents: List[Cid]
+    parent_weight: str
+    height: int
+    parent_state_root: Cid
+    parent_message_receipts: Cid
+    messages: Cid
+    bls_aggregate: Signature
+    timestamp: int
+    block_sig: Signature
+    fork_signaling: int
+    parent_base_fee: str
+
+    @staticmethod
+    def from_dict(data: Dict) -> 'BlockHeader':
+        """
+        Converts a dictionary representation of a block header to a BlockHeader object.
+
+        :param data: Dictionary containing block header details.
+        :return: An instance of the BlockHeader class.
+        """
+        parents = [Cid(item["/"]) for item in data["Parents"]]
+        parent_state_root = Cid(data["ParentStateRoot"]["/"])
+        parent_message_receipts = Cid(data["ParentMessageReceipts"]["/"])
+        messages = Cid(data["Messages"]["/"])
+
+        if data["BLSAggregate"]:
+            bls_aggregate = Signature(data["BLSAggregate"]["Type"], data["BLSAggregate"]["Data"])
+        else:
+            bls_aggregate = None
+
+        if data["BlockSig"]:
+            block_sig = Signature(data["BlockSig"]["Type"], data["BlockSig"]["Data"])
+        else:
+            block_sig = None
+
+        return BlockHeader(
+            miner=data["Miner"],
+            ticket=data["Ticket"],
+            election_proof=data["ElectionProof"],
+            beacon_entries=data["BeaconEntries"],
+            win_post_proof=data["WinPoStProof"],
+            parents=parents,
+            parent_weight=data["ParentWeight"],
+            height=data["Height"],
+            parent_state_root=parent_state_root,
+            parent_message_receipts=parent_message_receipts,
+            messages=messages,
+            bls_aggregate=bls_aggregate,
+            timestamp=data["Timestamp"],
+            block_sig=block_sig,
+            fork_signaling=data["ForkSignaling"],
+            parent_base_fee=data["ParentBaseFee"]
+        )
