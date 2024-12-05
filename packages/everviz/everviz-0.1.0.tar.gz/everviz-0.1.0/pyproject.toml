@@ -1,0 +1,104 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "everviz"
+description = "Visualization for Everest"
+authors = [
+  {name = "Equinor ASA", email = "fg_sib-scout@equinor.com"},
+]
+license = {text = "AGPL-3.0"}
+readme = "README.md"
+classifiers = [
+    "Environment :: Plugins",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dynamic = ["version"]
+dependencies = [
+    "pyyaml",
+    "pandas",
+    "numpy",
+    "dash>=2.0",
+    "webviz-config>=0.2.0",
+    "webviz-config-equinor",
+    "plotly",
+    "flask",
+]
+
+[project.urls]
+repository = "https://github.com/equinor/everviz"
+
+[project.optional-dependencies]
+test = [
+    "dash[testing]",
+    "pillow",
+    "pytest-mock",
+    "sphinx",
+    "polars"
+]
+style = [
+    "pre-commit",
+]
+
+[project.entry-points."everest"]
+everviz = "everviz.everest_hooks"
+[project.entry-points."webviz_config_plugins"]
+Crossplot = "everviz.plugins:Crossplot"
+CrossplotIndexed = "everviz.plugins:CrossplotIndexed"
+SummaryPlot = "everviz.plugins:SummaryPlot"
+ObjectivesPlot = "everviz.plugins:ObjectivesPlot"
+SingleObjectivesPlot = "everviz.plugins:SingleObjectivesPlot"
+ControlsPlot = "everviz.plugins:ControlsPlot"
+BestControlsPlot = "everviz.plugins:BestControlsPlot"
+DeltaPlot = "everviz.plugins:DeltaPlot"
+GradientPlot = "everviz.plugins:GradientPlot"
+ConfigEditor = "everviz.plugins:ConfigEditor"
+WellsPlot = "everviz.plugins:WellsPlot"
+
+[tool.setuptools_scm]
+write_to = "everviz/version.py"
+
+[tool.setuptools.dynamic]
+version = {attr = "everviz.version.__version__"}
+
+[tool.ruff]
+src = ["evereviz"]
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "W",     # pycodestyle
+    "I",     # isort
+    "B",     # flake-8-bugbear
+    "SIM",   # flake-8-simplify
+    "F",     # pyflakes
+    "PL",    # pylint
+    "NPY",   # numpy specific rules
+    "C4",    # flake8-comprehensions
+    "ASYNC", # flake8-async
+    "RUF",   # ruff specific rules
+]
+
+[tool.ruff.lint.pylint]
+max-args = 20
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*" = [
+    "RUF001",  # ambiguous-string
+    "RUF003",  # ambiguous-string-comments
+]
+"everviz/everest_hooks.py" = [
+    "SIM115",  # Use a context manager for opening files
+]

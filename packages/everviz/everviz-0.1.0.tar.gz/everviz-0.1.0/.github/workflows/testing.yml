@@ -1,0 +1,38 @@
+name: testing
+
+on: [pull_request]
+
+jobs:
+  tests:
+    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install everviz and dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        wget https://chromedriver.storage.googleapis.com/$(wget https://chromedriver.storage.googleapis.com/LATEST_RELEASE -q -O -)/chromedriver_linux64.zip
+        unzip chromedriver_linux64.zip
+        export PATH=$PATH:$PWD
+        python -m pip install ".[test]"
+
+    - name: Run Tests
+      run: pytest --headless
+
+    - name: Build documentation
+      run: sphinx-build -d "doctrees" docs/ "docs_out" --color -W -bhtml
