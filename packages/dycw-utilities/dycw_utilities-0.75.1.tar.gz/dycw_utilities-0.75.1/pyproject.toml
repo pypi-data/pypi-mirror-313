@@ -1,0 +1,462 @@
+#
+
+# build-system
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+# project
+[project]
+authors = [{name = "Derek Wan", email = "d.wan@icloud.com"}]
+dependencies = ["typing-extensions >= 4.12.2, < 4.13"]
+dynamic = ["version"]
+name = "dycw-utilities"
+readme = "README.md"
+requires-python = ">= 3.11"
+
+[project.optional-dependencies]
+dev = [
+  "aiohttp >= 3.11.7, < 3.12",  # for slack-sdk
+  "aiosqlite >= 0.20.0, < 0.21",
+  "altair >= 5.5.0, < 5.6",
+  "astor >= 0.8.1, < 0.9",
+  "asyncpg >= 0.30.0, < 0.31",  # for sqlalchemy async
+  "atomicwrites >= 1.4.1, < 1.5",
+  "atools >= 0.14.2, < 0.15",
+  "bottleneck >= 1.4.2, < 1.5",
+  "beartype >= 0.19.0, < 0.20",
+  "cachetools >= 5.5.0, < 5.6",
+  "click >= 8.1.7, < 8.2",
+  "coloredlogs >= 15.0.1, < 15.1",
+  "concurrent-log-handler >= 0.9.25, < 0.10",
+  "cryptography >= 44.0.0, < 44.1",
+  "cvxpy >= 1.6.0, < 1.7",
+  "dacite >= 1.8.1, < 1.9",
+  "eventkit >= 1.0.3, < 1.1",
+  "fpdf2 >= 2.8.1, < 2.9",
+  "greenlet >= 3.1.1, < 3.2",  # for sqlalchemy async
+  "hatch >= 1.13.0, < 1.14",
+  "hypothesis >= 6.122.1, < 6.123",
+  "ib-async-dataclass >= 1.0.3rc5, < 1.1",
+  "img2pdf >= 0.5.1, < 0.6",
+  "loguru >= 0.7.2, < 0.8",
+  "memory-profiler >= 0.61.0, < 0.62",
+  "more-itertools >= 10.5.0, < 10.6",
+  "nest-asyncio >= 1.6.0, < 1.7",  # for sqlalchemy async
+  "nox >= 2024.10.9, < 2024.11",
+  "numbagg >= 0.8.2, < 0.9",
+  "numpy >= 2.0.2, < 2.1",  # if 2.1, llvmite: RuntimeError: Cannot install on Python version 3.11.9; only versions >=3.6,<3.10 are supported.
+  "optuna >= 4.1.0, < 4.2",
+  "orjson >= 3.10.12, < 3.11",
+  "polars-lts-cpu >= 1.16.0, < 1.17",
+  "pqdm >= 0.2.0, < 0.3",
+  "psycopg2-binary >= 2.9.10, < 2.10",  # for sqlalchemy
+  "pydantic >= 2.10.2, < 2.11",
+  "pyhumps >= 3.8.0, < 3.9",
+  "pyinstrument >= 5.0.0, < 5.1",
+  "pyrsistent >= 0.20.0, < 0.21",
+  "pytest >= 8.3.4, < 8.4",
+  "python-dotenv >= 1.0.1, < 1.1",
+  "redis >= 5.2.0, < 5.3",
+  "rich >= 13.8.1, < 13.9",  # if 13.9, twine upload fails https://github.com/dycw/python-utilities/actions/runs/11125686648/job/30913966455
+  "scipy >= 1.14.1, < 1.15",
+  "slack-sdk >= 3.33.4, < 3.34",
+  "sqlalchemy >= 2.0.36, < 2.1",
+  "streamlit >= 1.40.2, < 1.41",
+  "tenacity >= 9.0.0, < 9.1",
+  "treelib >= 1.7.0, < 1.8",
+  "tzdata >= 2024.2, < 2024.3",
+  "tzlocal >= 5.2, < 5.3",
+  "vegafusion >= 2.0.1, < 2.1",
+  "vegafusion-python-embed >= 1.6.9, < 1.7",
+  "vl-convert-python >= 1.7.0, < 1.8",
+  "whenever >= 0.6.14, < 0.7",
+  # test
+  "coverage-conditional-plugin >= 0.9.0, < 0.10",
+  "pytest-asyncio >= 0.24.0, < 0.25",
+  "pytest-cov >= 6.0.0, < 6.1",
+  "pytest-instafail >= 0.5.0, < 0.6",
+  "pytest-only >= 2.1.2, < 2.2",
+  "pytest-randomly >= 3.16.0, < 3.17",
+  "pytest-rerunfailures >= 15.0, < 16",
+  "pytest-xdist >= 3.6.1, < 3.7",
+  # CI
+  "win32_setctime >= 1.1.0, < 1.2",  # https://github.com/Delgan/loguru/issues/147
+  "setuptools >= 75.1.0, < 76.0",  # https://github.com/theY4Kman/pytest-only/issues/14
+]
+test = [
+  "coverage-conditional-plugin >= 0.9.0, < 0.10",
+  "hypothesis >= 6.122.1, < 6.123",
+  "pytest >= 8.3.4, < 8.4",
+  "pytest-asyncio >= 0.24.0, < 0.25",
+  "pytest-cov >= 6.0.0, < 6.1",
+  "pytest-instafail >= 0.5.0, < 0.6",
+  "pytest-only >= 2.1.2, < 2.2",
+  "pytest-randomly >= 3.16.0, < 3.17",
+  "pytest-rerunfailures >= 15.0, < 16",
+  "pytest-xdist >= 3.6.1, < 3.7",
+]
+zzz-test-altair = [
+  "altair >= 5.5.0, < 5.6",
+  "atomicwrites >= 1.4.1, < 1.5",
+  "img2pdf >= 0.5.1, < 0.6",
+  "polars-lts-cpu >= 1.16.0, < 1.17",
+  "vl-convert-python >= 1.6.1, < 1.7",
+]
+zzz-test-astor = ["astor >= 0.8.1, < 0.9"]
+zzz-test-asyncio = []
+zzz-test-atomicwrites = ["atomicwrites >= 1.4.1, < 1.5"]
+zzz-test-atools = [
+  "atools >= 0.14.2, < 0.15",
+]
+zzz-test-beartype = ["beartype >= 0.19.0, < 0.20"]
+zzz-test-cachetools = ["cachetools >= 5.5.0, < 5.6"]
+zzz-test-click = [
+  "click >= 8.1.7, < 8.2",
+  "sqlalchemy >= 2.0.36, < 2.1",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-cryptography = ["cryptography >= 44.0.0, < 44.1"]
+zzz-test-cvxpy = ["cvxpy >= 1.6.0, < 1.7"]
+zzz-test-dacite = ["dacite >= 1.8.1, < 1.9"]
+zzz-test-dataclasses = ["ib-async-dataclass >= 1.0.3rc5, < 1.1"]
+zzz-test-datetime = ["tzlocal >= 5.2, < 5.3"]
+zzz-test-enum = []
+zzz-test-errors = []
+zzz-test-eventkit = ["eventkit >= 1.0.3, < 1.1"]
+zzz-test-fpdf2 = [
+  "fpdf2 >= 2.8.1, < 2.9",
+  "tzlocal >= 5.2, < 5.3",
+]
+zzz-test-functions = []
+zzz-test-functools = []
+zzz-test-getpass = []
+zzz-test-git = []
+zzz-test-hashlib = [
+  "orjson >= 3.10.12, < 3.11",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-http = [
+  "atomicwrites >= 1.4.1, < 1.5",
+  "orjson >= 3.10.12, < 3.11",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-humps = ["pyhumps >= 3.8.0, < 3.9"]
+zzz-test-hypothesis = [
+  "aiosqlite >= 0.20.0, < 0.21",
+  "asyncpg >= 0.30.0, < 0.31",  # for sqlalchemy async
+  "greenlet >= 3.1.1, < 3.2",  # for sqlalchemy async
+  "hypothesis >= 6.122.1, < 6.123",
+  "numpy >= 2.0.2, < 2.1",
+  "redis >= 5.2.0, < 5.3",
+  "sqlalchemy >= 2.0.36, < 2.1",
+  "tzlocal >= 5.2, < 5.3",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-ipython = ["ipython >= 8.24.0, < 8.25"]
+zzz-test-iterables = []
+zzz-test-jupyter = [
+  "jupyterlab >= 4.2.0, < 4.3",
+  "pandas >= 2.2.2, < 2.3",
+  "polars-lts-cpu >= 1.16.0, < 1.17",
+]
+zzz-test-logging = [
+  "coloredlogs >= 15.0.1, < 15.1",
+  "concurrent-log-handler >= 0.9.25, < 0.10",
+  "tzlocal >= 5.2, < 5.3",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-loguru = ["loguru >= 0.7.2, < 0.8"]
+zzz-test-math = ["numpy >= 2.0.2, < 2.1"]
+zzz-test-memory-profiler = ["memory-profiler >= 0.61.0, < 0.62"]
+zzz-test-modules = []
+zzz-test-more-itertools = ["more-itertools >= 10.5.0, < 10.6"]
+zzz-test-numpy = [
+  "bottleneck >= 1.4.0, < 1.5",
+  "numbagg >= 0.8.2, < 0.9",
+  "numpy >= 2.0.2, < 2.1",
+]
+zzz-test-optuna = ["optuna >= 3.6.1, < 3.7"]
+zzz-test-orjson = [
+  "ib-async-dataclass >= 1.0.3rc5, < 1.1",
+  "orjson >= 3.10.12, < 3.11",
+  "rich >= 13.8.1, < 13.9",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-os = []
+zzz-test-pathlib = []
+zzz-test-pickle = ["atomicwrites >= 1.4.1, < 1.5"]
+zzz-test-platform = []
+zzz-test-polars = [
+  "dacite >= 1.8.1, < 1.9",
+  "polars-lts-cpu >= 1.16.0, < 1.17",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-pqdm = ["pqdm >= 0.2.0, < 0.3"]
+zzz-test-pydantic = [
+  "atomicwrites >= 1.4.1, < 1.5",
+  "pydantic >= 2.10.2, < 2.11",
+]
+zzz-test-pyinstrument = [
+  "atomicwrites >= 1.4.1, < 1.5",
+  "pyinstrument >= 5.0.0, < 5.1",
+  "tzlocal >= 5.2, < 5.3",
+]
+zzz-test-pyrsistent = ["pyrsistent >= 0.20.0, < 0.21"]
+zzz-test-pytest = [
+  "atomicwrites >= 1.4.1, < 1.5",
+  "orjson >= 3.10.12, < 3.11",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-python-dotenv = ["python-dotenv >= 1.0.1, < 1.1"]
+zzz-test-random = []
+zzz-test-re = []
+zzz-test-redis = [
+  "orjson >= 3.10.12, < 3.11",
+  "polars-lts-cpu >= 1.16.0, < 1.17",
+  "redis >= 5.2.0, < 5.3",
+  "rich >= 13.8.1, < 13.9",
+  "tzlocal >= 5.2, < 5.3",
+  "whenever >= 0.6.14, < 0.7",
+]
+zzz-test-reprlib = ["polars-lts-cpu >= 1.16.0, < 1.17"]
+zzz-test-rich = ["rich >= 13.8.1, < 13.9"]
+zzz-test-scipy = ["scipy >= 1.14.1, < 1.15"]
+zzz-test-sentinel = []
+zzz-test-slack-sdk = [
+  "aiohttp >= 3.11.7, < 3.12",  # for slack-sdk
+  "slack-sdk >= 3.33.4, < 3.34",
+]
+zzz-test-socket = []
+zzz-test-sqlalchemy = [
+  "aiosqlite >= 0.20.0, < 0.21",
+  "asyncpg >= 0.30.0, < 0.31",  # for sqlalchemy async
+  "greenlet >= 3.1.1, < 3.2",  # for sqlalchemy async
+  "nest-asyncio >= 1.6.0, < 1.7",  # for sqlalchemy async
+  "pyhumps >= 3.8.0, < 3.9",
+  "sqlalchemy >= 2.0.36, < 2.1",
+]
+zzz-test-sqlalchemy-polars = [
+  "aiosqlite >= 0.20.0, < 0.21",
+  "asyncpg >= 0.30.0, < 0.31",  # for sqlalchemy async
+  "greenlet >= 3.1.1, < 3.2",  # for sqlalchemy async
+  "nest-asyncio >= 1.6.0, < 1.7",  # for sqlalchemy async
+  "polars-lts-cpu >= 1.16.0, < 1.17",
+  "pyhumps >= 3.8.0, < 3.9",
+  "sqlalchemy >= 2.0.36, < 2.1",
+]
+zzz-test-streamlit = ["streamlit >= 1.40.2, < 1.41"]
+zzz-test-sys = []
+zzz-test-tempfile = []
+zzz-test-tenacity = ["tenacity >= 9.0.0, < 9.1"]
+zzz-test-text = []
+zzz-test-threading = []
+zzz-test-timer = []
+zzz-test-traceback = [
+  "beartype >= 0.19.0, < 0.20",
+  "rich >= 13.8.1, < 13.9",
+]
+zzz-test-treelib = ["treelib >= 1.7.0, < 1.8"]
+zzz-test-types = []
+zzz-test-typing = []
+zzz-test-uuid = []
+zzz-test-warnings = []
+zzz-test-whenever = ["whenever >= 0.6.14, < 0.7"]
+zzz-test-zipfile = []
+zzz-test-zoneinfo = ["tzdata >= 2024.2, < 2024.3"]
+
+[project.scripts]
+
+# coverage
+[tool.coverage]
+
+[tool.coverage.coverage_conditional_plugin.rules]
+skipif-ci = '"CI" in os_environ'
+skipif-ci-and-not-linux = '("CI" in os_environ) and (sys_platform != "linux")'
+skipif-ci-and-windows = '("CI" in os_environ) and (sys_platform != "windows")'
+skipif-linux = 'sys_platform == "linux"'
+skipif-mac = 'sys_platform == "darwin"'
+skipif-not-linux = 'sys_platform != "linux"'
+skipif-not-macos = 'sys_platform != "darwin"'
+skipif-not-windows = 'sys_platform != "windows"'
+skipif-version-ge-312 = "sys_version_info >= (3, 12)"
+skipif-version-le-311 = "sys_version_info <= (3, 11)"
+skipif-windows = 'sys_platform == "windows"'
+
+[tool.coverage.html]
+directory = ".coverage/html"
+
+[tool.coverage.report]
+exclude_also = [
+  "@overload",
+  "assert_never",
+  "case _ as never:",
+  "if TYPE_CHECKING:",
+]
+fail_under = 100.0
+skip_covered = true
+skip_empty = true
+
+[tool.coverage.run]
+branch = true
+data_file = ".coverage/data"
+omit = ["src/utilities/streamlit.py"]
+parallel = true
+plugins = ["coverage_conditional_plugin"]
+
+# hatch
+[tool.hatch]
+
+[tool.hatch.build]
+sources = ["src"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/utilities"]
+
+[tool.hatch.version]
+path = "src/utilities/__init__.py"
+
+# isort
+[tool.isort]
+float_to_top = true
+
+# nitpick
+[tool.nitpick]
+style = [
+  "https://raw.githubusercontent.com/dycw/nitpick/master/styles/3.11.toml",
+  "https://raw.githubusercontent.com/dycw/nitpick/master/styles/common.toml",
+]
+
+# pyright
+[tool.pyright]
+deprecateTypingAliases = true
+enableReachabilityAnalysis = false
+pythonVersion = "3.11"
+reportAny = false
+reportCallInDefaultInitializer = true
+reportImplicitOverride = true
+reportImplicitStringConcatenation = true
+reportImportCycles = true
+reportMissingSuperCall = true
+reportMissingTypeArgument = false
+reportMissingTypeStubs = false
+reportPrivateUsage = false
+reportPropertyTypeMismatch = true
+reportShadowedImports = true
+reportUninitializedInstanceVariable = true
+reportUnknownArgumentType = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
+reportUnnecessaryTypeIgnoreComment = true
+reportUnusedCallResult = true
+reportUnusedImport = false
+reportUnusedVariable = false
+typeCheckingMode = "strict"
+
+# pytest
+[tool.pytest]
+
+[tool.pytest.ini_options]
+addopts = [
+  "-ra",
+  "-vv",
+  "--color=auto",
+  "--cov=utilities",
+  "--cov-config=pyproject.toml",
+  "--cov-report=html",
+  "--durations=10",
+  "--durations-min=10",
+  "--strict-markers",
+]
+asyncio_default_fixture_loop_scope = "function"
+asyncio_mode = "auto"
+filterwarnings = [
+  "error",
+  "ignore:Implicitly cleaning up <TemporaryDirectory '.*'>:ResourceWarning",
+  "ignore:There is no current event loop:DeprecationWarning",  # eventkit
+  "ignore:Using fork.* can cause Polars to deadlock in the child process:RuntimeWarning",  # polars/pqdm
+  "ignore:ast.Num is deprecated and will be removed in Python 3.14; use ast.Constant instead:DeprecationWarning",  # astor
+  "ignore:unclosed <StreamWriter .*>:ResourceWarning",  # redis
+  "ignore:unclosed <socket.*socket .*>:ResourceWarning",  # redis
+  "ignore:unclosed Connection <redis.*asyncio.*connection.*Connection.*>:ResourceWarning",  # redis
+  "ignore:unclosed event loop <_UnixSelectorEventLoop .*>:ResourceWarning",  # redis
+  "ignore:unclosed transport <_SelectorSocketTransport .*>:ResourceWarning",  # redis
+]
+minversion = "8.0"
+testpaths = ["src/tests"]
+xfail_strict = true
+
+# ruff
+[tool.ruff]
+src = ["src"]
+target-version = "py311"
+unsafe-fixes = true
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint]
+explicit-preview-rules = true
+fixable = ["ALL"]
+ignore = [
+  "ANN401",  # any-type
+  "ASYNC109",  # async-function-with-timeout
+  "C901",  # complex-structure
+  "D100",  # undocumented-public-module
+  "D101",  # undocumented-public-class
+  "D102",  # undocumented-public-method
+  "D103",  # undocumented-public-function
+  "D104",  # undocumented-public-package
+  "D105",  # undocumented-magic-method
+  "D106",  # undocumented-public-nested-class
+  "D107",  # undocumented-public-init
+  "D203",  # one-blank-line-before-class
+  "D213",  # multi-line-summary-second-line
+  "E501",  # line-too-long
+  "PD",  # pandas-vet
+  "PERF203",  # try-except-in-loop
+  "PLR0911",  # too-many-return-statements
+  "PLR0912",  # too-many-branches
+  "PLR0913",  # too-many-arguments
+  "PLR0915",  # too-many-statements
+  "PLR2004",  # magic-value-comparison
+  "PT013",  # pytest-incorrect-pytest-import
+  "S311",  # suspicious-non-cryptographic-random-usage
+  "S603",  # subprocess-without-shell-equals-true
+  "S607",  # start-process-with-partial-path
+  # preview
+  "S101",  # assert
+  # formatter
+  "W191",  # tab-indentation
+  "E111",  # indentation-with-invalid-multiple
+  "E114",  # indentation-with-invalid-multiple-comment
+  "E117",  # over-indented
+  "D206",  # indent-with-spaces
+  "D300",  # triple-single-quotes
+  "Q000",  # bad-quotes-inline-string
+  "Q001",  # bad-quotes-multiline-string
+  "Q002",  # bad-quotes-docstring
+  "Q003",  # avoidable-escaped-quote
+  "COM812",  # missing-trailing-comma
+  "COM819",  # prohibited-trailing-comma
+  "ISC001",  # single-line-implicit-string-concatenation
+  "ISC002",  # multi-line-implicit-string-concatenation
+]
+preview = true
+select = [
+  "ALL",
+  "RUF022",  # unsorted-dunder-all
+]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"src/tests/**/*.py" = ["S101"]  # assert
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["utilities.typed_settings.click_field"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
