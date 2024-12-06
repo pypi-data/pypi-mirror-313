@@ -1,0 +1,50 @@
+name: Tests
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+        h5py-version: ['dev']
+        numpy-version: ['latest', '1.24.4']
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install native dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y hdf5-tools libhdf5-dev mpi-default-dev
+
+      - name: Install target numpy version
+        if: matrix.numpy-version != 'latest'
+        run: |
+          pip install numpy~=${{ matrix.numpy-version }}
+          pip list
+
+      - name: Install development h5py version
+        if: matrix.h5py-version == 'dev'
+        run: pip install git+https://github.com/h5py/h5py
+
+      - name: Install versioned-hdf5
+        run: pip install .
+
+      - name: Install versioned-hdf5 test packages and extra h5py compression types
+        run: |
+          pip install .[test]
+          pip install hdf5plugin tables
+
+      - name: Dump pip environment
+        run: pip list
+
+      - name: Print hdf5 configuration
+        run: |
+          python -c 'import utils; utils.debug_libhdf5_so()'
+          h5cc -showconfig
+
+      - name: Run Tests
+        run: pytest -v .

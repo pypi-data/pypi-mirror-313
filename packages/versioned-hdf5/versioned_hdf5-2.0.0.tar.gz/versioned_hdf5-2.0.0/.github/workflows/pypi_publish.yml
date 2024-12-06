@@ -1,0 +1,83 @@
+name: Release Python Bindings to PyPI
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      test_pypi:
+        type: boolean
+        description: 'Test release: publish on test.pypi.org'
+        default: false
+
+jobs:
+  build-sdist:
+    name: Build package
+    runs-on: ubuntu-latest
+    steps:
+      - name: 💻 Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install native dependencies
+        run: |
+          set -xe
+          sudo apt update -y
+          sudo apt install -y hdf5-tools libhdf5-dev mpi-default-dev
+
+      - name: 🚀 Install build dependencies
+        run: |
+          python -m pip install build twine
+
+      - name: 📦 Build the sdist and wheel
+        run: |
+          python -m build --sdist -o wheelhouse
+
+      - name: List and check sdist
+        run: |
+          ls -lh wheelhouse/
+          twine check wheelhouse/*
+
+      - name: Upload sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist
+          path: ./wheelhouse/*.tar.gz
+
+  publish:
+    name: Publish Python packages on PyPI
+    needs: [build-sdist]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/versioned-hdf5
+    permissions:
+      id-token: write
+    steps:
+      - name: Retrieve wheels and sdist
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: wheels/
+
+      - name: print artifacts
+        run: |
+          ls -l wheels/
+
+      - name: 🧪 Publish to PyPI Testing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: ${{ inputs.test_pypi }}
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: wheels
+
+      - name: 🎉 Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: ${{ !inputs.test_pypi }}
+        with:
+          packages-dir: wheels
