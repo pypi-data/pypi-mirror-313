@@ -1,0 +1,133 @@
+Metadata-Version: 2.1
+Name: comuniitaliani
+Version: 0.1.6
+Summary: Libreria Python per ottenere informazioni sui comuni italiani dal file ISTAT
+Home-page: https://github.com/cvrboni/comuniitaliani
+Author: Andrea Carboni
+Author-email: andreacarboni@stepservizi.net
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas >=1.0.0
+Requires-Dist: requests >=2.0.0
+
+
+# Comuni Italiani
+
+Una libreria Python per ottenere informazioni sui comuni italiani, basata sui dati ufficiali dell'ISTAT.
+
+## **Funzionalità**
+- Cerca un comune per nome e ottieni informazioni dettagliate (es. codice catastale, sigla provincia, ecc.).
+- Ottieni una lista di comuni per provincia.
+- Aggiornamento automatico dei dati con l'ultima versione disponibile sul sito dell'ISTAT.
+
+---
+
+## **Installazione**
+Puoi installare la libreria direttamente da PyPI:
+
+```bash
+pip install comuniitaliani
+```
+
+---
+
+## **Utilizzo**
+Ecco come utilizzare la libreria per le operazioni principali:
+
+### **Cercare un comune per nome**
+```python
+from comuniitaliani import Comuni
+
+comuni = Comuni()
+
+# Cerca un comune
+info = comuni.cerca_comune("Agliè")
+print(info)
+```
+
+**Output Esempio:**
+```json
+{
+    "Nome": "Agliè",
+    "Sigla Provincia": "TO",
+    "Codice Catastale": "A074",
+    "Codice ISTAT Numerico": "1001",
+    "Regione": "Piemonte",
+    "Capoluogo": False
+}
+```
+
+---
+
+### **Elencare i comuni di una provincia**
+```python
+from comuniitaliani import Comuni
+
+comuni = Comuni()
+
+# Ottieni tutti i comuni della provincia di Torino
+provincia_comuni = comuni.comuni_per_provincia("TO")
+print(provincia_comuni[:5])  # Mostra i primi 5 comuni
+```
+
+**Output Esempio:**
+```json
+[
+    {"Nome": "Agliè", "Sigla Provincia": "TO", "Codice Catastale": "A074"},
+    {"Nome": "Airasca", "Sigla Provincia": "TO", "Codice Catastale": "A109"},
+    {"Nome": "Ala di Stura", "Sigla Provincia": "TO", "Codice Catastale": "A117"},
+    ...
+]
+```
+
+---
+
+## **Aggiornamento Automatico**
+La libreria verifica automaticamente se il dataset ISTAT è aggiornato e lo scarica se necessario.
+
+---
+
+## **Dipendenze**
+Questa libreria utilizza:
+- **pandas**: per la gestione e manipolazione dei dati.
+- **requests**: per scaricare il dataset ISTAT.
+
+Puoi installarle con:
+```bash
+pip install pandas requests
+```
+
+---
+
+## **Contribuire**
+Se vuoi contribuire alla libreria:
+1. Fai un fork del repository.
+2. Crea un branch per le tue modifiche:
+   ```bash
+   git checkout -b nome-branch
+   ```
+3. Fai un commit delle modifiche:
+   ```bash
+   git commit -m "Descrizione delle modifiche"
+   ```
+4. Fai un push del branch:
+   ```bash
+   git push origin nome-branch
+   ```
+5. Apri una Pull Request.
+
+---
+
+## **Licenza**
+Questa libreria è distribuita sotto la licenza MIT. Consulta il file [LICENSE](./LICENSE) per maggiori dettagli.
+
+---
+
+## **Link Utili**
+- [Repository GitHub](https://github.com/cvrboni/comuniitaliani)
+- [PyPI Package](https://pypi.org/project/comuniitaliani)
+- [Dataset ISTAT](https://www.istat.it/it/archivio/6789)
