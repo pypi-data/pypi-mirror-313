@@ -1,0 +1,119 @@
+Metadata-Version: 2.1
+Name: pytest-isolate-mpi
+Version: 0.2
+Summary: pytest-isolate-mpi allows for MPI-parallel tests being executed in a segfault and MPI_Abort safe manner
+Author-email: Sebastian Gottfried <sebastian.gottfried@dlr.de>, Jordan Lavialle <jordan.j.lavialle@airbus.com>, Immo Huismann <immo.huismann@dlr.de>
+License: Copyright 2024 German Aerospace Center (DLR e.V.) - Institute of
+        Software Methods for Product Virtualization
+        Copyright (c) 2016, James Tocknell
+        All rights reserved.
+        
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are met:
+            * Redistributions of source code must retain the above copyright
+              notice, this list of conditions and the following disclaimer.
+            * Redistributions in binary form must reproduce the above copyright
+              notice, this list of conditions and the following disclaimer in the
+              documentation and/or other materials provided with the distribution.
+            * Neither the name of the <organization> nor the
+              names of its contributors may be used to endorse or promote products
+              derived from this software without specific prior written permission.
+        
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+        ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+        WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+        DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+        DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+        (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+        LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+        
+Project-URL: Documentation, http://pytest-isolate-mpi.readthedocs.io/
+Project-URL: Repository, https://github.com/dlr-sp/pytest-isolate-mpi
+Project-URL: Bug Tracker, https://github.com/dlr-sp/pytest-isolate-mpi/issues
+Project-URL: Changelog, https://github.com/dlr-sp/pytest-isolate-mpi/blob/main/CHANGES.rst
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python
+Classifier: Framework :: Pytest
+Requires-Python: >=3.8
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+Requires-Dist: pytest>=5
+Requires-Dist: mpi4py
+Provides-Extra: dev
+Requires-Dist: check-manifest; extra == "dev"
+Requires-Dist: Sphinx<7; extra == "dev"
+Requires-Dist: sphinx-rtd-theme<2; extra == "dev"
+Requires-Dist: docutils<0.19; extra == "dev"
+Requires-Dist: pylint; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: wheel; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: pycodestyle; extra == "dev"
+Requires-Dist: watchdog; extra == "dev"
+
+MPI-Parallel, Crash-Safe Tests for Pytest
+=========================================
+
+``pytest-isolate-mpi`` is a plugin for `Pytest`_ to enable the test of
+MPI-parallel Python software. MPI-parallel tests are executed in forked
+MPI jobs with the help of `mpirun`_ to isolate the tests from each
+other. Thus, a crash in test only aborts the test, not the whole test
+suite. Similarly, deadlocks can be treated with timeouts for tests to
+prevent a test suite from never being able to finish::
+
+    import pytest
+    
+    
+    @pytest.mark.mpi(ranks=2, timeout=10, unit="s")
+    def test_with_mpi(mpi_ranks):
+        assert True  # replace with actual, MPI-parallel test code
+
+
+.. _pytest: https://docs.pytest.org/en/stable/
+.. _mpirun: https://docs.open-mpi.org/en/v5.0.x/man-openmpi/man1/mpirun.1.html
+
+Installation
+------------
+
+``pytest-isolate-mpi`` is available on `pypi.org`_ and can be installed
+with ``pip``::
+
+    pip install pytest-mpi-isolate
+
+
+.. _pypi.org: https://pypi.org/project/pytest-isolate-mpi/
+
+Documentation
+-------------
+
+For the full documentation, please see
+https://pytest-isolate-mpi.readthedocs.io/.
+
+Contributing
+------------
+
+Please refer to the `Contributor Guide`_ for
+instructions on how to contribute to ``pytest-isolate-mpi``.
+
+.. _Contributor Guide: https://pytest-isolate-mpi.readthedocs.io/en/latest/contributing.html
+
+License
+-------
+
+This work is licensed under the conditions of the BSD license, see
+`LICENSE <LICENSE>`_.
+
+The software is provided as is.  We sincerely welcome your feedback on
+issues, bugs and possible improvements.  Please use the issue tracker of
+the project for the corresponding communication or make a fork.  Our
+priority and time line for working on the issues depend on the project
+and its follow ups.  This may lead to issue and tickets, which are not
+pursued.  In case you need an urgent fix, please contact us directly for
+discussing possible forms of collaboration (direct contribution,
+projects, contracting, ...): `Institute of Software Methods for Product
+Virtualization <https://www.dlr.de/sp>`_.
+
+
