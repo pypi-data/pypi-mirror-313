@@ -1,0 +1,58 @@
+Metadata-Version: 2.1
+Name: jwt-kms
+Version: 0.1.4
+Summary: Library to offload some JWT crypto operations to KMS
+Home-page: https://github.com/jmtapio/python-jwt-kms
+License: MIT
+Author: Juha-Matti Tapio
+Author-email: jmtapio@verkkotelakka.net
+Requires-Python: >=3.9.2
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: cryptography (>=44.0.0)
+Project-URL: Repository, https://github.com/jmtapio/python-jwt-kms
+Description-Content-Type: text/markdown
+
+# Python `jwt_kms` library
+
+This library is work in progress.
+
+Isolating private asymmetric keys to AWS KMS helps improve security by 
+making it next to impossible to make copies of them. This library aims to 
+provide a simple interface to use KMS keys to sign payloads into JWS tokens 
+and/or to encrypt payloads into JWE tokens.
+
+Signing with RSA and EC keys is currently supported.
+
+## Keys
+
+```
+import boto3
+from jwt_kms import jwk
+
+client = boto3.client('kms')
+key = jwk.JWK(client, 'some-key-id')
+
+public_key_pem = key.public_key_pem
+```
+
+## Signing
+
+```
+from jwt_kms import jws
+
+payload = {
+   'something': 'yes',
+   'more_something': 'abc'
+}
+
+token = jws.JWS(payload).add_signature(key, 'RS256').serialize(compact=True)  # or compact=False
+```
+
+## Encrypting
+
+TODO.
+
