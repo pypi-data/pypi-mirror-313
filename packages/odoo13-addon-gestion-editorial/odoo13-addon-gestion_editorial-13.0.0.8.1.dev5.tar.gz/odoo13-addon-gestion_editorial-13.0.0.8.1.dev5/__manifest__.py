@@ -1,0 +1,63 @@
+# -*- coding: utf-8 -*-
+######################################################################################
+#
+#         License**
+#
+########################################################################################
+{
+    'name': 'Sistema de gestión Editorial',
+    'version': '13.0.0.8.0',
+    'summary': 'Módulo para gestión de la editorial Descontrol.',
+    'description': 'Módulo para gestión de la editorial Descontrol.',
+    'category': 'Industries',
+    'author': 'Colectivo DEVCONTROL',
+    'author_email': 'devcontrol@zici.fr',
+    'maintainer': 'Colectivo DEVCONTROL',
+    'company': 'Colectivo DEVCONTROL',
+    'website': 'https://framagit.org/devcontrol',
+    'depends': [
+        'account',
+        'account_invoice_pricelist',
+        'base',
+        'product',
+        'point_of_sale',
+        'sale',
+        'sale_management',
+        'sale_purchase',
+        'sale_stock',
+        'stock',
+    ],
+    'data': [
+        'data/deposito_venta_data.xml',
+        'data/deposito_compra_data.xml',
+        'data/ddaa_data.xml',
+        'data/promocion_data.xml',
+        'wizards/liquidacion_lineas_pendientes/liquidacion_lineas_pendientes.xml',
+        'views/product_descontrol_view.xml',
+        'views/res_partner_descontrol_view.xml',
+        'views/liquidacion_descontrol_view.xml',
+        'views/menu_items.xml',
+        'views/sale_order_descontrol_view.xml',
+        'views/purchase_order_descontrol_view.xml',
+        'views/stock_picking_descontrol_view.xml',
+        'views/stock_quant_descontrol_view.xml',
+        'views/report_deliveryslip_document_descontrol_view.xml',
+        'views/report_purchaseorder_document_descontrol_view.xml',
+        'views/report_purchasequotation_document_descontrol_view.xml',
+        'views/report_stockpicking_operations_document_descontrol_view.xml',
+        'views/report_saleorder_document_descontrol_view.xml',
+        'views/report_invoice_document_descontrol_view.xml',
+        'views/res_config_settings_descontrol_view.xml',
+        'views/product_pricelist_descontrol_view.xml',
+        'security/ir.model.access.csv'
+    ],
+    'post_init_hook': 'set_company_default_values',
+    'qweb': ['static/src/xml/sale_order_widget.xml'],
+    'images': ['static/description/logo-devcontrol.png'],
+    'license': 'OPL-1',
+    'price': 0,
+    'currency': 'EUR',
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+}

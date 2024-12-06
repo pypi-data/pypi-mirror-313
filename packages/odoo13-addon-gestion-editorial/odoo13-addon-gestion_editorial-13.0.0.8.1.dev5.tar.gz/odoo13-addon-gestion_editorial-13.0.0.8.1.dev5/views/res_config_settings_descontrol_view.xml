@@ -1,0 +1,92 @@
+<odoo>
+    <record id="res_config_settings_view_form_editorial" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.editorial</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="100"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="app_settings_block pb-5" data-string="Editorial" string="Gestión editorial" data-key="gestion_editorial" groups="sales_team.group_sale_manager">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h2>Derechos de Autoría</h2>
+                            <div class="row mt16 o_settings_container" name="editorial_setting_container">
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="module_editorial_ddaa"/>
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="module_editorial_ddaa"/>
+                                        <div class="text-muted">
+                                            Activar generación de derechos de autoría.
+                                        </div>
+                                        <div class="row mt16" attrs="{'invisible': [('module_editorial_ddaa', '=', False)]}">
+                                            <label for="product_category_ddaa_id" string="Categoría para DDAA" class="col-lg-4 o_light_label"/>
+                                            <field name="product_category_ddaa_id" class="oe_inline" attrs="{'required': [('module_editorial_ddaa', '=', True)]}"/>
+                                        </div>
+                                        <div class="row mt16" attrs="{'invisible': [('module_editorial_ddaa', '=', False)]}">
+                                            <label for="product_categories_genera_ddaa_ids" string="Categorías madre que generan DDAA" class="col-lg-4 o_light_label"/>
+                                            <field name="product_categories_genera_ddaa_ids" widget="many2many_tags" class="oe_inline" attrs="{'required': [('module_editorial_ddaa', '=', True)]}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <h2>Visibilidad limitada por proveedor</h2>
+                            <div class="row mt16 o_settings_container" name="editorial_setting_container_visibility_limited_by_provider">
+                                <div class="col-12 col-lg-6 o_setting_box">
+                                    <div class="o_setting_left_pane">
+                                        <field name="visibility_limited_by_supplier" />
+                                    </div>
+                                    <div class="o_setting_right_pane">
+                                        <label for="visibility_limited_by_supplier"/>
+                                        <div class="text-muted">
+                                            Los nuevos productos tendrán por defecto la visibilidad limitad por proveedor si esta casilla esta activada.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Depósito compra</h2>
+                    <div class="row o_settings_container" name="editorial_setting_container_deposito_compra">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <div class="row mt16">
+                                    <label for="stock_picking_type_compra_deposito_id" string="Tipo de operación de depósito compra" class="col-lg-4 o_light_label"/>
+                                    <field name="stock_picking_type_compra_deposito_id" class="oe_inline" required="1"/>
+                                </div>
+                                <div class="row mt16">
+                                    <label for="account_journal_deposito_compra_id" string="Diario para liquidaciones de compra a depósito" class="col-lg-4 o_light_label"/>
+                                    <field name="account_journal_deposito_compra_id" class="oe_inline" required="1"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h2>Ubicaciones</h2>
+                    <div class="row o_settings_container" name="editorial_setting_container_deposito_venta">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_right_pane">
+                                <div class="row mt16">
+                                    <div class="col-lg-6">
+                                        <label for="location_venta_deposito_id" string="Ubicación de depósito venta" class="o_light_label"/>
+                                        <field name="location_venta_deposito_id" class="oe_inline" required="1"/>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label for="location_authors_id" string="Ubicación para los autores" class="o_light_label"/>
+                                        <field name="location_authors_id" class="oe_inline" required="1"/>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label for="location_promotion_id" string="Ubicación para promoción" class="o_light_label"/>
+                                        <field name="location_promotion_id" class="oe_inline" required="1"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,32 @@
+<!-- Copy of OCB/addons/sale_stock/static/src/xml/qty_at_date_widget.xml
+// https://github.com/OCA/OCB/blob/13.0/addons/sale_stock/static/src/xml/qty_at_date.xml -->
+
+<templates>
+    <div t-name="gestion_editorial.SaleOrderWidget">
+        <div t-att-class="!widget.data.display_qty_widget ? 'invisible' : ''">
+            <t t-if="widget.data.in_stock_qty &lt; widget.data.qty_to_deliver">
+                <a tabindex="0" class="fa fa-info-circle text-danger"/>
+            </t>
+            <t t-else="">
+                <a tabindex="0" class="fa fa-info-circle text-primary"/>
+            </t>
+        </div>
+    </div>
+
+    <div t-name="gestion_editorial.SaleOrderPopOver">
+        <table>
+            <tbody>
+                <tr>
+                    <td><strong>In Stock</strong><br /><small>On <span t-esc="data.delivery_date"/></small></td>
+                    <td class="float-right"><t t-esc='data.in_stock_qty'/>
+                    <t t-esc='data.product_uom.data.display_name'/></td>
+                </tr>
+                <tr>
+                    <td><strong>In Distribution</strong><br /><small>On <span t-esc="data.delivery_date"/></small></td>
+                    <td class="float-right"><t t-esc='data.in_distribution_qty'/>
+                    <t t-esc='data.product_uom.data.display_name'/></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</templates>

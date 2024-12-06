@@ -1,0 +1,36 @@
+<odoo>
+    <record id="purchase_order_form_descontrol_view" model="ir.ui.view">
+      <field name="name">purchase.order.descontrol.form.view</field>
+      <field name="model">purchase.order</field>
+      <field name="inherit_id" ref="purchase.purchase_order_form"/>
+      <field name="arch" type="xml">
+
+        <xpath expr="//field[@name='picking_type_id']" position="replace">
+          <field name="available_products" invisible="1" />
+        </xpath>
+      
+        <xpath expr="//field[@name='order_line']/tree//field[@name='product_id']" position="attributes">
+          <attribute name="domain">[('purchase_ok', '=', True), '|', 
+          ('company_id', '=', False), ('company_id', '=', 'parent.company_id'),
+          ('id', 'in', parent.available_products)]</attribute>
+        </xpath>
+
+        <xpath expr="//field[@name='date_order']" position="after">
+          <field name="picking_type_id" domain="[('code','=','incoming'), '|', ('warehouse_id', '=', False), ('warehouse_id.company_id', '=', company_id)]" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
+        </xpath>
+
+        <xpath expr="//page/field[@name='order_line']/form/group/group/field[@name='product_id']" position="after">
+          <field name="product_barcode"/>
+        </xpath>
+        <xpath expr="//page/field[@name='order_line']/tree/field[@name='product_id']" position="after">
+           <field name="product_barcode"/>
+        </xpath>
+        <xpath expr="//page/field[@name='order_line']/tree/field[@name='qty_invoiced']" position="after">
+          <field name="liquidated_qty" string="Liquidados" attrs="{'column_invisible': [('parent.state', 'not in', ('purchase', 'done'))]}" optional="show" readonly="1"/>
+        </xpath>
+        <xpath expr="//page/field[@name='order_line']/tree/field[@name='name']" position="attributes">
+           <attribute name="optional">hide</attribute>
+        </xpath>
+      </field>
+    </record>
+</odoo>
