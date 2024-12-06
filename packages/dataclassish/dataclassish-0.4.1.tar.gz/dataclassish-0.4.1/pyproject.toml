@@ -1,0 +1,146 @@
+[project]
+name = "dataclassish"
+authors = [
+  { name = "Nathaniel Starkman", email = "nstarman@users.noreply.github.com" },
+]
+description = "dataclass tools, extended by multiple dispatch"
+readme = "README.md"
+license.file = "LICENSE"
+requires-python = ">=3.10"
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+  "Typing :: Typed",
+]
+dynamic = ["version"]
+dependencies = [
+  "plum-dispatch>=2.5.1",
+  "typing_extensions>=4.12.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/GalacticDynamics/dataclassish"
+"Bug Tracker" = "https://github.com/GalacticDynamics/dataclassish/issues"
+Discussions = "https://github.com/GalacticDynamics/dataclassish/discussions"
+Changelog = "https://github.com/GalacticDynamics/dataclassish/releases"
+
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+  { "include-group" = "nox" },
+  { "include-group" = "test" },
+]
+nox = ["nox"]
+test = [
+  "attrs",
+  "pytest >=6",
+  "pytest-cov >=3",
+  "sybil",
+]
+
+[tool.hatch]
+version.source = "vcs"
+build.hooks.vcs.version-file = "src/dataclassish/_version.py"
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = [
+  "error",
+]
+log_cli_level = "INFO"
+testpaths = [
+  "src", "tests",
+]
+
+
+[tool.coverage]
+run.source = ["dataclassish"]
+report.exclude_also = [
+  '\.\.\.',
+  'if typing.TYPE_CHECKING:',
+]
+
+[tool.mypy]
+files = ["src"]
+python_version = "3.10"
+warn_unused_configs = true
+strict = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+warn_unreachable = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[[tool.mypy.overrides]]
+module = "dataclassish.*"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = ["plum.*"]
+
+
+[tool.ruff]
+src = ["src"]
+
+[tool.ruff.lint]
+extend-select = ["ALL"]
+ignore = [
+  "ANN101",   # Missing type annotation for `self`
+  "ANN401",   # Dynamically typed expressions are disallowed in `**kwargs`
+  "COM812",   # For ruff.format
+  "D203",     # 1 blank line required before class docstring
+  "D213",     # Multi-line docstring summary should start at the first line
+  "F811",     # Redefinition of unused '...'  (for plum-dispatch)
+  "FIX002",   # Line contains TODO
+  "ISC001",   # Conflicts with formatter
+  "PLR09",    # Too many <...>
+  "PLR2004",  # Magic value used in comparison
+  "TD002",    # Missing author in TODO
+  "TD003",    # Missing issue link on the line following this TODO
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ANN", "S101", "T20"]
+"noxfile.py" = ["T20"]
+"docs/conf.py" = ["INP001"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+
+[tool.pylint]
+py-version = "3.10"
+ignore-paths = [".*/_version.py"]
+reports.output-format = "colorized"
+similarities.ignore-imports = "yes"
+messages_control.disable = [
+  "design",
+  "fixme",
+  "function-redefined",  # for plum-dispatch
+  "line-too-long",
+  "missing-module-docstring",
+  "missing-function-docstring",
+  "no-value-for-parameter",  # for plum-dispatch
+  "unused-argument",  # handled by ruff
+  "unused-wildcard-import",  # handled by ruff
+  "wildcard-import",  # handled by ruff
+  "wrong-import-position",
+]
