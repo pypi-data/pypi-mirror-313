@@ -1,0 +1,145 @@
+[project]
+name = "contrast-agent"
+authors = [{ name = "Contrast Security, Inc.", email = "python@contrastsecurity.com"}]
+classifiers=[
+    "Development Status :: 5 - Production/Stable",
+    # Audience
+    "Intended Audience :: Developers",
+    # License; commercial
+    # supported languages
+    "Programming Language :: Python :: 3",
+]
+dynamic = ["version"]
+dependencies = [
+    "requests>=2.4.2,<3",
+    "contrast-agent-lib~=0.7.0",
+    "contrast-fireball==0.1.5"
+]
+description = "Contrast Security's agent for Python web frameworks"
+keywords = ["security development"]
+license = { file = "LICENSE.txt" }
+# Do not add an upper limit here - doing so will cause users on too-new python versions
+# to receive the last release of the python agent that did not specify an upper limit.
+# At the time of writing, this is 5.18.9 (Mar 2023), which is obviously not desirable.
+# Instead, use the machinery in setup.py.
+# See https://discuss.python.org/t/requires-python-upper-limits/12663
+requires-python = ">=3.8"
+readme = "README.md"
+
+[project.optional-dependencies]
+debug = [
+    "viztracer>=0.16.3,<1.1.0"
+]
+
+[project.urls]
+"Contrast" = "https://www.contrastsecurity.com"
+"Change Log" = "https://docs.contrastsecurity.com/en/python-agent-release-notes-and-archive.html"
+"Support" = "https://support.contrastsecurity.com"
+"Trouble Shooting" = "https://support.contrastsecurity.com/hc/en-us/search?utf8=%E2%9C%93&query=Python"
+"Wiki" = "https://docs.contrastsecurity.com/"
+
+[project.scripts]
+"contrast-python-run" = "contrast.scripts.runner:runner"
+"contrast-fix-interpreter-permissions" = "contrast.scripts.fix_interpreter_permissions:fix_interpreter_permissions"
+"contrast-validate-config" = "contrast.scripts.validate_config:validate_config"
+"contrast-propagator-check" = "contrast.scripts.propagator_check:propagator_check"
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2,<9"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools_scm]
+write_to = "src/contrast/version.py"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']  # TODO: PYT-3407
+exclude = '''
+(
+  /(
+    | src/contrast_vendor/*
+    | src/contrast/assess_extensions/*
+    | src/contrast/data/*
+    | tests/agent/data/*
+    | tests/extern/*
+    | tests/assess_extensions/python_12_plus_only/*
+    | .eggs/*
+    | build/*
+  )/ |
+  framework_test/django-2\.2\.1/app/view_definitions\.py |
+  framework_test/django-3\.0\.6/app/view_definitions\.py
+)
+'''
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"  # TODO: PYT-3407
+extend-exclude = [
+  "src/contrast_vendor/",
+  "*.golden",
+  "tests/agent/data/rewriter/source/",
+  "tests/extern/",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "B",
+    "E",
+    "PERF",
+    "PLC",
+    "PLE",
+    "UP",
+    "W",
+    # we may want to add these eventually
+    # "PLW",
+    # "RUF",
+    # "RET",
+]
+# we may want to remove this eventually
+ignore = [
+  "E501",  # Line too long
+]
+
+[tool.pytest.ini_options]
+testpaths = "tests integration-tests/test-create-config-script"
+filterwarnings = [
+  "error::DeprecationWarning",
+  # for DeprecatedWarning which doesn't work for some reason if not like this
+  "error:.*Call to deprecated.*",
+  "error::PendingDeprecationWarning",
+  "error::pytest.PytestUnhandledThreadExceptionWarning",
+  "error::pytest.PytestUnhandledCoroutineWarning",
+  "error::pytest.PytestUnraisableExceptionWarning",
+  "error::RuntimeWarning:asyncio.*",
+  "ignore::DeprecationWarning:pip._vendor.*",
+  "ignore::DeprecationWarning:wrapt.*",
+  "ignore::DeprecationWarning:jinja2.*",
+  "ignore::DeprecationWarning:pyramid.*",
+  "ignore::DeprecationWarning:aiohttp.*",
+  # Both filter pkg_resources warnings are required because we have vendored dependencies that still use it.
+  # In addition the same dependency a vendored package uses (paste) uses the legacy style method of declaring a namespace package
+  "ignore:pkg_resources.*:DeprecationWarning",
+  "ignore:Deprecated call to .*pkg_resources.declare_namespace.*:DeprecationWarning",
+  "ignore:ast.Ellipsis is deprecated.*:DeprecationWarning",
+  "ignore:.*datetime.datetime.utc.*:DeprecationWarning",  # from older dependency or maybe pytest
+  "ignore:ast.Num is deprecated.*:DeprecationWarning", # TODO: PYT-3116 from unparse test
+
+  # defusedxml was deprecated long ago but we still test it.
+  "ignore:.*defusedxml.lxml:DeprecationWarning",
+  # turn off YAMLLoadWarning about unsafe yaml since we have to test for unsafe use
+  "ignore:.*calling yaml.load.*as the default Loader is unsafe.*",
+  # we still test these functions
+  "ignore:.*'flask.helpers.safe_join' is deprecated.*",
+  "ignore:.*'utils.escape' is deprecated.*",
+  "ignore:.*unicode_internal codec has been deprecated.*",
+  "ignore:.*'cgi' is deprecated.*",
+  "ignore:Please use.*python_multipart.*instead.*:PendingDeprecationWarning", # TODO: PYT-3421 this can be removed after upgrading fastapi to 0.115.4+
+  "ignore::contrast.utils.exceptions.deprecation_warning.ContrastDeprecationWarning",
+]
+timeout = 300 # in seconds => 5m
+xfail_strict = true
+asyncio_mode = "auto"
+addopts = "--ignore=tests/performance"
