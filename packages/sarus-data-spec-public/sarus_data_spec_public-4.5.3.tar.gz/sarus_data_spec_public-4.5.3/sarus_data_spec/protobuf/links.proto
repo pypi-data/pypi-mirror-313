@@ -1,0 +1,18 @@
+syntax = "proto3";
+import "sarus_data_spec/protobuf/path.proto";
+import "sarus_data_spec/protobuf/statistics.proto";
+package sarus_data_spec;
+
+message Links {
+  string uuid = 1;
+  string dataset = 2; // uuid
+  repeated LinkStat links_statistics = 3;
+  map<string, string> properties = 4;
+
+  message LinkStat {
+    Path pointing=1;
+    Path pointed=2;
+    Distribution distribution=3;
+    map<string, string> properties = 4; // Needed for compatibility with typing
+  }
+}
