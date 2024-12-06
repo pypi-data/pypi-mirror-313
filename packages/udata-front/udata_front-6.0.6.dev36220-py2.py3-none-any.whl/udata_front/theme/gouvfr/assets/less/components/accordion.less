@@ -1,0 +1,51 @@
+// Data.gouv customization
+.fr-accordion {
+    --border-default-blue-france: @blue-400;
+    --text-action-high-blue-france: @grey-500;
+    --background-open-blue-france: @background-alt-grey;
+    --background-open-blue-france-hover: @background-alt-grey-hover;
+    --background-open-blue-france-active: @background-alt-grey-active;
+}
+
+
+// Accordion interaction styling
+.accordion-button {
+    // Prevent click events bubbling
+    * {
+        pointer-events: none;
+    }
+
+    &:extend(.fr-icon-arrow-right-s-line);
+    &:extend([class^="fr-icon-"]);
+    &::before {
+        &:extend(.fr-icon-arrow-right-s-line::before);
+        &:extend([class^="fr-icon-"]::before);
+        transform: rotate(90deg);
+        transition: transform ease 0.3s; // Warning : if you change the timing here, change it in accordion.js as well
+    }
+
+    &[aria-expanded]::before {
+        transform: rotate(-90deg);
+    }
+
+    &.trigger-once {
+        &[aria-expanded] {
+            display: none;
+        }
+    }
+
+    display: inline-block;
+
+    svg {
+        width: 15px;
+        height: 15px;
+
+        * {
+            fill: @grey-380;
+        }
+    }
+}
+
+:root {
+    @accordion-content-if-js();
+}
