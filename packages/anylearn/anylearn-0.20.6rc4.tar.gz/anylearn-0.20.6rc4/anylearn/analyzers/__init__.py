@@ -1,0 +1,1 @@
+from anylearn.analyzers.artifact_collector import ArtifactCollector
