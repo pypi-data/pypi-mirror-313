@@ -1,0 +1,89 @@
+[project]
+name = 'relationalai'
+version = '0.6.3'
+description = 'RelationalAI Library and CLI'
+readme="docs/pypi/README.md"
+authors = [
+    { name="RelationalAI", email="support@relational.ai" },
+]
+requires-python = ">= 3.9"
+dependencies = [
+    "snowflake-connector-python[secure-local-storage]",
+    "snowflake-snowpark-python",
+    "rai-sdk>=0.7.5",
+    "typing-extensions",
+    "rich",
+    "nicegui",
+    "numpy<2",
+    "pandas",
+    "colorama",
+    "inquirerpy",
+    "click",
+    "gravis",
+    "bytecode",
+    "toml",
+    "tomlkit",
+    "requests",
+    "pyarrow",
+    "websockets",
+    "aiohttp",
+    "packaging",
+    "wcwidth",
+    "cryptography<43"
+]
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-snapshot",
+    "hypothesis",
+    "faker",
+    "argcomplete",
+    "watchdog",
+    "hupper",
+    "prompt_toolkit",
+    "build",
+    "ruff",
+    "pexpect",
+    "ddtrace",
+    "coverage",
+    "pandas-stubs",
+]
+
+[project.scripts]
+rai = "relationalai.tools.cli:cli"
+rai-dev = "relationalai.tools.dev:cli"
+
+[tool.ruff]
+extend-exclude = ["*.ipynb"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+# Note that the wheel is build _from_ the source dist, so it needs to be shaped the way the repo is shaped
+[tool.hatch.build.targets.sdist]
+only-include = ["src"]
+[tool.hatch.build.targets.sdist.force-include]
+"frontend/debugger/dist" = "frontend/debugger/dist"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/relationalai", "src/relationalai_test_util"]
+# Everything I have read seems to indicate I should be able to do a regular
+# include from the force-include in the sdist. But it does not work.
+[tool.hatch.build.targets.wheel.force-include]
+"frontend/debugger/dist" = "frontend/debugger/dist"
+
+[tool.pyright]
+include = ["src", "tests"]
+exclude = ["**/node_modules", "**/__pycache__", "**/.*", "**/test_cases/*", "src/relationalai/metagen.py", "src/gentest"]
+useLibraryCodeForTypes = true
+reportMissingImports = true
+reportMissingTypeStubs = false
+pythonVersion = "3.9"
+typeCheckingMode = "standard"
+reportUnusedExpression = false
