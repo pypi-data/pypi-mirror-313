@@ -1,0 +1,108 @@
+[project]
+name = "splinkclickhouse"
+version = "0.3.3"
+description = "Clickhouse backend support for Splink"
+authors = [{name = "Andrew Bond"}]
+license = {text = "MIT License"}
+readme = "README.md"
+keywords = [
+    "data linking",
+    "record linkage",
+    "entity resolution",
+    "deduplication",
+    "fuzzy matching",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+
+    "License :: OSI Approved :: MIT License",
+
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "splink >= 4.0.6",
+    "clickhouse_connect >= 0.7.0",
+]
+[project.urls]
+Homepage = "https://github.com/ADBond/splinkclickhouse"
+Documentation = "https://github.com/ADBond/splinkclickhouse/blob/main/README.md"
+Repository = "https://github.com/ADBond/splinkclickhouse.git"
+Issues = "https://github.com/ADBond/splinkclickhouse/issues"
+Changelog = "https://github.com/ADBond/splinkclickhouse/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+chdb = [
+    "chdb >= 2.0.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "ruff == 0.6.4",
+    "mypy == 1.11.2",
+    "pytest == 8.3.3",
+    "pyarrow >= 17.0.0",
+    # probably not ideal having this doubled here,
+    # but saves having to pass --all_extras for 'uv run'
+    "chdb >= 2.0.1",
+]
+package = true
+
+[tool.hatch.build.targets.sdist]
+# opt-in to build
+include = [
+    "splinkclickhouse/*",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "pyproject.toml"
+]
+
+[tool.ruff]
+line-length = 88
+lint.select = [
+    # Pyflakes
+    "F",
+    # Pycodestyle
+    "E",
+    "W",
+    # isort
+    "I001",
+    # bugbear
+    "B",
+    # flake8-print
+    "T20"
+]
+
+[tool.mypy]
+packages = "splinkclickhouse"
+
+implicit_optional = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = [
+    # tests not marked with chdb or clickhouse:
+    "core",
+    # these run backend versions of tests, and core
+    "chdb",
+    "clickhouse",
+    # these do only the backend ones, no core
+    "chdb_no_core",
+    "clickhouse_no_core",
+]
