@@ -1,0 +1,7 @@
+ATTRIB_START = 'sisc_start'
+ATTRIB_END = 'sisc_end'
+ATTRIB_TEXT_START = 'sisc_text_start'
+ATTRIB_TEXT_END = 'sisc_text_end'
+ATTRIB_SKIP = 'sisc_skip'
+ATTRIB_OFFSET_START = 'sisc_offset_start'
+ATTRIB_OFFSET_END = 'sisc_offset_end'
