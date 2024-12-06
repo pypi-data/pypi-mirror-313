@@ -1,0 +1,109 @@
+# CI stages to execute against Pull Requests
+name: PyPi & Quay Releases
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+    PYCURL_SSL_LIBRARY: openssl
+
+jobs:
+  codechecks:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+    steps:
+      - name: Checkout Cloudwash
+        uses: actions/checkout@v4
+
+      - name: Set Up Python-${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt-get install -y libgnutls28-dev libcurl4-openssl-dev libssl-dev
+          # Uninstall pycurl - its likely not installed, but in case the ubuntu-latest packages change
+          # then compile and install it with PYCURL_SSL_LIBRARY set to openssl
+          pip install -U pip
+          pip uninstall -y pycurl
+          pip install --compile --no-cache-dir pycurl
+          pip install .[dev]
+          cp settings.yaml.template settings.yaml
+
+      - name: Pre Commit Checks
+        uses: pre-commit/action@v3.0.1
+
+      - name: Analysis (git diff)
+        if: failure()
+        run: git diff
+
+  release_to_pypi:
+    needs: codechecks
+    name: PyPi Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set Up Python3
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Setup and Build
+        run: |
+          sudo apt update
+          sudo apt-get install -y libgnutls28-dev libcurl4-openssl-dev libssl-dev
+          # Uninstall pycurl - its likely not installed, but in case the ubuntu-latest packages change
+          # then compile and install it with PYCURL_SSL_LIBRARY set to openssl
+          pip install -U pip
+          pip uninstall -y pycurl
+          pip install --compile --no-cache-dir pycurl
+          pip install .[setup]
+          python setup.py sdist bdist_wheel
+          python -m twine check dist/*
+
+      - name: Release to PyPi
+        uses: pypa/gh-action-pypi-publish@v1.9.0
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip_existing: true
+
+  cloudwash_container:
+    needs: release_to_pypi
+    name: Quay Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Quay Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: 'quay.io'
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Build and push image to Quay
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.dev
+          push: true
+          tags: quay.io/redhatqe/cloudwash:latest,quay.io/redhatqe/cloudwash:v${{ github.ref_name }}
