@@ -1,0 +1,56 @@
+Metadata-Version: 2.3
+Name: add-qbt-trackers
+Version: 0.1
+Summary: Add known working trackers to a qBittorrent instance.
+Project-URL: Homepage, https://codeberg.org/hyperreal/add-qbt-trackers
+Project-URL: Issues, https://codeberg.org/hyperreal/add-qbt-trackers/issues
+Author-email: Jeffrey Serio <hyperreal@fedoraproject.org>
+Classifier: Environment :: Console
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Communications :: File Sharing
+Classifier: Topic :: Utilities
+Requires-Python: >=3.10
+Requires-Dist: qbittorrent-api>=2024.11.70
+Requires-Dist: requests>=2.32.3
+Description-Content-Type: text/markdown
+
+# add-qbt-trackers
+
+This program simply adds known working trackers to a qBittorrent instance. The tracker URLs are taken from the following lists:
+
+``` shell
+https://newtrackon.com/api/stable
+https://trackerslist.com/best.txt
+https://trackerslist.com/http.txt
+https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt
+```
+
+I've also included my own tracker URLs:
+
+``` shell
+http://tracker.hyperreal.coffee/announce
+udp://tracker.hyperreal.coffee:1337
+```
+
+## Installation
+
+``` shell
+pipx install add-qbt-trackers --include-deps
+```
+
+## Usage
+
+``` shell
+add-qbt-trackers HOSTNAME USERNAME PASSWORD
+add-qbt-trackers -h
+```
+
+Example:
+
+``` shell
+add-qbt-trackers "http://localhost:8080" "admin" "password"
+```
+
+> Note: Be sure to use quotes around the HOSTNAME, USERNAME, and PASSWORD so that the shell parses them correctly.
