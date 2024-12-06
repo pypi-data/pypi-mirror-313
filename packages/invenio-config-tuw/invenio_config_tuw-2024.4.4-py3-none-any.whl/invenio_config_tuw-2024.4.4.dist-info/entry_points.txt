@@ -1,0 +1,23 @@
+[invenio_base.api_apps]
+invenio_config_tuw = invenio_config_tuw:InvenioConfigTUW
+
+[invenio_base.api_finalize_app]
+invenio_config_tuw_mail_handler = invenio_config_tuw.startup:register_smtp_error_handler
+invenio_config_tuw_search_drafts = invenio_config_tuw.startup:override_search_drafts_options
+
+[invenio_base.apps]
+invenio_config_tuw = invenio_config_tuw:InvenioConfigTUW
+
+[invenio_base.blueprints]
+invenio_config_tuw_settings = invenio_config_tuw.views:blueprint
+
+[invenio_base.finalize_app]
+invenio_config_tuw_curation_settings = invenio_config_tuw.startup:register_menu_entries
+invenio_config_tuw_mail_handler = invenio_config_tuw.startup:register_smtp_error_handler
+invenio_config_tuw_search_drafts = invenio_config_tuw.startup:override_search_drafts_options
+
+[invenio_celery.tasks]
+invenio_config_tuw = invenio_config_tuw.tasks
+
+[invenio_config.module]
+zzz_invenio_config_tuw = invenio_config_tuw.config
