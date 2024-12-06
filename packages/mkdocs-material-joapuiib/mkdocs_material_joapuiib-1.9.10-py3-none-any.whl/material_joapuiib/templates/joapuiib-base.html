@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{'stylesheets/site.css' | url}}">
+    <link rel="stylesheet" href="{{'stylesheets/admonitions.css' | url}}">
+    <link rel="stylesheet" href="{{'stylesheets/highlight.css' | url}}">
+    <link rel="stylesheet" href="{{'stylesheets/collapse-code.css' | url}}">
+    <link rel="stylesheet" href="{{'stylesheets/download-button.css' | url}}">
+    <link rel="stylesheet" href="https://unpkg.com/katex@0/dist/katex.min.css">
+    {% if page.is_page %}
+    {% for path in page.meta.extra_stylesheets %}
+        <link rel="stylesheet" href="{{ path | url }}">
+    {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://unpkg.com/katex@0/dist/katex.min.js"></script>
+    <script src="https://unpkg.com/katex@0/dist/contrib/auto-render.min.js"></script>
+    <script src="{{ 'javascript/katex.js' | url }}"></script>
+    <script src="https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js"></script>
+    <script src="{{ 'javascript/tablesort.js' | url }}"></script>
+    <script src="{{ 'javascript/download-button.js' | url }}"></script>
+    {% if page.is_page %}
+    {% for script in page.meta.extra_javascript %}
+        {{ script | script_tag }}
+    {% endfor %}
+    {% endif %}
+{% endblock %}
+
+{% block announce %}{% if config.theme.under_construction %}
+<div class="under-construction" markdown>
+<img alt="🚧" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/1f6a7.svg">
+<img alt="🏗" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/1f3d7.svg" title="">
+Lloc web en construcció!
+<img alt="🚧" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/1f6a7.svg">
+<img alt="🏗" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.1.0/assets/svg/1f3d7.svg" title="">
+</div>
+{% endif %}{% endblock %}
+
+{% block container %}
+  {% if page.is_page and page.meta['spell-ignore'] %}
+    {% set spell_ignore = " spell-ignore" %}
+  {% endif %}
+
+  <div class="md-content{{ spell_ignore }}" data-md-component="content">
+    <article class="md-content__inner md-typeset">
+      {% block content %}
+        {% include "partials/content.html" %}
+      {% endblock %}
+    </article>
+  </div>
+{% endblock %}

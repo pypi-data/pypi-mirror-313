@@ -1,0 +1,64 @@
+{% extends "main.html" %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{'stylesheets/document.css' | url}}">
+    <link rel="stylesheet" href="{{'stylesheets/cover.css' | url}}">
+
+    {% if self.document_header() %}
+    <style>
+        :root {
+            --md-document__header-height: 3rem;
+        }
+    </style>
+    {% endif %}
+    {% if self.document_footer() %}
+    <style>
+        :root {
+            --md-document__footer-height: 3rem;
+        }
+    </style>
+    {% endif %}
+{% endblock %}
+
+{% block container %}
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+
+<div class="md-document__header">
+{% block document_header %}{% endblock %}
+</div>
+
+<table class="md-document__print-layout">
+    <thead><tr><td>
+        <div class="md-document__header-space">&nbsp;</div>
+    </td></tr></thead>
+
+    <tbody><tr><td>
+
+{% block content %}
+    {% if "material/tags" in config.plugins and tags %}
+      {% include "partials/tags.html" %}
+    {% endif %}
+    {% include "partials/cover.html" %}
+    {% include "partials/actions.html" %}
+    {{ page.content }}
+{% endblock %}
+
+    </td></tr></tbody>
+
+    <tfoot><tr><td>
+        <div class="md-document__footer-space">&nbsp;</div>
+    </td></tr></tfoot>
+</table>
+
+<div class="md-document__footer">
+{% block document_footer %}{% endblock %}
+</div>
+
+{% include "partials/source-file.html" %}
+{% include "partials/feedback.html" %}
+{% include "partials/comments.html" %}
+</article>
+</div>
+{% endblock %}
