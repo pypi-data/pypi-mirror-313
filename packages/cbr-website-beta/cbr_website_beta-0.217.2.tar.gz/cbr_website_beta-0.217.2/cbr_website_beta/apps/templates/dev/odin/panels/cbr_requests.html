@@ -1,0 +1,150 @@
+<style>
+    .hover-link-container .hover-link {
+            color: #3e5569;
+        }
+    /* Show the link when hovering over the container */
+    .hover-link-container:hover .hover-link {
+        color: #1e88e5; /* You can set the color for your link */
+        visibility: visible;
+        {#font-style: italic;#}
+        font-weight: bold;
+    }
+    .id-cell {
+        cursor: pointer; /* Change cursor to indicate clickable */
+        color: #3e5569;
+    }
+    .id-cell:hover {
+        color: #1e88e5; /* Change color on hover */
+        font-weight: bold;
+    }
+</style>
+
+<h2>{{ title }}</h2>
+<p>
+    Showing <span  class="badge bg-dark font-bold">{{ requests | length }} requests </span>
+    in
+    <select id="envDropdown" class="badge bg-info font-bold" onchange="change_env(this.value)">
+        <option value="PROD" >PROD  env</option>
+        <option value="DEV"  >DEV   env</option>
+        <option value="LOCAL">LOCAL env</option>
+    </select>
+    for last
+    <select id="envHours" class="badge bg-info font-bold" onchange="change_hours(this.value)">
+        <option value="1" >1 hour</option>
+        <option value="2" >2 hours</option>
+        <option value="3" >3 hours</option>
+        <option value="5" >5 hours</option>
+        <option value="12">12 hours</option>
+        <option value="24">today</option>
+    </select>
+    <a href="#" onclick="refresh(event)">reload</a>
+</p>
+
+<table id="the_data_table">
+    <thead>
+        <tr>
+            {% for field in metadata.fields %}
+                <th>{{ field }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+</table>
+
+<script>
+    var consolidatedData = {{  requests       | tojson  }}
+    var fields           = {{ metadata.fields | tojson  }};
+    var fields_to_link   = ['ip_address', 'path', 'source', 'when', 'session_id'];
+    var no_wrap_cell     = function (td, cellData, rowData, row, col) { $(td).css('white-space', 'nowrap'); }
+    $(document).ready(function() {
+        let cell_render = function (data, type, row, meta) {
+            let field_index = meta.col;                                                                         // Get the field column index
+            let field_name  = fields[field_index];                                                              // Get the field name using the index
+            if (field_name === 'id') {
+                let displayData = data.slice(0, 4);                                                             // Display only the first few characters
+                return `<div class="id-cell" onclick="copyToClipboard(this, '${data}')">${displayData}</div>`;  // On click, copy the full id to clipboard
+            }
+            if (fields_to_link.includes(field_name)) {                                                      // Check if the field is one of the linkable fields
+                return `<div class="hover-link-container"><a href="#" class="hover-link" onclick="load_data_from_index(event, '${field_name}', '${data.replace(/'/g, "\\'")}')">${data}</a></div>`;
+            } else {
+                    return data;
+            }}
+
+        let columns_config = fields.map(function(field) {
+            return { data     : field       ,
+                     render   :  cell_render
+                    };
+             });
+
+
+
+        columns_config[0].createdCell = no_wrap_cell            // todo: refactor this into better mode
+        columns_config[1].createdCell = no_wrap_cell
+        columns_config[2].createdCell = no_wrap_cell
+        if ("{{ method_name }}" === 'cbr_requests') {
+            columns_config[3].createdCell = no_wrap_cell
+            columns_config[4].createdCell = no_wrap_cell
+            columns_config[5].createdCell = no_wrap_cell
+        }
+
+        var columns_order  =  [[2, 'desc']]
+
+        document.getElementById('envDropdown').value = "{{metadata.env}}"
+        document.getElementById('envHours'   ).value = "{{metadata.hours}}"
+
+        let config = {  columns   : columns_config                  ,
+                        data      : consolidatedData                ,
+                        dom       : '<"top"f>rt<"bottom"i><"clear">',
+                        order     : columns_order                   ,
+                        pageLength: -1                              ,
+                        responsive: true                            // not working on page resize
+                     }
+        window.data_table = $('#the_data_table').DataTable(config);
+    });
+
+    function copyToClipboard(element, text) {
+        const elem = document.createElement('textarea');        // Create a temporary hidden textarea element to copy the text
+        elem.value = text;
+        document.body.appendChild(elem);
+        elem.select();
+        document.execCommand('copy');
+        document.body.removeChild(elem);
+        element.innerHTML = '<i>copied</i>'
+    }
+
+    function change_env(env) {
+        get_data({"class_name":"odin_logs","method_name":"{{method_name}}","method_kwargs":{"env":env,"hours": {{ metadata.hours}}}})
+    }
+    function change_hours(hours) {
+        get_data({"class_name":"odin_logs","method_name":"{{method_name}}","method_kwargs":{"env": "{{ metadata.env}}","hours": parseInt(hours) }})
+    }
+    function refresh(event) {
+        event?.preventDefault();
+        env   = $('#envDropdown').val()
+        hours = parseInt($('#envHours'   ).val())
+        get_data({"class_name":"odin_logs","method_name":"{{method_name}}","method_kwargs":{"env":env,"hours": hours }})
+    }
+
+    function load_data_from_index(event, index_name,index_value) {
+        event?.preventDefault();
+        let data = { "class_name"   : "odin_logs",
+                     "method_name"  : "{{method_name}}",
+                     "method_kwargs": { "env"        : "{{metadata.env}}",
+                                        "hours"      : {{metadata.hours}},
+                                        "index_name" : index_name        ,
+                                        "index_value": index_value       }}
+        submit_data(data)
+    }
+
+    function submit_data(data) {
+        showSpinner(true)
+        let post_data = JSON.stringify(data)
+
+        $.ajax({url: '/web/dev/dev-panel',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: post_data,
+                    success: handleSuccess,
+                    error: handleError
+                });
+    }
+</script>

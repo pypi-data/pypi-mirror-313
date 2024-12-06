@@ -1,0 +1,115 @@
+<aside class="left-sidebar" data-sidebarbg="skin6">
+    <webc-api-markdown-to-html content-path = 'en/web-site/side-menu/content.md'  apply-css></webc-api-markdown-to-html>
+
+    {% if ('username' | current_user) %}
+        <webc-api-side-menu    data-file    = 'en/web-site/side-menu/menu-for-user__logged-in.toml' apply-css disable-cdn ></webc-api-side-menu       >
+    {% else %}
+        <webc-api-side-menu    data-file    = 'en/web-site/side-menu/menu-for-user__anonymous.toml' apply-css disable-cdn ></webc-api-side-menu       >
+    {% endif %}
+
+    <!-- (code below still need refactoring, the rest (after it) can be deleted -->
+    <div class="sidebar-footer">
+
+        <div class="row">
+            {% if config.LOGIN_ENABLED %}
+                <div class="col-4 link-wrap">
+                    <!-- item-->
+                    <a href="user/profile"
+                       class="link" data-toggle="tooltip" title="User profile" data-original-title="Settings">
+                       <i class="ti-settings"></i></a>
+                </div>
+                <div class="col-4 link-wrap">
+                </div>
+                {%   if ('username' | current_user) %}
+                    <div class="col-4 link-wrap">
+                        <a href="sign-out" class="link" data-toggle="tooltip" title="Sign out" data-original-title="Logout"><i
+                           class="mdi mdi-power"></i></a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+        {% include 'includes/footer.html' %}
+    </div>
+
+
+    <!-- Sidebar scroll-->
+<!--    <div class="scroll-sidebar">-->
+<!--        &lt;!&ndash; Sidebar navigation&ndash;&gt;-->
+<!--        <nav class="sidebar-nav">-->
+<!--        </nav>-->
+
+<!--        &lt;!&ndash; End Sidebar navigation &ndash;&gt;-->
+<!--    </div>-->
+
+<!--            <ul id="sidebarnav">-->
+<!--                <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                        href="home" aria-expanded="false"><i-->
+<!--                            class="mdi me-2 mdi-home"></i><span class="hide-menu">Home</span></a></li>-->
+<!--                <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                        href="athena" aria-expanded="false"><i-->
+<!--                            class="mdi me-2 mdi-robot"></i><span class="hide-menu">Athena</span></a></li>-->
+<!--                <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                        href="content" aria-expanded="false"><i class="mdi me-2 mdi-security"></i><span-->
+<!--                            class="hide-menu">Security content</span></a></li>-->
+<!--                <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                        href="content/videos" aria-expanded="false"><i class="mdi me-2 mdi-video"></i><span-->
+<!--                            class="hide-menu">Videos</span></a></li>-->
+<!--                <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                        href="docs" aria-expanded="false"><i class="mdi me-2 mdi-book-multiple-variant"></i><span-->
+<!--                            class="hide-menu">Docs</span></a></li>-->
+<!--                &lt;!&ndash; User Profile&ndash;&gt;-->
+<!--                {% if config.LOGIN_ENABLED %}-->
+<!--                    <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                            href="user/profile" aria-expanded="false">-->
+<!--                            <i class="mdi me-2 mdi-account-check"></i><span class="hide-menu">Profile</span></a>-->
+<!--                    </li>-->
+<!--                {% endif %}-->
+<!--                &lt;!&ndash; Conditional link for /dev &ndash;&gt;-->
+<!--                {% if g.user_groups and 'CBR-Team' in g.user_groups %}-->
+<!--                    <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                            href="dev" aria-expanded="false"><i-->
+<!--                            class="mdi me-2 mdi-developer-board"></i><span class="hide-menu">Dev</span></a></li>-->
+<!--                   <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                                 href="minerva" aria-expanded="false"><i-->
+<!--                                class="mdi me-2 mdi-robot"></i><span class="hide-menu">Minerva</span></a></li>-->
+<!--                {% endif %}-->
+<!--                <br/>-->
+<!--                <br/>-->
+<!--                {%   if ('username' | current_user) %}-->
+<!--                    <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                                     href="sign-out" aria-expanded="false"><i-->
+<!--                                     class="mdi me-2 mdi-logout"></i><span class="hide-menu">Logout</span></a></li>-->
+<!--                {% else %}-->
+<!--                    {% if config.LOGIN_ENABLED %}-->
+<!--                        <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                                                     href="login" aria-expanded="false">-->
+<!--                                                        <i class="mdi me-2 mdi-login"></i>-->
+<!--                                                        <span >Login</span>-->
+<!--                                                  </a></li>-->
+<!--                    {% endif %}-->
+<!--                {% endif %}-->
+
+
+<!--            {%  if ('admin_token' | current_user) and ('impersonating' | current_user)%}-->
+<!--                <br/>-->
+<!--                <hr/>-->
+<!--                <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                                                   href="admin/restore_admin_user" aria-expanded="false">-->
+<!--                                                        <i class="mdi me-2 mdi-restore"></i>-->
+<!--                                                        <span class="hide-menu">RESTORE ADMIN USER</span>-->
+<!--                                          </a></li>-->
+<!--            {% endif %}-->
+
+<!--            &lt;!&ndash; start of CBR community links &ndash;&gt;-->
+
+<!--            <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                                                   href="chat-with-llms" aria-expanded="false">-->
+<!--                                                        <i class="mdi me-2 mdi-message"></i>-->
+<!--                <span class="hide-menu">Chat with LLMs</span></a></li>-->
+<!--            <li class="sidebar-item"> <a class="sidebar-link waves-effect waves-dark sidebar-link"-->
+<!--                                                   href="https://discord.gg/HdJJbFpzMX" aria-expanded="false">-->
+<!--                                                        <i class="mdi me-2 mdi-message"></i>-->
+<!--                <span class="hide-menu">Community (Discord)</span></a></li>-->
+<!--            </ul>-->
+
+</aside>

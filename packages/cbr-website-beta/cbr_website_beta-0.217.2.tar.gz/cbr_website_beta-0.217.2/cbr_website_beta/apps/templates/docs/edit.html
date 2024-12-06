@@ -1,0 +1,103 @@
+
+<div class="container-fluid" id="doc-page">
+
+    <h3>Edit Page</h3>
+    {{path}}
+
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
+                <button class="form-control btn-primary" onclick="save_content()">Save</button>
+            </div>
+        </div>
+        <div class="col-6">
+                <div id="status_message"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body" id="doc-content">
+                    <textarea id="markdown-input" class="form-control" rows="20">{{content}}</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div id="html-output">...
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <button class="form-control btn-primary" onclick="save_content()">Save</button>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <a href="docs/{{path}}" >back to page</a>
+</div>
+
+
+<script>
+    function save_content() {
+        $('#status_message').text('saving content')
+        const markdownText = $('#markdown-input').val();
+        $.ajax({
+            url: 'docs/markdown/save',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ path: '{{path}}', contents: markdownText }),
+            success: function(response) {
+                console.log(response)
+                $('#status_message').text(`Saved: ${response.message}`);
+                window.location.href = 'docs/{{path}}';  // Redirect to the new path
+            },
+            error: function(error) {
+
+                $('#status_message').text(`Error:  ${error.responseText}`);
+            }
+        });
+    }
+
+    function renderMarkdown() {
+        const markdownText = $('#markdown-input').val();
+        $.ajax({
+            url: '/markdown/render/markdown-to-html',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ text: markdownText }),
+            success: function(response) {
+                $('#html-output').html(response);
+                window.response=response
+                apply_ui_fixes__markdown()
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        let timeout = null;
+
+        $('#markdown-input').on('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(renderMarkdown, 100); // 500ms delay after the user stops typing
+        });
+
+        // Call renderMarkdown on page load
+        renderMarkdown();
+    });
+
+    $(document).keydown(function(event) {
+    if ((event.metaKey || event.ctrlKey) && event.key === 's') {        // Check if the Cmd (Mac) or Ctrl (Windows/Linux) key is pressed along with 'S' key
+        event.preventDefault();                                         // Prevent the default save action of the browser
+        save_content();                                                 // Call your save_content function
+    }
+});
+</script>
+
+{% include 'docs/markdown-ui-fixes.html' %}
