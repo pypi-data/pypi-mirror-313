@@ -1,0 +1,790 @@
+Metadata-Version: 2.1
+Name: zope.app.file
+Version: 5.0
+Summary: File and Image -- Zope 3 Content Components
+Home-page: https://github.com/zopefoundation/zope.app.file
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Keywords: zope3 file image content
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope :: 3
+Requires-Python: >=3.8
+Requires-Dist: setuptools
+Requires-Dist: transaction
+Requires-Dist: persistent
+Requires-Dist: zope.app.content>=4.0.0
+Requires-Dist: zope.app.form>=5.0.0
+Requires-Dist: zope.app.publication
+Requires-Dist: zope.contenttype>=4.0.0
+Requires-Dist: zope.datetime
+Requires-Dist: zope.dublincore>=4.0.0
+Requires-Dist: zope.event
+Requires-Dist: zope.exceptions
+Requires-Dist: zope.filerepresentation
+Requires-Dist: zope.i18nmessageid>=4.1.0
+Requires-Dist: zope.interface
+Requires-Dist: zope.schema
+Requires-Dist: zope.site
+Requires-Dist: zope.size
+Provides-Extra: test
+Requires-Dist: webtest; extra == "test"
+Requires-Dist: zope.app.appsetup>=4.0.0; extra == "test"
+Requires-Dist: zope.app.basicskin>=4.0.0; extra == "test"
+Requires-Dist: zope.app.exception>=4.0.1; extra == "test"
+Requires-Dist: zope.app.folder>=4.0.0; extra == "test"
+Requires-Dist: zope.app.http>=4.0.1; extra == "test"
+Requires-Dist: zope.app.rotterdam>=4.0.0; extra == "test"
+Requires-Dist: zope.app.securitypolicy; extra == "test"
+Requires-Dist: zope.app.wsgi>=5.3; extra == "test"
+Requires-Dist: zope.dublincore; extra == "test"
+Requires-Dist: zope.login; extra == "test"
+Requires-Dist: zope.principalannotation; extra == "test"
+Requires-Dist: zope.publisher>=3.12; extra == "test"
+Requires-Dist: zope.testing; extra == "test"
+Requires-Dist: zope.testrunner; extra == "test"
+
+This package provides two basic Zope 3 content components, File and Image, and
+their ZMI-compliant browser views.
+
+
+.. contents::
+
+File objects
+============
+
+Adding Files
+------------
+
+You can add File objects from the common tasks menu in the ZMI.
+
+  >>> result = http(b"""
+  ... GET /@@contents.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """)
+  >>> "http://localhost/@@+/action.html?type_name=zope.app.file.File" in str(result)
+  True
+
+Let's follow that link.
+
+  >>> print(http(b"""
+  ... GET /@@+/action.html?type_name=zope.app.file.File HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 303 See Other
+  Content-Length: ...
+  Location: http://localhost/+/zope.app.file.File=
+  <BLANKLINE>
+
+The file add form lets you specify the content type, the object name, and
+optionally upload the contents of the file.
+
+  >>> print(http(b"""
+  ... GET /+/zope.app.file.File= HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
+  ...
+      <title>Z3: +</title>
+  ...
+  ...
+    <form action="http://localhost/+/zope.app.file.File%3D"
+          method="post" enctype="multipart/form-data">
+      <h3>Add a File</h3>
+      ...<input class="textType" id="field.contentType"
+                name="field.contentType" size="20" type="text" value="" />...
+      ...<input class="fileType" id="field.data" name="field.data" size="20"
+                type="file" />...
+        <div class="controls"><hr />
+          <input type="submit" value="Refresh" />
+          <input type="submit" value="Add"
+                 name="UPDATE_SUBMIT" />
+          &nbsp;&nbsp;<b>Object Name</b>&nbsp;&nbsp;
+          <input type="text" name="add_input_name" value="" />
+        </div>
+  ...
+    </form>
+  ...
+
+Binary Files
+------------
+
+Let us upload a binary file.
+
+  >>> hello_txt_gz = (
+  ...     b'\x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e'
+  ...     b'\x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36'
+  ...     b'\x06\x00\x00\x00')
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'application/octet-stream'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', '')],
+  ...    [('field.data', 'hello.txt.gz', hello_txt_gz, 'application/x-gzip')])
+  >>> print(http(b"""
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content)))
+  HTTP/1.1 303 See Other
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  Location: http://localhost/@@contents.html
+  <BLANKLINE>
+  ...
+
+Since we did not specify the object name in the form, Zope 3 will use the
+filename.
+
+  >>> response = http(b"""
+  ... GET /hello.txt.gz HTTP/1.1
+  ... """)
+  >>> print(response)
+  HTTP/1.1 200 Ok
+  Content-Length: 36
+  Content-Type: application/octet-stream
+  <BLANKLINE>
+  ...
+
+Let's make sure the (binary) content of the file is correct
+
+  >>> response.getBody() == hello_txt_gz
+  True
+
+Also, lets test a (bad) filename with full path that generates MS Internet Explorer,
+Zope should process it successfully and get the actual filename. Let's upload the
+same file with bad filename.
+
+  >>> test_gz = (
+  ...   b'\x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e'
+  ...   b'\x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36'
+  ...   b'\x06\x00\x00\x00')
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'application/octet-stream'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', '')],
+  ...    [('field.data', 'c:\\windows\\test.gz', test_gz, 'application/x-gzip')])
+  >>> print(http(b"""
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content)))
+  HTTP/1.1 303 See Other
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  Location: http://localhost/@@contents.html
+  <BLANKLINE>
+  ...
+
+The file should be saved as "test.gz", let's check it name and contents.
+
+  >>> response = http(b"""
+  ... GET /test.gz HTTP/1.1
+  ... """)
+  >>> print(response)
+  HTTP/1.1 200 Ok
+  Content-Length: 36
+  Content-Type: application/octet-stream
+  <BLANKLINE>
+  ...
+
+
+  >>> response.getBody() == test_gz
+  True
+
+Text Files
+----------
+
+Let us now create a text file.
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', 'sample.txt')],
+  ...    [('field.data', '', b'', 'application/octet-stream')])
+  >>> print(http(b"""
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content)))
+  HTTP/1.1 303 See Other
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  Location: http://localhost/@@contents.html
+  <BLANKLINE>
+  ...
+
+The file is initially empty, since we did not upload anything.
+
+  >>> print(http(b"""
+  ... GET /sample.txt HTTP/1.1
+  ... """))
+  HTTP/1.1 200 Ok
+  Content-Length: 0
+  Content-Type: text/plain
+  Last-Modified: ...
+  <BLANKLINE>
+
+Since it is a text file, we can edit it directly in a web form.
+
+  >>> print(http(b"""
+  ... GET /sample.txt/edit.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
+  ...
+      <title>Z3: sample.txt</title>
+  ...
+      <form action="http://localhost/sample.txt/edit.html"
+            method="post" enctype="multipart/form-data">
+        <div>
+          <h3>Change a file</h3>
+  ...<input class="textType" id="field.contentType" name="field.contentType"
+            size="20" type="text" value="text/plain"  />...
+  ...<textarea cols="60" id="field.data" name="field.data" rows="15" ></textarea>...
+  ...
+          <div class="controls">
+            <input type="submit" value="Refresh" />
+            <input type="submit" name="UPDATE_SUBMIT"
+                   value="Change" />
+          </div>
+  ...
+      </form>
+  ...
+
+Files of type text/plain without any charset information can contain UTF-8 text.
+So you can use ASCII text.
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain'),
+  ...     ('field.data', 'This is a sample text file.\n\nIt can contain US-ASCII characters.'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
+  ... POST /sample.txt/edit.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content), handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
+  ...
+      <title>Z3: sample.txt</title>
+  ...
+      <form action="http://localhost/sample.txt/edit.html"
+            method="post" enctype="multipart/form-data">
+        <div>
+          <h3>Change a file</h3>
+  <BLANKLINE>
+          <p>Updated on ...</p>
+  <BLANKLINE>
+        <div class="row">
+  ...<input class="textType" id="field.contentType" name="field.contentType"
+            size="20" type="text" value="text/plain"  />...
+        <div class="row">
+  ...<textarea cols="60" id="field.data" name="field.data" rows="15"
+  >This is a sample text file.
+  <BLANKLINE>
+  It can contain US-ASCII characters.</textarea></div>
+  ...
+          <div class="controls">
+            <input type="submit" value="Refresh" />
+            <input type="submit" name="UPDATE_SUBMIT"
+                   value="Change" />
+          </div>
+  ...
+      </form>
+  ...
+
+Here's the file
+
+  >>> print(http(b"""
+  ... GET /sample.txt HTTP/1.1
+  ... """))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/plain
+  Last-Modified: ...
+  <BLANKLINE>
+  This is a sample text file.
+  <BLANKLINE>
+  It can contain US-ASCII characters.
+
+
+Non-ASCII Text Files
+--------------------
+
+We can also use non-ASCII charactors in text file.
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain'),
+  ...     ('field.data', 'This is a sample text file.\n\nIt can contain non-ASCII(UTF-8) characters, e.g. \u263B (U+263B BLACK SMILING FACE).'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
+  ... POST /sample.txt/edit.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content)))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
+  ...
+      <title>Z3: sample.txt</title>
+  ...
+      <form action="http://localhost/sample.txt/edit.html"
+            method="post" enctype="multipart/form-data">
+        <div>
+          <h3>Change a file</h3>
+  <BLANKLINE>
+          <p>Updated on ...</p>
+  <BLANKLINE>
+        <div class="row">
+  ...<input class="textType" id="field.contentType" name="field.contentType"
+            size="20" type="text" value="text/plain"  />...
+        <div class="row">
+  ...<textarea cols="60" id="field.data" name="field.data" rows="15"
+  >This is a sample text file.
+  <BLANKLINE>
+  It can contain non-ASCII(UTF-8) characters, e.g. ... (U+263B BLACK SMILING FACE).</textarea></div>
+  ...
+          <div class="controls">
+            <input type="submit" value="Refresh" />
+            <input type="submit" name="UPDATE_SUBMIT"
+                   value="Change" />
+          </div>
+  ...
+      </form>
+  ...
+
+Here's the file
+
+  >>> response = http(b"""
+  ... GET /sample.txt HTTP/1.1
+  ... """)
+  >>> print(response)
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/plain
+  Last-Modified: ...
+  <BLANKLINE>
+  This is a sample text file.
+  <BLANKLINE>
+  It can contain non-ASCII(UTF-8) characters, e.g. ... (U+263B BLACK SMILING FACE).
+
+  >>> u'\u263B' in response.getBody().decode('UTF-8')
+  True
+
+And you can explicitly specify the charset. Note that the browser form is always UTF-8.
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain; charset=ISO-8859-1'),
+  ...     ('field.data', 'This is a sample text file.\n\nIt now contains Latin-1 characters, e.g. \xa7 (U+00A7 SECTION SIGN).'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
+  ... POST /sample.txt/edit.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content)))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
+  ...
+      <title>Z3: sample.txt</title>
+  ...
+      <form action="http://localhost/sample.txt/edit.html"
+            method="post" enctype="multipart/form-data">
+        <div>
+          <h3>Change a file</h3>
+  <BLANKLINE>
+          <p>Updated on ...</p>
+  <BLANKLINE>
+        <div class="row">
+  ...<input class="textType" id="field.contentType" name="field.contentType"
+            size="20" type="text" value="text/plain; charset=ISO-8859-1"  />...
+        <div class="row">
+  ...<textarea cols="60" id="field.data" name="field.data" rows="15"
+  >This is a sample text file.
+  <BLANKLINE>
+  It now contains Latin-1 characters, e.g. ... (U+00A7 SECTION SIGN).</textarea></div>
+  ...
+          <div class="controls">
+            <input type="submit" value="Refresh" />
+            <input type="submit" name="UPDATE_SUBMIT"
+                   value="Change" />
+          </div>
+  ...
+      </form>
+  ...
+
+Here's the file
+
+  >>> response = http(b"""
+  ... GET /sample.txt HTTP/1.1
+  ... """)
+  >>> print(response)
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/plain; charset=ISO-8859-1
+  Last-Modified: ...
+  <BLANKLINE>
+  This is a sample text file.
+  <BLANKLINE>
+  It now contains Latin-1 characters, e.g. ... (U+00A7 SECTION SIGN).
+
+Body is actually encoded in ISO-8859-1, and not UTF-8
+
+  >>> response.getBody().splitlines()[-1].decode('latin-1')
+  'It now contains Latin-1 characters, e.g. \xa7 (U+00A7 SECTION SIGN).'
+
+The user is not allowed to specify a character set that cannot represent all
+the characters.
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain; charset=US-ASCII'),
+  ...     ('field.data', 'This is a slightly changed sample text file.\n\nIt now contains Latin-1 characters, e.g. \xa7 (U+00A7 SECTION SIGN).'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
+  ... POST /sample.txt/edit.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content), handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
+  ...
+      <title>Z3: sample.txt</title>
+  ...
+      <form action="http://localhost/sample.txt/edit.html"
+            method="post" enctype="multipart/form-data">
+        <div>
+          <h3>Change a file</h3>
+  <BLANKLINE>
+          <p>The character set you specified (US-ASCII) cannot encode all characters in text.</p>
+  <BLANKLINE>
+        <div class="row">
+  ...<input class="textType" id="field.contentType" name="field.contentType" size="20" type="text" value="text/plain; charset=US-ASCII"  />...
+        <div class="row">
+  ...<textarea cols="60" id="field.data" name="field.data" rows="15" >This is a slightly changed sample text file.
+  <BLANKLINE>
+  It now contains Latin-1 characters, e.g. ... (U+00A7 SECTION SIGN).</textarea></div>
+  ...
+          <div class="controls">
+            <input type="submit" value="Refresh" />
+            <input type="submit" name="UPDATE_SUBMIT"
+                   value="Change" />
+          </div>
+  ...
+      </form>
+  ...
+
+Likewise, the user is not allowed to specify a character set that is not supported by Python.
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain; charset=I-INVENT-MY-OWN'),
+  ...     ('field.data', 'This is a slightly changed sample text file.\n\nIt now contains just ASCII characters.'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
+  ... POST /sample.txt/edit.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content), handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
+  ...
+      <title>Z3: sample.txt</title>
+  ...
+      <form action="http://localhost/sample.txt/edit.html"
+            method="post" enctype="multipart/form-data">
+        <div>
+          <h3>Change a file</h3>
+  <BLANKLINE>
+          <p>The character set you specified (I-INVENT-MY-OWN) is not supported.</p>
+  <BLANKLINE>
+        <div class="row">
+  ...<input class="textType" id="field.contentType" name="field.contentType" size="20" type="text" value="text/plain; charset=I-INVENT-MY-OWN"  />...
+        <div class="row">
+  ...<textarea cols="60" id="field.data" name="field.data" rows="15" >This is a slightly changed sample text file.
+  <BLANKLINE>
+  It now contains just ASCII characters.</textarea></div>
+  ...
+          <div class="controls">
+            <input type="submit" value="Refresh" />
+            <input type="submit" name="UPDATE_SUBMIT"
+                   value="Change" />
+          </div>
+  ...
+      </form>
+  ...
+
+If you trick Zope and upload a file with a content type that does not
+match the file contents, you will not be able to access the edit view:
+
+  >>> print(http(b"""
+  ... GET /hello.txt.gz/@@edit.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=True))
+  HTTP/1.1 200 Ok
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
+  ...
+     <li>The character set specified in the content type (UTF-8) does not match file content.</li>
+  ...
+
+Non-ASCII Filenames
+-------------------
+
+Filenames are not restricted to ASCII.
+
+  >>> björn_txt_gz = (
+  ...     b'\x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e'
+  ...     b'\x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36'
+  ...     b'\x06\x00\x00\x00')
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'application/octet-stream'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', '')],
+  ...    [('field.data', 'björn.txt.gz', björn_txt_gz, 'application/x-gzip')])
+  >>> print(http(b"""
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ...
+  ... %b
+  ... """ % (content_type, content)))
+  HTTP/1.1 303 See Other
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  Location: http://localhost/@@contents.html
+  <BLANKLINE>
+  ...
+
+Since we did not specify the object name in the form, Zope 3 will use the
+filename.
+
+  >>> response = http(b"""
+  ... GET /bj%C3%B6rn.txt.gz HTTP/1.1
+  ... """)
+  >>> print(response)
+  HTTP/1.1 200 Ok
+  Content-Length: 36
+  Content-Type: application/octet-stream
+  Last-Modified: ...
+  <BLANKLINE>
+  ...
+
+
+Special URL handling for DTML pages
+===================================
+
+When an HTML File page containing a head tag is visited, without a
+trailing slash, the base href isn't set.  When visited with a slash,
+it is:
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/html'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', 'file.html')],
+  ...    [('field.data', '', b'', 'application/octet-stream')])
+  >>> print(http(b"""
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ... Referer: http://localhost:8081/+/zope.app.file.File=
+  ...
+  ... %b
+  ... """ % (content_type, content)))
+  HTTP/1.1 303 See Other
+  ...
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/html'),
+  ...     ('field.data', b'<html>\n<head></head>\n<body>\n<a href="eek.html">Eek</a>\n</body>\n</html>'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
+  ... POST /file.html/edit.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: %b
+  ... Referer: http://localhost:8081/file.html/edit.html
+  ...
+  ... %b
+  ... """ % (content_type, content)))
+  HTTP/1.1 200 Ok
+  ...
+
+  >>> print(http(b"""
+  ... GET /file.html HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """))
+  HTTP/1.1 200 Ok
+  ...
+  <html>
+  <head></head>
+  <body>
+  <a href="eek.html">Eek</a>
+  </body>
+  </html>
+
+
+  >>> print(http(b"""
+  ... GET /file.html/ HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """))
+  HTTP/1.1 200 Ok
+  ...
+  <html>
+  <head>
+  <base href="http://localhost/file.html" />
+  </head>
+  <body>
+  <a href="eek.html">Eek</a>
+  </body>
+  </html>
+
+
+Changes
+=======
+
+5.0 (2024-12-04)
+----------------
+
+- Add support for Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13.
+
+- Drop support for Python 2.7, 3.4, 3.5, 3.6.
+
+- Fix tests to support ``multipart >= 1.1``.
+
+4.0.0 (2017-05-16)
+------------------
+
+- Add support for Python 3.4, 3.5, 3.6 and PyPy.
+
+- Remove test dependency on ``zope.app.testing`` and ``zope.app.zcmlfiles``,
+  among others.
+
+- Change dependency from ZODB3 to persistent and add missing
+  dependencies on ``zope.app.content``.
+
+
+3.6.1 (2010-09-17)
+------------------
+
+- Removed ZPKG slugs and ZCML ones.
+
+- Moved a functional test here from `zope.app.http`.
+
+- Using Python's ``doctest`` instead of deprecated ``zope.testing.doctest``.
+
+
+3.6.0 (2010-08-19)
+------------------
+
+- Updated ``ftesting.zcml`` to use the new permission names exported by
+  ``zope.dublincore`` 3.7.
+
+- Using python's `doctest` instead of deprecated `zope.testing.doctest`.
+
+
+3.5.1 (2010-01-08)
+------------------
+
+- Fix ftesting.zcml due to zope.securitypolicy update.
+
+- Added missing dependency on transaction.
+
+- Import content-type parser from zope.contenttype, reducing zope.publisher to
+  a test dependency.
+
+- Fix tests using a newer zope.publisher that requires zope.login.
+
+3.5.0 (2009-01-31)
+------------------
+
+- Replace ``zope.app.folder`` use by ``zope.site``. Add missing
+  dependency in ``setup.py``.
+
+3.4.6 (2009-01-27)
+------------------
+
+- Remove zope.app.zapi dependency again. Previous release
+  was wrong. We removed the zope.app.zapi uses before, so
+  we don't need it anymore.
+
+3.4.5 (2009-01-27)
+------------------
+
+- added missing dependency: zope.app.zapi
+
+3.4.4 (2008-09-05)
+------------------
+
+- Bug: Get actual filename instead of full filesystem path when adding
+  file/image using Internet Explorer.
+
+3.4.3 (2008-06-18)
+------------------
+
+- Using IDCTimes interface instead of IZopeDublinCore to determine the
+  modification date of a file.
+
+3.4.2 (2007-11-09)
+------------------
+
+- Include information about which attributes changed in the
+  ``IObjectModifiedEvent`` after upload.
+
+  This fixes https://bugs.launchpad.net/zope3/+bug/98483.
+
+3.4.1 (2007-10-31)
+------------------
+
+- Resolve ``ZopeSecurityPolicy`` deprecation warning.
+
+
+3.4.0 (2007-10-24)
+------------------
+
+- Initial release independent of the main Zope tree.
