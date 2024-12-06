@@ -1,0 +1,5 @@
+{{cls}}(
+{% for field in message.ListFields() -%}
+    {{ _spaces_for(indent+2) }}{{ field[0].name }}={{ attribute_overrides.get(_append(attribute_path, field[0].name), render_message_field(field[0], field[1], _append(attribute_path, field[0].name), indent+2, template_dir=template_dir)) }},
+{% endfor %}
+{{_spaces_for(indent)}})
