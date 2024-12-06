@@ -1,0 +1,41 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - "pub/*"
+      - main
+
+concurrency:
+  group: onediff-pub-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VERSION_LOCAL_SCHEME: no-local-version
+
+jobs:
+  publish:
+    if: github.repository == 'siliconflow/onediff'
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: cat src/onediff/__init__.py
+      - run: python3 -m pip install build
+      - run: echo "VERSION_LOCAL_SCHEME=$VERSION_LOCAL_SCHEME"
+      - run: python3 -m build
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+      - run: python3 -m build
+        working-directory: ./onediff_diffusers_extensions
+      - name: Publish extension
+        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN_ONEDIFF_X }}
+          packages_dir: ./onediff_diffusers_extensions/dist
