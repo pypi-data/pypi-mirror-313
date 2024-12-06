@@ -1,0 +1,44 @@
+
+name: CI Additional
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  min-version-policy:
+    name: Minimum Version Policy
+    runs-on: "ubuntu-latest"
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags.
+
+      - name: Create conda environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: min-version-policy
+          micromamba-version: 'latest'
+          create-args: >-
+            python=3.10
+            pyyaml
+            conda
+            python-dateutil
+          condarc: |
+            channels:
+              - conda-forge
+              - nodefaults
+
+      - name: minimum versions policy
+        run: |
+          python ci/min_deps_check.py ci/requirements/min-all-deps.yml
