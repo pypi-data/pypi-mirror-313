@@ -1,0 +1,121 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=64", "setuptools_scm>=8", "wheel"]
+
+[tool.setuptools]
+packages = ["pgqueuer"]
+
+[tool.setuptools_scm]
+
+[project]
+name = "pgqueuer"
+description = "Pgqueuer is a Python library leveraging PostgreSQL for efficient job queuing."
+authors = [{name = "JeyBee"}]
+license = {text = "MIT License"}
+dynamic = ["version"]
+requires-python = ">=3.10"
+readme = "README.md"
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Topic :: System :: Distributed Computing"
+]
+
+dependencies = [
+    "anyio>=4.0",
+    "croniter>=5.0.1",
+    "pydantic-settings>=2.6.1",
+    "pydantic>=2.0.0",
+    "tabulate>=0.9.0",
+]
+
+[project.urls]
+Documentation = "https://github.com/janbjorge/pgqueuer/wiki"
+Homepage = "https://github.com/janbjorge/pgqueuer/"
+Issues = "https://github.com/janbjorge/pgqueuer/issues"
+Repository = "https://github.com/janbjorge/pgqueuer/"
+
+[project.scripts]
+pgq = "pgqueuer.__main__:main"
+
+[project.optional-dependencies]
+asyncpg = ["asyncpg>=0.30.0"]
+psycopg = ["psycopg>=3.2.0"]
+dev = [
+    "async-timeout>=4.0.3",
+    "asyncpg-stubs",
+    "asyncpg",
+    "fastapi",
+    "httpx",
+    "icecream>=2.1.3",
+    "mypy-extensions",
+    "mypy",
+    "psycopg>=3.2.0",
+    "pytest-asyncio",
+    "pytest-mock>=3.14.0",
+    "pytest",
+    "ruff",
+    "tqdm",
+    "types-croniter",
+    "types-tabulate",
+    "uvicorn",
+]
+docs = [
+    "myst-parser",
+    "sphinx",
+    "sphinx-rtd-theme"
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "C",
+    "E",
+    "F",
+    "I",
+    "PIE",
+    "Q",
+    "RET",
+    "RSE",
+    "SIM",
+    "W",
+    "C90"
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.mypy]
+disallow_untyped_defs = true
+exclude = "^(build)"
+extra_checks = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+python_version = "3.10"
+strict_equality = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function" 

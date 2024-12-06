@@ -1,0 +1,14 @@
+services:
+  pgq:
+    build:
+      context: .
+      dockerfile: test/db/Dockerfile
+      args:
+        - POSTGRES_VERSION
+    ports:
+      - "5432:5432"
+    tmpfs:
+      - /var/lib/pg/data
+    environment:
+      PGDATA: /var/lib/pg/data
+    restart: "no"
