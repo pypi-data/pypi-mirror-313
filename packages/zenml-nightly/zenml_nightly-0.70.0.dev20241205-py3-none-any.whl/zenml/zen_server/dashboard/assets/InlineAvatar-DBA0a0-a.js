@@ -1,0 +1,1 @@
+import{j as e}from"./@radix-DeK6qiuw.js";import{A as s,b as a}from"./index-FO-p0GU7.js";function m({username:t}){return e.jsxs("div",{className:"inline-flex items-center gap-1",children:[e.jsx(s,{size:"sm",children:e.jsx(a,{size:"sm",children:t[0]})}),e.jsx("p",{className:"text-text-sm font-semibold text-theme-text-primary",children:t})]})}export{m as I};
