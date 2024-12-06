@@ -1,0 +1,152 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: "Run the build with tmate debugging enabled"
+        required: false
+        default: false
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup python, vorta and dev deps
+        uses: ./.github/actions/setup
+        with:
+          python-version: 3.11
+          pre-commit: true
+
+      - name: Test formatting with ruff
+        shell: bash
+        run: pre-commit run --all-files --show-diff-on-failure
+
+  prepare-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix-unit: ${{ steps.set-matrix-unit.outputs.matrix }}
+      matrix-integration: ${{ steps.set-matrix-integration.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Give execute permission to script
+        run: chmod +x ./.github/scripts/generate-matrix.sh
+
+      - name: Generate matrices
+        run: |
+          ./.github/scripts/generate-matrix.sh "${{ github.event_name }}" "${GITHUB_REF##refs/heads/}"
+
+      - name: Set matrix for unit tests
+        id: set-matrix-unit
+        run: echo "matrix=$(cat matrix-unit.json)" >> $GITHUB_OUTPUT
+
+      - name: Set matrix for integration tests
+        id: set-matrix-integration
+        run: echo "matrix=$(cat matrix-integration.json)" >> $GITHUB_OUTPUT
+
+  test-unit:
+    needs: prepare-matrix
+    timeout-minutes: 60  # macos tests are very slow
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.prepare-matrix.outputs.matrix-unit)}}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install system dependencies
+        uses: ./.github/actions/install-dependencies
+
+      - name: Setup python, vorta and dev deps
+        uses: ./.github/actions/setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          install-nox: true
+
+      - name: Validate Flatpak manifest
+        if: runner.os == 'Linux'
+        shell: bash
+        run: appstreamcli validate ./src/vorta/assets/metadata/com.borgbase.Vorta.appdata.xml
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'true' }}
+
+      - name: Run Unit Tests with pytest (Linux)
+        if: runner.os == 'Linux'
+        env:
+          BORG_VERSION: ${{ matrix.borg-version }}
+        run: |
+          xvfb-run --server-args="-screen 0 1024x768x24+32" \
+                -a dbus-run-session -- make test-unit
+
+      - name: Run Unit Tests with pytest (macOS)
+        if: runner.os == 'macOS'
+        env:
+          BORG_VERSION: ${{ matrix.borg-version }}
+          PKG_CONFIG_PATH: /usr/local/opt/openssl@3/lib/pkgconfig
+        run: echo $PKG_CONFIG_PATH && make test-unit
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          OS: ${{ runner.os }}
+          python: ${{ matrix.python-version }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS, python
+
+  test-integration:
+    needs: prepare-matrix
+    timeout-minutes: 20
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.prepare-matrix.outputs.matrix-integration)}}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install system dependencies
+        uses: ./.github/actions/install-dependencies
+
+      - name: Setup python, vorta and dev deps
+        uses: ./.github/actions/setup
+        with:
+          python-version: ${{ matrix.python-version }}
+          install-nox: true
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled == 'true'}}
+
+      - name: Run Integration Tests with pytest (Linux)
+        if: runner.os == 'Linux'
+        env:
+          BORG_VERSION: ${{ matrix.borg-version }}
+        run: |
+          xvfb-run --server-args="-screen 0 1024x768x24+32" \
+                -a dbus-run-session -- make test-integration
+
+      - name: Run Integration Tests with pytest (macOS)
+        if: runner.os == 'macOS'
+        env:
+          BORG_VERSION: ${{ matrix.borg-version }}
+          PKG_CONFIG_PATH: /usr/local/opt/openssl@3/lib/pkgconfig
+        run: echo $PKG_CONFIG_PATH && make test-integration
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          OS: ${{ runner.os }}
+          python: ${{ matrix.python-version }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS, python
+          version: v0.7.3  # workaround on Intel macs (GH Actions)
