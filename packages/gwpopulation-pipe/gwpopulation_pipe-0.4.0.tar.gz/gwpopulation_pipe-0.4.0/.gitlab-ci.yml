@@ -1,0 +1,153 @@
+# This script is an edited version of the example found at
+# https://git.ligo.org/lscsoft/example-ci-project/blob/python/.gitlab-ci.yml
+# Each 0th-indendation level is a job that will be run within GitLab CI
+# The only exception are a short list of reserved keywords
+#
+# https://docs.gitlab.com/ee/ci/yaml/#gitlab-ci-yml
+
+# stages is a reserved keyword that defines job dependencies and
+# parallelization. each stage runs in parallel but must complete
+# before the next stage begins
+# This file was copied from bilby_pipe
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
+      variables:
+        SETUPTOOLS_SCM_PRETEND_VERSION: "0.0.0"
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      variables:
+        SETUPTOOLS_SCM_PRETEND_VERSION: ""
+    - if: $CI_COMMIT_TAG
+      variables:
+        SETUPTOOLS_SCM_PRETEND_VERSION: ""
+
+stages:
+  - test
+  - deploy
+
+.test-python: &test-python
+  stage: test
+  image: python
+  before_script:
+    - pip install --upgrade pip
+  script:
+    - pip install .[test]
+    - cd ..
+    - python -c "import gwpopulation_pipe; print(gwpopulation_pipe.__version__)"
+    - python -c "import gwpopulation_pipe.common_format"
+    - python -c "import gwpopulation_pipe.create_injections"
+    - python -c "import gwpopulation_pipe.data_analysis"
+    - python -c "import gwpopulation_pipe.data_collection"
+    - python -c "import gwpopulation_pipe.main"
+    - python -c "import gwpopulation_pipe.parser"
+    - python -c "import gwpopulation_pipe.post_plots"
+    - python -c "import gwpopulation_pipe.review"
+    - python -c "import gwpopulation_pipe.utils"
+    - python -c "import gwpopulation_pipe.vt_helper"
+    - for script in $(pip show -f gwpopulation_pipe | grep "bin\/" | xargs -I {} basename {}); do
+          echo ${script};
+          ${script} --help;
+      done
+
+basic-3.10:
+  <<: *test-python
+  image: python:3.10
+
+basic-3.11:
+  <<: *test-python
+  image: python:3.11
+
+.precommits-python: &precommits-python
+  stage: test
+  image: python
+  script:
+    - pip install --upgrade pip
+    - pip install pre-commit
+    - pre-commit run --all-files --verbose --show-diff-on-failure
+
+precommits-py3.10:
+  <<: *precommits-python
+  image: containers.ligo.org/lscsoft/bilby/v2-bilby-python310
+
+.example-tests: &example-tests
+  stage: test
+  image: containers.ligo.org/ratesandpopulations/gwpopulation_pipe/gwpopulation-testing
+  before_script:
+    - python -m pip install setuptools_scm
+    - export SETUPTOOLS_SCM_PRETEND_VERSION=""
+    - export SETUPTOOLS_SCM_PRETEND_VERSION="0.0.0"
+    - python -m pip install .[test]
+    - python -m pip install git+https://github.com/ColmTalbot/bilby-numpyro.git
+    - mamba list
+    - cd example
+  script:
+    - export RUNDIR=GWTC-3-$BACKEND-$KIND
+    - gwpopulation_pipe gwtc3-$KIND.ini --backend $BACKEND --run-dir $RUNDIR --log-dir $RUNDIR/logs
+    - export PYTHONPATH=$PYTHONPATH:$PWD
+    - bash $RUNDIR/submit/$KIND.sh
+    - if [ ! -f $RUNDIR/result/*_full_posterior.hdf5 ]; then exit 1; fi
+    - cd -
+  artifacts:
+    paths:
+      - example/GWTC-3-$BACKEND-$KIND/result/*.png
+      - example/GWTC-3-$BACKEND-$KIND/result/*.pdf
+
+bbh-numpy:
+  <<: *example-tests
+  variables:
+    BACKEND: numpy
+    KIND: bbh
+
+bbh-jax:
+  <<: *example-tests
+  variables:
+    BACKEND: jax
+    KIND: bbh
+  
+gaussian-jax:
+  <<: *example-tests
+  variables:
+    BACKEND: jax
+    KIND: gaussian
+
+docs:
+    stage: test
+    needs: [ "basic-3.10" ]
+    image: containers.ligo.org/lscsoft/bilby/v2-bilby-python310
+    script:
+      - python -m pip install .[pages]
+      - cd docs
+      - make clean
+      - make html
+
+    artifacts:
+      paths:
+        - docs/_build/html/
+
+
+pypi-release:
+  stage: deploy
+  image: containers.ligo.org/lscsoft/bilby/v2-bilby-python310
+  variables:
+    TWINE_USERNAME: $PYPI_USERNAME
+    TWINE_PASSWORD: $PYPI_PASSWORD
+  before_script:
+    - python -m build --sdist --wheel --outdir dist/ .
+  script:
+    - twine upload dist/*
+  only:
+    - tags
+
+pages:
+  stage: deploy
+  needs: ["docs"]
+  script:
+    - mkdir public/
+    - mv docs/_build/html/* public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
