@@ -1,0 +1,63 @@
+[build-system]
+requires = [
+    'meson-python',
+    'nanobind',          # for stubgen
+    'typing_extensions', # for stubgen (should be declared by nanobind)
+    'ruff',              # for stubgen
+]
+build-backend = 'mesonpy'
+
+[project]
+requires-python = ">=3.9"
+name = "pymmcore-nano"
+dynamic = ['version']
+description = "CMMCore wrapper for Python, using nanobind"
+readme = "README.md"
+dependencies = ["numpy"]
+
+[dependency-groups]
+dev = [
+    "ipython",
+    "meson-python",
+    "nanobind",
+    "mypy",
+    "ninja",
+    "pdbpp; sys_platform != 'win32'",
+    "pre-commit",
+    "pytest",
+    "ruff",
+    "pytest-cov",
+    "gcovr",
+    "rich",
+]
+
+# https://docs.pytest.org/
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+filterwarnings = ["error"]
+
+# https://coverage.readthedocs.io/
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.run]
+omit = ['subprojects/']
+source = ["pymmcore_nano", "mmCoreAndDevices"]
+
+[tool.cibuildwheel]
+build-verbosity = 1
+# Skip 32-bit builds, musllinux, and PyPy wheels on all platforms
+# Note: use of PTHREAD_MUTEX_RECURSIVE_NP in DeviceThreads.h
+# is specific to glibc and not available in musl-libc
+skip = ["*-manylinux_i686", "*-musllinux*", "*-win32", "pp*"]
+build = ["cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+test-requires = "pytest"
+test-command = 'pytest "{project}/tests" -v'
+test-skip = ["*-macosx*", "*linux*"]                           # until we build device adapters locally
+
+[tool.cibuildwheel.macos]
+# https://cibuildwheel.readthedocs.io/en/stable/faq/#apple-silicon
+archs = ["x86_64", "arm64"]
+# Needed for full C++17 support on macOS
+environment = { MACOSX_DEPLOYMENT_TARGET = "10.14" }
