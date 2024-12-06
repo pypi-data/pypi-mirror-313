@@ -1,0 +1,90 @@
+Metadata-Version: 2.1
+Name: meteocatpy
+Version: 0.0.6
+Summary: Script para obtener datos meteorológicos de la API de Meteocat
+Home-page: https://gitlab.com/figorr/meteocatpy
+License: Apache-2.0
+Keywords: meteocatpy,meteocat
+Author: figorr
+Author-email: jdcuartero@yahoo.es
+Requires-Python: >=3.12,<3.13
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: aiofiles (>=24.1.0,<25.0.0)
+Requires-Dist: aiohttp (>=3.10.11,<4.0.0)
+Requires-Dist: diskcache (>=5.6.3,<6.0.0)
+Requires-Dist: geopy (>=2.4.1,<3.0.0)
+Requires-Dist: python-dotenv (>=1.0.1,<2.0.0)
+Requires-Dist: python-semantic-release (>=7.28.1,<8.0.0)
+Requires-Dist: requests (>=2.32.3,<3.0.0)
+Requires-Dist: setuptools (>=75.5.0,<76.0.0)
+Requires-Dist: simplejson (>=3.19.3,<4.0.0)
+Requires-Dist: twine (>=3,<4)
+Requires-Dist: tzdata (>=2024.2,<2025.0)
+Requires-Dist: voluptuous (>=0.15.2,<0.16.0)
+Project-URL: Repository, https://gitlab.com/figorr/meteocatpy
+Description-Content-Type: text/markdown
+
+# Meteocat Python Package for Meteocat Home Assistant Integration
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python version compatibility](https://img.shields.io/pypi/pyversions/meteocatpy)](https://pypi.org/project/meteocatpy)
+[![pipeline status](https://gitlab.com/figorr/meteocatpy/badges/master/pipeline.svg)](https://gitlab.com/figorr/meteocatpy/commits/master)
+
+
+`meteocatpy` is a Python package to interact with the Meteocat API. Allows you to obtain meteorological data and lists of municipalities from the Meteocat API.
+
+**NOTE:** Meteocat API requires to use an API_KEY, you should ask to (https://apidocs.meteocat.gencat.cat/documentacio/acces-ciutada-i-administracio/)
+
+# Installation
+
+You can install the package from PyPI using `pip`:
+```bash
+pip install meteocatpy
+```
+
+```bash
+from meteocatpy.client import MeteocatClient
+
+# Replace 'tu_api_key' with your actual API key
+api_key = "tu_api_key"
+client = MeteocatClient(api_key)
+
+# Get a list of municipalities (asynchronous call)
+municipis = await client.get_municipis()
+print(municipis)
+```
+
+# Credits
+
+This is a personal project.
+
+Authors:
+- Figorr
+
+# Contributing
+
+If you would like to contribute to this project, please open an issue or create a pull request. I'd be happy to review your contributions!
+
+1.  [Check for open features/bugs](https://gitlab.com/figorr/meteocatpy/issues)
+    or [initiate a discussion on one](https://gitlab.com/figorr/meteocatpy/issues/new).
+2.  [Fork the repository](https://gitlab.com/figorr/meteocatpy/forks/new).
+3.  Install the dev environment: `make init`.
+4.  Enter the virtual environment: `pipenv shell`
+5.  Code your new feature or bug fix.
+6.  Write a test that covers your new functionality.
+7.  Update `README.md` with any new documentation.
+8.  Run tests and ensure 100% code coverage for your contribution: `make coverage`
+9.  Ensure you have no linting errors: `make lint`
+10. Ensure you have typed your code correctly: `make typing`
+11. Add yourself to `AUTHORS.md`.
+12. Submit a pull request!
+
+# License
+
+[Apache-2.0](LICENSE). By providing a contribution, you agree the contribution is licensed under Apache-2.0.
+
+# API Reference
+
+[See the docs 📚](https://apidocs.meteocat.gencat.cat/section/informacio-general/).
