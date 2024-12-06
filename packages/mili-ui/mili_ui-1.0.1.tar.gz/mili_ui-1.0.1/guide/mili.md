@@ -1,0 +1,188 @@
+[<- BACK](https://github.com/damusss/mili/blob/main/guide/guide.md)
+
+# MILI Class Guide
+
+The MILI class is the UI manager.
+
+Each instance is independent and will manage its own elements.
+Each instance has an internal context instance.
+
+A MILI instance must be associated with a surface to draw on. You can retrieve it or change it with the `MILI.canva: Surface` property. If the canva isn't the screen and is not rendered at the topleft, you can seet the `MILI.canva_offset` property to the render position relative to the window so that the mouse clicks are registered correctly.
+
+MILI has a few methods related to styling:
+
+-   `MILI.default_style`/`MILI.default_styles`: Set the default styles for the style resolution
+-   `MILI.reset_style`: Reset the default styles
+
+The following are two essential functions in the game loop:
+
+-   `MILI.start(style)`: Must be called at the start of the game loop. Acts like the parent of all elements, so it supports styling and components. If `is_global` is True the `ImageCache` preallocated index will be reset. You only want one MILI instance to start as global.
+-   `MILI.update_draw`: Update the interaction and draws all elements. Elements are sorted using their z index which automatically increases when new elements are created.
+
+Boilerplate example code for MILI (it's a better practice to use classes):
+
+```py
+import mili
+import pygame
+
+pygame.init()
+# create window
+my_mili = mili.MILI(window_surface)
+
+def ui():
+    # your UI structure
+    ...
+
+while True:
+    my_mili.start()
+
+    # event loop
+    # clear window
+
+    ui()
+    my_mili.update_draw()
+
+    # update window
+```
+
+## Element Structure
+
+In MILI there are no prefabs such as buttons or labels. The skeleton is composed of elements. All elements can be interacted and they can have children, but they do not have intrinsic graphics - they are just hitboxes. You have the following methods to create elements:
+
+-   `MILI.element(rect, style)`: Create an element with no children
+-   `MILI.begin(rect, style)`: Create an element and set it as the current parent
+-   `MILI.end()`: Signal that the current parent has ended
+
+Elements created after the begin call will be assigned to that parent. The end call will set the parent to the previous one.
+You can avoid calling end using the context manager on the returned `Interaction` object.
+
+Example of an element structure:
+
+```py
+with my_mili.begin(rect, style) as main_container:
+    my_mili.element(rect, style) # parent is main_container
+    my_mili.element(rect, style) # parent is main_container
+
+    with my_mili.begin(rect, style) as second_container:
+        for i in range(3):
+            my_mili.element(rect, style) # parent is second_container
+
+        with my_mili.begin(rect, style) as inner_container:
+            my_mili.element(rect, style) # parent is inner_container
+            my_mili.element(rect, style) # parent is inner_container
+
+        my_mili.element(rect, style) # parent is second_container
+
+    my_mili.element(rect, style) # parent is main_container
+    my_mili.element(rect, style) # parent is main_container
+```
+
+Parent elements organize their children by default, behaviour which is higly customizable using styles.
+
+## Update ID System
+
+Since, as you saw, the element structure is not remembered by the UI manager and is immediate mode, most utilities have an update method that processes an element every frame to work. To avoid calling all this methods, every object of this kind allows you to provide an update ID to their constructor. Then, in your UI loop, when you create the elements, if you add the `update_id` style to an element MILI is going to automatically call the update methods that were registered with the same ID.
+
+Note that you can use a list of strings to associate multiple update IDs with the same element.
+
+For example:
+
+```py
+# normal approach:
+dragger = mili.Dragger()
+sound_player = mili.InteractionSound(sound)
+
+# UI loop
+el = my_mili.element(rect, style)
+dragger.update(el)
+sound_player.play(el)
+
+# update ID system approach:
+dragger = mili.Dragger(update_id="element1")
+sound_player = mili.InteractionSound(sound, update_id="element1")
+
+# UI loop
+my_mili.element(rect, {"update_id": "element1"})
+# automatically call dragger.update and sound_player.play
+```
+
+## Components
+
+Since elements have no graphics, to give the user visual feedback you need to use components. There are six built in components, each with its method:
+
+-   `MILI.rect(style)`
+-   `MILI.circle(style)`
+-   `MILI.line([start, end], style)`
+-   `MILI.polygon(points, style)`
+-   `MILI.text(text, style)`
+-   `MILI.image(surface, style)`
+
+To have both a filled version and the outline version of a shape you must concatenate two calls, specifying the `"outline"` (size) style for the second.
+
+Components are attached to the most recent element. They are contained within the hitbox of the element (customizable with styles).
+You should change the style of components based on interaction for visual feeback.
+
+Example usage of components:
+
+```py
+my_mili.start(mili.CENTER)
+my_mili.rect({"color": (30,) * 3}) # component attached to the start element
+
+with my_mili.begin(None, {"fillx": "50", "filly": "80"}) as container:
+    my_mili.rect({"color": (50,) * 3}) # component attached to container
+    my_mili.rect({"color": (100,) * 3, "outline": 1, "draw_above": True}) # component attached to container
+
+    for i in range(5):
+        if interaction:=my_mili.element((0, 0, 0, 50), {"fillx": True}): # if used for indentation, always True
+            my_mili.rect({"color": (80 if interaction.hovered else 60,) * 3}) # component attached to element, conditionally changes color
+            my_mili.text(f"Button {i}", {"size": 30}) # component attached to element
+            my_mili.rect({"color": (120,) * 3, "outline": 1}) # component attached to element
+
+            if interaction.left_just_released:...
+                # action on button press
+
+    # NOTE: calling my_mili.component here will attach it to the last button, not container!
+```
+
+To reduce boilerplate code, for every component there is a shortcut that creates an element with a single component of said type, for example `MILI.text_element` will create an element with a text component.
+
+For text specifically there are also the utilities `MILI.text_size` and `MILI.text_font` that compute and return the size and font a text element would use if it was rendered.
+
+## Advanced Usage
+
+### Advanced Properties
+
+You can manage the font cache with the provided functions. A font instance will be automatically created for each combination of path/name and size:
+
+-   `mili.get_font_cache()`
+-   `mili.clear_font_cache()`
+
+MILI instances have a couple advanced properties and methods:
+
+-   `MILI.stack_id`: The ID of the main parent element
+-   `MILI.current_parent_id`: The ID of the current parent
+-   `MILI.all_elements_ids`: A list with the IDs of all created elements in memory
+-   `MILI.data_from_id()`: Get an `ElementData` object from an element ID
+-   `MILI.clear_memory()`: Clear all the elments in memory. Useful when changing scenes to avoid glitches.
+-   `MILI.id_checkpoint()`: Manually set the internal ID. Useful to avoid new elements to inherit the memory of the previous element and be visually unpleasent for a few frames.
+
+### Packing Components
+
+You can pack components in dictionaries to store them and add them later without repeating code:
+
+-   `mili.pack_component(name, data, style)`: Return a packed dictionary
+-   `MILI.packed_component(comp1, comp2, ...)`: Add a component from a packed dictionary
+
+### Custom Components
+
+If the builtin components are not enough, You can create your custom components.
+
+To do so, you need to create an object that supports the `mili.typing.ComponentProtocol`. The `added` function will be called when your component is added to an element while the `draw` function will be called to draw your component.
+You can then use the following functions:
+
+-   `mili.register_custom_component(name, component_object)`: Register your component so it can be added to elements
+-   `MILI.custom_component(name, data, style)`: Add your custom component to an element (builtins are allowed in this call)
+
+Interacting with the context object might be challenging as it's undocumented and not annotated.
+
+If you are extending MILI, consider subclassing the MILI class adding a shortcut for your component.
