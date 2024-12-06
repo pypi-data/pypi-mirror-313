@@ -1,0 +1,96 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pycryptoex"
+dynamic = ["version"]
+description = "A library providing a clients for interacting with various APIs of cryptocurrency exchanges for trading and accessing market data"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+  { name = "ren3104", email = "2ren3104@gmail.com" },
+]
+keywords = [
+  "crypto",
+  "cryptocurrency",
+  "exchange",
+  "trade",
+  "trading",
+  "bitcoin",
+  "altcoin",
+  "api",
+  "api-client",
+  "websocket",
+  "async",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Financial and Insurance Industry",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
+]
+dependencies = [
+  "aiohttp>=3.3.0",
+  "typing-extensions>=4.0.0 ; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+speedup = ["orjson"]
+crypto = ["pycryptodome"]
+fmt = ["mypy"]
+dev = ["pre-commit", "ruff"]
+
+[project.urls]
+Homepage = "https://github.com/ren3104/pycryptoex"
+Repository = "https://github.com/ren3104/pycryptoex"
+"Bug Tracker" = "https://github.com/ren3104/pycryptoex/issues"
+
+[project.scripts]
+pycryptoex = "pycryptoex._cli:cli"
+
+[tool.hatch.version]
+path = "pycryptoex/__version__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = ["/clients"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["pycryptoex"]
+
+[tool.hatch.envs.default]
+features = ["dev", "fmt"]
+post-install-commands = ["pre-commit install"]
+
+[tool.hatch.envs.hatch-static-analysis]
+config-path = "none"
+dependencies = ["ruff"]
+features = ["fmt"]
+
+[tool.hatch.envs.hatch-static-analysis.scripts]
+format-check = "ruff format{env:HATCH_FMT_ARGS:} --check --diff {args:.}"
+format-fix = "ruff format{env:HATCH_FMT_ARGS:} {args:.}"
+lint-check = [
+  "ruff check{env:HATCH_FMT_ARGS:} {args:.}",
+  "mypy {args:.}",
+]
+lint-fix = [
+    "ruff check{env:HATCH_FMT_ARGS:} --fix {args:.}",
+    "mypy {args:.}",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_no_return = false
