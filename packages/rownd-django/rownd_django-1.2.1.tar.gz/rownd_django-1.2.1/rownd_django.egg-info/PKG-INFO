@@ -1,0 +1,236 @@
+Metadata-Version: 2.1
+Name: rownd_django
+Version: 1.2.1
+Summary: Rownd bindings for Django
+Home-page: https://rownd.io
+Author: Rownd, Inc.
+Author-email: support@rownd.io
+License: Apache 2.0
+Project-URL: Documentation, https://docs.rownd.io/rownd/sdk-reference/web/django
+Project-URL: Source, https://github.com/rownd/django
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 3.0
+Classifier: Framework :: Django :: 3.1
+Classifier: Framework :: Django :: 3.2
+Classifier: Framework :: Django :: 4.0
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Classifier: Topic :: Internet :: WWW/HTTP :: Session
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: Django>=3.0
+Requires-Dist: PyJWT>=2.3
+Requires-Dist: cryptography>=36.0
+Requires-Dist: requests>=2.27
+
+# Rownd bindings for Django
+Easily add Rownd instant accounts to your Django-backed apps.
+
+## Installation
+
+Begin by adding the `rownd_django` package to your dependencies. In `requirements.txt`, this would look like:
+```
+rownd_django>=1.2.1
+```
+
+> NOTE: This plugin only works with Django v3 and above. We strongly recommend upgrading if you're
+> using something older. If you can't for some reason, please [get in touch](mailto:support@rownd.io?subject=Django%soSDK:%20Request%20for%20older%20version%20support).
+
+Next, add the Rownd app and authentication backend to your Django `settings.py` file.
+
+```python
+
+INSTALLED_APPS = [
+    ...
+    'rownd_django',
+]
+
+AUTHENTICATION_BACKENDS = [
+    'rownd_django.auth.backend.RowndAuthenticationBackend',
+    'django.contrib.auth.backends.ModelBackend'
+]
+```
+
+If you're using Django REST Framework, then add the Rownd authentication class to your `REST_FRAMEWORK` settings.
+
+```python
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rownd_django.auth.backend.RowndApiAuthentication',
+    ]
+}
+```
+
+Finally, add your Rownd app credentials to your Django `settings.py` file. You can obtain these from the [Rownd dashboard](https://app.rownd.io).
+These credentials enable the Rownd authentication backend to communicate with the Rownd API.
+
+```python
+ROWND = {
+    'APP_KEY': '<your app key>',
+    'APP_SECRET': '<your app secret>',
+}
+```
+
+#### A note on Google Sign-in
+If you plan to use Google sign-in, you'll need to add or update one last configuration item in your 
+`settings.py` while developing locally without HTTPS connections enabled. Without this setting, the
+Google One Tap iframe will not load correctly due to a missing Referrer header.
+
+```
+    SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
+```
+
+### Configure the Rownd Hub (required)
+Rownd authentication requires a small code snippet to be embedded within your app, present on all HTML pages.
+Setup for the Hub/snippet itself is outside the scope of this document, but you can find the relevant setup
+guides for either [single page apps](https://docs.rownd.io/rownd/sdk-reference/web/react-next.js) 
+or [traditional web apps via vanilla js](https://docs.rownd.io/rownd/sdk-reference/web/javascript-browser).
+
+Use our SDKs to embed the Hub/snippet in your SPA or use the vanilla JS SDK to add the snippet in your main Django template HTML.
+
+Now that everything is set up, you can add Rownd authentication to your APIs or views.
+
+## Usage
+The Rownd Django SDK provides support for both "traditional" Django apps where you have an authentication
+session that follows a user across page loads, as well as "single-page" (SPA) Django apps using frameworks
+like React, Vue, etc.
+
+### Single-page apps (SPA) / API-based
+When using an SPA framework like React, Vue, or similar, you'll likely want to leverage the specific Rownd SDK
+for those frameworks. You can find a list of supported frameworks in [our documentation](https://docs.rownd.io/rownd/sdk-reference/web).
+
+Typically, an SPA will use an API-driven request/response flow which makes typical sessions unnecessary (though Rownd supports them if you
+need them). We highly recommend the [Django REST framework](https://www.django-rest-framework.org/) for this purpose. Rownd provides plug-and-play
+support for the REST framework's authentication API.
+
+Here's an example of how you might configure an API to leverage Rownd's authenticator, given the installation instructions above:
+
+```python
+from rownd_django.auth.backend import RowndApiAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+class ExampleView(APIView):
+    authentication_classes = [RowndApiAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        content = {
+            'user': str(request.user),  # `django.contrib.auth.User` instance.
+            'auth': str(request.auth),  # None
+        }
+        return Response(content)
+```
+
+### Traditional (non-SPA) apps / session-based
+In this flow, once a user has been authenticated with the Rownd Hub, the Hub will make a request to your
+app's backend to set up a session for the user.
+
+First, ensure your project has session middleware enabled.
+
+```python
+MIDDLEWARE = [
+    ...
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    ...
+]
+```
+
+Next, include the Rownd `session_authenticator` in your `urls.py` file.
+
+```python
+urlpatterns = [
+    ...
+    path('rownd/', include('rownd_django.auth.urls', namespace='rownd')),
+    ...
+]
+```
+
+Finally, update your Rownd Hub code snippet to fire post-authenticate and post-sign-out API requests
+ to the session authenticator we just enabled.
+
+```html
+<script type="text/javascript">
+(function () {
+    // Rownd Hub snippet
+})();
+</script>
+<script type="text/javascript">
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    _rphConfig.push(['setAppKey', '<rownd app key>']);
+    _rphConfig.push(['setPostAuthenticationApi', {
+        method: 'post',
+        url: '/rownd/session_authenticate',
+        extra_headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    }]);
+    _rphConfig.push(['setPostSignOutApi', {
+        method: 'post',
+        url: '/rownd/session_sign_out',
+        extra_headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    }]);
+</script>
+```
+
+The session authenticator will establish an authenticated session if one doesn't already exist and will return a response
+indicating that the Rownd Hub should trigger a page refresh. This is usually necessary for your app views to display
+the desired authenticated context. In the event that an authenticated session already exists, the Hub will not trigger
+further page refreshes.
+
+#### CSRF Protection
+By default CSRF protection is disabled on the two sign-in and sign-out routes provided by Rownd. If
+you would like to enable it on those endpoints, you must ensure all of your sites views contain the
+`csrftoken` cookie and update your settings to enable the CSRF protection. You can find more information
+on the `csrftoken` cookie [here](https://docs.djangoproject.com/en/4.2/ref/csrf/).
+```python
+ROWND = {
+    'APP_KEY': '<your app key>',
+    'APP_SECRET': '<your app secret>',
+    'CSRF_PROTECT_ROUTES': True
+}
+```
+    
+#### Custom User Model
+If you are using a customized user model that changes the default `USERNAME_FIELD` value from `username`, 
+you must tell the Rownd SDK the property name.
+
+```python
+ROWND = {
+    'USER_MODEL_USERNAME_FIELD': 'email',
+}
+```
