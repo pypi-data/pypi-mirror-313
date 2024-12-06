@@ -1,0 +1,45 @@
+name: doc
+
+on:
+  push:
+    branches: ["main"]
+
+# Prevent doc action on `main` to conflict with each others.
+concurrency:
+  group: doc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  doc:
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+          cache-dependency-glob: ./pyproject.toml
+      
+      - name: Install the project
+        run: uv sync --all-groups --python 3.12
+
+      - name: Configure git
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - name: Deploy the doc
+        run: |
+          echo "Get the gh-pages branch"
+          git fetch origin gh-pages
+
+          echo "Build and deploy the doc on main"
+          uv run mike deploy --push main

@@ -1,0 +1,149 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# NOTE(hadim): unfortunately, we cannot use `polaris` on pypi.
+# See https://github.com/pypi/support/issues/2908
+name = "polaris-lib"
+description = "Client for the Polaris Hub."
+dynamic = ["version"]
+authors = [
+    { name = "Cas Wognum", email = "cas@valencelabs.com" },
+    { name = "Lu Zhu", email = "lu@valencelabs.com" },
+    { name = "Andrew Quirke", email = "andrew@valencelabs.com" },
+    { name = "Julien St-Laurent", email = "julien.stl@valencelabs.com" },
+]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "tqdm",
+    "loguru",
+    "typer",
+    "pyyaml",
+    "pydantic >=2",
+    "pydantic-settings >=2",
+    "authlib",
+    "httpx",
+    "tenacity",
+    "filelock",
+    "numpy < 2",
+    # We need to pin numpy to avoid issues with fastpdb/biotite.
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "seaborn",
+    "datamol >=0.12.1",
+    "fastpdb",
+    "zarr",
+    "pyarrow < 18",
+    "fsspec[http]",
+    "yaspin",
+    "typing-extensions>=4.12.0",
+    "boto3>=1.35.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-xdist",
+    "pytest-cov",
+    "ruff",
+    "jupyterlab",
+    "ipywidgets",
+    "moto[s3]>=5.0.14",
+]
+doc = [
+    "mkdocs",
+    "mkdocs-material >=9.4.7",
+    "mkdocstrings",
+    "mkdocstrings-python",
+    "mkdocs-jupyter",
+    "markdown-include",
+    "mdx_truly_sane_lists",
+    "nbconvert",
+    "mike >=1.0.0"
+]
+codecs = [
+    "imagecodecs",
+]
+
+
+[project.scripts]
+polaris = "polaris.cli:app"
+
+[project.urls]
+Website = "https://polarishub.io/"
+"Source Code" = "https://github.com/polaris-hub/polaris"
+"Bug Tracker" = "https://github.com/polaris-hub/polaris/issues"
+Documentation = "https://polaris-hub.github.io/polaris/"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0.dev1"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["polaris", "polaris.*"]
+exclude = []
+namespaces = false
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "--verbose --durations=10 -n auto --cov=polaris --cov-fail-under=75 --cov-report xml --cov-report term-missing"
+testpaths = ["tests"]
+pythonpath = "."
+filterwarnings = ["ignore::DeprecationWarning:jupyter_client.connect.*:"]
+
+[tool.coverage.run]
+source = ["polaris/"]
+disable_warnings = ["no-data-collected"]
+data_file = ".coverage/coverage"
+
+[tool.coverage.report]
+omit = [
+    "polaris/__init__.py",
+    "polaris/_version.py",
+    # We cannot yet test the interaction with the Hub.
+    # See e.g. https://github.com/polaris-hub/polaris/issues/30
+    "polaris/hub/client.py",
+    "polaris/hub/external_auth_client.py",
+    "polaris/hub/oauth2.py",
+    "polaris/hub/settings.py",
+    "polaris/hub/polarisfs.py",
+    "polaris/hub/__init__.py",
+]
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
+[tool.ruff]
+lint.ignore = [
+    "E501", # Never enforce `E501` (line length violations).
+]
+
+lint.per-file-ignores."__init__.py" = [
+    "F401", # imported but unused
+    "E402", # Module level import not at top of file
+]
+line-length = 110
+target-version = "py310"
