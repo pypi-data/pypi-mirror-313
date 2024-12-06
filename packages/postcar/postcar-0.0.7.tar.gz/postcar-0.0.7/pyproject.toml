@@ -1,0 +1,129 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "postcar"
+dynamic = ["version"]
+description = 'A database migration utility for Postgres'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+keywords = []
+authors = [{ name = "tunnelworks", email = "git@tunnelworks.org" }]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Database",
+  "Typing :: Typed",
+]
+dependencies = ["psycopg>=3"]
+
+
+[project.scripts]
+postcar = "postcar.cli:main"
+
+
+[project.urls]
+Documentation = "https://github.com/tunnelworks/postcar#readme"
+Issues = "https://github.com/tunnelworks/postcar/issues"
+Source = "https://github.com/tunnelworks/postcar"
+
+
+[tool.hatch.version]
+path = "src/postcar/__about__.py"
+
+
+[tool.hatch.envs.types]
+extra-dependencies = ["mypy>=1.0.0", "pytest"]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/postcar tests}"
+
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_configs = true
+warn_unused_ignores = true
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_no_return = true
+warn_unreachable = true
+warn_incomplete_stub = true
+no_implicit_optional = true
+no_implicit_reexport = true
+disallow_any_explicit = true
+disallow_any_generics = true
+disallow_any_unimported = true
+disallow_subclassing_any = true
+disallow_untyped_defs = true
+
+
+[tool.hatch.envs.hatch-test]
+extra-args = ["-vv"]
+randomize = true
+extra-dependencies = ["pytest-asyncio"]
+
+
+[tool.pytest.ini_options]
+addopts = ["--strict-markers"]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+markers = ["db: marks tests as depending on db (deselect with '-m \"not db\"')"]
+
+
+[tool.coverage.run]
+source_pkgs = ["postcar", "tests"]
+branch = true
+parallel = true
+omit = ["src/postcar/__about__.py"]
+
+[tool.coverage.paths]
+postcar = ["src/postcar", "*/postcar/src/postcar"]
+tests = ["tests", "*/postcar/tests"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["C90", "E", "F", "I", "W"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-wrap-aliases = true
+lines-after-imports = 2
+lines-between-types = 0
+order-by-type = true
+no-lines-before = [
+  "standard-library",
+  "first-party",
+  "third-party",
+  "local-folder",
+]
+known-third-party = ["psycopg"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+
+[tool.hatch.build.targets.sdist]
+exclude = [".github", "tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/postcar"]
