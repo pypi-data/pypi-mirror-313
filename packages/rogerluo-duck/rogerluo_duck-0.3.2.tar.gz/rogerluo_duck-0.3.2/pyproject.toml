@@ -1,0 +1,98 @@
+[project]
+name = "rogerluo-duck"
+version = "0.3.2"
+description = "A software framework for the duck (operator learning) renormalization group."
+readme = "README.md"
+authors = [{ name = "Roger-luo", email = "rogerluo.rl18@gmail.com" }]
+requires-python = ">=3.12"
+dependencies = [
+    "diffrax>=0.6.0",
+    "equinox>=0.11.8",
+    "jax>=0.4.35",
+    "jaxtyping>=0.2.34",
+    "optax>=0.2.3",
+    "pydantic>=2.9.2",
+    "rich>=13.9.3",
+    "tomlkit>=0.13.2",
+    "tqdm>=4.67.1",
+    "typing-extensions>=4.12.2",
+]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.9.2"]
+wandb = ["wandb>=0.18.5"]
+gpu = ["jax[cuda12]>=0.4.35"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/duck"]
+
+[tool.uv]
+dev-dependencies = [
+    "black>=24.10.0",
+    "coverage>=7.6.4",
+    "ipython>=8.28.0",
+    "notebook>=7.2.2",
+    "pre-commit>=4.0.1",
+    "pyright>=1.1.387",
+    "pytest-env>=1.1.5",
+    "pytest>=8.3.3",
+    "ruff>=0.7.0",
+    "rust-just>=1.36.0",
+    "isort>=5.13.2",
+]
+
+[tool.isort]
+profile = "black"
+combine_as_imports = true
+multi_line_output = 3
+length_sort = true
+src_paths = ["src/duck"]
+
+[tool.black]
+line-length = 88
+
+[tool.pytest_env]
+JAX_ENABLE_X64 = "True"
+
+[tool.ruff]
+target-version = "py312"
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+[tool.ruff.lint]
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.coverage.run]
+include = ["src/duck/*"]
+
+[dependency-groups]
+app = [
+    "tyro>=0.9.1",
+]
