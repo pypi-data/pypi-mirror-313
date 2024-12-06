@@ -1,0 +1,93 @@
+[tool.poetry]
+name = "griffv2"
+version = "2.0.22"
+description = "DDD Library"
+authors = ["Wedge Digital"]
+packages = [{ include = "griff" }]
+exclude = ["**/_tests/*", "**/test_*.py"]
+include = ["**/tpl/**/_tests/*", "**/tpl/**/test_*.py"]
+readme = "README.md"
+repository = "https://github.com/Wedge-Digital/griff"
+license = "MIT"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2"
+injector = "^0.22"
+pydantic-settings = "^2"
+email-validator = "^2"
+asyncpg = "^0.29"
+loguru = "^0.7"
+arrow = "^1.3"
+aiosql = "^12"
+orjson = "^3.10"
+fastapi = "^0.115"
+typer = "^0.12"
+yoyo-migrations = "^9"
+argon2-cffi = "^23"
+httpx = "^0.27.2"
+returns = "^0.23"
+pyjwt = "^2.9"
+pydantic-i18n = "^0.4"
+psycopg2-binary = "^2.9"
+fastapi-babel = "^0.0"
+python-ulid = { extras = ["pydantic"], version = "^2" }
+python-multipart = "^0.0.12"
+cookiecutter = "^2.6.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2"
+flake8 = "^7.0"
+pytest-asyncio = "^0.23.6"
+pytest-cov = "^5.0"
+mypy = "^1.11"
+black = "^23.12" # attention la version 24 n'est pas encore compatible avec flakes8
+
+
+[tool.pytest.ini_options]
+python_files = "test_*.py"
+addopts = "-p no:warnings --tb=short"
+asyncio_mode = "auto"
+testpaths = "_tests"
+
+[tool.mypy]
+strict = false
+ignore_missing_imports = true
+warn_unused_configs = true
+plugins = [
+    "pydantic.mypy"
+]
+disable_error_code = "import-untyped"
+exclude = [
+    "griff/test_utils/*",
+    "griff/infra/cli/controllers/griff/tpl/*",
+    "_tests/_fixtures/*",
+]
+
+[tool.coverage.run]
+omit = [
+    "conftest.py",
+    "griff/**/_tests/**",
+    "griff/test_utils/*",
+    "griff/**/abstract_*.py",
+    "griff/**/cli/*",
+    "griff/**/settings/*",
+    "griff/appli/command/*",
+    "griff/appli/event/*",
+    "griff/appli/query/*",
+    "griff/appli/policies/*",
+    "griff/infra/persistence/dict_domain_persistence.py",
+    "griff/infra/registry/cli_decorator_processor.py",
+    "griff/infra/fastapi/exception_handlers/pydantic_exception_handler.py",
+    "griff/infra/cli/controllers/griff/tpl/*",
+    "griff/runtime/factories/app_runtime_factory.py",
+    "griff/runtime/components/*",
+    "griff/utils/errors.py",
+]
+
+[tool.black]
+extend_exclude = "griff/infra/cli/controllers/griff/tpl"

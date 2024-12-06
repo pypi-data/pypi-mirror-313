@@ -1,0 +1,6 @@
+class AbstractService:
+    ...
+
+
+class AbstractAsyncService(AbstractService):
+    ...
