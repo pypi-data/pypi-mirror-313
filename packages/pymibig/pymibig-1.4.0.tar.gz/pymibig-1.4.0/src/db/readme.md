@@ -1,0 +1,1 @@
+This directory stores the latest version of [MIBiG](https://mibig.secondarymetabolites.org/download) database files

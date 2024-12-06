@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling>=1.26.1"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pymibig"
+dynamic = ["version"]
+description = 'A small tool to download, match and save sequences from MIBiG.'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "lgpl-3.0-or-later"
+keywords = ["Biosynthetic Gene Cluster", "MIBiG", "bioinformatics",
+"Secondary Metabolites"]
+authors = [
+  { name = "Rodrigo Aluizio", email = "r.aluizio@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "Bio~=1.7",
+  "biopython~=1.84",
+  "Requests~=2.32",
+  "rich~=13.9",
+  "pandas~=2.2",
+]
+
+[project.scripts]
+pymibig = "main:main"
+
+[project.urls]
+Documentation = "https://github.com/Godrigos/pyMIBiG#readme"
+Issues = "https://github.com/Godrigos/pyMIBiG/issues"
+Source = "https://github.com/Godrigos/pyMIBiG"
+
+[tool.hatch.version]
+path = "src/pymibig/__about__.py"
+
+[tool.hatch.build]
+exclude = [
+  "/.vscode",
+  "/.gitignore",
+  "/src/db/mibig*"
+]
+include = [
+  "main.py",
+  "/src"
+]
+HATCH_BUILD_CLEAN = "true"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/pymibig tests}"
+
+[tool.coverage.run]
+source_pkgs = ["pymibig"]
+branch = true
+parallel = true
+omit = [
+  "src/pymibig/__about__.py",
+]
+
+[tool.coverage.paths]
+db = ["db", "src/db"]
+pymibig = ["src/pymibig", "*/pymibig/src/pymibig"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
