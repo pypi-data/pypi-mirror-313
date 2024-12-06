@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=70.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "karuocv"
+dynamic = ["version"]
+description = "package for computer vision tools wrap"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name="caimmy", email = "caimmy@hotmail.com" },
+]
+maintainers = [
+    { name = "caimmy", email = "caimmy@hotmail.com" },
+]
+dependencies = [
+    "setuptools>65.3.0",
+    "wheel",
+    "opencv-contrib-python",
+    "opencv-python",
+    "matplotlib",
+    "numpy",
+    "ultralytics",
+    "supervision",
+    "torch",
+    "scikit-learn",
+    "pandas",
+    "sahi"
+]
+[tool.setuptools]
+packages = { find = { where = ["."], include = ["karuocv", "karuocv.*"] } }
+
+[project.scripts]
+karuocv = "karuocv.client:client_command"
+
+[tool.setuptools.dynamic]
+version = { attr = "karuocv.__version__" }
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules --durations=30 --color=yes"
+markers = [
+    "slow: skip slow tests unless --slow is set",
+]
+norecursedirs = [".git", "dist", "build"]
