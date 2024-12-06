@@ -1,0 +1,59 @@
+name: FactGridTranslator
+description: |
+  Wikidata to FactGrid Mapping configuration
+source:
+  name: Wikidata
+  sparql_url: https://query.wikidata.org/sparql
+  mediawiki_api_url: https://www.wikidata.org/w/api.php
+  mediawiki_rest_url: https://www.wikidata.org/w/rest.php
+  website: https://wikidata.org/
+  item_prefix: http://www.wikidata.org/entity/
+  user:
+  password:
+target:
+  name: FactGrid
+  sparql_url: https://database.factgrid.de/sparql
+  mediawiki_api_url: https://database.factgrid.de/w/api.php
+  mediawiki_rest_url: https://database.factgrid.de/w/rest.php
+  website: https://database.factgrid.de
+  item_prefix: https://database.factgrid.de/entity/
+  user:
+  password:
+mapping:
+  location_of_mapping: target
+  item_mapping_query: |
+    PREFIX schema: <http://schema.org/>
+    SELECT ?source_entity ?target_entity
+    WHERE{
+
+      VALUES ?source_entity {
+        $source_entities
+      }
+      BIND(IRI(CONCAT("https://www.wikidata.org/wiki/", STR( ?source_entity))) as ?wd_qid)
+      ?wd_qid schema:isPartOf <https://www.wikidata.org/>.
+      ?wd_qid schema:about ?factgrid_item.
+      BIND(STRAFTER(STR(?factgrid_item), "https://database.factgrid.de/entity/") AS ?target_entity)
+    }
+  property_mapping_query: |
+    PREFIX wdt: <https://database.factgrid.de/prop/direct/>
+    SELECT ?source_entity ?target_entity
+    WHERE{
+
+      VALUES ?source_entity {
+        $source_entities
+      }
+      ?factgrid_item wdt:P343 ?source_entity.
+      BIND(STRAFTER(STR(?factgrid_item), "https://database.factgrid.de/entity/") AS ?target_entity)
+    }
+  languages: ["de", "en"]
+  sitelinks: ["wikidatawiki", "dewiki", "enwiki"]
+back_reference:
+  item:
+    type: Sitelink
+    id: wikidatawiki
+  property:
+    type: Property
+    id: P343
+type_casts:
+  enabled: True
+  fallback_language: "en"
