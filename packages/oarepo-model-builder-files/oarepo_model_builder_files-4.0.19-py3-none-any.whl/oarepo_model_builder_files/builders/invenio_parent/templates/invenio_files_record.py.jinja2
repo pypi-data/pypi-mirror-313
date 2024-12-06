@@ -1,0 +1,19 @@
+from invenio_records.systemfields import ModelField
+
+{{ vars.record.class|generate_import }}
+{{ vars.files_field.file_class|generate_import }}
+{{ vars.files_field.field_class|generate_import }}
+
+class {{ metadata_record.record.class|base_name }}:
+    {% if not vars.files_field.skip %}
+    files = {{ vars.files_field.field_class|base_name }}(
+        file_cls={{ vars.files_field.file_class|base_name }}{% if vars.files_field.field_args %},
+        {{ vars.files_field.field_args|generate_list }}
+    {% endif %}
+    )
+    {% endif %}
+
+    bucket_id = ModelField(dump=False)
+    bucket = ModelField(dump=False)
+
+{{ vars.record.class|base_name }}.record_cls = {{ metadata_record.record.class|base_name }}
