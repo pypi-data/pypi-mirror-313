@@ -1,0 +1,3 @@
+class ContextCash:
+    label = ""
+    model = ""
