@@ -1,0 +1,45 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  BUILD_NUMBER: ${{ github.run_number }}
+
+jobs:
+  build-python311:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and Test
+        run: |
+          sudo apt-get install libxml2-dev libxslt1-dev llvm-14-dev
+          python -m pip install --upgrade pip
+          python -m pip install .[test]
+          python -m pytest . --cov --cov-config pyproject.toml
+
+  build-python312:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and Test
+        run: |
+          sudo apt-get install libxml2-dev libxslt1-dev llvm-14-dev
+          python -m pip install --upgrade pip
+          python -m pip install .[test]
+          python -m pytest . --cov --cov-config pyproject.toml
