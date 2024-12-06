@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2011 rel. 2 (http://www.altova.com) by TeaM DJiNN (TeaM DJiNN) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn://x-artefacts-smev-gov-ru/esnsi/smev-integration/update/2.0.0" targetNamespace="urn://x-artefacts-smev-gov-ru/esnsi/smev-integration/update/2.0.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:annotation>
+		<xs:documentation>Обновление содержимого классификаторов. v2.0.0</xs:documentation>
+	</xs:annotation>
+	<xs:element name="CnsiRequest">
+		<xs:annotation>
+			<xs:documentation>Корневой элемент запроса</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="UpdateClassifierData" type="tns:UpdateClassifierDataRequestType"/>
+				<xs:element name="DeleteClassifierData" type="tns:DeleteClassifierDataRequestType"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="CnsiResponse">
+		<xs:annotation>
+			<xs:documentation>Корневой элемент ответа</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:element name="UpdateClassifierData" type="tns:UpdateClassifierDataResponseType"/>
+				<xs:element name="DeleteClassifierData" type="tns:DeleteClassifierDataResponseType"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:annotation>
+		<xs:documentation>----------========== UpdateClassifierData - изменение данных классификатора ==========----------</xs:documentation>
+	</xs:annotation>
+	<xs:complexType name="UpdateClassifierDataRequestType">
+		<xs:annotation>
+			<xs:documentation>Запрос на изменение данных классификаторов</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="authorizationString" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Строка с авторизационными данными, заполненная по шаблону "Basic "+Base64(СНИЛС:Фамилия)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:choice minOccurs="1">
+				<xs:element name="code" type="xs:string" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Запрос по коду классификатора</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="uid" type="xs:string" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Запрос по уникальному идентификатору классификатора</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+			<xs:element name="removeMissing" type="xs:boolean" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Удалить, отсутствующие в файле обновления</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="UpdateClassifierDataResponseType">
+		<xs:annotation>
+			<xs:documentation>Ответ</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ClassifierUpdateSuccessful" type="xs:boolean"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:annotation>
+		<xs:documentation>----------========== DeleteClassifierData - удаление данных классификатора ==========----------</xs:documentation>
+	</xs:annotation>
+	<xs:complexType name="DeleteClassifierDataRequestType">
+		<xs:annotation>
+			<xs:documentation>Запрос на удаление данных классификаторов</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="authorizationString" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>Строка с авторизационными данными, заполненная по шаблону "Basic "+Base64(СНИЛС:Фамилия)</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:choice minOccurs="1">
+				<xs:element name="code" type="xs:string" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Запрос по коду классификатора</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="uid" type="xs:string" minOccurs="1">
+					<xs:annotation>
+						<xs:documentation>Запрос по уникальному идентификатору классификатора</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DeleteClassifierDataResponseType">
+		<xs:annotation>
+			<xs:documentation>Ответ</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ClassifierDeleteSuccessful" type="xs:boolean"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:annotation>
+		<xs:documentation>----------========== Общие ==========----------</xs:documentation>
+	</xs:annotation>
+	<xs:complexType name="ClassifierDetailsRequestType">
+		<xs:choice minOccurs="0">
+			<xs:element name="code" type="xs:string" minOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Запрос по коду классификатора</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="uid" type="xs:string" minOccurs="1">
+				<xs:annotation>
+					<xs:documentation>Запрос по уникальному идентификатору классификатора</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+</xs:schema>
