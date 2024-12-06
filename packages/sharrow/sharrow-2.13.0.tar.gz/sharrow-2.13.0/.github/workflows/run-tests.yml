@@ -1,0 +1,254 @@
+name: sharrow testing
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v[0-9]+.[0-9]+**'
+  pull_request:
+    branches: [ main, develop ]
+    tags:
+      - 'v[0-9]+.[0-9]+**'
+  workflow_dispatch:
+
+jobs:
+
+  fmt:
+    name: formatting quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Ruff
+        run: |
+          python -m pip install ruff
+      - name: Lint with Ruff
+        run: |
+          # code quality check, stop the build for any errors
+          ruff check . --show-fixes --exit-non-zero-on-fix
+
+  test-minimal:
+    needs: fmt
+    name: minimal tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-python@v5
+          with:
+            python-version: '3.11'
+        - name: Install pytest
+          run: |
+            python -m pip install pytest pytest-cov pytest-regressions pytest-xdist nbmake
+        - name: Install sharrow
+          run: |
+            python -m pip install .
+        - name: Initial simple tests
+          # tests that sharrow can be imported and that categorical tests can be run
+          run: |
+            python -m pytest sharrow/tests/test_categorical.py
+        - name: Install openmatrix
+          run: |
+            python -m pip install openmatrix
+        - name: Dataset tests
+          # tests that the datasets can be read and that the tests can be run
+          run: |
+            python -m pytest sharrow/tests/test_datasets.py
+        - name: Install zarr and dask-diagnostics
+          run: |
+            python -m pip install zarr "dask[diagnostics]"
+        - name: More complete test with pytest
+          run: |
+            python -m pytest -v --disable-warnings sharrow/tests
+
+  test:
+    needs: fmt
+    name: ${{ matrix.os }} py${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: ["3.10", "3.11", "3.12"]
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python and Dependencies
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          environment-file: envs/testing.yml
+          python-version: ${{ matrix.python-version }}
+          activate-environment: testing-env
+          auto-activate-base: false
+          auto-update-conda: false
+      - name: Install sharrow
+        run: |
+          python -m pip install .
+      - name: Conda checkup
+        run: |
+          conda info -a
+          conda list
+      - name: Lint with Ruff
+        run: |
+          # code quality check
+          # stop the build if there are Python syntax errors or undefined names
+          ruff check . --select=E9,F63,F7,F82 --no-fix
+          # stop the build for any other configured Ruff linting errors
+          ruff check . --show-fixes --exit-non-zero-on-fix
+      - name: Test with pytest
+        run: |
+          python -m pytest
+
+  deploy-docs:
+    needs: test
+    # only on pushes tagged with v...
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: asim
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniforge-version: latest
+        environment-file: envs/testing.yml
+        python-version: "3.10"
+        activate-environment: testing-env
+        auto-activate-base: false
+        auto-update-conda: false
+    - name: Install Jupyterbook and ruamel.yaml
+      run: |
+        conda install jupyter-book ruamel.yaml sphinx-autosummary-accessors -c conda-forge
+    - name: Install sharrow
+      run: |
+        python -m pip install --no-deps .
+    - name: Conda checkup
+      run: |
+        conda info -a
+        conda list
+    - name: Install pip build
+      run: |
+        python -m pip install --upgrade build
+    - name: Build wheel
+      run: |
+        python -m build
+    - name: Build the docs
+      run: |
+        python docs/_script/run_all.py
+        jupyter-book build ./docs
+    - name: Push to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3.5.9
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        # Token is created automatically by Github Actions, no other config needed
+        publish_dir: ./docs/_build/html
+    # now send to PyPI
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      if: github.repository_owner == 'ActivitySim'
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+  activitysim-examples:
+    # test that updates to sharrow will not break the activitysim canonical examples
+    needs: fmt
+    env:
+      python-version: "3.10"
+      label: linux-64
+    strategy:
+      matrix:
+        include:
+          - region: ActivitySim 1-Zone Example (MTC)
+            region-org: ActivitySim
+            region-repo: activitysim-prototype-mtc
+            region-branch: extended
+          - region: ActivitySim 2-Zone Example (SANDAG)
+            region-org: ActivitySim
+            region-repo: sandag-abm3-example
+            region-branch: main
+      fail-fast: false
+    defaults:
+      run:
+        shell: bash -l {0}
+    name: ${{ matrix.region }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Sharrow
+        uses: actions/checkout@v4
+        with:
+          path: 'sharrow'
+
+      - name: Checkout ActivitySim
+        uses: actions/checkout@v4
+        with:
+          repository: 'ActivitySim/activitysim'
+          ref: 'main'
+          path: 'activitysim'
+
+      - name: Setup Miniforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          activate-environment: asim-test
+          python-version: ${{ env.python-version }}
+
+      - name: Set cache date for year and month
+        run: echo "DATE=$(date +'%Y%m')" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.CONDA }}/envs
+            ~/.cache/ActivitySim
+          key: ${{ env.label }}-conda-${{ hashFiles('activitysim/conda-environments/github-actions-tests.yml') }}-${{ env.DATE }}-${{ env.CACHE_NUMBER }}
+        id: cache
+
+      - name: Update environment
+        run: |
+          conda env update -n asim-test -f activitysim/conda-environments/github-actions-tests.yml
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: Install sharrow
+        # installing from source
+        run: |
+          python -m pip install ./sharrow
+
+      - name: Install activitysim
+        # installing without dependencies is faster, we trust that all needed dependencies
+        # are in the conda environment defined above.  Also, this avoids pip getting
+        # confused and reinstalling tables (pytables).
+        run: |
+          python -m pip install ./activitysim --no-deps
+
+      - name: Conda checkup
+        run: |
+          conda info -a
+          conda list
+
+      - name: Checkout Example
+        uses: actions/checkout@v4
+        with:
+          repository: '${{ matrix.region-org }}/${{ matrix.region-repo }}'
+          ref: '${{ matrix.region-branch }}'
+          path: '${{ matrix.region-repo }}'
+
+      - name: Test ${{ matrix.region }}
+        run: |
+          cd ${{ matrix.region-repo }}/test
+          python -m pytest .

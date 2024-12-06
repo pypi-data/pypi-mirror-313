@@ -1,0 +1,86 @@
+[build-system]
+requires = [
+    "setuptools>=69",
+    "setuptools_scm>=8",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sharrow"
+requires-python = ">=3.9"
+dynamic = ["version"]
+dependencies = [
+    "numpy >= 1.19",
+    "pandas >= 1.2",
+    "pyarrow",
+    "xarray",
+    "numba >= 0.57",
+    "numexpr",
+    "filelock",
+    "dask",
+    "networkx",
+]
+classifiers = [
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+description = "numba for ActivitySim-style spec files"
+readme = "README.md"
+keywords = ["activitysim", "discrete choice"]
+
+[project.urls]
+Documentation = "https://activitysim.github.io/sharrow/"
+Repository = "https://github.com/activitysim/sharrow"
+
+[tool.setuptools]
+packages = ["sharrow", "sharrow.utils"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+sharrow = ["*"]
+
+[tool.setuptools_scm]
+fallback_version = "1999"
+write_to = "sharrow/_version.py"
+
+[tool.ruff]
+fix = true
+line-length = 88
+target-version = "py39"
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = [
+    "F", # Pyflakes
+    "E", # Pycodestyle Errors
+    "W", # Pycodestyle Warnings
+    "I", # isort
+    "UP", # pyupgrade
+    "D", # pydocstyle
+    "B", # flake8-bugbear
+]
+ignore = ["B905", "D1"]
+per-file-ignores = { "*.ipynb" = [
+    "E402", # allow imports to appear anywhere in Jupyter Notebooks
+    "E501", # allow long lines in Jupyter Notebooks
+] }
+
+[tool.ruff.lint.isort]
+known-first-party = ["sharrow"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-v --nbmake --disable-warnings"
+testpaths = [
+    "sharrow/tests",
+    "docs",
+]
