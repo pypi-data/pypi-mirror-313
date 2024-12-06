@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Health Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 3em;
+            color: #3498db;
+        }
+        h2 {
+            font-size: 2em;
+            color: #555;
+        }
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .status-ok {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .status-warning {
+            color: #856404;
+            font-weight: bold;
+        }
+        .status-error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Application Health Status</h1>
+    <h2>System Components</h2>
+
+    {% if statuses %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Component Name</th>
+                    <th>Last Checked</th>
+                    <th>Status</th>
+                    <th>Event</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in statuses %}
+                <tr>
+                    <td>{{ record.name }}</td>
+                    <td>{{ record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td class="status-{{ record.status.name.lower() }}">
+                        {{ record.status.name }}
+                    </td>
+                    <td>{{ record.event if record.event else 'No events reported' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No health records available at this time.</p>
+    {% endif %}
+</body>
+</html>
