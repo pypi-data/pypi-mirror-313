@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "tomlparams"
+version = "0.1.26"
+description = ""
+authors = [
+  "Smart Data Foundry <datascience@smartdatafoundry.com>",
+  "Paola Arce <paola.arce@smartdatafoundry.com>",
+  "Victor Diaz <victor.diaz@smartdatafoundry.com>",
+  "Eric Janto <eric.janto@smartdatafoundry.com>",
+  "Del Middlemiss <derek.middlemiss@smartdatafoundry.com>",
+  "Nick Radcliffe <njr@stochasticsolutions.com>",
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+tomli = "^2.0.1"
+tomli-w = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.1"
+pytest = "^7.3.2"
+parameterized = "^0.9.0"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+myst-parser = "^2.0.0"
+
+[tool.black]
+line-length = 79
+skip-string-normalization = true
+preview = true
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.poetry.scripts]
+tomlparams = "tomlparams.console:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
