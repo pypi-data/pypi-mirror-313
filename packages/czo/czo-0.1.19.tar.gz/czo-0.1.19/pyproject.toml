@@ -1,0 +1,50 @@
+# https://packaging.python.org/en/latest/tutorials/packaging-projects/#uploading-your-project-to-pypi
+[build-system]
+requires = [
+    "hatchling",
+    "hatch-fancy-pypi-readme",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "czo"
+version = "0.1.19"
+authors = [
+    { name = "sfwwslm", email = "sfwwslm@gmail.com" },
+]
+description = "构建测试数据的工具包"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "twine",
+    "black",
+]
+test = [
+    "pytest",
+]
+
+[project.urls]
+Homepage = "https://github.com/sfwwslm/czo"
+Issues = "https://github.com/sfwwslm/czo/issues"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/czo",
+    "/README.md",
+    "/tests",
+]
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
