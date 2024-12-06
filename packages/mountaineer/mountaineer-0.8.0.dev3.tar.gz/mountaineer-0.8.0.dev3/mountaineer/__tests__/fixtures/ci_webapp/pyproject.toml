@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "ci-webapp"
+version = "0.1.0"
+description = ""
+authors = ["Pierce Freeman <pierce@freeman.vc>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+# While in development, link to the local path
+mountaineer = { path = "../../../../", develop = true }
+
+[tool.poetry.scripts]
+runserver = "ci_webapp.cli:runserver"
+watch = "ci_webapp.cli:watch"
+build = "ci_webapp.cli:build"
+
+[tool.poetry.group.dev.dependencies]
+types-setuptools = "^69.0.0.20240125"
+mypy = "^1.8.0"
+ruff = "^0.1.14"
+pyright = "^1.1.352"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+select = ["E4", "E7", "E9", "F", "I001"]

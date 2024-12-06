@@ -1,0 +1,711 @@
+# Based on - https://github.com/samuelcolvin/rtoml/blob/main/.github/workflows/ci.yml
+# The MIT License (MIT)
+#
+# Copyright (c) 2020 Samuel Colvin
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "**"
+  pull_request: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: test py${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    services:
+      docker:
+        image: docker:24.0.2
+        options: --privileged
+
+    env:
+      PYTHON: ${{ matrix.python-version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - id: cache-rust
+        name: cache rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: v1
+
+      - name: install golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.21.2"
+
+      - name: Log go env
+        run: |
+          go env
+
+      - name: Get GOROOT
+        run: |
+          echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - name: Install poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Install main dependencies
+        run: |
+          export PATH="/Users/runner/.local/bin:/Users/runner/.cargo/bin:$PATH"
+          make clean-poetry-lock
+          make install-deps-lib
+
+      - name: Tests
+        run: make test-lib
+        env:
+          GOROOT: ${{ env.GOROOT }}
+          GOPATH: ${{ env.GOPATH }}
+          GOMODCACHE: ${{ env.GOMODCACHE }}
+
+  lint:
+    name: lint py${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: cache rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: install golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.21.2"
+
+      - name: Log go env
+        run: |
+          go env
+
+      - name: Get GOROOT
+        run: |
+          echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - name: Log go env
+        run: |
+          go env
+
+      - name: Install dependencies
+        run: |
+          export PATH="/Users/runner/.local/bin:/Users/runner/.cargo/bin:$PATH"
+          make clean-poetry-lock
+          make install-deps
+        env:
+          GOROOT: ${{ env.GOROOT }}
+          GOPATH: ${{ env.GOPATH }}
+          GOMODCACHE: ${{ env.GOMODCACHE }}
+
+      - name: Run typehinting
+        run: make lint-validation
+
+      - name: Lint Clippy
+        run: cargo clippy -- -D warnings
+        env:
+          GOROOT: ${{ env.GOROOT }}
+          GOPATH: ${{ env.GOPATH }}
+          GOMODCACHE: ${{ env.GOMODCACHE }}
+
+  # https://github.com/marketplace/actions/alls-green#why used for branch protection checks
+  check:
+    if: always()
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
+
+  rust-tests:
+    # Test the OS specific rust hooks
+    name: rust-tests os=${{ matrix.os }} release=${{ matrix.release || 'latest' }}
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'Full Build')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+          - os: macos
+          - os: windows
+
+    runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-${{ matrix.release || 'latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.21.2"
+
+      - name: Log go env
+        run: |
+          go env
+
+      - name: Get GOROOT
+        run: |
+          echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      # Before we start building, validate that the Rust code compiles
+      # This helps to detect errors on different underlying architectures, since
+      # these wheel builds are representative of our deployment platforms
+      - name: Rust tests
+        run: cargo test --all
+
+      # Run basic benchmarks to make sure these still compile
+      - name: Rust benchmarks
+        run: cargo check --benches
+
+  build:
+    name: build os=${{ matrix.os }} target=${{ matrix.target }} int=${{ matrix.interpreter || 'all' }} ml=${{ matrix.manylinux || 'auto' }} release=${{ matrix.release || 'latest' }}
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'Full Build')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The main contraint with our architecture choices at the moment is the dependency
+          # on rusty_v8, which only supports x86_64 and aarch64. Deno is tracking: https://github.com/denoland/deno/issues/7517
+
+          # linux
+          - os: linux
+            target: x86_64
+          - os: linux
+            target: aarch64
+
+          # macos
+          - os: macos
+            target: x86_64
+          - os: macos
+            target: aarch64
+
+          # windows
+          - os: windows
+            target: x86_64
+
+    runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-${{ matrix.release || 'latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: ${{ matrix.python-architecture || 'x64' }}
+
+      - name: install golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.21.2"
+
+      - name: Set golang build architecture
+        shell: bash
+        run: |
+          case "${{ matrix.target }}" in
+            x86_64) export GOARCH="amd64";;
+            aarch64) export GOARCH="arm64";;
+            *) echo "Unsupported architecture: ${{ matrix.target }}"; exit 1;;
+          esac
+          echo "GOARCH=${GOARCH}"
+          echo "GOARCH=${GOARCH}" >> $GITHUB_ENV
+
+          # Must be explicitly specified for cross-compilation
+          # Otherwise it causes the misleading "go: no Go source files" error
+          echo "CGO_ENABLED=1" >> $GITHUB_ENV
+
+      - name: Log go env
+        run: |
+          go env
+
+      - name: Get GOROOT
+        run: |
+          echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - run: pip install -U twine
+
+      #
+      # Bump release version
+      # Our managed directory uses poetry for these dependencies but there's an issue
+      # with installing poetry on windows runners, so we use a global python install
+      # for the required dependencies
+      #
+      - name: Update version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          pip install packaging toml
+          python .github/scripts/update_version.py ${{ github.ref_name }}
+
+      #
+      # Build pipeline
+      #
+      - name: build sdist
+        if: ${{ matrix.os == 'linux' && matrix.target == 'x86_64' }}
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+
+      - name: build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          manylinux: ${{ matrix.manylinux || 'auto' }}
+          args: -vv --release --out dist --interpreter ${{ matrix.interpreter || '3.10 3.11 3.12' }}
+          rust-toolchain: stable
+          docker-options: -e CI -e CI_TARGET=${{ matrix.target }} -e GOARCH=${{ env.GOARCH }} -e CGO_ENABLED=${{ env.CGO_ENABLED }}
+          # Already defaults to build, but we make explicit here. Any arguments should
+          # be added to args above and not here - otherwise we will affect the switch()
+          # condition handling of maturin-action.
+          command: build
+          before-script-linux: |
+            # Install go within the docker container - only used for manylinux builds
+            # since they need an isolated docker context. The other build pipelines
+            # just run within the host so use the global worker's go install.
+            # Determine the machine architecture
+            echo "Raw architecture: $(uname -m)"
+
+            # Log the current glibc version
+            ldd --version
+
+            # System configs
+            uname -a
+            cat /etc/os-release
+            cat /proc/version
+
+            # Determine distribution from /etc/os-release
+            DISTRO=$(grep ^ID= /etc/os-release | cut -d= -f2 | tr -d '"')
+
+            # Install necessary packages based on the distribution
+            if [ "$DISTRO" = "centos" ]; then
+                # CentOS specific package installation
+                yum -y install wget llvm-toolset-7 centos-release-scl
+                export PATH=/opt/rh/llvm-toolset-7/root/usr/bin:/opt/rh/llvm-toolset-7/root/usr/sbin:/opt/rh/devtoolset-10/root/usr/bin:$PATH
+                export LIBCLANG_PATH=/opt/rh/llvm-toolset-7/root/usr/lib64/
+            elif [ "$DISTRO" = "ubuntu" ]; then
+                # Ubuntu specific package installation
+                # Clang is already installed as part of the base image
+                apt-get update
+                apt-get -y install wget
+
+                # The maturin environment includes the gcc cross-compilers for aarch64, but it
+                # doesn't include the necessary headers
+                # This causes issues when rust / bindgen tries to run clang, which will fail with
+                # missing headers like 'bits/libc-header-start.h' file not found
+                # We install the headers here to fix this issue
+                apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+                find /usr -name libc-header-start.h
+            else
+                echo "Unsupported distribution: $DISTRO"
+                exit 1
+            fi
+
+            clang --version
+
+            ls -ls /usr/bin
+
+            case "${{ matrix.target }}" in
+              x86_64) ;;
+              aarch64)
+              export PATH=$PATH:/usr/aarch64-unknown-linux-gnu/bin;
+              aarch64-unknown-linux-gnu-gcc --version;
+              export CC=aarch64-unknown-linux-gnu-gcc;;
+              *) echo "Unsupported architecture: ${{ matrix.target }}"; exit 1;;
+            esac
+            echo "GOARCH=${GOARCH}"
+
+            GOVERSION="1.22.1"
+
+            # Download and Install Go - we will always be running on a x86_64 runner
+            # despite the build architecture
+            wget -q https://go.dev/dl/go${GOVERSION}.linux-amd64.tar.gz
+            tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz
+            rm -f go${GOVERSION}.linux-amd64.tar.gz
+
+            # Set up Go environment variables
+            export GOROOT=/usr/local/go
+            export PATH=$PATH:$GOROOT/bin
+
+            go env
+
+            go version
+            go tool dist list
+        env:
+          GOROOT: ${{ env.GOROOT }}
+          GOPATH: ${{ env.GOPATH }}
+          GOMODCACHE: ${{ env.GOMODCACHE }}
+
+      - run: ${{ (matrix.os == 'windows' && 'dir') || 'ls -lh' }} dist/
+
+      - run: twine check --strict dist/*
+
+      # Unzip wheel files to directories
+      - name: Unzip Wheels
+        shell: bash
+        run: |
+          mkdir unpacked_wheels
+          for wheel in dist/*.whl; do
+            unzip -d unpacked_wheels/"$(basename "$wheel" .whl)" "$wheel"
+          done
+          rm dist/*.whl # Remove original .whl files to avoid confusion
+
+      - name: List unpacked wheel directories
+        shell: bash
+        run: ls -lh unpacked_wheels/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pypi_files-${{ matrix.os }}-${{ matrix.target }}
+          path: unpacked_wheels/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pypi_files_sdist-${{ matrix.os }}-${{ matrix.target }}
+          path: dist/
+
+  inspect-pypi-assets:
+    needs: [build]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: set up python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: get dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pypi_files-*
+          merge-multiple: true
+          path: unpacked_wheels
+
+      - name: get dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pypi_files_sdist-*
+          merge-multiple: true
+          path: dist
+
+      - name: list unpacked files
+        run: |
+          ls -lh unpacked_wheels/
+          echo "`ls unpacked_wheels | wc -l` files"
+
+      - name: list dist files
+        run: |
+          ls -lh dist/
+          echo "`ls dist | wc -l` files"
+
+      - name: extract and list sdist file
+        run: |
+          mkdir sdist-files
+          tar -xvf dist/*.tar.gz -C sdist-files
+          find sdist-files -print
+
+      # Unzip wheel files to directories
+      - name: Zip Wheels
+        run: |
+          for dir in unpacked_wheels/*; do
+              # Check if it's a directory
+              if [ -d "$dir" ]; then
+                  # Get the base name of the directory
+                  base_name=$(basename "$dir")
+                  # Zip the directory into a .whl file inside the dist directory
+                  cd unpacked_wheels/$base_name
+                  zip -r "../../dist/${base_name}.whl" .
+                  cd ../..
+              fi
+          done
+
+      - run: pip install twine
+      - run: twine check dist/*
+
+  release:
+    needs: [check, build, inspect-pypi-assets]
+    if: "success() && startsWith(github.ref, 'refs/tags/')"
+    # pypi release script requires linux runner
+    runs-on: ubuntu-latest
+    environment: release
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: get unpacked_wheels artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pypi_files-*
+          merge-multiple: true
+          path: unpacked_wheels
+
+      - name: get dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pypi_files_sdist-*
+          merge-multiple: true
+          path: dist
+
+      - run: ls -lh unpacked_wheels
+
+      - run: ls -lh dist
+
+      # Unzip wheel files to directories
+      - name: Zip Wheels
+        run: |
+          for dir in unpacked_wheels/*; do
+              # Check if it's a directory
+              if [ -d "$dir" ]; then
+                  # Get the base name of the directory
+                  base_name=$(basename "$dir")
+                  # Zip the directory into a .whl file inside the dist directory
+                  cd unpacked_wheels/$base_name
+                  zip -r "../../dist/${base_name}.whl" .
+                  cd ../..
+              fi
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: final_dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  lib-integration-test:
+    name: Integration Tests - py${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.21.2"
+
+      - name: Log go env
+        run: |
+          go env
+
+      - name: Get GOROOT
+        run: |
+          echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: make install-deps-lib
+
+      - name: Run tests
+        run: make test-lib-integrations
+        env:
+          GOROOT: ${{ env.GOROOT }}
+          GOPATH: ${{ env.GOPATH }}
+          GOMODCACHE: ${{ env.GOMODCACHE }}
+
+  # Tie create-mountaineer-app distribution to the release of the main
+  # package, since if the main package fails we shouldn't yet bump the
+  # create-mountaineer-app version.
+  cma-test:
+    name: CMA Test - py${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install golang
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.21.2"
+
+      - name: Log go env
+        run: |
+          go env
+
+      - name: Get GOROOT
+        run: |
+          echo "GOROOT=$(go env GOROOT)" >> $GITHUB_ENV
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: make install-deps-create-mountaineer-app
+
+      - name: Run tests
+        run: make test-create-mountaineer-app
+
+      - name: Run integration tests
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'Full Build')
+        run: make test-create-mountaineer-app-integrations test-args="-vv"
+        env:
+          GOROOT: ${{ env.GOROOT }}
+          GOPATH: ${{ env.GOPATH }}
+          GOMODCACHE: ${{ env.GOMODCACHE }}
+
+  cma-build:
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'Full Build')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # linux
+          - os: linux
+            target: x86_64
+          - os: linux
+            target: aarch64
+
+          # macos
+          - os: macos
+            target: x86_64
+          - os: macos
+            target: aarch64
+
+    runs-on: ${{ (matrix.os == 'linux' && 'ubuntu') || matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          architecture: ${{ matrix.python-architecture || 'x64' }}
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Update version in pyproject.toml
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cd create_mountaineer_app
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Version to update: $VERSION"
+          poetry version $VERSION
+
+      - name: Build
+        run: |
+          cd create_mountaineer_app
+          poetry build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}-${{ matrix.target }}
+          path: create_mountaineer_app/dist
+
+  cma-release:
+    needs: [cma-test, cma-build, release]
+    if: "success() && startsWith(github.ref, 'refs/tags/')"
+    runs-on: ubuntu-latest
+    environment: release
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+
+      - run: ls -lh dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
