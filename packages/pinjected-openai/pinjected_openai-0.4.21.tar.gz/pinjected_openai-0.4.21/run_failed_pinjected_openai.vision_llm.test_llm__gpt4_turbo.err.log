@@ -1,0 +1,35 @@
+Error code: 400 - {'error': {'message': 'max_tokens is too large: 127486. This model supports at most 4096 completion tokens, whereas you provided 127486.', 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': None}}
+Traceback (most recent call last):
+  File "/Users/s22625/Library/Caches/pypoetry/virtualenvs/pinjected-openai-hGRAoudA-py3.11/lib/python3.11/site-packages/pinjected/run_helpers/run_injected.py", line 128, in run_anything
+    res = asyncio.run(res)
+          ^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Caskroom/miniforge/base/envs/base311/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Caskroom/miniforge/base/envs/base311/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Caskroom/miniforge/base/envs/base311/lib/python3.11/asyncio/base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/Users/s22625/repos/pinjected_openai/pinjected_openai/vision_llm.py", line 119, in a_llm__gpt4_turbo
+    chat_completion = await a_repeat_for_rate_limit(task)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/s22625/repos/pinjected_openai/pinjected_openai/vision_llm.py", line 34, in a_repeat_for_rate_limit
+    return await task()
+           ^^^^^^^^^^^^
+  File "/Users/s22625/repos/pinjected_openai/pinjected_openai/vision_llm.py", line 102, in task
+    chat_completion = await async_openai_client.chat.completions.create(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/s22625/Library/Caches/pypoetry/virtualenvs/pinjected-openai-hGRAoudA-py3.11/lib/python3.11/site-packages/openai/resources/chat/completions.py", line 1300, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/s22625/Library/Caches/pypoetry/virtualenvs/pinjected-openai-hGRAoudA-py3.11/lib/python3.11/site-packages/openai/_base_client.py", line 1703, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/s22625/Library/Caches/pypoetry/virtualenvs/pinjected-openai-hGRAoudA-py3.11/lib/python3.11/site-packages/openai/_base_client.py", line 1406, in request
+    return await self._request(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/s22625/Library/Caches/pypoetry/virtualenvs/pinjected-openai-hGRAoudA-py3.11/lib/python3.11/site-packages/openai/_base_client.py", line 1497, in _request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'error': {'message': 'max_tokens is too large: 127486. This model supports at most 4096 completion tokens, whereas you provided 127486.', 'type': 'invalid_request_error', 'param': 'max_tokens', 'code': None}}
