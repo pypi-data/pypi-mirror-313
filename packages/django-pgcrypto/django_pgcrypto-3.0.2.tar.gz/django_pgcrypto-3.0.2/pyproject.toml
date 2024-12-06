@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-pgcrypto"
+authors = [
+    {name = "Dan Watson", email = "dcwatson@gmail.com"},
+]
+description = "Python and Django utilities for encrypted fields using pgcrypto."
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.8"
+license = {text = "BSD-2-Clause"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Django",
+    "Programming Language :: Python :: 3",
+    "Topic :: Database",
+]
+dependencies = [
+    "cryptography",
+]
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/dcwatson/django-pgcrypto"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pgcrypto"]
+
+[tool.hatch.version]
+path = "pgcrypto/base.py"
+
+[tool.uv]
+dev-dependencies = [
+    "django",
+    "psycopg[binary]",
+]
