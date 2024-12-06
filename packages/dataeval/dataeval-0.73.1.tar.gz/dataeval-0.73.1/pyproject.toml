@@ -1,0 +1,202 @@
+[tool.poetry]
+name = "dataeval"
+version = "0.73.1" # dynamic
+description = "DataEval provides a simple interface to characterize image data and its impact on model performance across classification and object-detection tasks"
+license = "MIT"
+readme = "README.md"
+homepage = "https://dataeval.ai/"
+repository = "https://github.com/aria-ml/dataeval/"
+documentation = "https://dataeval.readthedocs.io/"
+
+authors = [
+  "Andrew Weng <andrew.weng@ariacoustics.com>",
+  "James Gleeson <james.gleeson@ariacoustics.com>",
+  "Jon Botts <jonathan.botts@ariacoustics.com>",
+  "Max Bright <max.bright@ariacoustics.com>",
+  "Ryan Wood <ryan.wood@ariacoustics.com>",
+  "Scott Swan <scott.swan@ariacoustics.com>",
+  "Shaun Jullens <shaun.jullens@ariacoustics.com>",
+  "Thayer Fisher <thayer.fisher@ariacoustics.com>",
+]
+maintainers = [
+  "ARiA <dataeval@ariacoustics.com>"
+]
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+]
+
+packages = [
+  {include = "dataeval", from = "src"}
+]
+
+[tool.poetry.dependencies]
+# required
+python = ">=3.9,<3.13"
+hdbscan = {version = ">=0.8.36"}
+numpy = {version = ">1.24.3"}
+pillow = {version = ">=10.3.0"}
+scipy = {version = ">=1.10"}
+scikit-learn = {version = ">=1.5.0"}
+tqdm = {version = "*"}
+typing-extensions = {version = ">=4.12", python = ">=3.9,<3.10"}  # ParamSpec
+xxhash = {version = ">=3.3"}
+
+# optional
+matplotlib = {version = "*", optional = true}
+markupsafe = {version = "<3.0.2", optional = true}
+tensorflow = {version = ">=2.16,<2.18", optional = true}
+tensorflow_probability = {version = ">=0.24,<0.25", optional = true}
+tf-keras = {version = ">=2.16,<2.18", optional = true}
+torch = {version = ">=2.2.0", source = "pytorch", optional = true}
+torchvision = {version = ">=0.17.0", source = "pytorch", optional = true}
+
+[tool.poetry.extras]
+tensorflow = ["markupsafe", "tensorflow", "tensorflow_probability", "tf-keras"]
+torch = ["torch", "torchvision", "matplotlib"]
+all = ["matplotlib", "markupsafe", "tensorflow", "tensorflow_probability", "tf-keras", "torch", "torchvision"]
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+nox = {version = "*", extras = ["uv"]}
+uv = {version = "*"}
+poetry = {version = "*"}
+poetry-lock-groups-plugin = {version = "*"}
+poetry2conda = {version = "*"}
+# lint
+ruff = {version = "*"}
+codespell = {version = "*", extras = ["toml"]}
+# unit
+pytest = {version = "*"}
+pytest-cov = {version = "*"}
+pytest-xdist = {version = "*"}
+coverage = {version = "*", extras = ["toml"]}
+torchmetrics = {version = ">=1.0.0", source = "pytorch"}
+# type
+pyright = {version = "*", extras = ["nodejs"]}
+# prototype
+maite = {version = "*"}
+pandas = {version = "*"}
+seaborn = {version = "*"}
+# docs
+certifi = {version = ">=2024.07.04"}
+enum_tools = {version = ">=0.12.0", extras = ["sphinx"]}
+ipykernel = {version = ">=6.26.0"}
+ipywidgets = {version = ">=8.1.1"}
+jupyter-client = {version = ">=8.6.0"}
+jupyter-cache = {version = "*"}
+myst-nb = {version = ">=1.0.0"}
+pydata-sphinx-theme = {version = ">=0.15.4"}
+sphinx-design = {version = "*"}
+sphinx-tabs = {version = "*"}
+Sphinx = {version = ">=7.2.6"}
+markupsafe = {version = "<3.0.2", optional = true}
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu124"
+priority = "explicit"
+
+[tool.poetry-dynamic-versioning]
+enable = false
+vcs = "git"
+style = "semver"
+pattern = "v(?P<base>\\d+\\.\\d+\\.\\d+)$"
+
+[tool.poetry-dynamic-versioning.substitution]
+files = ["src/dataeval/__init__.py"]
+
+[tool.poetry2conda]
+name = "dataeval"
+
+[tool.poetry2conda.dependencies]
+tensorflow_probability = { name = "tensorflow-probability" }
+torch = { name = "pytorch" }
+xxhash = { name = "python-xxhash" }
+
+[tool.pyright]
+reportMissingImports = false
+
+[tool.pytest.ini_options]
+norecursedirs = ["prototype"]
+testpaths = ["tests"]
+addopts = ["--pythonwarnings=ignore::DeprecationWarning", "--verbose", "--durations=20", "--durations-min=1.0"]
+
+[tool.coverage.run]
+source = ["src/dataeval"]
+branch = true
+concurrency = ["multiprocessing"]
+parallel = true
+
+[tool.coverage.report]
+exclude_also = [
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+  "if _IS_TENSORFLOW_AVAILABLE",
+  "if _IS_TORCH_AVAILABLE",
+  "if _IS_TORCHVISION_AVAILABLE",
+]
+include = ["*/src/dataeval/*"]
+omit = [
+  "*/torch/blocks.py",
+  "*/torch/utils.py",
+  "*/tensorflow/_internal/models.py",
+]
+fail_under = 90
+
+# Ruff rules - https://docs.astral.sh/ruff/rules/
+[tool.ruff]
+exclude = [
+  ".devcontainer",
+  ".github",
+  ".vscode",
+  ".jupyter_cache",
+  "*env*",
+  "output",
+  "_build",
+  ".nox",
+  ".tox",
+  "prototype",
+]
+line-length = 120
+indent-width = 4
+target-version = "py38"
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = ["A", "E", "F", "C4", "I", "UP", "NPY", "SIM", "RUF100"]
+ignore = ["NPY002"]
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+per-file-ignores = { "*.ipynb" = ["E402"] }
+
+[tool.ruff.lint.isort]
+known-first-party = ["dataeval"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.codespell]
+skip = './*env*,./prototype,./output,./docs/_build,./docs/.jupyter_cache,CHANGELOG.md,poetry.lock,*.html'
+ignore-words-list = ["Hart"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
