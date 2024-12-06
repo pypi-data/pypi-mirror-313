@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "nicovideo_api_client"
+version = "3.0.1"
+description = "ニコニコ動画 スナップショット検索APIv2の Python クライアント"
+authors = ["Javakky <iemura.java@gmail.com>"]
+homepage = "https://github.com/Javakky/NicoApiClient"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10"
+]
+
+[tool.poetry.dependencies]
+python = "^3.10.2"
+requests = "^2.26.0"
+urllib3 = ">=1.26.6,<3.0.0"
+
+[tool.poetry.dev-dependencies]
+sphinx-rtd-theme = "^1.2.1"
+pytest = "^7.3.2"
+Sphinx = "^6.1.3"
+taskipy = "^1.11.0"
+pyproject-flake8 = "^6.0.0.post1"
+black = "^23.1"
+isort = "5.12.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.taskipy.tasks]
+example = "python examples/example.py"
+test = "pytest tests -vv"
+docs = "sh script/make-docs.sh"
+lint = "poetry run pflake8 nicovideo_api_client examples tests"
+format = "poetry run black --target-version py310 nicovideo_api_client examples tests && poetry run isort nicovideo_api_client examples tests"
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = "E203,E402,"
+max-complexity = 15
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+include_trailing_comma = true
+line_length = 120
+multi_line_output = 3
+
+[tool.poetry-dynamic-versioning]
+enable = false
+style = "pep440"
