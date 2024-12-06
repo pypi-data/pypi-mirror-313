@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Results</title>
+        <link href="styles/bootstrap.min.css" rel="stylesheet" />
+        <link href="styles/custom.css" rel="stylesheet" />
+        <script src="scripts/bootstrap.min.js"></script>
+    </head>
+
+    <body>
+        <div>
+            <header
+                class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom"
+            >
+                <a
+                    href="index.html"
+                    class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-dark text-decoration-none"
+                >
+                    <svg class="bi me-2" width="40" height="32">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg>
+                    <img
+                        style="margin-right: 10px"
+                        src="assets/hoppr_hippo.png"
+                        alt="Hoppr Hippo"
+                        height="32"
+                        width="32"
+                    />
+                    <span class="fs-4">Hoppr Reports</span>
+                </a>
+            </header>
+            <div class="container">
+                {% include "general_summary.jinja2" %} {% if report_count > 0 %}
+                <div class="row">
+                    <h4 id="reportTitle" class="report-title">
+                        <div class="dropdown">
+                            <label for="dropdown">View Reports By: </label>
+                            <select
+                                class="btn btn-outline-primary"
+                                style="font-size: 14px; margin-bottom: 1px"
+                                id="dropdown"
+                                onchange="toggleReports()"
+                            >
+                                <option value="reportsByPlugin">Plugin</option>
+                                <option value="reportsByStage">Stage</option>
+                            </select>
+                        </div>
+                    </h4>
+                    <div
+                        id="reportsByStage"
+                        class="reports-container"
+                        style="display: none"
+                    >
+                        <div class="btn-type-container col-3">
+                            <h5>Stages</h5>
+                            {% for stage in reports_by_stage %}
+                            <a
+                                class="btn {{
+                                    get_overall_status_button_class(
+                                        reports_by_stage[stage]
+                                    )
+                                }} m-1"
+                                data-bs-toggle="collapse"
+                                href="#{{ stage }}"
+                                role="button"
+                                aria-expanded="false"
+                                aria-controls="{{ stage }}"
+                            >
+                                {{ stage.capitalize() }} ({{
+                                    get_successful_report_total(
+                                        reports_by_stage[stage]
+                                    )
+                                }}
+                                / {{ get_length(reports_by_stage[stage]) }})
+                            </a>
+                            {% endfor %}
+                        </div>
+                        <div class="col-9">
+                            {% for stage in reports_by_stage %}
+                            <div
+                                class="{{ 'collapse show' if loop.index == 1 else 'collapse' }}"
+                                id="{{ stage }}"
+                                data-bs-parent="#reportsByStage"
+                            >
+                                <div>
+                                    <h5>
+                                        {{ stage.capitalize() }}
+                                        ({{
+                                            get_length(reports_by_stage[stage])
+                                        }})
+                                    </h5>
+                                    {% for report in reports_by_stage[stage] %}
+                                    {% include "component_card.jinja2" %} {%
+                                    endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div id="reportsByPlugin" class="reports-container">
+                        <div class="btn-type-container col-3">
+                            <h5>Plugins</h5>
+                            {% for plugin in reports_by_plugin %}
+                            <a
+                                class="btn {{
+                                    get_overall_status_button_class(
+                                        reports_by_plugin[plugin]
+                                    )
+                                }} m-1"
+                                data-bs-toggle="collapse"
+                                href="#{{ plugin }}"
+                                role="button"
+                                aria-expanded="false"
+                                aria-controls="{{ plugin }}"
+                            >
+                                {{ plugin }} (
+                                {{
+                                    get_successful_report_total(
+                                        reports_by_plugin[plugin]
+                                    )
+                                }}
+                                / {{ get_length(reports_by_plugin[plugin]) }} )
+                            </a>
+                            {% endfor %}
+                        </div>
+                        <div class="col-9" id="reportsByPlugin">
+                            {% for plugin in reports_by_plugin %}
+                            <div
+                                class="{{ 'collapse show' if loop.index == 1 else 'collapse' }}"
+                                id="{{ plugin }}"
+                                data-bs-parent="#reportsByPlugin"
+                            >
+                                <div>
+                                    <h5>
+                                        {{ plugin }}
+                                        ({{
+                                            get_length(
+                                                reports_by_plugin[plugin]
+                                            )
+                                        }})
+                                    </h5>
+                                    {% for report in reports_by_plugin[plugin]
+                                    %} {% include "component_card.jinja2" %} {%
+                                    endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <script src="scripts/custom.js"></script>
+    </body>
+</html>

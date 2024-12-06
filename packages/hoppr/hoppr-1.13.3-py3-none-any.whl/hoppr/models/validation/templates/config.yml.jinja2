@@ -1,0 +1,23 @@
+{{- header if header -}}
+---
+{%- for field in fields %}
+{%- if field.type_.__doc__ %}
+{{ '# ' ~ field.type_.__doc__ }}
+{%- endif %}
+{{ field.alias }}:
+{%- for check in field.type_.__fields__.values() %}
+  {%- if check.field_info.description %}{{ "\n" }}
+  # {{ check.field_info.description }}
+  {%- endif %}
+  {%- if check.type_.__fields__ %}
+  {{ check.alias -}}:
+  {%- for subcheck in check.type_.__fields__.values() %}
+    {%- if subcheck.field_info.description %}{{ "\n" }}
+    # {{ subcheck.field_info.description }}
+    {%- endif %}
+    {{ subcheck.alias }}:{{ " " ~ obj[field.name][check.name][subcheck.name] if obj[field.name][check.name][subcheck.name] }}
+  {%- endfor %}{%- else %}
+  {{ check.alias }}:{{ " " ~ obj[field.name][check.name] if obj[field.name][check.name] }}
+  {%- endif %}
+{%- endfor %}
+{% endfor %}

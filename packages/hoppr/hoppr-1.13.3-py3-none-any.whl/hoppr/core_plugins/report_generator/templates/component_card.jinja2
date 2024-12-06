@@ -1,0 +1,106 @@
+<div
+    class="{{ 'collapse-card-container component-success' if report['result'] == ResultStatus.SUCCESS else 'collapse-card-container component-failure' }}"
+>
+    <div class="collapse-card-data">
+        <div>
+            <div><strong>Plugin: </strong>{{ report["plugin"] }}</div>
+            <div>
+                <strong>Purl: </strong>
+                {{ report["component"].purl }}
+            </div>
+        </div>
+        <a class="btn p-0 expand-details-btn" style="display: flex;" data-bs-toggle="collapse" href="#{{ report["unique_id"] }}" role="button" aria-expanded="false" aria-controls="{{ report["unique_id"] }}">
+            <strong>Expand Details</strong>
+            <div class="down-arrow ml-1">&#8964;</div>
+        </a>
+        <div class="collapse" id="{{ report["unique_id"] }}">
+            <div style="font-family: monospace; margin-left: 10px;">
+                <strong>Component Details:</strong>
+                <div class="component-indent">Type: {{report["component"].type}}</div>
+                <div class="component-indent">Name: {{report["component"].name}}</div>
+                <div class="component-indent">Version: {{report["component"].version}}</div>
+                <div class="component-indent">Scope: {{report["component"].scope}}</div>
+                {% if report["component"].externalReferences %}
+                <div class="component-indent">External References:
+                    {% for reference in report["component"].externalReferences %}
+                    <div class="component-indent">URL: <a href="{{ reference.url }}" target="_blank">{{ reference.url }}</a></div>
+                    <div class="component-indent">Comment: {{ reference.comment }}</div>
+                    <div class="component-indent">Type: {{ reference.type }}</div>
+                    <div class="component-indent">Hashes: {{ reference.hashes | default("None") }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if report["component"].properties %}
+                <div class="component-indent">Properites:
+                    {% for prop in report["component"].properties %}
+                    <div>
+                        <div class="component-indent">Name: {{ prop.name }}</div>
+                        <div class="component-indent">
+                            Value:
+                            {% if prop.name == "hoppr:repository:component_search_sequence" %}
+                            {% set search_sequence = parse_search_sequence(prop.value) %}
+                            <div class="component-indent">
+                                <div>Version: {{ search_sequence.version }}</div>
+                                <div>
+                                    Repositories:
+                                    {% for repository in search_sequence.repositories %}
+                                        <div class="component-indent">
+                                            <a href="{{ repository }}" target="_blank">{{ repository }}</a>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                                {{ prop.value }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% if report["details"] %}
+            <div class="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">Failure Details</div>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-line">{{ report["details"] }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div>
+        {% if report["result"] == ResultStatus.SUCCESS %}
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="36"
+            height="36"
+            fill="green"
+            class="bi bi-check2"
+            viewBox="0 0 16 16"
+        >
+            <path
+                d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"
+            />
+        </svg>
+        {% else %}
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="36"
+            height="36"
+            fill="red"
+            class="bi bi-x-circle"
+            viewBox="0 0 16 16"
+        >
+            <path
+                d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"
+            />
+            <path
+                d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"
+            />
+        </svg>
+        {% endif %}
+    </div>
+</div>
