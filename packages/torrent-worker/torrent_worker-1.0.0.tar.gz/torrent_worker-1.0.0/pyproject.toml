@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "torrent-worker"
+description = "Downloads torrents"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["Torrent", "Worker", "Distributed"]
+license = { text = "BSD 3-Clause License" }
+classifiers = ["Programming Language :: Python :: 3"]
+dynamic = ["dependencies"]
+# Change this with the version number bump.
+version = "1.0.0"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.scripts]
+torrent-worker = "torrent_worker.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "flake8", 
+    "mypy",
+    "pylint",
+    "pytest",
+    "black",
+    "isort",
+    "tox",
+    "requests",
+    "pytest-xdist",
+    "jinja2",
+]
+
+[tool.ruff]
+line-length = 200
+
+[tool.pylint."MESSAGES CONTROL"]
+good-names = [
+    "c",
+    "i",
+    "ok",
+    "id",
+    "e",
+    "f"
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
