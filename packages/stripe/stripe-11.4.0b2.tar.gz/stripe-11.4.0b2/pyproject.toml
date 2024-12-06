@@ -1,0 +1,36 @@
+[tool.ruff]
+# same as our black config
+line-length = 79
+extend-exclude = ["build"]
+
+[tool.ruff.format]
+# currently the default value, but opt-out in the future
+docstring-code-format = false
+
+[tool.pyright]
+include = [
+  "stripe",
+  "tests/test_generated_examples.py",
+  "tests/test_exports.py",
+  "tests/test_http_client.py",
+]
+exclude = ["build", "**/__pycache__"]
+reportMissingTypeArgument = true
+reportUnnecessaryCast = true
+reportUnnecessaryComparison = true
+reportUnnecessaryContains = true
+reportUnnecessaryIsInstance = true
+reportPrivateImportUsage = true
+reportUnnecessaryTypeIgnoreComment = true
+
+[tool.mypy]
+follow_imports = "silent"
+python_version = "3.10"
+files = ["tests/test_generated_examples.py", "tests/test_exports.py"]
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+no_implicit_reexport = true
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore::DeprecationWarning"
