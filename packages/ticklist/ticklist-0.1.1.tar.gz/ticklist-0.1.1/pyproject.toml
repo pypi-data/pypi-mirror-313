@@ -1,0 +1,74 @@
+[build-system]
+build-backend = "hatchling.build"
+
+requires = [ "hatchling" ]
+
+[project]
+name = "ticklist"
+version = "0.1.1"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+
+keywords = ['textual','cli','pydantic','forms']
+dependencies = [
+  "pydantic>=2.10.2",
+  "textual>=0.88",
+]
+
+[project.urls]
+Repository = "https://github.com/sander76/clipstick"
+
+[dependency-groups]
+dev = [
+  "coverage[toml]>=7.6.8",
+  "mypy>=1.13",
+  "nox>=2024.10.9",
+  "pyproject-fmt>=2.5",
+  "pytest>=8.3.3",
+  "pytest-asyncio>=0.24",
+  "ruff>=0.8.1",
+]
+
+[tool.ruff]
+src = [
+  "noxfile.py",
+  "src",
+  "tests",
+]
+
+lint.select = [
+  "D", # pydocstyle
+  "E", # pycodestyle
+  "F", # pyflakes
+  "I", # isort
+]
+lint.extend-per-file-ignores."tests/*" = [
+  "D",
+]
+lint.pydocstyle.convention = "google"
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+
+[tool.coverage.report]
+fail_under = 100
+
+[tool.coverage.run]
+source = [
+  "ticklist",
+]
+
+[tool.mypy]
+strict = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
