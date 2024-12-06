@@ -1,0 +1,44 @@
+####
+1G1R
+####
+
+ROMSearch operates on a "one game, one ROM" (1G1R) philosophy. This means that for each game, it will find the
+ROM file that it believes to be the best. The approach ROMSearch takes is to (1) filter out ROMs that the user does
+not want, and then (2) score the remaining ROMs to find an overall "best" ROM.
+
+Filters
+-------
+
+Firstly, ROMs are filtered.
+
+* This starts with dat categories the user may not want (by default, this is everything not a game,
+  so demos, beta, etc.)
+* We then filter out ROMs that don't have languages (or implied languages) that are in the user preferences
+* ROMs are filtered if they don't have regions in the user preferences
+
+Scoring
+-------
+
+After the initial round of filtering, we then score the ROMs. Some have an ordered priority, which means that
+the order the user has selected matters (e.g. USA, World, Europe for regions).
+
+Scores are boosted in this order of priority:
+
+* Has RetroAchievements
+* Regions (ordered priority)
+* Languages (ordered priority)
+* Budget editions
+* Versions/revisions
+* Improved versions (e.g. EDC)
+
+There are also some demotions that go on. The priority is (from most to least demoted):
+
+* Priority from ``retool`` clonelists
+* Modern versions
+* Alternate versions
+* Demoted versions (e.g. arcade versions)
+
+End result
+----------
+
+The final result is that you should get the single best ROM for your preferences. Hooray!
