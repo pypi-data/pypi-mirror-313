@@ -1,0 +1,14 @@
+{% from "macros/render_panel.html"           import render_panel  %}
+{% from "macros/utils/ip_address_info.html"  import ip_address_info  %}
+
+{% set class_name    = 'odin_logs' %}
+{% set method_name   = 'cbr_requests' %}
+{% set method_kwargs = { 'env'        : env or 'LOCAL',
+                         'hours'      : hours or 1    ,
+                         'index_name' : 'ip_address' ,
+                         'index_value': ip_address or 'NA' }  %}
+
+
+{{ ip_address_info(ip_address, ip_address_data) }}
+
+{{ render_panel(class_name=class_name, method_name=method_name, method_kwargs=method_kwargs) }}
