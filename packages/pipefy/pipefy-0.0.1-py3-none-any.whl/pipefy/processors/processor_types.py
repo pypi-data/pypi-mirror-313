@@ -1,0 +1,6 @@
+from typing import TypeVar
+
+INPUT_DATA = TypeVar("INPUT_DATA")
+YIELD_VALUE = TypeVar("YIELD_VALUE")
+VALUE_TO_SEND = TypeVar("VALUE_TO_SEND")
+RETURN_VALUE = TypeVar("RETURN_VALUE")
