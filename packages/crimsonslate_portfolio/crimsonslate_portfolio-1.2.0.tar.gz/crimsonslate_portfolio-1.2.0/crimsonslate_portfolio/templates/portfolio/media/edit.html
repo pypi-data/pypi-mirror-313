@@ -1,0 +1,16 @@
+{% extends "portfolio/layout.html" %}
+{% load portfolio_display %}
+{% block content %}
+<div class="p-8 m-8 flex flex-col gap-8">
+    <div class="max-w-screen-sm">
+        {% display media %}
+    </div>
+    <form method="post" action="{% url 'media edit' media.slug %}" class="">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="bg-blue-500 hover:bg-blue-300 text-white block w-full p-4 rounded-lg border-gray-600 drop-shadow-sm">
+            Submit
+        </button>
+    </form>
+</div>
+{% endblock content %}

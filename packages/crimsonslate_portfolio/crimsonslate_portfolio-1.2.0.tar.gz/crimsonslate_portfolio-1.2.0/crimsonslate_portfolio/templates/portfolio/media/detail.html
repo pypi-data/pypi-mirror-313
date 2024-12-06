@@ -1,0 +1,18 @@
+{% extends "portfolio/layout.html" %}
+{% load portfolio_display %}
+{% block content %}
+<div class="grid h-screen grid-rows-1 place-items-center gap-16">
+    <div class="m-16 p-16 space-y-8">
+        {% display media force_image=False css_class="h-full w-full" %}
+        <div class="flex flex-col gap-8 text-center">
+            <h2 class="text-3xl font-bold lg:text-6xl">{{ media.title }}</h2>
+            {% if media.subtitle %}<h3 class="text-xl font-semibold lg:text-2xl">{{ media.subtitle }}</h3>{% endif %}
+        </div>
+        {% if media.desc %}
+        <div class="p-16 -m-16 static w-full bg-gray-200">
+            <p class="text-lg">{{ media.desc }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock content %}
