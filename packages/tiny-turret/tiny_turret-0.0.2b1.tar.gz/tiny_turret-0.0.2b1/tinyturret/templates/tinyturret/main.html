@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Tiny Turret{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Exception Groups</h1>
+    <div id="content-main">
+    <div class="module" id="changelist">
+        <div class="changelist-form-container">
+            <form id="changelist-form" method="post" {% if cl.formset and cl.formset.is_multipart %}
+                enctype="multipart/form-data" {% endif %} novalidate>{% csrf_token %}
+                <div class="results">
+                    <table id="results_list">
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <div class="text"><span>base_file_name</span></div>
+                                </th>
+                                <th scope="col">
+                                    <div class="text"><span>exception_name</span></div>
+                                </th>
+                                <th scope="col">
+                                    <div class="text"><span>exception_message</span></div>
+                                </th>
+                                <th scope="col">
+                                    <div class="text"><span>error_count</span></div>
+                                </th>
+                                <th scope="col">
+                                    <div class="text"><span>first_seen</span></div>
+                                </th>
+                                <th scope="col">
+                                    <div class="text"><span>last_seen</span></div>
+                                </th>
+                                <th scope="col">
+                                    <div class="text"><span>Actions</span></div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for group in exception_groups %}
+                            <tr>
+                                <td>{{ group.info.base_file_name }}</td>
+                                <td>{{ group.info.exception_name }}</td>
+                                <td>{{ group.info.exception_message }}</td>
+                                <td>{{ group.info.error_count }}</td>
+                                <td>{{ group.info.first_seen }}</td>
+                                <td>{{ group.info.last_seen }}</td>
+                                <td>
+                                    <a href="{% url 'tinyturret-exception' group.group_key %}">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

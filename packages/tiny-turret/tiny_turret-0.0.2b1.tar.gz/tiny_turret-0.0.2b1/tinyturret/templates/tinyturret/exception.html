@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Exception - {{exc_name}}{% endblock %}
+
+{% block content %}
+<div>
+    <div id="content-main">
+    <a href="{% url 'tinyturret-main' %}">Back</a>
+    <div class="module" id="changelist">
+        <h1>{{exc_name}}</h1>
+        <div style="padding-bottom: 2em">
+            {{ exc_str }}
+        </div>
+        <div class="changelist-form-container">
+            <form id="changelist-form" method="post" {% if cl.formset and cl.formset.is_multipart %}
+                enctype="multipart/form-data" {% endif %} novalidate>{% csrf_token %}
+
+
+            {%  for exc in exceptions %}
+                <textarea style="height: 75vh; width: 100%">
+                    {{  exc|safe }}
+                </textarea>
+            {%  endfor %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
