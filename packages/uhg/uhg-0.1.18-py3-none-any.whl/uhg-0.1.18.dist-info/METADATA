@@ -1,0 +1,84 @@
+Metadata-Version: 2.1
+Name: uhg
+Version: 0.1.18
+Summary: Universal Hyperbolic Geometry library using pure projective operations
+Home-page: https://github.com/zachbovaird/UHG-Library
+Author: Zach Bovaird
+Author-email: zach.bovaird@example.com
+Project-URL: Documentation, https://github.com/zachbovaird/UHG-Library#readme
+Project-URL: Source, https://github.com/zachbovaird/UHG-Library
+Project-URL: Bug Tracker, https://github.com/zachbovaird/UHG-Library/issues
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: torch>=1.8.0
+Requires-Dist: numpy>=1.19.0
+Requires-Dist: scipy>=1.6.0
+Requires-Dist: torch-geometric>=2.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=6.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=2.10.0; extra == "dev"
+Requires-Dist: black>=20.8b1; extra == "dev"
+Requires-Dist: isort>=5.7.0; extra == "dev"
+Requires-Dist: flake8>=3.8.0; extra == "dev"
+Requires-Dist: mypy>=0.800; extra == "dev"
+Requires-Dist: twine>=3.4.0; extra == "dev"
+Requires-Dist: build>=0.7.0; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx>=4.0.0; extra == "docs"
+Requires-Dist: sphinx-rtd-theme>=0.5.0; extra == "docs"
+Requires-Dist: nbsphinx>=0.8.0; extra == "docs"
+Requires-Dist: jupyter>=1.0.0; extra == "docs"
+
+# Universal Hyperbolic Geometry (UHG)
+
+A PyTorch library for hyperbolic deep learning using pure UHG principles.
+
+## Features
+
+- Pure projective geometry implementation
+- No differential geometry or manifold concepts
+- Cross-ratio preservation
+- Projective transformations
+- Graph neural networks
+- Optimizers and samplers
+
+## Quick Start
+
+```python
+import torch
+import uhg
+
+# Create points in projective space
+x = torch.randn(10, 3)
+y = torch.randn(10, 3)
+
+# Initialize UHG
+uhg_proj = uhg.ProjectiveUHG()
+
+# Transform points
+x_proj = uhg_proj.transform(x)
+y_proj = uhg_proj.transform(y)
+
+# Compute projective distance
+dist = uhg_proj.proj_dist(x_proj, y_proj)
+
+# Compute cross-ratio
+cr = uhg_proj.cross_ratio(x_proj[0], x_proj[1], x_proj[2], x_proj[3])
+```
+
+## Installation
+
+```bash
+pip install uhg
+```
+
+## Documentation
+
+For detailed documentation, visit [uhg.readthedocs.io](https://uhg.readthedocs.io).
