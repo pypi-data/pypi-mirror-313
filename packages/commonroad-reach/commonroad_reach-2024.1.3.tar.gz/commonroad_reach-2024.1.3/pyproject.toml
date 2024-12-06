@@ -1,0 +1,92 @@
+[project]
+name = "commonroad-reach"
+version = "2024.1.3"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.9,<3.12"
+license = { file = "LICENSE.txt" }
+authors = [
+    { name = "Cyber-Physical Systems Group - Technical University of Munich", email = "commonroad@lists.lrz.de" }
+]
+description = "A Toolbox for Computing Reachable Sets of Automated Vehicles"
+keywords = [
+    "autonomous vehicles",
+    "automated driving",
+    "motion planning",
+    "reachability analysis",
+]
+dependencies = [
+    "commonroad-io~=2024.1",
+    "commonroad-route-planner~=2024.2",
+    "commonroad-drivability-checker~=2024.2",
+    "cython~=3.0",
+    "imageio~=2.9",
+    "matplotlib~=3.3",
+    "networkx~=3.0",
+    "numpy>=1.19, <3.0",
+    "omegaconf~=2.1",
+    "opencv-python~=4.5",
+    "scipy~=1.4",
+    "seaborn~=0.10",
+    "shapely~=2.0",
+]
+
+classifiers = [
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+Homepage = "https://commonroad.in.tum.de/tools/commonroad-reach"
+Documentation = "https://commonroad.in.tum.de/docs/commonroad-reach/"
+Forum = "https://commonroad.in.tum.de/forum/c/commonroad-reach/19"
+Source = "https://gitlab.lrz.de/tum-cps/commonroad-reach"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=3.8.0",
+]
+docs = [
+    "Sphinx>=4.5.0",
+    "sphinx-autodoc-typehints>=1.18.1",
+    "sphinx-rtd-theme>=2.0.0",
+    "m2r2>=0.3.0",
+]
+build = [
+    "scikit-build-core~=0.8.0",
+    "pybind11~=2.11.1",
+    "pathspec>=0.12.1",
+    "pyproject-metadata>=0.7.1",
+    "cmake>=3.24",
+]
+
+[build-system]
+requires = [
+    "scikit-build-core~=0.8.0",
+    "pybind11~=2.12.0",
+]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+wheel.packages = ["commonroad_reach"]
+build-dir = "build/{build_type}_{wheel_tag}"
+install.components = ["pycrreach"]
+
+minimum-version = "0.8"
+cmake.version = ">=3.24"
+
+[tool.cibuildwheel]
+# Skip PyPy
+skip = "pp*"
+archs = ["auto"]
+environment = { PIP_DISABLE_PIP_VERSION_CHECK = "1" }
+build-verbosity = 1
+
+# Skip tests on musllinux due to missing wheels
+test-skip = "*i686 *-musllinux*"
+test-extras = ["test"]
+# use --import-mode=append to test the installed package and not the source
+test-command = "python -m pytest {package}/tests --import-mode append"
