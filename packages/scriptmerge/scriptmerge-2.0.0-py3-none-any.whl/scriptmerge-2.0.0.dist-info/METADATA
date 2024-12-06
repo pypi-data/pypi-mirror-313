@@ -1,0 +1,163 @@
+Metadata-Version: 2.3
+Name: scriptmerge
+Version: 2.0.0
+Summary: Convert Python packages into a single script
+Project-URL: Homepage, https://github.com/Amourspirit/python-scriptmerge/tree/scriptmerge
+Project-URL: Documentation, https://github.com/Amourspirit/python-scriptmerge/tree/scriptmerge
+Project-URL: Repository, https://github.com/Amourspirit/python-scriptmerge/tree/scriptmerge
+Project-URL: Issues, https://github.com/Amourspirit/python-scriptmerge/tree/scriptmerge/issues
+Author-email: ":Barry-Thomas-Paul: Moss" <bigbytetech@gmail.com>, Michael Williamson <mike@zwobble.org>
+License: Copyright (c) 2012, Michael Williamson
+        All rights reserved.
+        
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are met: 
+        
+        1. Redistributions of source code must retain the above copyright notice, this
+           list of conditions and the following disclaimer. 
+        2. Redistributions in binary form must reproduce the above copyright notice,
+           this list of conditions and the following disclaimer in the documentation
+           and/or other materials provided with the distribution. 
+        
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+        ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+        WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+        DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+        ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+        (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+        LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+        ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+        (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+        SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Keywords: compile,oooscript,scriptmerge,stickytape
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Utilities
+Requires-Python: >=3.8
+Provides-Extra: test
+Requires-Dist: pytest==7.0.1; extra == 'test'
+Requires-Dist: tox==3.26.0; extra == 'test'
+Requires-Dist: virtualenv==20.16.5; extra == 'test'
+Description-Content-Type: text/markdown
+
+# scriptmerge: Convert Python packages into a single script
+
+Scriptmerge can be used to convert a Python script and any Python modules
+it depends on into a single-file Python script.
+There are likely better alternatives depending on what you're trying to do.
+For instance:
+
+* If you want to create a single file that can be executed by a Python interpreter,
+  use [zipapp](https://docs.python.org/3/library/zipapp.html).
+
+* If you need to create a standalone executable from your Python script,
+  I recommend using an alternative such as [PyInstaller](http://www.pyinstaller.org/).
+
+Since scriptmerge relies on correctly analysing both your script and any dependent modules,
+it may not work correctly in all circumstances.
+
+
+## Installation
+
+```sh
+pip install scriptmerge
+```
+
+## Usage
+
+You can tell scriptmerge which directories to search using the `--add-python-path` argument.
+For instance:
+
+```sh
+scriptmerge scripts/blah --add-python-path . > /tmp/blah-standalone
+```
+
+Or to output directly to a file:
+
+```sh
+scriptmerge scripts/blah --add-python-path . --output-file /tmp/blah-standalone
+```
+
+You can also point scriptmerge towards a Python binary that it should use
+sys.path from, for instance the Python binary inside a virtualenv:
+
+```sh
+scriptmerge scripts/blah --python-binary _virtualenv/bin/python --output-file /tmp/blah-standalone
+```
+
+Sscriptmerge cannot automatically detect dynamic imports,
+but you can use `--add-python-module` to explicitly include modules:
+
+```sh
+scriptmerge scripts/blah --add-python-module blah.util
+```
+
+Scriptmerge can exclucde modules from be added to output.
+This is useful in special cases where is it known that a module is not required to run the methods being used in the output.
+An example might be a script that is being used as a LibreOffice macro.
+You can use `--exclude-python-module` to explicitly exclude modules.
+
+`--exclude-python-module` takes one or more regular expressions
+
+In this example module `blah` is excluded entirly.
+`blah\.*` matches modules such as `blah.__init__`, `blah.my_sub_module`.
+
+```sh
+scriptmerge scripts/blah --exclude-python-module blah\.*
+```
+
+By default, scriptmerge will ignore the shebang in the script
+and use `"#!/usr/bin/env python"` in the output file.
+To copy the shebang from the original script,
+use `--copy-shebang`:
+
+```sh
+scriptmerge scripts/blah --copy-shebang --output-file /tmp/blah-standalone
+```
+
+Scritpmerge can strip all doc strings and comments from imported modules using the `--clean` option.
+
+```sh
+scriptmerge --clean
+```
+
+To see all scriptmerge options:
+
+```sh
+scriptmerge --help
+```
+
+As you might expect with a program that munges source files, there are a
+few caveats:
+
+* Due to the way that scriptmerge generates the output file, your script
+  source file should be encoded using UTF-8. If your script doesn't declare
+  its encoding in its first two lines, then it will be UTF-8 by default
+  as of Python 3.
+
+* Your script shouldn't have any ``from __future__`` imports.
+
+* Anything that relies on the specific location of files will probably
+  no longer work. In other words, ``__file__`` probably isn't all that
+  useful.
+
+* Any files that aren't imported won't be included. Static data that
+  might be part of your project, such as other text files or images,
+  won't be included.
+
+# Credits
+
+Scriptmerge is a fork of [stickytape](https://pypi.org/project/stickytape/).
+
+Credit goes to Michael Williamson as the original author.
