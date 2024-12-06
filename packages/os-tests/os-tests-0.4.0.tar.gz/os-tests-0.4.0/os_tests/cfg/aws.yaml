@@ -1,0 +1,54 @@
+# This is ONLY a template for provision aws resources. 
+# Please copy it to other place that you want to edit
+# Not recommend you edit it directly in case leaking sensitive information.
+Cloud:
+    provider : aws
+# aws account profile name, default is default
+profile_name : default
+ami_id : 
+region : 
+#subnet_id_ipv6 is an id of subnet which contains both ipv4 and ipv6
+subnet_id_ipv6 : 
+subnet_id_ipv4 : 
+#subnet_id_ipv6only is an id of subnet which only contains ipv6
+subnet_id_ipv6only :
+security_group_ids : 
+#placement_group_id :
+placement_group_name : 
+ssh_key_name : 
+username: ec2-user
+vm_password:
+# optional, default is os_tests_aws
+tagname : os_tests_aws
+# optional(imdsv1 and v2)|required(imdsv2 only)
+httptokens : optional
+# default root volume setting
+# set customize_block_device_map to False to leave api to handle block device mapping.
+# when customize_block_device_map is False, volume_type and volume_size will not be used
+customize_block_device_map: True
+# volume_type: 'standard'|'io1'|'io2'|'gp2'|'sc1'|'st1'|'gp3' or other supported
+volume_type : 'gp3'
+volume_size : 10
+# you can pass multipe info seperated by ';', if one cannot start instance, will use anothers
+# "ignore-no-launches=true,target-droplet=$ip;ignore-no-launches=true,target-droplet=$ip"
+# additionalinfo : xxxx
+# optional, amazon and ubuntu AMIs for boot preformance comparing
+# specify outpostsarn if test on outposts system
+#outpostarn : arn:aws:outposts:xxxxxx
+# specify allowed ration in test eg. amazon 23s, rhel 40s, (40-23/23)*100 > 70, the test will fail
+boottime_max_ratio : 70
+net_max_ratio : 10
+# specify 1(vm1&vm2) or 2 instance types(vm1,vm2), split by ','
+# instance_type: is4gen.large
+# instance_type: t2.large,t3.small (vm1,vm2)
+instance_type: is4gen.large
+# specify below items if cannot retrive instance spec automatically
+cpus: None
+memory: None
+disks: None
+net_bandwidth: None
+# Add case name into support cases if support versions are undefined when testing fixed scratch build
+# For example ["case1","case2"]
+support_cases: None
+# Test with amdsevsnp enabled, us-east-2 supports this feature
+amdsevsnp: False
