@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "opendapi"
+version = "1.0.6"
+description = "Python client for Open DAPI interfaces"
+authors = ["Woven <opendapi-publisher@wovencollab.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://wovencollab.com"
+
+[tool.poetry.urls]
+"Quickstart" = "https://opendapi.org"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+deepmerge = "^1.1.0"
+jsonschema = "^4.17.3"
+ruamel-yaml = "^0.17.32"
+requests = "^2.31.0"
+click = "^8.0.0"
+jinja2 = "^3.0.0"
+pyparsing = "^3.0.0"
+sentry-sdk = "^2.5.1"
+jsonref = "^1.1.0"
+requests-cache = "^1.2.0"
+esprima = "^4.0.1"
+snakemd = "^2.2.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+black = "^24.3.0"
+pylint = "^3.1.0"
+bandit = "^1.7.5"
+isort = "^5.11.0"
+pytest-cov = "^4.0.0"
+pytest-mock = "^3.10.0"
+# for testing fixtures
+pynamodb = "^5.5.1"
+sqlalchemy = "^2.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+opendapi = "opendapi.cli.main:cli_wrapper"
+
+[tool.coverage.run]
+omit = ["*/pytest*/**/*.py"]
+
+concurrency = ["multiprocessing"]
+parallel = true
+sigterm = true
