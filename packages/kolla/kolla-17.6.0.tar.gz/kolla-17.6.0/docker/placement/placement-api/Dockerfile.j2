@@ -1,0 +1,17 @@
+FROM {{ namespace }}/{{ image_prefix }}placement-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block placement_api_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% set placement_api_packages = [
+] %}
+{{ macros.install_packages(placement_api_packages | customizable("packages")) }}
+
+COPY extend_start.sh /usr/local/bin/kolla_placement_extend_start
+
+{% block placement_api_footer %}{% endblock %}
+{% block footer %}{% endblock %}

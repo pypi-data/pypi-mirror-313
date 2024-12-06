@@ -1,0 +1,52 @@
+FROM {{ namespace }}/{{ image_prefix }}openstack-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block gnocchi_base_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.configure_user(name='gnocchi') }}
+
+{{ macros.enable_extra_repos(['ceph']) }}
+
+{% if base_package_type == 'rpm' %}
+
+    {% set gnocchi_base_packages = [
+        'librados2-devel',
+        'python3-rados',
+    ] %}
+
+RUN mkdir -p /var/www/cgi-bin/gnocchi
+{% elif base_package_type == 'deb' %}
+
+    {% set gnocchi_base_packages = [
+        'librados-dev',
+        'python3-rados',
+    ] %}
+
+
+{% endif %}
+
+{{ macros.install_packages(gnocchi_base_packages | customizable("packages")) }}
+
+ADD gnocchi-base-archive /gnocchi-base-source
+
+{% set gnocchi_base_pip_packages = [
+    'gnocchiclient',
+    '/gnocchi[keystone,mysql,file,ceph,s3]'
+] %}
+
+COPY extend_start.sh /usr/local/bin/kolla_extend_start
+COPY gnocchi_sudoers /etc/sudoers.d/kolla_gnocchi_sudoers
+
+RUN ln -s gnocchi-base-source/* gnocchi \
+    && {{ macros.install_pip(gnocchi_base_pip_packages | customizable("pip_packages")) }} \
+    && mkdir -p /etc/gnocchi \
+    && chmod 750 /etc/sudoers.d \
+    && chmod 640 /etc/sudoers.d/kolla_gnocchi_sudoers \
+    && touch /usr/local/bin/kolla_gnocchi_extend_start \
+    && chmod 644 /usr/local/bin/kolla_extend_start /usr/local/bin/kolla_gnocchi_extend_start
+
+{% block gnocchi_base_footer %}{% endblock %}

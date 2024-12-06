@@ -1,0 +1,117 @@
+FROM {{ namespace }}/{{ image_prefix }}base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block kolla_toolbox_header %}{% endblock %}
+
+{% set venv_path='/opt/ansible' %}
+{% set os_client_config= venv_path + '/lib/python' + distro_python_version + '/site-packages/os_client_config/defaults.json' %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.configure_user(name='ansible') }}
+{{ macros.configure_user(name='rabbitmq') }}
+
+{{ macros.enable_extra_repos(['crb', 'erlang', 'openvswitch', 'rabbitmq']) }}
+
+{% block rabbitmq_apt_preferences %}
+{% if base_package_type == 'deb' %}
+COPY apt_preferences_rabbitmq.{{ base_distro }} /etc/apt/preferences.d/rabbitmq
+{% endif %}
+{% endblock %}
+
+{% if base_package_type == 'rpm' %}
+
+    {% set kolla_toolbox_packages = [
+        'crudini',
+        'erlang-26.*',
+        'gcc',
+        'gdisk',
+        'git',
+        'jq',
+        'libffi-devel',
+        'libxml2-devel',
+        'libxslt-devel',
+        'make',
+        'openssh-clients',
+        'openssl-devel',
+        'openvswitch',
+        'python3-devel',
+        'rabbitmq-server-3.12.*'
+    ] %}
+
+{% elif base_package_type == 'deb' %}
+    {% set kolla_toolbox_packages = [
+        'build-essential',
+        'ca-certificates',
+        'crudini',
+        'gdisk',
+        'git',
+        'jq',
+        'libffi-dev',
+        'libssl-dev',
+        'libxslt1-dev',
+        'openvswitch-switch',
+        'python3-dev',
+        'python3-venv',
+        'rabbitmq-server',
+     ] %}
+{% endif %}
+{{ macros.install_packages(kolla_toolbox_packages | customizable("packages")) }}
+
+{% block kolla_toolbox_upper_constraints %}
+RUN mkdir -p /requirements \
+    && curl -o /requirements/upper-constraints.txt ${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/{{ openstack_release }}} \
+    && {{ macros.upper_constraints_remove("openstacksdk") }} \
+    && python3 -m venv --system-site-packages {{ venv_path }}
+{% endblock %}
+
+ENV PATH {{ venv_path }}/bin:$PATH
+
+{% set kolla_toolbox_pip_packages = [
+        'ansible-core==2.15.*',
+        'cmd2',
+        'influxdb',
+        'openstacksdk',
+        'os-client-config',
+        'pbr',
+        'pymysql',
+        'python-ironicclient',
+        'python-openstackclient',
+        'pytz',
+        'pyudev',
+    ] %}
+
+RUN {{ macros.install_pip(['pip', 'wheel', 'setuptools']) }} \
+    && {{ macros.install_pip(kolla_toolbox_pip_packages | customizable("pip_packages")) }} \
+    && mkdir -p /etc/ansible /usr/share/ansible \
+    && echo 'localhost ansible_connection=local ansible_python_interpreter={{ venv_path }}/bin/python' > /etc/ansible/hosts \
+    && sed -i 's|  "identity_api_version": "2.0",|  "identity_api_version": "3",|' {{ os_client_config }}
+
+{% block kolla_toolbox_collections_install %}
+COPY requirements.yml /var/lib/ansible/
+RUN fail=1; for i in $(seq 1 5); do if \
+ansible-galaxy collection install --timeout 120 -p /usr/share/ansible/collections -r /var/lib/ansible/requirements.yml \
+; then fail=0; break; fi; echo "Collection download failed, retrying"; sleep 5; done; \
+if [ "$fail" -eq 1 ]; then exit 1; fi
+
+ENV ANSIBLE_LIBRARY /usr/share/ansible:$ANSIBLE_LIBRARY
+{% endblock %}
+
+COPY find_disks.py /usr/share/ansible/
+COPY ansible.cfg /etc/ansible/ansible.cfg
+COPY ansible_sudoers /etc/sudoers.d/kolla_ansible_sudoers
+COPY extend_start.sh /usr/local/bin/kolla_extend_start
+COPY kolla_toolbox.sh /usr/local/bin/kolla_toolbox
+
+RUN chmod 644 /usr/share/ansible/find_disks.py \
+              /etc/ansible/ansible.cfg \
+              /usr/local/bin/kolla_extend_start \
+    && chmod 755 /usr/local/bin/kolla_toolbox \
+    && chmod 440 /etc/sudoers.d/kolla_ansible_sudoers
+
+{% block kolla_toolbox_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER ansible

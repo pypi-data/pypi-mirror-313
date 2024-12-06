@@ -1,0 +1,60 @@
+FROM {{ namespace }}/{{ image_prefix }}base:{{ tag }}
+
+{% set fluentd_user = 'fluentd' %}
+
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}" fluentd_binary="fluentd" fluentd_user="{{ fluentd_user }}"
+{% endblock %}
+
+{% block fluentd_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.enable_extra_repos(['fluentd']) }}
+
+{% if base_package_type == 'rpm' %}
+
+    {% set fluentd_packages = [
+        'gcc-c++',
+        'make',
+        'fluent-package',
+    ] %}
+
+{% elif base_package_type == 'deb' %}
+
+    {% set fluentd_packages = [
+        'g++',
+        'make',
+        'fluent-package',
+    ] %}
+
+{% endif %}
+
+{{ macros.configure_user(name=fluentd_user, groups='mysql') }}
+
+COPY fluentd_sudoers /etc/sudoers.d/kolla_fluentd_sudoers
+COPY extend_start.sh /usr/local/bin/kolla_extend_start
+
+{{ macros.install_packages(fluentd_packages | customizable("packages")) }} \
+    && chmod 440 /etc/sudoers.d/kolla_fluentd_sudoers \
+    && mkdir -p /etc/{{ fluentd_user }} \
+    && mkdir -p /var/run/{{ fluentd_user }} \
+    && chown -R {{ fluentd_user }}: /var/run/{{ fluentd_user }} \
+    && chmod 644 /usr/local/bin/kolla_extend_start
+
+{% block fluentd_plugins_install %}
+
+{% set fluentd_plugins = [
+    'fluent-plugin-grok-parser',
+    'fluent-plugin-prometheus',
+    'fluent-plugin-rewrite-tag-filter',
+] %}
+
+{{ macros.install_fluent_plugins(fluentd_plugins | customizable("plugins")) }}
+
+{% endblock %}
+
+{% block fluentd_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER {{ fluentd_user }}

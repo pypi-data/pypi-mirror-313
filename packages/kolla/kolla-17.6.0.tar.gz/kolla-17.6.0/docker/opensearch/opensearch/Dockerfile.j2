@@ -1,0 +1,29 @@
+FROM {{ namespace }}/{{ image_prefix }}base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block opensearch_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.configure_user(name='opensearch', shell='/bin/bash', homedir='/usr/share/opensearch') }}
+{{ macros.enable_extra_repos(['opensearch']) }}
+
+    {% set opensearch_packages = [
+        'opensearch'
+    ] %}
+
+ENV OPENSEARCH_INITIAL_ADMIN_PASSWORD="Kolla24OpenSearch"
+
+{{ macros.install_packages(opensearch_packages | customizable("packages")) }}
+
+RUN chown -R opensearch:opensearch /usr/share/opensearch
+
+COPY extend_start.sh /usr/local/bin/kolla_extend_start
+RUN chmod 755 /usr/local/bin/kolla_extend_start
+
+{% block opensearch_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER opensearch

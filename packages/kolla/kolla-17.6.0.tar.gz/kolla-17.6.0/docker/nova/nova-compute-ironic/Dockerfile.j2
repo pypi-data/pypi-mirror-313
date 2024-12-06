@@ -1,0 +1,17 @@
+FROM {{ namespace }}/{{ image_prefix }}nova-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block nova_compute_ironic_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% set nova_compute_ironic_packages = ['genisoimage', 'nvme-cli'] %}
+
+{{ macros.install_packages(nova_compute_ironic_packages | customizable("packages")) }}
+
+{% block nova_compute_ironic_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER nova

@@ -1,0 +1,31 @@
+FROM {{ namespace }}/{{ image_prefix }}prometheus-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block prometheus_mtail_header %}{% endblock %}
+
+{% block prometheus_mtail_version %}
+
+ARG prometheus_mtail_version=3.0.0-rc52
+{% if debian_arch == 'amd64' %}
+ARG prometheus_mtail_url=https://github.com/google/mtail/releases/download/v${prometheus_mtail_version}/mtail_${prometheus_mtail_version}_linux_amd64.tar.gz
+{% else %}
+ARG prometheus_mtail_url=https://github.com/google/mtail/releases/download/v${prometheus_mtail_version}/mtail_${prometheus_mtail_version}_linux_{{debian_arch}}.tar.gz
+{% endif %}
+{% endblock %}
+
+{% block prometheus_mtail_install %}
+RUN curl -o /tmp/mtail.tar.gz ${prometheus_mtail_url} \
+    && tar xvf /tmp/mtail.tar.gz -C /opt/ \
+    && rm -f /tmp/mtail.tar.gz
+{% endblock %}
+
+{% block prometheus_mtail_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+# NOTE(dszumski): We run as root so that mtail can scrape root owned logs
+# such as /var/log/secure which are mounted into the container as read only
+# for auditing purposes. Longer term we should use a more secure mechanism
+# for tailing these logs.
+USER root

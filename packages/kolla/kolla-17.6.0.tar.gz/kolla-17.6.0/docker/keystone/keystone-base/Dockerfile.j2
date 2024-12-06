@@ -1,0 +1,48 @@
+FROM {{ namespace }}/{{ image_prefix }}openstack-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block keystone_base_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.configure_user(name='keystone') }}
+
+{% if base_package_type == 'rpm' %}
+    {% set keystone_base_packages = [
+        'cyrus-sasl-devel',
+        'mod_auth_mellon',
+        'mod_auth_openidc',
+        'openldap-devel',
+    ] %}
+
+{% elif base_package_type == 'deb' %}
+    {% set keystone_base_packages = [
+        'libapache2-mod-auth-mellon',
+        'libapache2-mod-auth-openidc',
+        'libldap-common',
+        'libldap2-dev',
+        'libsasl2-dev',
+    ] %}
+{% endif %}
+{{ macros.install_packages(keystone_base_packages | customizable("packages")) }}
+
+{% block keystone_source_install %}
+ADD keystone-base-archive /keystone-base-source
+
+{% set keystone_base_pip_packages = [
+    '/keystone[ldap]',
+] %}
+
+RUN ln -s keystone-base-source/* keystone \
+    && {{ macros.install_pip(keystone_base_pip_packages | customizable("pip_packages")) }} \
+    && mkdir -p /etc/keystone /var/www/cgi-bin/keystone \
+    && cp -r /keystone/etc/* /etc/keystone/ \
+    && cp /var/lib/kolla/venv/bin/keystone-wsgi-admin /var/www/cgi-bin/keystone/admin \
+    && cp /var/lib/kolla/venv/bin/keystone-wsgi-public /var/www/cgi-bin/keystone/main
+{% endblock %}
+
+RUN chmod 755 /var/www/cgi-bin/keystone/*
+
+{% block keystone_base_footer %}{% endblock %}

@@ -1,0 +1,36 @@
+FROM {{ namespace }}/{{ image_prefix }}openstack-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block mistral_base_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.configure_user(name='mistral') }}
+
+ADD mistral-base-archive /mistral-base-source
+ADD plugins-archive /
+
+{% set mistral_base_pip_packages = [
+    '/mistral',
+    'redis'
+] %}
+
+{% set mistral_base_plugins_pip_packages = [
+    '/plugins/*'
+] %}
+
+COPY extend_start.sh /usr/local/bin/kolla_extend_start
+
+RUN ln -s mistral-base-source/* mistral \
+    && {{ macros.install_pip(mistral_base_pip_packages | customizable("pip_packages")) }} \
+    && mkdir -p /etc/mistral \
+    && cp -r /mistral/etc/* /etc/mistral/ \
+    && if [ "$(ls /plugins)" ]; then \
+        {{ macros.install_pip(mistral_base_plugins_pip_packages) }}; \
+       fi \
+    && touch /usr/local/bin/kolla_mistral_extend_start \
+    && chmod 644 /usr/local/bin/kolla_extend_start /usr/local/bin/kolla_mistral_extend_start
+
+{% block mistral_base_footer %}{% endblock %}
