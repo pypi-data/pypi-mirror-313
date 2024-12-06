@@ -1,0 +1,110 @@
+<!-- 
+===----------------------------------------------------------------------===#
+
+         STAIRLab -- STructural Artificial Intelligence Laboratory
+
+===----------------------------------------------------------------------===#
+
+Claudio Perez, Summer 2023 
+
+-->
+{# TODO: Accordion table? #}
+
+{% extends "layouts/base.html" %}
+{% load predictor %}
+{% block title %} {{ asset.calid }} Predictors {% endblock %} 
+{% block stylesheets %}
+<style>
+  .accordion-button::after {
+    content: '+'; 
+  }
+</style>
+{% endblock %}
+{% block content %}
+<h1><code>{{ asset.calid }}</code> Predictors</h1>
+  <div class="py-4 align-right">
+    {% for predictor in predictor_types %}
+    {% include 'prediction/new-predictor.html' with predictor=predictor %}
+    {% endfor %}
+
+    <a role="button" class="button btn btn-outline-white btn-gray-600 text-white"
+    href="/inventory/{{ asset.calid }}" class="me-1">Back to Structure Profile</a>
+
+    {% if False %}
+    <a role="button" class="button btn btn-outline-primary" disabled
+       href="/inventory/{{ asset.calid }}/predictors/new/" class="me-1">New (Link)</a>
+    {% endif %}
+  </div>
+  {% if False %}
+  <pre id="get-params"></pre>
+  {% endif %}
+
+<div class="col-10">
+  <div class="card">
+    <div class="card-body">
+      <div class="accordion accordion-flush" id="accordionFlush">
+        {% for predictor in asset.predictors.values %}
+          <div class="accordion-item">
+              <button class="btn {%if predictor.active %}btn-outline-success{%else%}btn-outline-dark{%endif%}" type="button">Active</button>
+              {% if False %}
+              <button class="btn btn-outline-danger" type="button">Delete</button>
+              {% endif %}
+              <button class="btn" type="button"
+                      data-bs-toggle="collapse" 
+                      data-bs-target="#flush-collapse{{forloop.counter}}"
+                      aria-expanded="false" aria-controls="flush-collapse{{forloop.counter}}">
+                Details</button>
+              &nbsp;
+              <h6 class="accordion-header" style="display:inline" id="flush-heading{{forloop.counter}}">
+                  {{predictor.name}}
+              </h6>
+              (<code>{{predictor.platform}}</code>)
+              {% if False %}
+              <button class="accordion-button btn collapsed" type="button" 
+                      data-bs-toggle="collapse" 
+                      data-bs-target="#flush-collapse{{forloop.counter}}"
+                      aria-expanded="false" aria-controls="flush-collapse{{forloop.counter}}">
+              </button>
+              {% endif %}
+            <div id="flush-collapse{{forloop.counter}}" class="accordion-collapse collapse" 
+                 style="color:black"
+                 aria-labelledby="flush-heading{{forloop.counter}}" 
+                 data-bs-parent="#accordionFlushExample">
+              <div class="table-responsive">
+              {{ predictor|display_predictor }}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+<script>
+
+  for (const element of document.querySelectorAll("form")) {
+    let editor_elem = element.querySelector(`#${element.id}-editor`);
+    let config = {
+      use_name_attributes: false,
+      theme: 'bootstrap5',
+      disable_edit_json: true,
+      disable_properties: true,
+      // disable_collapse: true,
+      schema: JSON.parse(editor_elem.dataset.schema)
+    };
+
+    let editor = new JSONEditor(editor_elem, config)
+
+    editor.on('change', function () {
+      element.querySelector('#input').value = JSON.stringify(editor.getValue())
+    })
+  }
+</script>
+{% endblock %}
+
