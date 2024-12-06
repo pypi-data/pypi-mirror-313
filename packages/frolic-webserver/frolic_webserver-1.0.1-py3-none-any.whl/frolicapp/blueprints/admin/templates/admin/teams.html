@@ -1,0 +1,83 @@
+{% extends 'admin/__base__.html' %}
+
+{% block title %}
+Teams
+{% endblock %}
+
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+{% endblock %}
+
+
+{% block sidebar %}
+{% from 'admin/macros.html' import generate_sidebar %}
+{{ generate_sidebar('Team') }}
+{% endblock %}
+
+
+{% block main %}
+<div class="container-fluid">
+    {% if teams %}
+    <div class="px-2 py-0">
+        <table id="teams" class="table datatable table-hover">
+            <thead>
+                <tr>
+                    <th>Team Leader</th>
+                    <th>Team Name</th>
+                    <th>Event</th>
+                </tr>
+            </thead>
+            <tbody class="align-middle">
+                {% for team in teams %}
+                <tr>
+                    <td><a href="{{ url_for('Admin.get_user', id=team.leader.user_id) }}">{{ team.leader.fullname }}</a></td>
+                    <td><a href="{{ url_for('Admin.get_team', id=team.team_id) }}">{{ team.name }}</a></td>
+                    <td><a href="{{ url_for('Admin.get_event', id=team.event.event_id) }}">{{ team.event.name }}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <h1 class="fw-bold">No teams found for any event</h1>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+{% block script %}
+{% if teams %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#teams').DataTable({
+            paging: false,
+            searching: true,
+            ordering: false,
+            scrollX: true,
+            scrollY: '450px',
+            padding: false,
+            layout: {
+                topStart: {
+                    features: [
+                        {
+                            search: {
+                                placeholder: "type here..."
+                            }
+                        }
+                    ]
+                },
+                topEnd: {
+
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{{ super() }}
+{% endblock %}

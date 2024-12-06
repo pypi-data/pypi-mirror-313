@@ -1,0 +1,88 @@
+{% extends 'admin/__base__.html' %}
+
+{% block title %}
+Co-ordinators
+{% endblock %}
+
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+{% endblock %}
+
+
+{% block sidebar %}
+{% from 'admin/macros.html' import generate_sidebar %}
+{{ generate_sidebar('Coordinator') }}
+{% endblock %}
+
+
+{% block main %}
+<div class="container-fluid">
+    {% if coordinators %}
+    <div class="px-2 py-0">
+        <table id="teams" class="table datatable table-hover">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Event</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody class="align-middle">
+                {% for coordinator in coordinators %}
+                <tr>
+                    <td>{{ coordinator.fname }}</td>
+                    <td>{{ coordinator.lname }}</td>
+                    <td>{{ coordinator.email }}</td>
+                    <td><a href="{{ url_for('Admin.get_event', id=coordinator.event.event_id) }}">{{ coordinator.event.name }}</a></td>                    
+                    <td><a href="{{ url_for('Admin.get_user', id=coordinator.user_id) }}"><i
+                                class="bi bi-arrow-right"></i></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <h1 class="fw-bold">No coordinators found for any event</h1>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+{% block script %}
+{% if coordinators %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#teams').DataTable({
+            paging: false,
+            searching: true,
+            ordering: false,
+            scrollX: true,
+            scrollY: '450px',
+            padding: false,
+            layout: {
+                topStart: {
+                    features: [
+                        {
+                            search: {
+                                placeholder: "type here..."
+                            }
+                        }
+                    ]
+                },
+                topEnd: {
+
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{{ super() }}
+{% endblock %}
