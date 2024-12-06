@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pertdata"
+version = "1.1.0"
+dependencies = [
+    "appdirs",
+    "numpy==2.0.0",
+    "pandas",
+    "requests",
+    "scanpy",
+]
+authors = [
+    { name = "Jan Voges", email = "jvoges@external.unav.es" },
+    { name = "Guillermo Dufort y Álvarez", email = "gdufortyalv@unav.es" },
+]
+description = "Functionality for Handling Perturbation Datasets"
+readme = "README.md"
+license = { file = "LICENSE" }
+
+[project.urls]
+Repository = "https://github.com/voges/pertdata.git"
+
+[tool.setuptools.package-data]
+"pertdata.resources" = ["*.json"]
+
+[tool.ruff.lint]
+extend-select = [
+    # pycodestyle
+    "E", "W",
+    # isort
+    "I",
+    # pep8-naming
+    "N",
+    # pydocstyle
+    "D", "D401"
+]
+
+[tool.ruff.lint.pydocstyle]
+# The Google convention includes all D errors apart from: D203, D204, D213, D215,
+# D400, D401, D404, D406, D407, D408, D409, and D413.
+convention = "google"
