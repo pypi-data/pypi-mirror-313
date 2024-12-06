@@ -1,0 +1,286 @@
+{
+  "title": "PromptTemplate",
+  "type": "object",
+  "required": [
+    "system",
+    "question"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "keywords": {
+      "description": "List of keywords that determines the category of the template",
+      "items": {
+        "type": "string"
+      },
+      "title": "Keywords",
+      "type": "array"
+    },
+    "category": {
+      "$ref": "#/$defs/PromptCategory",
+      "description": "Category object, classifies the template. Required unless keywords have been supplied"
+    },
+    "system": {
+      "$ref": "#/$defs/PromptTextSnippet",
+      "description": "System part of the prompt"
+    },
+    "examples": {
+      "$ref": "#/$defs/QnAFewShotPromptSection",
+      "description": "Prompt template section for Few shot examples. Required if specified in category/keywords"
+    },
+    "context": {
+      "$ref": "#/$defs/RepeatablePromptSection",
+      "description": "Prompt template section for retrieved context. Required if specified in category/keywords"
+    },
+    "question": {
+      "$ref": "#/$defs/PromptSection",
+      "description": "Prompt template for the user question"
+    },
+    "seperator": {
+      "default": "\n\n",
+      "title": "Seperator",
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "PromptTextSnippet": {
+      "description": "Basic prompt template building block. Represent a text snippet in a prompt template.\nIt might be the system prompt, or it might be a part of a prompt section.\nThe PromptTextSnippet basically consist of a text which can holds a number of variables in the form {var}, if the\nvariables are related to counting of an inputted text (e.g. example 2 of 3 examples) then they are handled explicitly\nby the boolean numbered and counted, respectively, and the variable name is stored in num_var and count_var,\nrespectively. These variables will be handled automatically by the prompt template, whereas other metadata variables\nneeds to be provided together with an accompaning prompt input adhering to the PromptInput class.",
+      "properties": {
+        "text": {
+          "description": "Template text snippet with optional variables in the form {var}.",
+          "title": "Text",
+          "type": "string"
+        },
+        "seperator": {
+          "default": "\n",
+          "description": "Separator to be used between text snippet and inputted text when the text snippet is part of a prompt section.",
+          "title": "Seperator",
+          "type": "string"
+        },
+        "numbered": {
+          "default": false,
+          "description": "Indicate if a variable represents a count eg \"example nr {#} of a total of 3 examples\"",
+          "title": "Numbered",
+          "type": "boolean"
+        },
+        "num_var": {
+          "default": "#",
+          "description": "The variable to be counted",
+          "title": "Num Var",
+          "type": "string"
+        },
+        "counted": {
+          "default": false,
+          "description": "Indicate if a variable represents a total count eg \"example nr 2 of a total of {tot} examples\"",
+          "title": "Counted",
+          "type": "boolean"
+        },
+        "count_var": {
+          "default": "tot",
+          "description": "The variable to be substituted for the total count",
+          "title": "Count Var",
+          "type": "string"
+        },
+        "meta_data_vars": {
+          "description": "The variables used in the template snippet, they will have to be supplied as metadata for prompt input",
+          "items": {
+            "type": "string"
+          },
+          "title": "Meta Data Vars",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "PromptTextSnippet",
+      "type": "object"
+    },
+    "PromptSection": {
+      "additionalProperties": true,
+      "description": "PromptSection class gives a section of the prompt template, which can take a prompt input and pre or append a\nprompt template text snippet, which will optionally be formatted with a markup.",
+      "properties": {
+        "text_before": {
+          "$ref": "#/$defs/PromptTextSnippet",
+          "description": "Optional text introducing an section"
+        },
+        "text_after": {
+          "$ref": "#/$defs/PromptTextSnippet",
+          "description": "Optional text ending an section"
+        },
+        "prompt_text_markup": {
+          "$ref": "#/$defs/Markup",
+          "description": "Optional formatting of an section"
+        }
+      },
+      "title": "PromptSection",
+      "type": "object"
+    },
+    "RepeatablePromptSection": {
+      "additionalProperties": true,
+      "description": "RepeatablePromptSection class gives a section of the prompt template like the PromptSection, but in addition to a \ntext before and a text after, it also contains a main text section, which in itself is also a promptSection. \nThe main text will be repeated when a prompt is constructed the number of times needed based on the length of the\nlist of prompt input supplied to the class method get_text.",
+      "properties": {
+        "text_before": {
+          "$ref": "#/$defs/PromptTextSnippet",
+          "description": "Optional text introducing an section"
+        },
+        "text_after": {
+          "$ref": "#/$defs/PromptTextSnippet",
+          "description": "Optional text ending an section"
+        },
+        "prompt_text_markup": {
+          "$ref": "#/$defs/Markup",
+          "description": "Optional formatting of an section"
+        },
+        "main_text": {
+          "$ref": "#/$defs/PromptSection",
+          "description": "Template for a section of the prompt that will be repeated as many times as needed depending on the input supplied for template."
+        },
+        "seperator": {
+          "default": "\n",
+          "description": "Seperator between the repeated sections",
+          "title": "Seperator",
+          "type": "string"
+        }
+      },
+      "required": [
+        "main_text"
+      ],
+      "title": "RepeatablePromptSection",
+      "type": "object"
+    },
+    "QnAFewShotPromptSection": {
+      "additionalProperties": true,
+      "description": "QnAFewShotPromptSection class gives a section of the prompt template like the RepeatablePromptSection, but instead\nof a single main text section, it contains two prompt sections (question_text and answer_text) and an optional\nRepeatablePromptSection (context_text), where these two are three prompt sections are concatenated and then repeated\nthe number of times needed based on the length of the list of prompt input supplied to the class method get_text.",
+      "properties": {
+        "text_before": {
+          "$ref": "#/$defs/PromptTextSnippet",
+          "description": "Optional text introducing an section"
+        },
+        "text_after": {
+          "$ref": "#/$defs/PromptTextSnippet",
+          "description": "Optional text ending an section"
+        },
+        "prompt_text_markup": {
+          "$ref": "#/$defs/Markup",
+          "description": "Optional formatting of an section"
+        },
+        "text_before_set": {
+          "$ref": "#/$defs/PromptTextSnippet",
+          "description": "Optional text preceding each example"
+        },
+        "text_after_set": {
+          "$ref": "#/$defs/PromptTextSnippet",
+          "description": "Optional text succeding each example"
+        },
+        "question_text": {
+          "$ref": "#/$defs/PromptSection",
+          "description": "Prompt template specification for the question text of the few shot examples"
+        },
+        "answer_text": {
+          "$ref": "#/$defs/PromptSection",
+          "description": "Prompt template specification for the answer text of the few shot examples"
+        },
+        "context_text": {
+          "$ref": "#/$defs/RepeatablePromptSection",
+          "description": "Optional prompt template specification for the context text of the few shot examples"
+        },
+        "inner_seperator": {
+          "default": "\n\n",
+          "description": "Seperator between the elements of an example - (context), question and answer",
+          "title": "Inner Seperator",
+          "type": "string"
+        },
+        "outer_seperator": {
+          "default": "\n\n---\n\n",
+          "description": "Seperator between the examples",
+          "title": "Outer Seperator",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question_text",
+        "answer_text"
+      ],
+      "title": "QnAFewShotPromptSection",
+      "type": "object"
+    },
+    "PromptMethod": {
+      "description": "The PromptMethod Enum class specify which methods the prompt template uses",
+      "enum": [
+        "RAG",
+        "zero_shot",
+        "few_shot"
+      ],
+      "title": "PromptMethod",
+      "type": "string"
+    },
+    "PromptStyle": {
+      "description": "The style of the prompt template, indicates which model type the prompt\ntemplate is intended for. Whether continuation models, instruction finetuned\nmodels or dialogue finetuned models",
+      "enum": [
+        "instruct",
+        "continuation",
+        "dialog"
+      ],
+      "title": "PromptStyle",
+      "type": "string"
+    },
+    "PromptTask": {
+      "description": "The PromptTask Enum class specify the type of task the prompt template is intended for\n\nNOTE: Currently only question_answer is supported.",
+      "enum": [
+        "summarization",
+        "question_answer"
+      ],
+      "title": "PromptTask",
+      "type": "string"
+    },
+    "Language": {
+      "description": "The Language Enum class specify the language of the text in the prompt template",
+      "enum": [
+        "english",
+        "danish"
+      ],
+      "title": "Language",
+      "type": "string"
+    },
+    "PromptCategory": {
+      "description": "A dataclass for the prompt template to hold metadata categorising the template",
+      "properties": {
+        "task": {
+          "$ref": "#/$defs/PromptTask"
+        },
+        "style": {
+          "$ref": "#/$defs/PromptStyle"
+        },
+        "methods": {
+          "items": {
+            "$ref": "#/$defs/PromptMethod"
+          },
+          "title": "Methods",
+          "type": "array"
+        },
+        "language": {
+          "$ref": "#/$defs/Language"
+        }
+      },
+      "required": [
+        "task",
+        "style",
+        "methods",
+        "language"
+      ],
+      "title": "PromptCategory",
+      "type": "object"
+    },
+    "Markup": {
+      "description": "The Markup Enum class list the possible markup that can be applied to various input sections in the prompt template.\n\nNOTE: Currently the markup will be formatted with Markdown syntax",
+      "enum": [
+        "unordered_list",
+        "quote",
+        "bold",
+        "italics"
+      ],
+      "title": "Markup",
+      "type": "string"
+    }
+  }
+}

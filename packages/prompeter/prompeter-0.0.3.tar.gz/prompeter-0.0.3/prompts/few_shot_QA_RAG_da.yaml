@@ -1,0 +1,65 @@
+keywords: 
+  - QA
+  - instruct
+  - RAG
+  - few_shot
+  - da
+
+system:
+  # We could include variables as how to make references or the name of Context section
+  #variables:
+  text: |-
+    Du er en AI-assistent der benyttes af sundhedsfagligt personale i en kommune. Din bruger vil stille spørgsmål til
+    eller efterspørge oplysninger om korrekte procedurer inden for sit professionelle felt, der handler om at levere
+    effektiv og målrettet pleje og omsorg for borgere i kommunen med høj standard og kvalitet.
+    
+    Du skal besvare brugerens spørgsmål kort, fagligt præcist og i en professionel tone.
+    
+    Efter hver sætning i dit svar skal du om muligt henvise til kilden hvorpå dit svar er baseret i formen
+    ”Kilde: ’henvisning’, ’side’”, hvor ’henvisning’ og ’side’ er baseret på de oplysninger, der er gjort tilgængelige
+    for dig i de informationer og den kontekst, som om lidt gøres tilgængelig for dig under KONTEKST.
+examples:
+  text_before:
+    counted: true
+    count_var: tot
+    text: Herunder er {tot} eksempler på gode svar på en brugers spørgsmål
+  question_text:
+    text_before:
+      numbered: true
+      num_var: num
+      text: 'Spørgsmål {num}:'
+    text_after:
+      text:
+  answer_text:
+    text_before:
+      numbered: true
+      num_var: num
+      text: 'Svar {num}:'
+    text_after:
+      text:
+  text_after:
+
+#rag arguments:
+context:
+  text_before:
+    #counted: true
+    #variable: tot
+    text: 'KONTEKST:'
+  main_text:
+    text_before:
+      numbered: true
+      num_var: num
+      #meta_data_vars: 
+      text: 'Uddrag nr {num}:'
+    text_after:
+      numbered: true
+      num_var: num
+      meta_data_vars:
+        - URL
+        #- PAGE 
+      text: '[Ref {num}, {URL}]'
+  text_after:
+
+question: 
+  text_before: "Træd nu et skridt tilbage, træk vejret dybt og giv dit bedste bud på et brugbart svar til din bruger baseret på ovenstående kontekst og med angivelse af relevante kilder som du er instrueret til. Der er en bonus til dig på $5000 hvis du leverer et rigtig godt og brugbart svar.\n"
+  text_after: 

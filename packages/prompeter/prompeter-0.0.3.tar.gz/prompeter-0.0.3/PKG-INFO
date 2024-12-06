@@ -1,0 +1,302 @@
+Metadata-Version: 2.3
+Name: prompeter
+Version: 0.0.3
+Summary: Prompeter defines a data model for structuring prompts for LLMs and loads yaml and json files following this model
+Project-URL: Homepage, https://github.com/itk-ai/prompeter
+Project-URL: Issues, https://github.com/itk-ai/prompeter/issues
+Author-email: Daniel Kjeldsmark Andreasen <akda@aarhus.dk>
+Classifier: License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.9
+Requires-Dist: markdown-strings
+Requires-Dist: pydantic>=2
+Requires-Dist: ruamel-yaml
+Description-Content-Type: text/markdown
+
+# ![prompeter logo](logo/prompeter_stable_diffusion_62px.png) Prompeter
+
+Prompeter defines a model for structuring prompts for LLMs. 
+This is done using [pydantic](https://docs.pydantic.dev/latest/concepts/models/)
+
+Prompeter can read prompt templates structured using this model from either json or yaml files.
+For json a [schema with the definitions is available](prompt_template.schema.json).  
+
+For now the prompt template only supports question-answer tasks (you're welcome to add summarization, 
+named entity recog., info extraction or what ever)
+
+## The data model
+A prompt template consist of a:
+ - Systemprompt: Basically a text string with possibility to define variables that can be substitutes when the prompt 
+   is created from the template.
+ - Optional section with few short examples.
+ - Optional context section for retrival argumentation.
+ - Question section
+ - Seperator specifying how the sections should be concatenated
+
+and finally as a form of metadata a category entry that classifies the template (a list of keywords that specifies 
+the category entry)
+
+in yaml:
+```yaml
+keywords:
+system:  # Systemprompt
+examples:  # Optional few-shot examples
+context:  # Optional
+question:
+seperator:  # defaults to "\n\n"
+```
+
+### Example prompt structured by the prompeter model
+Given a prompt like:
+```txt
+You are {name}, a friendly assistant, that answers colleagues questions
+about feet hygiene.
+
+Examples of possible questions and how you are supposed to answer:
+Example 1 of 2
+--------------
+Question 1 of 2: <question>
+{name}: "<answer>"
+
+Example 2 of 2
+--------------
+Question 2 of 2: <question>
+{name}: "<answer>"
+End of examples
+
+Context
+-------
+1. piece of context:
+<context>
+ref: {url}
+
+2. piece of context:
+<context>
+ref: {url}
+-------
+
+Take a step back - give it your best shot. If you succeed in delivering a perfect answer you'll get a reward of 500$.
+Question: <question>
+```
+in the prompeter prompt format it will look like
+```yaml
+keywords:
+  - QnA  # Task
+  - instruct  # Style
+  - RAG  # Method used
+  - fewshot  # Method used
+  - en  # language
+system:
+  text: |-
+    You are {name}, a friendly assistant, that answers colleagues questions
+    about feet hygiene.
+  meta_data_vars:
+    - name  # name must now be provided as metadata and will be substituted when the prompt is constructed
+examples:
+  text_before: "Examples of possible questions and how you are supposed to answer:"
+  # When now variables have to be specified and the default seperator is fitting, then instead of providing an object with a text-field the text can just be provided directly
+  text_before_set:
+    text: "Example {num} of {tot}\n--------------"
+    numbered: true
+    num_var: num  # here we indicate that num is used instead of the default variable {#}
+    counted: true  # for the total count we use the default (being {tot})
+  question_text:
+    text_before:
+      text: "Question {#} of {tot}:"
+      numbered: true
+      counted: true
+      seperator: ' '
+  answer_text:
+    text_before:
+      text: "{name}: \""
+      meta_data_vars:
+        - "name"
+      seperator: ""
+    text_after:
+      text: "\""
+      seperator: ""
+  text_after: "End of examples"  
+  inner_seperator: '\n'
+  outer_seperator: "\n\n"
+context:
+  text_before: "Context\n-------"
+  text_after: "-------"
+  main_text:
+    text_before:
+      text: "{#}. piece of context:"
+      numbered: true
+    text_after:
+      text: "ref: {url}"
+      meta_data_vars:
+        - "url"
+question:
+  text_before:
+    text: "Take a step back - give it your best shot. If you succeed in delivering a perfect answer you'll get a reward of 500$.\nQuestion:"
+    seperator: ' '
+```
+Admitted, the plain text version of the prompt might be easier read, but structuring the parts of the prompt template
+makes it possible to automatically scale the number of context snippets provided or the number of examples provided.
+
+### The prompt template class shown diagramtically 
+Below is the class diagram. 
+ - It is indicated which classes are Pydantic BaseModel classes.
+ - Optional class members defaults to `None`, if nothing is indicated
+ - Internal methods have not been included
+ - Default arguments for methods have not been included
+ - Compared to the codebase some classes indicate to be children of BaseModel are actually grandchildren, with
+   their parent class only implementing a class method adjusting how a json schema is created by pydantic.
+ 
+````mermaid
+classDiagram
+  class PromptStyle {
+    <<enumeration>>
+    continuation
+    instruct
+    dialog
+  }
+  class PromptTask {
+    <<enumeration>>
+    question_answer
+    summarization
+  }
+  class PromptMethod {
+    <<enumeration>>
+    zero_shot
+    RAG
+  }
+  class Language {
+    <<enumeration>>
+    danish
+    english
+  }
+  class Markup {
+    <<enumeration>>
+    unordered_list
+    quote
+    bold
+    italics
+  }
+  class PromptCategory~BaseModel~ { 
+    PromptStyle style
+    PromptTask task
+    Language language
+    methods List[~]PromptMethod]
+    %% get_enum_attr(data: Any) Any
+  }
+  class PromptTextSnippet~BaseModel~ {
+    text : str
+    numbered : bool
+    num_var : str
+    counted : bool
+    count_var : str
+    meta_data_vars : List[str]
+    seperator : str = #quot;#bsol;n#quot;
+    %% check_variables_in_text() 'PromptTextSnippet'
+    get_text(number: int, total_count: int, **metadata) str
+  }
+  class PromptSection~BaseModel~ {
+    prompt_text_markup : Optional[Markup]
+    text_after : Optional[PromptTextSnippet | str]
+    text_before : Optional[PromptTextSnippet | str]
+    %% cast_str_to_prompt_text_snippets(data: Any) Any
+    get_text(prompt_text: PromptInput | str, number: int, total_count: int,  **metadata) str
+  }
+  class RepeatablePromptSection { 
+    main_text: PromptSection
+    seperator: str = #quot;#bsol;n#quot;
+    get_text(prompt_texts: List[PromptInput | dict | str], **metadata) str
+  }
+  class QnAFewShotPromptSection {
+      text_before_set: Optional[PromptTextSnippet]
+      text_after_set: Optional[PromptTextSnippet]
+      question_text: PromptSection
+      answer_text: PromptSection
+      context_text: Optional[RepeatablePromptSection]
+      inner_seperator: str = #quot;#bsol;n#bsol;n#quot;
+      outer_seperator: str = #quot;#bsol;n#bsol;n---#bsol;n#bsol;n#quot;
+      get_text(prompt_texts: List[QnAPromptInput | dict | str], **metadata) str
+  }
+  class PromptTemplate~BaseModel~ { 
+    keywords : Optional[List[str]]
+    category : Optional[PromptCategory]
+    system : PromptTextSnippet
+    examples : Optional[QnAFewShotPromptSection]
+    context : Optional[RepeatablePromptSection]
+    question :  PromptSection
+    seperator : str
+    %% cast_str_to_prompt_text_snippets(data: Any) Any
+    construct_messages(example_texts: List[QnAPromptInput | dict | str], context_texts: List[PromptInput | dict | str], user_prompt: PromptInput | dict | str], **metadata) list[dict]
+    construct_prompt(example_texts: List[QnAPromptInput | dict | str], context_texts: List[PromptInput | dict | str], user_prompt: PromptInput | dict | str], **metadata) str
+    %% validate_category() 'PromptTemplate'
+  }
+  PromptStyle --* PromptCategory : style
+  PromptTask --* PromptCategory : task
+  PromptMethod --* PromptCategory : method
+  Language --* PromptCategory : language
+  Markup --* PromptSection
+  PromptTextSnippet --* PromptSection : text_after, text_before
+  PromptSection --|> RepeatablePromptSection
+  PromptSection --|> QnAFewShotPromptSection
+  PromptTextSnippet --* QnAFewShotPromptSection : text_after_set, text_before_set
+  PromptSection --* QnAFewShotPromptSection : question_text, answer_text
+  RepeatablePromptSection --* PromptTemplate : context
+  RepeatablePromptSection --* QnAFewShotPromptSection : context_text
+  QnAFewShotPromptSection --* PromptTemplate : examples
+  PromptCategory --* PromptTemplate : category
+  PromptSection --* PromptTemplate : question
+  PromptTextSnippet --* PromptTemplate : system
+````
+
+In addition input classes for the methods are defined as:
+```mermaid
+classDiagram
+  class PromptInput~BaseModel~ {
+    text: str
+    metadata: Optional[dict]
+  }
+  class QnAPromptInput~BaseModel~ {
+    question: PromptInput | dict | str
+    answer: PromptInput | dict | str
+    context: Optional[List[PromptInput | dict | str]]
+  }
+  PromptInput --* QnAPromptInput : question, answer, context
+```
+
+Finally, Prompeter defines the method `get_prompt_template`, that given a path to prompt template structured in
+yaml or json, returns an instance of the `PromptTemplate` object
+
+
+## Install Prompeter
+Download or clone the repo. Run
+```shell
+pip install -e .
+```
+
+## Prompeter usage
+```python
+from prompeter import get_prompt_template
+prompt_template = get_prompt_template('prompts/example_template_instruct_QA_few_shot_RAG.yaml')
+
+user_question = '<a question>'
+with open('<path to few shot examples>') as fp:
+  response_examples = json.load(fp)
+retrieved_context = search_in_context_collection_DEFINE_YOURSELF(
+   search_string=user_question
+)
+
+prompt = prompt_template.construct_prompt(
+  example_texts=[{'question': qna_pair['question'], 'answer': qna_pair['answer']} for qna_pair in response_examples],
+  context_texts=[{'text': piece_context['text'], 'metadata': {'url': piece_context['ref_url']}} for piece_context in retrieved_context],
+  user_prompt=user_question,
+  name='Eliza'  # Metadata according to the template
+)
+```
+The prompt can then be passed to a LLM e.g. via a call to an API.
+
+## Generating the json schema
+After prompeter have been installed the json schema for the prompt template model
+can be exported by:
+```shell
+python scripts/dump_prompt_template_json_schema.py > prompt_template.schema.json
+```

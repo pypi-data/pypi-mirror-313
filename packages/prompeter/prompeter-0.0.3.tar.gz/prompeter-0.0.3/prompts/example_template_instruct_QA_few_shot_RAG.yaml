@@ -1,0 +1,53 @@
+keywords:
+  - QnA  # Task
+  - instruct  # Style
+  - RAG  # Method used
+  - fewshot  # Method used
+  - en  # language
+system:
+  text: |-
+    You are {name}, a friendly assistant, that answers colleagues questions
+    about feet hygiene.
+  meta_data_vars:
+    - name  # name must now be provided as metadata and will be substituted when the prompt is constructed
+examples:
+  text_before: "Examples of possible questions and how you are supposed to answer:"
+  # When now variables have to be specified and the default seperator is fitting, then instead of providing an object with a text-field the text can just be provided directly
+  text_before_set:
+    text: "Example {num} of {tot}\n--------------"
+    numbered: true
+    num_var: num  # here we indicate that num is used instead of the default variable {#}
+    counted: true  # for the total count we use the default (being {tot})
+  question_text:
+    text_before:
+      text: "Question {#} of {tot}:"
+      numbered: true
+      counted: true
+      seperator: ' '
+  answer_text:
+    text_before:
+      text: "{name}: \""
+      meta_data_vars:
+        - "name"
+      seperator: ""
+    text_after:
+      text: "\""
+      seperator: ""
+  text_after: "End of examples"  
+  inner_seperator: '\n'
+  outer_seperator: "\n\n"
+context:
+  text_before: "Context\n-------"
+  text_after: "-------"
+  main_text:
+    text_before:
+      text: "{#}. piece of context:"
+      numbered: true
+    text_after:
+      text: "ref: {url}"
+      meta_data_vars:
+        - "url"
+question:
+  text_before:
+    text: "Take a step back - give it your best shot. If you succeed in delivering a perfect answer you'll get a reward of 500$.\nQuestion:"
+    seperator: ' '
