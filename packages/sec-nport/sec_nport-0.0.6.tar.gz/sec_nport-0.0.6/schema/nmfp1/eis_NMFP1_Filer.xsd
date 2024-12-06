@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sec.gov/edgar/nmfp1" xmlns:ns1="http://www.sec.gov/edgar/common" xmlns:ns2="http://www.sec.gov/edgar/statecodes" xmlns:ns3="http://www.sec.gov/edgar/nmfp1common" targetNamespace="http://www.sec.gov/edgar/nmfp1" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://www.sec.gov/edgar/common" schemaLocation="eis_Common.xsd"/>
+	<xs:import namespace="http://www.sec.gov/edgar/statecodes" schemaLocation="eis_stateCodes.xsd"/>
+	<xs:import namespace="http://www.sec.gov/edgar/nmfp1common" schemaLocation="eis_NMFP1_common.xsd"/>
+	<xs:simpleType name="SUBMISSION_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="N-MFP1"/>
+			<xs:enumeration value="N-MFP1/A"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="MARKET_FUND_CATEGORY_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Treasury"/>
+			<xs:enumeration value="Government/Agency"/>
+			<xs:enumeration value="Exempt Government"/>
+			<xs:enumeration value="Prime"/>
+			<xs:enumeration value="Single State"/>
+			<xs:enumeration value="Other Tax Exempt"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="INVESTMENT_CATEGORY_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="U.S. Treasury Debt"/>
+			<xs:enumeration value="U.S. Government Agency Debt"/>
+			<xs:enumeration value="Non-U.S. Sovereign, Sub-Sovereign and Supra-National debt"/>
+			<xs:enumeration value="Certificate of Deposit"/>
+			<xs:enumeration value="Non-Negotiable Time Deposit"/>
+			<xs:enumeration value="Variable Rate Demand Note"/>
+			<xs:enumeration value="Other Municipal Security"/>
+			<xs:enumeration value="Asset Backed Commercial Paper"/>
+			<xs:enumeration value="Other Asset Backed Securities"/>
+			<xs:enumeration value="U.S. Treasury Repurchase Agreement, if collateralized only by U.S. Treasuries (including Strips) and cash"/>
+			<xs:enumeration value="U.S. Government Agency Repurchase Agreement, collateralized only by U.S. Government Agency securities, U.S. Treasuries, and cash"/>
+			<xs:enumeration value="Other Repurchase Agreement, if any collateral falls outside Treasury, Government Agency and cash"/>
+			<xs:enumeration value="Insurance Company Funding Agreement"/>
+			<xs:enumeration value="Investment Company"/>
+			<xs:enumeration value="Financial Company Commercial Paper"/>
+			<xs:enumeration value="Non-Financial Company Commercial Paper"/>
+			<xs:enumeration value="Tender Option Bond"/>
+			<xs:enumeration value="Other Instrument"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="COLLATERAL_INVESTMENT_CATEGORY_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="Asset-Backed Securities"/>
+			<xs:enumeration value="Agency Collateralized Mortgage Obligation"/>
+			<xs:enumeration value="Agency Debentures and Agency Strips"/>
+			<xs:enumeration value="Agency Mortgage-Backed Securities"/>
+			<xs:enumeration value="Private Label Collateralized Mortgage Obligations"/>
+			<xs:enumeration value="Corporate Debt Securities"/>
+			<xs:enumeration value="Equities"/>
+			<xs:enumeration value="Money Market"/>
+			<xs:enumeration value="U.S. Treasuries (including strips)"/>
+			<xs:enumeration value="Other Instrument"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SECURITY_RATED_TYPE">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="First Tier Security"/>
+			<xs:enumeration value="Rated Second Tier Security"/>
+			<xs:enumeration value="Unrated Security"/>
+			<xs:enumeration value="No Longer an Eligible Security"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="INVESTMENT_MATURITY_DATE_TYPE">
+		<xs:choice>
+			<xs:element name="date" type="ns3:STRING_10_TYPE"/>
+			<xs:element name="dateRange" type="ns3:DATE_RANGE_TYPE"/>
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="FILER_CREDENTIALS_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the FILER_CREDENTIALS_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="cik" type="ns1:CIK_TYPE" minOccurs="1"/>
+			<xs:element name="ccc" type="ns1:CCC_TYPE" minOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FILER_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the FILER_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="filerCredentials" type="FILER_CREDENTIALS_TYPE" minOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CONTACT_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the CONTACT_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="contactName" type="ns1:NAME_TYPE" minOccurs="0"/>
+			<xs:element name="contactPhoneNumber" type="ns1:EDGAR_PHONE_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NOTIFICATIONS_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the NOTIFICATIONS_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="notificationEmailAddress" type="ns1:INTERNET_ADDRESS_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CONTACT2_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the CONTACT2_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="contactName" type="ns1:NAME_TYPE" minOccurs="0"/>
+			<xs:element name="contactPhoneNumber" type="ns1:EDGAR_PHONE_TYPE" minOccurs="0"/>
+			<xs:element name="contactEmailAddress" type="ns1:INTERNET_ADDRESS_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="INDP_PUB_ACCOUNTANT_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the INDP_PUB_ACCOUNTANT_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name" type="ns1:STRING_150_TYPE" minOccurs="1"/>
+			<xs:element name="city" type="ns1:STRING_30_TYPE" minOccurs="1"/>
+			<xs:element name="stateCountry" type="ns2:STATE_COUNTRY_CODE" minOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ADMINISTRATOR_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the ADMINISTRATOR_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="administratorName" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="TRANSFER_AGENT_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the TRANSFER_AGENT_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="name" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="cik" type="ns1:CIK_TYPE" minOccurs="0"/>
+			<xs:element name="fileNumber" type="ns1:FILE_NUMBER_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="COLLATERAL_ISSUERS_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the COLLATERAL_ISSUERS_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="nameOfCollateralIssuer" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="LEIID" type="ns3:STRING_20_TYPE" minOccurs="0"/>
+			<xs:element name="maturityDate" type="INVESTMENT_MATURITY_DATE_TYPE" minOccurs="0"/>
+			<xs:element name="couponOrYield" type="ns3:STRING_25_TYPE" minOccurs="0"/>
+			<xs:element name="principalAmountToTheNearestCent" type="ns3:DECIMAL_14_TYPE" minOccurs="0"/>
+			<xs:element name="valueOfCollateralToTheNearestCent" type="ns3:DECIMAL_14_TYPE" minOccurs="0"/>
+			<xs:element name="ctgryInvestmentsRprsntsCollateral" type="COLLATERAL_INVESTMENT_CATEGORY_TYPE" minOccurs="0"/>
+			<xs:element name="otherInstrumentBriefDesc" type="ns1:STRING_250_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="REPURCHASE_AGREEMENTS_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the REPURCHASE_AGREEMENTS_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="repurchaseAgreementOpenFlag" type="ns1:YES_NO_TYPE" minOccurs="0"/>
+			<xs:element name="collateralIssuers" type="COLLATERAL_ISSUERS_TYPE" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DESIGNATED_NRSRO_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the DESIGNATED_NRSRO_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="nameOfDesignatedNRSRO" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="creditRatingDesignatedNRSRO" type="ns3:STRING_20_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DEMAND_FEATURE_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the DEMAND_FEATURE_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="identityOfDemandFeatureIssuer" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="designatedNRSRODemandFeature" type="DESIGNATED_NRSRO_TYPE" minOccurs="0" maxOccurs="6"/>
+			<xs:element name="amountProvidedByDemandFeatureIssuer" type="ns3:DECIMAL_5_TYPE2" minOccurs="0"/>
+			<xs:element name="remainingPeriodDemandFeature" type="ns3:INT_3_TYPE" minOccurs="0"/>
+			<xs:element name="demandFeatureConditionalFlag" type="ns1:YES_NO_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GUARANTOR_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the GUARANTOR_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="identityOfTheGuarantor" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="designatedNRSROGuarantor" type="DESIGNATED_NRSRO_TYPE" minOccurs="0" maxOccurs="6"/>
+			<xs:element name="amountProvidedByGuarantor" type="ns3:DECIMAL_5_TYPE2" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ENHANCEMENT_PROVIDER_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the ENHANCEMENT_PROVIDER_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="identityOfTheEnhancementProvider" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="typeOfEnhancement" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="designatedNRSROEnhancement" type="DESIGNATED_NRSRO_TYPE" minOccurs="0" maxOccurs="6"/>
+			<xs:element name="amountProvidedByEnhancement" type="ns3:DECIMAL_5_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FEEDER_FUND_INFO_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the FEEDER_FUND_INFO_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="cik" type="ns1:CIK_TYPE" minOccurs="0"/>
+			<xs:element name="name" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="fileNumber" type="ns1:FILE_NUMBER_TYPE" minOccurs="0"/>
+			<xs:element name="seriesId" type="ns3:SERIES_ID_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FUND_INFO_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the FUND_INFO_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="cik" type="ns1:CIK_TYPE" minOccurs="0"/>
+			<xs:element name="fileNumber" type="ns1:FILE_NUMBER_TYPE" minOccurs="0"/>
+			<xs:element name="seriesId" type="ns3:SERIES_ID_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ADVISER_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the ADVISER_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="adviserName" type="ns3:STRING_150_TYPE" minOccurs="0"/>
+			<xs:element name="adviserFileNumber" type="ns1:FILE_NUMBER_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="NET_SHAREHOLDER_FLOW_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the NET_SHAREHOLDER_FLOW_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="weeklyGrossSubscriptions" type="ns3:DECIMAL_14_TYPE" minOccurs="0"/>
+			<xs:element name="weeklyGrossRedemptions" type="ns3:DECIMAL_14_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FILER_INFO_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the FILER_INFO_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="filer" type="FILER_TYPE" minOccurs="1"/>
+			<xs:element name="liveTestFlag" type="ns1:LIVE_TEST_TYPE" minOccurs="0"/>
+			<xs:element name="contact" type="CONTACT_TYPE" minOccurs="0"/>
+			<xs:element name="notifications" type="NOTIFICATIONS_TYPE" minOccurs="0" maxOccurs="30"/>
+			<xs:element name="confirmingCopyFlag" type="ns1:YES_NO_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="GENERAL_INFO_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the GENERAL_INFO_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="reportDate" type="ns3:DATE_TYPE" minOccurs="1"/>
+			<xs:element name="cik" type="ns1:CIK_TYPE" minOccurs="1"/>
+			<xs:element name="registrantLEIId" type="ns3:STRING_20_TYPE" minOccurs="0"/>
+			<xs:element name="seriesId" type="ns3:SERIES_ID_TYPE" minOccurs="1"/>
+			<xs:element name="totalShareClassesInSeries" type="ns3:INT_3_TYPE" minOccurs="1"/>
+			<xs:element name="finalFilingFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="fundLiquidatingFlag" type="ns1:YES_NO_TYPE" minOccurs="0"/>
+			<xs:element name="fundMrgOrAcqrdByOthrFlag" type="ns1:YES_NO_TYPE" minOccurs="0"/>
+			<xs:element name="successorFund" type="FUND_INFO_TYPE" minOccurs="0" maxOccurs="10"/>
+			<xs:element name="fundAcqrdOrMrgdWthAnthrFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="acquiredMergedFund" type="FUND_INFO_TYPE" minOccurs="0" maxOccurs="10"/>
+			<xs:element name="contact2" type="CONTACT2_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SERIES_LEVEL_INFO_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the SERIES_LEVEL_INFO_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="securitiesActFileNumber" type="ns1:FILE_NUMBER_TYPE" minOccurs="0"/>
+			<xs:element name="adviser" type="ADVISER_TYPE" minOccurs="1" maxOccurs="10"/>
+			<xs:element name="subAdviser" type="ADVISER_TYPE" minOccurs="0" maxOccurs="10"/>
+			<xs:element name="indpPubAccountant" type="INDP_PUB_ACCOUNTANT_TYPE" minOccurs="1"/>
+			<xs:element name="administrator" type="ADMINISTRATOR_TYPE" minOccurs="0" maxOccurs="10"/>
+			<xs:element name="transferAgent" type="TRANSFER_AGENT_TYPE" minOccurs="1" maxOccurs="10"/>
+			<xs:element name="feederFundFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="masterFeederFund" type="FEEDER_FUND_INFO_TYPE" minOccurs="0"/>
+			<xs:element name="masterFundFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="feederFund" type="FEEDER_FUND_INFO_TYPE" minOccurs="0" maxOccurs="20"/>
+			<xs:element name="seriesFundInsuCmpnySepAccntFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="moneyMarketFundCategory" type="MARKET_FUND_CATEGORY_TYPE" minOccurs="1"/>
+			<xs:element name="fundExemptRetailFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="averagePortfolioMaturity" type="ns3:INT_2_TYPE" minOccurs="1"/>
+			<xs:element name="averageLifeMaturity" type="ns3:INT_3_TYPE" minOccurs="1"/>
+			<xs:element name="totalValueDailyLiquidAssets" type="ns3:TOTAL_VALUE_OF_LIQUID_ASSET" minOccurs="0"/>
+			<xs:element name="totalValueWeeklyLiquidAssets" type="ns3:TOTAL_VALUE_OF_LIQUID_ASSET" minOccurs="1"/>
+			<xs:element name="percentageDailyLiquidAssets" type="ns3:PERCENTAGE_OF_TOTAL_ASSET_INVESTED" minOccurs="0"/>
+			<xs:element name="percentageWeeklyLiquidAssets" type="ns3:PERCENTAGE_OF_TOTAL_ASSET_INVESTED" minOccurs="1"/>
+			<xs:element name="cash" type="ns3:DECIMAL_14_TYPE" minOccurs="1"/>
+			<xs:element name="totalValuePortfolioSecurities" type="ns3:DECIMAL_14_TYPE" minOccurs="1"/>
+			<xs:element name="amortizedCostPortfolioSecurities" type="ns3:DECIMAL_14_TYPE" minOccurs="1"/>
+			<xs:element name="totalValueOtherAssets" type="ns3:DECIMAL_14_TYPE2" minOccurs="1"/>
+			<xs:element name="totalValueLiabilities" type="ns3:DECIMAL_14_TYPE" minOccurs="1"/>
+			<xs:element name="netAssetOfSeries" type="ns3:DECIMAL_14_TYPE" minOccurs="1"/>
+			<xs:element name="numberOfSharesOutstanding" type="ns3:DECIMAL_16_TYPE" minOccurs="1"/>
+			<xs:element name="stablePricePerShare" type="ns3:DECIMAL_8_TYPE2" minOccurs="0"/>
+			<xs:element name="sevenDayGrossYield" type="ns3:DECIMAL_5_TYPE3" minOccurs="1"/>
+			<xs:element name="netAssetValue" type="ns3:NET_ASSET_VALUE" minOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CLASS_LEVEL_INFO_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the CLASS_LEVEL_INFO_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="classesId" type="ns3:CLASS_ID_TYPE" minOccurs="1"/>
+			<xs:element name="minInitialInvestment" type="ns3:DECIMAL_14_TYPE" minOccurs="1"/>
+			<xs:element name="netAssetsOfClass" type="ns3:DECIMAL_14_TYPE2" minOccurs="1"/>
+			<xs:element name="numberOfSharesOutstanding" type="ns3:DECIMAL_16_TYPE" minOccurs="1"/>
+			<xs:element name="netAssetPerShare" type="ns3:NET_ASSET_VALUE" minOccurs="1"/>
+			<xs:element name="fridayWeek1" type="NET_SHAREHOLDER_FLOW_TYPE" minOccurs="1"/>
+			<xs:element name="fridayWeek2" type="NET_SHAREHOLDER_FLOW_TYPE" minOccurs="1"/>
+			<xs:element name="fridayWeek3" type="NET_SHAREHOLDER_FLOW_TYPE" minOccurs="1"/>
+			<xs:element name="fridayWeek4" type="NET_SHAREHOLDER_FLOW_TYPE" minOccurs="1"/>
+			<xs:element name="fridayWeek5" type="NET_SHAREHOLDER_FLOW_TYPE" minOccurs="0"/>
+			<xs:element name="totalForTheMonthReported" type="NET_SHAREHOLDER_FLOW_TYPE" minOccurs="1"/>
+			<xs:element name="sevenDayNetYield" type="ns3:DECIMAL_5_TYPE3" minOccurs="1"/>
+			<xs:element name="personPayForFundFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="nameOfPersonDescExpensePay" type="ns1:STRING_250_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SCHEDULE_OF_PORTFOLIO_SECURITIES_INFO_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the SCHEDULE_OF_PORTFOLIO_SECURITIES_INFO_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="nameOfIssuer" type="ns1:STRING_150_TYPE" minOccurs="1"/>
+			<xs:element name="titleOfIssuer" type="ns1:STRING_200_TYPE" minOccurs="1"/>
+			<xs:element name="CUSIPMember" type="ns3:CUSIP_MEMBER_TYPE" minOccurs="0"/>
+			<xs:element name="LEIID" type="ns3:STRING_20_TYPE" minOccurs="0"/>
+			<xs:element name="ISINId" type="ns3:STRING_12_TYPE" minOccurs="0"/>
+			<xs:element name="cik" type="ns1:CIK_TYPE" minOccurs="0"/>
+			<xs:element name="otherUniqueId" type="ns3:STRING_20_TYPE" minOccurs="0"/>
+			<xs:element name="investmentCategory" type="INVESTMENT_CATEGORY_TYPE" minOccurs="1"/>
+			<xs:element name="briefDescription" type="ns1:STRING_250_TYPE" minOccurs="0"/>
+			<xs:element name="fundAcqstnUndrlyngSecurityFlag" type="ns1:YES_NO_TYPE" minOccurs="0"/>
+			<xs:element name="repurchaseAgreement" type="REPURCHASE_AGREEMENTS_TYPE" minOccurs="0"/>
+			<xs:element name="securityRated" type="SECURITY_RATED_TYPE" minOccurs="0"/>
+			<xs:element name="designatedNrsro" type="DESIGNATED_NRSRO_TYPE" minOccurs="1" maxOccurs="6"/>
+			<xs:element name="investmentMaturityDateWAM" type="ns3:DATE_TYPE" minOccurs="1"/>
+			<xs:element name="investmentMaturityDateWAL" type="ns3:DATE_TYPE" minOccurs="1"/>
+			<xs:element name="finalLegalInvestmentMaturityDate" type="ns3:DATE_TYPE" minOccurs="1"/>
+			<xs:element name="securityDemandFeatureFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="demandFeature" type="DEMAND_FEATURE_TYPE" minOccurs="0" maxOccurs="6"/>
+			<xs:element name="securityGuaranteeFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="guarantor" type="GUARANTOR_TYPE" minOccurs="0" maxOccurs="6"/>
+			<xs:element name="securityEnhancementsFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="enhancementProvider" type="ENHANCEMENT_PROVIDER_TYPE" minOccurs="0" maxOccurs="6"/>
+			<xs:element name="yieldOfTheSecurityAsOfReportingDate" type="ns3:DECIMAL_5_TYPE" minOccurs="1"/>
+			<xs:element name="includingValueOfAnySponsorSupport" type="ns3:DECIMAL_14_TYPE" minOccurs="1"/>
+			<xs:element name="excludingValueOfAnySponsorSupport" type="ns3:DECIMAL_14_TYPE" minOccurs="1"/>
+			<xs:element name="percentageOfMoneyMarketFundNetAssets" type="ns3:DECIMAL_5_TYPE2" minOccurs="1"/>
+			<xs:element name="securityCategorizedAtLevel3Flag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="dailyLiquidAssetSecurityFlag" type="ns1:YES_NO_TYPE" minOccurs="0"/>
+			<xs:element name="weeklyLiquidAssetSecurityFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="illiquidSecurityFlag" type="ns1:YES_NO_TYPE" minOccurs="1"/>
+			<xs:element name="explanatoryNotes" type="ns1:STRING_250_TYPE" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="SIGNATURE_TYPE">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the SIGNATURE_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="registrant" type="ns1:STRING_150_TYPE" minOccurs="1"/>
+			<xs:element name="signatureDate" type="ns3:DATE_TYPE" minOccurs="1"/>
+			<xs:element name="signature" type="ns1:STRING_150_TYPE" minOccurs="1"/>
+			<xs:element name="nameOfSigningOfficer" type="ns1:STRING_150_TYPE" minOccurs="1"/>
+			<xs:element name="titleOfSigningOfficer" type="ns1:STRING_150_TYPE" minOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="HEADER_DATA">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the HEADER_DATA_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="submissionType" type="SUBMISSION_TYPE" minOccurs="1"/>
+			<xs:element name="filerInfo" type="FILER_INFO_TYPE" minOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="FORM_DATA">
+		<xs:annotation>
+			<xs:documentation>These elements are part of the FORM_DATA_TYPE group</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="generalInfo" type="GENERAL_INFO_TYPE" minOccurs="1"/>
+			<xs:element name="seriesLevelInfo" type="SERIES_LEVEL_INFO_TYPE" minOccurs="1"/>
+			<xs:element name="classLevelInfo" type="CLASS_LEVEL_INFO_TYPE" minOccurs="1" maxOccurs="50"/>
+			<xs:element name="scheduleOfPortfolioSecuritiesInfo" type="SCHEDULE_OF_PORTFOLIO_SECURITIES_INFO_TYPE" minOccurs="1" maxOccurs="9999"/>
+			<xs:element name="signature" type="SIGNATURE_TYPE" minOccurs="1"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="edgarSubmission">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="schemaVersion" type="ns1:SCHEMA_VERSION_TYPE" minOccurs="0"/>
+				<xs:element name="headerData" type="HEADER_DATA"/>
+				<xs:element name="formData" type="FORM_DATA"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

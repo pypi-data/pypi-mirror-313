@@ -1,0 +1,90 @@
+[project]
+name = "sec-nport"
+description = "Fast and reliable parsing of financial instrument data from N-PORT filings."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+keywords = ["sec", "edgar", "nport", "python", "finance", "financial", "reports", "filings", "nport"]
+authors = [
+    {name = "dev-quanty", email = ""}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13"
+]
+dependencies = [
+    "httpx>=0.28.0",
+    "orjson>=3.10.0",
+    "stamina>=24.3.0",
+    "tqdm>=4.67.0",
+    "pydantic>=2.10.0",
+    "beautifulsoup4>=4.12.3",
+    "lxml>=5.3.0",
+    "pandas>=2.2.3",
+    "xmlschema>=3.4.3"
+]
+dynamic = ["version"]
+
+[project.urls]
+Repository = "https://github.com/dev-quanty/sec-nport.git"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "nport/__about__.py"
+
+[tool.hatch.build]
+include = [
+  "nport/**/*.py",
+  "schema/*/*.xsd",
+  "LICENSE.txt"
+]
+artifacts = [
+  "LICENSE.txt"
+]
+
+[tool.hatch.envs.default]
+python = "3.13"
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+  "pytest-watch"
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.10", "3.11", "3.12", "3.13"]
+
+[tool.coverage.run]
+source_pkgs = ["nport", "tests"]
+branch = true
+parallel = true
+omit = [
+  "nport/__about__.py",
+]
+
+[tool.coverage.paths]
+nport = ["nport"]
+tests = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
