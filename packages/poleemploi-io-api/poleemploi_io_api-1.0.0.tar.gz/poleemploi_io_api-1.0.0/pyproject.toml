@@ -1,0 +1,68 @@
+[tool.poetry]
+name = "poleemploi-io-api"
+version = "1.0.0"
+description = "Python package to use poleemploi io api (requires account)"
+authors = ["La Bonne Boite <labonneboite@pole-emploi.fr>"]
+license = "GPL-3.0-only"
+keywords = ["poleemploi", "poleemploi_io", "poleemploi_io_api"]
+readme = "README.md"
+packages = [{ include = "poleemploi_io_api" }]
+repository = "https://github.com/StartupsPoleEmploi/poleemploi-io-api"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<4.0"
+pydantic = { extras = ["email"], version = "^2.5.3" }
+requests = "^2.28.2"
+requests-cache = "^1.1.1"
+redis = "^5.0.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+pytest-cov = "^3.0.0"
+flake8 = "^5.0.4"
+flake8-junit-report = "^2.1.0"
+coverage = "^6.4.4"
+pytest-html = "^3.1.1"
+
+
+[tool.poetry.group.help.dependencies]
+mkdocs = "^1.4.1"
+mkdocs-material = "^8.5.6"
+mkdocstrings = { extras = ["python"], version = "^0.20.0" }
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--cov"
+testpaths = ["poleemploi_io_api/tests"]
+python_files = "test_*.py"
+
+env = []
+
+
+[tool.coverage.run]
+branch = true
+parallel = true
+concurrency = ["multiprocessing"]
+
+[tool.coverage.report]
+precision = 1
+show_missing = true
+ignore_errors = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+omit = ["*/test*"]
