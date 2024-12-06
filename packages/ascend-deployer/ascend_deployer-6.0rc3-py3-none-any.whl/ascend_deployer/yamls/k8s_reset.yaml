@@ -1,0 +1,13 @@
+---
+- hosts:
+    - master
+    - worker
+  become: yes
+  tasks:
+    - name: reset k8s
+      shell:
+        cmd:
+          kubeadm reset -f && rm -rf $HOME/.kube /etc/cni/net.d /etc/kubernetes /var/lib/etcd/ || true;
+          iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X;
+      ignore_errors: true
+      changed_when: false

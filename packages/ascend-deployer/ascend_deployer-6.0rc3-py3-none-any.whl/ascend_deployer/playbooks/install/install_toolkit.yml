@@ -1,0 +1,19 @@
+- hosts: '{{ hosts_name }}'
+  name: install toolkit
+  tasks:
+    - name: install toolkit
+      install_cann:
+        pkg_name: "toolkit"
+        run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+        resources_dir: "{{resource_path}}"
+        npu_info: "{{npu_info}}"
+        is_ipv6: "{{working_on_ipv6}}"
+        log_file_name: "ascend_toolkit_install.log"
+      register: toolkit_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: toolkit_result
+      failed_when: toolkit_result.rc != 0

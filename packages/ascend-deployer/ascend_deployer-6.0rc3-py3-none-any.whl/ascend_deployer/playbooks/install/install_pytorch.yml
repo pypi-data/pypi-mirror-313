@@ -1,0 +1,19 @@
+- hosts: '{{ hosts_name }}'
+  name: install pytorch
+  tasks:
+    - name: install pytorch
+      process_framework:
+        resource_dir: "{{resource_path}}"
+        pkg_name: "pytorch"
+        python_version: "{{python_version}}"
+        ansible_run_tags: "{{ansible_run_tags}}"
+      register: pytorch_result
+      failed_when: false
+      environment:
+        LD_LIBRARY_PATH: "{{ local_path }}/{{ python_version }}/lib:{{ ascend_install_path }}/ascend-toolkit/latest/fwkacllib/lib64:{{ local_path }}/gcc7.3.0/lib64"
+
+    - name: message
+      debug:
+        var: pytorch_result
+      failed_when: pytorch_result.rc != 0
+

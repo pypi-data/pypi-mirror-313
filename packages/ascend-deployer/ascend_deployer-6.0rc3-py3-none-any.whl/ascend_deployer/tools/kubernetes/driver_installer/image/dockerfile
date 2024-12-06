@@ -1,0 +1,14 @@
+FROM ubuntu:20.04
+
+RUN sed -i "s@http://.*ubuntu.com@http://repo.huaweicloud.com@g" /etc/apt/sources.list && \
+    apt update && \
+    apt install -y --no-install-recommends iproute2 iputils-ping ssh openssl sshpass && \
+    apt clean
+
+WORKDIR /root
+
+COPY ./* ./
+
+EXPOSE 22
+
+ENTRYPOINT ["bash","driver-install.sh"]

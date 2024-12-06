@@ -1,0 +1,49 @@
+- hosts:
+    - master[0]
+    - other_build_image
+  name: build image for ascend-operator
+  tasks:
+    - name: build ascend-operator image
+      install_ascend_operator:
+        resources_dir: "{{ resource_path }}"
+        step: 'build'
+
+    - name: fetch ascend-operator image
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ ascend_operator_images }}"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/ascend-operator"
+        fetch: 'true'
+      delegate_to: localhost
+
+- hosts:
+    - master
+  name: install or upgrade ascend-operator
+  tasks:
+    - name: push images to remote
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/ascend-operator/*"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/ascend-operator/"
+      delegate_to: localhost
+
+    - name: install ascend-operator
+      install_ascend_operator:
+        resources_dir: "{{ resource_path }}"
+        step: 'install'
+        node_name: "{{ NODE_NAME }}"
+        master_node: "{{ inventory_hostname in groups['master'] }}"
+        worker_node: "{{ inventory_hostname in groups['worker'] }}"
+
+    - name: apply ascend-operator
+      run_once: yes
+      install_ascend_operator:
+        resources_dir: "{{ resource_path }}"
+        step: 'apply'
+        node_info: "{{ groups['master'] | map('extract', hostvars, 'ascend_operator_labels') | list |
+                combine(recursive=True) }}"
+      delegate_to: "{{ groups['master'][0] }}"

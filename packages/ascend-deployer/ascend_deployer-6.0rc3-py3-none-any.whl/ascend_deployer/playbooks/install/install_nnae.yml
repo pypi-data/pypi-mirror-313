@@ -1,0 +1,18 @@
+- hosts: '{{ hosts_name }}'
+  name: install nnae
+  tasks:
+    - name: install nnae
+      install_cann:
+        pkg_name: "nnae"
+        run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+        resources_dir: "{{resource_path}}"
+        npu_info: "{{npu_info}}"
+        log_file_name: "ascend_nnae_install.log"
+      register: nnae_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: nnae_result
+      failed_when: nnae_result.rc != 0

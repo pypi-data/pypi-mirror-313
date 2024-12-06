@@ -1,0 +1,16 @@
+- hosts: '{{ hosts_name }}'
+  name: install mindspore
+  tasks:
+    - name: install mindspore
+      process_framework:
+        resource_dir: "{{resource_path}}"
+        pkg_name: "mindspore"
+        python_version: "{{python_version}}"
+        ansible_run_tags: "{{ansible_run_tags}}"
+      register: mindspore_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: mindspore_result
+      failed_when: mindspore_result.rc != 0

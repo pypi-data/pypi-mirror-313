@@ -1,0 +1,63 @@
+- hosts:
+    - master
+    - worker
+  name: collect package and system info
+  tasks:
+    - name: clean caches
+      shell: "rm {{ playbook_dir }}/../report/cache/ -rf"
+      delegate_to: localhost
+      when: only_package | default('false') != "true"
+      run_once: yes
+
+    - name: collect package and system info
+      system_report:
+        ip: "{{ inventory_hostname }}"
+        only_package: "{{ only_package | default('false') }}"
+
+- hosts:
+    - master
+  name: collect k8s info
+  tasks:
+    - name: check if k8s cluster exist
+      shell: kubectl get nodes||true
+      register: cluster_set
+
+    - name: collect k8s info
+      script: "../scripts/k8s_rep.py '~/smartkit/reports' {{SCENE_NUM|default('1')}}"
+      when: only_package | default('false') != "true" and cluster_set.stdout != ""
+      run_once: yes
+      args:
+        executable: "{{ discovered_interpreter_python }}"
+      environment:
+        http_proxy: ""
+        https_proxy: ""
+        HTTP_PROXY: ""
+        HTTPS_PROXY: ""
+
+    - name: fetch k8s reports
+      fetch:
+        src: "~/smartkit/reports/node_dict.json"
+        dest: "{{ playbook_dir }}/../report/cache/{{ inventory_hostname }}/"
+        flat: yes
+      run_once: yes
+      when: only_package | default('false') != "true" and cluster_set.stdout != ""
+      failed_when: false
+
+- name: fetch reports
+  hosts:
+    - master
+    - worker
+  tasks:
+    - name: fetch system reports
+      fetch:
+        src: "~/smartkit/reports/local_info.json"
+        dest: "{{ playbook_dir }}/../report/cache/{{ inventory_hostname }}/"
+        flat: yes
+      when: only_package | default('false') != "true"
+
+    - name: process report
+      shell: "{{ ansible_playbook_python }} ../scripts/create_report.py 
+      '{{ playbook_dir }}/../report/cache/' '{{ playbook_dir }}/../report/' '{{ playbook_dir }}/../inventory_file'"
+      delegate_to: localhost
+      run_once: yes
+      when: only_package | default('false') != "true"

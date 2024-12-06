@@ -1,0 +1,18 @@
+- hosts: '{{ hosts_name }}'
+  name: install nnrt patch
+  tasks:
+    - name: install nnrt patch
+      install_cann:
+        pkg_name: "nnrt"
+        run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+        resources_dir: "{{resource_path}}"
+        npu_info: "{{npu_info}}"
+        action: "patch"
+      register: nnrt_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: nnrt_result
+      failed_when: nnrt_result.rc != 0

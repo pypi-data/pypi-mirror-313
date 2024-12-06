@@ -1,0 +1,22 @@
+- hosts:
+    - master
+    - worker
+  tasks:
+    - name: set timezone to local timezone
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "/etc/localtime"
+        dest: "/etc/localtime"
+      delegate_to: localhost
+
+    - name: check
+      shell: echo $(( $(date +%s) ))
+      register: time_result
+      delegate_to: localhost
+
+    - name: set time
+      shell: date -s "$(date -d "@{{ time_result.stdout }}" "+%F %T")"; hwclock -w
+      when: inventory_hostname != "localhost"
+

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: driver-installer-310-x86
+spec:
+  selector:
+    matchLabels:
+      app: 310-x86-driver
+  template:
+    metadata:
+      labels:
+        app: 310-x86-driver
+    spec:
+      containers:
+        - name: x86-310-installer
+          image: x86-310-installer:v1
+          volumeMounts:
+            - name: run-file
+              mountPath: /mnt
+            - name: log-file
+              mountPath: /var/log
+      volumes:
+        - name: run-file
+          hostPath:
+            path: /root
+        - name: log-file
+          hostPath:
+            path: /var/log
+      nodeSelector:
+        host-arch: huawei-x86
+        accelerator: huawei-Ascend310

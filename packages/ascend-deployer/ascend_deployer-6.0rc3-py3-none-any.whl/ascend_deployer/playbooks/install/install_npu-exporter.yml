@@ -1,0 +1,49 @@
+- hosts:
+    - master[0]
+    - other_build_image
+  name: build image for npu-exporter
+  tasks:
+    - name: build npu-exporter image
+      install_npu_exporter:
+        resources_dir: "{{ resource_path }}"
+        step: 'build'
+
+    - name: fetch npu-exporter image
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ npu_exporter_images }}"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/npu-exporter"
+        fetch: 'true'
+      delegate_to: localhost
+
+- hosts:
+    - worker
+  name: install or upgrade npu-exporter
+  tasks:
+    - name: push images to remote
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/npu-exporter/*"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/npu-exporter/"
+      delegate_to: localhost
+
+    - name: install npu-exporter
+      install_npu_exporter:
+        resources_dir: "{{ resource_path }}"
+        step: 'install'
+        node_name: "{{ NODE_NAME }}"
+        master_node: "{{ inventory_hostname in groups['master'] }}"
+        worker_node: "{{ inventory_hostname in groups['worker'] }}"
+
+    - name: apply npu-exporter
+      run_once: yes
+      install_npu_exporter:
+        resources_dir: "{{ resource_path }}"
+        step: 'apply'
+        node_info: "{{ groups['worker'] | map('extract', hostvars, 'npu_exporter_labels') | list |
+                combine(recursive=True) }}"
+      delegate_to: "{{ groups['master'][0] }}"

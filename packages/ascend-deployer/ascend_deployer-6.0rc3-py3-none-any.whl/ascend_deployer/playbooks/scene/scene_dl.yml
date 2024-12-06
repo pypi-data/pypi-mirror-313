@@ -1,0 +1,30 @@
+- name: check if need bypass system package installation
+  import_playbook: ../gather_installation_facts.yml
+
+- name: basic check
+  import_playbook: ../check.yaml
+
+- name: install ascend-docker-runtime
+  import_playbook: ../install/install_ascend-docker-runtime.yml
+
+- name: install clusterd
+  import_playbook: ../install/install_clusterd.yml
+
+- name: install volcano
+  import_playbook: ../install/install_volcano.yml
+  when: not (scale | bool)
+
+- name: install hccl-controller
+  import_playbook: ../install/install_hccl-controller.yml
+
+- name: install ascend-operator
+  import_playbook: ../install/install_ascend-operator.yml
+
+- name: install ascend-device-plugin
+  import_playbook: ../install/install_ascend-device-plugin.yml
+
+- name: install noded
+  import_playbook: ../install/install_noded.yml
+
+- name: install npu-exporter
+  import_playbook: ../install/install_npu-exporter.yml

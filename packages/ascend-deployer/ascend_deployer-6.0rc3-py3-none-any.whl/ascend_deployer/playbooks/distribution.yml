@@ -1,0 +1,18 @@
+- hosts: "{{hosts_name}}"
+  name: distribution - copy and uncompress
+  tasks:
+    - name: scp to remote hosts
+      scp:
+        ip: "{{inventory_hostname}}"
+        remote_user: "{{ansible_ssh_user}}"
+        passwd: "{{ansible_ssh_pass|default('')}}"
+        src: "~/resources_{{ansible_architecture}}.tar ../resources/{{os_and_arch}}/bzip2* ../resources/{{os_and_arch}}/unzip* ../resources/{{os_and_arch}}/tar*"
+        dest: "~/"
+      delegate_to: localhost
+      when:
+        - inventory_hostname != "localhost"
+
+    - name: uncompress on remote
+      uncompress_resources:
+        resources_dir: "{{ resource_path }}"
+        tags: "{{ ansible_run_tags }}"

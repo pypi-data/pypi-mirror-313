@@ -1,0 +1,254 @@
+- hosts: '{{ hosts_name }}'
+  name: install mindstudio
+  tasks:
+    - name: find mindstudio dir
+      find:
+        path: "{{ resources_dir }}"
+        recurse: no
+        file_type: directory
+        use_regex: yes
+        patterns: "MindStudio.*"
+      register: mindstudio_dir_tmp
+
+    - name: set mindstudio dir
+      set_fact:
+        mindstudio_dir: "{{ mindstudio_dir_tmp.files[0].path }}"
+      when: mindstudio_dir_tmp.matched > 0
+
+    - name: set mindstudio version
+      set_fact:
+        ms_version: "{{ mindstudio_dir_tmp.files[0].path | basename }}"
+      when: mindstudio_dir_tmp.matched > 0
+
+    - name: set mindstudio dir if not defined
+      set_fact:
+        mindstudio_dir: "{{ resources_dir }}/MindStudio"
+      when: mindstudio_dir is not defined
+
+    - name: find mindstudio package
+      find:
+        paths: "{{ mindstudio_dir }}"
+        recurse: no
+        file_type: file
+        use_regex: yes
+        patterns: "[Mm]ind[Ss]tudio.*{{ansible_architecture}}.tar.gz"
+      register: mindstudio_pkg
+
+    - name: set fact ms
+      set_fact:
+        ms: "{{mindstudio_pkg}}"
+        cacheable: yes
+      when: mindstudio_pkg.matched > 0
+
+    - name: find mindstudio package again
+      find:
+        paths: "{{ mindstudio_dir }}"
+        recurse: no
+        file_type: file
+        use_regex: yes
+        patterns: "[Mm]ind[Ss]tudio.*tar.gz"
+      register: mindstudio_pkg
+      when: mindstudio_pkg.matched == 0
+
+    - name: set fact ms again
+      set_fact:
+        ms: "{{mindstudio_pkg}}"
+        cacheable: yes
+      when: mindstudio_pkg.matched is defined and mindstudio_pkg.matched > 0
+
+    - name: copy py_compile
+      ansible.builtin.copy:
+        src: /usr/local/{{ python_version }}/lib/{{ python_version[:-2] }}/py_compile.py
+        dest: /usr/lib/{{ python_version[:-2] }}/
+        remote_src: no
+      when:
+        - ms is defined and ms.matched > 0
+
+    - name: check ubuntu desktop
+      shell: dpkg -l ubuntu-desktop | wc -l
+      register: ubuntu_desktop
+      changed_when: false
+      when: 
+        - ms is defined and ms.matched > 0
+        - "'Ubuntu' in os_and_arch"
+
+    - name: check nexus status
+      check_nexus_status:
+        os_and_arch: "{{os_and_arch}}"
+      delegate_to: localhost
+      register: nexus_status
+      failed_when: nexus_status.rc != 0
+      when: ansible_ssh_user == 'root'
+
+    - name: copy file to host
+      copy:
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+        force: yes
+        mode: 0644
+      when:
+        - "'gpg' not in item.dest or 'Ubuntu' in os_and_arch"
+        - ansible_ssh_user == 'root'
+      loop:
+        - { src: "{{inventory_dir}}/scripts/nexus_config.json", dest: "~/nexus/" }
+        - { src: "{{inventory_dir}}/downloader/software/{{ ms_version }}.json", dest: "~/nexus/" }
+        - { src: "{{inventory_dir}}/resources/nexus/nexus_pub.asc", dest: "/etc/apt/trusted.gpg.d/" }
+
+    - name: install system packages ubuntu desktop
+      install_sys_pkg:
+        nexus_url: "{{nexus_url|default('')}}"
+        ansible_run_tags: "{{ansible_run_tags}}"
+        resources_dir: "{{ mindstudio_dir }}/{{ os_and_arch }}/desktop/"
+        pkg_type: "{{ ms_version }}"
+      register: apt_desktop_result
+      environment:
+        PATH: "{{ local_path }}/{{ python_version }}/bin:{{ansible_env.PATH}}"
+        LD_LIBRARY_PATH: "{{ local_path }}/{{ python_version }}/lib"
+      failed_when: apt_desktop_result.rc != 0
+      when:
+        - ms is defined and ms.matched > 0
+        - "'Ubuntu' in os_and_arch"
+        - ubuntu_desktop is not skipped and ubuntu_desktop.stdout=='0'
+
+    - name: message
+      debug:
+        var: apt_desktop_result.stdout_lines
+
+
+    - name: install system packages apt
+      install_sys_pkg:
+        nexus_url: "{{nexus_url|default('')}}"
+        ansible_run_tags: "{{ansible_run_tags}}"
+        resources_dir: "{{ mindstudio_dir }}/{{ os_and_arch }}/"
+        pkg_type: "{{ ms_version }}"
+      register: apt_result
+      environment:
+        PATH: /usr/local/{{ python_version }}/bin:{{ ansible_env.PATH }}
+        LD_LIBRARY_PATH: /usr/local/{{ python_version }}/lib:/usr/local/gcc7.3.0/lib64
+      failed_when: apt_result.rc != 0
+      when:
+        - ms is defined and ms.matched > 0
+        - not use_rpm_command
+
+    - name: message
+      debug:
+        var: apt_result.stdout_lines
+
+    - name: install system packages rpm
+      shell: "rpm -ivh --force --nodeps --replacepkgs {{ mindstudio_dir }}/{{ os_and_arch }}/*.rpm"
+      register: yum_result
+      when:
+        - ms is defined and ms.matched > 0
+        - use_rpm_command
+
+    - name: message
+      debug: var=yum_result
+      when: yum_result.changed
+
+    - name: install python libs for mindstudio
+      shell: "python3 -m pip install --force-reinstall {{ item }} --no-index --find-links {{ resources_dir }}/pylibs"
+      environment:
+        PATH: "{{ local_path }}/{{ python_version }}/bin:{{ ansible_env.PATH }}"
+        LD_LIBRARY_PATH: "{{ local_path }}/{{ python_version }}/lib:{{ ascend_install_path }}/ascend-toolkit/latest/fwkacllib/lib64:{{ local_path }}/gcc7.3.0/lib64"
+      failed_when: false
+      when: ms is defined and ms.matched > 0
+      with_items:
+        - grpcio
+        - protobuf
+        - decorator
+        - sympy
+        - psutil
+        - requests
+        - pandas
+        - xlrd
+        - coverage
+        - gnureadline
+        - pylint
+        - scipy
+        - absl-py
+        - matplotlib
+        - pyqt5
+        - attrs
+        - pytest
+        - wheel
+        - pyyaml
+        - pathlib2
+        - pillow
+        - cffi
+        - pyparsing
+        - xlwt
+        - xlutils
+        - cycler
+        - matplotlib
+
+    - name: unarchive MindStudio
+      unarchive:
+        src: "{{ ms.files[0].path }}"
+        dest: ~/
+        copy: no
+        mode: 0750
+      when: ms is defined and ms.matched > 0
+
+    - name: find jdk-aarch64 package
+      find:
+        paths: "{{ mindstudio_dir }}"
+        recurse: no
+        file_type: file
+        use_regex: yes
+        patterns: "jbr.*linux-aarch64.*.tar.gz"
+      register: jdk_aarch64_dir
+
+    - name: unarchive jdk for aarch64
+      unarchive:
+        src: "{{ jdk_aarch64_dir.files[0].path }}"
+        dest: ~/MindStudio
+        copy: no
+        mode: 0750
+      when:
+        - ms is defined and ms.matched > 0
+        - ansible_architecture == 'aarch64'
+        - jdk_aarch64_dir.matched > 0
+
+    - name: find jdk-x64 package
+      find:
+        paths: "{{ mindstudio_dir }}"
+        recurse: no
+        file_type: file
+        use_regex: yes
+        patterns: "jbr.*linux-x64.*.tar.gz"
+      register: jdk_x64_dir
+
+    - name: unarchive jdk for x86_64
+      unarchive:
+        src: "{{ jdk_x64_dir.files[0].path }}"
+        dest: ~/MindStudio
+        copy: no
+      when:
+        - ms is defined and ms.matched > 0
+        - ansible_architecture == 'x86_64'
+        - jdk_x64_dir.matched > 0
+
+    - name: chmod MindStudio to 750
+      file:
+        path: ~/MindStudio
+        mode: 0750
+        recurse: yes
+      when: ms is defined and ms.matched > 0
+
+    - name: set MINDSTUDIO_JDK
+      shell: sed -i "2 i\export MINDSTUDIO_JDK=~/MindStudio/jbr" ~/MindStudio/bin/MindStudio.sh
+      failed_when: false
+      when:
+        - ms is defined and ms.matched > 0
+        - ansible_architecture == 'aarch64'
+
+    - name: message
+      debug:
+        msg:
+        - "[ASCEND]can not find mindstudio package, mindstudio install skipped"
+      when: ms is defined and ms.matched == 0
+
+    - name: fail if this install
+      fail:
+        msg: "[ASCEND]fail to install mindstudio"
+      when: "'mindstudio' in ansible_run_tags and ms is defined and ms.matched == 0"

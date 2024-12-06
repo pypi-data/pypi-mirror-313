@@ -1,0 +1,51 @@
+- name: gather fact info
+  import_playbook: ../gather_npu_fact.yml
+  tags: always
+
+- name: copy resources to remote servers
+  import_playbook: ../distribution.yml
+  tags: copy
+
+- name: install scene auto
+  import_playbook: ../scene/scene_auto.yml
+  tags: auto
+
+- name: install scene edge
+  import_playbook: ../scene/scene_edge.yml
+  tags: edge
+
+- name: install scene mindspore
+  import_playbook: ../scene/scene_mindspore.yml
+  tags: mindspore
+
+- name: install scene offline dev
+  import_playbook: ../scene/scene_offline_dev.yml
+  tags: offline_dev
+
+- name: install scene offline run
+  import_playbook: ../scene/scene_offline_run.yml
+  tags: offline_run
+
+- name: install scene pytorch dev
+  import_playbook: ../scene/scene_pytorch_dev.yml
+  tags: pytorch_dev
+
+- name: install scene pytorch run
+  import_playbook: ../scene/scene_pytorch_run.yml
+  tags: pytorch_run
+
+- name: install scene tensorflow dev
+  import_playbook: ../scene/scene_tensorflow_dev.yml
+  tags: tensorflow_dev
+
+- name: install scene tensorflow run
+  import_playbook: ../scene/scene_tensorflow_run.yml
+  tags: tensorflow_run
+
+- name: install dl
+  import_playbook: ../scene/scene_dl.yml
+  tags: dl
+
+- name: generate report
+  import_playbook: ../report.yaml
+  tags: always

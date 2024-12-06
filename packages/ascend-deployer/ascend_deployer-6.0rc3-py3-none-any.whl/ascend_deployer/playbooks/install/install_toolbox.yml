@@ -1,0 +1,18 @@
+- hosts: '{{ hosts_name }}'
+  name: install toolbox
+  tasks:
+    - name: install toolbox
+      install_cann:
+        pkg_name: "toolbox"
+        run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+        resources_dir: "{{resource_path}}"
+        npu_info: "{{npu_info}}"
+        log_file_name: "ascend_toolbox_install.log"
+      register: toolbox_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: toolbox_result
+      failed_when: toolbox_result.rc != 0

@@ -1,0 +1,18 @@
+- hosts: '{{ hosts_name }}'
+  name: rollback tfplugin
+  tasks:
+    - name: rollback tfplugin
+      install_cann:
+        pkg_name: "tfplugin"
+        run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+        resources_dir: "{{resource_path}}"
+        npu_info: "{{npu_info}}"
+        action: "rollback"
+      register: tfplugin_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: tfplugin_result
+      failed_when: tfplugin_result.rc != 0

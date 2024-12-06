@@ -1,0 +1,14 @@
+- hosts: worker
+  name: install npu
+  tasks:
+    - name: install npu
+      process_npu:
+        force_upgrade_npu: "{{ force_upgrade_npu }}"
+        resource_dir: "{{ resource_path }}"
+        cus_npu_info: "{{ cus_npu_info | default('') }}"
+        ansible_run_tags: "{{ ansible_run_tags }}"
+      register: install_npu_result
+
+    - name: show reboot message
+      debug:
+        var: install_npu_result.stdout_lines

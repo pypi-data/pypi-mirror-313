@@ -1,0 +1,49 @@
+- hosts:
+    - master[0]
+    - other_build_image
+  name: build image for hccl-controller
+  tasks:
+    - name: build hccl-controller image
+      install_hccl_controller:
+        resources_dir: "{{ resource_path }}"
+        step: 'build'
+
+    - name: fetch hccl-controller image
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ hccl_controller_images }}"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/hccl-controller"
+        fetch: 'true'
+      delegate_to: localhost
+
+- hosts:
+    - master
+  name: install or upgrade hccl-controller
+  tasks:
+    - name: push images to remote
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/hccl-controller/*"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/hccl-controller/"
+      delegate_to: localhost
+
+    - name: install hccl-controller
+      install_hccl_controller:
+        resources_dir: "{{ resource_path }}"
+        step: 'install'
+        node_name: "{{ NODE_NAME }}"
+        master_node: "{{ inventory_hostname in groups['master'] }}"
+        worker_node: "{{ inventory_hostname in groups['worker'] }}"
+
+    - name: apply hccl-controller
+      run_once: yes
+      install_hccl_controller:
+        resources_dir: "{{ resource_path }}"
+        step: 'apply'
+        node_info: "{{ groups['master'] | map('extract', hostvars, 'hccl_controller_labels') | list |
+                combine(recursive=True) }}"
+      delegate_to: "{{ groups['master'][0] }}"

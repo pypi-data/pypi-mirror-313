@@ -1,0 +1,49 @@
+- hosts:
+    - master[0]
+    - other_build_image
+  name: build image for ascend-device-plugin
+  tasks:
+    - name: build device-plugin image
+      install_device_plugin:
+        resources_dir: "{{ resource_path }}"
+        step: 'build'
+
+    - name: fetch device-plugin image
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ device_plugin_images }}"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/device-plugin"
+        fetch: 'true'
+      delegate_to: localhost
+
+- hosts:
+    - worker
+  name: install or upgrade ascend-device-plugin
+  tasks:
+    - name: push images to remote
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/device-plugin/*"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/device-plugin/"
+      delegate_to: localhost
+
+    - name: install device-plugin
+      install_device_plugin:
+        resources_dir: "{{ resource_path }}"
+        step: 'install'
+        node_name: "{{ NODE_NAME }}"
+        master_node: "{{ inventory_hostname in groups['master'] }}"
+        worker_node: "{{ inventory_hostname in groups['worker'] }}"
+
+    - name: apply device-plugin
+      run_once: yes
+      install_device_plugin:
+        resources_dir: "{{ resource_path }}"
+        step: 'apply'
+        node_info: "{{ groups['worker'] | map('extract', hostvars, 'device_plugin_labels') | list |
+                combine(recursive=True) }}"
+      delegate_to: "{{ groups['master'][0] }}"

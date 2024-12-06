@@ -1,0 +1,16 @@
+- hosts: '{{ hosts_name }}'
+  name: install tensorflow
+  tasks:
+    - name: install tensorflow
+      process_framework:
+        resource_dir: "{{resource_path}}"
+        pkg_name: "tensorflow"
+        python_version: "{{python_version}}"
+        ansible_run_tags: "{{ansible_run_tags}}"
+      register: tensorflow_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: tensorflow_result
+      failed_when: tensorflow_result.rc != 0

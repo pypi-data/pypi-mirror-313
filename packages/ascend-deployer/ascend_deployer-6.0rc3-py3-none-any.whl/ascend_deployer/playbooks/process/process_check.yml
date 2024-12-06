@@ -1,0 +1,116 @@
+- hosts: localhost
+  tags: always
+  tasks:
+    - name: check user
+      check_user:
+
+- hosts: all
+  tags: always
+  tasks:
+    - name: apt-get or yum check
+      apt_yum_check:
+
+- name: gather facts for all
+  tags: always
+  hosts:
+    - localhost
+    - master
+    - worker
+  tasks:
+    - name: collect basic info
+      collect_info:
+        tags: "{{ ansible_run_tags }}"
+        is_ipv6: "{{working_on_ipv6}}"
+
+- hosts:
+    - master
+    - worker
+  tags:
+    - dl
+    - volcano
+    - hccl-controller
+    - ascend-device-plugin
+    - noded
+    - npu-exporter
+    - ascend-operator
+    - clusterd
+    - resilience-controller
+  tasks:
+    - name: collect extra info
+      shell: kubectl get nodes -o wide||true
+      register: cluster_info
+      delegate_to: "{{ groups['master'][0]|default('localhost') }}"
+      run_once: yes
+
+    - name: check
+      check_status:
+        tags: "{{ ansible_run_tags }}"
+        master_groups: "{{ groups['master'] }}"
+        worker_groups: "{{ groups['worker'] }}"
+        current_hostname: "{{ inventory_hostname }}"
+        use_k8s_version: "{{ use_k8s_version }}"
+
+- hosts:
+    - master
+    - worker
+  tags: always
+  tasks:
+    - name: Check connectivity to target hosts
+      ping:
+
+    - name: collect info
+      generate_package_config:
+        ascend_deployer_work_dir: "{{ ascend_deployer_work_dir }}"
+      delegate_to: localhost
+
+    - name: check user compatibility npu cann dl ai_framework for installation
+      check_for_install:
+        tags: "{{ ansible_run_tags }}"
+        python_version: "{{ python_version }}"
+        force_upgrade_npu: "{{ force_upgrade_npu | default('false')}}"
+        npu_num: "{{ npu_num | default(-1)}}"
+        hosts_name: "{{ hosts_name | default('')}}"
+        group_names: "{{ group_names }}"
+        master_groups: "{{ groups['master'] }}"
+        worker_groups: "{{ groups['worker'] }}"
+        host_info: "{{ hostvars }}"
+        current_hostname: "{{ inventory_hostname }}"
+        ascend_deployer_work_dir: "{{ ascend_deployer_work_dir }}"
+        packages: "{{ packages }}"
+        node_name: "{{NODE_NAME}}"
+        cluster_info: "{{cluster_info | default({})}}"
+
+- hosts: localhost
+  tags:
+    - dl
+    - volcano
+    - hccl-controller
+    - ascend-device-plugin
+    - noded
+    - npu-exporter
+    - ascend-operator
+    - clusterd
+    - resilience-controller
+  tasks:
+# Only supports the same architecture for all master
+    - name: Get master node architecture
+      command: uname -m
+      register: master_arch
+      delegate_to: "{{ groups['master'][0] }}"
+
+# Only supports the same architecture for all worker
+    - name: Get worker node architecture
+      command: uname -m
+      register: worker_arch
+      delegate_to: "{{ groups['worker'][0] }}"
+
+    - name: Fail if 'other_build_image' group is empty and master_arch != worker_arch
+      fail:
+        msg: "Master and worker have different architectures. The 'other_build_image' group is required but is empty."
+      when:
+        - master_arch.stdout != worker_arch.stdout
+        - "'other_build_image' not in groups or (groups['other_build_image'] | length) == 0"
+
+    - name: check localhost whether in master group
+      check_localhost:
+        master_groups: "{{ groups['master'] }}"

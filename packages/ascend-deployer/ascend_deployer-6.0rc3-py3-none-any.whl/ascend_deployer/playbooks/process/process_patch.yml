@@ -1,0 +1,27 @@
+- name: gather fact info
+  import_playbook: ../gather_npu_fact.yml
+  tags: always
+
+- name: copy resources to remote servers
+  import_playbook: ../distribution.yml
+  tags: copy
+
+- name: install patch nnae
+  import_playbook: ../install/patch/install_nnae.yml
+  tags: nnae
+
+- name: install patch nnrt
+  import_playbook: ../install/patch/install_nnrt.yml
+  tags: nnrt
+
+- name: install patch tfplugin
+  import_playbook: ../install/patch/install_tfplugin.yml
+  tags: tfplugin
+
+- name: install patch toolkit
+  import_playbook: ../install/patch/install_toolkit.yml
+  tags: toolkit
+
+- name: generate report
+  import_playbook: ../report.yaml
+  tags: always

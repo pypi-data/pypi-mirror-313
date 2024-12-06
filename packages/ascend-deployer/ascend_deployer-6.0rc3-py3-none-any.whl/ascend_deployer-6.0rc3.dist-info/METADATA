@@ -1,0 +1,91 @@
+Metadata-Version: 2.1
+Name: ascend-deployer
+Version: 6.0rc3
+Summary: ascend offline installer
+Home-page: https://gitee.com/ascend/ascend-deployer
+License: Apache
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Requires-Python: >= 3.6
+Description-Content-Type: text/x-rst
+License-File: LICENSE
+License-File: NOTICE
+
+.. sectnum::
+
+简介
+=======
+
+离线安装工具提供系统组件、python第三方依赖自动下载以及一键式安装的功能，并支持驱动、固件、CANN软件包以及MindX DL的安装。
+
+免责声明
+========
+
+本代码仓库中包含多个开发分支，这些分支可能包含未完成、实验性或未测试的功能。在正式发布之前，这些分支不应被用于任何生产环境或依赖关键业务的项目中。请务必仅使用我们的正式发行版本，以确保代码的稳定性和安全性。
+使用开发分支所导致的任何问题、损失或数据损坏，本项目及其贡献者概不负责。
+正式版本请参考\ `ascend-deployer正式release版本 <https://gitee.com/ascend/ascend-deployer/releases>`__\。
+
+开源社区信息总览
+================
+
+包含MindX组件开源社区周期例会、组件版本更新通知等信息，请参考\ `昇腾MindX开源组件社区信息总览 <https://www.hiascend.com/forum/thread-0241161684752207015-1-1.html>`__\。
+
+快速指南
+===========
+
+本工具主要支持开局场景（环境仅安装了OS），如果遇到问题，请参考\ `ascend-deployer用户指南 <https://www.hiascend.com/document/detail/zh/ascend-deployer>`__\。
+
+安装内容
+-------------
+
+工具支持安装的内容参考下图，其中红色部分是昇腾设备上必须安装的，橙色部分和绿色部分是可选安装的，如果需要直接运行AI框架或Toolbox，橙色部分也是必须安装的。
+
+.. image:: ./assets/1.png
+
+
+版本配套
+-------------
+ascend-deployer支持安装的硬件和部件兼容性请参见\ `兼容性查询助手 <https://www.hiascend.com/hardware/compatibility>`__\。
+
+
+使用样例
+-------------
+
+以下以Ubuntu_18.04_x86_64系统，服务器上插Atlas 300I Pro推理卡为例快速展示工具的使用方式。
+
+1. 以root用户登录待安装设备。
+   
+2. 执行 ``pip3 install ascend-deployer==<version>`` 安装ascend-deployer工具。<version>为ascend-deployer工具的版本号，
+   建议参考\ `官网 <https://pypi.org/project/ascend-deployer/#history>`__\下载最新发布版本的工具包。如果提示pip3命令不存在，请用户自行安装。
+
+3. 执行下载命令。
+   
+   ::
+
+      ascend-download --os-list=Ubuntu_18.04_x86_64 --download=CANN==6.3.RC1,MindSpore==2.0.0rc1
+
+   执行以上命令后，会自动下载好OS所需依赖，CANN软件包和配套的驱动和固件包，以及docker软件等，**并存放到$HOME/ascend-deployer/resources目录下**。
+
+4. 安装驱动和固件时，如果不是归一包（包名以 **Ascend-hdk** 开头），需在inventory_file中提前配置cus_npu_info变量。
+   
+   ::
+
+      [ascend]
+      localhost ansible_connection='local' cus_npu_info="300i-pro"
+
+5. 执行以下安装命令，自动安装所有能找到的包（MindX DL集群调度组件除外，该组件安装请参考 \ `ascend-deployer用户指南 <https://www.hiascend.com/document/detail/zh/mindx-dl/60rc2/ascenddeployer>`__\）。
+   
+   ::
+
+      ascend-deployer --install-scene=auto
+
+6. 安装后配置。
+   使用python和CANN前，需要根据实际情况配置环境变量，以下内容以配置python和nnae的环境变量为例。
+
+   ::
+
+      source /usr/local/ascendrc                # 配置python环境变量
+      source /usr/local/Ascend/nnae/set_env.sh  # 配置nnae的环境变量
+
+7. 详细指南请参考\ `ascend-deployer用户指南 <https://www.hiascend.com/document/detail/zh/mindx-dl/60rc2/ascenddeployer>`__\

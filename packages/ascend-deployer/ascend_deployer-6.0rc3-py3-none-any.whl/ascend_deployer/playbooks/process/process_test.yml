@@ -1,0 +1,59 @@
+- hosts: localhost
+  tasks:
+    - name: do test
+      process_test:
+        ansible_run_tags: "{{ ansible_run_tags }}"
+        cus_npu_info: "{{ cus_npu_info | default('') }}"
+        ip: "{{ hostvars[item]['inventory_hostname'] }}"
+        python_version: "{{ python_version | default('python3.7.5')}}"
+      register: cann_test_result
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['worker'] }}"
+      loop_control:
+        loop_var: item
+
+    - name: aggregate cann test result
+      set_fact:
+        all_cann_test_result: "{{ all_cann_test_result | default([]) + [item.result] }}"
+      with_items: "{{ cann_test_result.results }}"
+      loop_control:
+        loop_var: item
+
+    - name: set master_exists variable
+      set_fact:
+        master_exists: "{{ groups['master'] | length > 0 }}"
+
+    - name: collect docker runtime test from workers
+      process_docker_runtime_test:
+        ansible_run_tags: "{{ ansible_run_tags }}"
+        node_name: "{{ hostvars[item]['set_hostname'] | default('') }}"
+      register: worker_info
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['worker'] }}"
+      when: master_exists
+      loop_control:
+        loop_var: item
+
+    - name: aggregate worker info
+      set_fact:
+        all_worker_info: "{{ all_worker_info | default([]) + [item.result] }}"
+      with_items: "{{ worker_info.results }}"
+      when: master_exists
+      loop_control:
+        loop_var: item
+
+    - name: Set test_master_nodes variable if master exists
+      set_fact:
+        test_master_nodes: "{{ groups['master'][0] }}"
+      when: master_exists
+
+    - name: do dl test
+      process_dl_test:
+        ansible_run_tags: "{{ ansible_run_tags }}"
+        ip: "{{ inventory_hostname }}"
+        roles: "{{ hostvars[inventory_hostname].group_names }}"
+        node_name: "{{ hostvars['master']['set_hostname'] | default('') }}"
+        cann_test_result: "{{ all_cann_test_result | default('[]') }}"
+        docker_runtime_result: "{{ all_worker_info | default('[]') }}"
+      delegate_to: "{{ test_master_nodes | default(groups['worker'][0]) }}"
+  tags: always

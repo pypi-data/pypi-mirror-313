@@ -1,0 +1,15 @@
+- hosts: '{{ hosts_name }}'
+  name: install fault-diag
+  tasks:
+    - name: install fault-diag
+      install_fault_diag:
+        resources_dir: "{{ resource_path }}"
+        ansible_run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+      register: fault_diag_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: fault_diag_result
+      failed_when: fault_diag_result.rc != 0

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: driver-installer-310p-arm
+spec:
+  selector:
+    matchLabels:
+      app: 310p-arm-driver
+  template:
+    metadata:
+      labels:
+        app: 310p-arm-driver
+    spec:
+      containers:
+        - name: arm-310p-installer
+          image: arm-310p-installer:v1
+          volumeMounts:
+            - name: run-file
+              mountPath: /mnt
+            - name: log-file
+              mountPath: /var/log
+      volumes:
+        - name: run-file
+          hostPath:
+            path: /root
+        - name: log-file
+          hostPath:
+            path: /var/log
+      nodeSelector:
+        host-arch: huawei-arm
+        accelerator: huawei-Ascend310P

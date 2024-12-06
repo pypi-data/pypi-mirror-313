@@ -1,0 +1,18 @@
+- hosts: '{{ hosts_name }}'
+  name: install nnae patch
+  tasks:
+    - name: install nnae patch
+      install_cann:
+        pkg_name: "nnae"
+        run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+        resources_dir: "{{resource_path}}"
+        npu_info: "{{npu_info}}"
+        action: "patch"
+      register: nnae_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: nnae_result
+      failed_when: nnae_result.rc != 0

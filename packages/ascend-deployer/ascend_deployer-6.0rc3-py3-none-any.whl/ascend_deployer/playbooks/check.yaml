@@ -1,0 +1,13 @@
+- hosts:
+    - localhost
+    - master
+    - worker
+  name: check status for k8s and driver
+  tasks:
+    - name: check
+      check_status:
+        tags: "{{ ansible_run_tags }}"
+        master_groups: "{{ groups['master'] }}"
+        worker_groups: "{{ groups['worker'] }}"
+        current_hostname: "{{ inventory_hostname }}"
+        use_k8s_version: "{{ use_k8s_version }}"

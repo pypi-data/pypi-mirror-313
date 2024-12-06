@@ -1,0 +1,25 @@
+- hosts: worker
+  name: install mindio
+  tasks:
+    # 创建用戶組
+    - name: create group HwHiAiUser
+      ansible.builtin.group:
+        name: "HwHiAiUser"
+        state: present
+      ignore_errors: true
+
+    # 创建用戶
+    - name: create user hwMindX
+      ansible.builtin.user:
+        name: "hwMindX"
+        comment: "hwMindX"
+        group: "HwHiAiUser"
+        groups: "HwHiAiUser"
+        append: yes
+        state: present
+        shell: "{{ '/bin/bash' }}"
+      ignore_errors: true
+
+    - name: install mindio
+      install_mindio:
+        resources_dir: "{{ resource_path }}"

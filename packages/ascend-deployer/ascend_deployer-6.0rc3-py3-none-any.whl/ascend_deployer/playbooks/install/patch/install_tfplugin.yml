@@ -1,0 +1,18 @@
+- hosts: '{{ hosts_name }}'
+  name: install tfplugin patch
+  tasks:
+    - name: install tfplugin patch
+      install_cann:
+        pkg_name: "tfplugin"
+        run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+        resources_dir: "{{resource_path}}"
+        npu_info: "{{npu_info}}"
+        action: "patch"
+      register: tfplugin_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: tfplugin_result
+      failed_when: tfplugin_result.rc != 0

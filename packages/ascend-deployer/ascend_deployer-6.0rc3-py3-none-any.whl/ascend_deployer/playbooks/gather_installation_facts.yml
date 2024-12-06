@@ -1,0 +1,6 @@
+- name: check if need bypass system package and k8s installation
+  hosts: all:localhost
+  tasks:
+    - set_fact:
+        skip_sys_pkg: '{{os_and_arch | string in ["UOS_20-1050e_aarch64", ]}}'
+        is_bc_linux_21_10: '{{os_and_arch | string in ["BCLinux_21.10_aarch64", ]}}'

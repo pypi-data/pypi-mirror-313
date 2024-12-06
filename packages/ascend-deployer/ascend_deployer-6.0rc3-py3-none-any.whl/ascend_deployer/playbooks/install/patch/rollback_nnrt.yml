@@ -1,0 +1,18 @@
+- hosts: '{{ hosts_name }}'
+  name: rollback nnrt
+  tasks:
+    - name: rollback nnrt
+      install_cann:
+        pkg_name: "nnrt"
+        run_tags: "{{ansible_run_tags}}"
+        python_version: "{{python_version}}"
+        resources_dir: "{{resource_path}}"
+        npu_info: "{{npu_info}}"
+        action: "rollback"
+      register: nnrt_result
+      failed_when: false
+
+    - name: message
+      debug:
+        var: nnrt_result
+      failed_when: nnrt_result.rc != 0

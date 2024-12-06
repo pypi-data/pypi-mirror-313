@@ -1,0 +1,45 @@
+- hosts: '{{ hosts_name }}'
+  name: install system dependencies for ascend packages
+  tasks:
+    - name: check nexus status
+      check_nexus_status:
+        os_and_arch: "{{os_and_arch}}"
+      delegate_to: localhost
+      register: nexus_status
+      failed_when: nexus_status.rc != 0
+      when: ansible_ssh_user == 'root'
+
+    - name: copy file to host
+      copy:
+        src: "{{item.src}}"
+        dest: "{{item.dest}}"
+        force: yes
+        mode: 0644
+      when:
+        - "'gpg' not in item.dest or 'Ubuntu' in os_and_arch"
+        - ansible_ssh_user == 'root'
+      loop:
+        - { src: "{{inventory_dir}}/scripts/nexus_config.json", dest: "~/nexus/" }
+        - { src: "{{inventory_dir}}/downloader/config/{{os_and_arch}}/pkg_info.json", dest: "~/nexus/" }
+        - { src: "{{inventory_dir}}/resources/nexus/nexus_pub.asc", dest: "/etc/apt/trusted.gpg.d/" }
+
+    - name: install system packages
+      install_sys_pkg:
+        nexus_url: "{{nexus_url|default('')}}"
+        ansible_run_tags: "{{ansible_run_tags}}"
+        resources_dir: "{{resource_path}}"
+        pkg_type: "system"
+      register: sys_pkg_result
+      failed_when: sys_pkg_result.rc != 0
+
+    - name: message
+      debug:
+        var: sys_pkg_result.stdout_lines
+
+    - name: install gcc for centos
+      install_gcc:
+        resources_dir: "{{resource_path}}"
+      register: gcc_result
+      when:
+        - "'CentOS' in os_and_arch"
+      failed_when: gcc_result.rc != 0

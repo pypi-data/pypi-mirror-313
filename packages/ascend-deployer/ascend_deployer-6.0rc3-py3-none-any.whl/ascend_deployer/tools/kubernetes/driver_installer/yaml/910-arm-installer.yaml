@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: driver-installer-910-arm
+spec:
+  selector:
+    matchLabels:
+      app: 910-arm-driver
+  template:
+    metadata:
+      labels:
+        app: 910-arm-driver
+    spec:
+      containers:
+        - name: arm-910-installer
+          image: arm-910-installer:v1
+          volumeMounts:
+            - name: run-file
+              mountPath: /mnt
+            - name: log-file
+              mountPath: /var/log
+      volumes:
+        - name: run-file
+          hostPath:
+            path: /root
+        - name: log-file
+          hostPath:
+            path: /var/log
+      nodeSelector:
+        host-arch: huawei-arm
+        accelerator: huawei-Ascend910

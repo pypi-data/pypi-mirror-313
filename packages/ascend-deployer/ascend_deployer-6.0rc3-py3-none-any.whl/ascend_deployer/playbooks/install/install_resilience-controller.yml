@@ -1,0 +1,49 @@
+- hosts:
+    - master[0]
+    - other_build_image
+  name: build image for resilience-controller
+  tasks:
+    - name: build resilience-controller image
+      install_resilience_controller:
+        resources_dir: "{{ resource_path }}"
+        step: 'build'
+
+    - name: fetch resilience-controller image
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ resilience_controller_images }}"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/resilience-controller"
+        fetch: 'true'
+      delegate_to: localhost
+
+- hosts:
+    - master
+  name: install or upgrade resilience-controller
+  tasks:
+    - name: push images to remote
+      scp:
+        ip: "{{ inventory_hostname }}"
+        remote_user: "{{ ansible_ssh_user }}"
+        passwd: "{{ ansible_ssh_pass|default('') }}"
+        src: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/resilience-controller/*"
+        dest: "{{ resource_path }}/mindxdl/dlImages/{{ ansible_architecture }}/resilience-controller/"
+      delegate_to: localhost
+
+    - name: install resilience-controller
+      install_resilience_controller:
+        resources_dir: "{{ resource_path }}"
+        step: 'install'
+        node_name: "{{ NODE_NAME }}"
+        master_node: "{{ inventory_hostname in groups['master'] }}"
+        worker_node: "{{ inventory_hostname in groups['worker'] }}"
+
+    - name: apply resilience-controller
+      run_once: yes
+      install_resilience_controller:
+        resources_dir: "{{ resource_path }}"
+        step: 'apply'
+        node_info: "{{ groups['master'] | map('extract', hostvars, 'resilience_controller_labels') | list |
+                combine(recursive=True) }}"
+      delegate_to: "{{ groups['master'][0] }}"

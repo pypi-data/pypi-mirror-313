@@ -1,0 +1,135 @@
+- name: gather fact info
+  import_playbook: ../gather_npu_fact.yml
+  tags: always
+
+- name: copy resources to remote servers
+  import_playbook: ../distribution.yml
+  tags: copy
+
+- name: install sys pkg
+  import_playbook: ../install/install_sys_pkg.yml
+  tags: sys_pkg
+
+- name: install python
+  import_playbook: ../install/install_python.yml
+  tags: python
+
+- name: install npu
+  import_playbook: ../install/install_npu.yml
+  tags: driver,firmware,npu
+
+- name: install atlasedge
+  import_playbook: ../install/install_atlasedge.yml
+  tags: atlasedge
+
+- name: install docker images
+  import_playbook: ../install/install_docker_images.yml
+  tags: docker_images
+
+- name: install ha
+  import_playbook: ../install/install_ha.yml
+  tags: ha
+
+- name: install ief
+  import_playbook: ../install/install_ief.yml
+  tags: ief
+
+- name: install mindstudio
+  import_playbook: ../install/install_mindstudio.yml
+  tags: mindstudio
+
+- name: install toolkit
+  import_playbook: ../install/install_toolkit.yml
+  tags: toolkit
+
+- name: install nnrt
+  import_playbook: ../install/install_nnrt.yml
+  tags: nnrt
+
+- name: install nnae
+  import_playbook: ../install/install_nnae.yml
+  tags: nnae
+
+- name: install tfplugin
+  import_playbook: ../install/install_tfplugin.yml
+  tags: tfplugin
+
+- name: install kernels
+  import_playbook: ../install/install_kernels.yml
+  tags: kernels
+
+- name: install toolbox
+  import_playbook: ../install/install_toolbox.yml
+  tags: toolbox
+
+- name: install pytorch
+  import_playbook: ../install/install_pytorch.yml
+  tags: pytorch
+
+- name: install tensorflow
+  import_playbook: ../install/install_tensorflow.yml
+  tags: tensorflow
+
+- name: install mindspore
+  import_playbook: ../install/install_mindspore.yml
+  tags: mindspore
+
+- name: prepare for dl
+  import_playbook: ../install/task_dl.yml
+  tags:
+    - volcano
+    - hccl-controller
+    - ascend-device-plugin
+    - noded
+    - npu-exporter
+    - ascend-operator
+    - clusterd
+    - resilience-controller
+
+- name: install volcano
+  import_playbook: ../install/install_volcano.yml
+  tags: volcano
+
+- name: install hccl-controller
+  import_playbook: ../install/install_hccl-controller.yml
+  tags: hccl-controller
+
+- name: install device plugin
+  import_playbook: ../install/install_ascend-device-plugin.yml
+  tags: ascend-device-plugin
+
+- name: install noded
+  import_playbook: ../install/install_noded.yml
+  tags: noded
+
+- name: install ascend-operator
+  import_playbook: ../install/install_ascend-operator.yml
+  tags: ascend-operator
+
+- name: install clusterd
+  import_playbook: ../install/install_clusterd.yml
+  tags: clusterd
+
+- name: install resilience-controller
+  import_playbook: ../install/install_resilience-controller.yml
+  tags: resilience-controller
+
+- name: install npu-exporter
+  import_playbook: ../install/install_npu-exporter.yml
+  tags: npu-exporter
+
+- name: install docker-runtime
+  import_playbook: ../install/install_ascend-docker-runtime.yml
+  tags: ascend-docker-runtime
+
+- name: install mindio
+  import_playbook: ../install/install_mindio.yml
+  tags: mindio
+
+- name: install fault-diag
+  import_playbook: ../install/install_fault-diag.yml
+  tags: fault-diag
+
+- name: generate report
+  import_playbook: ../report.yaml
+  tags: always
