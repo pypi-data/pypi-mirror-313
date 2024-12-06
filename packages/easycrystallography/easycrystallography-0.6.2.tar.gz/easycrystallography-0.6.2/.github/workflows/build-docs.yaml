@@ -1,0 +1,87 @@
+# Workflow for building a static documentation site and deploying it to
+# GitHub Pages.
+
+name: Build and deploy documentation
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: [master]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Build the static files for the documentation site
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Save the latest release version of EasyCrystallography to EC_LATEST_VERSION
+      # EC_LATEST_VERSION is used in the mkdocs.yml file to set edl_latest_version
+      # edl_latest_version is then needed to display the latest release version of
+      # EasyCrystallography in the index.md file
+      - name: Get the latest release version of EasyCrystallography
+        run:
+          echo "EC_LATEST_VERSION=$(curl
+          https://api.github.com/repos/EasyScience/EasyCrystallography/releases/latest
+          | grep -i 'tag_name' | awk -F '"' '{print $4}')" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Install MkDocs -- static site generator
+      # https://www.mkdocs.org
+      - name: Install MkDocs and its dependencies
+        run: >
+          python -m pip install mkdocs mkdocs-material mkdocs-jupyter
+          mkdocstrings-python mkdocs-macros-plugin
+
+      # Build the static files
+      # Input: docs/ directory containing the Markdown files
+      # Output: site/ directory containing the generated HTML files
+      - name: Build site with MkDocs
+        run: mkdocs build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # Upload the static files from the site/ directory to be used in the next job
+      - name: Upload static files as artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/
+
+  # Job 2: Deploy the static files to GitHub Pages
+  deploy-docs:
+    needs: build-docs # previous job 'build-docs' need to be finished first
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      contents: read
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment, originates from an appropriate source
+
+    # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+    # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+    concurrency:
+      group: 'pages'
+      cancel-in-progress: false
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Deploy the static files created in the previous job to GitHub Pages
+      # https://easyscience.github.io/EasyCrystallography
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

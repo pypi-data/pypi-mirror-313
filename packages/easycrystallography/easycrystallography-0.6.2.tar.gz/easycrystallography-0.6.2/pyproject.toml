@@ -1,0 +1,135 @@
+###############################
+# Configuration for the project
+###############################
+
+[project]
+name = 'easycrystallography'
+dynamic = ['version'] # Use versioningit to manage the version
+description = 'Crystallography in EasyScience'
+authors = [{ name = 'EasyCrystallography contributors' }]
+readme = 'README.md'
+license = { file = 'LICENSE' }
+classifiers = [
+  'Topic :: Scientific/Engineering',
+  'Development Status :: 4 - Beta',
+  'License :: OSI Approved :: BSD License',
+  'Operating System :: OS Independent',
+  'Programming Language :: Python :: 3 :: Only',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.9',
+  'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: 3.11',
+  'Programming Language :: Python :: 3.12',
+]
+requires-python = '>=3.9,<3.13'
+dependencies = [
+  'asteval',       # For evaluating mathematical expressions
+  'easyscience',   # The base library of the EasyScience framework
+  'gemmi',         # For handling CIF files
+  'numpy<2.0',     # For numerical calculations
+  'periodictable', # For atomic properties
+  'pint',          # For units
+  'uncertainties', # For error propagation
+  'versioningit',  # For versioning
+  'xarray',        # For handling data arrays
+]
+
+[project.optional-dependencies]
+dev = [
+  'build',        # For building the package
+  'pytest',       # For testing
+  'pytest-xdist', # For parallel testing
+  'pytest-cov',   # For coverage
+  'ruff',         # For linting
+]
+
+[project.urls]
+homepage = 'https://github.com/EasyScience/EasyCrystallography'
+documentation = 'https://easyscience.github.io/EasyCrystallography'
+source = 'https://github.com/EasyScience/EasyCrystallography'
+tracker = 'https://github.com/EasyScience/EasyCrystallography/issues'
+
+############################
+# Build system configuration
+############################
+
+# Build system 'hatch' -- Python project manager
+# https://hatch.pypa.io/
+
+# Versioning system 'versioningit' -- Versioning from git tags
+# https://versioningit.readthedocs.io/
+
+[build-system]
+build-backend = 'hatchling.build'
+requires = ['hatchling', 'versioningit']
+
+# Configuration for the hatch
+
+[tool.hatch.build.targets.wheel]
+packages = ['src/easycrystallography']
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.version]
+source = 'versioningit' # Use versioningit to manage the version
+
+################################
+# Configuration for versioningit
+################################
+
+# Versioningit generates versions from git tags, so we don't need to
+# either specify them statically in pyproject.toml or save them in the
+# source code.
+
+[tool.versioningit.format]
+distance = '{base_version}.post{distance}'       # example: 1.2.3.post42
+dirty = '{base_version}'                         # example: 1.2.3
+distance-dirty = '{base_version}.post{distance}' # example: 1.2.3.post42
+
+[tool.versioningit.vcs]
+method = 'git'
+match = ['v*']
+default-tag = 'v999.0.0'
+
+########################
+# Configuration for ruff
+########################
+
+# 'ruff' -- Python linter and code formatter
+# https://docs.astral.sh/ruff/rules/
+
+[tool.ruff]
+exclude = ['docs_old', 'examples_old', 'tests', 'tests_old']
+indent-width = 4
+line-length = 127
+
+[tool.ruff.format]
+docstring-code-format = true # Whether to format code snippets in docstrings
+indent-style = 'space'       # PEP 8 recommends using spaces over tabs
+line-ending = 'lf'           # Line endings will be converted to \n
+quote-style = 'single'       # But double quotes in docstrings (PEP 8, PEP 257)
+
+[tool.ruff.lint]
+select = [
+  'E9',
+  'F63',
+  'F7',
+  'F82', # flake8 settings from existing CI setup
+  'E',
+  'W',   # pycodestyle
+  'F',   # Pyflakes
+  'I',   # isort
+  'S',   # flake8-bandit
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.ruff.lint.per-file-ignores]
+# allow asserts in test files
+'*test_*.py' = ['S101']
+
+#[tool.ruff.lint.pycodestyle]
+#max-line-length = 88 # https://peps.python.org/pep-0008/#maximum-line-length
+#max-doc-length = 72  # https://peps.python.org/pep-0008/#maximum-line-length
