@@ -1,0 +1,83 @@
+[tool.poetry]
+name = "ampel-photometry"
+version = "0.10.1a0"
+description = "Photometry add-on for the Ampel system"
+authors = ["Valery Brinnel"]
+license = "BSD-3-Clause"
+packages = [
+    {include = "ampel"}
+]
+include = [
+    'conf/*/*.json',
+    'conf/*/*/*.json',
+    'conf/*/*.yaml',
+    'conf/*/*/*.yaml',
+    'conf/*/*.yml',
+    'conf/*/*/*.yml',
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+ampel-interface = {version = ">=0.10.2,<0.11"}
+astropy = ">=5"
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.3.3"
+mypy = "^1.13.0"
+pytest-cov = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--showlocals -r a"
+filterwarnings = [
+    "error",
+]
+
+[tool.mypy]
+namespace_packages = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+  "astropy.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "ampel.abstract.*"
+disable_error_code = "empty-body"
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "I",
+    "UP",
+    "B",
+    "DTZ",
+    "T20",
+    "PT",
+    "RET",
+    "SLF",
+    "SIM",
+    "PL",
+    "PERF",
+    "RUF",
+]
+ignore = [
+    "UP009", # UTF-8 encoding declaration is unnecessary
+    "PLR09", # too many (arguments|branches)
+    "RUF012", # mutable class properties (are harmless everywhere BaseModel is used)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["T20", "E731", "SLF001", "PLR2004"]
