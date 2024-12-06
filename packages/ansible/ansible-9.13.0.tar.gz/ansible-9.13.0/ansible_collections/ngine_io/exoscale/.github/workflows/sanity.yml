@@ -1,0 +1,42 @@
+name: Sanity
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: "5 12 * * *"
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  sanity:
+    name: Sanity (${{ matrix.ansible }})
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ansible_collections/ngine_io/exoscale
+    strategy:
+      matrix:
+        ansible:
+          - stable-2.14
+          - devel
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          path: ansible_collections/ngine_io/exoscale
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install ansible-base (${{ matrix.ansible }})
+        run: pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
+
+      - name: Install dependencies
+        run: ansible-galaxy collection install -p ../../ ngine_io.cloudstack
+
+      - name: Run sanity tests
+        run: ansible-test sanity --docker -v --color

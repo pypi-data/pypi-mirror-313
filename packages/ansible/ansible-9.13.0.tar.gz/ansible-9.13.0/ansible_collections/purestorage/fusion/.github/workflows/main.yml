@@ -1,0 +1,53 @@
+name: Pure Storage Ansible CI
+
+"on":
+  pull_request:
+  push:
+  schedule:
+    - cron: '25 10 * * *'
+
+jobs:
+  build:
+    name: Build purefusion on Ansible ${{ matrix.ansible }} (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        ansible:
+          - stable-2.14
+          - stable-2.15
+          - stable-2.16
+          - devel
+        python-version:
+          - 3.9
+          - "3.10"
+          - "3.11"
+        exclude:
+          - python-version: 3.9
+            ansible: stable-2.16
+          - python-version: 3.9
+            ansible: devel
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python${{ matrix.python }} -m pip install --upgrade pip
+        python${{ matrix.python }} -m pip install https://github.com/ansible/ansible/archive/${{ matrix.ansible }}.tar.gz --disable-pip-version-check
+        python${{ matrix.python }} -m pip install purefusion pytest
+
+    - name: Run sanity tests
+      run: |
+        pwd
+        mkdir -p ansible_collections/purestorage/fusion
+        rsync -av . ansible_collections/purestorage/fusion --exclude ansible_collection/purestorage/fusion
+        cd ansible_collections/purestorage/fusion
+        ansible-test sanity -v --color --python ${{ matrix.python-version }} --docker
+
+    - name: Run unit tests
+      run: python -m pytest --import-mode=append tests

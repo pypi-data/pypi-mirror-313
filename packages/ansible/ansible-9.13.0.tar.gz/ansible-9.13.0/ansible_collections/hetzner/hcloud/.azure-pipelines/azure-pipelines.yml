@@ -1,0 +1,217 @@
+trigger:
+  batch: true
+  branches:
+    include: [main, stable-1]
+
+pr:
+  autoCancel: true
+  drafts: false
+  branches:
+    include: [main, stable-1]
+
+schedules:
+  - cron: 0 9 * * *
+    displayName: Nightly
+    always: true
+    branches:
+      include: [main, stable-1]
+
+variables:
+  - name: checkoutPath
+    value: ansible_collections/hetzner/hcloud
+  - name: coverageBranches
+    value: main
+  - name: pipelinesCoverage
+    value: coverage
+  - name: entryPoint
+    value: tests/utils/ci.sh
+  - name: fetchDepth
+    value: 0
+
+resources:
+  containers:
+    - container: default
+      image: quay.io/ansible/azure-pipelines-test-container:4.0.1
+
+pool: Standard
+
+stages:
+  ### Sanity
+  - stage: Sanity_devel
+    displayName: Sanity devel
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: Sanity
+              test: devel/sanity
+
+  - stage: Sanity_2_16
+    displayName: Sanity 2.16
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: Sanity
+              test: 2.16/sanity
+
+  - stage: Sanity_2_15
+    displayName: Sanity 2.15
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: Sanity
+              test: 2.15/sanity
+
+  - stage: Sanity_2_14
+    displayName: Sanity 2.14
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: Sanity
+              test: 2.14/sanity
+
+  - stage: Sanity_2_13
+    displayName: Sanity 2.13
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: Sanity
+              test: 2.13/sanity
+
+  ### Units
+  - stage: Units_devel
+    displayName: Units devel
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: (py3.12)
+              test: devel/units/3.12
+
+  - stage: Units_2_16
+    displayName: Units 2.16
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: (py3.10)
+              test: 2.16/units/3.10
+
+  - stage: Units_2_15
+    displayName: Units 2.15
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: (py3.9)
+              test: 2.15/units/3.9
+
+  - stage: Units_2_14
+    displayName: Units 2.14
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: (py3.9)
+              test: 2.14/units/3.9
+
+  - stage: Units_2_13
+    displayName: Units 2.13
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          targets:
+            - name: (py3.8)
+              test: 2.13/units/3.8
+
+  ## Integration
+  - stage: Integration_devel
+    displayName: Integration devel
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          groups: [1, 2, 3]
+          targets:
+            - name: (py3.12)
+              test: devel/integration/3.12
+
+  - stage: Integration_2_16
+    displayName: Integration 2.16
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          groups: [1, 2, 3]
+          targets:
+            - name: (py3.10)
+              test: 2.16/integration/3.10
+
+  - stage: Integration_2_15
+    displayName: Integration 2.15
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          groups: [1, 2, 3]
+          targets:
+            - name: (py3.9)
+              test: 2.15/integration/3.9
+
+  - stage: Integration_2_14
+    displayName: Integration 2.14
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          groups: [1, 2, 3]
+          targets:
+            - name: (py3.9)
+              test: 2.14/integration/3.9
+
+  - stage: Integration_2_13
+    displayName: Integration 2.13
+    dependsOn: []
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          groups: [1, 2, 3]
+          targets:
+            - name: (py3.8)
+              test: 2.13/integration/3.8
+
+  ### Finally
+  - stage: Summary
+    condition: succeededOrFailed()
+    dependsOn:
+      - Sanity_devel
+      - Sanity_2_16
+      - Sanity_2_15
+      - Sanity_2_14
+      - Sanity_2_13
+      - Units_devel
+      - Units_2_16
+      - Units_2_15
+      - Units_2_14
+      - Units_2_13
+      - Integration_devel
+      - Integration_2_16
+      - Integration_2_15
+      - Integration_2_14
+      - Integration_2_13
+    jobs:
+      - template: templates/coverage.yml
