@@ -1,0 +1,118 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "tiktok_research_api_helper"
+version = "0.1.3-rc1"
+authors = [
+  { name="Bruno Coelho", email="bruno.coelho+c4d@nyu.edu" },
+]
+
+dependencies = [
+  "pyyaml",
+  "requests",
+  # https://urllib3.readthedocs.io/en/1.26.x/user-guide.html#ssl
+  "certifi",  
+  "pandas",
+  "numpy",
+  "attrs",
+  "sqlalchemy>=2.0.0",
+  "rich",
+  "typer",
+  "tenacity",
+  "pause",
+  "pendulum",
+  "psycopg2-binary"
+]
+
+
+description = "A small package to interface with the TikTok Research API"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+
+[project.urls]
+Homepage = "https://github.com/CybersecurityForDemocracy/tiktok-library"
+Issues = "https://github.com/CybersecurityForDemocracy/tiktok-library/issues"
+
+[project.scripts]
+tiktok-lib = "tiktok_research_api_helper.cli.main:APP"
+
+#TODO: Add Sphinx documentation auto-generation
+# Libs: sphinx, sphinx-autoapi
+
+[tool.hatch.envs.test]
+extra-dependencies = [
+  "pytest",
+  "responses",
+]
+
+# This is the default env for command 'hatch test'
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
+  "responses",
+]
+
+[tool.hatch.envs.alembic]
+extra-dependencies = [
+  "alembic"
+]
+
+[tool.hatch.envs.test.scripts]
+run = "pytest tests/ -vv"
+postgres-integration-test-docker-as-sudo = [
+  "sudo docker compose --file=docker-compose-postgres-integration-test.yml build",
+  "- sudo docker compose --file=docker-compose-postgres-integration-test.yml run postgres-integration-test",
+  "sudo docker compose --file=docker-compose-postgres-integration-test.yml down --remove-orphans"
+]
+
+[tool.hatch.envs.jupyter]
+extra-dependencies = [
+  "notebook"
+]
+
+[tool.hatch.envs.jupyter.scripts]
+notebook = "jupyter-notebook"
+
+# Hatch uses ruff for linting and formatting (hatch fmt ...)
+[tool.ruff]
+line-length=100
+exclude = ["./alembic"]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E", "W",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+ignore=[
+  # Do not suggest ternary operator
+  "SIM108",
+  # Allow use of Optional[...] style type annotation, since Typer relies on it
+  "UP007",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/alembic/",
+  "/src/",
+  "/tests/",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tiktok_research_api_helper"]
