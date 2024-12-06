@@ -1,0 +1,114 @@
+Metadata-Version: 2.3
+Name: ngio
+Version: 0.1.1
+Summary: Next Generation file format IO
+Project-URL: homepage, https://github.com/lorenzocerrone/ngio
+Project-URL: repository, https://github.com/lorenzocerrone/ngio
+Author-email: Lorenzo Cerrone <lorenzo.cerrone@uzh.ch>
+License: BSD-3-Clause
+Classifier: Development Status :: 3 - Alpha
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Typing :: Typed
+Requires-Python: <3.13,>=3.10
+Requires-Dist: aiohttp
+Requires-Dist: anndata<0.11.0,>=0.8.0
+Requires-Dist: dask[array]
+Requires-Dist: numpy
+Requires-Dist: pandas>=1.2.0
+Requires-Dist: pydantic
+Requires-Dist: requests
+Provides-Extra: core
+Requires-Dist: dask-image; extra == 'core'
+Requires-Dist: dask[distributed]; extra == 'core'
+Requires-Dist: zarr<3; extra == 'core'
+Provides-Extra: dev2
+Requires-Dist: dask-image; extra == 'dev2'
+Requires-Dist: dask[distributed]; extra == 'dev2'
+Requires-Dist: ipython; extra == 'dev2'
+Requires-Dist: matplotlib; extra == 'dev2'
+Requires-Dist: mypy; extra == 'dev2'
+Requires-Dist: napari; extra == 'dev2'
+Requires-Dist: notebook; extra == 'dev2'
+Requires-Dist: pdbpp; extra == 'dev2'
+Requires-Dist: plotly; extra == 'dev2'
+Requires-Dist: pre-commit; extra == 'dev2'
+Requires-Dist: pyqt5; extra == 'dev2'
+Requires-Dist: pytest; extra == 'dev2'
+Requires-Dist: pytest-cov; extra == 'dev2'
+Requires-Dist: rich; extra == 'dev2'
+Requires-Dist: ruff; extra == 'dev2'
+Requires-Dist: scikit-image; extra == 'dev2'
+Requires-Dist: zarr<3; extra == 'dev2'
+Provides-Extra: dev3
+Requires-Dist: dask-image; extra == 'dev3'
+Requires-Dist: dask[distributed]; extra == 'dev3'
+Requires-Dist: ipython; extra == 'dev3'
+Requires-Dist: mypy; extra == 'dev3'
+Requires-Dist: notebook; extra == 'dev3'
+Requires-Dist: pdbpp; extra == 'dev3'
+Requires-Dist: pre-commit; extra == 'dev3'
+Requires-Dist: pytest; extra == 'dev3'
+Requires-Dist: pytest-cov; extra == 'dev3'
+Requires-Dist: rich; extra == 'dev3'
+Requires-Dist: ruff; extra == 'dev3'
+Requires-Dist: zarr==v3.0.0-alpha.4; extra == 'dev3'
+Provides-Extra: docs
+Requires-Dist: mkdocs; extra == 'docs'
+Requires-Dist: mkdocs-autorefs; extra == 'docs'
+Requires-Dist: mkdocs-git-committers-plugin-2; extra == 'docs'
+Requires-Dist: mkdocs-git-revision-date-localized-plugin; extra == 'docs'
+Requires-Dist: mkdocs-jupyter; extra == 'docs'
+Requires-Dist: mkdocs-material; extra == 'docs'
+Requires-Dist: mkdocstrings[python]; extra == 'docs'
+Requires-Dist: scikit-image; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: pytest; extra == 'test'
+Requires-Dist: pytest-cov; extra == 'test'
+Requires-Dist: zarr<3; extra == 'test'
+Description-Content-Type: text/markdown
+
+# NGIO - Next Generation file format IO
+
+[![License](https://img.shields.io/pypi/l/ngio.svg?color=green)](https://github.com/lorenzocerrone/ngio/raw/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/ngio.svg?color=green)](https://pypi.org/project/ngio)
+[![Python Version](https://img.shields.io/pypi/pyversions/ngio.svg?color=green)](https://python.org)
+[![CI](https://github.com/lorenzocerrone/ngio/actions/workflows/ci.yml/badge.svg)](https://github.com/lorenzocerrone/ngio/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/fractal-analytics-platform/ngio/graph/badge.svg?token=FkmF26FZki)](https://codecov.io/gh/fractal-analytics-platform/ngio)
+
+NGIO is a Python library to streamline OME-Zarr image analysis workflows.
+
+**Main Goals:**
+
+- Abstract object base API for handling OME-Zarr files
+- Powefull iterators for processing data using common access patterns
+- Tight integration with [Fractal's Table Fractal](https://fractal-analytics-platform.github.io/fractal-tasks-core/tables/)
+- Validate OME-Zarr files
+
+To get started, check out the [Getting Started](https://fractal-analytics-platform.github.io/ngio/getting-started/) guide. Or checkout our [Documentation](https://fractal-analytics-platform.github.io/ngio/)
+
+## 🚧 Ngio is Under active Development 🚧
+
+### Roadmap
+
+| Feature | Status | ETA | Description |
+|---------|--------|-----|-------------|
+| Metadata Handling | ✅ | | Read, Write, Validate OME-Zarr Metadata (0.4 supported, 0.5 ready) |
+| OME-Zarr Validation | ✅ | | Validate OME-Zarr files for compliance with the OME-Zarr Specification + Compliance between Metadata and Data |
+| Base Image Handling | ✅ | | Load data from OME-Zarr files, retrieve basic metadata, and write data |
+| ROI Handling | ✅ | | Common ROI models |
+| Label Handling | ✅ | Mid-September | Based on Image Handling |
+| Table Validation | ✅ | Mid-September | Validate Table fractal V1 + Compliance between Metadata and Data |
+| Table Handling | ✅ | Mid-September | Read, Write ROI, Features, and Masked Tables |
+| Basic Iterators | Ongoing | End-September | Read and Write Iterators for common access patterns |
+| Base Documentation | ✅ | End-September | API Documentation and Examples |
+| Beta Ready Testing | ✅ | End-September | Beta Testing; Library is ready for testing, but the API is not stable |
+| Streaming from Fractal | Ongoing | December | Ngio can stream ome-zarr from fractal |
+| Mask Iterators | Ongoing | Early 2025 | Iterators over Masked Tables |
+| Advanced Iterators | Not started | mid-2025 | Iterators for advanced access patterns |
+| Parallel Iterators | Not started | mid-2025 | Concurrent Iterators for parallel read and write |
+| Full Documentation | Not started | 2025 | Complete Documentation |
+| Release 1.0 (Commitment to API) | Not started | 2025 | API is stable; breaking changes will be avoided |
