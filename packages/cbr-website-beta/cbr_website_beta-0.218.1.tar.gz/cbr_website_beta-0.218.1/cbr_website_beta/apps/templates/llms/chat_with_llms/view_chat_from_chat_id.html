@@ -1,0 +1,68 @@
+<script>
+    // jquery hacks to improve layout during dev
+    $('.left-sidebar').remove()
+    $('#main-wrapper').attr('data-layout', '')
+</script>
+
+
+<style>
+/*        .container-fluid { display : flex  ;
+                           } */
+        .chatbot         { flex    : 1      }
+</style>
+
+<div class="container-fluid">
+    <div class="row ">
+        <div class="col-12">
+            <chatbot-openai url              = "{{ url_athena }}"
+                            name             = "{{ title      }}"
+                            model            = "{{ model      }}"
+                            platform         = "{{ platform   }}"
+                            provider         = "{{ provider   }}",
+                            channel          = "chatbot-main" >
+            </chatbot-openai>
+        </div>
+{#        <div class="col-4">#}
+{#            <webc-events-utils></webc-events-utils>#}
+{#            <webc-events-viewer></webc-events-viewer>#}
+{#        </div>#}
+    </div>
+</div>
+<webc-events-utils></webc-events-utils>
+
+
+<script>
+    // todo: create CBR_Browser api to help with a lot of these methods and helper functions
+    // send test message as soon as the page opens (to Ollama running locally)
+
+    function add_message(message, type, images, platform, provider, model) {
+        let message_data = { message:message, type:type, images:images, platform:platform, provider:provider, model:model }
+        events_utils.send_to_channel("add-message", 'chatbot-main', message_data)
+    }
+    function load_chat_data(chat_data_raw) {
+        let  chat_data      = JSON.parse(chat_data_raw)
+        let chat_thread_id = chat_data.chat_thread_id
+        let histories      = chat_data.histories
+        let user_prompt    = chat_data.user_prompt
+        let images         = chat_data.images
+        let llm_answer     = chat_data.llm_answer
+        let platform       = chat_data.user_data?.selected_platform
+        let provider       = chat_data.user_data?.selected_provider
+        let model          = chat_data.user_data?.selected_model
+
+        histories.forEach(history => {
+            add_message(history.question, 'sent')
+            add_message(history.answer, 'received')
+        })
+        add_message(user_prompt, 'sent', images)
+        add_message(llm_answer , 'received', null, platform, provider, model)
+        $('chatbot-openai')[0].chat_thread_id = chat_thread_id
+        console.log(images)
+    }
+
+    $(document).ready(async function (){
+        url_chat_data = "{{ url_chat_data }}"
+        await fetch(url_chat_data).then(response => response.text()).then(load_chat_data)
+    })
+</script>
+

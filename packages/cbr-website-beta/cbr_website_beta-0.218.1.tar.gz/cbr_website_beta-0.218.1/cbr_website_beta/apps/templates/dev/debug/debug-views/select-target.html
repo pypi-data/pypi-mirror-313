@@ -1,0 +1,87 @@
+<style>
+    .debug_view {
+        border: 1px dotted;
+        background-color: #f0f6fc;
+    }
+</style>
+
+<form onsubmit="submit_debug_view_form(event);">
+    <div class="container py-3 debug_view">
+                <div class="row">
+                    <!-- Column 1 -->
+                    <div class="col-md-4">
+                        <label for="method_selector" class="form-label">Select Method</label>
+                        <select id="method_selector" name="method_selector"  size="5" onchange="updateFormFields()">
+                            {% for class_name, methods in views_mappings.items() %}
+                                <optgroup label="{{ class_name }}">
+                                    {% for method_name, kwargs in methods.items() %}
+                                        <option value="{{ class_name }}.{{ method_name }}" class="form-control">
+                                            {{ class_name }} - {{ method_name }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+
+                    <!-- Column 2 -->
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="class_name" class="form-label">Class Name</label>
+                            <input type="text" id="class_name" name="class_name" class="form-control" value="{{ class_name }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="method_name" class="form-label">Method Name</label>
+                            <input type="text" id="method_name" name="method_name" class="form-control" value="{{ method_name }}">
+                        </div>
+                        <div class="container">
+                            <div class="row align-items-center">
+                                <!-- Column A -->
+                                <div class="col-3">
+                                    <button type="submit" class="btn btn-primary">Render</button>
+                                </div>
+                                <div class="col-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="autoReloadToggle">
+                                        <label class="form-check-label" for="autoReloadToggle">Reload</label>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <!-- Bootstrap Dropdown Selector for Interval -->
+                                    <select class="form-select" id="autoReloadInterval">
+                                        <option value="5">5 seconds</option>
+                                        <option value="10">10 seconds</option>
+                                        <option value="15">15 seconds</option>
+                                        <option value="30">30 seconds</option>
+                                    </select>
+                                </div>
+                                <div class="col-3">
+                                    <button id="addRow" type="button" class="btn btn-secondary">Add</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Column 3 -->
+                    <div class="col-md-4">
+                        <label for="method_kwargs" class="form-label">Method Kwargs </label>
+                        <table id="kwargsTable" class="table">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Value</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <br/>
+                    </div>
+                </div>
+
+        </div>
+</form>
+

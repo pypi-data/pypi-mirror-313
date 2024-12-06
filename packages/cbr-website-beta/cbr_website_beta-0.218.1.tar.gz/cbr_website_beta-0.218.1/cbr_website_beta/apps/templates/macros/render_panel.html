@@ -1,0 +1,66 @@
+{% macro render_panel(class_name, method_name, method_kwargs, div_id, spinner_id) %}
+    {% set random_num      = range(1, 99999)|random %}
+    {% set random_panel_id = "panel_" ~ random_num %}
+
+    {% if not div_id %}
+        {% set div_id = random_panel_id %}
+    {% endif %}
+
+    <div id="{{ div_id }}" class="panel_div"></div>
+
+    <script>
+        {% if spinner_id %}
+            var spinner_id = "{{ spinner_id }}"
+        {% endif %}
+        $(document).ready(function() {
+            // Load the panel on page load
+            loadPanel();
+
+            // Reload button click event
+            $('#{{ div_id }}_reload').click(function () {
+                loadPanel();
+            });
+        })
+        function loadPanel() {
+
+            showSpinner(true)
+
+            let call_data = { class_name   : "{{class_name}}"           ,
+                              method_name  : "{{method_name}}"         ,
+                              method_kwargs: {{  method_kwargs | tojson  }} }
+            get_data(call_data)
+        }
+
+        function get_data(call_data) {
+            showSpinner(true)
+            let post_data = JSON.stringify(call_data)
+            $.ajax({
+                url: '/web/dev/dev-panel',
+                type: 'POST',
+                contentType: 'application/json',
+                data: post_data,
+                success: handleSuccess,
+                error: handleError
+            });
+        }
+
+        function handleSuccess(data) {
+            showSpinner(false)
+            if (data['status'] === 'ok') {
+                $('#{{div_id}}').html(data['return_value']);
+            } else {
+                $('#{{div_id}}').html('Error: ' + data['data']);
+            }
+        }
+
+        function handleError(xhr, status, error) {
+            showSpinner(false)
+            console.error("Error fetching panel: ", status, error);
+            $('#{{div_id}}').html('Error loading the panel. Please try again.');
+        }
+
+        function showSpinner(show) {
+            $('#'+spinner_id).css('display', show ? 'inline-block' : 'none');
+        }
+    </script>
+{% endmacro %}

@@ -1,0 +1,125 @@
+<script type="text/javascript" src="/assets/plugins/golden-layout/goldenlayout.min.js"></script>
+<link type="text/css" rel="stylesheet" href="/assets/plugins/golden-layout/goldenlayout-base.css" />
+<link type="text/css" rel="stylesheet" href="/assets/plugins/golden-layout/goldenlayout-dark-theme.css" />
+
+
+<div id="layout" style="widxth: 100%; height: 100vh;"></div>
+<webc-events-utils></webc-events-utils>
+
+<script>
+    $(function() {
+        let base_prompt     = 'Act like are a board member that has legal responsibilities for the company; Reply in one paragraph only'
+        let system_prompt_1 = base_prompt + 'you  focused on the finance side of things          ; no experience in Cyber Security'
+        let system_prompt_2 = base_prompt + 'you are focused on the Operational side of things   ; some experience in Cyber Security'
+        let system_prompt_3 = base_prompt + 'You focused on the HR side of things                ; no experience in Cyber Security'
+        platform = "Groq (Free)"
+        provider = "1. Meta"
+        model    = "llama3-70b-8192"
+        var chatbotConfig = [
+            { name: "Board member #1 (CFO background)"  , platform: platform, provider: platform , model: model , channel: "MODEL-1" , system_prompt:system_prompt_1},
+            { name: "Board member #1 (COO background)"  , platform: platform, provider: platform , model: model , channel: "MODEL-2" , system_prompt:system_prompt_2},
+            { name: "Board member #1 (HR  background)"  , platform: platform, provider: platform , model: model , channel: "MODEL-3" , system_prompt:system_prompt_3},
+        ];
+        var components = chatbotConfig.map(function(config) {
+            return {
+                url: "{{ url_athena }}",
+                name: config.name,
+                model: config.model,
+                platform: config.platform,
+                provider: config.provider,
+                channel: config.channel,
+                system_prompt: config.system_prompt
+            };
+        });
+
+        component_1 = components[0]
+        component_2 = components[1]
+        component_3 = components[2]
+        component_4 = components[3]
+        component_5 = components[4]
+        component_6 = components[5]
+
+        var config = {
+        content: [{
+            type: 'column',
+            content:[{  type: 'component',
+                        componentName: 'user_prompt',
+                        componentState: {},
+                        height: '10'
+                    },
+                { type: 'row',
+                 content:[ { type: 'component',
+                            componentName: 'chatbot',
+                            componentState: component_1,
+                            width: 33 },
+                          { type: 'component',
+                            componentName: 'chatbot',
+                            componentState: component_2,
+                            width: 33} ,
+                          { type: 'component',
+                            componentName: 'chatbot',
+                            componentState: component_3,
+                            width: 33 }]
+            }]},
+        ]
+    };
+
+    var myLayout = new GoldenLayout( config , "#layout");
+
+    window.myLayout = myLayout
+       myLayout.registerComponent('user_prompt', function(container, componentState) {
+           html = `<webc-chat-input></webc-chat-input>`
+           container.getElement().html(html)
+       })
+
+       myLayout.registerComponent('chatbot', function(container, componentState) {
+           console.log(componentState.system_prompt)
+           html = `<chatbot-openai name="${componentState.name}"
+                                   channel="${componentState.channel}"
+                                   platform="${componentState.platform}"
+                                   provider="${componentState.provider}"
+                                   model="${componentState.model}"
+                                   show_sent_messages='false'
+                                   edit_mode='false'
+                                   system_prompt='${componentState.system_prompt}'>
+                   </chatbot-openai>`
+
+           container.getElement().html(html)
+    });
+    let initial_prompt = "I'm a CISO and I have 100 vulnerabilities to report to you, how should I do it?"
+        initial_prompt = "Hi, I would like to get 250k budget to replace our SIEM so that we can improve our SOAR capabilities and deal with APT more effectively "
+    setTimeout(()=>{
+        //myLayout.destroy();
+        myLayout.init()
+
+        send_message_to_llms(initial_prompt)
+        hook_send_button()
+    }, 1)
+
+    function send_message_to_llm(channel, user_prompt) {
+        events_utils.send_to_channel("new_input_message", channel, {'user_prompt': user_prompt})
+    }
+    function send_message_to_llms(message) {
+        send_message_to_llm('MODEL-1',message )
+        send_message_to_llm('MODEL-2',message )
+        send_message_to_llm('MODEL-3',message )
+        send_message_to_llm('MODEL-4',message )
+        send_message_to_llm('MODEL-5',message )
+        send_message_to_llm('MODEL-6',message )
+    }
+    function hook_send_button() {
+        function on_click() {
+            current_text = $('webc-chat-input')[0].input.value
+            send_message_to_llms(current_text)
+        }
+
+        $('webc-chat-input')[0].send_user_message_event = on_click
+        $('webc-chat-input')[0].on_action_button = on_click
+
+        $('webc-chat-input')[0].input.value = initial_prompt
+    }
+
+});
+
+
+</script>
