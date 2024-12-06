@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<div class="jumbotron-fluid"></div>
+<h1 class="display-4" style="float: left;">Appointments</h1>
+<img src="{{ url_for('static', filename='logo.png') }}" style="float: left; padding-left: 1em; padding-right: 2em;"
+    width="14%"", alt=" SJD logo">
+</div>
+<br><br><br>
+<hr class="my-4">
+{% endblock %}
+
+{% block content %}
+<header>
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+          <h1 class="display-4">Appointments ({{ appt_id }})</h1>
+          <p class="lead">Modifying details about appointment {{ appt_id }}. Hit the "Submit" button when finished.</p>
+        </div>
+      </div>
+    <hr class="my-4">
+  </header>
+<body>
+    <form class="form needs-validation" method="POST" novalidate>
+        <div class="row">
+            <div class="col">
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    <button type="submit"
+                class="btn btn-warning" style="float: left; margin: 0.5em;"><i
+                  class="fa fa-pen"></i>&nbsp&nbspSubmit</button>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="width: 30%; float: left; margin-right: 2em;">
+            <h5 class="card-header">Appointment information</h5>
+            <div class="card-body">
+                <div class="col">
+                    <label for="inputStudy" class="form-label">Study</label>
+                    <select class="form-select" name="inputStudy" required>
+                        <option disabled selected value> -- Select one -- </option>
+                        {% for k, v in data_dict["appointment_study"].items() %}
+                        <option {% if data["study"]==v %} selected {% endif %} value="{{ k }}">{{ v }}</option>                        value="{{ k }}">{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="valid-feedback">
+                        Looks good!
+                    </div>
+                    <label for="inputStatus" class="form-label">Appointment status</label>
+                    <select class="form-select" name="inputStatus" required>
+                        <option disabled selected value> -- Select one -- </option>
+                        {% for k, v in data_dict["appointment_status"].items() %}
+                        <option {% if data["status"]==v %} selected {% endif %} value="{{ k }}">{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="inputDate">Appointment date</label>
+                    <input type="datetime-local" name="inputDate" placeholder="{{ data['date'] }}"
+                        value="{{ data['date'] }}" required>
+                </div>
+                <label for="inputTaxiAddress" class="form-label">Taxi address</label>
+                <input type="text" class="form-control" name="inputTaxiAddress" rows="1"
+                    placeholder="{{ data['taxi_address'] }}" value="{{ data['taxi_address'] }}">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="inputTaxiIsbooked" id="inputTaxiIsbooked" ,
+                        placeholder="{{ data['taxi_isbooked'] }}" value="{{ data['taxi_isbooked'] }}">
+                    <label class="form-check-label" for="inputTaxiIsbooked">Is the taxi booked</label>
+                </div>
+                <label for="inputComments" class="form-label">Comments</label>
+                <textarea class="form-control" name="inputComments" rows="3" placeholder="{{ data['comments'] }}"
+                    value="{{ data['comments'] }}"></textarea>
+            </div>
+        </div>
+    </form>
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('needs-validation');
+                // Loop over them and prevent submission
+                var validation = Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+</body>
+{% endblock %}
