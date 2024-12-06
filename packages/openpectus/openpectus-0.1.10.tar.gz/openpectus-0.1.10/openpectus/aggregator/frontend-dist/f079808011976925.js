@@ -1,0 +1,1 @@
+import{create as a}from"../vscode/src/vs/workbench/api/worker/extensionHostWorker.js";const s=a();globalThis.onmessage=e=>s.onmessage(e.data);

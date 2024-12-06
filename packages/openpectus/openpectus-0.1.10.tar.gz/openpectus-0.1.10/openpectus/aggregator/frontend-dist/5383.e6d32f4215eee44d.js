@@ -1,0 +1,7 @@
+"use strict";(self.webpackChunkfrontend=self.webpackChunkfrontend||[]).push([[5383],{95383:(i,a,t)=>{t.r(a),t.d(a,{conf:()=>s,language:()=>n});var e=t(57847),s=e.conf,n={defaultToken:"invalid",tokenPostfix:".js",keywords:["break","case","catch","class","continue","const","constructor","debugger","default","delete","do","else","export","extends","false","finally","for","from","function","get","if","import","in","instanceof","let","new","null","return","set","static","super","switch","symbol","this","throw","true","try","typeof","undefined","var","void","while","with","yield","async","await","of"],typeKeywords:[],operators:e.language.operators,symbols:e.language.symbols,escapes:e.language.escapes,digits:e.language.digits,octaldigits:e.language.octaldigits,binarydigits:e.language.binarydigits,hexdigits:e.language.hexdigits,regexpctl:e.language.regexpctl,regexpesc:e.language.regexpesc,tokenizer:e.language.tokenizer};
+/*!-----------------------------------------------------------------------------
+       * Copyright (c) Microsoft Corporation. All rights reserved.
+       * Version: 0.45.0(5e5af013f8d295555a7210df0d5f2cea0bf5dd56)
+       * Released under the MIT license
+       * https://github.com/microsoft/monaco-editor/blob/main/LICENSE.txt
+       *-----------------------------------------------------------------------------*/}}]);
