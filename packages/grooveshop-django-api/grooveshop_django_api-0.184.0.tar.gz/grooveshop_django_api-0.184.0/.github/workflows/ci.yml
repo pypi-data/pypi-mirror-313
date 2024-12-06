@@ -1,0 +1,220 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+
+name: CI
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  SYSTEM_ENV: ci
+  MEILI_HOST: 127.0.0.1
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13.0
+          cache: 'pip'
+
+      - name: Install pipx and Poetry
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pipx
+          pipx install poetry==1.8.2
+
+      - name: Configure Poetry settings
+        run: |
+          poetry config virtualenvs.in-project true
+
+      - name: Display Poetry version
+        run: |
+          poetry --version
+
+      - name: Install dependencies
+        run: |
+          poetry install
+
+      - name: Lint with flake8
+        run: |
+          poetry run flake8 . --exclude .venv --count --select=E9,F63,F7,F82 --show-source --statistics
+          poetry run flake8 . --exclude .venv --count --exit-zero --max-complexity=31 --max-line-length=120 --statistics
+  testing:
+    needs: quality
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        db: [ postgres ]
+        python-version: [ 3.13.0 ]
+        meilisearch-version: [ 1.11 ]
+        include:
+          - db: postgres
+            db_port: 5432
+            db_user: devuser
+            db_password: changeme
+
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: devuser
+          POSTGRES_PASSWORD: changeme
+        options: --mount type=tmpfs,destination=/var/lib/postgresql/data --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+      meilisearch:
+        image: getmeili/meilisearch:v${{ matrix.meilisearch-version }}
+        ports:
+          - 7700:7700
+        env:
+          MEILI_HTTP_ADDR: meilisearch:7700
+          MEILI_LOG_LEVEL: INFO
+          MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
+          MEILI_ENV: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install psycopg prerequisites
+        run: sudo apt-get install libpq-dev
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install apprise braintree coverage coveralls
+
+      - name: Run migrations
+        run: |
+          python manage.py makemigrations
+          python manage.py migrate
+        env:
+          DB: ${{ matrix.db }}
+          DB_PORT: ${{ matrix.db_port }}
+          DB_USER: ${{ matrix.db_user }}
+          DB_PASSWORD: ${{ matrix.db_password }}
+          MEILI_HTTP_ADDR: meilisearch:7700
+          MEILI_LOG_LEVEL: INFO
+          MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
+          MEILI_ENV: production
+
+      - name: Run Tests
+        env:
+          DB: ${{ matrix.db }}
+          DB_PORT: ${{ matrix.db_port }}
+          DB_USER: ${{ matrix.db_user }}
+          DB_PASSWORD: ${{ matrix.db_password }}
+          MEILI_HTTP_ADDR: meilisearch:7700
+          MEILI_LOG_LEVEL: INFO
+          MEILI_MASTER_KEY: ${{ secrets.MEILI_MASTER_KEY }}
+          MEILI_ENV: production
+        run: |
+          coverage run --rcfile=.coveragerc --source='.' -m pytest && coverage report
+        timeout-minutes: 5
+
+      - name: Upload coverage to Coveralls
+        if: matrix.db == 'postgres'
+        run: coveralls --service=github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Store Pull Request comment to be posted
+        uses: actions/upload-artifact@v4
+        if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
+        with:
+          name: python-coverage-comment-action
+          path: python-coverage-comment-action.txt
+
+  release:
+    needs: testing
+    runs-on: ubuntu-latest
+    concurrency: release
+    environment: release
+    permissions:
+      id-token: write
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13.0
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13.0
+          cache: 'pip'
+
+      - name: Install latest pip
+        run: python -m pip install --upgrade pip
+
+      - name: Clear dist_build directory
+        run: rm -rf dist_build/
+
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.DJANGO_TOKEN }}
+
+      - name: Install pypa/build
+        run: python3 -m pip install build --user
+
+      - name: Build a binary wheel and a source tarball
+        run: python3 -m build --sdist --wheel --outdir dist_build/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist_build
+          path: dist_build/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist_build
+          path: dist_build/
+
+      - name: Remove non-distribution files
+        run: |
+          find dist_build/ -type f ! -name '*.whl' ! -name '*.tar.gz' -delete
+
+      - name: Publish package distributions 📦 to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist_build/
+          attestations: false  # Added this line
+        if: steps.release.outputs.released == 'true'
+
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist_build/
+          attestations: false  # Added this line
+        if: steps.release.outputs.released == 'true'
