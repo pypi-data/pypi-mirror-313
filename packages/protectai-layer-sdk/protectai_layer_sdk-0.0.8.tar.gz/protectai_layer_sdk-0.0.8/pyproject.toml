@@ -1,0 +1,122 @@
+[tool.poetry]
+name = "protectai-layer-sdk"
+version = "0.0.8"
+description = "Python SDK for Protect AI's Layer."
+authors = ["Protect AI <support@protectai.com>"]
+readme = "README.md"
+packages = [{ include = "layer_sdk" }]
+license = "Apache-2.0"
+exclude = ["tests/*", "Makefile"]
+homepage = "https://protectai.com/layer"
+keywords = [
+    "layer",
+    "llm",
+    "monitoring",
+    "security",
+]
+repository = "https://github.com/protectai/layer/tree/main/python"
+classifiers = [
+  "Typing :: Typed",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Operating System :: POSIX",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Microsoft :: Windows",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "License :: OSI Approved :: Apache Software License"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+orjson = "^3.10.7"
+requests = "^2.32.3"
+wrapt = "^1.16.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "8.3.3"
+pyright = "1.1.388"
+ruff = "0.8.1"
+pytest-cov = "6.0.0"
+pytest-asyncio = "0.24.0"
+openai = ">=1.18.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+
+[tool.coverage.html]
+show_contexts = true
+
+[tool.ruff]
+line-length = 100
+src = [
+    "layer_sdk",
+    "tests",
+]
+
+[tool.ruff.lint]
+ignore = [
+    'RUF001', # String contains ambiguous `，`
+    'D417',  # Relax the convention by _not_ requiring documentation for every function parameter.
+]
+select = [
+    "E", # pycodestyle
+    "D", # pydocstyle
+    "D401", # First line should be in imperative mood
+    'A',  # flake8-builtins
+    'ASYNC',  # flake8-async
+    'ERA',  # eradicate
+    'F',  # Pyflakes
+    'I',  # Isort
+    'NPY',  # NumPy Rules
+    'PERF',  # performance
+    'PYI',  # flake8-pyi
+]
+
+[tool.ruff.lint.isort]
+length-sort = true
+length-sort-straight = true
+combine-as-imports = true
+known-first-party = [
+    "layer_sdk",
+    "tests",
+]
+split-on-trailing-comma = false
+
+[tool.ruff.lint.pep8-naming]
+ignore-names = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401",  # Import imported into __init__ by unused; consider adding to `__all__` or using a redundant alias
+    "F403",  # Unable to detect undefined names
+    "F405",  # May be undefined, or defined from star imports
+]
+"**/{tests,docs,tools}/*" = ["D100", "D101", "D102"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 80
+
+[tool.pyright]
+include = ["layer_sdk", "tests"]
+exclude = ["build", "**/__pycache__"]
+
+pythonVersion = "3.12"
+pythonPlatform = "Linux"
