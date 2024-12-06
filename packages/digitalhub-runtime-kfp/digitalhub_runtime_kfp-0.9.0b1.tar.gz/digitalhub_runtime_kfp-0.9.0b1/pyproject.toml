@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digitalhub-runtime-kfp"
+version = "0.9.0b1"
+description = "KFP runtime for DHCore"
+readme = "README.md"
+authors = [
+    { name = "Fondazione Bruno Kessler", email = "dslab@fbk.eu" },
+    { name = "Matteo Martini", email = "mmartini@fbk.eu" }
+]
+license = { file = "LICENSE.txt" }
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+keywords = ["data", "dataops", "kubernetes"]
+requires-python = ">=3.9"
+dependencies = [
+"digitalhub[full]>=0.9.0b, <0.10"
+]
+[project.optional-dependencies]
+local = [
+    "kfp==1.8.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/scc-digitalhub/digitalhub-sdk"
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint.extend-per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.bumpver]
+current_version = "0.9.0b1"
+version_pattern = "MAJOR.MINOR.PATCH[PYTAGNUM]"
+commit_message  = "Bump version {old_version} -> {new_version}"
+commit          = false
+tag             = false
+push            = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
