@@ -1,0 +1,116 @@
+[tool.poetry]
+name = "ipsuite"
+version = "0.2.2"
+description = "A suite of tools for machine learned interatomic potentials."
+authors = ["zincwarecode <zincwarecode@gmail.com>"]
+keywords = ["data-version-control", "machine-learning", "reproducibility", "interatomic potentials"]
+license = "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)"
+readme = "README.md"
+
+[tool.poetry.urls]
+documentation = "https://ipsuite.readthedocs.io"
+repository = "https://github.com/zincware/ipsuite"
+
+[tool.poetry.dependencies]
+# tensorflow-io-gcs-filesystem
+python = ">=3.10,<4.0.0"
+
+znh5md = "^0.4.1"
+ase = "^3.23"
+
+seaborn = "^0.12.2"
+cp2k-input-tools = "^0.9"
+cp2k-output-tools = "^0.5.0"
+
+lazy-loader = "0.4"
+zntrack = "0.8.0"
+uncertainty-toolbox = "^0.1.1"
+rdkit2ase = "^0.1.4"
+
+[tool.poetry.group.GAP.dependencies]
+quippy-ase = "^0.9.12"
+xmltodict = "^0.13.0"
+
+[tool.poetry.group.d3.dependencies]
+torch-dftd = "^0.4.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.4.0"
+pytest = "^7.2.1"
+coverage = "^7.2.1"
+imageio = "^2.28.1"
+dvc-s3 = "^3.0.1"
+mdanalysis = "^2.7.0"
+
+[tool.poetry.group.notebook.dependencies]
+jupyterlab = "^3.6.1"
+ipywidgets = "^8.0.6"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.2.6"
+furo = "^2024.1.29"
+sphinx-copybutton = "^0.5.2"
+
+[tool.poetry.extras]
+comparison = ["h5py", "tensorflow", "dscribe"]
+gap = ["quippy-ase", "xmltodict"]
+d3 = ["torch-dftd"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = 'black'
+multi_line_output = 3
+
+[tool.black]
+line-length = 90
+preview = true
+
+
+[tool.ruff]
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "tests",
+]
+
+# Same as Black.
+line-length = 90
+
+# Assume Python 3.10.
+target-version = "py310"
+
+[tool.ruff.lint]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["A", "B", "C", "E", "F", "I", "C90", "C4", "TID", "PTH"] #  "D", "S"
+# ignore = ["D203", "D213", "D104", "D102", "D100", ]
+ignore = [
+    "B905", # not supported in older python versions
+]
+
+[tool.codespell]
+ignore-words-list = "dscribe"
+skip = "poetry.lock,ipsuite/static_data/*,docs/source/examples/06_Bootstrapping_Datasets.ipynb"
