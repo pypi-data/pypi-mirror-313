@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load crispy_forms_filters %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}
+    {% translate "Copy event" %}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" media="screen" href="{% static "recurrence/css/recurrence.css" %}">
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript" src="{% static "recurrence/js/recurrence.js" %}"></script>
+    <script type="text/javascript" src="{% static "recurrence/js/recurrence-widget.js" %}"></script>
+    <script type="text/javascript" src="{% static "ephios/js/event_copy.js" %}"></script>
+{% endblock %}
+
+{% block html_head %}
+    <script type="application/json" id="rrule_url">{"url": "{% url "core:rrule_occurrences" %}"}</script>
+{% endblock %}
+
+
+{% block content %}
+    <div class="page-header">
+        <h1>
+            {% translate "Copy event" %} "{{ event.title }}" <small>({{ event.get_start_time }})</small>
+        </h1>
+    </div>
+
+    <div class="mt-2">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="clearfix mb-2 row">
+                <div class="col-md-6">
+                    {{ form.start_date|as_crispy_field }}
+                    {{ form.recurrence }}
+                </div>
+                <div class="col-md-6">
+                    <h2 id="rrule_occurrences_heading"></h2>
+                    <div id="rrule_occurrences" class="two-columns"></div>
+                </div>
+            </div>
+
+            <div>
+                <a role="button" class="btn btn-secondary"
+                   href="{{ event.get_absolute_url }}">{% translate "Back" %}</a>
+                <button type="submit" class="btn btn-primary float-end">{% translate "Copy" %}</button>
+                <button type="button" role="button" class="btn btn-outline-success float-end me-1"
+                        id="btn_check">{% translate "Preview" %}</button>
+            </div>
+
+        </form>
+    </div>
+{% endblock %}
+
