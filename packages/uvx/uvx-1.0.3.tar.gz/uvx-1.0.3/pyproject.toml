@@ -1,0 +1,110 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "uvx"
+dynamic = ["version"]
+description = 'uvx: pipx for uv'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = ["uv", "pipx", "cli", "typer", "venv"]
+authors = [
+    { name = "Robin van der Noord", email = "robinvandernoord@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "uv",
+    "typer",
+    "plumbum",
+    "threadful>=0.3",
+    "rich",
+    "msgspec",
+    "packaging",
+    "result",
+    "configuraptor",
+]
+
+[project.optional-dependencies]
+dev = [
+    "hatch",
+    "python-semantic-release<8",
+    "black",
+    "su6[all]",
+]
+
+[project.scripts]
+uvx = "uvx.cli:app"
+
+[project.urls]
+Documentation = "https://github.com/robinvandernoord/uvx#readme"
+Issues = "https://github.com/robinvandernoord/uvx/issues"
+Source = "https://github.com/robinvandernoord/uvx"
+
+[tool.hatch.version]
+path = "src/uvx/__about__.py"
+
+[tool.su6]
+directory = "src"
+include = []
+exclude = ["pytest"]
+stop-after-first-failure = false
+coverage = 100
+badge = true
+
+[tool.black]
+target-version = ["py311"]
+line-length = 120
+# 'extend-exclude' excludes files or directories in addition to the defaults
+extend-exclude = '''
+# A regex preceded with ^/ will apply only to files and directories
+# in the root of the project.
+(
+  ^.*\.bak\/.+     # ignore every .bak directory
+  ^.*venv.+\/.+    # ignore every venv directory
+  venv.+|.+\.bak   # idk why it suddenly works, let's not touch it
+)
+'''
+
+[tool.isort]
+profile = "black"
+extend_skip_glob = ["*.bak/*"]
+
+[tool.setuptools.package-data]
+"uvx" = ["py.typed"]
+
+[tool.coverage.run]
+source_pkgs = ["uvx", "tests"]
+branch = true
+parallel = true
+omit = [
+    "src/uvx/__about__.py",
+]
+
+[tool.coverage.paths]
+uvx = ["src/uvx", "*/uvx/src/uvx"]
+tests = ["tests", "*/uvx/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.semantic_release]
+branch = "master"
+version_variable = "src/uvx/__about__.py:__version__"
+change_log = "CHANGELOG.md"
+upload_to_repository = false
+upload_to_release = false
+build_command = "hatch build"
