@@ -1,0 +1,73 @@
+Metadata-Version: 2.4
+Name: discord-ext-songbird
+Version: 0.1.1
+Classifier: Programming Language :: Rust
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: discord-py[voice]
+Requires-Dist: audioop-lts ; python_version >= '3.13'
+License-File: LICENSE
+Summary: Library to replace the voice backend of discord.py with Songbird.
+Author: Sumito Izumita <mail@smdr.io>
+Author-email: Sumito Izumita <mail@smdr.io>
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown; charset=UTF-8; variant=GFM
+Project-URL: Source Code, https://github.com/sizumita/discord-ext-songbird
+
+# discord-ext-songbird
+
+![GitHub License](https://img.shields.io/github/license/sizumita/discord-ext-songbird)
+![GitHub Release](https://img.shields.io/github/v/release/sizumita/discord-ext-songbird)
+![PyPI - Version](https://img.shields.io/pypi/v/discord-ext-songbird)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/discord-ext-songbird)
+
+
+Library to replace the voice backend of [discord.py](https://github.com/rapptz/discord.py) with [Songbird](https://github.com/serenity-rs/songbird).
+
+# Installation
+
+```bash
+$ python -m pip install discord-ext-songbird
+```
+
+# Quick Example
+
+```python
+import discord
+from discord.ext.songbird import SongbirdClient
+
+client = discord.Client()
+
+@client.event
+async def on_ready():
+    print("ready")
+    channel: discord.VoiceChannel = client.get_channel(CHANNEL_ID)
+    voice_client: SongbirdClient = await channel.connect(cls=SongbirdClient)
+    source = songbird.RawBufferSource(...) # passes io.BufferIOBase
+    track = songbird.Track(source).set_volume(0.8)
+
+    await voice_client.queue.enqueue(track)
+
+client.run(...)
+```
+
+More examples are on `examples` folder.
+
+# Todo
+
+- [ ] Voice Sending 
+  - [ ] Multi Codec Support
+    - [x] Wav
+  - [ ] Sharded Bot Support
+  - [ ] Stream input
+- [ ] Voice Receiving
+  - [ ] Sink Model
+    - [ ] Multi ssrc stream
+
