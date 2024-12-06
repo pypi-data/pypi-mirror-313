@@ -1,0 +1,39 @@
+[project]
+name = "uhil-api-server"
+version = "0.1.0"
+dynamic = ["dependencies"]
+description = "µHIL API server package"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { text = "BSD License" }
+authors = [{ name = "Guillaume Sottas", email = "guillaumesottas@gmail.com" }]
+urls = { "Repository" = "https://github.com/Sauci/uhil-api-server" }
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Unix"
+]
+
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = [
+    "api",
+    "api.ipc",
+    "api.v1",
+    "api.v1.data_models"
+]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+
+[project.scripts]
+uhil-api-server = "cli:main"
