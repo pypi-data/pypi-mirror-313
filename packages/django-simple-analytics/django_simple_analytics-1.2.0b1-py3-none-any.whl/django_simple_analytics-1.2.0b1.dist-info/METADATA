@@ -1,0 +1,90 @@
+Metadata-Version: 2.1
+Name: django-simple-analytics
+Version: 1.2.0b1
+Summary: A simple django packages to track requests on the site
+Author-email: Ferran Jovell <ferran.jovell+gh@gmail.com>
+Project-URL: homepage, https://github.com/mrswats/django-simple-analytics
+Project-URL: Bug Tracker, https://github.com/mrswats/django-simple-analytics/issues
+Keywords: django,analytics
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Utilities
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENCE
+Requires-Dist: Django>=4.1.0
+Provides-Extra: test
+Requires-Dist: pytest==7.1.2; extra == "test"
+Requires-Dist: pytest-cov==3.0.0; extra == "test"
+Requires-Dist: pytest-django==4.5.2; extra == "test"
+Requires-Dist: pytest-sugar==0.9.5; extra == "test"
+Requires-Dist: time-machine==2.16.0; extra == "test"
+Requires-Dist: django-stubs[compatible-mypy]==1.12.0; extra == "test"
+Requires-Dist: typing-extensions==4.3.0; extra == "test"
+
+# Django Simple Analytics
+
+![PyPI](https://img.shields.io/pypi/v/django-simple-analytics?style=for-the-badge)
+[![](https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge)](https://github.com/psf/black)
+![PyPI - License](https://img.shields.io/pypi/l/django-simple-analytics?style=for-the-badge)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django-simple-analytics?style=for-the-badge)
+
+Simple analytics is a very simple package to track requests done to the website and store them in database.
+
+## Installation
+
+From PYPi using `pip`:
+
+```
+pip install django-simple-analytics
+```
+
+## Usage
+
+In order to install the package add the following line to `INSTALLED_APPS`
+
+```python
+INSTALLED_APPS = [
+    ...
+    "simple_analytics",
+]
+```
+
+This will make the model available for you to call and query. To enable the middleware, add this at the bottom of the middleware list:
+
+```python
+MIDDLEWARE = [
+    ...
+    "simple_analytics.middleware.page_counts",
+]
+```
+
+Then, you need to run migrations, finally:
+
+```console
+./manage.py migrate
+```
+
+To actually create the table in the database.
+
+Now every request done to the django website will be recorded in the database with the following fields:
+
+- Date: The date pf the request.
+- Page: The path of the request.
+- Method: The verb used to request the page.
+- Whether the page exists or not.
+- Origin: If the header exists in the requst, where the request originated.
+- User: The user who performed the request. If the user is not authenticated, it will show as AnonymousUser.
+- view_count: The number of requests to that page, per date and per method used.
+
+## Licence
+
+This package is distributed under [MIT Licence](./LICENCE).
