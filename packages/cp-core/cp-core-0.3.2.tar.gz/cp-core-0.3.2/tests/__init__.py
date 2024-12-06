@@ -1,0 +1,3 @@
+"""
+Functional test about cmd
+"""
