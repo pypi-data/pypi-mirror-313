@@ -1,0 +1,367 @@
+module Test;
+
+import Stdlib.Prelude open;
+import Stdlib.Extra.Gcd open;
+import Stdlib.Trait.Ord as Ord;
+
+import Data.List open;
+import Data.String open;
+
+import Test.QuickCheckTest as QC;
+import Test.Arb as QC;
+
+import Test.JuvixUnit open;
+import Stdlib.System.IO open;
+import Test.AVL open using {suite as avlSuite};
+import Test.Map open using {suite as mapSuite};
+import Test.Queue open using {suite as queueSuite};
+import Test.UnbalancedSet open using {suite as unbalancedSetSuite};
+
+propReverseDoesNotChangeLength (xs : List Int) : Bool :=
+  length (reverse xs) == length xs;
+
+propReverseReverseIsIdentity (xs : List Int) : Bool :=
+  eqListInt xs (reverse (reverse xs));
+
+propTailLengthOneLess (xs : List Int) : Bool :=
+  isEmpty xs || ofNat (length (tail xs)) == intSubNat (length xs) 1;
+
+propSplitAtRecombine (n : Nat) (xs : List Int) : Bool :=
+  case splitAt n xs of lhs, rhs := eqListInt xs (lhs ++ rhs);
+
+propSplitAtLength (n : Nat) (xs : List Int) : Bool :=
+  case splitAt n (xs ++ replicate (sub n (length xs)) (ofNat 0)) of
+    lhs, rhs := length lhs == n && length rhs == sub (length xs) n;
+-- Make sure the list has length at least n (TODO: make sure where?)
+
+propMergeSumLengths (xs ys : List Int) : Bool :=
+  length xs + length ys == length (merge xs ys);
+
+propPartition (xs : List Int) (predicate : Int -> Bool) : Bool :=
+  case partition predicate xs of
+    lhs, rhs :=
+      all predicate lhs
+        && not (any predicate rhs)
+        && eqListInt (sortInt xs) (sortInt (lhs ++ rhs));
+
+propDistributive (a b : Int) (f : Int -> Int) : Bool := f (a + b) == f a + f b;
+
+propAddSub (a b : Int) : Bool := a == a + b - b;
+
+propAddSubBad (a b : Int) : Bool := a == ofNat 2;
+
+propGcdBad (a b : Int) : Bool := gcd a b > ofNat 1;
+
+propEqualCompareToEq (a : Nat) : Bool := Ord.isEqual (Ord.cmp a a);
+
+propSort (sort : List Int -> List Int) (xs : List Int) : Bool :=
+  let
+    sorted : List Int := sort xs;
+    isSorted : List Int -> Bool
+      | nil := true
+      | (_ :: nil) := true
+      | (x :: y :: xs) := x <= y && isSorted (y :: xs);
+  in length sorted == length xs
+    && eqListInt sorted (sort sorted)
+    && isSorted sorted;
+
+propZip (xs ys : List Int) : Bool :=
+  let
+    zs : List (Pair Int Int) := zip xs ys;
+    expectedLen : Nat := min (length xs) (length ys);
+  in length zs == expectedLen
+    && eqListInt (take expectedLen xs) (map fst zs)
+    && eqListInt (take expectedLen ys) (map snd zs);
+
+propZipWith (f : Int -> Int -> Int) (xs ys : List Int) : Bool :=
+  let
+    zs : List Int := zipWith f xs ys;
+    zsFlip : List Int := zipWith (flip f) ys xs;
+    expectedLen : Nat := min (length xs) (length ys);
+  in length zs == expectedLen
+    && eqListInt zs zsFlip
+    && eqListInt (map λ{x := f x x} xs) (zipWith f xs xs);
+
+propSnoc (xs : List Int) (x : Int) : Bool :=
+  let
+    snoc-x : List Int := snoc xs x;
+  in eqListInt snoc-x (reverse (x :: reverse xs));
+
+propDrop (n : Nat) (xs : List Int) : Bool :=
+  let
+    drop-n : List Int := drop n xs;
+  in length drop-n <= length xs
+    && eqListInt (drop n (drop n xs)) (drop (2 * n) xs);
+
+-- Assumption: The input list represents a rectangular matrix
+propTransposeMatrixId (xs : List (List Int)) : Bool :=
+  Eq.eq xs (transpose (transpose xs));
+
+-- Assumption: The input list represents a rectangular matrix
+propTransposeMatrixDimensions (xs : List (List Int)) : Bool :=
+  let
+    txs : List (List Int) := transpose xs;
+    checkTxsRowXsCol : Bool :=
+      case xs of
+        | x :: _ := length txs == length x
+        | _ := isEmpty txs;
+    checkXsRowTxsCol : Bool :=
+      case txs of
+        | tx :: _ := length xs == length tx
+        | _ := isEmpty xs;
+  in checkTxsRowXsCol && checkXsRowTxsCol;
+
+propFoundElementSatisfiesPredicate (p : Int -> Bool) (xs : List Int) : Bool :=
+  case find p xs of
+    | just x := p x
+    | nothing := true;
+
+propNonExistenceImpliesPredicateFalseForAll
+  (p : Int -> Bool) (xs : List Int) : Bool :=
+  case find p xs of
+    | just _ := true
+    | nothing :=
+      all (x in xs) {
+        not (p x)
+      };
+
+propFindConsistentWithSplitAt
+  (n : Nat) (p : Int -> Bool) (xs : List Int) : Bool :=
+  let
+    ys×zs := splitAt n xs;
+    ys := fst ys×zs;
+    zs := snd ys×zs;
+  in case find p xs of
+       | just x :=
+         if
+           | isMember x ys := find p ys == just x
+           | isMember x zs := find p zs == just x
+           | else := false
+       | nothing := true;
+
+propFindWithEmptyList (p : Int -> Bool) : Bool := find p [] == nothing;
+
+propFindWithAlwaysTrueIsJust (xs : List Int) : Bool :=
+  if
+    | isEmpty xs := true
+    | else :=
+      case find (const true) xs of
+        | just _ := true
+        | nothing := false;
+
+propFindWithAlwaysFalseIsNothing (xs : List Int) : Bool :=
+  find (const false) xs == nothing;
+
+propResultErrorApplication (f : Int -> Int) (g : Int -> Int) (x : Int) : Bool :=
+  handleResult f g (error x) == f x;
+
+propResultOkApplication (f : Int -> Int) (g : Int -> Int) (x : Int) : Bool :=
+  handleResult f g (ok x) == g x;
+
+propResultIsError (result : Result Int Bool) : Bool :=
+  case result of
+    | error _ := isError result
+    | ok _ := not (isError result);
+
+propResultIsOk (result : Result Int Bool) : Bool :=
+  case result of
+    | error _ := not (isOk result)
+    | ok _ := isOk result;
+
+propResultFromErrorDefault
+  (defaultError : Int) (result : Result Int Bool) : Bool :=
+  case result of
+    | error x := fromError defaultError result == x
+    | ok _ := fromError defaultError result == defaultError;
+
+propResultFromOkDefault (defaultOk : Bool) (result : Result Int Bool) : Bool :=
+  case result of
+    | error _ := fromOk defaultOk result == defaultOk
+    | ok x := fromOk defaultOk result == x;
+
+propResultToMaybe (result : Result Int Bool) : Bool :=
+  case result of
+    | error _ := resultToMaybe result == nothing
+    | ok x := resultToMaybe result == just x;
+
+propMaybeToResult (def : Int) (maybe : Maybe Bool) : Bool :=
+  case maybe of
+    | just x := maybeToResult def maybe == ok x
+    | nothing := maybeToResult def maybe == error def;
+
+propResultMapError (f : Int -> Int) (result : Result Int Int) : Bool :=
+  case result of
+    | error x := mapError f result == error (f x)
+    | ok _ := mapError f result == result;
+
+propResultMapOk (f : Int -> Int) (result : Result Int Int) : Bool :=
+  case result of
+    | error _ := mapOk f result == result
+    | ok x := mapOk f result == ok (f x);
+
+sortTest (sortName : String) (sort : List Int -> List Int) : QC.Test :=
+  QC.mkTest ("sort properties: " ++str sortName) (propSort sort);
+
+dropTest : QC.Test := QC.mkTest "drop properties" propDrop;
+
+snocTest : QC.Test := QC.mkTest "snoc properties" propSnoc;
+
+zipTest : QC.Test := QC.mkTest "zip properties" propZip;
+
+zipWithTest : QC.Test := QC.mkTest "zipWith properties" propZipWith;
+
+equalCompareToEqTest : QC.Test :=
+  QC.mkTest "equal Nats compare to EQ" propEqualCompareToEq;
+
+gcdNoCoprimeTest : QC.Test := QC.mkTest "no integers are coprime" propGcdBad;
+
+partitionTest : QC.Test :=
+  QC.mkTest
+    "partition: recombination of the output equals the input"
+    propPartition;
+
+testDistributive : QC.Test :=
+  QC.mkTest "all functions are distributive over +" propDistributive;
+
+reverseLengthTest : QC.Test :=
+  QC.mkTest "reverse preserves length" propReverseDoesNotChangeLength;
+
+reverseReverseIdTest : QC.Test :=
+  QC.mkTest "reverse of reverse is identity" propReverseReverseIsIdentity;
+
+splitAtRecombineTest : QC.Test :=
+  QC.mkTest
+    "splitAt: recombination of the output is equal to the input list"
+    propSplitAtRecombine;
+
+splitAtLengthTest : QC.Test :=
+  QC.mkTest
+    "splitAt: Check lengths of output if the input Nat is greater than the length of the input list"
+    propSplitAtLength;
+
+mergeSumLengthsTest : QC.Test :=
+  QC.mkTest
+    "merge: sum of the lengths of input lists is equal to the length of output list"
+    propMergeSumLengths;
+
+tailLengthOneLessTest : QC.Test :=
+  QC.mkTest
+    "tail: length of output is one less than input unless empty"
+    propTailLengthOneLess;
+
+transposeMatrixIdTest : QC.Test :=
+  QC.mkTest
+    {{QC.testableFunction {{showListI}} {{QC.arbitraryMatrix}}}}
+    "transpose: recrangular matrix has property transpose . transpose = id"
+    propTransposeMatrixId;
+
+transposeMatrixDimentionsTest : QC.Test :=
+  QC.mkTest
+    {{QC.testableFunction {{showListI}} {{QC.arbitraryMatrix}}}}
+    "transpose: transpose swaps dimensions"
+    propTransposeMatrixDimensions;
+
+findFoundElementSatisfiesPredicate : QC.Test :=
+  QC.mkTest
+    "find: found element satisfies predicate"
+    propFoundElementSatisfiesPredicate;
+
+findNonExistenceImpliesPredicateFalseForAll : QC.Test :=
+  QC.mkTest
+    "find: non existence implies predicate false for all"
+    propNonExistenceImpliesPredicateFalseForAll;
+
+findConsistentWithSplitAt : QC.Test :=
+  QC.mkTest "find: consistent with splitAt" propFindConsistentWithSplitAt;
+
+findOnEmptyListIsNothing : QC.Test :=
+  QC.mkTest "find: called with empty list is nothing" propFindWithEmptyList;
+
+findWithAlwaysTrueIsJust : QC.Test :=
+  QC.mkTest
+    "find: always true predicate returns just"
+    propFindWithAlwaysTrueIsJust;
+
+findWithAlwaysFalseIsNothing : QC.Test :=
+  QC.mkTest
+    "find: always false predicate returns nothing"
+    propFindWithAlwaysFalseIsNothing;
+
+resultResultErrorApplication : QC.Test :=
+  QC.mkTest "result: result error application" propResultErrorApplication;
+
+resultResultOkApplication : QC.Test :=
+  QC.mkTest "result: result ok application" propResultOkApplication;
+
+resultIsError : QC.Test :=
+  QC.mkTest "result: isError detects error" propResultIsError;
+
+resultIsOk : QC.Test := QC.mkTest "result: isOk detects ok" propResultIsOk;
+
+resultFromError : QC.Test :=
+  QC.mkTest "result: fromError uses default" propResultFromErrorDefault;
+
+resultFromOk : QC.Test :=
+  QC.mkTest "result: fromOk uses default" propResultFromOkDefault;
+
+resultResultToMaybe : QC.Test :=
+  QC.mkTest "result: resultToMaybe" propResultToMaybe;
+
+resultMaybeToResult : QC.Test :=
+  QC.mkTest "result: maybeToResult" propMaybeToResult;
+
+resultMapError : QC.Test := QC.mkTest "result: mapError" propResultMapError;
+
+resultMapOk : QC.Test := QC.mkTest "result: mapOk" propResultMapOk;
+
+main : IO :=
+  readLn
+      \{seed :=
+        let
+          seedNat := stringToNat seed;
+        in QC.runTestsIO
+            100
+            seedNat
+            [
+              partitionTest;
+              reverseLengthTest;
+              reverseReverseIdTest;
+              splitAtRecombineTest;
+              splitAtLengthTest;
+              mergeSumLengthsTest;
+              tailLengthOneLessTest;
+              equalCompareToEqTest;
+              zipTest;
+              zipWithTest;
+              snocTest;
+              dropTest;
+              sortTest "mergeSort" mergeSort;
+              sortTest "quickSort" quickSort;
+              transposeMatrixIdTest;
+              transposeMatrixDimentionsTest;
+              findFoundElementSatisfiesPredicate;
+              findNonExistenceImpliesPredicateFalseForAll;
+              findConsistentWithSplitAt;
+              findOnEmptyListIsNothing;
+              findWithAlwaysTrueIsJust;
+              findWithAlwaysFalseIsNothing;
+            ]
+          >>> QC.runTestsIO
+            100
+            seedNat
+            [
+              resultResultErrorApplication;
+              resultResultOkApplication;
+              resultIsError;
+              resultIsOk;
+              resultFromError;
+              resultFromOk;
+              resultResultToMaybe;
+              resultMaybeToResult;
+              resultMapError;
+              resultMapOk;
+            ]}
+    >>> runTestSuite avlSuite
+    >>> runTestSuite mapSuite
+    >>> runTestSuite queueSuite
+    >>> runTestSuite unbalancedSetSuite;

@@ -1,0 +1,38 @@
+module Test.Arb;
+
+import Stdlib.Prelude open;
+import Test.QuickCheck open;
+import Test.QuickCheck.Arbitrary open;
+import Test.QuickCheck.Gen open;
+import Data.Random open;
+
+arbitrarySizedList
+  {A} (size : Nat) (arbitraryA : Arbitrary A) : Arbitrary (List A) :=
+  case arbitraryA of
+    mkArbitrary g :=
+      mkArbitrary
+        (mkGen
+          \{rand :=
+            let
+              randList : StdGen -> Nat -> List A
+                | _ zero := nil
+                | r (suc n) :=
+                  let
+                    rSplit : Pair StdGen StdGen := stdSplit r;
+                    r1 : StdGen := fst rSplit;
+                    r2 : StdGen := snd rSplit;
+                  in Gen.run g r1 :: randList r2 n;
+            in randList rand size});
+
+--- Generate an arbitrary rectangular matrix
+arbitraryMatrix {A} {{arbA : Arbitrary A}} : Arbitrary (List (List A)) :=
+  mkArbitrary
+    (mkGen
+      \{rand :=
+        let
+          randSplit : Pair StdGen StdGen := stdSplit rand;
+          rand1 : StdGen := fst randSplit;
+          rand2 : StdGen := snd randSplit;
+          cols : Nat := fst (randNat rand1 1 10);
+          arbRow : Arbitrary (List A) := arbitrarySizedList cols arbA;
+        in runArb {{arbitraryList {{arbRow}}}} rand2});
