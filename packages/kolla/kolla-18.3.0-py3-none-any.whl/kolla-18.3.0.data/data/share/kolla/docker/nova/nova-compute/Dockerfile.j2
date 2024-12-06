@@ -1,0 +1,116 @@
+FROM {{ namespace }}/{{ image_prefix }}nova-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block nova_compute_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.enable_extra_repos(['ceph', 'epel']) }}
+
+{% if base_package_type == 'rpm' %}
+
+    {% set nova_compute_packages = [
+        'ceph-common',
+        'cyrus-sasl-md5',
+        'cyrus-sasl-scram',
+        'device-mapper-multipath',
+        'dosfstools',
+        'e2fsprogs',
+        'genisoimage',
+        'iscsi-initiator-utils',
+        'libosinfo',
+        'ndctl',
+        'nfs-utils',
+        'nvme-cli',
+        'parted',
+        'python3-libguestfs',
+        'python3-libvirt',
+        'python3-rtslib',
+        'qemu-img',
+        'qemu-kvm-block-rbd',
+        'rsync',
+        'sysfsutils',
+        'targetcli',
+        'xfsprogs'
+    ] %}
+
+    # NOTE(hrw): daxio is part of pmdk which is x86-64 only in CentOS 8
+    {% if base_arch == 'x86_64' %}
+        {% set nova_compute_packages = nova_compute_packages + [
+            'daxio'
+        ] %}
+    {% endif %}
+
+{{ macros.install_packages(nova_compute_packages | customizable("packages")) }}
+
+{% elif base_package_type == 'deb' %}
+
+    {% set nova_compute_packages = [
+        'ceph-common',
+        'dosfstools',
+        'e2fsprogs',
+        'genisoimage',
+        'libosinfo-bin',
+        'libsasl2-modules-gssapi-mit',
+        'multipath-tools',
+        'ndctl',
+        'nfs-common',
+        'nvme-cli',
+        'open-iscsi',
+        'parted',
+        'pmdk-tools',
+        'python3-cephfs',
+        'python3-guestfs',
+        'python3-libvirt',
+        'python3-rados',
+        'python3-rbd',
+        'python3-rtslib-fb',
+        'qemu-block-extra',
+        'qemu-utils',
+        'rsync',
+        'sasl2-bin',
+        'swtpm',
+        'swtpm-tools',
+        'sysfsutils',
+        'targetcli-fb',
+        'tpm2-tools',
+        'xfsprogs'
+    ] %}
+
+    {% if base_arch == "aarch64" %}
+        {% set nova_compute_packages = nova_compute_packages + [
+            'qemu-efi'
+        ] %}
+    {% endif %}
+
+RUN mkdir -p /etc/ceph \
+    && {{ macros.install_packages(nova_compute_packages | customizable("packages"), chain=True) }}
+
+{% endif %}
+
+{% set nova_compute_pip_packages = [
+        'oslo-vmware'
+    ]
+%}
+
+{% set nova_compute_plugins_pip_packages = [
+    '/plugins/*'
+] %}
+
+ADD plugins-archive /
+
+COPY extend_start.sh /usr/local/bin/kolla_nova_extend_start
+
+RUN {{ macros.install_pip(nova_compute_pip_packages | customizable("pip_packages")) }} \
+    && if [ "$(ls /plugins)" ]; then \
+           {{ macros.install_pip(nova_compute_plugins_pip_packages) }}; \
+       fi \
+    && chmod 644 /usr/local/bin/kolla_nova_extend_start \
+    && rm -f /etc/machine-id
+
+{% block nova_compute_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER nova

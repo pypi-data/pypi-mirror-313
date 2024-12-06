@@ -1,0 +1,17 @@
+FROM {{ namespace }}/{{ image_prefix }}prometheus-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block prometheus_alertmanager_header %}{% endblock %}
+
+{% block prometheus_alertmanager_install %}
+ADD prometheus-alertmanager-archive /prometheus-alertmanager-source
+RUN cp -r /prometheus-alertmanager-source/* /opt/ \
+    && ln -s /opt/alertmanager* /opt/prometheus_alertmanager
+{% endblock %}
+
+{% block prometheus_alertmanager_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER prometheus

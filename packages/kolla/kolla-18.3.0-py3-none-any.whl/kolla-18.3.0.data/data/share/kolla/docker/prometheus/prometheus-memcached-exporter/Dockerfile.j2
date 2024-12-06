@@ -1,0 +1,19 @@
+FROM {{ namespace }}/{{ image_prefix }}prometheus-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block prometheus_memcached_exporter_header %}{% endblock %}
+
+{% block prometheus_memcached_exporter_install %}
+ADD prometheus-memcached-exporter-archive /prometheus-memcached-exporter-source
+
+RUN ln -s /prometheus-memcached-exporter-source/* prometheus-memcached-exporter \
+    && mkdir -p /opt/memcached_exporter/ \
+    && cp /prometheus-memcached-exporter/memcached_exporter /opt/memcached_exporter/
+{% endblock %}
+
+{% block prometheus_memcached_exporter_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER prometheus

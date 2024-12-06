@@ -1,0 +1,31 @@
+FROM {{ namespace }}/{{ image_prefix }}cinder-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block cinder_backup_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% if base_package_type == 'rpm' %}
+    {% set cinder_backup_packages = [
+        'device-mapper-multipath',
+        'lsscsi',
+        'nfs-utils',
+        'sysfsutils'
+    ] %}
+{% elif base_package_type == 'deb' %}
+    {% set cinder_backup_packages = [
+        'lsscsi',
+        'multipath-tools',
+        'nfs-common',
+        'sysfsutils'
+    ] %}
+{% endif %}
+
+{{ macros.install_packages(cinder_backup_packages | customizable("packages")) }}
+
+{% block cinder_backup_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER cinder
