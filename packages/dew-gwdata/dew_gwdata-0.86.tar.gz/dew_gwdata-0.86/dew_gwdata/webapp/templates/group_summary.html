@@ -1,0 +1,47 @@
+{% extends "app_layout.html" %}
+
+{% block header_title %}
+{{ group.group_code }} - drillhole group
+{% endblock %}
+
+{% block title %}
+Drillhole group: {{ group.group_code }}
+{% endblock %}
+
+{% block content %}
+
+<p>
+    <form>
+        <label>Group code:</label>
+        <input type="text" name="group_code" value="{{ group_code }}" /> 
+    <br>
+        <label>SWL statuses:</label>
+        <input type="text" name="swl_status" value="{{ swl_status }}" /> - comma-separated list of either C, H, or N - use "C,H,N" to select all values (e.g. if you want to filter with a different field)
+    <br>
+        <label>TDS statuses:</label>
+        <input type="text" name="tds_status" value="{{ tds_status }}" /> - as above
+    <br>
+        <label>SWL frequencies:</label>
+        <input type="text" name="swl_freq" value="{{ swl_freq }}" /> - comma-separated list of frequencies: to select all use "1,2,3,4,6,12,24,R,S"
+    <br>
+        <label>TDS statuses:</label>
+        <input type="text" name="tds_freq" value="{{ tds_freq }}" /> - as above
+    <br>
+        <label>Filter by comment field:</label>
+        <input type="text" name="filter_comment" value="{{ filter_comment }}" /> - use * to match anything
+    <br>
+        <label>SA Geodata environment:</label>
+        <input type="text" name="env" value="{{ env }}" /> (prod, test, dev)
+    <br>
+        <button type="submit" formaction="/app/group_summary">
+            Reload
+        </button>
+    </form>
+</p>
+
+    <p><a href='/app/wells_summary?group_code={{ group_code }}&swl_status={{ swl_status }}&tds_status={{ tds_status }}&swl_freq={{ swl_freq }}&tds_freq={{ tds_freq }}&filter_group_comment={{ filter_comment }}&env={{ env }}'>Load {{ dhs|length }} wells</a> - use this link to access CSV downloads etc.</p>
+
+    {{ dhs_table|safe }}
+
+
+{% endblock %}
