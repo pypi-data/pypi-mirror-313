@@ -1,0 +1,37 @@
+from enum import Enum
+from typing import Callable, Iterable
+
+import pandas as pd
+
+from strideutils import slack_connector as slack_connector
+from strideutils.stride_config import config as config
+
+DEFAULT_DAILY_UTC_HOUR: int
+
+class AlertType(Enum):
+    DEBUG: str
+    INFO: str
+    WARNING: str
+    CRITICAL: str
+
+def get_tags(individuals: str | Iterable[str]) -> str: ...
+def df_to_message_body(df: pd.DataFrame) -> str: ...
+def wrap_in_code_block(message: str) -> str: ...
+def notify(
+    messages: str | list[str],
+    urgency,
+    tag: str | Iterable[str] | None = None,
+    beta_alert: bool = False,
+    debug_readme: str = ...,
+    debug_readme_section: str = '',
+) -> None: ...
+def raise_alert(
+    urgency: AlertType | str,
+    tag: str | Iterable[str] | None = None,
+    beta_alert: bool = False,
+    debug_readme: str = ...,
+    debug_readme_section: str = '',
+) -> Callable: ...
+def run_daily(utc_hour_or_alert: int | Callable) -> Callable: ...
+def run_stride_epochly(f: Callable) -> Callable: ...
+def run_day_epochly(f: Callable) -> Callable: ...
