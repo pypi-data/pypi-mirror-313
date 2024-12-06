@@ -1,0 +1,5 @@
+equities_real_total_return_header = 'equities_real_tr'
+bonds_real_total_return_header = 'bonds_real_tr'
+tbills_total_return_header = 'tbills_total_return'
+tbills_real_return_header = 'tbills_real_return'
+ten_year_treasury_yield_header = '10y treasury yields'
