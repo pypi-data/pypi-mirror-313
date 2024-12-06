@@ -1,0 +1,102 @@
+[tox]
+envlist = flake,py312-coverage,py38-install
+skipsdist = True
+allowlist_externals =
+    rm
+    bash
+
+[testenv]
+setenv =
+    CCACHE_DIR = {envdir}/.ccache
+    coverage: DONT_YARN = true
+passenv =
+    DJANGO_LOG_LEVEL
+    PYTHONPATH
+    CC
+allowlist_externals =
+    rm
+    ls
+    ln
+    bash
+    head
+    mkdir
+    yarn
+commands =
+    pip install -U pip
+    pip uninstall {{project_name}} -y
+    install: rm -rfv {envdir}/dist/
+    install: pip wheel {toxinidir} -w {envdir}/dist/ --no-deps
+    install: bash -ec "pip install -U {envdir}/dist/$(ls {envdir}/dist/*.whl | head -1)[all]"
+    install: rm -f {envdir}/test.py {envdir}/test.pyc
+    install: bash -c "cd {envdir} && ln -s {toxinidir}/test.py && python -m {{project_name}} test -v 2 --failfast --parallel 8"
+    # Uncomment this strings if you're using custom frontend
+    # coverage: yarn install --pure-lockfile
+    # coverage: yarn devBuild
+    coverage: pip install -U -e .[test]
+    coverage: python -m {{project_name}} makemigrations {{project_name}} --check
+    coverage: coverage debug sys
+    coverage: coverage erase
+    coverage: coverage run -m {{project_name}} test -v 2 --failfast --parallel 8 {posargs}
+    coverage: coverage combine
+    coverage: coverage report
+    rm -rf .eggs build {{project_name}}.egg-info {envdir}/dist
+    pip uninstall {{project_name}} -y
+deps =
+    -rrequirements.txt
+    -rrequirements-test.txt
+
+[testenv:flake]
+basepython = python3.8
+deps =
+    flake8==6.1.0
+    flake8-bugbear==23.9.16
+    flake8-comprehensions==3.14.0
+    flake8-executable==2.1.3
+    flake8-functions==0.0.8
+    flake8-import-order==0.18.2
+    Flake8-pyproject==1.2.3
+commands =
+    flake8 {{project_name}}
+
+[testenv:contrib]
+basepython = python3.8
+skipsdist = True
+envdir = {toxinidir}/env
+setenv = CCACHE_DIR = {envdir}/.ccache
+passenv = *
+allowlist_externals = *
+commands =
+    pip install -U -r requirements-test.txt -r requirements.txt
+    pip install -U -e .[test]
+deps =
+   tox>=4
+
+[testenv:build_for_docker]
+basepython = python3.8
+skipsdist = True
+setenv =
+    CCACHE_DIR = {envdir}/.ccache
+    BUILD_OPTIMIZATION = true
+    BUILD_COMPILE = true
+    UWSGI_PROFILE = default
+passenv = *
+allowlist_externals = *
+commands =
+    rm -frv {envdir}/dist
+    bash -c "pip wheel .[prod] -w wheels"
+deps =
+    pip>=23.3.1
+    cython>=3.0.5
+    wheel==0.41.3
+    setuptools>=61.2.0
+
+[testenv:build]
+passenv = *
+changedir = .
+allowlist_externals =
+    tox
+    rm
+commands =
+    rm -rf dist build
+    tox -c tox_build.ini --workdir {toxworkdir}
+deps =
