@@ -1,0 +1,98 @@
+[project]
+name = "crosszip"
+version = "1.1.0"
+description = "Apply a given function to all combinations of elements from multiple iterables"
+readme = "README.md"
+authors = [
+    { name = "Indrajeet Patil", email = "patilindrajeet.science@gmail.com" }
+]
+requires-python = ">=3.10"
+license = { file = "LICENSE.md" }
+keywords = ["iterables"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = ["pytest>=8.3.3"]
+
+[project.urls]
+Homepage = "https://github.com/IndrajeetPatil/crosszip"
+Documentation = "https://indrajeetpatil.github.io/crosszip/"
+Repository = "https://github.com/IndrajeetPatil/crosszip"
+Issues = "https://github.com/IndrajeetPatil/crosszip/issues"
+Changelog = "https://github.com/IndrajeetPatil/crosszip/blob/main/CHANGELOG.md"
+
+[project.entry-points.pytest11]
+crosszip_parametrize = "crosszip.plugin"
+
+[tool.uv]
+dev-dependencies = [
+    "coverage>=7.6.4",
+    "mypy>=1.13.0",
+    "pytest-random-order>=1.1.1",
+    "pytest>=8.3.3",
+    "ruff>=0.8.0",
+    "pytest-snapshot>=0.9.0",
+    "pre-commit>=4.0.1",
+    "jupyter>=1.1.1",
+    "pytest-cov>=6.0.0",
+    "mkdocstrings-python>=1.12.2",
+    "mkdocs-material>=9.5.47",
+    "mkdocs>=1.6.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+#select = ["ALL"]
+preview = true
+
+[tool.ruff.format]
+preview = true
+
+[tool.pytest.ini_options]
+addopts = [
+    # error on problems parsing pytest configuration
+    "--strict-config",
+    # error on using unregistered marker
+    "--strict-markers",
+    # show extra test summary info for everything
+    "-ra",
+    # include more verbose output
+    "--verbose",
+    # using pytest-random-order plugin option
+    "--random-order",
+]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+xfail_strict = true
+python_files = ["test_*.py", "test-*.py", "tests.py", "test.py"]
+
+[tool.coverage.run]
+source = ["crosszip"]
+omit = ["tests/*", "test/*", "test_*.py", "test-*.py", "test.py", "tests.py"]
+
+[tool.coverage.report]
+fail_under = 100
+format = "markdown"
+show_missing = true
+sort = "-Cover"
+
+[tool.mypy]
+strict = true
+disallow_untyped_decorators = false

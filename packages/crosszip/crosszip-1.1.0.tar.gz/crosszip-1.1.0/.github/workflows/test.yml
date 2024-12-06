@@ -1,0 +1,48 @@
+name: Package Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Ubuntu with all supported Python versions
+          - os: ubuntu-latest
+            python-version: "3.10"
+          - os: ubuntu-latest
+            python-version: 3.11
+          - os: ubuntu-latest
+            python-version: 3.12
+          - os: ubuntu-latest
+            python-version: 3.13
+          - os: ubuntu-latest
+            python-version: 3.14-dev
+          # macOS and windows with the latest Python version
+          - os: macos-latest
+            python-version: 3.13
+          - os: windows-latest
+            python-version: 3.13
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Run Tests
+        run: uv run pytest .
