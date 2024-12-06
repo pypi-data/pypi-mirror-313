@@ -1,0 +1,4 @@
+.. _superiorization:
+
+Superiorization
+================

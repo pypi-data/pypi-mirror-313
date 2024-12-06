@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "suppy"
+version = "0.1.0"
+dependencies = ["numpy","scipy","matplotlib"]
+license = { text = "BSD-3-Clause" }
+authors = [
+{ name="Tobias Becher"},
+]
+description = "Library for superiorization algorithms"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+"Programming Language :: Python :: 3",
+"License :: OSI Approved :: BSD License",
+"Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["pytest","coverage","pytest-cov","pre-commit","sphinx","sphinx-design","pydata-sphinx-theme"]
+
+
+[tool.black]
+# For code, we use the relaxed 99 line limit
+line-length = 99
+extend-exclude = '''
+(
+  ^/.venv
+  ^/.git"
+  ^/__pycache__
+  ^/docs
+  ^/test
+)
+'''
+
+
+[tool.flake8]
+max-line-length = 99
+exclude = [
+  ".venv",
+  ".git",
+  "__pycache__",
+  "docs",
+  "test" ]
+
+[tool.pydocstringformatter]
+write = true
+exclude = [
+  "**/.venv/**",
+  "**/.git",
+  "**/__pycache__/**",#
+  "**/docs/**",
+  ]
+style = ["numpydoc"]
+linewrap-full-docstring = true
+# PEP says that when using a higher line length limit, documentation should still have 79 max
+max-line-length = 79
+
+
+[tool.pylint.format]
+max-line-length = 99
+ignore = [
+  ".venv",
+  ".git",
+  "__pycache__",
+  "docs",
+  "test" ]
