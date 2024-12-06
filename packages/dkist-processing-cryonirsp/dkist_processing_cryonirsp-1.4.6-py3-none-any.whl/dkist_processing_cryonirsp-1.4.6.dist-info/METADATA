@@ -1,0 +1,194 @@
+Metadata-Version: 2.1
+Name: dkist-processing-cryonirsp
+Version: 1.4.6
+Summary: Science processing code for the Cryo-NIRSP instrument on DKIST
+Author-email: NSO / AURA <dkistdc@nso.edu>
+License: BSD-3-Clause
+Project-URL: Homepage, https://nso.edu/dkist/data-center/
+Project-URL: Repository, https://bitbucket.org/dkistdc/dkist-processing-cryonirsp/
+Project-URL: Documentation, https://docs.dkist.nso.edu/projects/cryo-nirsp
+Project-URL: Help, https://nso.atlassian.net/servicedesk/customer/portal/5
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.11
+Description-Content-Type: text/x-rst
+Requires-Dist: Pillow==10.3.0
+Requires-Dist: astropy==6.1.0
+Requires-Dist: dkist-fits-specifications==4.10.0
+Requires-Dist: dkist-header-validator==5.1.1
+Requires-Dist: dkist-processing-common==10.5.3
+Requires-Dist: dkist-processing-math==2.1.1
+Requires-Dist: dkist-processing-pac==3.1.0
+Requires-Dist: dkist-spectral-lines==3.0.0
+Requires-Dist: largestinteriorrectangle==0.2.0
+Requires-Dist: dkist-service-configuration==2.2
+Requires-Dist: moviepy==2.0.0
+Requires-Dist: numba==0.59.1
+Requires-Dist: numpy==1.26.4
+Requires-Dist: peakutils==1.3.4
+Requires-Dist: scikit-image==0.23.2
+Requires-Dist: scipy==1.13.1
+Requires-Dist: sunpy==5.1.3
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-cov; extra == "test"
+Requires-Dist: pytest-xdist; extra == "test"
+Requires-Dist: pytest-mock; extra == "test"
+Requires-Dist: hypothesis; extra == "test"
+Requires-Dist: towncrier; extra == "test"
+Requires-Dist: dkist-data-simulator>=5.2.0; extra == "test"
+Requires-Dist: dkist-processing-cryonirsp[inventory]; extra == "test"
+Requires-Dist: dkist-processing-cryonirsp[asdf]; extra == "test"
+Requires-Dist: dkist-processing-cryonirsp[quality]; extra == "test"
+Provides-Extra: inventory
+Requires-Dist: dkist-processing-common[inventory]; extra == "inventory"
+Requires-Dist: dkist-inventory==1.4.3; extra == "inventory"
+Provides-Extra: asdf
+Requires-Dist: dkist-processing-common[asdf]; extra == "asdf"
+Requires-Dist: dkist-inventory[asdf]==1.4.3; extra == "asdf"
+Provides-Extra: quality
+Requires-Dist: dkist-quality==1.1.1; extra == "quality"
+Provides-Extra: grogu
+Requires-Dist: dkist; extra == "grogu"
+Requires-Dist: pyparsing; extra == "grogu"
+Requires-Dist: dkist-inventory>=1.4.3; extra == "grogu"
+Provides-Extra: docs
+Requires-Dist: sphinx; extra == "docs"
+Requires-Dist: sphinx-astropy; extra == "docs"
+Requires-Dist: sphinx-changelog; extra == "docs"
+Requires-Dist: sphinx-autoapi==3.3.3; extra == "docs"
+Requires-Dist: pytest; extra == "docs"
+Requires-Dist: towncrier; extra == "docs"
+Requires-Dist: dkist-sphinx-theme; extra == "docs"
+
+dkist-processing-cryonirsp
+==========================
+
+Overview
+--------
+The dkist-processing-cryonirsp library contains the implementation of the cryonirsp pipelines as a collection of the
+`dkist-processing-core <https://pypi.org/project/dkist-processing-core/>`_ framework and
+`dkist-processing-common <https://pypi.org/project/dkist-processing-common/>`_ Tasks.
+
+The recommended project structure is to separate tasks and workflows into separate packages.  Having the workflows
+in their own package facilitates using the build_utils to test the integrity of those workflows in the unit test.
+
+Calibration Pipeline
+------------------------
+
+Build
+-----
+Artifacts are built through Bitbucket Pipelines.
+
+The pipeline can be used in other repos with a modification of the package and artifact locations
+to use the names relevant to the target repo.
+
+e.g. dkist-processing-test -> dkist-processing-vbi and dkist_processing_test -> dkist_processing_vbi
+
+Deployment
+----------
+Deployment is done with `turtlebot <https://bitbucket.org/dkistdc/turtlebot/src/master/>`_ and follows
+the process detailed in `dkist-processing-core <https://pypi.org/project/dkist-processing-core/>`_
+
+Environment Variables
+---------------------
+Only those specified by `dkist-processing-core <https://pypi.org/project/dkist-processing-core/>`_ and `dkist-processing-common <https://pypi.org/project/dkist-processing-common/>`_.
+
+Development
+-----------
+.. code-block:: bash
+
+    git clone git@bitbucket.org:dkistdc/dkist-processing-cryonirsp.git
+    cd dkist-processing-cryonirsp
+    pre-commit install
+    pip install -e .[test]
+    pytest -v --cov dkist_processing_cryonirsp
+
+Changelog
+#########
+
+When you make **any** change to this repository it **MUST** be accompanied by a changelog file.
+The changelog for this repository uses the `towncrier <https://github.com/twisted/towncrier>`__ package.
+Entries in the changelog for the next release are added as individual files (one per change) to the ``changelog/`` directory.
+
+Writing a Changelog Entry
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A changelog entry accompanying a change should be added to the ``changelog/`` directory.
+The name of a file in this directory follows a specific template::
+
+  <PULL REQUEST NUMBER>.<TYPE>[.<COUNTER>].rst
+
+The fields have the following meanings:
+
+* ``<PULL REQUEST NUMBER>``: This is the number of the pull request, so people can jump from the changelog entry to the diff on BitBucket.
+* ``<TYPE>``: This is the type of the change and must be one of the values described below.
+* ``<COUNTER>``: This is an optional field, if you make more than one change of the same type you can append a counter to the subsequent changes, i.e. ``100.bugfix.rst`` and ``100.bugfix.1.rst`` for two bugfix changes in the same PR.
+
+The list of possible types is defined in the towncrier section of ``pyproject.toml``, the types are:
+
+* ``feature``: This change is a new code feature.
+* ``bugfix``: This is a change which fixes a bug.
+* ``doc``: A documentation change.
+* ``removal``: A deprecation or removal of public API.
+* ``misc``: Any small change which doesn't fit anywhere else, such as a change to the package infrastructure.
+
+
+Rendering the Changelog at Release Time
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When you are about to tag a release first you must run ``towncrier`` to render the changelog.
+The steps for this are as follows:
+
+* Run `towncrier build --version vx.y.z` using the version number you want to tag.
+* Agree to have towncrier remove the fragments.
+* Add and commit your changes.
+* Tag the release.
+
+**NOTE:** If you forget to add a Changelog entry to a tagged release (either manually or automatically with ``towncrier``)
+then the Bitbucket pipeline will fail. To be able to use the same tag you must delete it locally and on the remote branch:
+
+.. code-block:: bash
+
+    # First, actually update the CHANGELOG and commit the update
+    git commit
+
+    # Delete tags
+    git tag -d vWHATEVER.THE.VERSION
+    git push --delete origin vWHATEVER.THE.VERSION
+
+    # Re-tag with the same version
+    git tag vWHATEVER.THE.VERSION
+    git push --tags origin main
+
+Science Changelog
+^^^^^^^^^^^^^^^^^
+
+Whenever a release involves changes to the scientific quality of L1 data, additional changelog fragment(s) should be
+created. These fragments are intended to be as verbose as is needed to accurately capture the scope of the change(s),
+so feel free to use all the fancy RST you want. Science fragments are placed in the same ``changelog/`` directory
+as other fragments, but are always called::
+
+  <PR NUMBER | +>.science[.<COUNTER>].rst
+
+In the case that a single pull request encapsulates the entirety of the scientific change then the first field should
+be that PR number (same as the normal CHANGELOG). If, however, there is not a simple mapping from a single PR to a scientific
+change then use the character "+" instead; this will create a changelog entry with no associated PR. For example:
+
+.. code-block:: bash
+
+  $ ls changelog/
+  99.bugfix.rst    # This is a normal changelog fragment associated with a bugfix in PR 99
+  99.science.rst   # Apparently that bugfix also changed the scientific results, so that PR also gets a science fragment
+  +.science.rst    # This fragment is not associated with a PR
+
+
+When it comes time to build the SCIENCE_CHANGELOG, use the ``science_towncrier.sh`` script in this repo to do so.
+This script accepts all the same arguments as the default `towncrier`. For example:
+
+.. code-block:: bash
+
+  ./science_towncrier.sh build --version vx.y.z
+
+This will update the SCIENCE_CHANGELOG and remove any science fragments from the changelog directory.
