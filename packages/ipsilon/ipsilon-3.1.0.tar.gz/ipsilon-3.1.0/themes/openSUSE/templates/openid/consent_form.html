@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block toptext %}
+<div class="alert alert-warning">
+    <span class="typcn typcn-lock-open-outline"></span>
+    <strong>{{trustroot}}</strong>
+    requests to use the following details from your openSUSE Account
+</div>
+{% endblock %}
+{% block cardwidths %}col-md-10{% endblock %}
+{% block main %}
+        <form method="post" action="{{action}}" enctype="application/x-www-form-urlencoded">
+            <ul class="list-group list-group-flush">
+                {% for entry in authz_details|dictsort %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <strong>{{ entry[0] }}</strong>
+                        {%- if entry[1] is iterable and not entry[1] is string -%}
+                        <span class="w-auto">{{ entry[1] | join(', ') }}</span>
+                        {%- else -%}
+                        <span class="w-auto">{{ entry[1] }}</span>
+                        {%- endif -%}
+                    </li>
+                {% endfor %}
+
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <strong>Remember&nbsp;approval</strong>
+                    <span class="w-auto">
+                        <select name="remember_for_days" class="custom-select">
+                            <option value="0">never</option>
+                            <option value="3">3 days</option>
+                            <option value="7">7 days</option>
+                        </select>
+                    </span>
+                </li>
+            </ul>
+            <input type="hidden" name="ipsilon_transaction_id" id="ipsilon_transaction_id" value="{{ ipsilon_transaction_id }}" />
+            <div class="card-footer d-flex justify-content-end">
+                <input class="btn btn-success mr-2" name="decided_allow" type="submit" value="Approve" />
+                <input class="btn btn-danger" name="decided_deny" type="submit" value="Reject" />
+            </div>
+        </form>
+{% endblock %}

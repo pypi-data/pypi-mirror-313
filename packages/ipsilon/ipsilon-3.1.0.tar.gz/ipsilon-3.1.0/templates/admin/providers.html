@@ -1,0 +1,71 @@
+{% extends "master-admin.html" %}
+{% block main %}
+{% if user.is_admin %}
+
+    <div class = "row">
+        <div class="col-md-6 col-sm-6 col-xs-6">
+            <h2>{{ title }}</h2>
+        </div>
+        <div class="col-md-6 col-sm-6 col-xs-6" role="alert">
+          {% if message %}
+            <div class="alert alert-{{message_type}}">
+                <p>{{ message }}</p>
+            </div>
+          {% endif %}
+        </div>
+    </div>
+
+    {% for p in available %}
+      {%- if p in enabled %}
+        {%- set highlight = "hl-enabled" %}
+        {%- set actpath = "disable" %}
+        {%- set actlabel = "Disable" %}
+        {%- if p in changed %}
+          {%- if changed[p] == 'enabled' %}
+          {%- set highlight = "hl-enabled-new" %}
+          {%- endif %}
+        {%- endif %}
+      {%- else %}
+        {%- set highlight = "hl-disabled" %}
+        {%- set actpath = "enable" %}
+        {%- set actlabel = "Enable" %}
+        {%- if p in changed %}
+          {%- if changed[p] == 'disabled' %}
+          {%- set highlight = "hl-disabled-new" %}
+          {%- endif %}
+        {%- endif %}
+      {%- endif %}
+      <div class="row ipsilon-row {{ highlight }}">
+        <div class="col-md-3 col-sm-3 col-xs-6">
+          <p><strong>{{ available[p].get_display_name() }}</strong></p>
+        </div>
+        <div class="col-md-9 col-sm-9 col-xs-6">
+          <div class="row">
+          <div class="col-md-4 col-sm-4 col-xs-12">
+              <p class="text-info"><a href="{{ baseurl }}/{{ actpath }}/{{ p }}">{{ actlabel }}</a></p>
+          </div>
+          <div class="col-md-4 col-sm-4 col-xs-12">
+            {%- if available[p].get_config_obj() %}
+              {%- if p in enabled %}
+              <p class="text-primary"><a href="{{ baseurl }}/{{ p }}">Configure</a></p>
+              {%- else %}
+              <p class="text-muted">Configure</p>
+              {%- endif %}
+            {%- endif %}
+          </div>
+          <div class="col-md-4 col-sm-4 col-xs-12">
+            {%- if available[p].admin %}
+              {%- if p in enabled %}
+              <p class="text-primary"><a href="{{ baseurl }}/{{ p }}/admin">Manage</a></p>
+              {%- else %}
+              <p class="text-muted">Manage</p>
+              {%- endif %}
+            {% endif %}
+          </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+{% endif %}
+{% endblock %}

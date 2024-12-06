@@ -1,0 +1,561 @@
+#!/usr/bin/python
+# Copyright (C) 2014 Ipsilon project Contributors, for license see COPYING
+
+from ipsilon.login.common import LoginMgrsInstall
+from ipsilon.info.common import InfoProviderInstall
+from ipsilon.providers.common import ProvidersInstall
+from ipsilon.helpers.common import EnvHelpersInstall
+from ipsilon.authz.common import AuthzProviderInstall
+from ipsilon.util.data import UserStore
+from ipsilon.tools import files, dbupgrade
+import argparse
+import cherrypy
+import json
+import logging
+import os
+import pwd
+import shutil
+import socket
+import six
+from six.moves import configparser
+from six.moves import input
+import subprocess
+import sys
+import time
+
+
+TEMPLATES = '/usr/share/ipsilon/templates/install'
+CONFDIR = '/etc/ipsilon'
+DATADIR = '/var/lib/ipsilon'
+HTTPDCONFD = '/etc/httpd/conf.d'
+BINDIR = '/usr/libexec/ipsilon'
+STATICDIR = '/usr/share/ipsilon'
+CACHEDIR = '/var/cache/ipsilon'
+WSGI_SOCKET_PREFIX = None
+
+
+class ConfigurationError(Exception):
+
+    def __init__(self, message):
+        super(ConfigurationError, self).__init__(message)
+
+
+#Silence cherrypy logging to screen
+cherrypy.log.screen = False
+
+# Regular logging
+LOGFILE = os.environ.get('LOGFILE', '/var/log/ipsilon-install.log')
+logger = logging.getLogger()
+
+
+def openlogs():
+    global logger  # pylint: disable=W0603
+    if os.path.isfile(LOGFILE):
+        try:
+            created = '%s' % time.ctime(os.path.getctime(LOGFILE))
+            shutil.move(LOGFILE, '%s.%s' % (LOGFILE, created))
+        except IOError:
+            pass
+    logger = logging.getLogger()
+    try:
+        lh = logging.FileHandler(LOGFILE)
+    except IOError as e:
+        sys.exit('Unable to open %s (%s)' % (LOGFILE, str(e)))
+    formatter = logging.Formatter('[%(asctime)s] %(message)s')
+    lh.setFormatter(formatter)
+    lh.setLevel(logging.DEBUG)
+    logger.addHandler(lh)
+    logger.propagate = False
+    ch = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(message)s')
+    ch.setFormatter(formatter)
+    ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+    cherrypy.log.error_log.setLevel(logging.DEBUG)
+
+
+def install(plugins, args):
+    logger.info('Installation initiated')
+    now = time.strftime("%Y%m%d%H%M%S", time.gmtime())
+    instance_conf = os.path.join(CONFDIR, args['instance'])
+
+    logger.info('Installing default config files')
+    ipsilon_conf = os.path.join(instance_conf, 'ipsilon.conf')
+    idp_conf = os.path.join(instance_conf, 'idp.conf')
+    args['httpd_conf'] = os.path.join(HTTPDCONFD,
+                                      'ipsilon-%s.conf' % args['instance'])
+    args['data_dir'] = os.path.join(DATADIR, args['instance'])
+    args['public_data_dir'] = os.path.join(args['data_dir'], 'public')
+    args['wellknown_dir'] = os.path.join(args['public_data_dir'],
+                                         'well-known')
+    if os.path.exists(ipsilon_conf):
+        shutil.move(ipsilon_conf, '%s.backup.%s' % (ipsilon_conf, now))
+    if os.path.exists(idp_conf):
+        shutil.move(idp_conf, '%s.backup.%s' % (idp_conf, now))
+    if not os.path.exists(instance_conf):
+        os.makedirs(instance_conf, 0o700)
+    proto = "https"
+    secure = True
+    if args['secure'] == "no":
+        proto = "http"
+        secure = False
+    listenline = ""
+    portseg = ""
+    splithost = args['hostname'].split(':')
+    if len(splithost) > 1:
+        portnum = splithost[1]
+        portseg = ":%s" % portnum
+        listenline = "Listen %s %s" % (portnum, proto)
+    servername = "%s://%s%s" % (proto, args['hostname'], portseg)
+    confopts = {'instance': args['instance'],
+                'instanceurl': args['instanceurl'],
+                'needs_mount': args.get('needs_mount'),
+                'script_alias': args.get('script_alias'),
+                'datadir': args['data_dir'],
+                'publicdatadir': args['public_data_dir'],
+                'wellknowndir': args['wellknown_dir'],
+                'sysuser': args['system_user'],
+                'cleanup_interval': args['cleanup_interval'],
+                'session_timeout': args['session_timeout'],
+                'ipsilondir': BINDIR,
+                'staticdir': STATICDIR,
+                'cachedir': CACHEDIR,
+                'admindb': args['admin_dburi'] or args['database_url'] % {
+                    'datadir': args['data_dir'], 'dbname': 'adminconfig'},
+                'usersdb': args['users_dburi'] or args['database_url'] % {
+                    'datadir': args['data_dir'], 'dbname': 'userprefs'},
+                'transdb': args['transaction_dburi'] or args['database_url'] %
+                {'datadir': args['data_dir'], 'dbname': 'transactions'},
+                'samlsessionsdb': args['samlsessions_dburi'] or args[
+                    'database_url'] % {'datadir': args['data_dir'],
+                                       'dbname': 'saml2sessions'},
+                'secure': secure,
+                'listenline': listenline,
+                'servername': servername,
+                'debugging': "True" if args['server_debugging'] else "False"}
+    # Testing database sessions
+    if 'session_type' in args:
+        confopts['sesstype'] = args['session_type']
+    else:
+        confopts['sesstype'] = 'file'
+    if 'session_dburi' in args:
+        confopts['sessopt'] = 'dburi'
+        confopts['sessval'] = args['session_dburi']
+    else:
+        confopts['sessopt'] = 'path'
+        confopts['sessval'] = os.path.join(args['data_dir'], 'sessions')
+    # Whether to disable security (for testing)
+    if args['secure'] == 'no':
+        confopts['secure'] = "False"
+        confopts['ssl_require'] = "# "
+    else:
+        confopts['secure'] = "True"
+        confopts['ssl_require'] = ""
+    if WSGI_SOCKET_PREFIX:
+        confopts['wsgi_socket'] = 'WSGISocketPrefix %s' % WSGI_SOCKET_PREFIX
+    else:
+        confopts['wsgi_socket'] = 'WSGISocketPrefix run/wsgi'
+    files.write_from_template(ipsilon_conf,
+                              os.path.join(TEMPLATES, 'ipsilon.conf'),
+                              confopts)
+    files.write_from_template(idp_conf,
+                              os.path.join(TEMPLATES, 'idp.conf'),
+                              confopts)
+    if not os.path.exists(args['httpd_conf']):
+        os.symlink(idp_conf, args['httpd_conf'])
+    if not os.path.exists(args['public_data_dir']):
+        os.makedirs(args['public_data_dir'], 0o755)
+    if not os.path.exists(args['wellknown_dir']):
+        os.makedirs(args['wellknown_dir'], 0o755)
+    sessdir = os.path.join(args['data_dir'], 'sessions')
+    if not os.path.exists(sessdir):
+        os.makedirs(sessdir, 0o700)
+    data_conf = os.path.join(args['data_dir'], 'ipsilon.conf')
+    if not os.path.exists(data_conf):
+        os.symlink(ipsilon_conf, data_conf)
+    # Load the cherrypy config from the newly installed file so
+    # that db paths and all is properly set before configuring
+    # components
+    cherrypy.config.update(ipsilon_conf)
+
+    # Prepare to allow plugins to save things changed during install
+    changes = {'env_helper': {},
+               'login_manager': {},
+               'info_provider': {},
+               'auth_provider': {},
+               'authz_provider': {}}
+
+    # Move pre-existing dbs away
+    admin_db = cherrypy.config['admin.config.db']
+    if os.path.exists(admin_db):
+        shutil.move(admin_db, '%s.backup.%s' % (admin_db, now))
+    users_db = cherrypy.config['user.prefs.db']
+    if os.path.exists(users_db):
+        shutil.move(users_db, '%s.backup.%s' % (users_db, now))
+
+    # Initialize initial database schemas
+    dbupgrade.execute_upgrade(ipsilon_conf)
+
+    # Store primary admin
+    db = UserStore()
+    db.save_user_preferences(args['admin_user'], {'is_admin': 1})
+
+    logger.info('Configuring environment helpers')
+    for plugin_name in plugins['Environment Helpers']:
+        plugin = plugins['Environment Helpers'][plugin_name]
+        plugin_changes = {}
+        if plugin.configure_server(args, plugin_changes) == False:
+            msg = 'Configuration of environment helper %s failed' % plugin_name
+            raise ConfigurationError(msg)
+        changes['env_helper'][plugin_name] = plugin_changes
+
+    logger.info('Configuring login managers')
+    for plugin_name in args['lm_order']:
+        try:
+            plugin = plugins['Login Managers'][plugin_name]
+        except KeyError:
+            sys.exit('Login provider %s not installed' % plugin_name)
+        plugin_changes = {}
+        if plugin.configure(args, plugin_changes) == False:
+            msg = 'Configuration of login manager %s failed' % plugin_name
+            raise ConfigurationError(msg)
+        changes['login_manager'][plugin_name] = plugin_changes
+
+    logger.info('Configuring Info provider')
+    for plugin_name in plugins['Info Provider']:
+        plugin = plugins['Info Provider'][plugin_name]
+        plugin_changes = {}
+        if plugin.configure(args, plugin_changes) == False:
+            msg = 'Configuration of info provider %s failed' % plugin_name
+            raise ConfigurationError(msg)
+        changes['info_provider'][plugin_name] = plugin_changes
+
+    logger.info('Configuring Authentication Providers')
+    for plugin_name in plugins['Auth Providers']:
+        plugin = plugins['Auth Providers'][plugin_name]
+        plugin_changes = {}
+        if plugin.configure(args, plugin_changes) == False:
+            msg = 'Configuration of auth provider %s failed' % plugin_name
+            raise ConfigurationError(msg)
+        changes['auth_provider'][plugin_name] = plugin_changes
+
+    logger.info('Configuring Authorization providers')
+    for plugin_name in args['az_order']:
+        try:
+            plugin = plugins['Authz Providers'][plugin_name]
+        except KeyError:
+            sys.exit('Authorization provider %s not installed' % plugin_name)
+        plugin_changes = {}
+        if plugin.configure(args, plugin_changes) == False:
+            msg = 'Configuration of authorization provider %s failed' % \
+                plugin_name
+            raise ConfigurationError(msg)
+        changes['authz_provider'][plugin_name] = plugin_changes
+
+    # Save any changes that were made
+    install_changes = os.path.join(instance_conf, 'install_changes')
+    changes = json.dumps(changes)
+    with open(install_changes, 'w+') as f:
+        f.write(changes)
+
+    # Initialize extra database schemas
+    dbupgrade.execute_upgrade(ipsilon_conf)
+
+    # Fixup permissions so only the ipsilon user can read these files
+    files.fix_user_dirs(instance_conf, opts['system_user'])
+    files.fix_user_dirs(args['data_dir'], opts['system_user'])
+    try:
+        subprocess.call(['/sbin/restorecon', '-R', args['data_dir']])
+    except Exception:  # pylint: disable=broad-except
+        pass
+
+
+def uninstall(plugins, args):
+    logger.info('Uninstallation initiated')
+    instance_conf = os.path.join(CONFDIR, args['instance'])
+
+    httpd_conf = os.path.join(HTTPDCONFD,
+                              'ipsilon-%s.conf' % args['instance'])
+    data_dir = os.path.join(DATADIR, args['instance'])
+
+    try:
+        tconf = configparser.ConfigParser()
+        tconf.read(os.path.join(instance_conf, 'ipsilon.conf'))
+        cache_dir = tconf.get('global', 'cache_dir')
+    except (configparser.NoOptionError, configparser.NoSectionError):
+        cache_dir = None
+    else:
+        cache_dir = cache_dir.replace('"', '')
+
+    if not os.path.exists(instance_conf):
+        raise Exception('Could not find instance %s configuration'
+                        % args['instance'])
+    if not os.path.exists(httpd_conf):
+        raise Exception('Could not find instance %s httpd configuration'
+                        % args['instance'])
+    if not args['yes']:
+        sure = input(('Are you certain you want to erase instance %s ' +
+                          '[yes/NO]: ')
+                         % args['instance'])
+        if sure != 'yes':
+            raise Exception('Aborting')
+
+    # Get the details of what we changed during installation
+    install_changes = os.path.join(instance_conf, 'install_changes')
+    with open(install_changes, 'r') as f:
+        changes = json.loads(f.read())
+
+    logger.info('Removing environment helpers')
+    for plugin_name in plugins['Environment Helpers']:
+        plugin = plugins['Environment Helpers'][plugin_name]
+        plugin_changes = changes['env_helper'].get(plugin_name, {})
+        if plugin.unconfigure(args, plugin_changes) == False:
+            logger.info('Removal of environment helper %s failed' % plugin_name)
+
+    logger.info('Removing login managers')
+    for plugin_name in plugins['Login Managers']:
+        plugin = plugins['Login Managers'][plugin_name]
+        plugin_changes = changes['login_manager'].get(plugin_name, {})
+        if plugin.unconfigure(args, plugin_changes) == False:
+            logger.info('Removal of login manager %s failed' % plugin_name)
+
+    logger.info('Removing Info providers')
+    for plugin_name in plugins['Info Provider']:
+        plugin = plugins['Info Provider'][plugin_name]
+        plugin_changes = changes['info_provider'].get(plugin_name, {})
+        if plugin.unconfigure(args, plugin_changes) == False:
+            logger.info('Removal of info provider %s failed' % plugin_name)
+
+    logger.info('Removing Authentication Providers')
+    for plugin_name in plugins['Auth Providers']:
+        plugin = plugins['Auth Providers'][plugin_name]
+        plugin_changes = changes['auth_provider'].get(plugin_name, {})
+        if plugin.unconfigure(args, plugin_changes) == False:
+            logger.info('Removal of auth provider %s failed' % plugin_name)
+
+    logger.info('Removing Authorization providers')
+    for plugin_name in plugins.get('Authz Providers', []):
+        plugin = plugins['Authz Providers'][plugin_name]
+        plugin_changes = changes['authz_provider'].get(plugin_name, {})
+        if plugin.unconfigure(args, plugin_changes) == False:
+            logger.info('Removal of authorization provider %s failed' %
+                        plugin_name)
+
+    logger.info('Removing httpd configuration')
+    os.remove(httpd_conf)
+    logger.info('Erasing instance configuration')
+    shutil.rmtree(instance_conf)
+    logger.info('Erasing instance data')
+    shutil.rmtree(data_dir)
+    if cache_dir and os.path.exists(cache_dir):
+        for fn in os.listdir(cache_dir):
+            os.unlink(os.path.join(cache_dir, fn))
+    logger.info('Uninstalled instance %s' % args['instance'])
+
+
+def find_plugins():
+    plugins = {
+        'Environment Helpers': EnvHelpersInstall().plugins,
+        'Login Managers': LoginMgrsInstall().plugins,
+        'Info Provider': InfoProviderInstall().plugins,
+        'Auth Providers': ProvidersInstall().plugins,
+        'Authz Providers': AuthzProviderInstall().plugins
+    }
+    return plugins
+
+
+def parse_config_profile(args):
+    config = configparser.RawConfigParser()
+    files = config.read(args['config_profile'])
+    if len(files) == 0:
+        raise ConfigurationError('Config Profile file %s not found!' %
+                                 args['config_profile'])
+
+    if 'globals' in config.sections():
+        G = config.options('globals')
+        for g in G:
+            val = config.get('globals', g)
+            if g in globals():
+                globals()[g] = val
+            else:
+                for k in globals():
+                    if k.lower() == g.lower():
+                        globals()[k] = val
+                        break
+
+    if 'arguments' in config.sections():
+        A = config.options('arguments')
+        for a in A:
+            args[a] = config.get('arguments', a)
+
+    return args
+
+
+def parse_args(plugins):
+    parser = argparse.ArgumentParser(description='Ipsilon Install Options')
+    parser.add_argument('--version',
+                        action='version', version='%(prog)s 0.1')
+    parser.add_argument('-o', '--login-managers-order', dest='lm_order',
+                        help='Comma separated list of login managers')
+    parser.add_argument('--authorization-order', dest='az_order',
+                        help='Comma separated list of authorization plugins')
+    parser.add_argument('--hostname',
+                        help="Machine's fully qualified host name, can also include :port")
+    parser.add_argument('--instance', default='idp',
+                        help="IdP instance name, each is a separate idp")
+    parser.add_argument('--root-instance', default=False, action='store_true',
+                        help='Configure Ipsilon to mount to the web root')
+    parser.add_argument('--system-user', default='ipsilon',
+                        help="User account used to run the server")
+    parser.add_argument('--admin-user', default='admin',
+                        help="User account that is assigned admin privileges")
+    parser.add_argument('--database-url',
+                        default='sqlite:///%(datadir)s/%(dbname)s.sqlite',
+                        help="The (templatized) database URL to use")
+    parser.add_argument('--secure', choices=['yes', 'no'], default='yes',
+                        help="Turn on all security checks")
+    parser.add_argument('--config-profile', default=None,
+                        help=argparse.SUPPRESS)
+    parser.add_argument('--server-debugging', action='store_true',
+                        help="Enable debugging")
+    parser.add_argument('--uninstall', action='store_true',
+                        help="Uninstall the server and all data")
+    parser.add_argument('--yes', action='store_true',
+                        help="Always answer yes")
+    parser.add_argument('--admin-dburi',
+                        help='Configuration database URI (override template)')
+    parser.add_argument('--users-dburi',
+                        help='User configuration database URI (override '
+                             'template)')
+    parser.add_argument('--transaction-dburi',
+                        help='Transaction database URI (override template)')
+    parser.add_argument('--samlsessions-dburi',
+                        help='SAML 2 sessions database URI (override ' +
+                             'template)')
+    parser.add_argument('--cleanup-interval', default=30, type=int,
+                        help='Interval between cleaning up stale database ' +
+                             'entries (in minutes, default: 30 minutes)')
+    parser.add_argument('--session-timeout', default=30, type=int,
+                        help='Time that sessions are valid for (in minutes, ' +
+                             'default: 30 minutes)')
+
+    lms = []
+    azs = []
+
+    for plugin_group in plugins:
+        group = parser.add_argument_group(plugin_group)
+        for plugin_name in plugins[plugin_group]:
+            plugin = plugins[plugin_group][plugin_name]
+            if plugin.ptype == 'login':
+                lms.append(plugin.name)
+            elif plugin.ptype == 'authz':
+                azs.append(plugin.name)
+            plugin.install_args(group)
+
+    args = vars(parser.parse_args())
+
+    if args['config_profile']:
+        args = parse_config_profile(args)
+
+    if not args['hostname']:
+        args['hostname'] = socket.getfqdn()
+
+    if args['uninstall']:
+        return args
+
+    if len(args['hostname'].split('.')) < 2:
+        raise ConfigurationError('Hostname: %s is not a FQDN' %
+                                 args['hostname'])
+
+    for plugin_group in plugins:
+        for plugin_name in plugins[plugin_group]:
+            plugin = plugins[plugin_group][plugin_name]
+            plugin.validate_args(args)
+
+    try:
+        pwd.getpwnam(args['system_user'])
+    except KeyError:
+        raise ConfigurationError('User: %s not found on the system' %
+                                 args['system_user'])
+
+    if args['lm_order'] is None:
+        args['lm_order'] = []
+        for name in lms:
+            if args[name] == 'yes':
+                args['lm_order'].append(name)
+    else:
+        args['lm_order'] = args['lm_order'].split(',')
+
+    if len(args['lm_order']) == 0 and args.get('ipa', 'no') != 'yes':
+        sys.exit('No login plugins are enabled.')
+
+    if args['az_order'] is None:
+        args['az_order'] = []
+        for name in azs:
+            if args['authz_' + name] == 'yes':
+                args['az_order'].append(name)
+    else:
+        args['az_order'] = args['az_order'].split(',')
+
+    if len(args['az_order']) == 0:
+        sys.exit('No authorization plugins are enabled.')
+
+    #FIXME: check instance is only alphanums
+
+    return args
+
+if __name__ == '__main__':
+    opts = []
+    out = 0
+    openlogs()
+    logger.setLevel(logging.DEBUG)
+
+    try:
+        fplugins = find_plugins()
+        opts = parse_args(fplugins)
+
+        logger.debug('Installation arguments:')
+        for k in sorted(six.iterkeys(opts)):
+            logger.debug('%s: %s', k, opts[k])
+
+        if not opts['root_instance'] and opts['instance'] == 'root':
+            raise ValueError('Instance name "root" is reserved')
+
+        if opts['root_instance']:
+            opts['instance'] = 'root'
+            opts['instanceurl'] = ''
+            opts['needs_mount'] = '# '
+            opts['script_alias'] = '/'
+        else:
+            opts['instanceurl'] = '/%s' % opts['instance']
+            opts['needs_mount'] = ''
+            opts['script_alias'] = opts['instanceurl']
+
+        if 'uninstall' in opts and opts['uninstall'] is True:
+            if not os.path.exists(os.path.join(CONFDIR, opts['instance'])):
+                logger.info('Instance %s could not be found' % opts['instance'])
+                sys.exit(0)
+            uninstall(fplugins, opts)
+        else:
+            install(fplugins, opts)
+    except Exception as e:  # pylint: disable=broad-except
+        logger.info(str(e))         # emit message to console
+        logger.debug(e, exc_info=1) # add backtrace information to logfile
+
+        if 'uninstall' in opts and opts['uninstall'] is True:
+            logger.info('Uninstallation aborted.')
+        else:
+            logger.info('Installation aborted.')
+        logger.info('See log file %s for details' % LOGFILE)
+        out = 1
+    except SystemExit:
+        out = 1
+        raise
+    finally:
+        if out == 0:
+            if 'uninstall' in opts and opts['uninstall'] is True:
+                logger.info('Uninstallation complete.')
+            else:
+                logger.info('Installation complete.')
+                logger.info('Please restart HTTPD to enable the IdP instance.')
+    sys.exit(out)

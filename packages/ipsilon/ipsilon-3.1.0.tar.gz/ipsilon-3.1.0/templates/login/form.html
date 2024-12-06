@@ -1,0 +1,66 @@
+{% extends "master.html" %}
+{% block main %}
+
+{% if error %}
+<div class="col-sm-12">
+  <div class="alert alert-danger">
+    <p>{{ error }}</p>
+  </div>
+</div>
+
+{% endif %}
+
+{% if login_target %}
+<div class="col-md-10">
+  <h4>You are being asked to login by {{login_target}}</h4>
+  <hr>
+</div>
+{% endif %}
+<div class="col-sm-7 col-md-6 col-lg-5 login">
+  <form class="form-horizontal" role="form" id="login_form" action="{{ action }}" method="post" enctype="application/x-www-form-urlencoded">
+    <input type="hidden" name="ipsilon_transaction_id" id="ipsilon_transaction_id" value="{{ ipsilon_transaction_id }}">
+    <div class="form-group {% if error_username %} has-error{% endif %}">
+      <label for="login_name" class="col-sm-2 col-md-2 control-label">{{ username_text }}</label>
+      <div class="col-sm-10 col-md-10">
+        <input type="text" class="form-control" name="login_name" id="login_name" placeholder="" tabindex="1" value="{{ username | e }}">
+      </div>
+    </div>
+    <div class="form-group{% if error_password %} has-error{% endif %}">
+      <label for="login_password" class="col-sm-2 col-md-2 control-label">{{ password_text }}</label>
+      <div class="col-sm-10 col-md-10">
+        <input type="password" class="form-control" name="login_password" id="login_password" placeholder="" tabindex="2">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-10 col-md-10 col-sm-offset-2 col-md-offset-2">
+        <input type="text" class="form-control" name="login_otp" id="otp" autocomplete="off" placeholder="One-Time-Password (if you have one)" tabindex="3" />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-md-offset-2 col-xs-12 col-sm-10 col-md-10 submit">
+        {% if cancel_url %}
+          <a href="{{ cancel_url }}" title="Cancel" class="btn btn-link" tabindex="4">Cancel</a>
+        {% else %}
+          <a href="{{ basepath }}" title="Cancel" class="btn btn-link" tabindex="4">Cancel</a>
+        {% endif %}
+        <button type="submit" value="login" class="btn btn-primary btn-lg" tabindex="3">Log In</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="col-sm-5 col-md-6 col-lg-7 details">
+  <p>{{description}}</p>
+{% if other_stacks %}
+  <hr>
+  <p>Other authentication methods:
+  <ul>
+  {% for s in other_stacks %}
+    <li><a href="{{ s['url'] }}" class="btn btn-link" tabindex="5">{{ s['name'] }}</a></li>
+  {% endfor %}
+  </ul>
+  </p>
+{% endif %}
+</div>
+
+{% endblock %}

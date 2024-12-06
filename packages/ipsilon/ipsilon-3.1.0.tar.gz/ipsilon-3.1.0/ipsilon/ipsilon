@@ -1,0 +1,108 @@
+#!/usr/bin/python
+#
+# Copyright (C) 2013 Ipsilon project Contributors, for license see COPYING
+
+# These lines make sure that we have at least a minimum version of some
+# packages, since we depend on features provided by them.
+import __main__
+
+import sys
+sys.stdout = sys.stderr
+import glob
+import os
+import atexit
+import string
+import cherrypy
+import six
+from ipsilon import find_config
+from ipsilon.util.data import AdminStore
+from ipsilon.util import page
+from ipsilon.root import Root
+from jinja2 import Environment, FileSystemLoader, ChoiceLoader
+import ipsilon.util.sessions
+
+
+def nuke_session_locks():
+    if cherrypy.config['tools.sessions.on']:
+        try:
+            sessdir = cherrypy.config['tools.sessions.storage_path']
+            for l in glob.glob(os.path.join(sessdir, '*.lock')):
+                try:
+                    os.remove(l)
+                except Exception:  # pylint: disable=broad-except
+                    pass
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+cfgfile = find_config(None, None)
+
+cherrypy.lib.sessions.SqlSession = ipsilon.util.sessions.SqlSession
+cherrypy.lib.sessions.EtcdSession = ipsilon.util.sessions.EtcdSession
+cherrypy.config.update(cfgfile)
+
+# Force cherrypy logging to work. Note that this ignores the config-file
+# setting.
+cherrypy.log.screen = True
+
+nuke_session_locks()
+
+datastore = AdminStore()
+admin_config = datastore.load_config()
+for option in admin_config:
+    cherrypy.config[option] = admin_config[option]
+
+template_loaders = []
+theme_dir = cherrypy.config.get('theme_dir')
+if theme_dir:
+    if theme_dir.startswith('/'):
+        template_loaders.append(FileSystemLoader(os.path.join(theme_dir, 'templates')))
+    else:
+        template_loaders.append(FileSystemLoader(os.path.join(cherrypy.config['base.dir'], theme_dir, 'templates')))
+default_template_dir = 'templates'
+template_dir = cherrypy.config.get('template_dir', default_template_dir)
+if template_dir.startswith('/'):
+    template_loaders.append(FileSystemLoader(template_dir))
+else:
+    template_loaders.append(FileSystemLoader(
+        os.path.join(cherrypy.config['base.dir'],
+                     template_dir)))
+# Fall-back to the default templates
+template_loaders.append(FileSystemLoader(
+    os.path.join(cherrypy.config['base.dir'],
+                 default_template_dir)))
+template_env = Environment(loader=ChoiceLoader(template_loaders),
+                           autoescape=True)
+
+transchars = string.punctuation.replace('-', '').replace('.', '')
+if six.PY2:
+    trans = string.maketrans(transchars, '_' * len(transchars))
+elif six.PY3:
+    trans = str.maketrans(transchars, '_' * len(transchars))
+
+if __name__ == "__main__":
+    conf = {'global': {'server.socket_host': '0.0.0.0'},
+            '/': {'tools.staticdir.root': os.getcwd(),
+                  'request.dispatch':
+                    cherrypy.dispatch.Dispatcher(translate=trans)},
+            '/ui': {'tools.staticdir.on': True,
+                    'tools.staticdir.dir': 'ui'},
+            '/cache': {'tools.staticdir.on': True,
+                       'tools.staticdir.dir': 'cache'}}
+    if theme_dir:
+        conf['/ui/res'] = {'tools.staticdir.on': True,
+                        'tools.staticdir.dir': os.path.join(theme_dir, 'res')}
+    cherrypy.quickstart(Root('default', template_env),
+                        cherrypy.config.get('base.mount') or '/', conf)
+
+else:
+    cherrypy.config['environment'] = 'embedded'
+
+    conf = {'/': {'request.dispatch':
+        cherrypy.dispatch.Dispatcher(translate=trans)}}
+
+    if cherrypy.__version__.startswith('3.0') and cherrypy.engine.state == 0:
+        cherrypy.engine.start(blocking=False)
+        atexit.register(cherrypy.engine.stop)
+
+    application = cherrypy.Application(Root('default', template_env),
+                                       script_name=None, config=conf)

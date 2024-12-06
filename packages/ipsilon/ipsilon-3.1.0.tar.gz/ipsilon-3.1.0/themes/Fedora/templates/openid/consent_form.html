@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block maincontent %}
+<div class="row mb-3">
+    <div class="col text-center">
+            <p class="h4"><strong>{{trustroot}}</strong> requests to use the following details from your Fedora Account</p>
+    </div>
+</div>
+<div class="row justify-content-around">
+    <div class="col-10">
+            <form method="post" action="{{action}}" enctype="application/x-www-form-urlencoded">
+                <input type="hidden" name="ipsilon_transaction_id" id="ipsilon_transaction_id" value="{{ ipsilon_transaction_id }}" />
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                        {% for entry in authz_details|dictsort %}
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col"><strong>{{ entry[0] }}</strong></div>
+                                    {%- if entry[1] is iterable and not entry[1] is string -%}
+                                    <div class="col-auto">{{ entry[1] | join(', ') }}</div>
+                                    {%- else -%}
+                                    <div class="col-auto">{{ entry[1] }}</div>
+                                    {%- endif -%}
+                                </div>
+                            </div>
+                        {% endfor %}
+                            <div class="list-group-item">
+                                <div class="row align-items-center">
+                                    <div class="col"><strong>Remember&nbsp;approval</strong></div>
+                                    <div class="col-auto">
+                                        <select name="remember_for_days" class="custom-select custom-select-sm">
+                                        <option value="0">never</option>
+                                        <option value="3">3 days</option>
+                                        <option value="7">7 days</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-end">
+                            <input class="btn btn-sm btn-outline-danger mr-1" name="decided_deny" type="submit" value="Reject" />
+                            <input class="btn btn-sm btn-primary" name="decided_allow" type="submit" value="Approve" />
+                        </div>
+                    </div>
+                </div>
+                        
+    
+                        
+
+            </form>
+    </div>
+</div>
+{% endblock %}
