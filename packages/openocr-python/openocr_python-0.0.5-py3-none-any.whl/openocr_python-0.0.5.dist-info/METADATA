@@ -1,0 +1,98 @@
+Metadata-Version: 2.1
+Name: openocr-python
+Version: 0.0.5
+Summary: a python package for openocr, which is used to help developers quickly deploy OCR algorithms implemented in the openocr framework.
+Home-page: https://github.com/Topdu/OpenOCR
+Author: OpenOCR
+Author-email: 784990967@qq.com
+Project-URL: Source Code, https://github.com/Topdu/OpenOCR
+Keywords: python,OCR,STR,OpenOCR,openocr
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: Unix
+Classifier: Operating System :: Microsoft :: Windows
+Description-Content-Type: text/markdown
+License-File: LICENCE
+Requires-Dist: opencv-python<=4.6.0.66
+Requires-Dist: tqdm
+Requires-Dist: rapidfuzz
+Requires-Dist: lmdb
+Requires-Dist: imgaug
+Requires-Dist: pyyaml
+Requires-Dist: pyclipper
+
+# OpenOCR: a general OCR system with accuracy and efficiency
+
+## Quick Start
+
+### Dependencies:
+
+- [PyTorch](http://pytorch.org/) version >= 1.13.0
+- Python version >= 3.7
+
+```shell
+conda create -n openocr python==3.8
+conda activate openocr
+conda install pytorch==2.2.0 torchvision==0.17.0 torchaudio==2.2.0 pytorch-cuda=11.8 -c pytorch -c nvidia
+```
+
+After installing dependencies, the following two installation methods are available. Either one can be chosen.
+
+### 1. Python Modules
+
+```shell
+pip install openocr-python
+```
+
+**Usage**:
+
+```python
+from openocr import OpenOCR
+
+engine = OpenOCR()
+
+img_path = '/path/img_path or /path/img_file'
+result, elapse = engine(img_path)
+
+# Server mode
+# engine = OpenOCR(mode='server')
+```
+
+### 2. Clone this repository:
+
+```shell
+git clone https://github.com/Topdu/OpenOCR.git
+cd OpenOCR
+pip install -r requirements.txt
+wget https://github.com/Topdu/OpenOCR/releases/download/develop0.0.1/openocr_det_repvit_ch.pth
+wget https://github.com/Topdu/OpenOCR/releases/download/develop0.0.1/openocr_repsvtr_ch.pth
+# Rec Server model
+# wget https://github.com/Topdu/OpenOCR/releases/download/develop0.0.1/openocr_svtrv2_ch.pth
+```
+
+**Usage**:
+
+```shell
+# OpenOCR system: Det + Rec model
+python tools/infer_e2e.py --img_path=/path/img_fold or /path/img_file
+
+# Det model
+python tools/infer_det.py --c ./configs/det/dbnet/repvit_db.yml --o Global.infer_img=/path/img_fold or /path/img_file
+
+# Rec model
+python tools/infer_rec.py --c ./configs/rec/svtrv2/repsvtr_ch.yml --o Global.infer_img=/path/img_fold or /path/img_file
+```
+
+#### Demo
+
+```shell
+pip install gradio==4.20.0
+wget https://github.com/Topdu/OpenOCR/releases/download/develop0.0.1/OCR_e2e_img.tar
+tar xf OCR_e2e_img.tar
+# start demo
+python demo_gradio.py
+```
+
+
+## More detail in [OpenOCR Documentation](https://github.com/Topdu/OpenOCR)
