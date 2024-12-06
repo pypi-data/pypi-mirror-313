@@ -1,0 +1,209 @@
+# NEAR AI Agent
+
+A Python package for building and managing AI agents on NEAR Protocol. This package provides a streamlined way to create, customize, and run AI agents using the NEAR AI Environment API, with support for both local development and NEAR AI deployment.
+
+## Features
+
+- Full integration with NEAR AI's Environment API
+- Support for both local development and NEAR AI deployment
+- Built-in tool registry for extending agent capabilities
+- Advanced message processing with LLM support
+- Configurable system prompts and model parameters
+- Modular design for custom task integration
+- Local development mode with mock environment
+
+## Installation
+
+Install the package from PyPI:
+```bash
+pip install near_ai_agent
+```
+
+For development:
+```bash
+git clone https://github.com/joe-rlo/near_ai_agent.git
+cd near_ai_agent
+pip install -e .
+```
+
+## Usage
+
+### Basic Usage with NEAR AI
+
+1. Create an agent directory in your NEAR AI registry:
+```bash
+mkdir -p ~/.nearai/registry/my-agent
+```
+
+2. Initialize your agent with default configuration:
+```python
+from near_ai_agent.agent import NearAIAgent
+
+# The environment will be provided by NEAR AI
+agent = NearAIAgent()
+agent.run()
+```
+
+3. Run your agent using NEAR AI CLI:
+```bash
+nearai agent interactive my-agent --local
+```
+
+### Local Development
+
+#### Create and Run a Custom Agent
+```python
+from near_ai_agent.agent import NearAIAgent
+from near_ai_agent.environment import NearAIEnvironment
+
+# Create agent with mock environment for local testing
+env = NearAIEnvironment()  # Creates a mock environment
+agent = NearAIAgent(env=env)
+agent.run()
+```
+
+#### Adding Custom Tools
+```python
+from near_ai_agent.agent import NearAIAgent
+
+class CustomAgent(NearAIAgent):
+    def _register_tools(self):
+        super()._register_tools()  # Register default tools
+        
+        @self.tool_registry.register_tool
+        def calculate_sum(a: int, b: int) -> int:
+            """Calculate the sum of two numbers"""
+            return a + b
+
+# Initialize and run
+agent = CustomAgent()
+agent.run()
+```
+
+### Configuration
+
+Create a `config.json` file to configure your agent:
+
+```json
+{
+    "agent_name": "MyCustomAgent",
+    "version": "1.0.0",
+    "system_prompt": {
+        "role": "system",
+        "content": "You are a helpful AI assistant that specializes in [your domain]."
+    },
+    "model": "qwen2p5-72b-instruct",
+    "temperature": 0.7,
+    "default_tasks": {
+        "greet": "Hello! I'm MyCustomAgent, here to assist you.",
+        "help": "I can help you with various tasks including file operations and calculations."
+    }
+}
+```
+
+### NEAR AI Deployment
+
+1. Create `metadata.json` in your agent directory:
+```json
+{
+    "category": "agent",
+    "description": "Your agent description",
+    "tags": ["python", "assistant"],
+    "details": {
+        "agent": {
+            "defaults": {
+                "model": "qwen2p5-72b-instruct",
+                "model_max_tokens": 16384,
+                "model_provider": "fireworks",
+                "model_temperature": 0.7
+            }
+        }
+    },
+    "show_entry": true,
+    "name": "my-custom-agent",
+    "version": "0.1.0"
+}
+```
+
+2. Upload your agent:
+```bash
+nearai registry upload ~/.nearai/registry/my-agent
+```
+
+## Advanced Features
+
+### Message Processing
+The agent handles messages through a sophisticated processing loop that can:
+- Execute multiple iterations of thought
+- Use tools when needed
+- Request user input at appropriate times
+- Maintain conversation context
+
+```python
+from near_ai_agent.agent import NearAIAgent
+
+agent = NearAIAgent()
+agent.process_message(max_iterations=5)  # Process with up to 5 iterations
+```
+
+### Tool Registry
+Built-in tools include:
+- File operations (read/write)
+- Command execution
+- Vector store queries
+- Custom task execution
+
+Add your own tools:
+```python
+from near_ai_agent.agent import NearAIAgent
+
+class CustomAgent(NearAIAgent):
+    def _register_tools(self):
+        super()._register_tools()
+        
+        @self.tool_registry.register_tool
+        def custom_tool(param: str) -> str:
+            """Tool description for the LLM"""
+            return f"Processed {param}"
+```
+
+## Testing
+
+Run the test suite:
+```bash
+python -m unittest discover tests
+```
+
+For local development testing:
+```bash
+python examples/run_agent.py --local
+```
+
+## Project Structure
+```
+near_ai_agent/
+├── near_ai_agent/
+│   ├── __init__.py
+│   ├── agent.py          # Core agent implementation
+│   ├── environment.py    # Environment wrapper
+│   ├── tasks.py         # Task implementations
+│   └── config.json      # Default configuration
+├── examples/
+│   └── run_agent.py     # Example usage
+├── tests/
+├── setup.py
+├── README.md
+└── requirements.txt
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
