@@ -1,0 +1,60 @@
+[project]
+name = "discord-ext-songbird"
+requires-python = ">=3.10"
+dependencies = [
+    "discord.py[voice]",
+    "audioop-lts; python_version >= '3.13'"
+]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+readme = "README.md"
+dynamic = ["version", "description", "authors", "license"]
+
+[build-system]
+requires = ["hatchling", "maturin"]
+build-backend = "maturin"
+
+[tool.uv.sources]
+"discord.py" = { git = "https://github.com/rapptz/discord.py" }
+
+[dependency-groups]
+dev = [
+    "hatchling>=1.26.3",
+    "maturin>=1.7.6"
+]
+
+[tool.maturin]
+python-source = "py-src"
+module-name = "discord.ext.songbird.backend"
+features = ["pyo3/extension-module"]
+
+[tool.ruff]
+include = ["py-src/**/*.py", "py-src/**/*.pyi", "examples/**/*.py"]
+line-length = 160
+target-version = "py313"
+
+[tool.ruff.lint]
+ignore = [
+    "E501",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+line-ending = "auto"
+
+[tool.pyright]
+include = ["py-src"]
+reportMissingImports = "error"
+reportMissingTypeStubs = "error"
+pythonVersion = "3.13"
+# because of discord.* occurs error
+reportAttributeAccessIssue = false
