@@ -1,0 +1,108 @@
+Metadata-Version: 2.3
+Name: pymibig
+Version: 1.4.0
+Summary: A small tool to download, match and save sequences from MIBiG.
+Project-URL: Documentation, https://github.com/Godrigos/pyMIBiG#readme
+Project-URL: Issues, https://github.com/Godrigos/pyMIBiG/issues
+Project-URL: Source, https://github.com/Godrigos/pyMIBiG
+Author-email: Rodrigo Aluizio <r.aluizio@gmail.com>
+License: LGPL-3.0-or-later
+Keywords: Biosynthetic Gene Cluster,MIBiG,Secondary Metabolites,bioinformatics
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Requires-Python: >=3.10
+Requires-Dist: biopython~=1.84
+Requires-Dist: bio~=1.7
+Requires-Dist: pandas~=2.2
+Requires-Dist: requests~=2.32
+Requires-Dist: rich~=13.9
+Description-Content-Type: text/markdown
+
+# pyMIBiG
+
+[![PyPI - Version](https://img.shields.io/pypi/v/pymibig.svg)](https://pypi.org/project/pymibig)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/pymibig)
+
+
+A small tool to download, match and save sequences from [MIBiG](https://mibig.secondarymetabolites.org/).
+
+`pyMIBiG` can search by "organism name", "compound / product",
+"biosynthetic class" and "entry quality" as intersections of every argument added.
+Which means that the more arguments you add more restrictive your search becomes.
+It uses the available MIBiG download files which have less information then
+those returned when using their web search. So, for very specific queries,
+that yield fewer results, you will be better using the web interface.
+
+## Usage
+
+Download the available package of `pyMIBiG` and execute `pymibig -<target>`
+where target is the term you wanto to search in MIBiG database.
+
+You can also install it using `pip`. In a virtual environment execute:
+
+```{console}
+pip install pymibig
+```
+
+By default `pyMIBiG` will fetch all entry data and information of a given target.
+
+You may change that using optional aguments passed along with the `<target>`:
+
+```{console}
+usage: pyMIBiG [-h] [-o ORGANISM] [-p PRODUCT] [-b BIOSYNT] [-c {complete,incomplete,unknown,all}] [-q {low,medium,high,questionable,all}]
+
+A small tool to download, match and save targeted sequences from MIBiG.
+
+options:
+  -h, --help            show this help message and exit
+  -o ORGANISM, --organism ORGANISM
+                        Organism name to query in database.
+  -p PRODUCT, --product PRODUCT
+                        Compound to query in database.
+  -b BIOSYNT, --biosynt BIOSYNT
+                        Biosynthetic class to query in database.
+  -c {complete,incomplete,unknown,all}, --completeness {complete,incomplete,unknown,all}
+                        Loci completeness.
+  -q {low,medium,high,questionable,all}, --quality {low,medium,high,questionable,all}
+                        Entry quality level.
+```
+
+You have to use at least one of the following arguments: organism, product or
+biosynt. The others are optional.
+
+On first execution `pyMIBiG` will download the database files from
+[MIBiG](https://mibig.secondarymetabolites.org/download) and save locally,
+so an internet connection will be needed, after that it can be used offline.
+
+Latest release of `pyMIBiG` will download from MIBiG
+**Version 4.0 (November 15, 2024)** the:
+- [Metadata](https://dl.secondarymetabolites.org/mibig/mibig_json_4.0.tar.gz)
+in compressed format, including several JSON files;
+- [Nucleotide](https://dl.secondarymetabolites.org/mibig/mibig_gbk_4.0.tar.gz)
+sequences of the biosynthetic gene clusters in compressed format, including
+several GBK files;
+- [Amino acid sequence translations](https://dl.secondarymetabolites.org/mibig/mibig_prot_seqs_4.0.fasta)
+of all genes from MIBiG entries are also available in a single compressed
+FASTa file.
+
+Version 1.2.7 uses MIBiG **Version 3.1 (October 7, 2022)**.
+
+## Output
+
+`pyMIBiG` will create three files:
+- a FASTa containing nucleotide sequences
+- a FASTa containing aminoacid sequences
+- a tab-separated value table with information on the selected sequences
+
+The filenames will reflect the parameters used when searching the database.
+
+Ps.: Retired entries will be presented in the table, but there will be no sequences for them.
+
+## Reference
+[MIBiG 4.0: Advancing Biosynthetic Gene Cluster Curation through Global Collaboration.](https://doi.org/10.1093/nar/gkae1115)
+
+## License
+
+`pyMiBiG` is distributed under the terms of the [LGPL 3.0](https://spdx.org/licenses/LGPL-3.0-or-later.html) license.
