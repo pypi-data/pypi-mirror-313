@@ -1,0 +1,140 @@
+{% from "macros/chat_with_llms/choose_llm.html" import choose_llm %}
+
+<style>
+        body {
+
+        }
+
+
+        .container-fluid {
+           min-height:calc(100vh - 50px) !important;
+          display: flex;
+          flex-direction: column;
+          padding: 0;
+
+        }
+
+        .chatbot {
+          flex: 1;
+          display: flex;
+          margin: 0;
+         /* max-height: calc(100vh - 370px);    todo: find better way to do this  */
+        }
+
+        .header-text { /* Add the class to your header text element */
+                text-align: center; /* Centers the text */
+                margin: 0 auto; /* Additional centering for block elements */
+                display: block; /* Ensures the element is treated as a block-level element */
+                font-size: 14px; /* Sets the font size */
+                font-weight: bold;
+                min-height:40px;
+                padding:10px;
+                word-wrap: break-word; /* Breaks the words to prevent overflow */
+                hyphens: auto; /* Automatic hyphenation */
+            }
+
+
+        .examples {
+            flex: 1;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .example {
+
+            width: 100%;
+            margin: 5px 0; /* Add margin to space out examples */
+            padding: 15px; /* Increase padding for better touch targets */
+            font-size: 10px; /* Increase font size for readability */
+            border: 1px solid #ccc; /* Softer border color */
+            border-radius: 8px; /* Rounder corners for a modern look */
+            cursor: pointer; /* Indicate that examples are clickable */
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+            word-wrap: break-word; /* Breaks the words to prevent overflow */
+            hyphens: auto; /* Automatic hyphenation */
+            text-align: center; /* Centers the text */
+        }
+
+        .example:hover {
+            background-color: #f0f0f0; /* Hover effect for interactivity */
+        }
+
+        .example.disabled {
+          pointer-events: none;
+          opacity: 0.6;
+          background-color: #f0f0f0; /* or any other color that indicates "disabled" */
+        }
+
+
+</style>
+
+        <template id="system_prompt">
+            {{ system_prompt }}
+        </template>
+
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card" style="padding: 10px">
+                        {{ 'chat-with-llms' | static_content(current_language) | safe }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card" style="padding: 10px">
+                        {{ choose_llm(model_options, languages, current_language) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row chatbot">
+                <div class="col-xs-12 col-sm-10">
+                    <chatbot-openai url              = "{{ url_athena }}"
+                                    initial_message  = "{{ initial_message }}"
+                                    name             = "Chat with LLM"
+                                    channel          = "cbr_community_chat"
+                                    model            = "{{ model      }}"
+                                    platform         = "{{ platform   }}"
+                                    provider         = "{{ provider   }}"  >
+
+                    </chatbot-openai>
+                </div>
+                <div class="col-sm-2 examples">
+                    <div class="header-text">{{ examples_title }}</div>
+                    {% for text in examples_texts %}
+                        <div class="example" onclick="submit_example(this)">{{ text }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+<script>
+    function submit_example(element) {
+        let user_prompt = element.innerText;
+        let chatbot = document.querySelector('chatbot-openai');
+        chatbot.messages.add_message_sent({user_prompt:user_prompt})
+    }
+
+    window.addEventListener('promptSent', (e)=>{
+        var examples = document.querySelectorAll('.example');
+        // Disable all example elements
+          examples.forEach(function(element) {
+            element.classList.add('disabled');
+          });
+    });
+
+    window.addEventListener('streamComplete', (e)=>{
+            var examples = document.querySelectorAll('.example');
+
+          // ReEnable all example elements
+          examples.forEach(function(element) {
+            element.classList.remove('disabled');
+          });
+        });
+</script>
+
+{#{%  include('llms/open_ai/submit_chat_data.html') %}#}

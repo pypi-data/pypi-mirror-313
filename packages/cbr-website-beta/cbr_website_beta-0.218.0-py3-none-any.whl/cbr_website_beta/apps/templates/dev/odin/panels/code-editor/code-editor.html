@@ -1,0 +1,85 @@
+<script> {% include 'dev/odin/panels/code-editor/code-editor.ws-support.js'            %} </script>
+
+<link type="text/css" rel="stylesheet" href="/assets/plugins/golden-layout/goldenlayout-base.css" />
+<link type="text/css" rel="stylesheet" href="/assets/plugins/golden-layout/goldenlayout-dark-theme.css" />
+
+<style>
+h2 {
+    font: 14px Arial, sans-serif;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+    .lm_popout {
+        display: none; /* Hide popout buttons */
+    }
+</style>
+</head>
+
+<iframe
+  src="https://marimo.app/l/aaa?embed=true"
+  width="100%"
+  height="700"
+  frameborder="0"
+></iframe>
+
+<div id="layout" style="widxth: 100%; height: 100vh;"></div>
+
+<script>
+    function setup() {
+            var config = {
+            content: [{
+                type: 'row',
+                content:[{
+                    type: 'component',
+                    title: 'Athena 1',
+                    componentName: 'testComponent',
+                    componentState: { label: 'Athena 1' } ,
+                    isClosable: false
+                },{
+                    type: 'column',
+                    content:[{
+                        type: 'component',
+                        title: 'Athena 2',
+                        componentName: 'testComponent',
+                        componentState: { label: 'Athena 2' }
+                    },{
+                        type: 'component',
+                        title: 'Athena 3',
+                        componentName: 'testComponent',
+                        componentState: { label: 'Athena 3' }
+                    }]
+                }]
+            }]
+        };
+
+        var myLayout = new GoldenLayout( config , "#layout");
+
+        myLayout.registerComponent( 'testComponent', function( container, componentState ){
+            container.getElement().html( `<h2>${componentState.label}</h2>
+<!--
+<iframe style='background-color: white;height:100%; width:100%' src='https://athena.thecyberboardroom.com/'></iframe>
+-->
+` );
+        });
+
+        myLayout.init();
+    };
+
+
+    function install_golden_layout(callback) {
+        if (typeof GoldenLayout !== 'function') {
+            $.getScript('/assets/plugins/golden-layout/goldenlayout.min.js', function() {
+                console.log('GoldenLayout has been loaded successfully!');
+                callback()
+            })
+        }
+        else {
+            console.log('GoldenLayout was already loaded ');
+            callback()
+        }
+    }
+
+    install_golden_layout(setup)
+
+</script>
