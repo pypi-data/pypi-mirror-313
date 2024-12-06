@@ -1,0 +1,154 @@
+[project]
+name = "serox"
+version = "0.1.3"
+description = "Serpentine Oxidation: Rusty abstractions for Python."
+keywords = [
+   "iterators",
+   "monads",
+   "option",
+   "protocols",
+   "python",
+   "result",
+   "rust",
+   "structural-typing",
+   "traits",
+   "types",
+   "typing",
+]
+authors = [{ name = "Myles Bartlett" }]
+license = "MIT"
+classifiers = [
+   "License :: OSI Approved :: MIT License",
+   "Operating System :: OS Independent",
+   "Programming Language :: Python :: 3.12",
+   "Typing :: Typed",
+]
+dependencies = [
+   "joblib>=1.4.2",
+]
+readme = "README.md"
+requires-python = ">= 3.12"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[dependency-groups]
+dev = [
+   "basedpyright>=1.21.0",
+   "bump2version>=1.0.1",
+   "codespell>=2.3.0",
+   "deptry>=0.21.1",
+   "pre-commit>=4.0.1",
+   "pydoclint>=0.5.9",
+   "pytest-cov>=6.0.0",
+   "pytest>=8.3.3",
+   "ruff>=0.7.3",
+]
+
+[tool.uv]
+managed = true
+
+[tool.rye]
+dev-dependencies = [
+   "basedpyright>=1.21.0",
+   "bump2version>=1.0.1",
+   "codespell>=2.3.0",
+   "deptry>=0.21.1",
+   "pre-commit>=4.0.1",
+   "pydoclint>=0.5.9",
+   "pytest-cov>=6.0.0",
+   "pytest>=8.3.3",
+   "ruff>=0.7.3",
+]
+managed = true
+repository = "https://github.com/MylesBartlett/serox"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["serox"]
+
+[tool.codespell]
+count = false
+ignore-words-list = "crate"
+skip = ".git"
+
+[tool.deptry.per_rule_ignores]
+DEP002 = ["bump2version"]
+DEP004 = ["pytest"]
+
+[tool.pydoclint]
+style = "sphinx"
+# Types in docstrings redundant due to annotations
+arg-type-hints-in-docstring = false
+check-return-types = false
+check-yield-types = false
+exclude = '.git|.undodir/|.venv'
+
+[tool.rye.scripts]
+lint-doc = { cmd = "pydoclint ." }
+pydoclint = { cmd = "pydoclint ." }
+sort = { cmd = "rye run ruff check --select I --fix ." }
+test = { cmd = "pytest . " }
+test-cov = { cmd = "pytest . --cov ." }
+test-doc = { cmd = "pytest . --doctest-modules" }
+type-check = { cmd = "rye run pyright --verbose" }
+# Currently, the Ruff formatter does not sort imports. In order to both sort
+# imports and format, call the Ruff linter and then the formatter.
+fmt = { chain = ["fmt:imports", "fmt:main"] }
+"fmt:imports" = "rye run ruff check --select I --fix"
+"fmt:main" = "rye fmt -a"
+
+[tool.ruff]
+format.docstring-code-format = true
+line-length = 100
+lint.ignore = [
+   "E501",    # line length
+   "E721",    # `isinstance()` vs `type() == type()`
+   "E741",    # ambiguous variable name
+   "F541",    # f-string without placeholder
+   "PLW2901", # overwriting loop variable
+   "PLC0105", # covariant typevars have to end in "_co"
+]
+lint.select = [
+   "E", # pycodestyle
+   "F", # pyflakes
+   "I", # isort
+   # "N", # naming
+   "PLC", # pylint convention
+   "PLE", # pylint error
+   # "PLR", # pylint refactor
+   "PLW", # pylint warning
+   "PTH", # use-pathlib
+   # "UP", # pyupgrade
+   "W",
+]
+target-version = "py310"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F403"]
+"prelude" = ["F403"]
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+classes = []
+force-sort-within-sections = true
+known-third-party = ["pytest"]
+no-lines-before = ["future", "standard-library"]
+split-on-trailing-comma = false
+
+[tool.ruff.lint.pep8-naming]
+ignore-names = ["C"]
+
+[tool.coverage.report]
+ignore_errors = true
+fail_under = 70
+
+[tool.coverage.run]
+branch = true
+
+[tool.basedpyright]
+typeCheckingMode = "all"
+reportIgnoreCommentWithoutRule = "error"
