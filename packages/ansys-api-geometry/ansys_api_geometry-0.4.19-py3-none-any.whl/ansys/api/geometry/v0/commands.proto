@@ -1,0 +1,430 @@
+// Copyright 2023, ANSYS Inc. Unauthorized use, distribution or duplication is prohibited.
+
+syntax = "proto3";
+
+package ansys.api.geometry.v0.commands;
+
+import "ansys/api/dbu/v0/dbumodels.proto";
+import "ansys/api/geometry/v0/models.proto";
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "Ansys.Api.Geometry.V0.Commands";
+
+
+service Commands{
+
+  rpc RenameMany(RenameManyRequest) returns (RenameManyResponse);
+
+  rpc Rename(RenameRequest) returns (RenameResponse);
+
+  rpc ProjectCurves(ProjectCurvesRequest) returns (ProjectCurvesResponse);
+
+  rpc ImprintCurves(ImprintCurvesRequest) returns (EntitiesCollection);
+
+  rpc ImprintProjectedCurves(ProjectCurvesRequest) returns (EntitiesCollection);
+
+  rpc PowerSelectFacesByAreaRange(PowerSelectFacesByAreaRangeRequest) returns (PowerSelectFacesByAreaRangeResponse);
+
+  rpc CreateBeamCircularProfile(CreateBeamCircularProfileRequest) returns(CreateBeamCircularProfileResponse);
+
+  rpc CreateBeamSegment(CreateBeamSegmentRequest) returns (CreateBeamSegmentResponse);
+    
+  rpc CreateBeamSegments(CreateBeamSegmentsRequest) returns (CreateBeamSegmentsResponse);
+
+  rpc FillFaces(FillFacesRequest) returns (google.protobuf.Empty);
+
+  rpc CreateDesignPoint(CreateDesignPointRequest) returns (CreateDesignPointResponse);
+
+  rpc CreateDesignPoints(CreateDesignPointsRequest) returns (CreateDesignPointsResponse);
+
+  rpc CreateCurvesFromProfile(CreateCurvesFromProfileRequest) returns (CreateCurvesFromProfileResponse);
+
+  rpc AssignMidSurfaceThickness(AssignMidSurfaceThicknessRequest) returns (google.protobuf.Empty);
+
+  rpc AssignMidSurfaceOffsetType(AssignMidSurfaceOffsetTypeRequest) returns (google.protobuf.Empty);
+  
+  rpc DownloadFile(google.protobuf.Empty) returns (DownloadFileResponse);  
+
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse);
+
+  rpc CreateSphere(CreateSphereRequest) returns (CreateSphereResponse);
+
+  rpc CreateTorus(CreateTorusRequest) returns (CreateTorusResponse);
+
+  rpc DeleteBeam(ansys.api.dbu.v0.EntityIdentifier) returns (google.protobuf.Empty);
+
+  rpc DeleteBeamProfile(ansys.api.dbu.v0.EntityIdentifier) returns (google.protobuf.Empty);
+
+  rpc GetAssembly(ansys.api.dbu.v0.EntityIdentifier) returns (GetAssemblyResponse);
+
+  rpc GetBeamProfileName(ansys.api.dbu.v0.EntityIdentifier) returns (GetBeamProfileNameResponse);
+    
+  rpc GetBeamProfileParts(google.protobuf.Empty) returns (GetBeamProfilePartsResponse);
+
+  rpc GetBeamProperties(ansys.api.dbu.v0.EntityIdentifier) returns (BeamProperties);
+
+  rpc GetBeamCrossSectionInfo(ansys.api.dbu.v0.EntityIdentifier) returns (BeamCrossSectionInfo);
+
+  rpc GetAllSpotWelds(google.protobuf.Empty) returns (GetAllSpotWeldsResponse);
+
+  rpc GetAllCADWelds(google.protobuf.Empty) returns (GetAllCADWeldsResponse);
+
+  rpc CreateSketchLine(CreateSketchLineRequest) returns (google.protobuf.Empty);
+
+  rpc IntersectCurves(IntersectCurvesRequest) returns (IntersectCurvesResponse);
+
+  rpc RevolveCurves(RevolveCurvesRequest) returns (google.protobuf.Empty);
+
+  rpc Chamfer(ChamferRequest) returns (ChamferResponse);
+
+  rpc Fillet(FilletRequest) returns (ChamferResponse);
+
+  rpc FaceOffset(FaceOffsetRequest) returns (CommandResponse);
+
+  rpc OffsetFacesSetRadius(OffsetFacesSetRadiusRequest) returns (CommandResponse);
+
+  rpc FullFillet(FullFilletRequest) returns (CommandResponse);
+
+  rpc ThickenFaces(ThickenFacesRequest) returns (CommandResponse);
+
+  rpc DraftFaces(DraftFacesRequest) returns (DraftFacesResponse);
+
+  rpc ExtrudeEdges(ExtrudeEdgesRequest) returns (CommandResponse);
+
+  rpc ExtrudeEdgesUpTo(ExtrudeEdgesUpToRequest) returns (CommandResponse);
+
+  rpc ExtrudeFaces(ExtrudeFacesRequest) returns (CommandResponse);
+
+  rpc ExtrudeFacesUpTo(ExtrudeFacesUpToRequest) returns (CommandResponse);
+}
+
+message ExtrudeEdgesRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier edges = 1;
+  ansys.api.dbu.v0.EntityIdentifier face = 2;
+  Point point = 3;
+  Direction direction = 4;
+  double distance= 5;
+  ExtrudeType extrude_type = 6;
+  bool pull_symmetric = 7;
+  bool copy = 8;
+  bool natural_extension = 9;
+}
+
+message ExtrudeEdgesUpToRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier edges = 1;
+  ansys.api.dbu.v0.EntityIdentifier up_to_selection = 2;
+  Point seed_point = 3;
+  Direction direction = 4;
+  ExtrudeType extrude_type = 5;
+}
+
+message ExtrudeFacesRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier faces = 1;
+  double distance = 2;
+  Direction direction = 3;
+  ExtrudeType extrude_type = 4;
+  bool pull_symmetric = 5;
+  OffsetMode offset_mode = 6;
+  bool copy = 7;
+  bool force_do_as_extrude = 8;
+}
+
+message ExtrudeFacesUpToRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier faces = 1;
+  ansys.api.dbu.v0.EntityIdentifier up_to_selection = 2;
+  Direction direction = 3;
+  ExtrudeType extrude_type = 4;
+  bool pull_symmetric = 5;
+  OffsetMode offset_mode = 6;
+  bool copy = 7;
+  bool force_do_as_extrude = 8;
+  Point seed_point = 9;
+}
+
+message DraftFacesRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier faces = 1;
+  repeated ansys.api.dbu.v0.EntityIdentifier reference_faces = 2;
+  DraftSide draft_side = 3;
+  double draft_angle = 4;
+  ExtrudeType extrude_type = 5;
+}
+
+message DraftFacesResponse {
+  repeated Face created_faces = 1;
+}
+
+message ThickenFacesRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier faces = 1;
+  Direction direction = 2;
+  double value = 3;
+  ExtrudeType extrude_type = 4;
+  bool pull_symmetric = 5;
+  bool select_direction = 6;
+}
+
+message FullFilletRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier faces = 1;
+}
+
+message OffsetFacesSetRadiusRequest {
+  ansys.api.dbu.v0.EntityIdentifier face = 1;
+  double radius = 2;
+  bool copy = 3;
+  OffsetMode offset_mode = 4;
+  ExtrudeType extrude_type = 5;
+}
+
+message FaceOffsetRequest {
+  ansys.api.dbu.v0.EntityIdentifier face1 = 1;
+  ansys.api.dbu.v0.EntityIdentifier face2 = 2;
+  bool set_baselines = 3;
+  bool process_adjacent_faces = 4;
+}
+
+message CommandResponse {
+  bool success = 1;
+  repeated Body created_bodies = 2;
+  repeated Body modified_bodies = 3;
+}
+
+message FilletRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier ids = 1;
+  double radius = 2;
+}
+
+message ChamferRequest {
+  repeated ansys.api.dbu.v0.EntityIdentifier ids = 1;
+  double distance = 2;
+}
+
+message ChamferResponse {
+  bool success = 1;
+  repeated Face created_faces = 2;
+  repeated Edge created_edges = 3;
+  repeated Body created_surfaces = 4;
+}
+
+message RevolveCurvesRequest {
+  repeated TrimmedCurve curves = 1;
+  Line axis = 2;
+  double angle = 3;
+  bool symmetric = 4;
+}
+
+message IntersectCurvesRequest {
+  TrimmedCurve first = 1;
+  TrimmedCurve second = 2;
+}
+
+message IntersectCurvesResponse {
+  repeated Point points = 1;
+  bool intersect = 2;
+}
+
+message CreateSketchLineRequest{
+  Point point1 = 1;
+  Point point2 = 2;
+}
+
+message GetAllSpotWeldsResponse {
+  repeated SpotWeld welds = 1;
+}
+
+message GetAllCADWeldsResponse {
+  repeated Weld welds = 1;
+}
+
+message GetBeamProfilePartsResponse {
+  repeated Part parts = 1;
+}
+
+message GetBeamProfileNameResponse{
+  string name = 1;
+}
+
+message RenameManyRequest{
+  map<string, SingleRenamedObject>  ids_updates = 1;
+}
+
+message RenameManyResponse{
+  map<string,string> results = 1;
+}
+
+message SingleRenamedObject{
+  string new_name = 1;
+  EntityType type = 2;
+}
+
+message RenameRequest{
+  string  id = 1;
+  EntityType type = 2;
+  string  new_name = 3;
+}
+
+message RenameResponse{
+  string result = 1;
+}
+
+message ProjectCurvesRequest {
+  string body=1;
+  Geometries curves=2;
+  Direction direction=3;
+  bool closest_face=4;
+}
+
+message ProjectCurvesResponse {
+  repeated Face faces=1;
+}
+
+message ImprintCurvesRequest {
+  string body=1;
+  Geometries curves=2;
+  repeated string faces=3;
+}
+
+message PowerSelectFacesByAreaRangeRequest {
+  string body=1;
+  double area1=2;
+  double area2=3;
+}
+
+message PowerSelectFacesByAreaRangeResponse {
+  repeated Face faces=1;
+}
+
+message CreateBeamCircularProfileRequest {
+  Plane plane=1;
+  double radius=2;
+  Point origin=3;
+  string name=4;
+}
+
+message CreateBeamCircularProfileResponse {
+  string id=1;
+}
+
+message CreateBeamSegmentRequest {
+  string profile=1;
+  oneof segment{
+    Line line=2;
+    Arc arc=3;
+    Circle circle=4;
+  }
+  Plane plane= 5;
+  string parent=6;
+}
+
+message CreateBeamSegmentResponse {
+  string id=1;
+}
+
+message CreateBeamSegmentsRequest{
+  string profile=1;
+  
+  repeated Line lines=2;
+  repeated Arc arcs=3;
+  repeated Circle circles=4;
+
+  repeated Plane planes= 5;
+  string parent=7;
+}
+
+message CreateBeamSegmentsResponse {
+  repeated string ids=1;
+}
+
+message FillFacesRequest {
+  repeated Face faces=1;
+}
+
+message CreateDesignPointRequest {
+  Point point=1;
+  string parent=2;
+}
+
+message CreateDesignPointResponse {
+  string id=1;
+}
+
+message CreateDesignPointsRequest {
+  repeated Point points = 1;
+  string parent=2;
+}
+
+message CreateDesignPointsResponse {
+  repeated string ids =1;
+}
+
+message CreateCurvesFromProfileRequest {
+  Geometries geometries=1;
+  string parent=2;
+  Plane plane=3;
+}
+
+message CreateCurvesFromProfileResponse {
+  repeated string design_curves=1;
+}
+
+message AssignMidSurfaceThicknessRequest {
+  repeated string bodies_or_faces=1;
+  double thickness=2;
+}
+
+message AssignMidSurfaceOffsetTypeRequest {
+  repeated string bodies_or_faces=1;
+  MidSurfaceOffsetType offset_type=2;
+}
+
+message DownloadFileResponse {
+  bytes data=1;
+}
+
+message UploadFileRequest {
+  bytes data=1;
+  string file_name=2;
+  bool open=3;
+  map<string,bool> import_options = 4;
+}
+
+message UploadFileResponse {
+  string file_path=1;
+  ansys.api.dbu.v0.EntityIdentifier document_id=2;
+}
+
+message CreateSphereRequest {
+  string name=1;
+  string parent=2;
+  Point point=3;
+  double radius=4;
+}
+
+message CreateSphereResponse {
+  string id=1;
+}
+
+message CreateTorusRequest {
+  string name=1;
+  string parent=2;
+  double major_radius=3;
+  double minor_radius=4;
+  Frame frame=5;
+}
+
+message CreateTorusResponse {
+  string id=1;
+}
+
+message CoordinateSystemList {
+  repeated CoordinateSystem coordinate_systems=1;
+}
+
+message GetAssemblyResponse {
+  repeated Part parts=1;
+  repeated Component transformed_parts=2;
+  repeated Component components=3;
+  repeated Body bodies=4;
+  repeated Material materials=5;
+  repeated NamedSelection named_selections=6;
+  map <string, CoordinateSystemList> component_coord_systems=7;
+  map <string, int32> component_shared_topologies=8;
+}
