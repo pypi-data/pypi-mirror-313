@@ -1,0 +1,54 @@
+Metadata-Version: 2.1
+Name: py3-qunjielong
+Version: 1.0.0
+Summary: The Python3 Qunjielong Library Developed By Guolei
+Home-page: https://github.com/guolei19850528/py3_qunjielong
+Author: guolei
+Author-email: 174000902@qq.com
+License: MIT
+Requires-Python: >=3.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests
+Requires-Dist: diskcache
+Requires-Dist: redis
+Requires-Dist: addict
+Requires-Dist: retrying
+Requires-Dist: jsonschema
+
+# py3_qunjielong
+The Python3 Qunjielong Library Developed By Guolei
+
+# Official Documentation
+
+## [Home](https://console-docs.apipost.cn/preview/b4e4577f34cac87a/1b45a97352d07e60/)
+
+
+# Installation
+```shell
+pip install py3_qunjielong
+```
+
+# Example
+## Qunjielong
+```python
+import os
+import unittest
+
+import diskcache
+
+from py3_qunjielong.qunjnielong import Qunjielong
+
+cache = diskcache.Cache(directory=os.path.join(os.getcwd(), "runtime", "diskcache", "default"))
+qunjielong = Qunjielong(
+    secret="<secret>",
+    cache=cache
+)
+qunjielong.token_with_cache().get_goods_detail()
+qunjielong.token_with_cache().get_ghome_info()
+qunjielong.token_with_cache().query_order_list_with_all()
+qunjielong.token_with_cache().query_order_list_with_forward()
+qunjielong.token_with_cache().query_order_list_with_reverse()
+qunjielong.token_with_cache().query_act_goods()
+qunjielong.token_with_cache().list_act_info()
+```
