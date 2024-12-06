@@ -1,0 +1,358 @@
++++++++++++
+LabKey Python Client API News
++++++++++++
+
+What's New in the LabKey 3.3.0 package
+==============================
+
+*Release date: 12/3/2024*
+- Add import_rows API to query module
+    - Accessible via API wrappers e.g. api.query.import_rows
+
+What's New in the LabKey 3.2.0 package
+==============================
+
+*Release date: 09/10/2024*
+- Add lineage API to experiment module
+    - Accessible via API wrappers e.g. api.experiment.lineage()
+
+What's New in the LabKey 3.1.0 package
+==============================
+
+*Release date: 04/03/2024*
+- ServerContext
+    - Add allow_redirects flag (defaults to False) to constructor
+    - Add allow_redirects flag to make_request
+- APIWrapper: Add allow_redirects flag (defaults to False)
+- Add UnexpectedRedirectError
+    - thrown when allow_redirects is False and the server issues a redirect
+
+What's New in the LabKey 3.0.0 package
+==============================
+
+*Release date: 12/14/2023*
+- Query API - WAF encode "sql" parameter for execute_sql
+    - WAF encoding of parameters is initially supported with LabKey Server v23.09
+    - WAF encoding can be opted out of on execute_sql calls by specifying waf_encode_sql=False
+- Query API - add optional parameters to insert_rows, update_rows, and delete_rows
+- Query API - add move_rows()
+    - earliest compatible LabKey Server version: 24.1.0
+
+What's New in the LabKey 2.6.1 package
+==============================
+
+*Release date: 10/09/2023*
+- Query API - Change max_rows default value to -1 in select_rows
+
+What's New in the LabKey 2.6.0 package
+==============================
+
+*Release date: 08/17/2023*
+- Query API - add lineage-related filter types
+
+What's New in the LabKey 2.5.0 package
+==============================
+
+*Release date: 07/06/2023*
+- Container API
+    - add rename
+    - add get_containers
+- Add transform_helper to labkey.utils
+    - See docs in docs/transform_helper.md for more information
+
+What's New in the LabKey 2.4.1 package
+==============================
+
+*Release date: 12/15/2022*
+- Freezer Manager API - add Primary Storage option to storage-related action documentation
+
+What's New in the LabKey 2.4.0 package
+==============================
+
+*Release date: 09/21/2022*
+- Add support for creating Freezer Manager freezer hierarchies via StorageController APIs
+  - earliest compatible LabKey Server version: 22.10.0
+  - StorageWrapper: create_storage_item, update_storage_item, delete_storage_item
+- Set User-Agent header for requests to "LabKey Python API/<version>"
+
+What's New in the LabKey 2.3.0 package
+==============================
+
+*Release date: 06/30/2022*
+- Add "hostname" property to ServerContext
+- Add "base_url" property to ServerContext
+- Add "webdav_client" method to ServerContext
+  - This method returns a webdavclient3 Client instance
+- Add "webdav_path" method to ServerContext
+- Add docs for WebDav support
+- Add unit tests for ServerContext
+
+What's New in the LabKey 2.2.0 package
+==============================
+
+*Release date: 08/11/2021*
+- Add `domain.get_domain_details` API to domain module.
+- Support saving domain options via `domain.save`.
+- Fix `ConditionalFormat.to_json()` to match server response.
+
+What's New in the LabKey 2.1.1 package
+==============================
+
+*Release date: 06/23/2021*
+- Fix issue with domain.create raising exception when attempting to create a domain from a template (Issue 43337)
+
+What's New in the LabKey 2.1.0 package
+==============================
+
+*Release date: 05/12/2021*
+- Add support for ontology based column filters ONTOLOGY_IN_SUBTREE and ONTOLOGY_NOT_IN_SUBTREE
+- ServerContext.make_request: payload is now optional
+- ServerContext.make_request: add json kwarg
+  - This automatically does json_dumps and sets the content-type header for you
+- Add impersonate_user and stop_impersonating to security module (including APIWrapper)
+- Add more environment variables for integration test configuration
+  - host, port, and context_path can now be overridden via env vars
+
+What's New in the LabKey 2.0.1 package
+==============================
+
+*Release date: 02/01/2021*
+- Updated Run.to_json() to drop unset values, since keys are given default values server-side, and null values on the
+form result in exceptions
+
+What's New in the LabKey 2.0.0 package
+==============================
+
+*Release date: 10/22/2020*
+- container.create: rename folderType arg to folder_type, rename isWorkbook arg to is_workbook
+- Remove support for Python 2.x
+- Add Type annotations
+    - We don't have 100% of our API methods typed yet, but we are getting there
+- Format code with Black (a static code formatter)
+- remove build_url helper
+    - it was just a single line wrapper around server_context
+- remove create_server_context
+    - It was just a wrapper around ServerContext, you can replace all usages of create_server_context with ServerContext
+- Add APIWrapper
+    - This wraps all of the supported APIs so you don't need to pass around a server_context
+- Removed various "from_data" methods
+    - They were all simple one line wrappers around Class constructors that were not needed if you were using any you
+    may update your code e.g. "SomeClass.from_data(data)" can be changed to "SomeClass(**data)"
+- Remove unsupported modules
+- Update example code
+
+What's New in the LabKey 1.4.1 package
+==============================
+
+*Release date: 09/08/2020*
+
+- Add integration tests
+- NOTE: The next planned release will be 2.0.0 and is expected to drop support for Python 2.x, we plan to introduce
+code that will only be compatible with Python 3.6 and beyond. Python 2.x is no longer supported by the PSF as of
+January 1st, 2020.
+
+What's New in the LabKey 1.4.0 package
+==============================
+
+*Release date: 06/17/2020*
+
+- Add ignore_filter option to select_rows
+
+What's New in the LabKey 1.3.0 package
+==============================
+
+*Release date: 05/27/2020*
+
+- domain.create() now iterates through its conditional formats and converts instances or lists of QueryFilter to their string format.
+- domain.conditional_format() provides a wrapper for creating a conditional format--typically to be used in updating
+- Added examples for domain.create, domain.conditional_format, and updating QC state.
+
+What's New in the LabKey 1.2.0 package
+==============================
+
+*Release date: 09/09/2019*
+
+- Added truncate_table function (#29)
+
+What's New in the LabKey 1.1.0 package
+==============================
+
+*Release date: 05/07/2019*
+
+- Add isblank and isnonblank filter types (#23)
+- Fix issue with Query API overwriting query filters with the same field/comparison (#20)
+- Use pytest as the default test runner (#24)
+
+What's New in the LabKey 1.0.1 package
+==============================
+
+*Release date: 11/02/2018*
+
+- Add __repr__ for ServerContext, QueryFilter. Thanks to @AetherUnbound for this contribution.
+
+What's New in the LabKey 1.0.0 package
+==============================
+
+*Release date: 09/20/2018*
+
+- BREAKING CHANGE: in labkey.experiment ProtocolOutput has been renamed to RunItem
+- Provide a default encoder for json.dumps to better handle datetime (#14).
+
+What's New in the LabKey 0.7.0 package
+==============================
+
+*Release date: 05/10/2018*
+
+- Domain API, see labkey.domain
+- Fix for error response handling (#12). Thanks to @thusharaw for this contribution.
+
+What's New in the LabKey 0.6.1 package
+==============================
+
+*Release date: 02/28/2018*
+
+- Support non-JSON response formats
+
+What's New in the LabKey 0.6.0 package
+==============================
+
+*Release date: 09/11/2017*
+
+- Support api_key in utils.create_server_context.
+- Support verify_ssl in utils.create_server_context. Thanks to @pescobar for this contribution.
+- Remove SafeTLSAdapter in favor of normal TLS convention.
+- Improve exception messaging when raising ServerContextError.
+
+What's New in the LabKey 0.5.0 package
+==============================
+
+*Release date: 04/19/2017*
+
+- Security API, see labkey.security
+- ServerContext now a class, support for CSRF
+- Fix for LSID handling in Experiment objects
+- Documentation updates
+
+What's New in the LabKey 0.4.3 package
+==============================
+
+*Release date: 01/12/2017*
+
+- Reintroduce portions of messageboard, wiki APIs (unsupported, not recommended for public use)
+- Documentation updates
+
+What's New in the LabKey 0.4.2 package
+==============================
+
+*Release date: 03/15/2016*
+
+- Fix for 25209: API returns incorrect error messages for 401 responses
+- Update test suites and fix for assertions of timeout
+- Documentation updates
+
+What's New in the LabKey 0.4.1 package
+==============================
+
+*Release date: 11/17/2015*
+
+- Fix for QueryFilter.Types to be Python 2/3 compatible.
+- Documentation updates
+
+What's New in the LabKey 0.4.0 package
+==============================
+
+*Release date: 11/11/2015*
+
+- Introduce experiment.py API for save, load batches.
+- Introduce concept of server_context for establishing connection context.
+- Switch credential model from .labkeycredentials.txt to .netrc.
+- Switch to PEP 8 compliant syntax for API in general (e.g. selectRows now select_rows).
+- Deprecate wiki, messageboard APIs (at least for now).
+
+What's New in the LabKey 0.3.0 package
+==============================
+
+*Release date: 08/20/2015*
+
+- Migrated package repository to GitHub.
+- Switch package to use semantic versioning.
+- Minor changes to setup.py.
+
+What's New in the LabKey 0.24 package
+==============================
+
+*Release date: 03/20/2015*
+
+- Fixed bug in updateWiki due to changes in LabKey Server v15.1 
+
+
+What's New in the LabKey 0.23 package
+==============================
+
+*Release date: 11/24/2014*
+
+- Force all SSL connections to use TLSv1 Protocol or higher. 
+  This disables the use of SSLv2(Heartbleed) and SSLv3(Poodle) to 
+  protect against the Heartbleed and Poodle vulnerabilities. 
+
+
+What's New in the LabKey 0.22 package
+==============================
+
+*Release date: 04/15/2014*
+
+- Fixed bug in updateWiki when updating a wiki where Guests have read access
+
+
+What's New in the LabKey 0.21 package
+==============================
+
+*Release date: 03/30/2012*
+
+- Fixed bug in updateWiki due to changes in LabKey Server v12.1
+
+
+What's New in the LabKey 0.20 package
+==============================
+
+*Release date: 01/25/2012*
+
+- Fixed authentication bug in labkey.wiki and labkey.messageboard
+  functions.
+
+
+What's New in the LabKey 0.19 package
+==============================
+
+*Release date: 11/02/2011*
+
+- Updated name of the sample labkeycredentials file
+
+- Cleaned up docstring comments in each module file. 
+
+- Checked into the LabKey subversion repository.
+
+
+What's New in the LabKey 0.18 package
+==============================
+
+*Release date: 10/25/2011*
+
+- Created README.txt, MANIFEST.in. Added further package information to 
+  setup.py 
+
+- Added empty test directory that will be used in future releases 
+  for unit tests
+
+
+What's New in the LabKey 0.16 package
+==============================
+
+*Release date: Unreleased*
+
+- Ported labkeyquery.py from a stand-alone module to be part of this 
+  package. To access the functions that were in labkeyquery.py, you 
+  will need to import labkey or import labkey.query
+
+- Added collaboration module which allows programmatic access to 
+  wikis and message boards on the LabKey Server
