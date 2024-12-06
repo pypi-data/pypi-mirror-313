@@ -1,0 +1,59 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: ${SERVICE_NAME}
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/scale-to-zero-pod-retention-period: "5m"
+        autoscaling.knative.dev/min-scale: "0"
+        autoscaling.knative.dev/max-scale: "3"
+    spec:
+      containers:
+      - image: <IMAGE>
+        name: user-container
+        command: ["COMMAND", "ARGS"]
+        volumeMounts:
+        - name: efs-storage
+          mountPath: /mnt/efs
+        - name: local-mount
+          mountPath: /mnt/local
+        resources:
+          requests:
+            nvidia.com/gpu: ${GPUS}
+          limits:
+            nvidia.com/gpu: ${GPUS}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 80
+          initialDelaySeconds: 2
+          periodSeconds: 2
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 100
+        securityContext:
+          runAsUser: 0
+          capabilities:
+            add:
+            - SYS_ADMIN
+      volumes: 
+      - name: efs-storage
+        persistentVolumeClaim:
+          claimName: efs-pvc
+      - name: local-mount
+        emptyDir: {}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: karpenter.k8s.aws/instance-family
+                    operator: NotIn
+                    values:
+                      - r5
+
