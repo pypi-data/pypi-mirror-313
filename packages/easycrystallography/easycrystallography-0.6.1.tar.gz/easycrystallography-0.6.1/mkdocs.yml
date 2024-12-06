@@ -1,0 +1,135 @@
+# Project information
+site_name: EasyCrystallography
+site_url: https://easyscience.github.io/EasyCrystallography
+
+# Repository
+repo_url: https://github.com/EasyScience/EasyCrystallography
+edit_uri: edit/develop/docs/
+
+# Copyright
+copyright: © 2024 EasyCrystallography
+
+# Sets the theme and theme specific configuration of your documentation site
+theme:
+  name: material
+  custom_dir: docs/overrides
+  features:
+    - content.action.edit
+    #- content.action.view
+    - content.code.annotate
+    - content.code.copy # Auto generated button to copy a code block's content
+    - content.tooltips
+    - navigation.footer
+    - navigation.indexes
+    - navigation.sections
+    - navigation.top # Back-to-top button
+    - navigation.tracking # Anchor tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+  palette:
+    # Palette toggle for light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: custom
+      toggle:
+        icon: fontawesome/solid/sun
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: custom
+      toggle:
+        icon: fontawesome/solid/moon
+        name: Switch to light mode
+  font:
+    text: Mulish
+    code: Roboto Mono
+  icon:
+    #logo: easycrystallography
+    edit: material/file-edit-outline
+  favicon: assets/favicon.ico
+  #logo: assets/easycrystallography.svg
+  logo_dark_mode: https://raw.githubusercontent.com/EasyScience/EasyCrystallography/master/resources/logo/EasyCrystallography-logo_darkmode.svg
+  logo_light_mode: https://raw.githubusercontent.com/EasyScience/EasyCrystallography/master/resources/logo/EasyCrystallography-logo_lightmode.svg
+
+# A set of key-value pairs, where the values can be any valid YAML construct, that will be passed to the template
+extra:
+  generator: false # Disable `Made with Material for MkDocs` (bottom left)
+  social: # Icons (bottom right)
+    - icon: easycrystallography
+      link: https://easyscience.github.io/EasyCrystallography
+    - icon: fontawesome/brands/github
+      link: https://github.com/EasyScience/EasyCrystallography
+    - icon: easyscience
+      link: https://easyscience.software
+  ci_branch: !ENV [CI_BRANCH, master]
+  ec_latest_version: !ENV [EC_LATEST_VERSION, v0.0.0]
+
+# Customization to be included by the theme
+extra_css:
+  - assets/stylesheets/extra.css
+extra_javascript:
+  - assets/javascripts/extra.js
+
+# A list of extensions beyond the ones that MkDocs uses by default (meta, toc, tables, and fenced_code)
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      options:
+        custom_icons:
+          - overrides/.icons
+  - pymdownx.highlight: # whether highlighting should be carried out during build time by Pygments
+      use_pygments: true
+      pygments_lang_class: true
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
+  - pymdownx.superfences: # whether highlighting should be carried out during build time by Pygments
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed: # enables content tabs
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      toc_depth: 3
+
+# A list of plugins (with optional configuration settings) to use when building the site
+plugins:
+  - autorefs
+  - macros
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_root_heading: true
+            show_source: false
+            show_submodules: true
+  - search
+
+# Determines additional directories to watch when running mkdocs serve
+watch:
+  - docs/overrides
+
+# Format and layout of the global navigation for the site
+nav:
+  - Introduction: index.md
+  - Getting started: getting-started.md
+  - Modules:
+      - components: modules/components.md
+      - databases: modules/databases.md
+      - elements: modules/elements.md
+      - io: modules/io.md
+      - structures: modules/structures.md
+      - symmetry: modules/symmetry.md
