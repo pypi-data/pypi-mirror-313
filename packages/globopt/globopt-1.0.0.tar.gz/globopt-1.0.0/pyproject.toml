@@ -1,0 +1,92 @@
+[build-system]
+requires = ["setuptools>=67.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "globopt"
+authors = [
+  { name="Filippo Airaldi", email="filippoairaldi@gmail.com" },
+]
+description = "Myopic and Non-Myopic Global Optimization"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+	"Programming Language :: Python :: 3.9",
+	"Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch >= 2.1.2",
+    "botorch >= 0.9.5",
+]
+keywords = [
+    "optimization",
+    "derivative-free-optimization",
+    "rollout",
+    "multi-step optimization",
+    "radial-basis-function",
+    "inverse-distance-weighting",
+]
+dynamic = ["version"]
+
+[project.urls]
+"Homepage" = "https://github.com/FilippoAiraldi/global-optimization"
+"Bug Tracker" = "https://github.com/FilippoAiraldi/global-optimization/issues"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools.dynamic]
+version = {attr = "globopt.__version__"}
+
+[tool.black]
+target-version = ["py39", "py310", "py311"]
+color = true
+
+[tool.isort]
+profile = "black"
+py_version = 39
+
+[tool.mypy]
+python_version = "3.9"
+plugins = ["numpy.typing.mypy_plugin"]
+exclude = ["tests"]
+
+[[tool.mypy.overrides]]
+module = [
+    "joblib.*",
+    "matplotlib.*",
+    "numba.*",
+    "pymoo.*",
+    "scipy.*",
+    "vpso.*",
+    "globopt.*",
+]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "tests/*",
+    "examples/*",
+]
+
+[tool.coverage.report]
+exclude_also = [
+    "def __repr__",
+    "def __str__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+]
+sort = "miss"
