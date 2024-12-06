@@ -1,0 +1,67 @@
+version: 0.2
+# AWS CodeCommit > CodeBuild = CodePipeline 구성, buildspec-dev.yml 파일을 사용하게 설정
+# AWS Codebuild 환경 > 이미지 구성 > 이미지: aws/codebuild/amazonlinux2-x86_64-standard:5.0
+# 환경 유형: Linux EC2
+# 컴퓨팅: 15GB 메모리, vCPU 8개
+
+# https://hub.docker.com/r/amazon/aws-lambda-python/tags 참고, 다른 이미지도 가능
+# DEV, PROD 분리하여 각 파일로 운용할 것
+
+env:
+  variables:
+    ARN_BASE: "arn:aws:lambda:us-west-1:<AWS_ACCOUNT_ID>"
+    S3_BUCKET: "prod-bucket-build"
+    # 아래에 배포할 Lambda 속성들을 리스트업합니다. 필요하면 list 형태로 추가하면 동일한 패키지가 함수에 배포됩니다.
+    # 배포전에 함수를 생성해두어야합니다.
+    LAMBDAS: |
+      [
+        {"name": "prod_{{project}}_{{app}}", "handler": "{{app}}.aws_handler.handler"}
+      ]
+    # 필요하면 추가..
+    RUNTIME: "python3.11"
+    MEM_SIZE: "1648"
+    ENV_NAME: "prod"
+
+phases:
+  pre_build:
+    commands:
+      - export DATE=$(date +%Y%m%d%H%M%S)
+  install:
+    commands:
+      - echo Installing required tools...
+      - yum install unzip -y
+      - yum install -y zip
+      - yum install -y jq
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Installing requirements.txt...
+      - pip install -r requirements.txt -t .
+      - echo Zipping the project...
+      - zip -r function.zip .
+      - cp function.zip ../function.zip
+      - python3 build_keeper.py
+      - echo Uploading to S3...
+      - aws s3 cp function.zip s3://$S3_BUCKET/$DATE/function.zip
+  post_build:
+     commands:
+       - |
+          for row in $(echo "${LAMBDAS}" | jq -r '.[] | @base64'); do
+            _jq() {
+              echo ${row} | base64 --decode | jq -r ${1}
+            }
+    
+            LAMBDA_FUNCTION_NAME=$(_jq '.name')
+            HANDLER=$(_jq '.handler')
+         
+            sleep 1
+            aws lambda update-function-configuration --function-name $LAMBDA_FUNCTION_NAME --runtime $RUNTIME --handler $HANDLER --memory-size $MEM_SIZE --description DeployByCodebuild --environment Variables={env=$ENV_NAME} --timeout 900
+            sleep 1
+            aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --s3-bucket $S3_BUCKET --s3-key $DATE/function.zip
+          done
+
+artifacts:
+  files:
+    - function.zip
+  discard-paths: yes
