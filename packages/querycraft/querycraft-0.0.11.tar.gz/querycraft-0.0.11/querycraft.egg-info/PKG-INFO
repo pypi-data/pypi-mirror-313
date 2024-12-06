@@ -1,0 +1,76 @@
+Metadata-Version: 2.1
+Name: querycraft
+Version: 0.0.11
+Summary: Provide usefully SQL classes and functions to execute SQL queries step by step
+Home-page: https://gitlab.univ-nantes.fr/ls2n-didactique/querycraft
+Author: Emmanuel Desmontils
+Author-email: emmanuel.desmontils@univ-nantes.fr
+Maintainer: Emmanuel Desmontils
+Maintainer-email:  emmanuel.desmontils@univ-nantes.fr
+License: GPL V3
+Keywords: SQL Step-By-Step Query Database
+Platform: ALL
+Classifier: Topic :: Education
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.24.0
+Requires-Dist: argparse>=1.4.0
+Requires-Dist: polars>=0.20.31
+Requires-Dist: tincan>=1.0.0
+Requires-Dist: psycopg2>=2.9.9
+Requires-Dist: sqlglot>=25.6.1
+Requires-Dist: mysql-connector-python>=9.0.0
+
+# QueryCraft
+
+## Le nom ?
+
+Un nom en anglais qui évoque l'idée de "façonner" ou "construire" des requêtes SQL de manière intuitive, parfait pour une approche pédagogique. (GPT 4o ;-) )
+
+## Installation 
+
+```
+git clone https://gitlab.univ-nantes.fr/ls2n-didactique/querycraft.git
+cd QueryCraft
+```
+
+## Usage
+
+Application qui permet de décomposer l'exécution d'une requête SQL sur une base de données SQLite.
+
+```
+python3 SQL-sbs.py -h                   
+usage: SQL-sbs.py [-h] [-d DB] (-f FILE | -s SQL)
+
+options:
+  -h, --help            show this help message and exit
+  -d DB, --db DB        database file
+  -f FILE, --file FILE  sql file
+  -s SQL, --sql SQL     sql string
+```
+
+Par exemple :
+```
+python3 SQL-sbs.py -d ./static/bdd/cours/cours.db -s 'Select * From etudiants join notes On noe=noetu Where noteex > 10;'
+```
+
+## Article de recherche
+
+- Emmanuel Desmontils, Laura Monceaux. **Enseigner SQL en NSI**. Atelier « Apprendre la Pensée Informatique de la Maternelle à l'Université », dans le cadre de la conférence Environnements Informatiques pour l'Apprentissage Humain (EIAH), Jun 2023, Brest, France. pp.17-24. https://hal.science/hal-04144210 
+ https://apimu.gitlabpages.inria.fr/site/ateliers/pdf-apimu23/APIMUEIAH_2023_paper_3.pdf
+
+## Doc
+
+Générée par :
+```
+pdoc3 --html --force -o doc cq cq.py
+```
+
+### LRS
+
+Lancer 
+```
+lrs2-mac
+```
+
+
