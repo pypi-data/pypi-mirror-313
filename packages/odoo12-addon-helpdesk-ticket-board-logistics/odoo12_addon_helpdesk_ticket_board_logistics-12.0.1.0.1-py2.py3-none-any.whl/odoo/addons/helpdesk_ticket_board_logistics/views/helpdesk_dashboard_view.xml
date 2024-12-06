@@ -1,0 +1,30 @@
+<odoo>
+    <record id="helpdesk_ticket_kanban_view_my_tickets" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.kanban.view.my.tickets</field>
+        <field name="model">helpdesk.ticket.team</field>
+        <field name="inherit_id" ref="helpdesk_mgmt.helpdesk_ticket_kanban_view"/>
+        <field name="arch" type="xml">
+            <field name="todo_ticket_count_high_priority" position="after">
+                <field name="todo_ticket_count_my_tickets"/>
+            </field>
+            <xpath expr="//div[contains(@class, 'o_kanban_primary_right')]/div[@class='row']/div[@class='col-9'][1]" position="replace">
+                <div class="col-9">
+                    <a name="%(helpdesk_mgmt.action_helpdesk_ticket_kanban_from_dashboard)d" type="action" context="{'search_default_mytickets': 1}" t-translation="context">
+                        <t t-raw="'My Tickets'"/> 
+                    </a>
+                </div>
+            </xpath>
+            <xpath expr="//div[contains(@class, 'o_kanban_primary_right')]/div[@class='row']/div[@class='col-3'][1]" position="replace">
+                <div class="col-3">
+                    <t t-esc="record.todo_ticket_count_my_tickets.value"/>
+                </div>
+            </xpath>
+            <xpath expr="//a[@name='%(helpdesk_mgmt.action_helpdesk_ticket_kanban_from_dashboard)d'][contains(@context, 'search_default_unattended')]" position="attributes">
+                <attribute name="context">{'search_default_unattended': 1}</attribute>
+            </xpath>
+            <xpath expr="//a[@name='%(helpdesk_mgmt.action_helpdesk_ticket_kanban_from_dashboard)d'][contains(@context, 'search_default_high_priority')]" position="attributes">
+                <attribute name="context">{'search_default_high_priority': 1}</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
