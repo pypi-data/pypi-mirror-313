@@ -1,0 +1,39 @@
+[project]
+name = "nrf-regtool"
+dynamic = ["version"]
+dependencies = [
+  "click>=8.0.0",
+  "devicetree~=0.0.2",
+  "intelhex",
+  "svada~=2.1.0",
+  "tomli",
+]
+authors = [{ name = "Nordic Semiconductor ASA" }]
+description = "Generate files of register content for memory-mapped peripherals."
+license = { file = "LICENSE" }
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Build Tools",
+]
+requires-python = ">=3.10"
+
+[project.urls]
+homepage = "https://www.nordicsemi.com"
+
+[project.scripts]
+nrf-regtool = "nrfregtool.__main__:package_main"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.sdist]
+packages = ["nrfregtool"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["nrfregtool"]
