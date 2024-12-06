@@ -1,0 +1,86 @@
+name: Release Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    concurrency: release
+    permissions:
+      id-token: write
+      contents: write
+    outputs:
+      released: ${{ steps.semantic_release.outputs.released }}
+      tag: ${{ steps.semantic_release.outputs.tag }}
+    env:
+      UV_TOOL_DIR: /tmp/.uv-tool
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Force correct release branch
+        run: |
+          git checkout -B ${{ github.ref_name }} ${{ github.sha }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Restore uv tools
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.uv-tools
+          key: uv-tools-${{ runner.os }}-psr-v9.11.1
+          restore-keys: |
+            uv-tools-${{ runner.os }}-psr-v9.11.1
+            uv-tools-${{ runner.os }}
+
+      - name: Install Python Semantic Release
+        run: uv tool install python-semantic-release@v9.11.1
+
+      - name: Run Semantic Release
+        id: semantic_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          output=$(uv tool run --from python-semantic-release semantic-release version --commit --changelog --push --tag --vcs-release)
+          echo "$output"
+          version=$(uv tool run --from python-semantic-release semantic-release version --no-commit --no-push --no-vcs-release --print-last-released-tag)
+          if echo "$output" | grep -q "No release will be made"; then
+            echo "release_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "release_needed=true" >> $GITHUB_OUTPUT
+          fi
+          echo "tag=$version" >> $GITHUB_OUTPUT
+
+
+  trigger-builds:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Trigger Python Build
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: trigger-python-build
+          client-payload: '{"tag": "${{ needs.release.outputs.tag }}"}'
+
+      - name: Trigger Docker Build
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: trigger-docker-build
+          client-payload: '{"tag": "${{ needs.release.outputs.tag }}"}'
