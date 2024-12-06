@@ -1,0 +1,118 @@
+[tool.poetry]
+name = "anicli_api"
+version = "0.6.12"
+description = "Anime extractors api implementation"
+authors = ["vypivshiy"]
+license = "MIT"
+readme = "README.MD"
+packages = [{include = "anicli_api"}]
+exclude = ["tests/", 'scripts/', 'libanime_schema/', 'dev/']
+keywords = [
+    "anime",
+    "api",
+    "ru",
+    "russia",
+    "asyncio",
+    "parser",
+    "httpx",
+    "dev"
+]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Quality Assurance",
+  "Typing :: Typed"
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/vypivshiy/anicli-api/issues"
+"Cli app" = "https://github.com/vypivshiy/ani-cli-ru"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+httpx = {extras = ["http2"], version = "^0.25.2"}
+parsel = "^1.8.1"
+attrs = "^23.2.0"
+tqdm = "^4.66.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = {extras = ["coverage"], version = "^7.2.0"}
+pytest-cov = "^4.0.0"
+mypy = "*"
+isort = "*"
+ruff = "*"
+black = "*"
+pytest-asyncio = "^0.23.5"
+
+
+[tool.poetry.group.codegen.dependencies]
+jinja2 = "^3.1.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+python_version = 3.8
+pretty = true
+explicit_package_bases = true  # anicli_api.player issue
+ignore_missing_imports = true
+exclude = [
+    "env",
+    ".env",
+    "venv",
+    "__pycache__",
+    "examples",
+    "__template__.py",
+    "^anicli_api/source/parsers/[a-z]+_parser.py$",  # auto generated files
+    "^anicli_api/players/parsers/[a-z]+_parser.py$",  # auto generated files
+]
+files=["anicli_api/*"]
+
+
+[tool.ruff]
+target-version = "py38"
+line-length = 120
+select = ["E", "F"]
+ignore = [
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107",
+  # Ignore complexity
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+exclude = [
+  "examples",
+  "venv",
+  "__init__.py",
+  "__template__.py",  # templates
+  "tests",
+  "anicli_api/source/parsers/*"  # auto generated modules
+]
+
+[tool.black]
+line-length = 120
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
