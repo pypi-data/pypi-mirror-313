@@ -1,0 +1,1 @@
+from .pytesseraxcocr import image_to_string
