@@ -1,0 +1,105 @@
+[project]
+name = "inflow-haisslab"
+dynamic = []
+description = "General python code for analysis pipeline"
+authors = [
+    { name = "Timothé Jost-MOUSSEAU", email = "timothe.jost-mousseau@pasteur.com" },
+]
+dependencies = [
+    "concurrent-log-handler>=0.9",
+    "cryptography>=38.0",
+    "h5py>=3.7",
+    "matplotlib>=3.6",
+    "natsort>=8.2",
+    "npTDMS>=1.6",
+    "numpy>=1.23",
+    "opencv_python_headless>=4.6",
+    "pandas>=1.4",
+    "paramiko>=2.8",
+    "scipy>=1.9",
+    "seaborn>=0.11",
+    "suite2p-haisslab>=0.14.0",
+    "timelined_array>=0.0.14",
+    "shapely>=2.0.6",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+version = "1.2.26"
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+Homepage = "https://gitlab.pasteur.fr/haisslab/analysis-packages/Inflow"
+
+[project.optional-dependencies]
+gui = [
+    "suite2p-haisslab[gui]>=0.14.11",
+]
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest>=8.3.2",
+    "pytest-cov>=5.0.0",
+]
+
+[tool.pdm.version]
+source = "file"
+path = "Inflow/__init__.py"
+
+[tool.pytest.ini_options]
+addopts = "--pdbcls=IPython.terminal.debugger:TerminalPdb --cov-report xml --cov --junitxml=pytest_results.xml"
+testpaths = [
+    "tests",
+]
+
+[tool.black]
+line-length = 120
+preview = true
+
+[tool.flake8]
+max-line-length = 120
+ignore = [
+    "F401",
+    "F403",
+    "F841",
+    "E401",
+    "E265",
+    "E266",
+    "E203",
+    "E712",
+    "W503",
+    "W605",
+]
+per-file-ignores = "tests/test_signal.py:E402"
+
+[tool.pyright]
+reportGeneralTypeIssues = "information"
+reportOptionalMemberAccess = "information"
+reportMissingImports = "information"
+reportMissingModuleSource = "information"
+reportInvalidStringEscapeSequence = "information"
+reportOptionalOperand = "none"
+reportOptionalSubscript = "none"
+reportOptionalIterable = "none"
+reportAttributeAccessIssue = "information"
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
