@@ -1,0 +1,84 @@
+Metadata-Version: 2.1
+Name: tcrutils
+Version: 13.0.9
+Summary: Useful stuff for TCR projects!
+Home-page: https://github.com/anamoyee/TCRUtils
+License: GPL-3.0
+Author: anamoyee
+Requires-Python: >=3.11.0
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: MS-DOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Provides-Extra: discord
+Provides-Extra: full
+Provides-Extra: imgui
+Requires-Dist: PyOpenGL (>=3.1.5) ; extra == "imgui" or extra == "full"
+Requires-Dist: attr (>=0.3.2,<0.4.0)
+Requires-Dist: colorama (>=0.4.6,<0.5.0)
+Requires-Dist: colored (>=2.2.4,<3.0.0)
+Requires-Dist: glfw (>=2.7.0) ; extra == "imgui" or extra == "full"
+Requires-Dist: hikari (>=2.0.0.dev125) ; extra == "discord" or extra == "full"
+Requires-Dist: hikari-arc (>=1.3.4) ; extra == "discord" or extra == "full"
+Requires-Dist: hikari-miru (>=4.1.1,<5.0.0) ; extra == "discord" or extra == "full"
+Requires-Dist: imgui[glfw] (>=2.0.0) ; extra == "imgui" or extra == "full"
+Requires-Dist: numpy (>=1.26.4) ; extra == "imgui" or extra == "full"
+Requires-Dist: pytz (>=2024.1,<2025.0)
+Project-URL: Repository, https://github.com/anamoyee/TCRUtils
+Description-Content-Type: text/markdown
+
+# TCRUtils - Utility Package for TCR Projects
+
+`TCRUtils` is a collection of utility functions, classes, and helpers designed to streamline various tasks in TCR projects. Below is a brief overview of some of the key features.
+
+## Installation and Importing
+
+Importing '''convention''' (it's just me using it...)
+```python
+import tcrutils as tcr
+```
+
+Star-importng is supported (overriden) but you'd be a lot better off by just importng by name or the module itself not to litter your global scope with all this garbage
+```python
+from tcrutils import timestr
+```
+
+## Featured Features (yipee :3)
+
+- **`fmt_iterable(x: LITERALLY_ANY_OBJECT_TYPE)`**: Pretty-formats any python object that i have thought of for easier readability, even some third-party-library ones.
+- **`console`, or just `tcr.c`**: Provides [hikari](https://pypi.org/project/hikari/)-styled logging combined with the above fmt_iterable to pretty-print your debugging! Yay!
+- **`TStr`**: Convert between seconds and readable timestrs. Now with timezones! for example `str("1h")` -> `int(3600)`.
+- **`ShelveDB`**: Quickly and easily set up a dict-based, python built-in shelve module's shelf - a python dictionary able to contain arbitrary python types that persists on restart.
+
+### Iterable Helpers
+- **`Or`**: Returns the first element of the tuple (arg, *args) that does not equal the supplied (`none`) variable, by default None. This is different from just doing `x or y or y` because it does not fail on falsey values, just the ones that are specified to be equal to the noney value
+- **`batched`**: py3.12 itertools.batched() in py3.11 with some extra features!
+- **`cut_at`**: Cut a string (or an iterable) with a specified suffix for example i'm running out of space on this markdown line so i will use th...
+- **`shuffled`**: Returns a shuffled version of an iterable. So you dont have to do `random.shuffle(x)` which does not return the shuffled
+
+### String and Formatting Utilities
+- **`commafy`**: Adds commas to numbers for better readability.
+- **`apostrophe_s`**: Handles the correct placement of apostrophes if the word ends with s for example `"peoples'"` and `"mike's"` (not `"peoples's"`).
+
+### Error Handling
+- **`extract_error` and `extract_traceback`**: Extracts the error object's name and the error message (or the traceback's contents).
+
+### Decorators
+- **`@autorun`**: Automatically runs the the function whenever its definition is completed.
+- **`@timeit`**: Measures the execution time of a function and prints it to the screen.
+
+### Miscellaneous
+- **`insist`**: Prompts user input with a customizable insistence until a valid answer is provided, for example you can keep input()ing the user if they provided invalid value for an integer field.
+
+This package includes many other useful utilities, go look for yourself if you want...
+
