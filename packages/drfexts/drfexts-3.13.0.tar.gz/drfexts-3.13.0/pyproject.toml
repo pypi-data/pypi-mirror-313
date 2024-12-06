@@ -1,0 +1,95 @@
+[tool.commitizen]
+version = "3.13.0"
+tag_format = "v$major.$minor.$patch$prerelease"
+version_files = ["pyproject.toml:version", "drfexts/__init__.py"]
+
+[tool.poetry]
+name = "drfexts"
+version = "3.13.0"
+package-mode = true
+readme = "README.md"
+description = "Django Restframework Utils"
+authors = ["aiden <allaher@icloud.com>"]
+keywords = ["django", "restframework"]
+homepage = "https://github.com/aiden520/drfexts"
+repository = "https://github.com/aiden520/drfexts"
+license = "Apache-2.0"
+include = ["LICENSE"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0.0"
+django = ">=4.2"
+django-storages = ">=1.12.3"
+django-filter = ">=21.1"
+djangorestframework = ">=3.14.0"
+pip = ">=21.3.1"
+djangorestframework-csv = ">=2.1.1"
+openpyxl = ">=3.0.9"
+orjson = ">=3.10.6"
+django-currentuser = ">=0.5.3"
+drf-flex-fields = ">=0.9.8"
+xlsxwriter = ">=3.2.0"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^4.0.1"
+flake8-isort = "^4.1.1"
+coverage = "^6.2"
+black = "^22.3.0"
+pylint-django = "^2.5.0"
+pre-commit = "^2.16.0"
+commitizen = "^2.28.0"
+pytest = "^7.1.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "error",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["flask", "tests"]
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/flask", "tests/typing"]
+show_error_codes = true
+pretty = true
+strict = true
+
+[[tool.mypy.overrides]]
+module = [
+    "asgiref.*",
+    "dotenv.*",
+    "cryptography.*",
+    "importlib_metadata",
+]
+ignore_missing_imports = true
+
+[tool.ruff]
+src = ["src"]
+fix = true
+show-fixes = true
+output-format = "full"
+
+[tool.ruff.lint]
+select = [
+    "B",  # flake8-bugbear
+    "E",  # pycodestyle error
+    "F",  # pyflakes
+    "I",  # isort
+    "UP",  # pyupgrade
+    "W",  # pycodestyle warning
+]
+ignore-init-module-imports = true
+
+[tool.ruff.lint.isort]
+force-single-line = true
+order-by-type = false
