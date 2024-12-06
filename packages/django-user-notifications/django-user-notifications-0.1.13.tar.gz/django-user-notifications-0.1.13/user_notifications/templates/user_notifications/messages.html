@@ -1,0 +1,66 @@
+{% load i18n %}
+
+{% if messages %}
+    {% for message in messages %}
+        {# Info Modal #}
+        {% if message.meta.display_type == 200 %} 
+        <div id="notification-modal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ message.meta.title}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{{ message.meta.description}}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="text-success font-weight-bold mr-2" data-dismiss="modal">{% trans 'Close' %}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Form Modal #}
+        {% elif message.meta.display_type == 201 %}
+        <div id="notification-modal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ message.meta.title}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{{ message.meta.description}}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <form action="{% url message.meta.accept_url %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="pk" value="{{message.meta.pk}}">
+                            <button type="submit" class="btn btn-success">{{message.meta.accept_button}}</button>
+                        </form>
+                        <form action="{% url message.meta.decline_url %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="pk" value="{{message.meta.pk}}">
+                            <button type="submit" class="btn btn-success">{{message.meta.decline_button}}</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-dismissible {% if message.tags %} alert-{{ message.tags }} {% endif %}fade show">
+            <a class="close" data-dismiss="alert">×</a>
+            {% if message.meta.description %}
+                {{ message.meta.description }}
+            {% else %}
+                {{ message }}
+            {% endif %}
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
