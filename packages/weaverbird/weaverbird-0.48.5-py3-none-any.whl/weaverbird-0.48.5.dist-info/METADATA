@@ -1,0 +1,57 @@
+Metadata-Version: 2.1
+Name: weaverbird
+Version: 0.48.5
+Summary: A visual data pipeline builder with various backends
+License: BSD-3-Clause
+Keywords: builder,data,dataviz,mongodb,pandas,pipeline,query,sql
+Author: Toucan Toco
+Author-email: dev@toucantoco.com
+Requires-Python: >=3.11,<3.13
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Provides-Extra: all
+Provides-Extra: pandas
+Provides-Extra: playground
+Provides-Extra: pypika
+Requires-Dist: PyPika (>=0.48.9,<0.49.0) ; extra == "pypika" or extra == "all"
+Requires-Dist: Quart-CORS (>=0.5,<0.8) ; extra == "playground"
+Requires-Dist: geopandas (<2) ; extra == "pandas" or extra == "all"
+Requires-Dist: hypercorn (>=0.13,<0.18) ; extra == "playground"
+Requires-Dist: pandas (>=1.2.5,<2.0.0) ; (python_version < "3.12") and (extra == "pandas" or extra == "all" or extra == "playground")
+Requires-Dist: pandas (>=2,<3) ; (python_version >= "3.12") and (extra == "pandas" or extra == "all" or extra == "playground")
+Requires-Dist: psycopg (>=3.0.15,<4.0.0) ; extra == "playground"
+Requires-Dist: pydantic (>=2.4.2,<3.0.0)
+Requires-Dist: pymongo[srv,tls] (>=4.2.0) ; extra == "playground"
+Requires-Dist: python-dateutil (>=2.8.2,<3.0.0)
+Requires-Dist: quart (>=0.17,<0.20) ; extra == "playground"
+Requires-Dist: toucan-connectors[awsathena,google-big-query,mongo,mysql,redshift,snowflake] (>=6.3.0,<7.0.0) ; extra == "playground"
+Description-Content-Type: text/markdown
+
+# weaverbird python package
+
+See [docs about purpose and usage](../docs/_docs/tech/python-package.md).
+
+## Development
+
+We use [poetry](https://python-poetry.org/) for managing dependencies.
+
+Main commands are available through `make`:
+
+    make install # Install dependencies & set up pre-commit
+
+    make format # Fix formatting issues using black and ruff
+    make lint # Execute various checks
+
+    make build # Build the project prior to publication
+    make upload # Publish on pypi
+
+    make test # Execute the test suite and produce reports
+    /!\ To run Snowflake's e2e tests, the password needs to be exported to env variables
+    as such: export SNOWFLAKE_PASSWORD='XXXXXXXXXXX'. This password is available in lastpass (user: toucan_test)
+
+### Playground server
+
+See `playground.py`. It provides a very simple server to test the module.
+
