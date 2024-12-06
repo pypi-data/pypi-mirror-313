@@ -1,0 +1,56 @@
+Metadata-Version: 2.1
+Name: mhi-psout
+Version: 1.0.5
+Summary: Manitoba Hydro International: PSOUT File Reader
+Home-page: https://www.pscad.com/webhelp-v5-al/index.html
+Author: Manitoba Hydro International Ltd.
+Author-email: pscad@mhi.ca
+License: BSD-3-Clause-Clear
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: Microsoft :: Windows
+Requires: wheel
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# PSOut Reader
+
+A reader for the PSCAD *.psout file
+
+## Example
+
+```python
+import mhi.psout
+import matplotlib.pyplot as plt
+
+with mhi.psout.File('Cigre.psout') as file:
+
+    ac_voltage = file.call("Root/Main/AC Voltage/0")
+    run = file.run(0)
+
+    for call in ac_voltage.calls():
+        trace = run.trace(call)
+        time = trace.domain
+        plt.plot(time.data, trace.data, label=trace['Description'])
+
+    plt.xlabel(time['Unit'])
+    plt.ylabel(trace['Unit'])
+    plt.legend()
+    plt.show()
+```
+
+## Documentation
+
+See: ``py -m mhi.psout help``
+
+
