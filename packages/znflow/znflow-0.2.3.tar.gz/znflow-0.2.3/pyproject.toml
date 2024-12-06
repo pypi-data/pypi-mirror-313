@@ -1,0 +1,69 @@
+[tool.poetry]
+name = "znflow"
+version = "0.2.3"
+description = "A general purpose framework for building and running computational graphs."
+authors = ["zincwarecode <zincwarecode@gmail.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.urls]
+repository = "https://github.com/zincware/znflow"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+networkx = "^3"
+
+dask = { version = "^2024", optional = true }
+distributed = { version = "^2024", optional = true }
+
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^7"
+coverage = "^6"
+zninit = "^0.1"
+attrs = "^22"
+pydantic = "^2.6.2"
+
+[tool.poetry.group.notebook.dependencies]
+jupyterlab = "^3"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3"
+
+[tool.poetry.extras]
+dask = ["dask", "distributed", "dask-jobqueue", "bokeh"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.report]
+exclude_lines = [
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:"
+]
+ignore_errors = true
+
+[tool.black]
+line-length = 90
+preview = true
+
+[tool.isort]
+profile = 'black'
+multi_line_output = 3
+
+[tool.ruff]
+line-length = 90
+
+[tool.ruff.lint]
+select = ["E", "F"] #, "D"] #, "N", "C", "ANN"]
+extend-ignore = [
+    "D213", "D203"
+]
+
+[tool.codespell]
+skip = "poetry.lock,examples/*,tmp/*"
