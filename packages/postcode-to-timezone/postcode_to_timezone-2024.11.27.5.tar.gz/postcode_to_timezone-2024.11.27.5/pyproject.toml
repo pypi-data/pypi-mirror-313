@@ -1,0 +1,63 @@
+[project]
+name = "postcode-to-timezone"
+version = "2024.11.27.5"
+dependencies = []
+
+description = "Converts postcodes to timezones"
+license = "MIT"
+readme = "README.md"
+
+authors = [{ name = "Koert van der Veer", email = "pypi@ondergetekende.nl" }]
+maintainers = [
+  { name = "Koert van der Veer", email = "pypi@ondergetekende.nl" },
+]
+
+keywords = ["time zone", "open street map"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+
+  # Indicate who your project is intended for
+  "Intended Audience :: Developers",
+
+  # Pick your license as you wish (see also "license" above)
+  "License :: OSI Approved :: MIT License",
+
+  # Specify the Python versions you support here.
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+repository = "https://github.com/kvdveer/postcode-to-timezone"
+
+[build-system]
+requires = ["hatchling", "osmium", "pandas", "timezonefinder"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "*.md",
+  "*.py",
+  "*.toml",
+  "LICENSE",
+  "postcode_to_timezone_lookup.csv",
+  "postcode_regex.json",
+]
+
+[tool.hatch.build.targets.wheel.force-include]
+"postcode_to_timezone_lookup.csv" = "postcode_to_timezone_lookup.csv"
+"postcode_regex.json" = "postcode_regex.json"
+
+[tool.hatch.build.targets.wheel]
+packages = ["postcode_to_timezone.py"]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 140
+
+[tool.mypy]
+python_version = "3.8"
