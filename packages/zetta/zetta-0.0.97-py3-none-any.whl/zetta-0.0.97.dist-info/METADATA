@@ -1,0 +1,80 @@
+Metadata-Version: 2.1
+Name: zetta
+Version: 0.0.97
+Summary: Python client library for ZettaBlock AI Network
+Author: ZettaBlock Labs
+Author-email: support@zettablock.com
+Project-URL: Homepage, https://zettablock.com
+Project-URL: Source, https://github.com/Zettablock/zetta-py-client
+Keywords: zettablock,client,cloud,AI,blockchain,infrastructure
+Classifier: Topic :: System :: Distributed Computing
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: click
+Requires-Dist: typer
+Requires-Dist: synchronicity (~=0.6.7)
+Requires-Dist: openai
+Requires-Dist: requests
+Requires-Dist: termcolor
+Requires-Dist: pyfiglet
+Requires-Dist: PyYAML
+Requires-Dist: web3
+Requires-Dist: grpcio
+Requires-Dist: grpcio-tools
+Requires-Dist: pyiceberg
+Requires-Dist: pyarrow
+Requires-Dist: boto
+Requires-Dist: boto3
+Requires-Dist: botocore
+
+Python client for ZettaBlock AI Network.
+
+
+# Development
+## Setup
+### Install locally
+1. Clone the repository.
+2. Create a virtual environment and install the package.
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+### GRPC
+The client import zetta-grpc-protos as an external repo, you will need to provide your github username and password to install
+```bash
+# using below command to store and skip the repeatly input username / password
+git config credential.helper store
+```
+For two phase authentication enabled account, password is private-access-token.
+
+### IDE setup
+for PyCharm, you will need to run 
+```bash
+pip install -e . 
+```
+to recognize the GRPC imported library correctly
+
+### Run the Client
+Try run the client.
+```sh
+zetta --help
+```
+
+## CICD
+1. the cicd is integrated with python 3.8 to 3.12 and on Ubuntu, MacOS and windows. make sure your PR passed all checks on all environment
+2. make sure some tests are added in the folder, cicd will run checks and test automatically
+3. if all tests passes, the version will be automatically boost and submit a newer version to PyPi
+4. If you want to include the comment in CHANGELOG.md, in Pull request, add ##Changelog in the comment
+
+# Examples of commands
+
+## datasets v2
+
+```shell
+zetta datasetsv2 read --namespace=ai-lake-test --dataset=imagenet-object-localization-challenge-dec03
+zetta datasetsv2 save --namespace=ai-lake-test --dataset=imagenet-object-localization-challenge-dec03
+```

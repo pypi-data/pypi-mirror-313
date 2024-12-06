@@ -1,0 +1,10 @@
+# Copyright ZettaBlock Labs 2024
+from .cli.entry_point import entrypoint_cli
+
+
+def main():
+    entrypoint_cli()
+
+
+if __name__ == "__main__":
+    main()
