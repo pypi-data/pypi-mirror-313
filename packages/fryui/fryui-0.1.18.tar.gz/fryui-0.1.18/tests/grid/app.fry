@@ -1,0 +1,100 @@
+from fryweb import html, Element
+from flask import Flask
+from fryui import Grid, HSplit, VSplit, HCenter, VCenter, Button
+
+app = Flask(__name__)
+
+@app.get('/')
+def index():
+    return html(App, title="fryui", autoreload=False)
+
+def App():
+    <template>
+      <div m-10 border-3 border-primary h-90vh text-primary bg-base>
+        <HSplit resizable={False}>
+          <HSplit>
+            <Center>A</Center>
+            <Center>B</Center>
+            <Center>C</Center>
+          </HSplit>
+          <VSplit>
+            <Center width="150px">A</Center>
+            <Center>C</Center>
+          </VSplit>
+          <Grid columns='1fr 1fr 1fr' rows='1fr 1fr'>
+            <Center>A</Center>
+            <Center>B</Center>
+            <Center>C</Center>
+            <Center>D</Center>
+            <Center>E</Center>
+            <Center>F</Center>
+          </Grid>
+          <HCenter ref=(hcenter) min_width="md">
+            <div bg-primary-bgx text-primary-t width="3fr">
+              这是一个HCenter
+            </div>
+          </HCenter>
+          <Center>
+            <Button primary @click=(hbroaden)>扩大</Button>
+            <Button primary @click=(hnarrow)>缩小</Button>
+            <Button primary @click=(toggleHcenter)>Centered:[true](hcentered)</Button>
+          </Center>
+          <VCenter ref=(vcenter)>
+            <div bg-primary-bgx text-primary-t height="3fr">
+              这是一个VCenter
+            </div>
+          </VCenter>
+          <Center>
+            <Button primary @click=(vbroaden)>扩大</Button>
+            <Button primary @click=(vnarrow)>缩小</Button>
+            <Button primary @click=(toggleVcenter)>Centered:[true](vcentered)</Button>
+          </Center>
+        </HSplit>
+      </div>
+    </template>
+    <script>
+        import { signal } from 'fryweb';
+        const hbroaden = () => hcenter.broaden();
+        const hnarrow = () => hcenter.narrow();
+        const vbroaden = () => vcenter.broaden();
+        const vnarrow = () => vcenter.narrow();
+        const hcentered = signal(true);
+        const vcentered = signal(true);
+        const toggleHcenter = () => {
+          if (hcentered.peek()) {
+            hcentered.value = false;
+            hcenter.setCentered(false);
+          } else {
+            hcentered.value = true;
+            hcenter.setCentered(true);
+          }
+        }
+        const toggleVcenter = () => {
+          if (vcentered.peek()) {
+            vcentered.value = false;
+            vcenter.setCentered(false);
+          } else {
+            vcentered.value = true;
+            vcenter.setCentered(true);
+          }
+        }
+        document.addEventListener('keydown', (e) => {
+          if (e.code === 'KeyB') {
+            console.log(e.code);
+            hbroaden();
+            vbroaden();
+          } else if (e.code === 'KeyN') {
+            console.log(e.code);
+            hnarrow();
+            vnarrow();
+          }
+        })
+    </script>
+
+
+def Center(children=[]):
+    <template>
+      <div flex justify-center gap-10 items-center min-w-150px min-h-0 overflow-hidden>
+        {children}
+      </div>
+    </template>
