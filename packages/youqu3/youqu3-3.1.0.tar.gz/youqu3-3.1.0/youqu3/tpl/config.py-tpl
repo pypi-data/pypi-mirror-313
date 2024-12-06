@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+# _*_ coding:utf-8 _*_
+"""
+:Author:${USER}
+:Date  :${DATE} ${TIME}
+"""
+
+import pathlib
+
+from youqu3 import setting
+
+
+class _Config:
+    ROOTDIR = pathlib.Path(__file__).parent
+    ASSERT_RES = ROOTDIR / "case/assert_res"
+    IMAGE_RES = ROOTDIR / "method/image_res"
+    STATIC_RES = ROOTDIR / "method/static_res"
+
+    try:
+        from pylinuxauto.config import config as pylinuxauto_config
+        pylinuxauto_config.IMAGE_SERVER_IP = "127.0.0.1/127.0.0.2"
+        pylinuxauto_config.OCR_SERVER_IP = "127.0.0.1/127.0.0.2"
+
+    except ImportError:
+        ...
+
+    setting.REPORT_SERVER_IP = "127.0.0.1/127.0.0.2"
+
+
+config = _Config()
