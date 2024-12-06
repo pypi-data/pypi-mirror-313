@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+
+[tool.setuptools.packages.find]
+include = ["pointblank"]
+
+[project]
+name = "pointblank"
+description = "Find out if your data is what you think it is."
+readme = "README.md"
+keywords = ["data", "quality", "validation", "testing", "data science", "data engineering"]
+license.file = "LICENSE"
+authors = [
+    { name = "Richard Iannone", email = "riannone@me.com" }
+]
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+dependencies = [
+    "commonmark>=0.9.1",
+    "importlib-metadata",
+    "narwhals>=1.10.0",
+    "great_tables>=0.13.0",
+    "typing_extensions>=3.10.0.0",
+    "ibis-framework[duckdb,mysql,postgres,sqlite]>=9.5.0",
+]
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "duckdb>=1.1.3",
+    "jupyter",
+    "quartodoc>=0.8.1; python_version >= '3.9'",
+    "griffe==0.38.1",
+    "nbclient>=0.10.0",
+    "nbformat>=5.10.4",
+    "pandas",
+    "polars",
+    "pre-commit==2.15.0",
+    "pyarrow",
+    "pyright>=1.1.244",
+    "pytest>=3",
+    "pytest-cov",
+    "pytest-snapshot",
+]
+
+[project.urls]
+homepage = "https://github.com/rich-iannone/pointblank"
+
+[tool.flake8]
+exclude = ["docs", ".venv", "tests/*"]
+
+ignore = [
+    "E402",    # module level import not at top of file
+    "E501",    # line too long (maximum 100 characters)
+    "W503",    # line break before binary operator
+    "F811",    # redefinition of unused name
+    "E203",    # whitespace before ':'
+    "F401",    # 'module' imported but unused
+    "F841",    # local variable 'name' is assigned to but never used
+    "E702",    # multiple statements on one line (semicolon)
+    "E704",    # multiple statements on one line (def)
+]
+
+max-line-length = 100
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra --cov=pointblank"
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = [
+    "tests"
+]
+
+[tool.black]
+line-length = 100
