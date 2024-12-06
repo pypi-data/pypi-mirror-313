@@ -1,0 +1,238 @@
+[tool.poetry]
+name = "vkbottle"
+version = "4.4.3.post1"
+description = "Homogenic! Customizable asynchronous VK API framework implementing comfort and speed"
+authors = ["timoniq"]
+maintainers = ["FeeeeK"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/vkbottle/vkbottle"
+repository = "https://github.com/vkbottle/vkbottle"
+keywords = [
+  "vk",
+  "vk-api",
+  "vkbottle",
+  "user-longpoll",
+  "async",
+  "asyncio",
+  "bot",
+  "longpoll-api",
+  "callback",
+  "middleware",
+]
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Quality Assurance",
+  "Typing :: Typed",
+]
+
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/vkbottle/vkbottle/issues"
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+aiohttp = "^3.10.0"
+choicelib = "^0.1.5"
+pydantic = "<3 || <=1.10.8"
+vbml = "^1.1.post1"
+aiofiles = "24.1.0"
+typing-extensions = "^4.4.0"
+colorama = "^0.4.6"
+vkbottle-types = "^5.199.63.3"
+
+[tool.poetry.group.dev.dependencies]
+# Lint
+black = ">=23.1,<25.0"
+mypy = "^1.10.0"
+mypy-extensions = "^1.0.0"
+# mypy stubs
+types-aiofiles = ">=22.1,<25.0"
+# flake8, isort and autoflake replacement
+ruff = ">=0.0.246,<0.8.2"
+# Tests
+pytest = ">=7.2.1,<9.0.0"
+pytest-asyncio = ">=0.20.3,<0.25.0"
+pytest-cov = ">=4,<6"
+pytest-mock = "^3.10.0"
+# Pre-commit
+pre-commit = ">=2.19,<4.0"
+
+[tool.poetry.group.docs.dependencies]
+# Docs
+mkdocs = "^1.4.2"
+mkdocs-material = "^9.0.12"
+mkdocs-redirects = "^1.2.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+
+[tool.mypy]
+python_version = "3.8"
+ignore_missing_imports = true
+warn_no_return = false
+warn_return_any = false
+warn_unused_configs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+# Ignore tests, because we can use fixtures that not quite represent a real type
+module = "tests.*"
+ignore_errors = true
+
+
+[tool.black]
+line-length = 99
+target-version = ["py38"]
+
+
+[tool.ruff]
+line-length = 99
+respect-gitignore = true
+target-version = "py38"
+lint.select = [
+  "F",     # Pyflakes
+  "E",     # pycodestyle errors
+  "W",     # pycodestyle warnings
+  "C90",   # mccabe
+  "I",     # isort
+  "N",     # pep8-naming
+  "D",     # pydocstyle
+  "UP",    # pyupgrade
+  "YTT",   # flake8-2020
+  # "ANN", # flake8-annotations
+  "ASYNC", # flake8-async
+  "S",     # flake8-bandit
+  # "BLE", # flake8-blind-except
+  # "FBT", # flake8-boolean-trap
+  "B",     # flake8-bugbear
+  "A",     # flake8-builtins
+  # "COM", # flake8-commas
+  # "CPY", # Copyright-related rules
+  "C40",   # flake8-comprehensions
+  # "DTZ", # flake8-datetimez
+  "T10",   # flake8-debugger
+  # "DJ",  # flake8-django
+  "EM",    # flake8-errmsg
+  "EXE",   # flake8-executable
+  "FA",    # flake8-future-annotations
+  "ISC",   # flake8-implicit-str-concat
+  "ICN",   # flake8-import-conventions
+  "G",     # flake8-logging-format
+  "INP",   # flake8-no-pep420
+  "PIE",   # flake8-pie
+  "T20",   # flake8-print
+  "PYI",   # flake8-pyi
+  "PT",    # flake8-pytest-style
+  "Q",     # flake8-quotes
+  "RSE",   # flake8-raise
+  "RET",   # flake8-return
+  "SLF",   # flake8-self
+  "SLOT",  # flake8-slots
+  "SIM",   # flake8-simplify
+  "TID",   # flake8-tidy-imports
+  "INT",   # flake8-gettext
+  "ARG",   # flake8-unused-arguments
+  "PTH",   # flake8-use-pathlib
+  "TD",    # flake8-todos
+  "FIX",   # flake8-fixme
+  "ERA",   # eradicate
+  "PD",    # pandas-vet
+  "PGH",   # pygrep-hooks
+  "PL",    # Pylint
+  "PLC",   # Pylint Convention
+  "PLE",   # Pylint Error
+  "PLR",   # Pylint Refactor
+  "PLW",   # Pylint Warning
+  "TRY",   # tryceratops
+  "FLY",   # flynt
+  "NPY",   # NumPy-specific rules
+  "PERF",  # Perflint
+  "RUF",   # ruff
+  "ALL",   # All not listed above
+]
+lint.ignore = [
+  "ANN",     # flake8-annotations
+  "BLE",     # flake8-blind-except
+  "FBT",     # flake8-boolean-trap
+  "COM",     # flake8-commas
+  "CPY",     # Copyright-related rules
+  "DTZ",     # flake8-datetimez
+  "DJ",      # flake8-Django
+  "INP",     # flake8-no-pep420
+  "PYI",     # flake8-pyi
+  "Q",       # flake8-quotes
+  "RET",     # flake8-return
+  "PTH",     # flake8-use-pathlib
+  "ERA",     # flake8-eradicate
+  "PD",      # pandas-vet
+  "D",       # pydocstyle
+  "TRY",     # tryceratops
+  "SLF",     # flake8-self
+  "AIR",     # Airflow
+  "UP037",   # quoted-annotation
+  # "E203",  # whitespace before ':' (black)
+  "E501",    # line too long
+  # "W503",  # line break before binary operator (black)
+  # "W504",  # line break after binary operator (black)
+  "B905",    # `zip()` without an explicit `strict=` parameter (python3.10+ only)
+  "PLR0913", # Too many arguments to function call
+  "A003",    # Class attribute builtin name shadowing
+  "N818",    # Exception should be named with an Error suffix
+  "PGH003",  # Use specific rule codes when ignoring type issues
+  "ARG002",  # Unused method argument
+  "RUF001",  # String contains ambiguous unicode character
+  "RUF002",  # Docstring contains ambiguous unicode character
+  "RUF003",  # Comment contains ambiguous unicode character
+  "PLW2901", # for loop variable overwritten by assignment target
+  "PLE1205", # https://github.com/charliermarsh/ruff/issues/3351
+  "B030",    # Except handlers should only be exception classes or tuples of exception
+  "UP006",   # Use `list` instead of `List` for type annotation
+  "UP007",   # Use `X | Y` for type annotations
+  "RUF022",  # Apply an isort-style sorting to `__all__`
+  "S311",    # Standard pseudo-random generators are not suitable for cryptographic purposes
+  "S301",    # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue
+  "FA100",   # `__future__` import "annotations" missing
+  "ISC001",  # single-line-implicit-string-concatenation
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**.py" = [
+  "S101",    # Use of assert detected
+  "PLR2004", # Magic value used in comparison
+  "S106",    # Possible hardcoded password
+  "ARG001",  # Unused function argument
+  "ARG005",  # Unused lambda argument
+]
+"examples/**.py" = [
+  "T201",    # print statement found
+  "RUF101",  # Move application import into a type-checking block
+]
+
+[tool.ruff.lint.pep8-naming]
+# Allow Pydantic's `@validator` decorator to trigger class method treatment.
+classmethod-decorators = [
+  "classmethod",
+  "pydantic.validator",
+  "pydantic.root_validator",
+  "vkbottle.modules.pydantic.validator",
+  "vkbottle.modules.pydantic.root_validator",
+]
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing_extensions", "typing"]
