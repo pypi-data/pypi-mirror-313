@@ -1,0 +1,124 @@
+# 🦫 CapibaraModel
+
+Language model with contextual processing based on JAX/Flax.
+
+## ✨ Features
+
+- **🧠 Architecture**:
+  - 🔄 Multi-head attention
+  - 🎯 Contextual activation
+  - 🔍 Coherence detection
+  - 🎭 Personality management
+
+- **⚡ Optimizations**:
+  - 🚀 Native TPU support
+  - ⚙️ Efficient processing
+  - 📦 Optimized batching
+  - 🕸️ Integrated sparsity
+
+## 📋 Requirements
+
+- Python >= 3.8
+- JAX >= 0.4.1
+- Flax >= 0.6.0
+- Optax >= 0.1.3
+
+## 🚀 Installation
+
+```bash
+pip install capibara_model
+```
+
+## 💻 Usage
+
+### Basic Example
+
+```python
+from capibara_model.core.model import CapibaraModel
+from capibara_model.core.inference import CapibaraInference
+
+# Create model
+model = CapibaraModel(hidden_size=768, num_heads=8)
+
+# Create inference
+inference = CapibaraInference(hidden_size=768)
+
+# Generate response
+response = inference("How are you?")
+print(response)
+```
+
+### Advanced Example
+
+```python
+# Custom configuration
+config = {
+    'model': {
+        'hidden_size': 1024,
+        'num_heads': 16,
+        'num_layers': 24,
+        'dropout_rate': 0.1
+    },
+    'training': {
+        'batch_size': 32,
+        'learning_rate': 1e-4,
+        'warmup_steps': 1000
+    }
+}
+
+# Create model with custom config
+model = CapibaraModel(**config['model'])
+
+# Process conversation
+context = "Previous conversation context..."
+response = inference(
+    "What's the meaning of life?",
+    context=context
+)
+```
+
+## ⚙️ Configuration
+
+```python
+config = {
+    'hidden_size': 768,
+    'num_heads': 8,
+    'num_layers': 12,
+    'dropout_rate': 0.1,
+    'use_tpu': False
+}
+```
+
+## 🛠️ Development
+
+```bash
+# Install development dependencies
+pip install capibara_model[dev]
+
+# Run tests
+pytest tests/
+
+# Run specific test
+pytest tests/test_model.py -k "test_attention"
+
+# Check code style
+black capibara_model/
+```
+
+## 📝 License
+
+MIT License. See `LICENSE` for more information.
+
+## 📫 Contact
+
+Marco Durán - [marco@anachroni.com](mailto:marco@anachroni.com)
+
+[🌐 Website](https://www.anachroni.com) | [💻 GitHub](https://github.com/anachroni-io/CapibaraModel)
+
+## 🙏 Acknowledgments
+
+Special thanks to:
+
+- JAX/Flax team
+- TPU Research Cloud
+- Open source community
