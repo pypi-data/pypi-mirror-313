@@ -1,0 +1,125 @@
+###############################################################################
+# (c) Copyright 2024 CERN for the benefit of the LHCb Collaboration           #
+#                                                                             #
+# This software is distributed under the terms of the GNU General Public      #
+# Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".   #
+#                                                                             #
+# In applying this licence, CERN does not waive the privileges and immunities #
+# granted to it by virtue of its status as an Intergovernmental Organization  #
+# or submit itself to any jurisdiction.                                       #
+###############################################################################
+
+image: gitlab-registry.cern.ch/ci-tools/ci-worker:cc7
+
+stages:
+  - check
+  - test
+  - build
+  - deploy
+
+before_script:
+  - source /cvmfs/lhcb.cern.ch/lib/LbEnv
+  - lb-conda-dev virtual-env default/2024-06-08 .venv
+  - .venv/run pip install -r requirements-ci.txt
+  - .venv/run pip install .
+
+formatting:
+  tags:
+    - cvmfs
+  stage: check
+  script:
+    - .venv/run black src --check
+  allow_failure: true
+
+linting:
+  stage: check
+  tags:
+    - cvmfs
+  script:
+    - .venv/run flake8 --select=F,E71,E9,E2,E1,W1,W6,W2
+  allow_failure: true
+
+testing:
+  stage: test
+  tags:
+    - cvmfs
+  script:
+    - .venv/run pytest -vv --pyargs src --junitxml=report.xml
+  coverage: /TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/
+  artifacts:
+    when: always
+    reports:
+      junit: report.xml
+    expire_in: 2 days
+
+# Test that docs build correctly
+build-docs:
+  stage: build
+  image: python:latest
+  # Functions that should be executed before the build script is run
+  before_script:
+    - pip install -r requirements-docs.txt
+  script:
+    - make html -C docs
+  artifacts:
+    paths:
+      # The folder that contains the files to be exposed at the Page URL
+      - docs/build/html
+
+# Building based on LHCb/Moore docs pipeline
+pages:
+  stage: deploy
+  image: python:latest
+  before_script:
+    - ''
+  dependencies:
+    - build-docs
+  script:
+    - mkdir -p public
+    # If this is a tag, create versioned docs
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        mkdir -p public/versions
+        cp -r docs/build/html public/versions/$CI_COMMIT_TAG
+        # If latest tag, also update latest
+        if [ "$CI_COMMIT_TAG" = "$(git describe --tags --abbrev=0)" ]; then
+          cp -r docs/build/html public/latest
+        fi
+      else
+        # For master branch, put in root
+        cp -r docs/build/html/* public/
+      fi
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: always
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: always
+
+package:
+  stage: build
+  image: gitlab-registry.cern.ch/lhcb-docker/python-deployment:python-3.7
+  script:
+    - python -m build
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 week
+  before_script:
+    - pip install build
+  after_script: []
+
+deploy-packages:
+  stage: deploy
+  image: gitlab-registry.cern.ch/lhcb-docker/python-deployment:python-3.7
+  only:
+    - tags
+  dependencies:
+    - package
+  script:
+    - if [ -z "$TWINE_PASSWORD" ] ; then echo "Set TWINE_PASSWORD in CI variables" ; exit 1 ; fi
+    - twine upload -u __token__ dist/*
+  before_script: []
+  after_script: []
