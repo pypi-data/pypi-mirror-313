@@ -1,0 +1,156 @@
+gateways:
+
+  inttest_duckdb:
+    connection:
+      type: duckdb
+      catalogs:
+        memory: ':memory:'
+        testing: 'testing.duckdb'
+
+  # Databases with docker images available
+  inttest_trino:
+    connection:
+      type: trino
+      host: {{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+      port: 8080
+      user: admin
+      catalog: datalake
+      http_scheme: http
+      retries: 20
+    state_connection:
+      type: duckdb
+  inttest_trino_iceberg:
+    connection:
+      type: trino
+      host: {{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+      port: 8080
+      user: admin
+      catalog: datalake_iceberg
+      http_scheme: http
+      retries: 20
+    state_connection:
+      type: duckdb
+  inttest_trino_delta:
+    connection:
+      type: trino
+      host: {{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+      port: 8080
+      user: admin
+      catalog: datalake_delta
+      http_scheme: http
+      retries: 20
+    state_connection:
+      type: duckdb
+  inttest_spark:
+    connection:
+      type: spark
+      config:
+        spark.remote: sc://{{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+    state_connection:
+      type: duckdb
+  inttest_mssql:
+    connection:
+      type: mssql
+      host: {{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+      user: sa
+      password: 1StrongPwd@@
+  inttest_postgres:
+    connection:
+      type: postgres
+      user: postgres
+      password: postgres
+      database: postgres
+      host: {{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+      port: 5432
+  inttest_mysql:
+    connection:
+      type: mysql
+      host: {{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+      user: root
+      password: mysql
+      port: 3306
+      charset: utf8
+  inttest_clickhouse:
+    connection:
+      type: clickhouse
+      host: {{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+      port: 8123
+      username: clickhouse
+      password: clickhouse
+    state_connection:
+      type: duckdb
+  inttest_clickhouse_cluster:
+    connection:
+      type: clickhouse
+      host: {{ env_var('DOCKER_HOSTNAME', 'localhost') }}
+      port: 8123
+      username: clickhouse
+      password: clickhouse
+      cluster: cluster1
+    state_connection:
+      type: duckdb
+
+
+  # Cloud databases
+  inttest_snowflake:
+    connection:
+      type: snowflake
+      account: {{ env_var('SNOWFLAKE_ACCOUNT') }}
+      warehouse: {{ env_var('SNOWFLAKE_WAREHOUSE') }}
+      database: {{ env_var('SNOWFLAKE_DATABASE') }}
+      user: {{ env_var('SNOWFLAKE_USER') }}
+      password: {{ env_var('SNOWFLAKE_PASSWORD') }}
+    state_connection:
+      type: duckdb
+
+  inttest_databricks:
+    connection:
+      type: databricks
+      catalog: {{ env_var('DATABRICKS_CATALOG') }}
+      server_hostname: {{ env_var('DATABRICKS_SERVER_HOSTNAME') }}
+      http_path: {{ env_var('DATABRICKS_HTTP_PATH') }}
+      access_token: {{ env_var('DATABRICKS_ACCESS_TOKEN') }}
+    state_connection:
+      type: duckdb
+
+  inttest_redshift:
+    connection:
+      type: redshift
+      host: {{ env_var('REDSHIFT_HOST') }}
+      user: {{ env_var('REDSHIFT_USER') }}
+      password: {{ env_var('REDSHIFT_PASSWORD') }}
+      database: {{ env_var('REDSHIFT_DATABASE') }}
+    state_connection:
+      type: duckdb
+
+  inttest_bigquery:
+    connection:
+      type: bigquery
+      method: service-account
+      keyfile: {{ env_var('BIGQUERY_KEYFILE') }}
+    state_connection:
+      type: duckdb
+
+  inttest_clickhouse_cloud:
+    connection:
+      type: clickhouse
+      host: {{ env_var("CLICKHOUSE_CLOUD_HOST") }}
+      port: 8443
+      username: {{ env_var("CLICKHOUSE_CLOUD_USERNAME") }}
+      password: {{ env_var("CLICKHOUSE_CLOUD_PASSWORD") }}
+    state_connection:
+      type: duckdb
+
+  inttest_athena:
+    connection:
+      type: athena
+      aws_access_key_id: {{ env_var("AWS_ACCESS_KEY_ID") }}
+      aws_secret_access_key: {{ env_var("AWS_SECRET_ACCESS_KEY") }}
+      region_name: {{ env_var("AWS_REGION") }}
+      work_group: {{ env_var("ATHENA_WORK_GROUP", "primary") }}
+      s3_warehouse_location: {{ env_var("ATHENA_S3_WAREHOUSE_LOCATION", "") }}
+    state_connection:
+      type: duckdb
+
+model_defaults:
+    dialect: duckdb
