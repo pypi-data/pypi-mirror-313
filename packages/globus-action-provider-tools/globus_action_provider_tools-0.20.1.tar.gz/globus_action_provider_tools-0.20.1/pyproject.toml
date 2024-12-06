@@ -1,0 +1,131 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+# poetry
+# ------
+
+[tool.poetry]
+name = "globus-action-provider-tools"
+version = "0.20.1"
+description = "Tools to help developers build services that implement the Action Provider specification."
+authors = [
+    "Globus Team <support@globus.org>",
+]
+keywords = [
+  "globus",
+  "automation",
+  "workflow",
+  "action_provider"
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: Free To Use But Restricted",
+  "Topic :: Internet :: WWW/HTTP",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+readme = "README.rst"
+license = "Apache-2.0"
+
+[tool.poetry.scripts]
+whattimeisit-provider = "examples.flask.whattimeisitrightnow.app.app:main"
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+globus-sdk="^3.9.0"
+jsonschema = "^4.17"
+pyyaml = "^6"
+pydantic = "^1.7.3"
+isodate = "^0.6.0"
+cachetools = "^5.0"
+flask = {version = "^2.3.0", optional = true}
+
+[tool.poetry.extras]
+flask = ["flask"]
+
+
+# coverage
+# --------
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = [
+    "globus_action_provider_tools",
+    "tests",
+]
+[tool.coverage.paths]
+source = [
+    "src/",
+    "*/site-packages/",
+]
+
+[tool.coverage.report]
+# When the test coverage increases, this bar should also raise.
+fail_under = 83
+
+
+# isort
+# -----
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+
+
+# mypy
+# ----
+
+[tool.mypy]
+sqlite_cache = true
+ignore_missing_imports = true
+disallow_subclassing_any = false
+warn_unreachable = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_no_return = true
+no_implicit_optional = true
+# disallow_untyped_defs = true
+
+
+# pytest
+# ------
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+
+    # Minimum Flask versions use a werkzeug version that triggers AST warnings.
+    "ignore:.+? is deprecated and will be removed:DeprecationWarning:werkzeug|ast",
+
+    # dateutil, used by freezegun during testing, has a Python 3.12 compatibility issue.
+    "ignore:datetime.datetime.utcfromtimestamp\\(\\) is deprecated:DeprecationWarning",
+]
+
+
+# scriv
+# -----
+
+[tool.scriv]
+categories = [
+    "Breaking changes",
+    "Security",
+    "Deprecations",
+    "Python support",
+    "Dependencies",
+    "Features",
+    "Bugfixes",
+    "Changes",
+    "Documentation",
+    "Development",
+]
+version = "literal: pyproject.toml: tool.poetry.version"
+new_fragment_template = "file: fragment-template.rst.txt"
