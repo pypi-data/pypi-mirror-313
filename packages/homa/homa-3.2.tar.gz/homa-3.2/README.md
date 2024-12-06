@@ -1,0 +1,50 @@
+# Homa
+
+- [Homa](#homa)
+  - [Helpers](#helpers)
+    - [Device](#device)
+    - [Pickle](#pickle)
+  - [Transformers](#transformers)
+    - [Positional Encoding](#positional-encoding)
+
+<div align="center">
+    <img src="https://github.com/tahashieenavaz/homa/raw/main/art/homa.svg" width="500" />
+</div>
+
+## Helpers
+
+### Device
+
+```py
+from homa import get_device
+
+torch.tensor(torch.randint(-20, 10, (32, 10))).to(get_device())
+```
+
+### Pickle
+
+```py
+from homa import pickle
+
+person = {"name": "John Doe", age: 88}
+pickle(person, "person.pkl")
+
+loaded_person = pickle("person.pkl")
+```
+
+## Transformers
+
+### Positional Encoding
+
+```py
+from homa import positional_encoding
+
+class TransformerModel(torch.nn.Module):
+    def __init__(self, seq_length, dimension):
+        # ...
+        self.positional_encoding = positional_encoding(seq_length, dimension)
+
+    def forward(self, x):
+        # ...
+        x = x + self.positional_encoding
+```
