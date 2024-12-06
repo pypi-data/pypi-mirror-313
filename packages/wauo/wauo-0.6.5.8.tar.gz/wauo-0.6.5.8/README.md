@@ -1,0 +1,116 @@
+# 更新历史
+
+- 新增`jsonp2json`静态方法
+- 爬虫`默认保持会话`状态
+- 新增`get_uuid`、`base64加解密`静态方法
+- 删除`download_text`、`download_bdata`，合并为`download`
+- 新增`update_default_headers`方法
+- `make_md5`支持`字符串`、`二进制`参数，并且可以加盐
+- `send`方法加入`delay`参数，请求时可以设置延迟
+- 新增`tools`包、`spiders`包
+- `线程池管理者`加入上下文，可以使用`with`了
+- 新增`get_results`方法，获取`所有fs`的返回值
+- 可以`提前`在 send 方法之前`自定义延迟、超时`
+- 线程池管理者新增`running`方法，可以用于判断任务状态
+- `send`方法加入`详细注释`
+- 新增`todos`方法、tools 改为 utils
+- `done`加入 func_name 参数，可以定位到具体是哪一个`线程函数`出现异常
+- `WaitPool`、`SpeedPool`
+- 一些参数的变化（改名、补充注解）
+- 加入了一些装饰器函数
+- 补充`send`方法中`**kwargs`的说明
+- 新增`block`方法，可以进行阻塞
+- 一些小优化
+- 新增`goto`方法等
+
+# 项目说明
+
+- 基于 requests 封装的一个爬虫类
+
+# Python 解释器
+
+- python3.10+
+
+# 如何使用？
+
+## 开始导入
+
+```python
+from wauo import WauoSpider
+
+spider = WauoSpider()
+```
+
+## 请求
+
+### GET
+
+- 默认是 get 请求
+
+```python
+url = 'https://github.com/markadc'
+resp = spider.send(url)
+print(resp.text)
+```
+
+### POST
+
+- 使用了`data`或者`json`参数，则是 post 请求
+
+```python
+api = 'https://github.com/markadc'
+payload = {
+    'key1': 'value1',
+    'key2': 'value2'
+}
+resp = spider.send(api, data=payload)  # 使用data参数
+resp = spider.send(api, json=payload)  # 使用json参数
+```
+
+## 响应
+
+### 校验响应
+
+#### 1、限制响应码
+
+- 如果响应码不在 codes 范围里则抛弃响应（此时`send`返回`None`）
+
+```python
+resp = spider.send('https://github.com/markadc', codes=[200, 301, 302])
+```
+
+#### 2、限制响应内容
+
+- 如果 checker 返回 False 则抛弃响应（此时`send`返回`None`）
+
+```python
+def is_ok(response):
+    html = response.text
+    if html.find('验证码') != -1:
+        return False
+
+
+resp = spider.send('https://github.com/markadc', checker=is_ok)
+```
+
+## 设置默认请求配置
+
+- 给 headers 设置 Cookie
+- 给 headers 设置代理
+- 给 headers 设置认证信息
+- ...
+
+### 例子 1
+
+- 每一次请求的 headers 都带上`cookie`
+
+```python
+from wauo import WauoSpider
+
+cookie = 'Your Cookies'
+spider = WauoSpider(default_headers={'Cookie': cookie})
+resp1 = spider.send('https://github.com/markadc')
+resp2 = spider.send('https://github.com/markadc/wauo')
+print(resp1.request.headers)
+print(resp2.request.headers)
+```
