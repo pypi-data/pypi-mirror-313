@@ -1,0 +1,40 @@
+<div class="cell">
+    <div class="hide-for-print cell">
+        <hr size="1"/>
+        <div style="text-align: right; font-size: 70%;">
+            {% if uczelnia.pokazuj_deklaracje_dostepnosci == 1 %}
+                <a href="{{ uczelnia.deklaracja_dostepnosci_url }}">deklaracja dostępności</a> |
+            {% endif %}
+
+            {% if uczelnia.pokazuj_deklaracje_dostepnosci == 2 %}
+                <a href="{% url "bpp:browse_deklaracja_dostepnosci" %}">deklaracja dostępności</a> |
+            {% endif %}
+
+            {% if not request.user.is_anonymous %}
+                zalogowany/a jako {{ request.user.username }} -
+            {% endif %}
+            Oprogramowanie <a href="http://bpp.iplweb.pl/">Bibliografia Publikacji Pracowników</a> &copy;
+            2004-2022 <a href="http://iplweb.pl">IPLweb</a>; wersja {% load bpp_version %}{% bpp_version %}
+            <div id="test-image-copyright" style="display: none;">
+                Obrazek tła dla serwera testowego: <a href=http://www.freepik.com>Designed by pch.vector /
+                Freepik</a>.
+            </div>
+        </div>
+    </div>
+    <div class="show-for-print">
+        <div class="text-right">
+            <small>
+                Dokument wygenerowano przy pomocy systemu Bibliografia Publikacji Pracowników w
+                wersji <strong>{% bpp_version %}</strong>
+                dnia <strong>{% now "SHORT_DATE_FORMAT" %} o godzinie {% now "H:i" %}</strong>
+                {% if not request.user.is_anonymous %}
+                    przez użytkownika <strong>{{ request.user.username }}</strong>
+                {% endif %}
+                <br/>
+                Baza danych &copy; {% now "Y" %} Biblioteka Główna {{ uczelnia.nazwa_dopelniacz_field }}.
+                Oprogramowanie Bibliografia Publikacji Pracowników &copy; 2004-2022 IPLweb,
+                https://bpp.iplweb.pl/
+            </small>
+        </div>
+    </div>
+</div>

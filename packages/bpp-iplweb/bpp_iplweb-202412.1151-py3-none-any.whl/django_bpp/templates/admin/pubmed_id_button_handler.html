@@ -1,0 +1,75 @@
+<script type="text/javascript">
+    (function ($) {
+        $(document).ready(function () {
+            var i = $("#id_pubmed_id");
+
+            $("<input id='id_pubmed_id_get' type='button' value='Pobierz PubmedID'/>").insertAfter(i);
+
+            var pubmed_button = $("#id_pubmed_id_get");
+            var orig = pubmed_button.val();
+
+            pubmed_button.click(function () {
+                var t = $("#id_tytul_oryginalny").val();
+                if (!t) {
+                    alert("Aby wykonać zapytanie, potrzebny jest tytuł w polu 'Tytuł oryginalny'.");
+                    return;
+                }
+
+                pubmed_button.val("Czekaj...");
+                pubmed_button.attr('disabled', true);
+
+                $.ajax({
+                    type: "POST",
+                    url: "{% url "bpp:api_pubmed_id" %}",
+                    data: {t: t},
+                    error: function (request, status, error) {
+                        alert('Wystąpił błąd (' + status + ', ' + error + '). Najpewniej może być on związany z ' +
+                            'problemem połączenia z bazą PubMed. Spróbuj za chwilę jeszcze raz.');
+
+                        pubmed_button.val("Spróbuj jeszcze raz!");
+                        pubmed_button.attr('disabled', false);
+
+                        return;
+                    },
+                    success: function (data, text) {
+                        var found = false;
+
+                        pubmed_button.attr('disabled', false);
+
+                        if (data.error) {
+                            var zt = "Zmień tytuł i spróbuj jeszcze raz.";
+                            alert("Błąd z serwera: " + data.error + "\r\n\r\nWyszukiwanie odbywa się " +
+                                "po wartości z pola 'Tytuł oryginalny'. " + zt);
+                            pubmed_button.val(zt);
+                            return;
+                        }
+
+                        pubmed_button.val("Pobrano!");
+
+                        ["pubmed_id", "doi", "pmc_id"].forEach(
+                            function (element, index, array) {
+                                if (data[element]) {
+
+                                    $("#id_" + element).val(data[element]);
+                                    found = true;
+                                }
+                            }
+                        );
+
+                        if (!found)
+                            pubmed_button.val("Brak danych w PubMed!");
+                        else {
+                            var at = 'Dane wypełnione na podstawie rekordu z PubMed: ' + data['title'];
+                            if (data.doi)
+                                at += "\r\n\r\nhttp://dx.doi.org/" + data['doi'];
+                            alert(at);
+                        }
+                    }
+                });
+
+            });
+
+
+        });
+    }(django.jQuery));
+</script>

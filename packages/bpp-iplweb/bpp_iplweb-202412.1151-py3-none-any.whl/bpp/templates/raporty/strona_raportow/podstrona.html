@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block extratitle %}
+    {{ nazwa_raportu }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li class="current">{{ nazwa_raportu }}</li>
+{% endblock %}
+
+{% block content %}
+    <h2>{{ nazwa_raportu }}</h2>
+    {% crispy form %}
+    {{ form.media }}
+
+    {% include "raporty/strona_raportow/ostatnio_wygenerowane.html" %}
+
+    <style>
+        select.selectmultiple {
+            height: auto !important;
+        }
+
+
+    </style>
+
+{% endblock %}

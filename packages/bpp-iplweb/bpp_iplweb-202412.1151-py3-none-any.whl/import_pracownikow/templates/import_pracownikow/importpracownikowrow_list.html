@@ -1,0 +1,76 @@
+{% extends "base.html" %}{% load render_table from django_tables2 %}
+
+{% block extratitle %}
+    Import pracowników - szczegóły {{ object.plik_xls.name }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url "import_pracownikow:index" %}">import pracowników</a></li>
+    <li class="current">import {{ object.plik_xls.name }}</li>
+{% endblock %}
+
+
+{% block content %}
+    <h1>Import danych {{ object.plik_xls.name }}</h1>
+
+    {% include "long_running/operation_details.html" %}
+
+    {% if object.finished_successfully %}
+        Lista modyfikacji do bazy danych, przeprowadzonych na podstawie pliku XLS poniżej:
+        <table>
+            <tr>
+                <th>Arkusz nr</th>
+                <th>Wiersz nr</th>
+                <th>Autor</th>
+                <th>Jednostka</th>
+                <th>Zmiany potrzebne?</th>
+                <th>Zmienione dane</th>
+            </tr>
+            {% include "pagination.html" %}
+            {% for row in object_list %}
+                <tr>
+                    <td>{{ row.nr_arkusza }}</td>
+                    <td>{{ row.nr_wiersza }}</td>
+                    <td><a href="{% url "bpp:browse_autor" row.autor.pk %}">{{ row.autor }}</a></td>
+                    <td><a href="{% url "bpp:browse_jednostka" row.jednostka.pk %}">{{ row.jednostka }}</a></td>
+                    <td>{{ row.zmiany_potrzebne }}</td>
+                    <td>{% for elem in row.sformatowany_log_zmian %}
+                        <p>{{ elem }}</p>
+                    {% endfor %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center"><strong>Żadnych zmian nie naniesiono. Stan bazy danych w
+                        momencie importu pliku zgodny z
+                        zawartością pliku XLS
+                    </strong></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+
+    {% if autorzy_spoza_pliku.exists %}
+        <h4>Na podstawie tego pliku importu należałoby odpiąć
+            {{ autorzy_spoza_pliku.count }} powiązań autor+jednostka, oto one ponizej: </h4>
+        <a onclick="return confirm('Czy na pewno?');" href="../resetuj-podstawowe-miejsce-pracy/">Kliknij tutaj, żeby przypisać. Uwaga, to zmieni bazę dancyh. </a>
+        <table>
+            <tr>
+                <th>Autor</th>
+                <th>Jednostka</th>
+            </tr>
+            {% for elem in autorzy_spoza_pliku %}
+                <tr>
+                    <td>{{ elem.autor }}</td>
+                    <td>{{ elem.jednostka }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h4>Zawartość tego pliku nie powoduje konieczności "likwidowania" podstawowych miejsc
+            pracy dla autorów w bazie. </h4>
+    {% endif %}
+
+{% endblock %}

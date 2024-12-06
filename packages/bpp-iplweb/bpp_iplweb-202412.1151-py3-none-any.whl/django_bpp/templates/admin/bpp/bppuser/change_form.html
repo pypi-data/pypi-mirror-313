@@ -1,0 +1,24 @@
+{% extends "admin/change_form.html" %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li><a id="loginas-link" href="#"><i class="icon-user
+    icon-alpha75"></i>Zaloguj się jako</a></li>
+
+{% endblock %}
+
+
+{% block footer %}
+{{ block.super }}
+    <form method="post" id="loginas-form" action="{% url 'loginas-user-login' object_id %}" style="display: none">
+        {% csrf_token %}
+    </form>
+    <script>
+	django.jQuery(function() {
+          django.jQuery('#loginas-link').click(function() {
+            django.jQuery('#loginas-form').submit();
+            return false;
+          });
+        });
+    </script>
+{% endblock %}

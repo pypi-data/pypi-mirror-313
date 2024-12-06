@@ -1,0 +1,103 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block javascripts %}
+    {{ block.super }}
+    <script type="text/javascript">
+        (function($) {
+            $(document).ready(function() {
+
+              {% block js_automatic_collapsibles_bpp %}
+                /* Automatically open every collapsible with value */
+                /* auto_open_collapsibles */
+                $("#grp-content-container .grp-collapse").each(function () {
+                    var has_value = false;
+
+                    $(this).find("input[type=checkbox]").each(function () {
+                        if ($(this).prop("checked"))
+                            has_value = true;
+                    });
+
+                    $(this).find("input[type!=checkbox]").each(function () {
+                        if ($(this).val() && $(this).val() != 0)
+                            has_value = true;
+                    });
+
+                    $(this).find("textarea").each(function () {
+                        if ($(this).val())
+                            has_value = true;
+                    });
+
+                    $(this).find("select").each(function () {
+                        v = $(this).val();
+                        if (v!="" && v!="unknown")
+                            has_value = true;
+                    });
+
+                    if ($(this).hasClass("grp-never-open-automatically")) {
+                        has_value = false;
+                    }
+
+                    if (has_value) {
+                        $(this).addClass("grp-open").removeClass("grp-closed");
+                    }
+                });
+                {% endblock %}
+            });
+        })(grp.jQuery);
+        </script>
+{% endblock %}
+
+
+<!-- CONTENT -->
+{% block content %}
+{#    UWAGA UWAGA #}
+{#    PONIZSZY BLOK ZOSTAŁ SKOPIOWANY Z DJANGO-GRAPPELLI CHANGE_FORM.HTML #}
+{#    JEDYNY SENS TEJ KOPII TO PRZEROBIENIE LISTY BŁĘDÓW TAK, ABY WYŚWIETLAŁA SIĘ POPRAWNIE #}
+{#    W DJANGO 4.2 #}
+
+{#    JEŻELI W GRAPPELLI ZOSTANIE TO POPRAWIONE, TO TEN BLOK 'CONTENT' MOŻNA BĘDZIE USUNĄĆ. #}
+
+    <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>{% csrf_token %}{% block form_top %}{% endblock %}
+        <div>
+            <!-- Popup Hidden Field -->
+            {% if is_popup %}<input type="hidden" name="_popup" value="1" />{% endif %}
+
+            <!-- No Submit-Row on Top -->
+
+            <!-- Errors -->
+{% if errors %}
+    <p class="errornote">
+    {% load i18n %}
+    {% blocktranslate count counter=errors|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}
+    </p>
+    {{ adminform.form.non_field_errors }}
+{% endif %}
+
+            <!-- Fieldsets -->
+            {% block field_sets %}
+                {% for fieldset in adminform %}
+                    {% include "admin/includes/fieldset.html" %}
+                {% endfor %}
+            {% endblock %}
+
+            {% block after_field_sets %}{% endblock %}
+
+            <!-- Inlines -->
+            {% block inline_field_sets %}
+                {% for inline_admin_formset in inline_admin_formsets %}
+                    {% include inline_admin_formset.opts.template %}
+                {% endfor %}
+            {% endblock %}
+
+            {% block after_related_objects %}{% endblock %}
+
+            <!-- Submit-Row -->
+            {% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+
+            <!-- JS for prepopulated fields -->
+            {% prepopulated_fields_js %}
+
+        </div>
+    </form>
+{% endblock %}

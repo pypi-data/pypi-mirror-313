@@ -1,0 +1,69 @@
+{% extends "base.html" %}{% load render_table from django_tables2 %}
+
+{% block extratitle %}
+    Raport slotów - uczelnia - za {{ object.od_roku }}
+    {% if object.do_roku != object.od_roku %} do {{ object.do_roku }}{% endif %}
+{% endblock %}
+
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url "raport_slotow:lista-raport-slotow-uczelnia" %}">raport slotów - uczelnia</a></li>
+    <li class="current">raport slotów - uczelnia za {{ object.od_roku }}
+        {% if object.do_roku != object.od_roku %} - {{ object.do_roku }}{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+    <h1>Raport slotów za {{ object.od_roku }}
+        {% if object.do_roku != object.od_roku %} - {{ object.do_roku }}{% endif %}</h1>
+
+    <div class="callout small secondary">
+        {% load humanize %}
+        <strong>Przypomnienie:</strong> oglądasz raport wygenerowany na podstawie bazy danych w
+        momencie {{ object.started_on }}, czyli {{ object.started_on|naturaltime }}.
+        <br/><a href="?_export=xlsx"><i class="fi-page-export"></i> Pobierz w formacie XLSX</a> |
+
+        <a title="Generuje raport od zera na podstawie aktualnych danych" href="../regen">
+            <i class="fi-refresh"></i> Wygeneruj
+            ponownie</a>
+    </div>
+
+    <style>
+        form.filtry input[type=number] {
+            width: 40%;
+            display: inline;
+        }
+    </style>
+    {% if filter %}
+        <form action="" method="get" class="filtry">
+            <table>
+                <tr>
+                    <td>Filtruj po nazwisku autora:</td>
+                    <td>Filtruj po dyscyplinie:</td>
+                    <td>Filtruj sumę:</td>
+                    <td>Filtruj slot:</td>
+                    <td>Filtruj średnią:</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td style="width: 25%;">{{ filter.form.autor__nazwisko }}</td>
+                    <td>{{ filter.form.dyscyplina }}</td>
+                    <td style="width: 15%;">{{ filter.form.suma__min }}&nbsp;{{ filter.form.suma__max }}</td>
+                    <td style="width: 15%;">{{ filter.form.slot__min }}&nbsp;{{ filter.form.slot__max }}</td>
+                    <td style="width: 15%;">{{ filter.form.avg__min }}&nbsp;{{ filter.form.avg__max }}</td>
+
+                    <td><input type="submit" value="Filtruj"/>
+
+                        {% for key, value in object.items %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}"/>
+                        {% endfor %}
+
+                        <input type="reset" value="Usuń filtry" onclick="location.href='?';"/>
+                        <input type="button" value="Pobierz XLS" onclick="location.href='?{{ export_link }}';"/>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    {% endif %}
+    {% render_table table %}
+{% endblock %}
