@@ -1,0 +1,388 @@
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+# https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
+# bash scripts/pypi_achatbot.sh
+
+# https://test.pypi.org/project/achatbot/
+# https://pypi.org/project/achatbot/
+
+# pip install pip-tools
+# pip-compile --all-extras pyproject.toml
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+#requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "achatbot"
+#dynamic = ["version"]
+# todo
+version = "0.0.7.14"
+authors = [{ name = "weedge", email = "weege007@gmail.com" }]
+maintainers = [{ name = "weedge", email = "weege007@gmail.com" }]
+description = "An open source chat bot for voice (and multimodal) assistants"
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["ai", "chat bot", "audio", "speech"]
+# https://pypi.org/classifiers/
+classifiers = [
+    # How mature is this project? Common values are
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    "Development Status :: 4 - Beta",
+
+    # Indicate who your project is intended for
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Video",
+
+    # BSD 3-Clause License
+    "License :: OSI Approved :: BSD License",
+
+    # Specify the Python versions you support here.
+    "Programming Language :: Python :: 3",
+    # when install TTS numpy==1.22.0;python_version<="3.10"
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "requests~=2.32.3",
+    "apipeline~=0.1.32",
+    "python-dotenv~=1.0.1",
+    "pydub~=0.25.1",        # need install ffmpeg
+    "pillow~=10.4.0",
+    "aiohttp~=3.10.3",
+    "scipy",
+    "pyloudnorm~=0.1.1",
+    "numpy>=1.22.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ai-bot-pro/chat-bot"
+Documentation = "https://github.com/ai-bot-pro/chat-bot/blob/main/docs"
+Repository = "https://github.com/ai-bot-pro/chat-bot.git"
+Issues = "https://github.com/ai-bot-pro/chat-bot/issues"
+Changelog = "https://github.com/ai-bot-pro/chat-bot/blob/main/CHANGELOG.md"
+
+
+[project.optional-dependencies]
+pyee = ["pyee~=12.0.0"]
+conf = ["omegaconf~=2.3.0", "hydra-core~=1.3.2"]
+gdown = ["gdown==5.1.0"]
+matplotlib = ["matplotlib==3.7.5"]
+# base opt dep
+tensorrt = ["tensorrt~=10.4.0"]
+einops = ["einops~=0.8.0"]
+# with --no-build-isolation
+flash-attn = ["flash-attn==2.5.6"]
+tiktoken = ["tiktoken~=0.7.0"]
+verovio = ["verovio~=4.3.1"]
+accelerate = ["accelerate~=0.28.0"]
+
+# diffusers DiT with quantizing model
+diffusers = [
+    "torch==2.4.1",
+    "torchvision==0.19.1",
+    "torchaudio==2.4.1",
+    "diffusers[torch]~=0.31.0",
+]
+
+# quantization
+# for transformers model weights with BitsAndBytes to 4bit/8bit quantization
+bitsandbytes = ["bitsandbytes~=0.44.1"]
+# for transformers awq model
+autoawq = ["autoawq"]
+
+
+# network framework
+fastapi = ["fastapi~=0.112.0"]
+websocket = ["websockets~=12.0"]
+# for simple dummy bot server to test
+fastapi_bot_server = ["fastapi~=0.112.0", "uvicorn~=0.30.6"]
+
+# ngrok proxy
+ngrok_proxy = ["pyngrok~=7.2.0", "nest-asyncio~=1.6.0"]
+
+
+# webRTC
+agora = [
+    #need move colorlog
+    "colorlog",
+    "agora-realtime-ai-api~=1.0.8",#
+    #"agora-realtime-ai-api@git+https://github.com/weedge/agora-realtime-ai-api",
+]
+daily = ["daily-python~=0.11.0"]
+livekit = ["livekit~=0.17.5"]
+# http api sdk
+livekit-api = ["livekit-api~=0.7.1"]
+
+# api llm
+google_ai = ["google-generativeai~=0.8.3"]
+openai = ["openai~=1.54.1"]
+together_ai = ["together~=1.3.3"]
+litellm = ["litellm~=1.52.0"]
+
+# rpc
+grpc = ["grpcio>=1.65.1"]
+grpc_tools = ["grpcio-tools>=1.65.1"]
+rpc = ["grpcio>=1.65.1"]
+
+# queue
+redis = ["redis~=5.0.0"]
+queue = ["achatbot[redis]"]
+
+# transports
+livekit_transport = ["achatbot[livekit,livekit-api]"]
+daily_transport = ["achatbot[daily]"]
+websocket_server_transport = ["achatbot[websocket]"]
+agora_transport = ["achatbot[agora]"]
+
+# audio_stream module tag -> pkgs
+
+# PyAudio need install python3-pyaudio 
+# e.g. ubuntu `apt-get install python3-pyaudio`, macos `brew install portaudio`
+# see: https://pypi.org/project/PyAudio/
+pyaudio_stream = ["PyAudio~=0.2.14"]
+daily_room_audio_stream = ["achatbot[daily]"]
+livekit_room_audio_stream = ["achatbot[livekit,livekit-api]"]
+speech_audio_stream = ["PyAudio~=0.2.14", "daily-python~=0.11.0"]
+
+# waker module tag -> pkgs
+porcupine_wakeword = ["pvporcupine~=3.0.2"]
+speech_waker = ["achatbot[porcupine_wakeword]"]
+
+# vad module tag -> pkgs
+pyannote_vad = ["pyannote.audio~=3.2.0"]
+webrtcvad = ["webrtcvad~=2.0.10"]
+silero_vad = ["torch~=2.2.2", "torchaudio~=2.2.2"]
+webrtc_silero_vad = ["achatbot[webrtcvad,silero_vad]"]
+speech_vad = ["achatbot[pyannote_vad,webrtcvad,silero_vad]"]
+
+#speech_vad_analyzer
+# vad_analyzer module tag -> pkgs
+daily_webrtc_vad_analyzer = ["achatbot[daily]"]
+silero_vad_analyzer = ["achatbot[silero_vad]"]
+speech_vad_analyzer = [
+    "achatbot[daily_webrtc_vad_analyzer,silero_vad_analyzer]",
+]
+
+# recorder module tag -> pkgs
+rms_recorder = []
+vad_recorder = ["achatbot[speech_vad]"]
+
+# asr module tag -> pkgs
+whisper_asr = ["openai-whisper==20231117"]
+whisper_timestamped_asr = ["whisper-timestamped~=1.14.2"]
+whisper_faster_asr = ["faster-whisper~=1.0.2"]
+whisper_transformers_asr = ["transformers[torch]>=4.40.2"]
+whisper_mlx_asr = [
+    "mlx_whisper~=0.2.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+]
+whisper_groq_asr = ["groq~=0.9.0"]
+sense_voice_asr = ["torch~=2.2.2", "funasr~=1.1.8"]
+speech_asr = [
+    "achatbot[whisper_asr,whisper_timestamped_asr,whisper_faster_asr,whisper_transformers_asr,whisper_mlx_asr,whisper_groq_asr,sense_voice_asr]",
+]
+
+# llm module tag -> pkgs
+# init  use cpu Pre-built Wheel to install, 
+# if want to use other lib(cuda), see: https://github.com/abetlen/llama-cpp-python#installation-configuration
+llama_cpp = ["llama-cpp-python~=0.2.82"]
+llm_personalai_proxy = ["geocoder~=1.38.1"]
+
+# vision
+llm_transformers_manual_vision = [
+    #"transformers@git+https://github.com/huggingface/transformers",
+    # https://github.com/huggingface/transformers/releases/tag/v4.45.0
+    "transformers~=4.45.0",
+    "qwen-vl-utils",
+    "av",
+    "torch~=2.2.2",
+    "torchaudio~=2.2.2",
+    "torchvision~=0.17.2",
+]
+llm_transformers_manual_vision_qwen = [
+    "achatbot[llm_transformers_manual_vision]",
+]
+llm_transformers_manual_vision_llama = [
+    "achatbot[llm_transformers_manual_vision]",
+]
+llm_transformers_manual_vision_molmo = [
+    "achatbot[llm_transformers_manual_vision,einops]",
+]
+vision_transformers_got_ocr = [
+    "achatbot[llm_transformers_manual_vision,tiktoken,verovio,accelerate]",
+]
+
+
+# core llms
+core_llm = ["achatbot[llama_cpp,llm_personalai_proxy]"]
+
+# tts module tag -> pkgs
+tts_coqui = ["TTS~=0.22.0"]
+tts_edge = ["edge-tts~=6.1.12"]
+tts_g = ["gTTS~=2.5.1"]
+tts_pyttsx3 = ["pyttsx3~=2.90"]
+tts_cosy_voice = [
+    "torch~=2.2.2",
+    "hyperpyyaml~=1.2.2",
+    "onnxruntime~=1.18.1",
+    "openai-whisper==20231117",
+    "WeTextProcessing~=1.0.2; sys_platform == 'linux'",
+    "conformer~=0.3.2",
+    "diffusers[torch]~=0.30.0",
+    "lightning~=2.4.0",
+    "wget~=3.2",
+    "modelscope~=1.16.0",
+]
+tts_chat = [
+    "torch~=2.2.2",
+    "vocos~=0.1.0",
+    "pybase16384~=0.3.7",
+    "vector_quantize_pytorch~=1.16.1",
+    "pynini~=2.1.5; sys_platform == 'linux'",
+    "WeTextProcessing~=1.0.2; sys_platform == 'linux'",
+    "nemo_text_processing~=1.0.2; sys_platform == 'linux'",
+    "transformers[torch]>=4.40.2",
+]
+# multi tts modules engine
+speech_tts = [
+    "achatbot[tts_coqui,tts_edge,tts_g,tts_pyttsx3,tts_cosy_voice,tts_chat]",
+]
+
+# voice
+llm_transformers_manual_voice = [
+    #"transformers@git+https://github.com/huggingface/transformers",
+    # https://github.com/huggingface/transformers/releases/tag/v4.45.0
+    "transformers~=4.45.0",
+    "torch~=2.2.2",
+    "torchaudio~=2.2.2",
+]
+llm_transformers_manual_voice_glm = [
+    "achatbot[llm_transformers_manual_voice,tts_cosy_voice,gdown,matplotlib,conf]",
+]
+
+
+# player module tag -> pkgs
+stream_player = []
+
+# vision detector
+vision_yolo_detector = ["ultralytics~=8.3.12", "supervision~=0.24.0"]
+
+# data process
+pytube = ["pytube~=15.0.0"]
+deep_translator = ["deep_translator~=1.11.4"]
+
+
+# -----------------processor------------------
+# when use asr tts processor 
+#   e.g.: 
+#   - achatbot[daily_rtvi_bot,deepgram_asr_processor,cartesia_tts_processor]
+# when use vad asr tts engine: achatbot[daily_rtvi_bot,speech_vad_analyzer,asr_processor,tts_processor]
+
+# ai framework
+ai_langchain_framework_processor = ["langchain~=0.2.13"]
+# multi ai framework modules processor
+ai_frameworks_processor = ["achatbot[ai_langchain_framework_processor]"]
+
+
+# asr
+deepgram_asr_processor = ["deepgram-sdk~=3.7.7"]
+# multi asr modules processor
+asr_processor = ["achatbot[deepgram_asr_processor,speech_asr]"]
+
+# tts
+cartesia_tts_processor = ["websockets~=12.0"]
+# multi tts modules processor
+tts_processor = ["achatbot[cartesia_tts_processor,openai,speech_tts]"]
+
+# text llm processor
+openai_llm_processor = ["achatbot[openai]"]
+google_llm_processor = ["achatbot[google_ai,openai]"]
+litellm_processor = ["achatbot[openai,litellm]"]
+# multi api text llm modules processor
+llm_processor = [
+    "achatbot[openai_llm_processor,google_llm_processor,litellm_processor]",
+]
+
+# image processor
+img_processor = ["openai~=1.54.1"]
+
+# voice processor
+glm_voice_processor = [
+    "achatbot[llm_transformers_manual_voice_glm,bitsandbytes]",
+]
+moshi_voice_processor = ["moshi~=0.1.0"]
+
+
+#------------------------bot-------------------------
+
+# default daily_rtvi_bot
+# whisper_groq_asr asr engine
+# like openai llm
+# tts_edge tts engine
+daily_rtvi_bot = [
+    "achatbot[daily_transport,whisper_groq_asr,llm_processor,tts_edge]",
+]
+
+# default daily_langchain_rag_bot
+langchain_openai_tidb_vector = [
+    "achatbot[ai_langchain_framework_processor]",
+    "langchain-text-splitters~=0.3.2",
+    "langchain-openai~=0.2.6",
+    "langchain-community~=0.3.5",                 # langchain.community.embeddings use Jina embeddings
+    "tidb-vector~=0.0.10",                        # TIDB vss
+    "pymysql~=1.1.1",                             # mysql py client
+]
+daily_langchain_rag_bot = [
+    "achatbot[daily_transport,whisper_groq_asr,llm_processor,tts_edge,langchain_openai_tidb_vector]",
+]
+
+local_terminal_chat_bot = [
+    "tqdm>=4.66.0",
+    "achatbot[pyaudio_stream,speech_waker,speech_vad,speech_asr,core_llm,speech_tts,stream_player]",
+]
+
+daily_webrtc_terminal_chat_bot = [
+    "achatbot[daily_room_audio_stream,speech_waker,speech_vad,speech_asr,core_llm,speech_tts,stream_player]",
+]
+
+remote_queue_chat_bot_fe = ["achatbot[speech_audio_stream,queue,stream_player]"]
+
+remote_queue_chat_bot_be_worker = [
+    "achatbot[queue,speech_waker,speech_vad,speech_asr,core_llm,speech_tts]",
+]
+
+remote_rpc_chat_bot_fe = ["achatbot[speech_audio_stream,rpc]"]
+remote_rpc_chat_bot_be_worker = [
+    "achatbot[rpc,speech_waker,speech_vad,speech_asr,core_llm,speech_tts]",
+]
+
+remote_grpc_tts_client = ["achatbot[grpc,stream_player]"]
+remote_grpc_tts_server = ["achatbot[grpc,speech_tts]"]
+
+
+# --------------------test---------------------------
+test = ["sentence_transformers~=3.0.0", "pytest~=8.3.2", "pytest-mock~=3.14.0"]
+
+
+# if use library, need add achatbot dir in pypi_build/app dir, change import codes
+[tool.setuptools.packages.find]
+# !NOTE: packages find .py file, other file don't to exclude
+# All the following settings are optional:
+where = ["pypi_build/app"]
+#include = ["deps", "src", "tests"]
+exclude = []
+
+
+[tool.pytest.ini_options]
+pythonpath = ["tests"]
+#include = ["tests"]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
