@@ -1,0 +1,113 @@
+{% extends "app_layout_well.html" %}
+
+{% block head_extra %}
+<script type="text/javascript" src="/static/dygraph.js"></script>
+<link rel="stylesheet" type="text/css" src="/static/dygraph.css" />
+{% endblock %}
+
+{% block header_title %}
+{{ title }} - Combined (manual and logger) water levels
+{% endblock %}
+
+{% block title %}
+Combined (manual and logger) water levels - {{ title }}
+{% endblock %}
+
+{% block well_content %}
+
+
+    <p>Back to <a href="/app/well_summary?dh_no={{ well.dh_no }}&env={{ env }}">well summary</a></p>
+
+    <p>
+        <form>
+            <input type="hidden" name="dh_no" value="{{ well.dh_no }}" />
+            <label>Parameter:</label>
+            <input type="text" name="param" value="{{ param }}" /> (dtw, swl, or rswl)
+        <br>
+            <label>Start:</label>
+            <input type="date" name="start" value="{{ start }}" /> (clear field to use earliest measurement)
+        <br>
+            <label>Finish:</label>
+            <input type="date" name="finish" value="{{ finish }}" /> (clear field to use latest measurement)
+        <br>
+            <label>Frequency:</label>
+            <input type="text" name="freq" value="{{ freq }}" /> (e.g. 1H, 6H, 5d, 7d - interpolatation or downsampling will be done as needed)
+        <br>
+            <label>Keep grades:</label>
+            <input type="text" name="keep_grades" value="{{ keep_grades }}" /> (1 = telemetered, 10 = out of range, 15 = unusable, 20 = fair, 30 = good)
+        <br>
+            <label>max_gap_days</label>
+            <input type="number" name="max_gap_days" value="{{ max_gap_days }}" /> (split dataset on gaps greater than max_gap_days)
+        <br>
+            <label>SA Geodata environment:</label>
+            <input type="text" name="env" value="{{ env }}" /> (prod, test, dev)
+        <br>
+            <label>AQTS environment:</label>
+            <input type="text" name="aqts_env" value="{{ aqts_env }}" /> (prod, test, dev)
+        <br>
+            <button type="submit" formaction="/app/well_combined_water_level">
+                Reload
+            </button>
+        </form>
+    </p>
+
+    {% if param == "dtw" or param == "swl" %}<p><em>For DTW & SWL, the legend which appears when you move the mouse over the 
+        chart will have the sign reversed. E.g. the true SWL of "4.34" will appear as "-4.34". RSWL values always have the correct sign in the mouse-over legend.
+        The Y axis labels are always correct, for all parameters.
+    </em></p>{% endif %}
+    
+    <div id="chart-legend"></div><br />
+    <div id="chart" style="width: 1000px; height: 430px;"></div>
+    <br />
+
+    <h2>Combined dataset details & download links</h2>
+
+    <p>These downloads provide a combined dataset of manual measurements from
+    SA Geodata and logger measurements from Aquarius:</p>
+
+    <p><a href="{{ download_url }}">Download entire dataset as CSV</a></p>
+
+    {{ dsets_table|safe }}
+
+<script type="text/javascript">
+Dygraph.onDOMready(function onDOMready() {
+    g = new Dygraph(
+        document.getElementById("chart"),
+        [{{ chart_data|safe }}],
+        {
+            labels: ["x", {{ chart_columns_str|safe }}],
+            resizable: "both",
+            drawPoints: true,
+            legend: "always",
+            labelsDiv: "chart-legend",
+            connectSeparatedPoints: false,
+            ylabel: "{{ param|upper }}",
+            showRangeSelector: true,
+            series: {
+                "{{ param }}": {
+                    drawPoints: false,
+                    strokeWidth: 1
+                },
+                "{{ param}}-SAGD": {
+                    drawPoints: true,
+                    pointSize: 4
+                },
+                "{{ param }}-AQTS": {
+                    drawPoints: false,
+                    strokeWidth: 1.4
+                }
+            },
+            axes: {
+                y: {
+                    {% if param != "rswl" %}     
+                    axisLabelFormatter: function(v) {
+                        return Math.round(v * -1 * 100) / 100;                        
+                    }
+                } {% endif %}
+            }
+        } 
+    );
+});
+</script>
+
+{% endblock %}
