@@ -1,0 +1,1 @@
+from bamboo_weather.bamboo_weather import Weather
