@@ -1,0 +1,113 @@
+#! /usr/bin/env bash
+
+# Usage:
+#   pypi::publish
+# If debugging, you can run the steps individually:
+#   pypi::publish getversion
+#   pypi::publish published
+#   pypi::publish gittag
+#   pypi::publish publish
+
+# This script is used to publish a package to PyPi. Assumptions:
+#  * Your cwd is the root of the package you want to publish.
+#  * You're using setuptools_scm to manage your version number, under git tags.
+#  * build dir is dist
+#  * Uses pyproject.toml, with the version in __version__.py
+
+print_error() {
+  echo -e "\033[31m$1\033[0m"
+}
+
+print_success() {
+  echo -e "\033[32m$1\033[0m"
+}
+
+get_version() {
+  package_name=$1
+  version=$(python -c "import importlib.util; spec = importlib.util.spec_from_file_location('$package_name.__version__', '$package_name/__version__.py'); module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module); print(module.__version__)")
+}
+
+get_package_name() {
+  echo "$(python -c 'import toml; print(toml.load("pyproject.toml")["project"]["name"])')"
+}
+
+check_if_published() {
+  response=$(curl -s "https://pypi.org/pypi/$package_name/json")
+  if echo "$response" | grep -q "\"$version\""; then
+    print_error "Version $version is already published on PyPi."
+    exit 1
+  fi
+}
+
+create_and_push_git_tag() {
+  if git rev-parse "v$version" >/dev/null 2>&1; then
+    echo "Tag v$version already exists."
+  else
+    git tag "v$version"
+    print_success "Tag v$version created."
+  fi
+  git push origin "v$version" && print_success "Tag v$version pushed to origin."
+}
+
+open_url_in_browser() {
+  url=$1
+  if which xdg-open > /dev/null; then
+    xdg-open "$url"
+  elif which open > /dev/null; then
+    open "$url"
+  else
+    print_error "Could not detect the web browser to open the URL."
+  fi
+}
+
+build_and_publish() {
+  rm -rf dist
+  python -m build && print_success "Package built successfully." || exit 1
+  output=$(twine upload dist/* 2>&1)
+  if [ $? -ne 0 ]; then
+    print_error "Failed to upload package to PyPi."
+    echo "$output"
+    exit 1
+  fi
+  print_success "Package published successfully."
+  url=$(echo "$output" | grep -o 'https://pypi.org/project/[^ ]*' | sed 's/[^ ]*$/&/')
+  echo "Package URL: $url"
+}
+
+confirm(){
+  echo "Building: $package_name: $version"
+  echo
+  read -p "Do you want to continue? [y/N] " -n 1 -r
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo
+    echo "Aborted."
+    exit 1
+  fi
+}
+# no arguments, do everything.
+# if you want to do only one step, pass the argument , helpful for debugging.
+if [ "$1" = "" ]; then
+  package_name=$(get_package_name)
+  get_version "$package_name"
+  confirm
+  echo
+  check_if_published
+  create_and_push_git_tag
+  build_and_publish
+  open_url_in_browser "$url"
+elif [ "$1" = "getversion" ]; then
+  get_version
+elif [ "$1" = "published" ]; then
+  check_if_published
+elif [ "$1" = "gittag" ]; then
+  create_and_push_git_tag
+elif [ "$1" = "publish" ]; then
+  build_and_publish
+  if [ "$url" != "" ]; then
+    open_url_in_browser "$url"
+  fi
+else
+  echo "Usage: $0 [getversion|published|gittag|publish]"
+  exit 1
+fi
+
