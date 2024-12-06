@@ -1,0 +1,32 @@
+import os
+import sys
+from vstcompile import make_setup, load_requirements
+
+# allow setup.py to be run from any path
+os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+
+ext_list = [
+    # Modules that should be compiled to C extentions
+    # Allowed '*.py', '*.pyx' and '*.c' files.
+    # Path should formatted as import path. Example:
+    # '{{project_name}}.settings'
+]
+
+requirements_txt = load_requirements('requirements.txt')
+
+kwargs = dict(
+    packages=find_packages(exclude=['tests']+ext_list),
+    ext_modules_list=ext_list,
+    install_requires=requirements_txt,
+    extras_require={
+        "test": [
+            r.replace('prod', 'prod,test')
+            for r in requirements_txt
+            if r.startswith('vstutils')
+        ] + load_requirements('requirements-test.txt'),
+    },
+    dependency_links=[
+    ],
+)
+
+make_setup(**kwargs)
