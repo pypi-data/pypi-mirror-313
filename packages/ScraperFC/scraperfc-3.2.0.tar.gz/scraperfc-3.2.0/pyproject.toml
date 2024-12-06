@@ -1,0 +1,146 @@
+[project]
+# -- Metadata --------------------------------------------------------------------------------------
+name = "ScraperFC"
+version = "3.2.0"
+description = "Package for scraping soccer data from a variety of sources."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">= 3.9"
+keywords = [
+    "webscraping", "scraping", "soccer", "football", "soccer data", "football data", 
+    "English Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1", "Champions League",
+    "World Cup"
+]
+authors = [
+    {email = "osmour043@gmail.com"},
+    {name = "Owen Seymour"}
+]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "botasaurus", "bs4", "cloudscraper", "datetime", "lxml", "numpy", "pandas", "requests",
+    "selenium", "tqdm"
+]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov", "pytest-instafail"]
+docs = ["sphinx", "furo", "myst-nb"]
+build = ["build", "setuptools", "wheel"]
+publish = ["publish",]
+typecheck = [
+    "mypy", "pandas-stubs", "types-beautifulsoup4", "types-openpyxl", "types-python-dateutil", 
+    "types-requests", "types-tqdm"
+]
+
+[project.urls]
+repository = "https://github.com/oseymour/ScraperFC/"
+documentation = "https://scraperfc.readthedocs.io/en/latest/"
+
+# -- Build system ----------------------------------------------------------------------------------
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# -- Pytest and pytest coverage --------------------------------------------------------------------
+[tool.pytest]
+norecursedirs = ["docs", "*.egg-info", ".git", ".tox"]
+
+[tool.coverage.run]
+branch = true
+omit = ["*oddsportal.py"]
+
+[tool.coverage.report]
+show_missing = true
+
+# -- Linting ---------------------------------------------------------------------------------------
+[tool.ruff]
+exclude = ["*dev_testing.ipynb", "*second_tester_notebook.ipynb"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+# -- Typechecking ----------------------------------------------------------------------------------
+[tool.mypy]
+ignore_missing_imports = true
+disallow_untyped_defs = true
+
+# -- Tox environments ------------------------------------------------------------------------------
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    isolated_build = true
+    envlist = py39, py310, py311, py312
+
+    [testenv]
+    extras = test
+    commands = 
+        python -m pip list
+        pytest ./test/ --cov=ScraperFC --durations=20 -s
+
+    [testenv:test-capology]
+    extras = test
+    commands = 
+        pip list
+        pytest ./test/test_capology.py -s --cov ScraperFC
+
+    [testenv:test-clubelo]
+    extras = test
+    commands = 
+        pip list
+        pytest ./test/test_clubelo.py -s --cov ScraperFC
+
+    [testenv:test-fbref]
+    extras = test
+    commands = 
+        pip list
+        pytest ./test/test_fbref.py -s --cov ScraperFC
+
+    [testenv:test-sofascore]
+    extras = test
+    commands = 
+        pip list
+        pytest ./test/test_sofascore.py -s --cov ScraperFC
+
+    [testenv:test-transfermarkt]
+    extras = test
+    commands = 
+        pip list
+        pytest ./test/test_transfermarkt.py -s --cov ScraperFC
+
+    [testenv:test-understat]
+    extras = test
+    commands = 
+        pip list
+        pytest ./test/test_understat.py -s --cov ScraperFC
+
+    [testenv:test-parallel]
+    extras = test
+    deps = pytest-xdist
+    commands = 
+        pip list
+        pytest ./test/ --cov=ScraperFC --durations=20 -s -n 6 --dist=loadscope
+
+    [testenv:docs]
+    extras = docs
+    commands = sphinx-build -nWEa --keep-going -b html ./docs/source/ ./docs/build/
+
+    [testenv:build]
+    skip_install = true
+    deps = build
+    commands = python -m build
+
+    [testenv:lint]
+    skip_install = true
+    deps = ruff
+    commands = ruff check --show-files
+
+    [testenv:typecheck]
+    extras = typecheck
+    commands = python -m mypy ./src/
+"""
