@@ -1,0 +1,106 @@
+Metadata-Version: 2.1
+Name: Credito-SQLViaCode
+Version: 0.2.0
+Summary: A Python package to execute SQL queries and procedures and manage backups.
+Author: Afik Ratzon
+Author-email: afik.ratzon@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: backports.tarfile ==1.2.0
+Requires-Dist: certifi ==2024.8.30
+Requires-Dist: charset-normalizer ==3.4.0
+Requires-Dist: docutils ==0.21.2
+Requires-Dist: greenlet ==3.1.1
+Requires-Dist: idna ==3.10
+Requires-Dist: importlib-metadata ==8.5.0
+Requires-Dist: jaraco.classes ==3.4.0
+Requires-Dist: jaraco.context ==6.0.1
+Requires-Dist: jaraco.functools ==4.1.0
+Requires-Dist: keyring ==25.5.0
+Requires-Dist: markdown-it-py ==3.0.0
+Requires-Dist: mdurl ==0.1.2
+Requires-Dist: more-itertools ==10.5.0
+Requires-Dist: nh3 ==0.2.19
+Requires-Dist: numpy ==2.1.3
+Requires-Dist: packaging ==24.2
+Requires-Dist: pandas ==2.2.3
+Requires-Dist: pkginfo ==1.11.2
+Requires-Dist: Pygments ==2.18.0
+Requires-Dist: pyodbc ==5.2.0
+Requires-Dist: python-dateutil ==2.9.0.post0
+Requires-Dist: python-dotenv ==1.0.1
+Requires-Dist: pytz ==2024.2
+Requires-Dist: pywin32-ctypes ==0.2.3
+Requires-Dist: readme-renderer ==44.0
+Requires-Dist: requests ==2.32.3
+Requires-Dist: requests-toolbelt ==1.0.0
+Requires-Dist: rfc3986 ==2.0.0
+Requires-Dist: rich ==13.9.4
+Requires-Dist: six ==1.16.0
+Requires-Dist: SQLAlchemy ==2.0.36
+Requires-Dist: tabulate ==0.9.0
+Requires-Dist: twine ==6.0.1
+Requires-Dist: typing-extensions ==4.12.2
+Requires-Dist: tzdata ==2024.2
+Requires-Dist: urllib3 ==2.2.3
+Requires-Dist: zipp ==3.21.0
+
+### Database Query and Backup Script - Summary
+
+This script provides the `get_query_from_db` and `exec_procedure_from_db` functions, designed to interact with a SQL Server database. It supports executing queries or stored procedures, and optionally creating backups of tables.
+
+#### Function Usage
+
+- **`get_query_from_db(query, table_to_backup, env_file_name=None, params=None)`**:
+  - Executes a SQL query on the database.
+  - Parameters:
+    - `query`: A SQL query string to execute on the database.
+    - `table_to_backup`: The name of a table to back up. Set this to `None` if no backup is needed.
+    - `env_file_name` (optional): The path to the `.env` file containing database credentials. Defaults to `.env`.
+    - `params` (optional): A dictionary of parameters to bind to the query.
+  - Returns:
+    - A pandas DataFrame with the query results.
+
+- **`exec_procedure_from_db(procedure_name, table_to_backup, env_file_name=None, params=None)`**:
+  - Executes a stored procedure on the database.
+  - Parameters:
+    - `procedure_name`: The name of the stored procedure to execute.
+    - `table_to_backup`: The name of a table to back up. Set this to `None` if no backup is needed.
+    - `env_file_name` (optional): The path to the `.env` file containing database credentials. Defaults to `.env`.
+    - `params` (optional): A dictionary of parameters to bind to the procedure.
+  - Returns:
+    - A pandas DataFrame with the procedure's output.
+
+#### Setup Instructions
+
+1. **Environment Variables**:
+   - The script requires a `.env` file to load database credentials and connection details.
+   - Required variables:
+     ```plaintext
+     USER=
+     PASSWORD=
+     HOST=
+     NAME=
+     DRIVER=ODBC+Driver+17+for+SQL+Server
+     ```
+     Fill in the variables with your database details. Leave `DRIVER` unchanged unless you are using a different driver.
+
+#### Installation
+
+Install the package directly from PyPI:
+
+```bash
+pip install Credito_SQLViaCode
+
+#### Examples:
+
+- **Execute a Query**:
+   ```python
+   from SQLViaCode import get_query_from_db
+
+   query = "SELECT * FROM your_table"
+   result_df = get_query_from_db(query, "your_table_to_backup")
+   print(result_df)
