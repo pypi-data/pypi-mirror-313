@@ -1,0 +1,75 @@
+[tool.poetry]
+name = "easydel"
+version = "0.0.80"
+description = "An open-source library to make training faster and more optimized in JAX"
+authors = ["Erfan Zare Chavoshi <Erfanzare810@gmail.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/erfanzar/EasyDeL"
+repository = "https://github.com/erfanzar/EasyDeL"
+documentation = "https://erfanzar.github.io/EasyDeL"
+keywords = ["JAX", "CUDA", "Deep Learning", "Machine Learning", "XLA"]
+classifiers = [
+	"Development Status :: 3 - Alpha",
+	"Intended Audience :: Developers",
+	"Topic :: Scientific/Engineering :: Artificial Intelligence",
+	"License :: OSI Approved :: Apache Software License",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+jax = ">=0.4.34"
+jaxlib = ">=0.4.34"
+fjformer = "0.0.91"
+uvicorn = "^0.32.0"
+transformers = ">=4.46.0"
+optax = "^0.2.2"
+msgpack = "^1.0.7"
+ipython = "^8.17.2"
+tqdm = "^4.64.1"
+datasets = "^2.19.2"
+tensorboard = "^2.18.0"
+tensorflow-cpu = "^2.18.0"
+tensorflow-datasets = "^4.9.6"
+scipy = "1.13.1"
+websocket-client = "^1.8.0"
+websockets = "^11.0.3"
+fastapi = "^0.115.2"
+prometheus_client = "^0.21.0"
+wandb = "^0.18.5"
+uvloop = "^0.21.0"
+
+[tool.poetry.group.torch.dependencies]
+torch = "*"
+torchvision = "*"
+torchaudio = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "B"]
+ignore = ["E501", "B905", "B007"]
+unfixable = ["B"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]
+"**/{tests,docs,tools}/*" = ["E402"]
+"tests/*" = ["E402", "E731"]
+"benchmarks/*" = ["E402", "E731"]
+"triton_*" = ["E741", "ISC001", "E501", "E731"]
+"pallas_*" = ["E741", "ISC001", "E501", "E731"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "tab"
+docstring-code-format = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+indent-width = 2
