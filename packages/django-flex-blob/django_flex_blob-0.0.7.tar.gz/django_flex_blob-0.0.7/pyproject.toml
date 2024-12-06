@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django_flex_blob"
+dynamic = ["version"]
+description = "A django app dedicated for managing media files and access to them"
+readme = "README.rst"
+authors = [
+  {name = "Saman Zand Haghighi", email = "samanzandh@gmail.com"},
+  {name = "Ali Avani", email = "ali.avani@outlook.com"}
+]
+maintainers = [
+  {name = "Saman Zand Haghighi", email = "samanzandh@gmail.com"},
+  {name = "Ali Avani", email = "ali.avani@outlook.com"}
+]
+classifiers = [
+
+]
+license = {text = "MIT license"}
+dependencies = [
+
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",  # testing
+    "mypy",  # linting
+    "pytest",  # testing
+    "ruff"  # linting
+]
+
+[project.urls]
+
+bugs = "https://github.com/ali-avani/django_flex_blob/issues"
+changelog = "https://github.com/ali-avani/django_flex_blob/blob/master/changelog.md"
+homepage = "https://github.com/ali-avani/django_flex_blob"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+"*" = ["*.*"]
+
+
+[tool.setuptools.dynamic]
+version = {attr = "flex_blob.__version__"}
+
+# Mypy
+# ----
+
+[tool.mypy]
+files = "."
+
+# Use strict defaults
+strict = true
+warn_unreachable = true
+warn_no_return = true
+
+[[tool.mypy.overrides]]
+# Don't require test functions to include types
+module = "tests.*"
+allow_untyped_defs = true
+disable_error_code = "attr-defined"
+
