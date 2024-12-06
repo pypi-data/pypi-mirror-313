@@ -1,0 +1,113 @@
+Metadata-Version: 2.1
+Name: kadi-apy
+Version: 0.45.0
+Summary: API wrapper library for Kadi4Mat
+Author: Karlsruhe Institute of Technology
+License: Apache-2.0
+Project-URL: Documentation, https://kadi-apy.readthedocs.io/en/stable
+Project-URL: Source, https://gitlab.com/iam-cms/kadi-apy
+Project-URL: Changelog, https://gitlab.com/iam-cms/kadi-apy/-/blob/master/HISTORY.md
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Requires-Python: <3.14,>=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: click<9.0.0,>=8.0.0
+Requires-Dist: jsonref<2.0.0,>=1.1.0
+Requires-Dist: python-dateutil<3.0.0,>=2.8.2
+Requires-Dist: rdflib<8.0.0,>=7.0.0
+Requires-Dist: requests<3.0.0,>=2.32.3
+Requires-Dist: xmlhelpy<0.15.0,>=0.14.0
+Provides-Extra: dev
+Requires-Dist: autoflake==2.3.1; extra == "dev"
+Requires-Dist: black==24.10.0; extra == "dev"
+Requires-Dist: build==1.2.2.post1; extra == "dev"
+Requires-Dist: isort==5.13.2; extra == "dev"
+Requires-Dist: myst-parser==3.0.1; extra == "dev"
+Requires-Dist: pre-commit==4.0.1; extra == "dev"
+Requires-Dist: pylint==3.3.2; extra == "dev"
+Requires-Dist: Sphinx==7.4.7; extra == "dev"
+Requires-Dist: sphinx-click==6.0.0; extra == "dev"
+Requires-Dist: sphinx-rtd-theme==3.0.2; extra == "dev"
+Requires-Dist: twine==6.0.1; extra == "dev"
+
+# Kadi-APY
+
+**Kadi-APY** is a library for use in tandem with
+[Kadi4Mat](https://gitlab.com/iam-cms/kadi "Kadi4Mat"). The REST-like API of
+Kadi4Mat makes it possible to programmatically interact with most of the
+resources that can be used through the web interface by sending suitable HTTP
+requests to the different endpoints the API provides.
+
+The goal of this library is to make the use of this API as easy as possible. It
+offers both an object oriented approach to work with the API in Python as well
+as a command line interface (CLI). The library is written in Python 3 and works
+under both Linux and Windows.
+
+## Quickstart
+
+### Installation
+
+The library can be installed using pip:
+
+`pip3 install kadi-apy`
+
+Note that Python version **>=3.9** is required to install the latest version.
+
+### Configuration
+
+To connect to an existing Kadi4Mat instance, some further configuration is
+required, which can be initialized by running:
+
+`kadi-apy config create`
+
+### Simple Python example
+
+Retrieve an existing record by its ID and upload a file to it:
+
+```python
+from kadi_apy import KadiManager
+
+manager = KadiManager()
+
+record = manager.record(id=1)
+record.upload_file("/path/to/file.txt")
+```
+
+### Simple CLI example
+
+Do the same as in the example above:
+
+```shell
+kadi-apy records add-files -r 1 -n /path/to/file.txt
+```
+
+## Issues
+
+For any issues regarding kadi-apy (bugs, suggestions, discussions, etc.) please
+use the [issue tracker](https://gitlab.com/iam-cms/kadi-apy/-/issues) of this
+project. Before creating an issue, please make sure that no similar issue is
+already open and that you are using the latest
+[release](https://pypi.org/project/kadi-apy/) or the current version of the
+`master` branch. Note that creating a new issue requires a GitLab account.
+
+For **bugs** in particular, please use the provided `Bug` template when
+creating an issue, which also adds the `Bug` label to the issue automatically.
+
+## Contributions
+
+Contributions to the code are always welcome. In order to merge any
+contributions back into the main repository, please open a corresponding [merge
+request](https://gitlab.com/iam-cms/kadi-apy/-/merge_requests). For
+instructions on how to set up a development environment, please see the
+[documentation](https://kadi-apy.readthedocs.io/en/latest).
+
+## Further links
+
+* Source code: https://gitlab.com/iam-cms/kadi-apy
+* Releases: https://pypi.org/project/kadi-apy/
+* Documentation:
+  * Latest release: https://kadi-apy.readthedocs.io/en/stable/
+  * Current state: https://kadi-apy.readthedocs.io/en/latest/
