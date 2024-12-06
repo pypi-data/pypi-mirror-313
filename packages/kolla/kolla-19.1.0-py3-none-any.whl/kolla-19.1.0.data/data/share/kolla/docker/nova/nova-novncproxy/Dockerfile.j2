@@ -1,0 +1,19 @@
+FROM {{ namespace }}/{{ image_prefix }}nova-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block nova_novncproxy_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% set nova_novncproxy_packages = [
+    'novnc'
+] %}
+
+{{ macros.install_packages(nova_novncproxy_packages | customizable("packages")) }}
+
+{% block nova_novncproxy_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER nova

@@ -1,0 +1,20 @@
+FROM {{ namespace }}/{{ image_prefix }}prometheus-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block prometheus_v2_server_header %}{% endblock %}
+
+{% block prometheus_v2_server_install %}
+ADD prometheus-v2-server-archive /prometheus-server-source
+
+RUN ln -s /prometheus-server-source/* prometheus-server \
+    && mkdir -p /opt/prometheus \
+    && cp -r /prometheus-server/* /opt/prometheus/ \
+    && mkdir -p /etc/prometheus /data
+{% endblock %}
+
+{% block prometheus_v2_server_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER prometheus

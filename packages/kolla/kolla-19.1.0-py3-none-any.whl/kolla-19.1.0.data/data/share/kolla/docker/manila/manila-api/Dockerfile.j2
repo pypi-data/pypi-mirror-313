@@ -1,0 +1,24 @@
+FROM {{ namespace }}/{{ image_prefix }}manila-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block manila_api_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% set manila_api_packages = [
+] %}
+{{ macros.install_packages(manila_api_packages | customizable("packages")) }}
+
+COPY extend_start.sh /usr/local/bin/kolla_manila_extend_start
+
+RUN mkdir -p /var/www/cgi-bin/manila \
+    && cp -a /var/lib/kolla/venv/bin/manila-wsgi /var/www/cgi-bin/manila/manila-wsgi \
+    && chmod 644 /usr/local/bin/kolla_manila_extend_start \
+    && chmod 755 /var/www/cgi-bin/manila/manila-wsgi
+
+{% block manila_api_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER manila

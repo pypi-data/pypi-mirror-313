@@ -1,0 +1,19 @@
+FROM {{ namespace }}/{{ image_prefix }}prometheus-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block prometheus_elasticsearch_exporter_header %}{% endblock %}
+
+{% block prometheus_elasticsearch_exporter_install %}
+ADD prometheus-elasticsearch-exporter-archive /prometheus-elasticsearch-exporter-source
+
+RUN ln -s /prometheus-elasticsearch-exporter-source/* prometheus-elasticsearch-exporter \
+    && mkdir -p /opt/elasticsearch_exporter \
+    && cp /prometheus-elasticsearch-exporter/elasticsearch_exporter /opt/elasticsearch_exporter/
+{% endblock %}
+
+{% block prometheus_elasticsearch_exporter_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER prometheus

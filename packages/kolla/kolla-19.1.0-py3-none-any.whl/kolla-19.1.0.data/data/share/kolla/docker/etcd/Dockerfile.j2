@@ -1,0 +1,29 @@
+FROM {{ namespace }}/{{ image_prefix }}base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block etcd_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.configure_user(name='etcd') }}
+
+{% block etcd_install %}
+ADD etcd-archive /etcd-source
+
+RUN ln -s etcd-source/* etcd \
+    && cp /etcd/etcd /etcd/etcdctl /usr/bin
+{% endblock %}
+
+COPY etcd_sudoers /etc/sudoers.d/kolla_etcd_sudoers
+COPY extend_start.sh /usr/local/bin/kolla_extend_start
+
+RUN chmod 644 /usr/local/bin/kolla_extend_start \
+    && chmod 750 /etc/sudoers.d \
+    && chmod 440 /etc/sudoers.d/kolla_etcd_sudoers
+
+{% block etcd_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER etcd
