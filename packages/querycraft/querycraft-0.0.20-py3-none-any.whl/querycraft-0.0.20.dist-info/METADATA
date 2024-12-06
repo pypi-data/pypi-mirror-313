@@ -1,0 +1,155 @@
+Metadata-Version: 2.1
+Name: querycraft
+Version: 0.0.20
+Summary: Provide usefully SQL classes and functions to execute SQL queries step by step
+Home-page: https://gitlab.univ-nantes.fr/ls2n-didactique/querycraft
+Author: Emmanuel Desmontils
+Author-email: emmanuel.desmontils@univ-nantes.fr
+Maintainer: Emmanuel Desmontils
+Maintainer-email:  emmanuel.desmontils@univ-nantes.fr
+License: GPL V3
+Keywords: SQL Step-By-Step Query Database
+Platform: ALL
+Classifier: Topic :: Education
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: requests>=2.24.0
+Requires-Dist: argparse>=1.4.0
+Requires-Dist: polars>=0.20.31
+Requires-Dist: tincan>=1.0.0
+Requires-Dist: psycopg2>=2.9.9
+Requires-Dist: sqlglot>=25.6.1
+Requires-Dist: mysql-connector-python>=9.0.0
+
+# QueryCraft
+
+## Le nom ?
+
+Un nom en anglais qui évoque l'idée de "façonner" ou "construire" des requêtes SQL de manière intuitive, parfait pour une approche pédagogique. (GPT 4o ;-) )
+
+## Installation 
+
+```shell
+git clone https://gitlab.univ-nantes.fr/ls2n-didactique/querycraft.git
+cd querycraft
+```
+
+ou
+
+```shell
+pip install querycraft
+```
+
+## Usage
+
+Application qui permet de décomposer l'exécution d'une requête SQL sur une base de données PostgreSQL.
+
+```
+usage: pgsql-sbs [-h] [-d DB] [-u USER] [-p PASSWORD] [--host HOST] [--port PORT] [--debug] [-v] [-f FILE | -s SQL]
+
+options:
+  -h, --help            show this help message and exit
+  -d DB, --db DB        database name
+  -u USER, --user USER  database user
+  -p PASSWORD, --password PASSWORD
+                        database password
+  --host HOST           database host
+  --port PORT           database port
+  --debug               debug mode
+  -v, --verbose         verbose mode
+  -f FILE, --file FILE  sql file
+  -s SQL, --sql SQL     sql string
+```
+
+Par exemple :
+```
+pgsql-sbs -s 'select * from etudiants join notes using(noetu);'   
+
+==================================================================================================
+select * FROM  #etudiants#  JOIN notes USING (noetu) ;
+┌─────────────────┬───────────────┬──────────────────┐
+│ etudiants.noetu ┆ etudiants.nom ┆ etudiants.prenom │
+╞═════════════════╪═══════════════╪══════════════════╡
+│ 28936E          ┆ Dupont        ┆ Franck           │
+│ 46283B          ┆ Dupont        ┆ Isabelle         │
+│ 86719E          ┆ Martin        ┆ Adrien           │
+│ 99628C          ┆ Robert        ┆ Adrien           │
+│ 99321C          ┆ Denou         ┆ Michelle         │
+│ 99322C          ┆ Dupont        ┆ Isabelle         │
+└─────────────────┴───────────────┴──────────────────┘
+
+==================================================================================================
+select * FROM etudiants JOIN  #notes#  USING (noetu) ;
+┌─────────────┬───────────────┬──────────────┬──────────────┐
+│ notes.noetu ┆ notes.codemat ┆ notes.noteex ┆ notes.notecc │
+╞═════════════╪═══════════════╪══════════════╪══════════════╡
+│ 99628C      ┆ MIAS2I5       ┆ 12.0         ┆ 15.5         │
+│ 46283B      ┆ MIAS2I5       ┆ 9.5          ┆ 2.0          │
+│ 86719E      ┆ IUP2MA        ┆ 12.0         ┆ 5.5          │
+│ 99321C      ┆ LIL6          ┆ 18.0         ┆ 16.5         │
+│ 28936E      ┆ MIAS2I5       ┆ 13.5         ┆ 13.5         │
+│ 86719E      ┆ IUP2IS        ┆ 8.5          ┆ 10.0         │
+│ 99321C      ┆ LIL5          ┆ 15.0         ┆ 14.5         │
+│ 99322C      ┆ MIAS2I5       ┆ 12.0         ┆ 15.5         │
+│ 46283B      ┆ MIAS2I6       ┆ 8.0          ┆ 12.0         │
+│ 99628C      ┆ MIAS2I6       ┆ 3.0          ┆ 7.0          │
+│ 28936E      ┆ MIAS2I6       ┆ 12.0         ┆ null         │
+└─────────────┴───────────────┴──────────────┴──────────────┘
+
+==================================================================================================
+select * FROM  #etudiants JOIN notes USING (noetu)#  ;
+┌─────────────────┬───────────────┬──────────────────┬───────────────┬──────────────┬──────────────┐
+│ etudiants.noetu ┆ etudiants.nom ┆ etudiants.prenom ┆ notes.codemat ┆ notes.noteex ┆ notes.notecc │
+╞═════════════════╪═══════════════╪══════════════════╪═══════════════╪══════════════╪══════════════╡
+│ 99628C          ┆ Robert        ┆ Adrien           ┆ MIAS2I5       ┆ 12.0         ┆ 15.5         │
+│ 46283B          ┆ Dupont        ┆ Isabelle         ┆ MIAS2I5       ┆ 9.5          ┆ 2.0          │
+│ 86719E          ┆ Martin        ┆ Adrien           ┆ IUP2MA        ┆ 12.0         ┆ 5.5          │
+│ 99321C          ┆ Denou         ┆ Michelle         ┆ LIL6          ┆ 18.0         ┆ 16.5         │
+│ 28936E          ┆ Dupont        ┆ Franck           ┆ MIAS2I5       ┆ 13.5         ┆ 13.5         │
+│ 86719E          ┆ Martin        ┆ Adrien           ┆ IUP2IS        ┆ 8.5          ┆ 10.0         │
+│ 99321C          ┆ Denou         ┆ Michelle         ┆ LIL5          ┆ 15.0         ┆ 14.5         │
+│ 99322C          ┆ Dupont        ┆ Isabelle         ┆ MIAS2I5       ┆ 12.0         ┆ 15.5         │
+│ 46283B          ┆ Dupont        ┆ Isabelle         ┆ MIAS2I6       ┆ 8.0          ┆ 12.0         │
+│ 99628C          ┆ Robert        ┆ Adrien           ┆ MIAS2I6       ┆ 3.0          ┆ 7.0          │
+│ 28936E          ┆ Dupont        ┆ Franck           ┆ MIAS2I6       ┆ 12.0         ┆ null         │
+└─────────────────┴───────────────┴──────────────────┴───────────────┴──────────────┴──────────────┘
+
+==================================================================================================
+select  #* FROM etudiants JOIN notes USING (noetu)#  ;
+┌─────────────────┬───────────────┬──────────────────┬───────────────┬──────────────┬──────────────┐
+│ etudiants.noetu ┆ etudiants.nom ┆ etudiants.prenom ┆ notes.codemat ┆ notes.noteex ┆ notes.notecc │
+╞═════════════════╪═══════════════╪══════════════════╪═══════════════╪══════════════╪══════════════╡
+│ 99628C          ┆ Robert        ┆ Adrien           ┆ MIAS2I5       ┆ 12.0         ┆ 15.5         │
+│ 46283B          ┆ Dupont        ┆ Isabelle         ┆ MIAS2I5       ┆ 9.5          ┆ 2.0          │
+│ 86719E          ┆ Martin        ┆ Adrien           ┆ IUP2MA        ┆ 12.0         ┆ 5.5          │
+│ 99321C          ┆ Denou         ┆ Michelle         ┆ LIL6          ┆ 18.0         ┆ 16.5         │
+│ 28936E          ┆ Dupont        ┆ Franck           ┆ MIAS2I5       ┆ 13.5         ┆ 13.5         │
+│ 86719E          ┆ Martin        ┆ Adrien           ┆ IUP2IS        ┆ 8.5          ┆ 10.0         │
+│ 99321C          ┆ Denou         ┆ Michelle         ┆ LIL5          ┆ 15.0         ┆ 14.5         │
+│ 99322C          ┆ Dupont        ┆ Isabelle         ┆ MIAS2I5       ┆ 12.0         ┆ 15.5         │
+│ 46283B          ┆ Dupont        ┆ Isabelle         ┆ MIAS2I6       ┆ 8.0          ┆ 12.0         │
+│ 99628C          ┆ Robert        ┆ Adrien           ┆ MIAS2I6       ┆ 3.0          ┆ 7.0          │
+│ 28936E          ┆ Dupont        ┆ Franck           ┆ MIAS2I6       ┆ 12.0         ┆ null         │
+└─────────────────┴───────────────┴──────────────────┴───────────────┴──────────────┴──────────────┘
+```
+
+## Article de recherche
+
+- Emmanuel Desmontils, Laura Monceaux. **Enseigner SQL en NSI**. Atelier « Apprendre la Pensée Informatique de la Maternelle à l'Université », dans le cadre de la conférence Environnements Informatiques pour l'Apprentissage Humain (EIAH), Jun 2023, Brest, France. pp.17-24. https://hal.science/hal-04144210 
+ https://apimu.gitlabpages.inria.fr/site/ateliers/pdf-apimu23/APIMUEIAH_2023_paper_3.pdf
+
+
+## Génération de la documentation
+
+```shell
+pdoc3 --html --force -o doc querycraft
+```
+
+## Licence
+
+(C) E. Desmontils, 2024
+
+Ce logiciel est distribué sous licence GPLv3.
+
+
+
