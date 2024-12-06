@@ -1,0 +1,3 @@
+from .gigachat_entrypoint import GigaChatEntryPoint
+from .gigachat_max_entrypoint import GigaMaxEntryPoint
+from .gigachat_plus_entrypoint import GigaPlusEntryPoint
