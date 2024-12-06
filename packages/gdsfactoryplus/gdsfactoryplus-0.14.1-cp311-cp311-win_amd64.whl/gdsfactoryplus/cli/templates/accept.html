@@ -1,0 +1,25 @@
+<span
+  class="fa child"
+  id="accept"
+  style="
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    font-style: normal;
+    position: relative;
+    top: 1px;
+  "
+  hx-get="/yaml/accept"
+  hx-vals='js:{
+  "path": "{{ path }}",
+  "name": "{{ name }}",
+  "what": "{{ what }}",
+  "key": function () { let el = document.getElementById("edit_key"); return el.value || el.placeholder || el.innerHTML; }(),
+  "value": function () { let el = document.getElementById("edit_val"); if (el) { return el.value || el.placeholder || el.innerHTML; } else { let el = document.getElementById("edit_key"); let k = el.value || el.placeholder || el.innerHTML; let el2 = document.getElementById(`edit_val-${k}`); return el2?el2.value || el2.placeholder || el2.innerHTML:null; } }(),
+  "prev_key": "{{ key }}"
+  }'
+  hx-trigger="click"
+  hx-target="#{{ id }}"
+  hx-swap="outerHTML"
+  ></span
+>
