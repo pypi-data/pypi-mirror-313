@@ -1,0 +1,64 @@
+name: Runs the tests for library modules
+run-name: Executed by ${{ github.actor }}
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  modules-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Install Avocado to run tests
+        run: pip3 install 'avocado-framework<104.0'
+
+      - name: Run the ar module test
+        run: ./tests/test_module.py metadata/archive/ar.yml
+
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install Avocado to allow for lint check on Python code under tests directory
+        run: pip3 install 'avocado-framework<104.0'
+
+      - name: Include autils directory from source tree into Python's PATH
+        run: |
+          pip install --upgrade pip
+          pip3 install .
+
+      - name: run static checks
+        uses: avocado-framework/avocado-ci-tools@main
+        with:
+          avocado-static-checks: true
+
+
+  api-stability-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Autils code from PR
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Fetch main branch
+        run: git fetch origin main
+
+      - name: Check for changes in tests directory
+        id: test_changes
+        run: |
+          git diff --quiet origin/main -- tests/
+        continue-on-error: true
+
+      - name: Install Avocado to run tests
+        if: steps.test_changes.outcome == 'failure'
+        run: pip3 install 'avocado-framework<104.0'
+
+      - name: Run API stability tests
+        if: steps.test_changes.outcome == 'failure'
+        run: ./tests/test_module.py metadata/archive/ar.yml
+

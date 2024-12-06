@@ -1,0 +1,82 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version type'
+        type: choice
+        options:
+        - major
+        - minor
+        default: 'major'
+  workflow_call:
+
+jobs:
+
+  release:
+    name: Release pipeline
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:34
+    env:
+      VERSION: ${{ github.event.inputs.version }}
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c
+        with:
+          app_id: ${{ secrets.MR_AVOCADO_ID }}
+          installation_id: ${{ secrets.MR_AVOCADO_INSTALLATION_ID }}
+          private_key: ${{ secrets.MR_AVOCADO_PRIVATE_KEY }}
+      - name: install required packages
+        run:  dnf -y install git python3-pip
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Commit files and tag
+        run: |
+          git config --global --add safe.directory "*"
+          git config --global user.name mr-avocado
+          git config --global user.email "username@users.noreply.github.com"
+          if [[ ${{ env.VERSION }} = "major" ]]; then
+            version=$(git tag --sort=version:refname | tail -n 1 | awk -F. '{$1++; $2=0; print $1"."$2}')
+          else
+            version=$(git tag --sort=version:refname | tail -n 1 | awk -F. '{$1; $2++; print $1"."$2}')
+          fi
+          git tag "$version" -m "Release $version"
+      - name: Push changes to github
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ steps.generate_token.outputs.token }}
+          branch: ${{ github.ref }}
+      - name: Build wheel
+        run: |
+          python3 -m pip install build
+          mkdir PYPI_UPLOAD
+          python3 -m build -o PYPI_UPLOAD
+      - name: Save wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: ${{github.workspace}}/PYPI_UPLOAD/
+          retention-days: 3
+
+  publish-to-pypi:
+    name: Publish Avocado to PyPI
+    needs:
+    - release
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/autils
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+    steps:
+    - name: Download all the wheels
+      uses: actions/download-artifact@v4
+      with:
+        name: wheel
+        path: dist/
+    - name: Publish avocado to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

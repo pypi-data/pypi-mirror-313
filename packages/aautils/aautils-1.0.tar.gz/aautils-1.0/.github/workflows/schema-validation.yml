@@ -1,0 +1,15 @@
+name: YAML file schema validation
+run-name: Executed by ${{ github.actor }}
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  schema-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Validating all libraries against our schema
+        run: python3 tests/validate_schema.py

@@ -1,0 +1,58 @@
+name: Pre-Release
+on:
+  workflow_dispatch:
+  workflow_call:
+jobs:
+
+  release-test:
+    name: Pre-Release pipeline
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:34
+
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@021a2405c7f990db57f5eae5397423dcc554159c
+        with:
+          app_id: ${{ secrets.MR_AVOCADO_ID }}
+          installation_id: ${{ secrets.MR_AVOCADO_INSTALLATION_ID }}
+          private_key: ${{ secrets.MR_AVOCADO_PRIVATE_KEY }}
+      - name: install required packages
+        run:  dnf -y install git python3-pip
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build wheel
+        run: |
+          git config --global --add safe.directory "*"
+          python3 -m pip install build
+          mkdir PYPI_UPLOAD
+          python3 -m build -o PYPI_UPLOAD
+      - name: Save wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: ${{github.workspace}}/PYPI_UPLOAD/
+          retention-days: 3
+
+  publish-to-test-pypi:
+    name: Publish Avocado to TestPyPI
+    needs:
+    - release-test
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/autils
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+    steps:
+    - name: Download all the wheels
+      uses: actions/download-artifact@v4
+      with:
+        name: wheel
+        path: dist/
+    - name: Publish avocado to test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
