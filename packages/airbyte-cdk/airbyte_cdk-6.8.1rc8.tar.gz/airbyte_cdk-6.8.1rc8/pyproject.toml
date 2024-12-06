@@ -1,0 +1,199 @@
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+
+[tool.poetry]
+name = "airbyte-cdk"
+description = "A framework for writing Airbyte Connectors."
+authors = ["Airbyte <contact@airbyte.io>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://airbyte.com"
+repository = "https://github.com/airbytehq/airbyte-python-cdk"
+documentation = "https://docs.airbyte.io/"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+]
+keywords = ["airbyte", "connector-development-kit", "cdk"]
+
+# Python CDK uses dynamic versioning: https://github.com/mtkennerly/poetry-dynamic-versioning
+version = "6.8.1rc8"  # Version will be calculated dynamically.
+
+[tool.poetry-dynamic-versioning]
+enable = false
+
+[tool.poetry.dependencies]
+python = "^3.10,<3.13"
+airbyte-protocol-models-dataclasses = "^0.14"
+backoff = "*"
+cachetools = "*"
+Deprecated = "~1.2"
+dpath = "^2.1.6"
+dunamai = "^1.22.0"
+genson = "1.3.0"
+isodate = "~0.6.1"
+Jinja2 = "~3.1.2"
+jsonref = "~0.2"
+jsonschema = "~4.17.3"  # 4.18 has some significant breaking changes: https://github.com/python-jsonschema/jsonschema/releases/tag/v4.18.0
+pandas = "2.2.2"
+pendulum = "<3.0.0"
+psutil = "6.1.0"
+pydantic = "^2.7"
+pyrate-limiter = "~3.1.0"
+python-dateutil = "*"
+python-ulid = "^3.0.0"
+PyYAML = "^6.0.1"
+rapidfuzz = "^3.10.1"
+requests = "*"
+requests_cache = "*"
+wcmatch = "10.0"
+# Extras depedencies
+avro = { version = "~1.11.2", optional = true }
+cohere = { version = "4.21", optional = true }
+fastavro = { version = "~1.8.0", optional = true }
+langchain = { version = "0.1.16", optional = true }
+langchain_core = { version = "0.1.42", optional = true }
+markdown = { version = "*", optional = true }
+openai = { version = "0.27.9", extras = ["embeddings"], optional = true }
+pdf2image = { version = "1.16.3", optional = true }
+"pdfminer.six" = { version = "20221105", optional = true }
+pyarrow = { version = "~15.0.0", optional = true }
+pytesseract = { version = "0.3.10", optional = true }
+python-calamine = { version = "0.2.3", optional = true }
+python-snappy = { version = "0.7.3", optional = true }
+Sphinx = { version = "~4.2", optional = true }
+sphinx-rtd-theme = { version = "~1.0", optional = true }
+tiktoken = { version = "0.8.0", optional = true }
+nltk = { version = "3.9.1", optional = true }
+# This will ensure that even when you run poetry install or pip install, the compatible version of numpy will always be chosen.
+# airbyte-ci will try to install latest version when --use-local-cdk is used, resulting in the conflict.
+numpy = "<2"
+unstructured = { version = "0.10.27", extras = ["docx", "pptx"], optional = true }
+"unstructured.pytesseract" = { version = ">=0.3.12", optional = true }
+pyjwt = "^2.8.0"
+cryptography = ">=42.0.5,<44.0.0"
+pytz = "2024.1"
+orjson = "^3.10.7"
+serpyco-rs = "^1.10.2"
+sqlalchemy = {version = "^2.0,!=2.0.36", optional = true }
+xmltodict = "^0.13.0"
+
+[tool.poetry.group.dev.dependencies]
+freezegun = "*"
+mypy = "*"
+asyncio = "3.4.3"
+ruff = "^0.7.2"
+pdoc = "^15.0.0"
+poethepoet = "^0.24.2"
+pyproject-flake8 = "^6.1.0"
+pytest = "^7"
+pytest-memray = "^1.6.0"
+pympler = "*"
+pytest-cov = "*"
+pytest-httpserver = "*"
+pytest-mock = "*"
+requests-mock = "*"
+
+[tool.poetry.extras]
+file-based = ["avro", "fastavro", "pyarrow", "unstructured", "pdf2image", "pdfminer.six", "unstructured.pytesseract", "pytesseract", "markdown", "python-calamine", "python-snappy"]
+sphinx-docs = ["Sphinx", "sphinx-rtd-theme"]
+vector-db-based = ["langchain", "openai", "cohere", "tiktoken"]
+sql = ["sqlalchemy"]
+
+[tool.poetry.scripts]
+
+source-declarative-manifest = "airbyte_cdk.cli.source_declarative_manifest:run"
+
+[tool.isort]
+skip = ["__init__.py"]  # TODO: Remove after this is fixed: https://github.com/airbytehq/airbyte-python-cdk/issues/12
+
+[tool.ruff]
+exclude = ["__init__.py"]  # TODO: Remove after this is fixed: https://github.com/airbytehq/airbyte-python-cdk/issues/12
+
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["I"]
+
+[tool.poe.tasks]
+# Build tasks
+assemble = {cmd = "bin/generate-component-manifest-dagger.sh", help = "Generate component manifest files."}
+build-package = {cmd = "poetry build", help = "Build the python package: source and wheels archives."}
+build = {sequence = ["assemble", "build-package"], help = "Run all tasks to build the package."}
+
+# Format check tasks
+_format-check-ruff = {cmd = "ruff format --check .", help = "Check formatting with Ruff."}
+_format-check-prettier = {cmd = "npx prettier . --check", help = "Check formatting with prettier."}
+format-check = {sequence = ["_format-check-ruff", "_format-check-prettier"], help = "Check formatting for all file types.", ignore_fail = "return_non_zero"}
+
+# Format fix tasks
+_format-fix-ruff = {cmd = "ruff format .", help = "Format with Ruff."}
+_format-fix-prettier = {cmd = "npx prettier . --write", help = "Format with prettier."}
+format-fix = {sequence = ["_format-fix-ruff", "_format-fix-prettier"], help = "Format all file types.", ignore_fail = "return_non_zero"}
+
+# Linting/Typing check tasks
+_lint-ruff = {cmd = "poetry run ruff check .", help = "Lint with Ruff."}
+type-check = {cmd = "bin/run-mypy-on-modified-files.sh", help = "Type check modified files with mypy."}
+lint = {sequence = ["_lint-ruff", "type-check"], help = "Lint all code. Includes type checking.", ignore_fail = "return_non_zero"}
+
+# Lockfile check task
+check-lockfile = {cmd = "poetry check", help = "Check the poetry lock file."}
+
+# Linting/Typing fix tasks
+lint-fix = { cmd = "poetry run ruff check --fix ." }
+lint-fix-unsafe = { cmd = "poetry run ruff check --fix --unsafe-fixes .", help = "Lint-fix modified files, including 'unsafe' fixes. It is recommended to first commit any pending changes and then always manually review any unsafe changes applied." }
+
+# Combined Check and Fix tasks
+
+check-all = {sequence = ["lint", "format-check", "type-check", "check-lockfile"], help = "Lint, format, and type-check modified files.", ignore_fail = "return_non_zero"}
+fix-all = {sequence = ["format-fix", "lint-fix"], help = "Lint-fix and format-fix modified files, ignoring unsafe fixes.", ignore_fail = "return_non_zero"}
+fix-and-check = {sequence = ["fix-all", "check-all"], help = "Lint-fix and format-fix, then re-check to see if any issues remain.", ignore_fail = "return_non_zero"}
+
+# PyTest tasks
+
+pytest = {cmd = "poetry run coverage run -m pytest --durations=10", help = "Run all pytest tests."}
+pytest-fast = {cmd = "poetry run coverage run -m pytest --durations=5 --exitfirst -m 'not flaky and not slow and not requires_creds'", help = "Run pytest tests, failing fast and excluding slow tests."}
+unit-test-with-cov = {cmd = "pytest -s unit_tests --cov=airbyte_cdk --cov-report=term --cov-config ./pyproject.toml", help = "Run unit tests and create a coverage report."}
+
+# Combined check tasks (other)
+
+# TODO: find a version of the modified mypy check that works both locally and in CI.
+check-local = {sequence = ["lint", "type-check", "check-lockfile", "unit-test-with-cov"], help = "Lint all code, type-check modified files, and run unit tests."}
+check-ci = {sequence = ["check-lockfile", "build", "lint", "unit-test-with-cov"], help = "Build the package, lint and run unit tests. Does not include type-checking."}
+
+# Build and check
+pre-push = {sequence = ["build", "check-local"], help = "Run all build and check tasks."}
+
+# API Docs with PDoc
+docs-generate = {env = {PDOC_ALLOW_EXEC = "1"}, cmd = "python -m docs.generate run"}
+docs-preview = {shell = "poe docs-generate && open docs/generated/index.html"}
+
+[tool.check-wheel-contents]
+# Quality control for Python wheel generation. Docs here:
+# - https://github.com/jwodder/check-wheel-contents
+ignore = [
+  "W002"  # Duplicate files. (TODO: Fix the few duplicate files, mostly `__init__.py` files that have only copyright text.)
+]
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+filterwarnings = [
+    "ignore::airbyte_cdk.sources.source.ExperimentalClassWarning"
+]
+
+[tool.airbyte_ci]
+python_versions = ["3.10", "3.11"]
+optional_poetry_groups = ["dev"]
+poetry_extras = ["file-based", "sphinx-docs", "vector-db-based"]
+poe_tasks = ["check-ci"]
+mount_docker_socket = true
