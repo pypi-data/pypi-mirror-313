@@ -1,0 +1,3 @@
+'''
+The CryptoBob main module.
+'''
