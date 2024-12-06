@@ -1,0 +1,152 @@
+[sqlfluff]
+dialect = ansi
+nocolor = False
+templater = jinja
+verbose = 0
+
+######
+fix_even_unparsable = False
+max_line_length = 80
+output_line_length = 80
+runaway_limit = 10
+
+
+####
+rules = all
+exclude_rules = convention.terminator
+
+
+# ##############
+[sqlfluff:indentation]
+tab_space_size = 2
+
+
+
+### Layout
+### Line breaks, etc
+[sqlfluff:layout:type:binary_operator]
+line_position = leading
+
+[sqlfluff:layout:type:comparison_operator]
+line_position = leading
+
+[sqlfluff:layout:type:comma]
+line_position = leading
+
+[sqlfluff:layout:type:select_clause]
+line_position = leading
+
+[sqlfluff:layout:type:from_clause]
+line_position = alone
+
+[sqlfluff:layout:type:groupby_clause]
+line_position = alone
+
+[sqlfluff:layout:type:having_clause]
+line_position = alone
+
+[sqlfluff:layout:type:join_clause]
+line_position = alone
+
+[sqlfluff:layout:type:limit_clause]
+line_position = alone
+
+[sqlfluff:layout:type:orderby_clause]
+# NOTE: Order by clauses appear in many places other than in a select
+# clause. To avoid unexpected behaviour we use `leading` in this
+# case rather than `alone`.
+line_position = leading
+
+[sqlfluff:layout:type:where_clause]
+line_position = alone:strict
+
+
+
+[sqlfluff:layout:type:common_table_expression]
+# The definition part of a CTE should fit on one line where possible.
+# For users which regularly define column names in their CTEs they
+# may which to relax this config to just `single`.
+spacing_within = single:inline
+
+
+
+
+### Ambiguity
+
+[sqlfluff:rules:ambiguous.join]
+fully_qualify_join_types = both
+
+[sqlfluff:rules:aliasing.table]
+# Aliasing preference for tables
+aliasing = explicit
+
+[sqlfluff:rules:aliasing.column]
+# Aliasing preference for columns
+aliasing = explicit
+
+[sqlfluff:rules:ambiguous.column_references]
+# GROUP BY/ORDER BY column references
+group_by_and_order_by_style = explicit
+
+
+######### Capitalization
+
+[sqlfluff:rules:capitalisation.functions]
+# Function names
+extended_capitalisation_policy = consistent
+ignore_words = None
+ignore_words_regex = None
+
+[sqlfluff:rules:capitalisation.identifiers]
+# Unquoted identifiers
+extended_capitalisation_policy = consistent
+# Comma separated list of words to ignore for this rule
+ignore_words = None
+ignore_words_regex = None
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
+ignore_words = None
+ignore_words_regex = None
+
+[sqlfluff:rules:capitalisation.literals]
+# Null & Boolean Literals
+capitalisation_policy = upper
+ignore_words = None
+ignore_words_regex = None
+
+[sqlfluff:rules:capitalisation.types]
+capitalisation_policy = upper
+
+######### Conventions
+
+[sqlfluff:rules:convention.select_trailing_comma]
+select_clause_trailing_comma = forbid
+
+[sqlfluff:rules:layout.long_lines]
+# Line length
+ignore_comment_lines = False
+ignore_comment_clauses = False
+
+
+[sqlfluff:rules:layout.select_targets]
+wildcard_policy = single
+
+[sqlfluff:rules:layout.select_modifiers]
+
+
+[sqlfluff:rules:references.from]
+# TKTK: verify
+# References must be in FROM clause
+# Disabled for some dialects (e.g. bigquery)
+force_enable = False
+
+
+[sqlfluff:rules:references.keywords]
+# TKTK: verify
+# Keywords should not be used as identifiers.
+unquoted_identifiers_policy = aliases
+quoted_identifiers_policy = none
+# Comma separated list of words to ignore for this rule
+ignore_words = None
+ignore_words_regex = None
