@@ -1,0 +1,64 @@
+[tool.poetry]
+name = "dabapush"
+version = "0.4.0-alpha8"
+description = ""
+authors = [
+	"Philipp Kessling <p.kessling@leibniz-hbi.de>",
+	"Aditya Kumar <a.kumar@leibniz-hbi.de>",
+	"Felix Victor Münch <f.muench@leibniz-hbi.de>"
+]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Leibniz-HBI/dabapush"
+classifiers = [
+		"Development Status :: 2 - Pre-Alpha",
+		"Environment :: Console",
+		"Intended Audience :: Science/Research",
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+click = "*"
+loguru = "*"
+pandas = "*"
+PyYAML = "*"
+importlib-metadata = "*"
+ujson = "*"
+tqdm = "^4.67.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-cov = "*"
+black = "*"
+coverage = "*"
+pdoc3 = "*"
+pre-commit = "*"
+isort = "*"
+pylint = "*"
+pytest-html = "*"
+pydocstyle = "*"
+mypy = "*"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.plugins.dabapush_readers]
+"Twacapic" = "dabapush.Reader.TwacapicReader:TwacapicReaderConfiguration"
+"NDJSON" = "dabapush.Reader.NDJSONReader:NDJSONReaderConfiguration"
+"Tegracli" = "dabapush.Reader.tegracli_reader:TegracliReaderConfiguration"
+
+[tool.poetry.plugins.dabapush_writers]
+"CSV" = "dabapush.Writer.CSVWriter:CSVWriterConfiguration"
+"NDJSON" = "dabapush.Writer.ndjson_writer:NDJSONWriterConfiguration"
+"STDOUT" = "dabapush.Writer.stdout_writer:STDOUTWriterConfiguration"
+
+[tool.poetry.scripts]
+dabapush = 'dabapush.cli.main:cli'
+
+[tool.pytest.ini_options]
+addopts = "--cov-report html:tests/coverage --cov=dabapush --capture=sys"
+
+[tool.pylint.messages_control]
+disable=["invalid-name"]

@@ -1,0 +1,4 @@
+from .NDJSONReader import NDJSONReaderConfiguration
+from .Reader import ReaderConfiguration
+from .tegracli_reader import TegracliReaderConfiguration
+from .TwacapicReader import TwacapicReaderConfiguration
