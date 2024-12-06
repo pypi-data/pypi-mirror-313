@@ -1,0 +1,1 @@
+from torch_incremental_pca.incremental_pca import IncrementalPCA
