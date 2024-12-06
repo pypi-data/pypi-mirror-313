@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: python
+      image: python:3.10.6
+      command: ["tail", "-f", "/dev/null"]  # this or any command that is basically a noop is required
+      imagePullPolicy: IfNotPresent
+      resources:  # limits the resources
+        requests:
+          memory: "512Mi"
+          cpu: "500m"
+        limits:
+          memory: "1Gi"
+    - image: docker:20.10.12
+      name: docker
+      command: ["sleep", "600"]
+      env:
+      - name: DOCKER_TLS_VERIFY
+        value: ""
+      - name: DOCKER_HOST
+        value: tcp://localhost:2375
+    - name: dind
+      image: docker:20.10.12-dind-rootless
+      args: ["--insecure-registry=$(REGISTRY)"]
+      env:
+      - name: REGISTRY
+        value: hub.k8s.li
+      - name: DOCKER_TLS_CERTDIR
+        value: ""
+      - name: DOCKER_HOST
+        value: tcp://localhost:2375
+      securityContext:
+        privileged: true
+      tty: true
+      readinessProbe:
+        exec:
+          command: ["docker", "info"]
+        initialDelaySeconds: 10
+        failureThreshold: 6
+    - name: kube-score
+      image: zegl/kube-score:v1.14.0-helm3
+      command: ["/bin/sh", "-c", "sleep infinity"]
+      ttyEnabled: "true"
+      imagePullPolicy: IfNotPresent
+    - name: trivy
+      image: aquasec/trivy:0.32.1
+      command: ["tail", "-f", "/dev/null"]
+      imagePullPolicy: IfNotPresent
+      env:
+      - name: DOCKER_TLS_VERIFY
+        value: ""
+      - name: DOCKER_HOST
+        value: tcp://localhost:2375
+    - name: gitleaks
+      image: zricethezav/gitleaks:latest
+      command: ["tail", "-f", "/dev/null"]
+      imagePullPolicy: IfNotPresent
+    - name: ddimport
+      image: maibornwolff/dd-import:latest
+      command: ["tail", "-f", "/dev/null"]
+      imagePullPolicy: IfNotPresent
