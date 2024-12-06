@@ -1,0 +1,108 @@
+---
+name: Main
+on: [push, pull_request]
+env:
+  DOCKER_BUILDKIT: 1
+  KUBECONFIG: ./kubeconfig
+jobs:
+  single-node:
+    name: "Single node"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [docker, podman]
+    env:
+      CONTAINER_ENGINE: "${{ matrix.engine }}"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up cgroup v2 delegation
+        run: |
+          sudo mkdir -p /etc/systemd/system/user@.service.d
+          cat <<EOF | sudo tee /etc/systemd/system/user@.service.d/delegate.conf
+          [Service]
+          Delegate=cpu cpuset io memory pids
+          EOF
+          sudo systemctl daemon-reload
+      - name: Remove preinstalled Moby
+        # Preinstalled Moby does not contain dockerd-rootless-setuptool.sh
+        run: sudo apt-get remove moby-engine-*
+      - name: Set up Rootless Docker
+        if: ${{ matrix.engine == 'docker' }}
+        run: |
+          set -eux -o pipefail
+          curl https://get.docker.com | sudo sh
+          sudo systemctl disable --now docker.socket docker.service
+          sudo rm -rf /var/run/docker*
+          dockerd-rootless-setuptool.sh install
+          docker info
+      - name: Set up Rootless Podman
+        if: ${{ matrix.engine == 'podman' }}
+        run: |
+          set -eux -o pipefail
+          sudo apt-get update
+          sudo apt-get install -y podman-compose
+          podman info
+      - run: make up
+      - run: sleep 5
+      - run: make kubeadm-init
+      - run: make install-flannel
+      - run: make kubeconfig
+      - run: kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+      - run: ./hack/test-smoke.sh
+      - name: "Test data persistency after restarting the node"
+        run: |
+          make down
+          make up
+          sleep 30
+          ./hack/test-smoke.sh
+
+  multi-node:
+    name: "Multi node (emulated using LXD)"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lxc-image: ubuntu:24.04
+            engine: docker
+# LXD is now banned from pulling images:fedora from https://images.linuxcontainers.org/
+# TODO: switch away from LXD to Incus: https://github.com/rootless-containers/usernetes/pull/332
+#          - lxc-image: images:fedora/39/cloud
+#            engine: podman
+    env:
+      LXC_IMAGE: "${{ matrix.lxc-image }}"
+      CONTAINER_ENGINE: "${{ matrix.engine }}"
+    steps:
+      - run: sudo modprobe vxlan
+      - uses: actions/checkout@v3
+      - uses: canonical/setup-lxd@v0.1.1
+      - name: "Relax disk pressure limit"
+        run: |
+          set -x
+          sudo snap install yq
+          yq -i 'select(.kind=="KubeletConfiguration").evictionHard."imagefs.available"="3Gi"' kubeadm-config.yaml
+      - run: ./hack/create-cluster-lxd.sh
+      - run: kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+      - run: ./hack/test-smoke.sh
+      - if: failure()
+        name: "kubectl get nodes"
+        run: |
+          set -x
+          kubectl get nodes -o wide
+          kubectl get nodes -o yaml
+          ssh -F ${HOME}/.u7s-ci-hosts/ssh_config host0 -- df -h
+          ssh -F ${HOME}/.u7s-ci-hosts/ssh_config host1 -- df -h
+      - if: failure()
+        name: "kubectl get pods"
+        run: |
+          set -x
+          kubectl get pods -A -o yaml
+          ssh -F ${HOME}/.u7s-ci-hosts/ssh_config host0 -- journalctl --user --no-pager --since "10 min ago"
+      - name: "Test data persistency after restarting the node"
+        run: |
+          lxc restart host0 host1
+          sleep 30
+          ./hack/test-smoke.sh
