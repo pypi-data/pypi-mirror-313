@@ -1,0 +1,87 @@
+Metadata-Version: 2.1
+Name: eazyml-cf
+Version: 0.0.18
+Summary: eazyml cf api
+Home-page: https://eazyml.com/
+Author: Eazyml
+Author-email: admin@ipsoftlabs.com
+Project-URL: Documentation, https://eazyml.com/docs
+Project-URL: Homepage, https://eazyml.com/
+Keywords: python
+Classifier: Development Status :: 1 - Planning
+Classifier: License :: Other/Proprietary License
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: openpyxl
+Requires-Dist: scikit-learn
+Requires-Dist: scipy
+
+## Eazyml Counterfactual
+EazyML revolutionizes machine learning by introducing counterfactual inference, automating the process of identifying optimal changes to variables that shift outcomes from unfavorable to favorable. This approach overcomes the limitations of manual "what-if" analysis, enabling models to provide actionable, prescriptive insights alongside their predictions.
+
+### Features
+- It performs feature selection from a training dataset by excluding specific columns and the target outcome column.
+- This function builds a machine learning model using a specified training dataset.
+- It provides platform to automates counterfactual inference for a test record by calculating the probability of an unfavorable outcome and determining the optimal adjustments to minimize it. It processes input datasets, configuration parameters, and model details to identify actionable changes in features while respecting constraints, enabling prescriptive insights for improved outcomes.
+
+### APIs
+It provides following apis :
+1) scikit_feature_selection
+
+
+```python
+sk_feature_selection(
+    train_file = 'train/file/path.csv',
+    outcome = 'outcome column name',
+    config= {
+               "discard_columns" : ['id', 'unnamed'],
+            }
+    )
+``` 
+
+2) scikit_model_building  
+
+```python
+sk_feature_selection(
+    train_file = 'train/file/path.csv',
+    test_file = 'test/file/path.csv',
+    outcome = 'outcome column name',
+    selected_columns = 'List of selected input features',
+    config= {
+        "unfavorable_outcome" : 1,
+        "sklearn_classifier" : 'Gradient Boosting'
+    }
+)
+```
+
+3) ez_cf_inference       
+
+```python
+ez_cf_inference(
+    train_file = 'train/file/path.csv',
+    test_file = 'test/file/path.csv',
+    outcome = 'outcome column name',
+    config= {
+        "unfavorable_outcome" : 1,
+        "lower_quantile" : 0.01,
+            "upper_quantile" : 0.99,
+            "p" : 40,
+            "M" : 2,
+            "N" : 10000,
+            "tolerable_error_threshold" : 0.1
+        },
+        selected_columns = 'List of selected input features',
+        model_info = 'dictionary of model information'
+        test_record_idx = 'single or multiple testdata id or None'
+    )
+```
