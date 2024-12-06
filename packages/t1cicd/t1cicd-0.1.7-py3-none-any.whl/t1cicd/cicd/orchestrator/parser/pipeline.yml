@@ -1,0 +1,48 @@
+# https://neu-seattle.gitlab.io/asd/cs6510f24/CS6510-F24/main/mods/cicd.html example2
+name:
+    pipeline-example
+stages:
+  - build
+  - test
+  - documentation
+
+default:
+  image: gradle:8.7
+
+jobs:
+  compile:
+    stage: build
+    needs: ["validation"]
+    script:
+      - echo "Compile application"
+      - gradle classes
+
+  compile2:
+    stage: build
+    needs: ["validation"]
+    script:
+      - echo "Compile application"
+      - gradle classes
+
+  validation:
+    stage: build
+    script:
+      - echo "Running validations"
+      - gradle checkstyleMain checkstyleTest spotbugsMain
+
+  testing:
+    stage: test
+    image: openjdk:8
+    script:
+      - echo "Running unit tests... "
+      - gradle test jacocoTestReport
+
+  javadoc:
+    stage: documentation
+    script:
+      - echo "Generate Javadocs"
+      - gradle javadoc
+    artifacts:
+      paths:
+        - build/docs/javadoc/
+        - build/reports/jacoco/test/html/
