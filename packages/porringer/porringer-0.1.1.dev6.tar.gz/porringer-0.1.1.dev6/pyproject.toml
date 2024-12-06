@@ -1,0 +1,125 @@
+[project]
+description = ""
+name = "porringer"
+authors = [
+    { name = "Synodic Software", email = "contact@synodic.software" },
+]
+readme = "README.md"
+dynamic = []
+requires-python = ">=3.13"
+dependencies = [
+    "typer>=0.15.0",
+    "pydantic>=2.10.3",
+    "platformdirs>=4.1.0",
+    "userpath>=1.9.1",
+    "packaging>=23.2",
+]
+version = "0.1.1.dev6"
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+homepage = "https://github.com/Synodic-Software/Porringer"
+repository = "https://github.com/Synodic-Software/Porringer"
+
+[project.entry-points."porringer.environment"]
+pip = "porringer.plugin.pip.plugin:PipEnvironment"
+pipx = "porringer.plugin.pipx.plugin:PipxEnvironment"
+winget = "porringer.plugin.winget.plugin:WingetEnvironment"
+
+[project.scripts]
+porringer = "porringer.console.entry:app"
+
+[tool.pdm.options]
+update = [
+    "--update-all",
+]
+
+[tool.pdm.version]
+source = "scm"
+
+[tool.pdm.scripts.analyze]
+shell = "ruff check porringer tests"
+
+[tool.pdm.scripts.format]
+shell = "ruff format"
+
+[tool.pdm.scripts.lint]
+composite = [
+    "analyze",
+    "format",
+    "type-check",
+]
+
+[tool.pdm.scripts.test]
+shell = "pytest --cov=porringer --verbose tests"
+
+[tool.pdm.scripts.type-check]
+shell = "mypy ."
+
+[tool.pytest.ini_options]
+log_cli = true
+testpaths = [
+    "tests",
+]
+
+[tool.mypy]
+exclude = "__pypackages__"
+plugins = [
+    "pydantic.mypy",
+]
+strict = true
+
+[tool.ruff]
+line-length = 120
+preview = true
+
+[tool.ruff.lint]
+ignore = [
+    "D206",
+    "D300",
+    "D415",
+    "E111",
+    "E114",
+    "E117",
+]
+select = [
+    "D",
+    "F",
+    "I",
+    "PL",
+    "UP",
+    "E",
+    "B",
+    "SIM",
+    "PT",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+indent-style = "space"
+quote-style = "single"
+
+[tool.coverage.report]
+skip_empty = true
+
+[dependency-groups]
+lint = [
+    "mypy>=1.10.0",
+    "ruff>=0.7.1",
+]
+test = [
+    "pytest>=7.4.4",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+]
+
+[build-system]
+build-backend = "pdm.backend"
+requires = [
+    "pdm.backend",
+]
