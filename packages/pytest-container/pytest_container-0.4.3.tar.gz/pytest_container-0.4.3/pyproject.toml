@@ -1,0 +1,71 @@
+[tool.poetry]
+name = "pytest_container"
+version = "0.4.3"
+description = "Pytest fixtures for writing container based tests"
+authors = ["Dan Čermák <dcermak@suse.com>"]
+homepage = "https://dcermak.github.io/pytest_container/"
+repository = "https://github.com/dcermak/pytest_container/"
+readme = "README.rst"
+license = "LGPL-2.1-or-later"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.6.2,<4.0"
+pytest = ">= 3.10"
+pytest-testinfra = [
+    { version = ">=6.4.0", python = "< 3.7" },
+    { version = ">=7.0", python = ">= 3.7,< 3.8" },
+    { version = ">=8.0", python = ">= 3.8" }
+]
+dataclasses = { version = ">=0.8", python = "< 3.7" }
+typing-extensions = { version = ">=3.0", markers="python_version < '3.8'" }
+cached-property = { version = "^1.5", markers="python_version < '3.8'" }
+filelock = "^3.4"
+deprecation = "^2.1"
+
+[tool.poetry.dev-dependencies]
+black = ">=21.9b0"
+mypy = ">=0.942"
+pylint = [
+    { version = ">=2.10.2", python = "< 3.8" },
+    { version = ">=3", python = ">= 3.8" },
+]
+reorder-python-imports = ">=2.6.0"
+pytest-xdist = ">=2.4.0"
+Sphinx = ">=5.0"
+pytest-rerunfailures = ">=10.2"
+typeguard = ">=2.13"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79
+
+[tool.poetry.plugins."pytest11"]
+"pytest11.container" = "pytest_container.plugin"
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = "testinfra,deprecation"
+ignore_missing_imports = true
