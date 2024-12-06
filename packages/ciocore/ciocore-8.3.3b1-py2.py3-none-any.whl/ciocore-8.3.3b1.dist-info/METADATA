@@ -1,0 +1,477 @@
+Metadata-Version: 2.1
+Name: ciocore
+Version: 8.3.3b1
+Summary: Core functionality for Conductor's client tools
+Home-page: https://github.com/ConductorTechnologies/ciocore
+Author: conductor
+Author-email: info@conductortech.com
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Multimedia :: Graphics :: 3D Rendering
+Description-Content-Type: text/markdown
+Requires-Dist: requests[use_chardet_on_py3]==2.28.1
+Requires-Dist: pyjwt==1.7.1
+Requires-Dist: future>=0.18.2
+Requires-Dist: cioseq<1.0.0,>=0.4.1
+Requires-Dist: Click<9.0.0,>=8.1.3
+Requires-Dist: markdown<4.0.0,>=3.5.2
+Requires-Dist: colorlog<7.0.0,>=6.8.2
+
+## Introduction
+
+Conductor Core is a Python package that provides an API and a command-line interface for interacting with Conductor.
+
+## Install
+
+```bash
+pip install ciocore
+```
+
+Run the conductor command to confirm the package was installed.
+```bash
+conductor --help
+```
+
+Get help for a specific sub command
+```bash
+conductor downloader --help
+conductor uploader --help
+conductor software --help
+```
+
+Example API usage
+```python
+from ciocore import api_client
+print(api_client.request_software_packages()[0])
+
+```
+## Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md)
+
+## Changelog
+
+## Unreleased: 
+
+* Added filter option for API data fetching
+
+## Version:8.3.2 -- 01 Oct 2024
+
+* Tweak to package order behavior for markdown package query
+
+## Version:8.3.1 -- 05 Sep 2024
+
+* Fixes a bug of the Conductor log going to the wrong path on Windows
+
+## Version:8.3.0 -- 13 Aug 2024
+
+* Fixes a bug where the uploader would hang if there were no uploads.
+
+## Version:8.1.0 -- 10 Jun 2024
+
+* Adds two new calls to the API to get usage; get_compute_usage() and get_storage_usage()
+
+## Version:8.0.1 -- 22 Apr 2024
+
+* The uploader now sends all error messages to the dashboard - not just the first error.
+* Fixed a bug where --log-to-console was not not working as expected in the command line upload subcommand.
+* Fixed some errors in DEBUG-level logging messages.
+
+
+## Version:8.0.0 -- 07 Apr 2024
+
+* The `conductor` commandline interface (CLI) has undergone a complete overhaul to improve its functionality and performance. It is now installed as a Python console script, which simplifies the installation process on all platforms and ensures that the tool is always accessible. In addition, this standardized installation allows for better integration into our Companion application and potentially customers' own proprietary tools.
+* The commandline downloader has been rewritten to improve its performance and reliability. In previous versions, the downloader would fetch all download URLs from the server before starting any downloads. This approach was inefficient and would lead to performance issues when handling jobs with large numbers of tasks. The new downloader fetches tasks in small batches, which allows the download to start almost immediately, regardless of the number of tasks. It provides several new commandline flags, such as filtering based on filenames, and better logging, giving users more control and visibility over the download process. In addition, the new downloader has been written as an event based system that can be seamlessly integrated into other pipeline tools and GUIs. Pipeline TDs need only to register handlers to any of the events that the downloader emits.
+* The `conductor` commandline now supports a new subcommand, `docs`, which opens API and commandline documentation in a local web browser. The documentation is generated using `mkdocs` and is included in the package. This command is useful as it ensures the **API** documentation is relevant to the version of the tool being used.
+* The `conductor` commandline now supports a new subcommand, `packages`, which displays all available software packages on Conductor's cloud. The command can output the document as text, markdown, or nicely formatted HTML. The data is pulled from the Conductor server and is always up-to-date.
+* The Python API now provides four new endpoints: `kill_tasks`, `kill_jobs`, `get_jobs`, and `get_log`.
+* The Python API now provides access to entries in the Dashboard's Extra Environment Variables section. This feature allows administrators to set environment variables that are passed to all jobs run on the cloud. It's useful for setting up access to license servers or other shared resources. The API is open to clients so that they may insert account-widse variables with the correct level of precedence. 
+* In addition, the environment variable schema has been extended to support a merge policy of `prepend`. This policy allows users to add new values to the beginning of the list of values for an environment variable and is useful for search paths.
+
+
+## Version:7.0.2 -- 10 Nov 2023
+
+* Bug fix: Fixed an issue where a list was copied with a Python3 only construct.
+* Compatibility improvement: Tests can now be run in Python 2.7 as well.
+* Cross-version support: Ensured that all tests pass successfully in both Python 2.7 and 3.9.
+* Improvement: Rewrite instance type descriptions on the client. Ensure uniqueness.
+* Workaround: Removed invalid 3dsmax entries from the packages response.
+
+## Version:7.0.1 -- 30 Oct 2023
+
+* Splits the output of the uploader. Progress now goes to stdout and logging to the system path by default.
+* Corrects issue where the upload could hang in certain situations.
+* Adds the provider property to HardwareSet objects so that clients can detect which cloud is enabled.
+  and make adjustments based on that, such as hide the preemptible checkbox for CoreWeave instances.
+* Fixes a bug in the core data class that meant the the list of platforms could be mutated out of scope.
+
+## Version:6.3.0 -- 05 Jul 2023
+
+* In the absence of instance-type categories provided by the endpoint, the client generates default
+  categories CPU and GPU which at least splits the instance types into two groups, thereby making
+  dropdown menus more manageable, especially for CoreWeave's array of machines.
+* update circleci config and related documentation
+
+## Version:6.1.0 -- 09 Jun 2023
+
+Add the ability to specify which platforms to get resources for. This helps consumers of the API to
+avoid fetching resources for Windows when the client is not ready.
+
+## Version:6.0.0 -- 07 Jun 2023
+
+This is a breaking change due instance types being provided as an instance of HardwareSet with
+support for categories as opposed to a simple list. Consumers of the API will need to be updated to
+support this change.
+
+## Version:6.0.0-rc.4 -- 06 Jun 2023
+
+* Refactoring HardwareSet class [bb9e942]
+
+## Version:6.0.0-rc.3 -- 04 Jun 2023
+
+* Manage removal of the misc category [29742ea]
+* Instance types contain a category list [aac9c8a]
+* Convert CICD to use skulk-2 flow [724458a]
+
+### Version:5.6.0 -- 6 April 2023
+
+* Add support for CoreWeave Object Storage. [3cdfcea]
+
+### Version:5.5.0 -- 10 Nov 2022
+
+* Support KMS encryption for uploaded files in both local and daemon mode. [a1ba987]
+
+### Version:5.4.2 -- 10 Aug 2022
+
+* Adds CONDUCTOR_AUTH_PORT environment variable. [eeee8c5]
+
+### Version:5.4.1 -- 27 Jul 2022
+
+* Graft old uploader back in. [caedcce]
+
+### Version:5.3.2 -- 25 Jul 2022
+
+* Fix argparse bug https://bugs.python.org/issue16308 [27841c8]
+
+### Version:5.3.1 -- 28 Jun 2022
+
+* Adds a check if any errors occured before marking the upload as complete. [124bbf6]
+
+### Version:5.3.0 -- 03 Jun 2022
+
+* Adds the option to upload a list of explicit paths to the cli. [ba16fe4]
+
+### Version:5.2.2 -- 23 May 2022
+
+* A minor documentation change. [533c7ee]
+
+### Version:5.2.0 -- 26 Apr 2022
+
+* Reinstate frozen requirement on urllib version, since it broke submissions on Mac.
+* Adds several doc strings.
+* Core data now allows initialization with a list of host products to act as a whitelist. Legacy behavior still works.
+* Remove reload code.
+* Use manageable fixtures for tests.
+* Refactor package tree to make docs clearer.
+* Autodoc setup, including script to publish autogen doc to mkdocs.
+
+### Version:5.1.1 -- 05 Apr 2022
+
+* Ensures the base64 strings are represented as strings. [be95b83]
+
+### Version:5.1.0 -- 05 Apr 2022
+
+* Adds registering the uploader and downloader for the user agent. [18a0a7c]
+* Adds the user-agent http header to all requests. [6b452c5]
+
+### Version:5.0.1 -- 31 Mar 2022
+
+* In developer mode we add X drive letter if submitting to a windows target. [bc91524]
+* Adds Packagetree platform filtering.
+* Add all=true to the r4equest for packages in order to get Windows packages included. [2735781]
+* ciocore.data singleton ensures that no windows -packages are provided if there are no windows
+  instance types, and vice versa.
+* Remove urllib constraint because pip complained. Might have to add this back if we get weird breakages. [4e34359]
+
+### Version:5.0.0-rc.1 -- 18 Mar 2022
+
+* This version contains breaking changes. Clients should be upgraded.
+* PackageTree now supports platform suffixes.
+* The singleton that brings together inst_types and packages now filter's each automatically based on platforms provided by the other.
+* Improvements to PackageEnvironment, including a constraint to prevent a merge_policy change, and platform detection for correct path separator.
+* Better validation for the value of the CONDUCTOR_URL variable.
+* Several uploader improvements, including support for reporting progress to external threads and gracefull cancelling the upload process.
+
+### Version:4.0.7 -- 10 Mar 2022
+
+* Adds a flag to propogate log properties. [dc12f84]
+
+### Version:4.0.6 -- 03 Mar 2022
+
+* Removes automatic setup of logging. adds an option to disable console logging during setup. [9194b4b]
+
+### Version:3.4.1 -- 03 Mar 2022
+
+* Adds a centralized py2/3 compatible reload logic. [1f5db2a]
+* Avoid validators being duplicated 
+
+
+### Version:3.2.4 -- 27 Jan 2022
+
+* Corrects very poor downloader performance in Python3 when runing in daemon mode.
+
+### Version:3.2.3 -- 13 Jan 2022
+
+* Repaired broken uploader args resolution. Specifically, md5 caching was None by default, which was treated as OFF. [615bfbe]
+
+### Version:3.1.0 -- 16 Nov 2021
+
+* Adds a post_install script to reset the shebang. This avoids errors that could occur when the
+  Python installation in Companion is changed or removed. [3918011]
+* Conductor cmd-line now asks for python 3. [093d9ea]
+
+### Version:3.0.11 -- 21 Oct 2021
+
+* Rename original downloader to downloader and remove linux daemon downloader version. [6b54566]
+* Use a fallback folder for downloads if the output folder doesn't exist. Also support a comma
+  separated task id list. [fb40e8d]
+* conductor command finds python on Windows in a cleaner way now. [0ab3261]
+
+### Version:3.0.10 -- 01 Sep 2021
+
+* The Windows bat command is simplified. It just tries to use python.exe in the path, and if it fails it provides some help. [0ab3261]
+
+### Version:3.0.9 -- 27 Aug 2021
+
+* Fixes a bug where DCCs on Windows using Python2 would fail to upload because the result of a file
+  stat size was a long, and long was erroneousl removed from the type check while converting to python 3 compatibility.
+
+### Version:3.0.7 -- 03 Aug 2021
+
+* Fix urllib version because of an error when using proxies. See https://stackoverflow.com/a/66669839/179412 [b89593e]
+* Keep auth_url for backwards compat. [1bfe5ed]
+* Eliminate use of project_url such as atomic-light-001. [b687f7a]
+
+### Version:3.0.6 -- 20 Jul 2021
+
+* Fixed a bug where filenames and md5s were failing assertions in py2 based hosts, like C4DR21 and Maya2019. [0ad6a88]
+
+### Version:3.0.5 -- 19 Jul 2021
+
+* Requests exceptions attrs changed, so we now use a try except block for both eventualities. [5f198c8]
+* Keep requests under 2.25.1 for m19 because chardet is replaced in 2.26.0 with a buggy replacement charset_normalizer. [f5ebadb]
+
+### Version:3.0.4 -- 17 Jul 2021
+
+* Fixed bug where server.py global vars were not reset at start of an auth run(). This caused a
+  problem when credentials were manually deleted during a single python session, which could happen
+  if we suggest that course of action in a support session. [6b4132c]
+
+### Version:3.0.3 -- 12 Jul 2021
+
+* Threading Isalive function was renamed to is_alive in py 3.9, so we now try both. [0070709]
+* Disable multiprocessing cached bearer token in order to work around a bug in c4d24, where the app
+  itself would respawn recursively if our plugin was registered.
+  [27afab9]
+* Use any python version to run the conductor command. Shebang looks for python, not python2. [fd13011]
+* Fix bug in pkgs and add windows path support. [fb7a71e]
+
+### Version:3.0.2 -- 27 Jun 2021
+
+* Remove the index.html file in favour of an inline string. [05fab98]
+
+### Version:3.0.1 -- 20 Jun 2021
+
+* Removes dependency on builtins which caused an error when running through Python2.7 [a37b118]
+* Better spawning for conductor command on Windows. It now searches the path for Python versions
+  with a preference for Python3 [ed11102]
+* Config is no longer a singleton instantiated on initialization. It can be force refreshed,
+  although that functionality is not yet utilized. [1407582]
+
+### Version:2.0.1 -- 10 Jun 2021
+
+* Adds Python 3 support for VFX Platform (CY2020) Maya2022, C4d23 etc. [fa5005b]
+
+### Version:1.0.3 -- 10 Jun 2021
+
+* Restored the please-close-your-browser index.html page that appears after authentication. [ba11cb1]
+
+### Version:1.0.2 -- 29 Apr 2021
+
+* Fix logging - use const for logger name. [38111bf]
+* Adds get_api_key_from_variable function. [cd57428]
+
+### Version:1.0.0 -- 07 Apr 2021
+
+* Version 1.0.0 is not backward compatible with older versions.  The functionality from sequence, gpath, and expander has been extracted to separate Py3 compatible packages. [25c64c6]
+
+### Version:0.3.0 -- 23 Mar 2021
+
+* Gpath supports dollar brace variables for context expansion. [ff2fae9]
+
+### Version:0.2.26 -- 11 Mar 2021
+
+* Better local dev flow and instructions. [4566a0b]
+
+### Version:0.2.25 -- 11 Mar 2021
+
+* Adds skulk to deps. [4c2dc89]
+* Developer install instructions.. [b9afd1d]
+
+### Version:0.2.20 -- 11 Mar 2021
+
+* Set up repo for Circle CI deploy. [e111736]
+
+### Version:0.2.19 -- 24 Feb 2021
+
+* Adds basename modifiers to expander. Example, use `<basename scenefile>` instead of `<scenename>`  [daf1af3]
+
+### Version:0.2.18 -- 15 Jan 2021
+
+* Adds expression resolution to expander class. [cbeb64e]
+* Unc support (#16)
+
+### Version:0.2.16 -- 07 Jan 2021
+
+* Gpath supports UNC paths. [7333433]
+
+### Version:0.2.15 -- 06 Nov 2020
+
+* Developer can switch between using test-fixtures and the real API within one session by using data.set_fixtures_dir() method. As a result, the DISK_CACHE env var is no longer used and has been deleted. [226b860]
+
+### Version:0.2.14 -- 21 Oct 2020
+
+* Repair windows command line executable. Added a bat file so that it is no longer necessary to call python explicitly. [cf9f19f]
+
+### Version:0.2.13 -- 08 Oct 2020
+
+* Adds README and CHANGELOG to PyPi description. [97a07dd]
+
+### Version:0.2.12 -- 04 Oct 2020
+
+* Catch unimplemented thread_count. [c64ad79]
+
+### Version:0.2.11 -- 01 Oct 2020
+
+* Package environment now allows exclusive override. [481851b]
+* Allow relative paths that start with letter, colon - it could happen. [241fc68]
+
+### Version:0.2.10 -- 08 Sep 2020
+
+* Gpath allow colons in paths. [9c19d3a]
+ 
+### Version:0.2.9 -- 06 Sep 2020
+
+* Sequence consumers must use factory. [01a7dd7]
+
+### Version:0.2.8 -- 03 Sep 2020
+
+* Tidy and remove dependency on future. [0c2f72c]
+
+### Version:0.2.7 -- 28 Aug 2020
+
+* Adds cycle_progressions chunk strategy for improved scout frame distribution. [9b42288]
+* Remove yaml config (#8)
+* Remove config file references
+* Adds jwt domain validation for credentials file so token is renewed when switching Google projects. 
+* Api_url defaults to same domain as auth_url
+
+### Version:0.2.6 -- 18 Aug 2020
+
+* Adds jwt domain validation for creds file. [0042b2b]
+* Remove config file references. [451896b]
+
+### Version:0.2.5 -- 11 Aug 2020
+
+* Production release
+
+### Version:0.2.4 -- 11 Aug 2020
+
+* Removed redshift package ids hack. [8d11367]
+
+### Version:0.2.3 -- 10 Aug 2020
+
+* Adds remove_missing files method to Gpath. [3b96796]
+* Adds validators base class. [c91ffc9] [b074cce]
+
+### Version:0.2.2 -- 08 Aug 2020
+
+* Temp workarounds for missing plugin-host links in packages
+* Remove "shared" request.session object. (#293)
+* Update httpbatchworker docstring (#291)
+* File api refactor multipart and tcp connection pooling (#290)
+* Multipart updates to workers
+* Add make_preapred_request for s3 calls to remove transfer-encoding header being added. update descriptions and v2 endpoints. Add content-length for s3 calls. don't return response object on s3 calls which can cause a build up of memory due to jobworker, return headers or none.
+* Add metric_store increments for aws presigned and multipart, cannot use chunked reader since generator does not have len function.
+* Use httpbatchworker response to avoid additional os.stat calls. [7c76c46]
+
+
+### Version:0.2.0 -- 01 Aug 2020
+
+* Use explicit entry point script. [dfd9da3]
+* The coredata singleton that holds instance_types, projects, and software must now be initialized with software product. This is to avoid having to specify the product on every call to data(). [db0fcb0]
+* Expander context made public to indicate to other objects that they may retrieve the context. [a457aa1]
+
+### Version:0.1.15 -- 27 Jul 2020
+
+* Made post install script runnable. [8dce89f]
+
+### Version:0.1.14 -- 27 Jul 2020
+
+* Simplified post install script - no longer interactive. [6bba8af]
+
+### Version:0.1.13 -- 26 Jul 2020
+
+* Refactored post install setup script. [3fbba5e]
+
+
+### Version:0.1.12 -- 25 Jul 2020
+
+* Setup can accept cmdline args for non-wizard mode. [f195b7d]
+* Adds safe mode to expander. [95f6cfd]
+
+### Version:0.1.11 -- 22 Jul 2020
+
+* Adds Setup wizard to make installation easier. [a06d610]
+
+### Version:0.1.10 -- 21 Jul 2020
+
+* Use cio to differentiate from conductor. [3f49451]
+* Projects and instance types sorted for fixtures. [4a0f833]
+
+### Version:0.1.9 -- 10 Jul 2020
+
+* Implement data singletons here and remove from conductor-maya. [d31aeaa]
+
+### Version:0.1.8 -- 06 Jul 2020
+
+* Repair some path list issues found while adding remove method. [7368cc2]
+
+### Version:0.1.7 -- 04 Jul 2020
+
+* Adds a remove method to pathlist. [5712d2c]
+* Wip configure script. [e7f6ea9]
+
+### Version:0.1.6 -- 29 Jun 2020
+
+* Fix bad path to conductor cmd. [5be12af]
+* Packages: Remove tree property and make _tree -> tree. [1e6ae34]
+
+### Version:0.1.5 -- 22 Jun 2020
+
+* Remove src. [a366047]
+* Newline in requirements. [a4cd9d3]
+* Missing member. [b2bfb6d]
+* Fix tests. [c9498c9]
+* Imports ciocore. [916651e]
+* Flatten. [c88afae]
+* Flatter hierarchy. [6906e23]
+* Slug means local slug. [0db16e0]
+* Init declare namespace. [84d16b3]
+* Use underscore name. [1aae967]
+* Correct namespace config. [22a09f3]
+
+
+### Version:0.1.4 -- 14 Jun 2020
+
+* Ignore build dir. [8080df5]
