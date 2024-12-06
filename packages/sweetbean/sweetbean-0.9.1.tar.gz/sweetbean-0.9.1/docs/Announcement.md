@@ -1,0 +1,3 @@
+- Stimulus enhancement: Language model support for ROK
+- Additional synthetic participants: Support for vision models as synthetic participants
+- Automated Documentation: Automatically generate a method section from code via large language models
