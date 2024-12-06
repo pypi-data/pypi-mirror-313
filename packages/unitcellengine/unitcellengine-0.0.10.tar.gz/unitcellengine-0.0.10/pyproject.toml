@@ -1,0 +1,103 @@
+[project]
+name = "unitcellengine"
+description = "Lattice unitcell geometry and analysis framework"
+version = "0.0.10"
+readme = "README.md"
+requires-python = ">=3.10, <3.12"
+license = {file = "LICENSE"}
+keywords = ["unitcell", "unitcellhub", "lattice", "homogenization", "finite element"]
+authors = [
+    {name = "Ryan Watkins", email = "watkinrt@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+]
+dependencies = [
+    "dill>=0.3.9",
+    "gmsh>=4.13.1",
+    "mkl-service>=2.4.1",
+    "numba>=0.60.0",
+    "numpy<2.0",
+    "pandas>=2.2.3",
+    "plotly>=5.24.1",
+    "pyamg>=5.2.1",
+    "pypardiso>=0.4.6",
+    "pyvista>=0.44.1",
+    "scikit-image>=0.24.0",
+    "scipy>=1.14.1",
+    "tables>=3.10.1",
+    "trimesh>=4.5.1",
+    "unitcellsdf>=0.0.2",
+    "vtk>=9.3.1",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/unitcellhub/unitcellengine"
+"Bug Reports" = "https://github.com/unitcellhub/unitcellengine/issues"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+# This is needed to properly set the path for the pytest framework
+# https://stackoverflow.com/questions/50155464/using-pytest-with-a-src-layer
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.bumpversion]
+current_version = "0.0.10"
+parse = """(?x)
+    (?P<major>0|[1-9]\\d*)\\.
+    (?P<minor>0|[1-9]\\d*)\\.
+    (?P<patch>0|[1-9]\\d*)
+    (?:
+        -                             # dash separator for pre-release section
+        (?P<pre_l>[a-zA-Z-]+)         # pre-release label
+        (?P<pre_n>0|[1-9]\\d*)        # pre-release version number
+    )?                                # pre-release section is optional
+"""
+serialize = [
+    "{major}.{minor}.{patch}-{pre_l}{distance_to_latest_tag}",
+    "{major}.{minor}.{patch}",
+]
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+regex = false
+ignore_missing_version = false
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+pre_commit_hooks = ["uv sync", "git add uv.lock"]
+commit_args = ""
+
+[tool.bumpversion.parts.pre_l]
+values = ["dev", "final"]
+optional_value = "final"
+
+[[tool.bumpversion.files]]
+filename = "src/unitcellengine/__init__.py"
+search = "version = \"{current_version}\""
+replace =  "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "pytest>=8.3.3",
+    "python-dotenv>=1.0.1",
+    "tqdm>=4.66.5",
+    "twine>=5.1.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
