@@ -1,0 +1,194 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pf8087-csu-csip-oms-session
+  namespace: csip
+  labels:
+    app: pf8087-csu-csip-oms-mongo
+    tier: backend
+spec:
+  ports:
+    # the port that this service should serve on
+  - port: 27017
+    targetPort: mongo-port
+  selector:
+    app: pf8087-csu-csip-oms-mongo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pf8087-csu-csip-oms-session
+  namespace: csip
+spec:
+  # this replicas value is default
+  # modify it according to your case
+  #replicas: 1
+  selector:
+    matchLabels: 
+        app: pf8087-csu-csip-oms-mongo
+  template:
+    metadata:
+      labels:
+        app: pf8087-csu-csip-oms-mongo
+    spec:
+      containers:
+      - name: session-store
+        #image: mongo:3.6  
+        image: mvertes/alpine-mongo:3.6.5-0  
+        resources:
+          requests:
+            cpu: 250m
+            memory: 48M
+        ports:
+        - name: mongo-port
+          containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pf8087-csu-csip-oms
+  namespace: csip
+  labels:
+    app: pf8087-csu-csip-oms
+    tier: frontend
+    context: csip-oms
+    context_version: '0.1.115-2.7.53'
+    platform: csu
+    platform_port: '8087'
+spec:
+  # if your cluster supports it, uncomment the following to automatically create
+  # an external load-balanced IP for the csip-mini service.
+  #type: LoadBalancer
+  ports:
+    # the port that this service should serve on
+  - port: 48087
+    targetPort: http-port
+    protocol: TCP
+  selector:
+    app: pf8087-csu-csip-oms
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pf8087-csu-csip-oms
+  namespace: csip
+spec:
+  # this replicas value is default
+  # modify it according to your case
+  # replicas: 8
+  selector:
+    matchLabels: 
+        app: pf8087-csu-csip-oms
+  template:
+    metadata:
+      labels:
+        app: pf8087-csu-csip-oms
+    spec:
+      containers:
+      - name: pf8087-csu-csip-oms-tomcat
+        image: omslab/csip-oms:0.1.115-2.7.53 # Version :0.1.115-2.7.53
+        #volumeMounts:
+        #- mountPath: "/mnt/csip-dem"
+        #  name: csip-dem
+        #- mountPath: "/mnt/csip-oms"
+        #  name: cephfs
+        livenessProbe:
+          httpGet:
+            path: /csip-oms
+            port: http-port
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          periodSeconds: 120 
+        resources:
+          requests:
+            cpu: '8'
+            memory: '256M'
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        - name: session_ip
+          value: pf8087-csu-csip-oms-session  
+        - name: csip__remote__acl
+          #value: '10.2.228.0/24 10.205.0.0/19 10.84.0.0/16 10.3.0.0/16 129.82.0.0/16'
+          value: 'localhost 127.0.0.1'
+        - name: csip__session__backend
+          value: mongodb
+        - name: csip__session__mongodb__uri
+          value: 'mongodb://${session_ip}:27017/csip'  
+        - name: csip__archive__backend
+          value: 'none'     
+        - name: csip__archive__max__filesize
+          value: '500MB'     
+        - name: csip__archive__mongodb__uri
+          value: 'mongodb://csip.engr.colostate.edu:8095/8087_csu_csip-oms?serverSelectionTimeoutMS=1000'     
+        - name: csip__data__dir
+          value: '/mnt/csip-oms'     
+        - name: csip__keepworkspace
+          value: 'false'     
+        - name: csip__session__ttl
+          value: 'PT95S'           
+        ports:
+        - name: http-port
+          containerPort: 8080 
+#      volumes:  # Remove cephfs and other setting
+      # - name: csip-dem
+      #   cephfs:
+      #     monitors:
+      #     - "129.82.20.235:6789"
+      #     user: admin
+      #     secretRef:
+      #       name: new-ceph-secret
+      #     path: "/csip-data/csip-dem"
+      #     readOnly: true
+      # - name: cephfs
+      #   cephfs:
+      #     monitors:
+      #     - "129.82.20.235:6789"
+      #     user: admin
+      #     secretRef:
+      #       name: new-ceph-secret
+      #     path: "/csip-data/csip-oms"
+      #     readOnly: true   
+
+#---
+#apiVersion: autoscaling/v1
+#kind: HorizontalPodAutoscaler
+#metadata:
+#  name: pf8087-csu-csip-oms-autoscaler
+#  namespace: csip 
+#spec:
+#  scaleTargetRef:
+#    apiVersion: apps/v1
+#    kind: Deployment
+#    name: pf8087-csu-csip-oms
+#  minReplicas: 1
+#  maxReplicas: 1
+#  targetCPUUtilizationPercentage: 70
+#-------------------
+
+#
+# HOW TO SETUP MINIKUBE
+#
+
+# Start Minikube
+# minikube start
+
+# Minikube Replace:
+#alias kubectl="minikube kubectl --"
+
+# Create namepsace
+# kubectl create namespace csip
+
+# Deploy
+#sudo kubectl create -f start.yaml
+
+# sleep 60
+
+# Open interface
+# minikube service pf8087-csu-csip-oms -n csip
+
+# Get status
+# kubectl get po -A
+
+# Destroy everything
+# minikube delete
