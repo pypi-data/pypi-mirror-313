@@ -1,0 +1,14 @@
+stages:
+    - release
+
+pypi:
+    image: docker.km3net.de/base/python:3.10
+    stage: release
+    cache: {}
+    script:
+        - cp $PYPIRC_CONFIG ~/.pypirc
+        - pip install -U twine setuptools setuptools_scm
+        - python setup.py sdist
+        - twine upload dist/*
+    only:
+        - tags
