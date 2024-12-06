@@ -1,0 +1,51 @@
+default_language_version:
+  python: "3"
+repos:
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.6.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-toml
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+  - repo: https://github.com/provinzkraut/unasyncd
+    rev: "v0.8.1"
+    hooks:
+      - id: unasyncd
+        additional_dependencies: ["ruff"]
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: "v0.8.2"
+    hooks:
+      # Run the linter.
+    - id: ruff
+      types_or: [ python, pyi ]
+      args: [ --fix ]
+    # Run the formatter.
+    - id: ruff-format
+      types_or: [ python, pyi ]
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        exclude: "uv.lock|examples/us_state_lookup.json"
+        additional_dependencies:
+          - tomli
+  - repo: https://github.com/sphinx-contrib/sphinx-lint
+    rev: "v1.0.0"
+    hooks:
+      - id: sphinx-lint
+  - repo: local
+    hooks:
+      - id: pypi-readme
+        name: pypi-readme
+        language: python
+        entry: python tools/pypi_readme.py
+        types: [markdown]
