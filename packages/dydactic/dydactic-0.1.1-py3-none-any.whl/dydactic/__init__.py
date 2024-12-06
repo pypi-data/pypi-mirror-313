@@ -1,0 +1,1 @@
+from dydactic.validate import validate
