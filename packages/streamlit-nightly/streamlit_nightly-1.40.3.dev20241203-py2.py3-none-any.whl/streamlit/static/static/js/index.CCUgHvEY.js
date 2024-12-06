@@ -1,0 +1,2 @@
+import{aG as i,j as e,aH as c,aY as B,aF as h,aI as f}from"./index.BzM4FHZT.js";function p(n){const{disabled:s,element:t,widgetMgr:o,width:a,fragmentId:l}=n,d={width:a},r=t.type==="primary"?i.PRIMARY:i.SECONDARY,u=t.help?a:!0;return e("div",{className:"stButton","data-testid":"stButton",style:d,children:e(c,{help:t.help,children:e(B,{kind:r,size:h.SMALL,disabled:s,fluidWidth:t.useContainerWidth?u:!1,onClick:()=>o.setTriggerValue(t,{fromUi:!0},l),children:e(f,{icon:t.icon,label:t.label})})})})}export{p as default};
+//# sourceMappingURL=index.CCUgHvEY.js.map
