@@ -1,0 +1,10 @@
+[env]
+_.python.venv = { path = ".venv", create = false }
+
+[tasks.bump]
+run = """
+#!/usr/bin/env bash
+
+v="$(uvx --from=toml-cli toml get --toml-path=pyproject.toml project.version)"
+uvx --from bump2version bumpversion --allow-dirty --current-version "$v" "$1" pyproject.toml
+"""
