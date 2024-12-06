@@ -1,0 +1,429 @@
+# YAML configuration file for AVR XT core architecture
+#
+# Copyright 2022-2024 Clement Savergne <csavergne@yahoo.com>
+#
+# This file is part of yasim-avr.
+#
+# yasim-avr is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# yasim-avr is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with yasim-avr.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+#========================================================================================
+SLPCTRL:
+    registers:
+        - name: CTRLA
+          offset: 0x00
+          fields:
+            SEN: { kind: BIT, pos: 0, one: on, zero: off }
+            SMODE:
+                kind: ENUM
+                LSB: 1
+                MSB: 2
+                values: [ IDLE, STANDBY, PDOWN ]
+
+    config:
+        modes:
+            0x00: Idle
+            0x01: Standby
+            0x02: PowerDown
+        rb_mode: CTRLA/SMODE
+        rb_enable: CTRLA/SEN
+
+#========================================================================================
+RSTCTRL:
+    registers:
+        - name: RSTFR
+          offset: 0x00
+          fields:
+            PORF: { kind: BIT, pos: 0 }
+            BORF: { kind: BIT, pos: 1 }
+            EXTRF: { kind: BIT, pos: 2 }
+            WDRF: { kind: BIT, pos: 3 }
+            SWRF: { kind: BIT, pos: 4 }
+            UPDIRF: { kind: BIT, pos: 5, supported: no }
+
+        - name: SWRR
+          offset: 0x01
+          fields:
+            SWRE: { kind: BIT, pos: 0 }
+
+#========================================================================================
+CPUINT:
+    registers:
+        - name: CTRLA
+          offset: 0x00
+          protected: CCP
+          fields:
+            LVL0RR: { kind: BIT, pos: 0 }
+            CVT: { kind: BIT, pos: 5 }
+            IVSEL: { kind: BIT, pos: 6 }
+
+        - name: STATUS
+          offset: 0x01
+          readonly: yes
+          fields:
+            LVL0EX: { kind: BIT, pos: 0 }
+            LVL1EX: { kind: BIT, pos: 1 }
+            NMIEX: { kind: BIT, pos: 7 }
+
+        - name: LVL0PRI
+          offset: 0x02
+          kind: INT
+
+        - name: LVL1VEC
+          offset: 0x03
+          kind: INT
+
+#========================================================================================
+CPU:
+    registers:
+        - name: CCP
+          address: 0x0034
+
+        - name: SP
+          address: 0x003D
+          size: 2
+
+        - name: SREG
+          address: 0x003F
+          fields:
+            C: { kind: BIT, pos: 0 }
+            Z: { kind: BIT, pos: 1 }
+            N: { kind: BIT, pos: 2 }
+            V: { kind: BIT, pos: 3 }
+            S: { kind: BIT, pos: 4 }
+            H: { kind: BIT, pos: 5 }
+            T: { kind: BIT, pos: 6 }
+            I: { kind: BIT, pos: 7 }
+
+#========================================================================================
+CLKCTRL:
+    registers:
+        - name: MCLKCTRLA
+          offset: 0x00
+          fields:
+            CLKSEL:
+                kind: ENUM
+                LSB: 0
+                MSB: 1
+                values: [ OSC20M, OSCULP32K, XOSC32K, EXTCLK ]
+            CLKOUT: { kind: BIT, pos: 7, one: enabled, zero: disabled }
+
+        - name: MCLKCTRLB
+          offset: 0x01
+          fields:
+            PEN: { kind: BIT, pos: 0, one: enabled, zero: disabled }
+            PDIV:
+                kind: ENUM
+                LSB: 1
+                MSB: 4
+                values: [ 2, 4, 8, 16, 32, 64, 6, 10, 12, 24, 48 ]
+
+        - name: MCLKLOCK
+          offset: 0x02
+          fields:
+            LOCKEN: { kind: BIT, pos: 0, one: locked, zero: unlocked }
+
+        - name: MCLKSTATUS
+          offset: 0x03
+          fields:
+            SOSC: { kind: BIT, pos: 0, one: stable, zero: unstable, readonly: yes }
+            OSC20MS: { kind: BIT, pos: 4, one: stable, zero: unstable, readonly: yes }
+            OSC32KS: { kind: BIT, pos: 5, one: stable, zero: unstable, readonly: yes }
+            XOSC32KS: { kind: BIT, pos: 6, one: stable, zero: unstable, readonly: yes }
+            EXTS: { kind: BIT, pos: 7, one: started, zero: not started, readonly: yes }
+
+        - name: OSC20MCTRLA
+          offset: 0x10
+          fields:
+            RUNSTDBY: { kind: BIT, pos: 1}
+
+        - name: OSC20MCALIBA
+          offset: 0x11
+          fields:
+            CAL20M:
+                kind: INT
+                LSB: 0
+                MSB: 6
+
+        - name: OSC20MCALIBB
+          offset: 0x12
+          fields:
+            TEMPCAL20M:
+                kind: INT
+                LSB: 0
+                MSB: 3
+            LOCK: { kind: BIT, pos: 7, one: locked, zero: unlocked, readonly: yes }
+
+    config:
+        regs:
+            - MCLKCTRLA
+            - [ MCLKCTRLB, 0x11 ]
+            - MCLKLOCK
+            - MCLKSTATUS
+            - OSC20MCTRLA
+            - OSC20MCALIBA
+            - OSC20MCALIBB
+
+#========================================================================================
+NVMCTRL:
+    registers:
+        - name: CTRLA
+          offset: 0x00
+          fields:
+            CMD:
+                kind: ENUM
+                LSB: 0
+                MSB: 2
+                values: [ NONE, WP, ER, ERWP, PBC, CHER, EEER, WFU ]
+
+        - name: CTRLB
+          offset: 0x01
+          fields:
+            APCWP: { kind: BIT, pos: 0, supported: no }
+            BOOTLOCK: { kind: BIT, pos: 1, supported: no }
+
+        - name: STATUS
+          offset: 0x02
+          fields:
+            FBUSY: { kind: BIT, pos: 0, readonly: yes, one: busy, zero: idle }
+            EEBUSY: { kind: BIT, pos: 1, readonly: yes, one: busy, zero: idle }
+            WRERROR: { kind: BIT, pos: 2, readonly: yes, one: error, zero: ok }
+
+        - name: INTCTRL
+          offset: 0x03
+          fields:
+            EEREADY: { kind: BIT, pos: 0, one: enable, zero: disable }
+
+        - name: INTFLAGS
+          offset: 0x04
+          fields:
+            EEREADY: { kind: BIT, pos: 0 }
+
+        - name: DATA
+          offset: 0x06
+          size: 2
+          kind: INT
+          supported: no
+
+        - name: ADDR
+          offset: 0x08
+          size: 2
+          kind: INT
+          supported: no
+
+    config:
+       buffer_erase_delay: 7
+       page_write_delay: 2000
+       page_erase_delay: 2000
+       chip_erase_delay: 4000
+       eeprom_erase_delay: 4000
+
+#========================================================================================
+MISC:
+    registers:
+        - name: GPIOR0
+          address: 0x001C
+
+        - name: GPIOR1
+          address: 0x001D
+
+        - name: GPIOR2
+          address: 0x001E
+
+        - name: GPIOR3
+          address: 0x001F
+
+        - name: REVID
+          address: 0x0F01
+
+        - name: DEVID
+          address: 0x1100
+          readonly: true
+          kind: ARRAY
+          size: 3
+
+        - name: SERNUM
+          address: 0x1103
+          readonly: true
+          kind: ARRAY
+          size: 10
+
+        - name: OSCCAL16M0
+          address: 0x1118
+          readonly: true
+          fields:
+            OSCCAL16M:
+                kind: INT
+                LSB: 0
+                MSB: 6
+
+        - name: OSCCAL16M1
+          address: 0x1119
+          readonly: true
+          fields:
+            OSCCAL16MTCAL:
+                kind: INT
+                LSB: 0
+                MSB: 3
+
+        - name: OSCCAL20M0
+          address: 0x111A
+          readonly: true
+          fields:
+            OSCCAL20M:
+                kind: INT
+                LSB: 0
+                MSB: 6
+
+        - name: OSCCAL20M1
+          address: 0x111B
+          readonly: true
+          fields:
+            OSCCAL20MTCAL:
+                kind: INT
+                LSB: 0
+                MSB: 3
+
+        - name: TEMPSENSE0
+          address: 0x1120
+          readonly: true
+          kind: INT
+
+        - name: TEMPSENSE1
+          address: 0x1121
+          readonly: true
+          kind: INT
+
+        - name: OSC16ERR3V
+          address: 0x1122
+          readonly: true
+          kind: INT
+
+        - name: OSC16ERR5V
+          address: 0x1123
+          readonly: true
+          kind: INT
+
+        - name: OSC20ERR3V
+          address: 0x1124
+          readonly: true
+          kind: INT
+
+        - name: OSC20ERR5V
+          address: 0x1125
+          readonly: true
+          kind: INT
+
+    config:
+        reg_base_gpior: 0x1C
+        gpior_count: 4
+        reg_base_sigrow: 0x1100
+        reg_revid: 0x0F01
+        dev_id:
+
+#========================================================================================
+FUSES:
+    registers:
+        - name: WDTCFG
+          offset: 0x00
+          readonly: true
+          fields:
+            PERIOD:
+                kind: ENUM
+                LSB: 0
+                MSB: 3
+                values: [ OFF, 8CLK, 16CLK, 32CLK,
+                          64CLK, 128CLK, 256CLK, 512CLK,
+                          1KCLK, 2KCLK, 4KCLK, 8KCLK ]
+            WINDOW:
+                kind: ENUM
+                LSB: 4
+                MSB: 7
+                values: [ OFF, 8CLK, 16CLK, 32CLK,
+                          64CLK, 128CLK, 256CLK, 512CLK,
+                          1KCLK, 2KCLK, 4KCLK, 8KCLK ]
+
+        - name: BODCFG
+          offset: 0x01
+          readonly: yes
+          supported: no
+
+        - name: OSCCFG
+          offset: 0x02
+          readonly: yes
+          fields:
+            FREQSEL:
+                kind: ENUM
+                LSB: 0
+                MSB: 1
+                values: { 1: 16MHz, 2: 20MHz }
+            OSCLOCK: { kind: BIT, pos: 7, one: locked, zero: unlocked }
+
+        - name: SYSCFG0
+          offset: 0x05
+          readonly: yes
+          fields:
+            EESAVE: { kind: BIT, pos: 0, supported: no }
+            RSTPINCFG: { kind: BIT, pos: 3, supported: no }
+            CRCSRC:
+                kind: ENUM
+                LSB: 6
+                MSG: 7
+                supported: no
+
+        - name: SYSCFG1
+          offset: 0x06
+          readonly: yes
+          fields:
+            SUT:
+                kind: ENUM
+                LSB: 0
+                MSG: 2
+                supported: no
+
+        - name: APPEND
+          offset: 0x07
+          readonly: yes
+          supported: no
+          kind: INT
+
+        - name: BOOTEND
+          offset: 0x08
+          readonly: yes
+          supported: no
+          kind: INT
+
+        - name: LOCKBIT
+          offset: 0x0A
+          readonly: yes
+          supported: no
+          kind: INT
+
+#========================================================================================
+USERROW_64:
+    registers:
+        - name: USERROW
+          offset: 0x00
+          readonly: true
+          kind: ARRAY
+          size: 64
+
+#========================================================================================
+USERROW_32:
+    registers:
+        - name: USERROW
+          offset: 0x00
+          readonly: true
+          kind: ARRAY
+          size: 32
