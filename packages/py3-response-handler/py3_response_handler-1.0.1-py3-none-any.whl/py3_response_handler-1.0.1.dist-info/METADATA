@@ -1,0 +1,84 @@
+Metadata-Version: 2.1
+Name: py3-response-handler
+Version: 1.0.1
+Summary: A Response Handler Library By Guolei
+Home-page: https://github.com/guolei19850528/py3_response_handler
+Author: guolei
+Author-email: 174000902@qq.com
+License: MIT
+Requires-Python: >=3.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests
+Requires-Dist: addict
+Requires-Dist: retrying
+Requires-Dist: jsonschema
+Requires-Dist: xmltodict
+Requires-Dist: beautifulsoup4
+Requires-Dist: lxml
+Requires-Dist: html5lib
+
+# py3-response-handler
+
+A Python3 Response Handler Library By Guolei
+
+# Installation
+
+```shell
+pip install py3-response-handler
+```
+
+# Example
+
+## Quickstart
+
+### requests.Response Handler
+
+```python
+import requests
+
+from py3_response_handler import Handler,HandlerType
+
+response = requests.get("https://www.google.com")
+
+response_handler=Handler.instance(HandlerType.REQUESTS_RESPONSE_HANDLER)
+
+# requests.Response object
+response_handler.response(response)
+
+# requests.Response object content
+response_handler.content(response, 200)
+
+# requests.Response object text
+response_handler.text(response, 200)
+
+# requests.Response object text to bs4.Beautifulsoup object
+response_handler.text_to_beautifulsoup(response, 200)
+
+# requests.Response object json
+response_handler.json(response, 200)
+
+# requests.Response object json to addict.Dict object
+response_handler.json_to_addict(response, 200)
+```
+
+## Advanced Usage
+
+### requests.Response Handler
+
+```python
+import requests
+from requests import Response
+from py3_response_handler.requests import ResponseHandler
+
+
+class MyResponseHandler(ResponseHandler):
+    def your_function(self, response: Response):
+        # your code
+        pass
+
+
+response = requests.get("https://www.google.com")
+my_response_handler = MyResponseHandler()
+my_response_handler.your_function(response)
+```
