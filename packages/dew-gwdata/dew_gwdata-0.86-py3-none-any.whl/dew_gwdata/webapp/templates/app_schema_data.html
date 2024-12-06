@@ -1,0 +1,52 @@
+{% extends "app_layout_schema.html" %}
+
+{% block content %}
+
+<p>
+    <form>
+        <p>
+            <label>Owner: </label>
+            <input type="text" name="owner" value="{{ owner }}" />
+            <br>
+            <label>Table or view name: </label>
+            <input type="text" name="table_name" value="{{ table_name }}" />
+            <br>
+            <label>Maximum number of records shown: </label>
+            <input type="number" name="limit" value={{ limit }} />
+            <br>
+            <label>Filter by: </label>
+            <input type="text" name="filter_by" value="{{ filter_by }}"/>
+            <br>
+            <label>Select clause: </label>
+            <input type="text" name="select" value="{{ select }}" />
+            <br>
+            <label>Where clause: </label>
+            <input type="text" name="where" value="{{ where }}" />
+            <br>
+            <label>Order by clause: </label>
+            <input type="text" name="order_by" value="{{ order_by }}" />
+            <br>
+            <label>Environment: </label>
+            <input type="select" list="envs" name="env" value="{{ env }}" />
+            <datalist id="envs">
+                <option value="prod"></option>
+                <option value="test"></option>
+            </datalist>
+            <br>
+            <input type="checkbox" name="transpose" value="Y" {% if transpose %}checked{% endif %}/>
+            <label>Transpose</label>
+            <br>
+            <button type="submit" formaction="/app/schema_data">
+                Search
+            </button>
+        </p>
+    </form>    
+</p>
+
+{% if is_view %}
+<p><a href="/app/schema_view?owner={{ owner }}&view_name={{ table_name }}">See SQL definition of view</a>.</p>
+{% endif %}
+  
+{{ data_html|safe }}
+
+{% endblock %}

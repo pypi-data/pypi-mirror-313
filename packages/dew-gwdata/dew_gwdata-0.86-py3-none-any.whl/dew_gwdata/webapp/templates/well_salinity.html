@@ -1,0 +1,56 @@
+{% extends "app_layout_well.html" %}
+
+{% block head_extra %}
+<script type="text/javascript" src="/static/dygraph.js"></script>
+<link rel="stylesheet" type="text/css" src="/static/dygraph.css" />
+{% endblock %}
+
+{% block header_title %}
+{{ title }} - Salinity
+{% endblock %}
+
+{% block title %}
+Salinity - {{ title }}
+{% endblock %}
+
+{% block well_content %}
+
+    <p>Back to <a href="/app/well_summary?dh_no={{ well.dh_no }}&env={{ env }}">well summary</a></p>
+
+    <div id="chart-legend"></div><br />
+    <div id="chart" style="width: 1000px; height: 430px;"></div>
+
+    {{ table|safe }}
+
+<script type="text/javascript">
+Dygraph.onDOMready(function onDOMready() {
+    g = new Dygraph(
+        document.getElementById("chart"),
+        [{{ chart_data|safe }}],
+        {
+            labels: ["x", "EC", "TDS"],
+            resizable: "both",
+            drawPoints: true,
+            pointSize: 3,
+            legend: "always",
+            labelsDiv: "chart-legend",
+            showRangeSelector: true,
+            series: {
+                EC: {
+                    axis: "y1"
+                },
+                TDS: {
+                    axis: "y2"
+                }
+            },
+            axes: {
+                y: {
+                    axisLabelWidth: 60
+                },
+            }
+        } 
+    );
+});
+</script>
+
+{% endblock %}

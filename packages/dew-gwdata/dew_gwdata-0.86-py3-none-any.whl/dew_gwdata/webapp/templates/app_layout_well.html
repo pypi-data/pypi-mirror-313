@@ -1,0 +1,50 @@
+{% extends "app_layout.html" %}
+
+{% block header_title %}
+    {{ title }}    
+{% endblock %}
+
+{% block title %}
+    {{ title }}    
+{% endblock %}
+
+{% block navbar %}
+
+{{ super() }}
+	{% include "app_navbar_wells_dropdown.html" %}
+    <div class="dropdown">
+        <button class="dropdown-button">
+            {{ well.title }} <i class="fa fa-caret-down"></i>
+        </button>
+  		<div class="dropdown-content">
+			<a href="/app/well_summary?dh_no={{ well.dh_no }}&env={{ env }}" class="dropdown-item">Well summary</a>
+			<a href="/app/well_construction?dh_no={{ well.dh_no }}&env={{ env }}" class="dropdown-item">Well construction</a>
+			<a href="/app/well_drillhole_logs?dh_no={{ well.dh_no }}&env={{ env }}" class="dropdown-item">Drillhole logs</a>
+			<a href="/app/well_combined_water_level?dh_no={{ well.dh_no }}&env={{ env }}" class="dropdown-item">Combined water levels</a>
+			<a href="/app/well_manual_water_level?dh_no={{ well.dh_no }}&env={{ env }}" class="dropdown-item">Manual water levels</a>
+			<a href="/app/well_logger_water_level?dh_no={{ well.dh_no }}&env={{ env }}" class="dropdown-item">Logger water levels</a>
+			<a href="/app/well_salinity?dh_no={{ well.dh_no }}&env={{ env }}" class="dropdown-item">Salinity</a>
+			<a href="/app/well_drillhole_document_images?dh_no={{ well.dh_no }}&env={{ env }}&inline=1&new_tab=1" class="dropdown-item">Drillhole document images</a>
+			<a href="/app/well_geophysical_logs?dh_no={{ well.dh_no }}&env={{ env }}" class="dropdown-item">Geophysical logs</a>
+			<a href="https://www.waterconnect.sa.gov.au/Systems/GD/Pages/Details.aspx?DHNO={{ well.dh_no }}" class="dropdown-item">
+				Groundwater Data <img src="/static/external-link.svg" width="14px" height="14px" />
+			</a>
+			<a href="https://water.data.sa.gov.au/Data/Location/Summary/Location/{{ well.unit_hyphen }}/Interval/Latest" class="dropdown-item">
+				AQ Web Portal <img src="/static/external-link.svg" width="14px" height="14px" />
+			</a>
+			<a href="https://minerals.sarig.sa.gov.au/Details.aspx?DRILLHOLE_NO={{ well.dh_no }}" class="dropdown-item">
+				SARIG <img src="/static/external-link.svg" width="14px" height="14px" />
+			</a>
+			<a href="http://bunyip:8091/well/{{ well.dh_no }}" class="dropdown-item">
+				Waterkennect <img src="/static/external-link.svg" width="14px" height="14px" />
+			</a>
+  		</div>
+	</div>
+{% endblock %}
+
+{% block content %}
+
+{% block well_content %}
+{% endblock %}
+
+{% endblock %}

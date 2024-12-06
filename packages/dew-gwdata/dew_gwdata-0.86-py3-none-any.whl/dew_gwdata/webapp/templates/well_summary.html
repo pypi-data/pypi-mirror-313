@@ -1,0 +1,71 @@
+{% extends "app_layout_well.html" %}
+
+{% block header_title %}
+{{ title }} - Well summary
+{% endblock %}
+
+{% block title %}
+Well summary - {{ title }}
+{% endblock %}
+
+{% block well_content %}
+
+    <div class="row">
+        <div class="col-1">
+            <h2>Summary</h2>
+            {{ well_table|safe }}
+        </div>
+        <div class="col-2">
+            {% if aqmon|length > 0 %}
+            <h2>Aquifers monitored</h2>
+            {{ aqmon_table|safe }}
+            {% endif %}
+
+            {% if const|length > 0 %}
+            <h2><a href="/app/well_construction?dh_no={{ well['dh_no'] }}&env={{ env }}">Construction</a></h2>
+            {{ const_table|safe }}
+            {% endif %}
+
+            {% if notes|length > 0 %}
+            <h2>Notes</h2>
+            {{ notes_table|safe }}
+            {% endif %}
+
+            {% if status|length > 0 %}
+            <h2>Status codes</h2>
+            {{ status_table|safe }}
+            {% endif %}
+            
+            {% if groups|length > 0 %}
+            <!-- <h2><a href="/app/wells_monitoring_networks_groups?dh_no={{ well['dh_no'] }}&env={{ env }}">Monitoring networks / drillhole groups</a></h2> -->
+            <h2>Monitoring networks / drillhole groups</h2>
+            {{ groups_table|safe }}
+            {% endif %}
+
+            {% if elev|length > 0 %}
+            <h2>Elevation</h2>
+            {{ elev_table|safe }}
+            {% endif %}
+
+            {% if files|length > 0 %}
+            <h2>Files</h2>
+            {{ files_table|safe }}
+            {% endif %}
+
+            {% if geophyslogs|length > 0 %}
+            <h2><a href="/app/well_geophysical_logs?dh_no={{ well['dh_no'] }}&env={{ env }}">Geophysical logs</a></h2>
+            {{ geophyslogs_table|safe }}
+            {% endif %}
+
+            {% if refs|length > 0 %}
+            <h2><a href="https://sarigbasis.pir.sa.gov.au/WebtopEw/ws/samref/sarig1/cat0/MSearch">SAMREF</a> (via SARIG) references</h2>
+            {{ refs_table|safe }}
+            {% endif %}
+            
+        </div>
+    </div>
+
+    
+    
+
+{% endblock %}
