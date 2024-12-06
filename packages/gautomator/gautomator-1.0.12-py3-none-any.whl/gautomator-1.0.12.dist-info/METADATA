@@ -1,0 +1,70 @@
+Metadata-Version: 2.1
+Name: gautomator
+Version: 1.0.12
+Author: Tencent WeTest
+Author-email: WeTest@wetest.net
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: lxml>=4.6.1
+Requires-Dist: wetest-osplatform
+
+# GAutomator Python Client
+
+## 安装
+
+支持python版本: 3.6+
+
+1. 使用pypi从公网pypi源安装
+```
+python3 -m pip install -U gautomator
+```
+
+2. 使用pip从公司的pypi源安装
+```
+python3 -m pip install -U gautomator -i https://mirrors.tencent.com/pypi/simple/ --extra-index-url https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple 
+```
+
+3. 直接从源码安装
+```
+git clone git@git.woa.com:CloudTesting/automation/GA-Python.git
+cd GA-Python
+python3 -m pip install -U -e .
+```
+
+## 使用
+
+### 初始化
+
+**Android**
+```python
+from gautomator.gautomator import GAutomator
+
+# 仅连接一台设备
+ga = GAutomator(device_type="android")
+
+# 连接多台设备
+ga = GAutomator(device_type="android", udid="your_android_serial_number")
+```
+
+**iOS**
+```python
+from gautomator.gautomator import GAutomator
+
+# 仅连接一台设备
+ga = GAutomator(device_type="ios")
+
+# 连接多台设备
+ga = GAutomator(device_type="ios", udid="your_ios_udid")
+```
+
+**端口转发**
+```python
+from gautomator.gautomator import GAutomator
+
+# 通过adb forward或idb relay进行端口转发
+$ adb forward tcp:<port> tcp:27029
+ga = GAutomator(device_type="local", udid="127.0.0.1", port=<port>)
+```
+
+- 快速入门请参考[sdk_client_test.py](./sdk_client_test.py)的代码。
+- iwiki: https://iwiki.woa.com/pages/viewpage.action?pageId=4008100651
