@@ -1,0 +1,180 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[project]
+authors = [
+  {name = "Frank Hoffmann", email = "15r10nk-git@polarbit.de"}
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Framework :: Pytest",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Testing",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+  "asttokens>=2.0.5",
+  "black>=23.3.0",
+  "click>=8.1.4",
+  "executing>=2.1.0",
+  "rich>=13.7.1",
+  "tomli>=2.0.0; python_version < '3.11'",
+  "typing-extensions"
+]
+description = "golden master/snapshot/approval testing library which puts the values right into your source code"
+keywords = []
+name = "inline-snapshot"
+readme = "README.md"
+requires-python = ">=3.8"
+version = "0.14.1"
+
+[project.entry-points.pytest11]
+inline_snapshot = "inline_snapshot.pytest_plugin"
+
+[project.urls]
+Changelog = "https://15r10nk.github.io/inline-snapshot/latest/changelog/"
+Discussions = "https://github.com/15r10nk/inline-snapshots/discussions"
+Documentation = "https://15r10nk.github.io/inline-snapshot/latest"
+Funding = "https://github.com/sponsors/15r10nk"
+Homepage = "https://15r10nk.github.io/inline-snapshot/latest"
+Issues = "https://github.com/15r10nk/inline-snapshots/issues"
+Repository = "https://github.com/15r10nk/inline-snapshot/"
+
+[tool.commitizen]
+major_version_zero = true
+tag_format = "v$major.$minor.$patch$prerelease"
+version_files = [
+  "src/inline_snapshot/__init__.py:__version__"
+]
+version_provider = "pep621"
+
+[tool.coverage.paths]
+inline_snapshot = ["src/inline_snapshot", "*/inline_snapshot/src/inline_snapshot"]
+tests = ["tests", "*/inline_snapshot/tests"]
+
+[tool.coverage.report]
+exclude_lines = ["assert False", "raise NotImplemented", "# pragma: no cover", "if TYPE_CHECKING:"]
+
+[tool.coverage.run]
+branch = true
+data_file = "$TOP/.coverage"
+omit = [
+  "src/inline_snapshot/__about__.py"
+]
+parallel = true
+source_pkgs = ["inline_snapshot", "tests"]
+
+[tool.hatch.envs.coverage]
+dependencies = [
+  "coverage"
+]
+env-vars.TOP = "{root}"
+scripts.report = "coverage html"
+
+[tool.hatch.envs.docs]
+dependencies = [
+  "markdown-exec[ansi]>=1.8.0",
+  "mkdocs>=1.4.2",
+  "mkdocs-material[imaging]>=9.5.17",
+  "mike",
+  "mkdocstrings[python]>=0.19.0",
+  "replace-url @ {root:uri}/docs/plugins",
+  "pytest",
+  "black"
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build"
+deploy = "mkdocs gh-deploy"
+export-deps = "pip freeze"
+serve = "mkdocs serve"
+
+[tool.hatch.envs.cog]
+dependencies=["cogapp","lxml","requests"]
+scripts.update="cog -r docs/**.md"
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.13", "3.12", "3.11", "3.10", "3.9", "3.8","pypy3.9","pypy3.10"]
+pytest=["8.3.3","8.3.4"]
+
+[tool.hatch.envs.hatch-test.overrides]
+matrix.pytest.dependencies = [
+  { value = "pytest==8.3.3", if = ["8.3.3"] },
+  { value = "pytest>=8.3.4", if = ["8.3.4"] },
+]
+
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
+  "dirty-equals>=0.7.0",
+  "hypothesis>=6.75.5",
+  "mypy>=1.2.0",
+  "pyright>=1.1.359",
+  "pytest-subtests>=0.11.0",
+  "pytest-freezer>=0.4.8",
+  "pydantic"
+]
+env-vars.TOP = "{root}"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+  "pytest",
+  "hypothesis>=6.75.5",
+  "pydantic"
+]
+
+[tool.hatch.envs.release]
+detached=true
+dependencies=[
+    "scriv",
+    "commitizen"
+]
+[tool.hatch.envs.release.scripts]
+create=[
+   "scriv collect",
+    "cz bump"
+]
+publish=[
+    "git push --force-with-lease",
+    "git push --tags",
+    "- rm dist/*",
+    "hatch build",
+    "hatch publish"
+]
+
+[[tool.hatch.envs.types.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12","3.13"]
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/inline_snapshot tests}"
+
+[tool.mypy]
+exclude = "tests/.*_samples"
+
+[tool.pyright]
+venv = "test-3-12"
+venvPath = ".nox"
+
+
+[tool.scriv]
+format = "md"
+version = "command: cz bump --get-next"
+
+[tool.inline-snapshot.shortcuts]
+fix=["create","fix"]
+review=["create","review"]
+
+[tool.pytest.ini_options]
+markers=["no_rewriting: marks tests which need no code rewriting and can be used with pypy"]
