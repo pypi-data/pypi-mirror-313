@@ -1,0 +1,23 @@
+# this is meant to be installed under /etc/systemd/system
+
+[Unit]
+Description=Sidecar service propagates R2lab testbed status using websockets
+After=network.target
+
+
+[Service]
+# where to store the data
+ExecStartPre=/usr/bin/mkdir -p /var/lib/sidecar
+
+# supported options
+# -u wss://r2lab-sidecar.inria.fr:443/
+# --debug
+ExecStart=r2lab-sidecar
+
+# make it more robust
+Restart=always
+RestartSec=2
+
+
+[Install]
+WantedBy=multi-user.target
