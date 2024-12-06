@@ -1,0 +1,85 @@
+Metadata-Version: 2.1
+Name: gammarer.aws-daily-cost-usage-reporter
+Version: 1.2.17
+Summary: Cost & Usage Reports
+Home-page: https://github.com/gammarers/aws-daily-cost-usage-reporter.git
+Author: yicr<yicr@users.noreply.github.com>
+License: Apache-2.0
+Project-URL: Source, https://github.com/gammarers/aws-daily-cost-usage-reporter.git
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: JavaScript
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Typing :: Typed
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: License :: OSI Approved
+Requires-Python: ~=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: aws-cdk-lib<3.0.0,>=2.80.0
+Requires-Dist: constructs<11.0.0,>=10.0.5
+Requires-Dist: jsii<2.0.0,>=1.105.0
+Requires-Dist: publication>=0.0.3
+Requires-Dist: typeguard<4.3.0,>=2.13.3
+
+# AWS Daily Cost Usage Reports
+
+AWS Cost And Usage report to Slack on daily 09:01.
+
+* Report type
+
+  * Services
+
+    * This is Cost by AWS Services.
+  * Accounts
+
+    * This is Cost by Linked Account (when organization master account)
+
+## Resources
+
+This construct creating resource list.
+
+* Lambda function execution role
+* Lambda function
+* EventBridge Scheduler execution role
+* EventBridge Scheduler
+
+## Install
+
+### TypeScript
+
+```shell
+npm install @gammarer/aws-daily-cost-usage-repoter
+# or
+yarn add @gammarer/aws-daily-cost-usage-repoter
+```
+
+### Python
+
+```shell
+pip install gammarer.aws-daily-cost-usage-repoter
+```
+
+## Example
+
+```shell
+npm install @gammarer/aws-daily-cost-usage-repoter
+```
+
+```python
+import { CostGroupType, DailyCostUsageReporter } from '@gammarer/aws-daily-cost-usage-repoter';
+
+new DailyCostUsageReporter(stack, 'DailyCostUsageReporter', {
+  slackWebhookUrl: 'https://hooks.slack.com/services/xxxxxxxxxx', // already created slack webhook url
+  slackPostChannel: 'example-channel', // already created slack channel
+  costGroupType: CostGroupType.SERVICES,
+});
+```
+
+## License
+
+This project is licensed under the Apache-2.0 License.
