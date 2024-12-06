@@ -1,0 +1,25 @@
+﻿locations
+=========
+
+.. automodule:: fpsim.locations
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+
+
