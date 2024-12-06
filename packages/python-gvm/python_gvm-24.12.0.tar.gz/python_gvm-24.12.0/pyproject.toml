@@ -1,0 +1,86 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "python-gvm"
+version = "24.12.0"
+description = "Library to communicate with remote servers over GMP or OSP"
+license = "GPL-3.0-or-later"
+authors = ["Greenbone AG <info@greenbone.net>"]
+readme = "README.md"
+homepage = "https://github.com/greenbone/python-gvm/"
+repository = "https://github.com/greenbone/python-gvm/"
+documentation = "https://greenbone.github.io/python-gvm/"
+classifiers = [
+  # Full list: https://pypi.org/pypi?%3Aaction=list_classifiers
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+packages = [{ include = "gvm" }, { include = "tests", format = "sdist" }]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+paramiko = ">=2.7.1"
+lxml = ">=4.5.0"
+
+[tool.poetry.group.dev.dependencies]
+coverage = ">=7.2"
+sphinx = ">=5.3.0"
+autohooks-plugin-ruff = ">=24.1.0"
+autohooks-plugin-black = ">=22.7.0"
+autohooks-plugin-mypy = ">=22.7.0"
+black = ">=22.6.0"
+pontos = ">=22.7.2"
+furo = ">=2022.6.21"
+lxml-stubs = "^0.5.1"
+types-paramiko = "^3.4.0.20240205"
+
+[tool.black]
+line-length = 80
+target-version = ['py39', 'py310', 'py311', 'py312']
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | \.github
+  | \.vscode
+  | _build
+  | build
+  | dist
+  | docs
+)/
+'''
+
+[tool.ruff]
+line-length = 80
+target-version = "py311"
+
+[tool.ruff.lint]
+extend-select = ["I", "PLE", "PLW"]
+
+[tool.autohooks]
+mode = "poetry"
+pre-commit = ['autohooks.plugins.black', "autohooks.plugins.ruff"]
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*", "*/__init__.py"]
+source = ["gvm"]
+
+[tool.pontos.version]
+version-module-file = "gvm/__version__.py"
+
+[tool.mypy]
+files = "gvm"
+ignore_missing_imports = true
+explicit_package_bases = true
+allow_redefinition = true
