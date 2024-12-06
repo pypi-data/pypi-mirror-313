@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tastytrade-cli"
+version = "0.4"
+description = "An easy-to-use command line interface for Tastytrade!"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Graeme Holliday", email = "graeme.holliday@pm.me"},
+]
+
+dependencies = [
+    "asyncclick>=8.1.7.2",
+    "rich>=13.8.1",
+    "tastytrade>=9.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/tastyware/tastytrade-cli"
+
+[tool.uv]
+dev-dependencies = [
+    "ipykernel>=6.29.5",
+    "pyright>=1.1.389",
+    "ruff>=0.6.7",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E731",  # lambda-assignment
+]
+
+[project.scripts]
+tt = "ttcli.app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ttcli"]
