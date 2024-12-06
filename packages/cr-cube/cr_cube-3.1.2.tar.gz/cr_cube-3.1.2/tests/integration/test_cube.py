@@ -1,0 +1,430 @@
+# encoding: utf-8
+
+"""Integration-test suite for `cr.cube.cube` module."""
+
+import numpy as np
+import pytest
+
+from cr.cube.cube import (
+    Cube,
+    _MeanMeasure,
+    _Measures,
+    _UnweightedCountMeasure,
+    _WeightedCountMeasure,
+)
+from cr.cube.dimension import Dimensions
+from cr.cube.enums import DIMENSION_TYPE as DT
+
+from ..fixtures import (
+    CR,  # cube-response
+    OL,  # overlaps
+    NA,  # numeric-array
+)
+
+
+class TestIntegratedCube:
+    """Integration-test suite for `cr.cube.cube.Cube` object."""
+
+    def test_it_provides_values_for_cat_x_cat(self):
+        cube = Cube(CR.CAT_X_CAT)
+
+        assert cube.__repr__() == "Cube(name='v4', dimension_types='CAT x CAT')"
+        assert cube.counts == pytest.approx(np.array([[5, 2], [5, 3]]))
+        assert cube.counts_with_missings == pytest.approx(
+            np.array([[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]])
+        )
+        assert cube.cube_index == 0
+        assert cube.description == "Pet Owners"
+        assert cube.dimension_types == (DT.CAT, DT.CAT)
+        assert isinstance(cube.dimensions, Dimensions)
+        assert cube.has_weighted_counts is False
+        assert cube.missing == 5
+        assert cube.name == "v4"
+        assert cube.ndim == 2
+        assert cube.population_fraction == 1.0
+        assert cube.title == "Pony Owners"
+        assert cube.unweighted_counts == pytest.approx(np.array([[5, 2], [5, 3]]))
+        assert cube.weighted_counts is None
+
+    @pytest.mark.parametrize(
+        "cube_response, expected_dim_types",
+        (
+            (CR.CA_SUBVAR_HS_X_MR_X_CA_CAT, (DT.CA_SUBVAR, DT.MR, DT.CA_CAT)),
+            (CR.CAT_X_LOGICAL, (DT.CAT, DT.LOGICAL)),
+            (CR.LOGICAL_UNIVARIATE, (DT.LOGICAL,)),
+        ),
+    )
+    def test_it_provides_access_to_its_dimensions(
+        self, cube_response, expected_dim_types
+    ):
+        cube = Cube(cube_response)
+
+        dimension_types = tuple(d.dimension_type for d in cube.dimensions)
+
+        assert dimension_types == expected_dim_types
+
+    def test_it_provides_array_for_single_valid_cat_CAT_X_MR(self):
+        """No pruning needs to happen, because pruning is based on unweighted counts:
+        >>> cube.unweighted_counts
+        array([[[0, 108],
+                [14, 94],
+                [94, 14]]])
+
+        so even though the weighted counts are all zeroes:
+
+        >>> cube.counts
+        array([[[0, 0],
+                [0, 0],
+                [0, 0]]])
+
+        we expect [[0, 0, 0]] as the result; no zero gets pruned because no unweighted
+        count is zero.
+        """
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
+        slice_ = Cube(CR.CAT_X_MR_SENTRY, transforms=transforms).partitions[0]
+        np.testing.assert_array_equal(slice_.counts, np.array([[0, 0, 0]]))
+
+    def test_it_provides_pruned_array_for_CA_CAT_x_CA_SUBVAR(self):
+        transforms = {
+            "rows_dimension": {"prune": True},
+            "columns_dimension": {"prune": True},
+        }
+        slice_ = Cube(CR.CA_CAT_X_CA_SUBVAR, transforms=transforms).partitions[0]
+        np.testing.assert_array_equal(
+            slice_.column_proportions,
+            np.array(
+                [
+                    [0.19012797074954296, 0.10494203782794387],
+                    [0.2528945764777575, 0.2190359975594875],
+                    [0.16514320536258378, 0.1720561317876754],
+                    [0.29859841560024375, 0.4069554606467358],
+                    [0.09323583180987204, 0.09701037217815742],
+                ]
+            ),
+        )
+
+    def test_it_provides_valid_counts_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        assert cube.covariance is None
+        assert cube.unweighted_valid_counts == pytest.approx(
+            np.array([[3, 2], [3, 1], [1, 1]])
+        )
+
+    @pytest.mark.parametrize(
+        "cube, valid_counts_summary_range",
+        (
+            (NA.NUM_ARR_MEANS_GROUPED_BY_CAT, (2, 5)),
+            (CR.SUM_MR_X_CAT, (1, 2)),
+            (CR.CAT_SUM_X_MR, (1, 2)),
+            (CR.CA_SUBVAR_X_CA_CAT_MEAN, (1000, 1000)),
+            (CR.DICHOTOMIZED_NUMERIC_MEAN, (9, 92)),
+        ),
+    )
+    def test_it_provides_valid_counts_summary_range_for_various_cubes(
+        self, cube, valid_counts_summary_range
+    ):
+        cube = Cube(cube)
+
+        np.testing.assert_array_equal(
+            cube.valid_counts_summary_range, valid_counts_summary_range
+        )
+
+    def test_and_it_returns_empty_array_for_summary_if_valid_counts_are_not_available(
+        self,
+    ):
+        cube = Cube(CR.CAT_X_CAT)
+
+        np.testing.assert_array_equal(cube.valid_counts_summary_range, [])
+
+    def test_it_provides_n_responses_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        assert cube.n_responses == 5
+
+    def test_it_provides_multiple_measures_for_NUM_ARRAY_GROUPED_BY_CAT(self):
+        cube = Cube(NA.NUM_ARR_MULTI_NUMERIC_MEASURES_GROUPED_BY_CAT)
+
+        assert cube.sums.tolist() == [
+            [183.0, 105.0, 43.0, 31.0],
+            [230.0, 71.0, 79.0, 123.0],
+            [25.0, 58.0, 148.0, 72.0],
+        ]
+        assert cube.means == pytest.approx(
+            np.array(
+                [
+                    [61.0, 52.5, 14.333333, 10.333333],
+                    [76.6666667, 35.5, 26.333333, 41.0],
+                    [8.333333, 29.0, 49.333333, 24.0],
+                ]
+            )
+        )
+        assert cube.medians == pytest.approx(
+            np.array(
+                [
+                    [71.0, 42.5, 55.33333333, 1.33333333],
+                    [16.66666667, 25.5, 21.33333333, 43.0],
+                    [2.33333333, 25.0, 4.33333333, 25.0],
+                ]
+            )
+        )
+        assert cube.covariance == pytest.approx(
+            np.array(
+                [
+                    [
+                        [1623.0, 1107.5, 155.5],
+                        [312.5, -362.5, 400.0],
+                        [217.333333, 124.333333, 11.333333],
+                        [25.333333, 73.0, 12.0],
+                    ],
+                    [
+                        [1107.5, 758.333333, 124.166666],
+                        [-362.5, 420.5, -464.0],
+                        [124.333333, 134.333333, -189.666666],
+                        [73.0, 937.0, -639.5],
+                    ],
+                    [
+                        [155.5, 124.166666, 140.333333],
+                        [400.0, -464.0, 512.0],
+                        [11.333333, -189.666666, 609.333333],
+                        [12.0, -639.5, 631.0],
+                    ],
+                ]
+            )
+        )
+
+    def test_optional_covariance_cube_measure(self):
+        cube = Cube(NA.NUM_ARR_MEANS_GROUPED_BY_CAT)
+
+        assert cube.covariance is None
+
+    def test_it_does_not_get_fooled_into_single_mr_cats_dim(self):
+        cube = Cube(CR.NOT_MR_CATS)
+        assert cube.dimension_types == (DT.LOGICAL,)
+        assert cube.partitions[0].counts.tolist() == [200, 100]
+
+    def test_it_provides_squared_weights_counts(self):
+        cube = Cube(CR.SQUARED_WEIGHTS)
+        assert cube.weighted_squared_counts.tolist() == [
+            0.0,
+            148.0,
+            212.0,
+            292.0,
+            0.0,
+            0.0,
+            0.0,
+            64.0,
+            100.0,
+            0.0,
+        ]
+
+    def test_but_it_provides_None_when_no_squared_weights_counts_exist(self):
+        cube = Cube(CR.NOT_MR_CATS)
+        assert cube.weighted_squared_counts is None
+
+
+class TestIntegrated_Measures:
+    """Integration-tests that exercise the `cr.cube.cube._Measures` object."""
+
+    def test_it_provides_access_to_the_overlaps_measure(self):
+        cube_dict = OL.CAT_X_MR_SUB_X_MR_SEL
+        measures = _Measures(
+            cube_dict,
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
+        )
+
+        overlaps = measures.overlaps
+
+        assert type(overlaps).__name__ == "_OverlapMeasure"
+
+    def test_but_only_when_the_cube_response_contains_overlaps(self):
+        cube_dict = CR.CAT_X_CAT
+        measures = _Measures(cube_dict, None)
+
+        overlaps = measures.overlaps
+
+        assert overlaps is None
+
+    def test_it_provides_access_to_the_mean_measure(self):
+        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+        measures = _Measures(
+            cube_dict,
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
+        )
+
+        means = measures.means
+
+        assert type(means).__name__ == "_MeanMeasure"
+
+    def test_but_only_when_the_cube_response_contains_means(self):
+        cube_dict = CR.CAT_X_CAT
+        measures = _Measures(cube_dict, None)
+
+        means = measures.means
+
+        assert means is None
+
+    def test_it_provides_the_means_missing_count_when_means_are_available(self):
+        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+        measures = _Measures(
+            cube_dict,
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
+        )
+        missing_count = measures.missing_count
+        assert missing_count == 3
+
+    def test_it_provides_the_median_missing_count_when_median_is_available(self):
+        cube_dict = CR.MEDIAN_CAT_X_CAT_HS
+        measures = _Measures(
+            cube_dict,
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
+        )
+        missing_count = measures.missing_count
+        assert missing_count == 0
+
+    def test_it_provides_the_means_missing_count_when_sum_are_available(self):
+        cube_dict = CR.SUM_CAT_X_MR
+        measures = _Measures(
+            cube_dict,
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
+        )
+        missing_count = measures.missing_count
+        assert missing_count == 1
+
+    def test_but_provides_the_general_missing_count_otherwise(self):
+        measures = _Measures(CR.CAT_X_CAT, None)
+        missing_count = measures.missing_count
+        assert missing_count == 5
+
+    @pytest.mark.parametrize(
+        "cube_dict, expected_value",
+        (
+            # ---filtered case---
+            (CR.CAT_X_CAT_FILT, 0.254),
+            # ---unfiltered case---
+            (CR.CAT_X_CAT, 1.0),
+            # ---complete cases---
+            (CR.CAT_X_CAT_FILT_COMPLETE, 0.5760869565217391),
+        ),
+    )
+    def test_it_knows_the_population_fraction(self, cube_dict, expected_value):
+        measures = _Measures(cube_dict, None)
+
+        population_fraction = measures.population_fraction
+
+        assert population_fraction == expected_value
+
+    def test_it_provides_access_to_the_unweighted_count_measure(self):
+        measures = _Measures(None, None)
+
+        unweighted_counts = measures.unweighted_counts
+
+        assert type(unweighted_counts).__name__ == "_UnweightedCountMeasure"
+
+    @pytest.mark.parametrize(
+        "cube_dict, expected_type_name",
+        (
+            # ---weighted case---
+            (CR.CAT_X_CAT_WGTD, "_WeightedCountMeasure"),
+            # ---unweighted case---
+            (CR.CAT_X_CAT, "NoneType"),
+        ),
+    )
+    def test_it_provides_access_to_wgtd_count_measure(
+        self, cube_dict, expected_type_name
+    ):
+        measures = _Measures(
+            cube_dict,
+            Dimensions.from_dicts(cube_dict["result"]["dimensions"]),
+        )
+
+        weighted_counts = measures.weighted_counts
+
+        assert type(weighted_counts).__name__ == expected_type_name
+
+
+class TestIntegrated_MeanMeasure:
+    def test_it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT_MEAN_WGTD
+        cube = Cube(cube_dict)
+        measure = _MeanMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array,
+            [
+                [52.78205128, 49.90697674, np.nan, np.nan, np.nan],
+                [50.43654822, 48.20100503, np.nan, np.nan, np.nan],
+                [51.56435644, 47.60283688, np.nan, np.nan, np.nan],
+                [58.0, 29.0, np.nan, np.nan, np.nan],
+                [37.53846154, 39.45238095, np.nan, np.nan, np.nan],
+                [36.66666667, np.nan, np.nan, np.nan, np.nan],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+            ],
+        )
+
+    def test_it_handles_cat_x_mr_with_means(self):
+        slice_ = Cube(CR.MEANS_CAT_X_MR).partitions[0]
+        assert slice_.column_labels.tolist() == [
+            "Denmark",
+            "Finland",
+            "Iceland",
+            "Norway",
+            "Sweden",
+        ]
+
+    def test_it_handles_means_cat_hs_x_cat_hs(self):
+        slice_ = Cube(CR.MEANS_CAT_HS_X_CAT_HS).partitions[0]
+
+        means = slice_.means
+
+        np.testing.assert_array_almost_equal(
+            means,
+            [
+                [41.96875, 30.875, 25.66666667, np.nan, 42.0],
+                [51.51515152, 47.95555556, 45.44444444, np.nan, 45.0952381],
+                [46.17088608, 44.55504587, 48.09090909, np.nan, 50.8],
+                [np.nan, np.nan, np.nan, np.nan, np.nan],
+                [44.03030303, 45.21568627, 54.53333333, np.nan, 56.19512195],
+                [45.64516129, 47.41428571, 46.89361702, np.nan, 55.27894737],
+                [34.20408163, 43.2745098, 41.2, np.nan, 35.26086957],
+            ],
+        )
+
+
+class TestIntegrated_UnweightedCountMeasure:
+    def test_it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT
+        cube = Cube(cube_dict)
+        measure = _UnweightedCountMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array, [[5, 3, 2, 0], [5, 2, 3, 0], [0, 0, 0, 0]]
+        )
+
+
+class TestIntegrated_WeightedCountMeasure:
+    def test_it_provides_access_to_its_raw_cube_array(self):
+        cube_dict = CR.CAT_X_CAT_WGTD
+        cube = Cube(cube_dict)
+        measure = _WeightedCountMeasure(cube_dict, cube._all_dimensions)
+
+        raw_cube_array = measure.raw_cube_array
+
+        np.testing.assert_array_almost_equal(
+            raw_cube_array,
+            [
+                [32.9, 87.6, 176.2, 117.5, 72.1, 13.4, 0.0, 0.0, 0.0],
+                [38.8, 94.1, 199.0128, 102.9, 38.8305, 26.2135, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            ],
+        )

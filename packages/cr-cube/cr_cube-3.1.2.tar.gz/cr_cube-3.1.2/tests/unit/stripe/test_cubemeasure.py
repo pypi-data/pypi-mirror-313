@@ -1,0 +1,507 @@
+# encoding: utf-8
+
+"""Unit test suite for `cr.cube.stripe.cubemeasure` module."""
+
+import numpy as np
+import pytest
+
+from cr.cube.cube import Cube
+from cr.cube.dimension import Dimension
+from cr.cube.enums import DIMENSION_TYPE as DT
+from cr.cube.stripe.cubemeasure import (
+    _BaseCubeMeans,
+    _BaseCubeMedians,
+    _BaseCubeSums,
+    _BaseCubeCounts,
+    _CatCubeCounts,
+    _CatCubeMeans,
+    _CatCubeMedians,
+    _CatCubeSums,
+    _MrCubeMedians,
+    CubeMeasures,
+    _MrCubeCounts,
+    _MrCubeMeans,
+    _MrCubeSums,
+    _NumArrCubeCounts,
+)
+
+from ...unitutil import class_mock, instance_mock, property_mock
+
+
+class TestCubeMeasures:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure.CubeMeasures` object."""
+
+    def test_it_provides_access_to_the_cube_means_object(
+        self, request, cube_, rows_dimension_
+    ):
+        cube_means_ = instance_mock(request, _BaseCubeMeans)
+        _BaseCubeMeans_ = class_mock(
+            request, "cr.cube.stripe.cubemeasure._BaseCubeMeans"
+        )
+        _BaseCubeMeans_.factory.return_value = cube_means_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, None, None)
+
+        cube_means = cube_measures.cube_means
+
+        _BaseCubeMeans_.factory.assert_called_once_with(cube_, rows_dimension_)
+        assert cube_means is cube_means_
+
+    def test_it_provides_access_to_the_cube_median_object(
+        self, request, cube_, rows_dimension_
+    ):
+        cube_medians_ = instance_mock(request, _BaseCubeMedians)
+        _BaseCubeMedian_ = class_mock(
+            request, "cr.cube.stripe.cubemeasure._BaseCubeMedians"
+        )
+        _BaseCubeMedian_.factory.return_value = cube_medians_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, None, None)
+
+        cube_medians = cube_measures.cube_medians
+
+        _BaseCubeMedian_.factory.assert_called_once_with(cube_, rows_dimension_)
+        assert cube_medians is cube_medians_
+
+    def test_it_provides_access_to_the_cube_sum_object(
+        self, request, cube_, rows_dimension_
+    ):
+        cube_sum_ = instance_mock(request, _BaseCubeSums)
+        _BaseCubeSums_ = class_mock(request, "cr.cube.stripe.cubemeasure._BaseCubeSums")
+        _BaseCubeSums_.factory.return_value = cube_sum_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, None, None)
+
+        cube_sum = cube_measures.cube_sum
+
+        _BaseCubeSums_.factory.assert_called_once_with(cube_, rows_dimension_)
+        assert cube_sum is cube_sum_
+
+    @pytest.mark.parametrize(
+        "unweighted_counts, unweighted_valid_counts, counts_used",
+        (
+            ("counts", None, "counts"),
+            ("counts", "valid", "valid"),
+        ),
+    )
+    def test_it_provides_access_to_the_unweighted_cube_counts_object(
+        self,
+        cube_,
+        cube_counts_,
+        _BaseCubeCounts_,
+        rows_dimension_,
+        unweighted_counts,
+        unweighted_valid_counts,
+        counts_used,
+    ):
+        cube_.unweighted_counts = unweighted_counts
+        cube_.unweighted_valid_counts = unweighted_valid_counts
+        _BaseCubeCounts_.factory.return_value = cube_counts_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, False, slice_idx=7)
+
+        unweighted_cube_counts = cube_measures.unweighted_cube_counts
+
+        _BaseCubeCounts_.factory.assert_called_once_with(
+            counts_used, rows_dimension_, False, 7
+        )
+        assert unweighted_cube_counts is cube_counts_
+
+    @pytest.mark.parametrize(
+        "weighted_counts, weighted_valid_counts, counts_used",
+        (
+            ("counts", None, "counts"),
+            ("counts", "valid", "valid"),
+        ),
+    )
+    def test_it_provides_access_to_the_weighted_cube_counts_object(
+        self,
+        cube_,
+        cube_counts_,
+        _BaseCubeCounts_,
+        rows_dimension_,
+        weighted_counts,
+        weighted_valid_counts,
+        counts_used,
+    ):
+        cube_.counts = weighted_counts
+        cube_.weighted_valid_counts = weighted_valid_counts
+        _BaseCubeCounts_.factory.return_value = cube_counts_
+        cube_measures = CubeMeasures(cube_, rows_dimension_, False, slice_idx=7)
+
+        weighted_cube_counts = cube_measures.weighted_cube_counts
+
+        _BaseCubeCounts_.factory.assert_called_once_with(
+            counts_used, rows_dimension_, False, 7
+        )
+        assert weighted_cube_counts is cube_counts_
+
+    # fixture components ---------------------------------------------
+
+    @pytest.fixture
+    def _BaseCubeCounts_(self, request):
+        return class_mock(request, "cr.cube.stripe.cubemeasure._BaseCubeCounts")
+
+    @pytest.fixture
+    def cube_(self, request):
+        return instance_mock(request, Cube)
+
+    @pytest.fixture
+    def cube_counts_(self, request):
+        return instance_mock(request, _BaseCubeCounts)
+
+    @pytest.fixture
+    def rows_dimension_(self, request):
+        return instance_mock(request, Dimension)
+
+
+# === COUNTS ===
+
+
+class Test_BaseCubeCounts:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseUnweightedCubeCounts`."""
+
+    @pytest.mark.parametrize(
+        (
+            "ca_as_0th",
+            "rows_dimension_type",
+            "CubeCountsCls",
+            "counts",
+            "expected_counts",
+        ),
+        (
+            (
+                True,
+                DT.CA_CAT,
+                _CatCubeCounts,
+                [[4, 5, 6], [1, 2, 3]],
+                [1, 2, 3],
+            ),
+            (False, DT.MR, _MrCubeCounts, [1, 2, 3], [1, 2, 3]),
+            (False, DT.CAT, _CatCubeCounts, [1, 2, 3], [1, 2, 3]),
+            (
+                False,
+                DT.NUM_ARRAY,
+                _NumArrCubeCounts,
+                [4, 5, 6],
+                [4, 5, 6],
+            ),
+        ),
+    )
+    def test_it_provides_a_factory_for_constructing_unweighted_cube_count_objects(
+        self,
+        request,
+        ca_as_0th,
+        rows_dimension_type,
+        CubeCountsCls,
+        counts,
+        expected_counts,
+    ):
+        rows_dimension_ = instance_mock(
+            request, Dimension, dimension_type=rows_dimension_type
+        )
+        cube_counts_ = instance_mock(request, CubeCountsCls)
+        CubeCountsCls_ = class_mock(
+            request,
+            "cr.cube.stripe.cubemeasure.%s" % CubeCountsCls.__name__,
+            return_value=cube_counts_,
+        )
+
+        unweighted_cube_counts = _BaseCubeCounts.factory(
+            counts, rows_dimension_, ca_as_0th, slice_idx=1
+        )
+
+        CubeCountsCls_.assert_called_once_with(rows_dimension_, expected_counts)
+        assert unweighted_cube_counts is cube_counts_
+
+
+class Test_CatCubeCounts:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeCounts`."""
+
+    def test_it_knows_its_bases(self, request, raw_counts):
+        property_mock(
+            request,
+            _CatCubeCounts,
+            "table_base",
+            return_value=42,
+        )
+        cube_counts = _CatCubeCounts(None, raw_counts)
+        assert cube_counts.bases.tolist() == [42, 42, 42]
+
+    def test_it_knows_its_counts(self, raw_counts):
+        cube_counts = _CatCubeCounts(None, raw_counts)
+        assert cube_counts.counts.tolist() == [1, 2, 3]
+
+    def test_it_knows_its_pruning_base(self, raw_counts):
+        cube_counts = _CatCubeCounts(None, raw_counts)
+        assert cube_counts.pruning_base.tolist() == [1, 2, 3]
+
+    def test_it_knows_its_table_base(self, raw_counts):
+        cube_counts = _CatCubeCounts(None, raw_counts)
+        assert cube_counts.table_base == 6
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_counts(self):
+        """(3,) np.int ndarray of cube-counts as received from Cube."""
+        return np.array([1, 2, 3])
+
+
+class Test_MrCubeCounts:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeCounts`."""
+
+    def test_it_knows_its_bases(self, raw_counts):
+        cube_counts = _MrCubeCounts(None, raw_counts)
+        assert cube_counts.bases.tolist() == [3, 7, 11]
+
+    def test_it_knows_its_counts(self, raw_counts):
+        cube_counts = _MrCubeCounts(None, raw_counts)
+        assert cube_counts.counts.tolist() == [1, 3, 5]
+
+    def test_it_knows_its_pruning_base(self, raw_counts):
+        cube_counts = _MrCubeCounts(None, raw_counts)
+        assert cube_counts.pruning_base.tolist() == [3, 7, 11]
+
+    def test_it_knows_its_table_base_is_None(self, raw_counts):
+        cube_counts = _MrCubeCounts(None, raw_counts)
+        assert cube_counts.table_base is None
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_counts(self):
+        """(3, 2) np.int ndarray of unweighted cube-counts as received from Cube."""
+        return np.array([[1, 2], [3, 4], [5, 6]])
+
+
+class Test_NumArrCubeCounts:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._NumArrCubeCounts`."""
+
+    def test_it_knows_its_bases(self, raw_counts):
+        cube_counts = _NumArrCubeCounts(None, raw_counts)
+        assert cube_counts.bases.tolist() == [1, 2, 3]
+
+    def test_it_knows_its_counts(self, raw_counts):
+        cube_counts = _NumArrCubeCounts(None, raw_counts)
+        assert cube_counts.counts.tolist() == [1, 2, 3]
+
+    def test_it_knows_its_pruning_base(self, raw_counts):
+        cube_counts = _NumArrCubeCounts(None, raw_counts)
+        assert cube_counts.pruning_base.tolist() == [1, 2, 3]
+
+    def test_it_knows_its_table_base_is_None(self, raw_counts):
+        cube_counts = _NumArrCubeCounts(None, raw_counts)
+        assert cube_counts.table_base is None
+
+    # fixtures -------------------------------------------------------
+
+    @pytest.fixture
+    def raw_counts(self):
+        """(3,) np.int ndarray of valid cube-counts as received from Cube."""
+        return np.array([1, 2, 3])
+
+
+# === MEANS ===
+
+
+class Test_BaseCubeMeans:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMeans`."""
+
+    @pytest.mark.parametrize(
+        "rows_dimension_type, CubeMeansCls, means",
+        (
+            (DT.CAT, _CatCubeMeans, [1, 2, 3]),
+            (DT.MR, _MrCubeMeans, [[1, 6], [2, 5], [3, 4]]),
+        ),
+    )
+    def test_it_provides_a_factory_for_constructing_cube_means_objects(
+        self, request, rows_dimension_type, CubeMeansCls, means
+    ):
+        cube_ = instance_mock(request, Cube, means=means)
+        rows_dimension_ = instance_mock(
+            request, Dimension, dimension_type=rows_dimension_type
+        )
+        cube_means_ = instance_mock(request, CubeMeansCls)
+        CubeMeansCls_ = class_mock(
+            request,
+            "cr.cube.stripe.cubemeasure.%s" % CubeMeansCls.__name__,
+            return_value=cube_means_,
+        )
+
+        cube_means = _BaseCubeMeans.factory(cube_, rows_dimension_)
+
+        CubeMeansCls_.assert_called_once_with(rows_dimension_, means)
+        assert cube_means is cube_means_
+
+
+class Test_CatCubeMeans:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeMeans`."""
+
+    def test_it_knows_its_means(self):
+        cube_means = _CatCubeMeans(None, np.array([1.1, 2.2, 3.3]))
+        assert cube_means.means == pytest.approx([1.1, 2.2, 3.3])
+
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_means(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.means = None
+        with pytest.raises(ValueError) as e:
+            _CatCubeMeans(None, None).factory(cube_, None)
+
+        assert str(e.value) == "cube-result does not contain cube-means measure"
+
+
+class Test_MrCubeMeans:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeMeans`."""
+
+    def test_it_knows_its_means(self):
+        cube_means = _MrCubeMeans(None, np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]]))
+        assert cube_means.means == pytest.approx([1.1, 3.3, 5.5])
+
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_means(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.means = None
+        with pytest.raises(ValueError) as e:
+            _CatCubeMeans(None, None).factory(cube_, None)
+
+        assert str(e.value) == "cube-result does not contain cube-means measure"
+
+
+# === MEDIANS ===
+
+
+class Test_BaseCubeMedian:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeMedian`."""
+
+    @pytest.mark.parametrize(
+        "rows_dimension_type, CubeMedianCls, medians",
+        (
+            (DT.CAT, _CatCubeMedians, [1, 2, 3]),
+            (DT.MR, _MrCubeMedians, [[1, 6], [2, 5], [3, 4]]),
+        ),
+    )
+    def test_it_provides_a_factory_for_constructing_cube_medians_objects(
+        self, request, rows_dimension_type, CubeMedianCls, medians
+    ):
+        cube_ = instance_mock(request, Cube, medians=medians)
+        rows_dimension_ = instance_mock(
+            request, Dimension, dimension_type=rows_dimension_type
+        )
+        cube_medians_ = instance_mock(request, CubeMedianCls)
+        CubeMedianCls_ = class_mock(
+            request,
+            "cr.cube.stripe.cubemeasure.%s" % CubeMedianCls.__name__,
+            return_value=cube_medians_,
+        )
+
+        cube_medians = _BaseCubeMedians.factory(cube_, rows_dimension_)
+
+        CubeMedianCls_.assert_called_once_with(rows_dimension_, medians)
+        assert cube_medians is cube_medians_
+
+
+class Test_CatCubeMedians:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeMedians`."""
+
+    def test_it_knows_its_medians(self):
+        cube_medians = _CatCubeMedians(None, np.array([1.1, 2.2, 3.3]))
+        assert cube_medians.medians == pytest.approx([1.1, 2.2, 3.3])
+
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_medians(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.medians = None
+        with pytest.raises(ValueError) as e:
+            _CatCubeMedians(None, None).factory(cube_, None)
+
+        assert str(e.value) == "cube-result does not contain cube-median measure"
+
+
+class Test_MrCubeMedians:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeMedians`."""
+
+    def test_it_knows_its_medians(self):
+        cube_medians = _MrCubeMedians(
+            None, np.array([[1.1, 2.2], [3.3, 4.4], [5.5, 6.6]])
+        )
+        assert cube_medians.medians == pytest.approx([1.1, 3.3, 5.5])
+
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_medians(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.medians = None
+        with pytest.raises(ValueError) as e:
+            _CatCubeMedians(None, None).factory(cube_, None)
+
+        assert str(e.value) == "cube-result does not contain cube-median measure"
+
+
+# === SUM ===
+
+
+class Test_BaseCubeSums:
+    """Unit test suite for `cr.cube.matrix.cubemeasure._BaseCubeSums`."""
+
+    @pytest.mark.parametrize(
+        "rows_dimension_type, CubeSumCls, sums",
+        (
+            (DT.CAT, _CatCubeSums, [1, 2, 3]),
+            (DT.MR, _MrCubeSums, [[1, 6], [2, 5], [3, 4]]),
+        ),
+    )
+    def test_it_provides_a_factory_for_constructing_cube_sums_objects(
+        self, request, rows_dimension_type, CubeSumCls, sums
+    ):
+        cube_ = instance_mock(request, Cube, sums=sums)
+        rows_dimension_ = instance_mock(
+            request, Dimension, dimension_type=rows_dimension_type
+        )
+        cube_sums_ = instance_mock(request, CubeSumCls)
+        CubeSumCls_ = class_mock(
+            request,
+            "cr.cube.stripe.cubemeasure.%s" % CubeSumCls.__name__,
+            return_value=cube_sums_,
+        )
+
+        cube_sums = _BaseCubeSums.factory(cube_, rows_dimension_)
+
+        CubeSumCls_.assert_called_once_with(rows_dimension_, sums)
+        assert cube_sums is cube_sums_
+
+
+class Test_CatCubeSums:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._CatCubeSum`."""
+
+    def test_it_knows_its_sum(self):
+        cube_sum = _CatCubeSums(None, np.array([1, 2, 3]))
+        assert cube_sum.sums == pytest.approx([1, 2, 3])
+
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_sums(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.sums = None
+        with pytest.raises(ValueError) as e:
+            _CatCubeSums(None, None).factory(cube_, None)
+
+        assert str(e.value) == "cube-result does not contain cube-sum measure"
+
+
+class Test_MrCubeSums:
+    """Unit-test suite for `cr.cube.stripe.cubemeasure._MrCubeSum`."""
+
+    def test_it_knows_its_sum(self):
+        cube_sum = _MrCubeSums(None, np.array([[1, 2], [3, 4], [5, 6]]))
+        assert cube_sum.sums == pytest.approx([1, 3, 5])
+
+    def test_but_it_raises_value_error_when_the_cube_result_does_not_contain_sum(
+        self, request
+    ):
+        cube_ = instance_mock(request, Cube)
+        cube_.sums = None
+        with pytest.raises(ValueError) as e:
+            _CatCubeSums(None, None).factory(cube_, None)
+
+        assert str(e.value) == "cube-result does not contain cube-sum measure"
