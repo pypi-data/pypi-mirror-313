@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plot Editor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: visible;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #cccccc8a;
+            gap: 10px;
+            align-items: center;
+        }
+        #svg-container {
+            width: 100%;
+            height: calc(100vh + 60px); 
+            overflow: auto; 
+            position: relative;
+            background-color: #eaeaea;
+        }
+        #svg-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        svg {
+            background-color: rgb(255, 255, 255);
+            transform-origin: center;
+            cursor: pointer;
+            display: block; 
+        }
+        .selected {
+            stroke: rgb(255, 0, 0) !important;
+            stroke-width: 3px;
+            fill: rgba(255, 123, 0, 0.2) !important;
+        }
+        #selection-rectangle {
+            position: absolute;
+            border: 1px dashed blue;
+            background-color: rgba(0, 0, 255, 0.2);
+            pointer-events: none;
+            display: none;
+        }
+        button, select {
+            cursor: pointer;
+            padding: 5px 10px;
+            font-size: 14px;
+            margin-right: 2px;
+        }
+
+
+
+        .icon-button {
+            padding: 8px;
+            font-size: 20px;
+            background-color: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .icon-button:hover {
+            background-color: #ddd;
+        }
+
+        
+
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+
+        <button id="adjustButton">
+            <i class="fa-solid fa-expand"></i>
+        </button>
+        
+        <button id="delete-element">
+            <i class="fa-solid fa-eraser"></i>
+        </button>
+
+        <button id="undo">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <button id="redo">
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <label for="move-step">Shift:</label>
+
+        <select id="move-step">
+            <option value="0.1">0.1</option>
+            <option value="0.5">0.5</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="20">10</option>
+
+        </select>
+
+        <label for="resize">Resize:</label>
+
+        <select id="resize">
+            
+            <option value="0.1" selected>0.1</option>
+            <option value="0.2">0.2</option>
+            <option value="0.3">0.3</option>
+            <option value="0.4">0.4</option>
+            <option value="0.5">0.5</option>
+            <option value="0.6">0.6</option>
+            <option value="0.7">0.7</option>
+            <option value="0.8">0.8</option>
+            <option value="0.9">0.9</option>
+            <option value="1.0">1.0</option>
+
+        </select>
+
+        <button id="zoomIn">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
+        <button id="zoomOut">
+            <i class="fa-solid fa-minus"></i>
+        </button>
+
+
+        <button id="move-to-top">
+            <i class="fa-solid fa-arrow-up"></i>
+        </button>
+
+        <button id="move-to-bottom">
+            <i class="fa-solid fa-arrow-down"></i>
+        </button> 
+
+
+        <label for="color-picker">Color:</label>
+        <input type="color" id="color-picker" value="#000000">
+        <button id="apply-color">Fill</button>
+
+
+
+        <label for="save-format">Save as:</label>
+        <select id="save-format">
+            <option value="svg">SVG</option>
+            <option value="png">PNG</option>
+            <option value="jpeg">JPEG</option>
+        </select>
+
+
+        <label for="resolution">Resolution (DPI):</label>
+        <select id="resolution">
+            <option value="200">200</option>
+            <option value="300" selected>300</option>
+            <option value="600">600</option>
+        </select>
+
+
+        <button id="save-file">
+            <i class="fa-solid fa-file-export"></i>
+        </button>
+
+        
+
+
+
+
+    </div>
+    <div id="svg-container">
+        <div id="svg-wrapper">
+            <svg id="svg-editor" xmlns="http://www.w3.org/2000/svg"></svg>
+            
+        </div>
+        <div id="selection-rectangle"></div>
+    </div>
+    <script>
+
+        const fileInput = document.getElementById('file-input');
+        const svgEditor = document.getElementById('svg-editor');
+        const svgWrapper = document.getElementById('svg-wrapper');
+        const svgContainer = document.getElementById('svg-container');
+        const selectionRectangle = document.getElementById('selection-rectangle');
+      
+
+        const saveFileButton = document.getElementById('save-file');
+        const saveFormatSelect = document.getElementById('save-format');
+        const deleteElementButton = document.getElementById('delete-element');
+        const undoButton = document.getElementById('undo');
+        const redoButton = document.getElementById('redo');
+        const moveToTopButton = document.getElementById('move-to-top');
+        const moveToBottomButton = document.getElementById('move-to-bottom');
+        const svg = document.querySelector('svg');
+        const colorPicker = document.getElementById('color-picker'); 
+        const applyColorButton = document.getElementById('apply-color');
+        const moveStepSelect = document.getElementById('move-step');
+
+
+        
+
+        let selectedElements = [];
+        let isSelecting = false;
+        let startX = 0, startY = 0;
+
+        let history = [];
+        let redoStack = [];
+
+
+        function adjustBackground() {
+
+            saveState();
+
+            if (selectedElements.length === 0) {
+                console.warn("Brak zaznaczonych elementów.");
+                return;
+            }
+
+            const rectWidth = parseFloat(selectionRectangle.style.width);
+            const rectHeight = parseFloat(selectionRectangle.style.height);
+
+            if (isNaN(rectWidth) || isNaN(rectHeight) || rectWidth === 0 || rectHeight === 0) {
+                console.warn("Wymiary selectionRectangle są nieprawidłowe.");
+                return; 
+            }
+
+            const rectX = parseFloat(selectionRectangle.getAttribute('x'));
+            const rectY = parseFloat(selectionRectangle.getAttribute('y'));
+
+            const bbox = {
+                x: rectX,
+                y: rectY,
+                width: rectWidth,
+                height: rectHeight
+            };
+
+            svgEditor.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+            svgEditor.setAttribute('width', `${bbox.width}`);
+            svgEditor.setAttribute('height', `${bbox.height}`);
+
+            svgEditor.style.removeProperty('width');
+            svgEditor.style.removeProperty('height');
+            svgWrapper.style.removeProperty('width');
+            svgWrapper.style.removeProperty('height');
+
+            console.log('SVG zostało zmodyfikowane:', {
+                viewBox: svgEditor.getAttribute('viewBox'),
+                width: svgEditor.getAttribute('width'),
+                height: svgEditor.getAttribute('height')
+            });
+        }
+
+
+
+
+        function scaleSelectedElements(factor) {
+            if (typeof factor !== "number" || factor <= 0) {
+                console.error("Skalowanie wymaga dodatniego współczynnika liczbowego.");
+                return;
+            }
+
+            if (!selectedElements || selectedElements.length === 0) {
+                console.warn("Nie wybrano żadnych elementów.");
+                return;
+            }
+
+            selectedElements.forEach(el => {
+                const currentTransform = el.getAttribute("transform") || "";
+                console.log('Current transform:', currentTransform); 
+
+                const transformParts = currentTransform.trim().split(/\s+/);
+
+                let scaleFound = false;
+                const updatedTransformParts = transformParts.map(part => {
+                    const scaleRegex = /^scale\(([^)]+)\)$/;
+
+                    if (scaleRegex.test(part)) {
+                        scaleFound = true;
+                        return part.replace(scaleRegex, (_, scale) => {
+                            const newScale = parseFloat(scale) * factor;
+                            return `scale(${newScale})`;
+                        });
+                    }
+                    return part;
+                });
+
+                if (!scaleFound) {
+                    updatedTransformParts.push(`scale(${factor})`);
+                }
+
+                const updatedTransform = updatedTransformParts.join(" ").trim();
+                el.setAttribute("transform", updatedTransform);
+            });
+
+            try {
+                saveState();
+                console.log("Stan zapisany.");
+            } catch (error) {
+                console.error("Nie udało się zapisać stanu:", error);
+            }
+        }
+
+        document.getElementById('adjustButton').addEventListener('click', adjustBackground);
+
+
+
+        document.getElementById("zoomIn").addEventListener("click", () => {
+            saveState();
+            const resizeValue = parseFloat(document.getElementById('resize').value); 
+            console.log('Zoom In Factor:', 1 + resizeValue); 
+            scaleSelectedElements(1 + resizeValue); 
+        });
+
+        document.getElementById("zoomOut").addEventListener("click", () => {
+            saveState();
+            const resizeValue = parseFloat(document.getElementById('resize').value); 
+            console.log('Zoom Out Factor:', 1 - resizeValue); 
+            scaleSelectedElements(1 - resizeValue); 
+        });
+
+        
+        applyColorButton.addEventListener('click', () => {
+            if (selectedElements.length > 0) {
+
+                saveState();
+
+                const color = colorPicker.value;  
+                selectedElements.forEach(el => {
+                    el.setAttribute('fill', color);
+                    el.setAttribute('stroke', color);
+
+                    el.style.fill = color;
+                    el.style.stroke = color;
+
+                });
+            } else {
+                alert('Please select an SVG element first!');
+            }
+        });
+
+
+        svgEditor.addEventListener('click', (e) => {
+        if (e.target !== svgEditor) {  
+
+            svgEditor.querySelectorAll('*').forEach(el => el.classList.remove('selected'));
+            selectedElement = e.target;
+            selectedElement.classList.add('selected');  
+        }
+
+        });
+
+
+        applyColorButton.addEventListener('click', () => {
+            if (selectedElement) {
+                const selectedColor = colorPicker.value;
+                selectedElement.setAttribute('fill', selectedColor);  
+                selectedElement.setAttribute('stroke', selectedColor); 
+            } else {
+                alert('Please select an SVG element first!');
+            }
+        });
+
+        function moveToTop() {
+            selectedElements.forEach(el => {
+                el.parentNode.appendChild(el); 
+            });
+            saveState(); 
+        }
+
+        function moveToBottom() {
+            selectedElements.forEach(el => {
+                el.parentNode.insertBefore(el, el.parentNode.firstChild); 
+            });
+            saveState(); 
+        }
+
+        moveToTopButton.addEventListener('click', moveToTop);
+        moveToBottomButton.addEventListener('click', moveToBottom);
+
+        function saveState() {
+            selectedElements.forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+            const serializer = new XMLSerializer();
+            history.push(serializer.serializeToString(svgEditor));
+            redoStack = []; 
+        }
+
+        
+        undoButton.addEventListener('click', () => {
+            if (history.length > 0) {
+                redoStack.push(history.pop());
+                svgEditor.innerHTML = history[history.length - 1] || '';
+                clearSelection(); 
+                attachEventListeners(); 
+            }
+        });
+
+        redoButton.addEventListener('click', () => {
+            if (redoStack.length > 0) {
+                history.push(redoStack.pop());
+                svgEditor.innerHTML = history[history.length - 1];
+                clearSelection(); 
+                attachEventListeners(); 
+            }
+        });
+
+
+        function attachEventListeners() {
+            document.addEventListener('click', (e) => {
+                if (!svgEditor.contains(e.target)) {
+                    clearSelection(); 
+                }
+            });
+
+            svgEditor.querySelectorAll('*').forEach(element => {
+                element.addEventListener('click', (e) => {
+                    e.stopPropagation(); 
+                    if (e.ctrlKey) {
+                        toggleSelection(element); 
+                    } else {
+                        clearSelection(); 
+                        selectElement(element); 
+                    }
+                });
+            });
+        } 
+
+
+        function selectElement(element) {
+            if (!selectedElements.includes(element)) {
+                selectedElements.push(element);
+                element.classList.add('selected');
+            }
+        }
+
+        function deselectElement(element) {
+            selectedElements = selectedElements.filter(el => el !== element);
+            element.classList.remove('selected');
+        }
+
+        function toggleSelection(element) {
+            if (selectedElements.includes(element)) {
+                deselectElement(element);
+            } else {
+                selectElement(element);
+            }
+        }
+
+        function clearSelection() {
+            selectedElements.forEach(el => el.classList.remove('selected'));
+            selectedElements = [];
+        }
+
+        svgEditor.addEventListener('mousedown', (e) => {
+            if (!e.ctrlKey) {
+                isSelecting = true;
+                startX = e.offsetX;
+                startY = e.offsetY;
+                selectionRectangle.style.left = `${startX}px`;
+                selectionRectangle.style.top = `${startY}px`;
+                selectionRectangle.style.width = '0px';
+                selectionRectangle.style.height = '0px';
+                selectionRectangle.style.display = 'block';
+            }
+        });
+
+        svgEditor.addEventListener('mousemove', (e) => {
+            if (isSelecting) {
+                const width = e.offsetX - startX;
+                const height = e.offsetY - startY;
+                selectionRectangle.style.width = `${Math.abs(width)}px`;
+                selectionRectangle.style.height = `${Math.abs(height)}px`;
+                selectionRectangle.style.left = `${Math.min(startX, e.offsetX)}px`;
+                selectionRectangle.style.top = `${Math.min(startY, e.offsetY)}px`;
+            }
+        });
+
+        svgEditor.addEventListener('mouseup', (e) => {
+            if (isSelecting) {
+                const rect = selectionRectangle.getBoundingClientRect();
+                svgEditor.querySelectorAll('*').forEach(element => {
+                    const elRect = element.getBoundingClientRect();
+                    if (
+                        elRect.left >= rect.left &&
+                        elRect.right <= rect.right &&
+                        elRect.top >= rect.top &&
+                        elRect.bottom <= rect.bottom
+                    ) {
+                        selectElement(element);
+                    }
+                });
+                selectionRectangle.style.display = 'none';
+                isSelecting = false;
+            }
+        });
+
+        deleteElementButton.addEventListener('click', deleteSelectedElements);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete') {
+                deleteSelectedElements();
+                saveState();
+            }
+        });
+
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                clearSelection(); 
+            }
+        });
+
+
+
+        function deleteSelectedElements() {
+            if (selectedElements.length > 0) {
+                selectedElements.forEach(el => {
+                    el.classList.remove('selected');
+                });
+
+                saveState(); 
+
+                selectedElements.forEach(el => el.remove());
+
+                clearSelection();
+            }
+        }
+      
+
+        // Save file
+        saveFileButton.addEventListener('click', () => {
+            const format = saveFormatSelect.value; 
+            const resolution = parseInt(document.getElementById('resolution').value, 10); 
+            const serializer = new XMLSerializer();
+            const svgData = serializer.serializeToString(svgEditor); 
+
+            const getScaleFactor = (resolution) => {
+                const defaultDPI = 96; 
+                return resolution / defaultDPI; 
+            };
+
+
+            const scaleFactor = getScaleFactor(resolution);
+
+            if (format === 'svg') {
+                const blob = new Blob([svgData], { type: 'image/svg+xml' });
+                downloadFile(blob, 'image.svg');
+            } else {
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const img = new Image();
+
+                img.onload = () => {
+                    try {
+                        const svgWidth = svgEditor.clientWidth;
+                        const svgHeight = svgEditor.clientHeight;
+
+                        const width = svgWidth * scaleFactor;
+                        const height = svgHeight * scaleFactor;
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        context.setTransform(scaleFactor, 0, 0, scaleFactor, 0, 0);
+
+                        if (format === 'jpeg' || format === 'jpg') {
+                            context.fillStyle = 'white';
+                            context.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+
+                        context.drawImage(img, 0, 0, svgWidth, svgHeight);
+
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                downloadFile(blob, `image.${format}`);
+                            } else {
+                                console.error('Błąd: Blob jest pusty!');
+                            }
+                        }, `image/${format}`);
+                    } catch (error) {
+                        console.error('Błąd podczas rysowania na canvasie:', error);
+                    }
+                };
+
+                img.onerror = (error) => {
+                    console.error('Nie udało się załadować obrazu SVG jako źródła:', error);
+                };
+
+                const svgBlob = new Blob([svgData], { type: 'image/svg+xml' });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                img.src = svgUrl;
+            }
+        });
+
+
+        function downloadFile(blob, filename) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+
+            URL.revokeObjectURL(link.href);
+        }
+
+   
+
+        deleteElementButton.addEventListener('click', () => {
+            selectedElements.forEach(el => el.remove());
+            clearSelection();
+            saveState();
+        });
+
+     
+
+       
+        document.addEventListener('keydown', (e) => {
+            if (selectedElements.length > 0) {
+                let dx = 0, dy = 0;
+
+                const moveStep = parseFloat(moveStepSelect.value);
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                        dy = -moveStep;
+                        break;
+                    case 'ArrowDown':
+                        dy = moveStep;
+                        break;
+                    case 'ArrowLeft':
+                        dx = -moveStep;
+                        break;
+                    case 'ArrowRight':
+                        dx = moveStep;
+                        break;
+                    default:
+                        return;
+                }
+
+                e.preventDefault();
+
+                selectedElements.forEach(el => {
+                    let transform = el.getAttribute('transform') || '';
+                    let translateX = 0, translateY = 0;
+
+                    const translateMatch = transform.match(/translate\(([^)]+)\)/);
+                    if (translateMatch) {
+                        const [x, y] = translateMatch[1].split(/[\s,]+/).map(parseFloat);
+                        translateX = x || 0;
+                        translateY = y || 0;
+                    }
+
+                    const newTranslate = `translate(${translateX + dx}, ${translateY + dy})`;
+
+                    if (translateMatch) {
+                        transform = transform.replace(/translate\([^)]+\)/, newTranslate);
+                    } else {
+                        transform = `${transform} ${newTranslate}`.trim();
+                    }
+
+                    el.setAttribute('transform', transform);
+
+                    const bbox = el.getBBox();
+                    const svgBBox = svgEditor.getBBox();
+                    if (
+                        bbox.x < svgBBox.x ||
+                        bbox.y < svgBBox.y ||
+                        bbox.x + bbox.width > svgBBox.x + svgBBox.width ||
+                        bbox.y + bbox.height > svgBBox.y + svgBBox.height
+                    ) {
+                        console.warn(`Element ${el.id || el.tagName} wychodzi poza obszar SVG.`);
+                    }
+                });
+
+                saveState(); 
+            }
+        });
+
+        
+
+
+        function flattenSvgGroups(svgElement) {
+            svgElement.querySelectorAll('g').forEach((group) => {
+                const parent = group.parentNode;
+                const groupTransform = group.getAttribute('transform') || '';
+
+                Array.from(group.children).forEach((child) => {
+                    const childTransform = child.getAttribute('transform') || '';
+
+                    const combinedTransform = `${groupTransform} ${childTransform}`.trim();
+                    child.setAttribute('transform', combinedTransform);
+
+                    child.removeAttribute('clip-path');
+
+                    parent.insertBefore(child, group);
+                });
+
+                group.remove(); 
+            });
+        }
+
+
+        function assignUniqueIds(svgElement) {
+            let idCounter = 0;
+            svgElement.querySelectorAll('path, rect, circle, ellipse, polygon').forEach((element) => {
+                if (!element.id) {
+                    element.id = `element-${idCounter++}`;
+                }
+            });
+        }
+
+
+        function loadSvgFromPath(path) {
+            fetch(path)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    svgEditor.innerHTML = data;
+                    const svgElement = svgEditor.querySelector('svg');
+
+                    // Wywołanie Twoich funkcji
+                    flattenSvgGroups(svgElement);
+                    assignUniqueIds(svgElement);
+                    clearSelection();
+                    fitSvgToScreen();
+                    attachEventListeners();
+                })
+                .catch(error => {
+                    console.error('Error loading SVG:', error);
+                });
+        }
+        
+        
+        const params = new URLSearchParams(window.location.search);
+        const pathToSvg = params.get('graph'); 
+
+        console.log("Path to SVG:", pathToSvg);
+
+        if (pathToSvg) {
+            loadSvgFromPath(pathToSvg)
+        } else {
+            console.error('Path to SVG not provided in URL.');
+        }
+
+
+
+
+     
+        // Adjust SVG to fit screen
+        function fitSvgToScreen() {
+            const bbox = svgEditor.getBBox();
+            svgEditor.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+            svgEditor.style.width = `${bbox.width}px`;
+            svgEditor.style.height = `${bbox.height}px`;
+            svgWrapper.style.width = `${bbox.width}px`;
+            svgWrapper.style.height = `${bbox.height}px`;
+            svgContainer.scrollLeft = (svgWrapper.offsetWidth - svgContainer.offsetWidth) / 2;
+            svgContainer.scrollTop = (svgWrapper.offsetHeight - svgContainer.offsetHeight) / 2;
+        }
+
+     
+
+
+    </script>
+</body>
+</html>
