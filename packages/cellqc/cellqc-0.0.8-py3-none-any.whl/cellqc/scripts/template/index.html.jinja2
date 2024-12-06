@@ -1,0 +1,247 @@
+<!doctype html>
+
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>QC Report</title>
+    <style>{{ "style.css"|get_resource_as_string }}</style>
+  </head>
+
+  <body>
+    <div class="result">
+    {% if cellrangersummary is not none %}
+      <div class="heading">
+        <h1>CellRanger metrics summary</h1>
+      </div>
+      <div class="outer-wrapper">
+        <div class="table-wrapper">
+          {{ cellrangersummary }}
+        </div>
+      </div>
+    {% endif %}
+    </div>
+
+    <div class="result">
+    {% if soupxrhoEst is not none %}
+      <div class="heading">
+        <h1>Soupx: estimated contamination fraction </h1>
+      </div>
+      <div class="outer-wrapper">
+        <div class="table-wrapper">
+          {{ soupxrhoEst }}
+        </div>
+      </div>
+    {% endif %}
+    </div>
+
+    <div class="result">
+      <div class="heading">
+        <h2> Global contamination fraction estimate  </h2>
+      </div>
+    {% for file, datauri in soupxrho.items() -%}
+      <div class="pdf">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="iframe-wrapper">
+          <iframe src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%" height="100%"> </iframe>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+
+    <div class="result">
+    {% if dropkickstat is not none %}
+      <div class="heading">
+        <h1>Dropkick: filtering empty droplets </h1>
+      </div>
+      <div class="outer-wrapper">
+        <div class="table-wrapper">
+          {{ dropkickstat }}
+        </div>
+      </div>
+
+      <div class="heading">
+        <h2> Dropkick: QC summary </h2>
+      </div>
+    {% for file, datauri in dropkicksummary.items() -%}
+      <div class="png">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="img-wrapper">
+          <img src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%"> </img>
+        </div>
+      </div>
+    {% endfor %}
+
+      <div class="heading">
+        <h2> Dropkick: training set and classification probability </h2>
+      </div>
+    {% for file, datauri in dropkickscore.items() -%}
+      <div class="png">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="img-wrapper">
+          <img src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%"> </img>
+        </div>
+      </div>
+    {% endfor %}
+
+    {% endif %}
+    </div>
+
+    <div class="result">
+    {% if filterbycountncell is not none %}
+      <div class="heading">
+        <h1> Filter cells by count </h1>
+      </div>
+      <div class="outer-wrapper">
+        <div class="table-wrapper">
+          {{ filterbycountncell }}
+        </div>
+      </div>
+    {% endif %}
+
+      <div class="heading">
+        <h2> Violin plot before filtering </h2>
+      </div>
+    {% for file, datauri in filterbycountpltbf.items() -%}
+      <div class="pdf">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="iframe-wrapper">
+          <iframe src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%" height="100%"> </iframe>
+        </div>
+      </div>
+    {% endfor %}
+
+      <div class="heading">
+        <h2> Violin plot after filtering </h2>
+      </div>
+    {% for file, datauri in filterbycountpltaf.items() -%}
+      <div class="pdf">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="iframe-wrapper">
+          <iframe src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%" height="100%"> </iframe>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+
+    <div class="result">
+    {% if doubletratio is not none %}
+      <div class="heading">
+        <h1> Doublet removal by DoubletFinder </h1>
+      </div>
+      <div class="outer-wrapper">
+        <div class="table-wrapper">
+          {{ doubletratio }}
+        </div>
+      </div>
+    {% endif %}
+
+      <div class="heading">
+        <h2> Violin plot of pANN (percentage of artificial nearest neighbors) </h2>
+      </div>
+    {% for file, datauri in doubletpannviolin.items() -%}
+      <div class="pdf">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="iframe-wrapper">
+          <iframe src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%" height="100%"> </iframe>
+        </div>
+      </div>
+    {% endfor %}
+
+      <div class="heading">
+        <h2> TSNE: color by classification </h2>
+      </div>
+    {% for file, datauri in doublettsne.items() -%}
+      <div class="pdf">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="iframe-wrapper">
+          <iframe src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%" height="100%"> </iframe>
+        </div>
+      </div>
+    {% endfor %}
+
+      <div class="heading">
+        <h2> UMAP: color by classification </h2>
+      </div>
+    {% for file, datauri in doubletumap.items() -%}
+      <div class="pdf">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="iframe-wrapper">
+          <iframe src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%" height="100%"> </iframe>
+        </div>
+      </div>
+    {% endfor %}
+
+    </div>
+
+    <div class="result">
+    {% if scpredcontingency is not none %}
+      <div class="heading">
+        <h1> Contingency table between predicted cell types and cell clusters </h1>
+      </div>
+    {% for file, contingency in scpredcontingency.items() -%}
+      <div class="contingency">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="outer-wrapper">
+          <div class="table-wrapper">
+            {{ contingency }}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+      <div class="heading">
+        <h2> Max classification probabilities </h2>
+      </div>
+    {% for file, datauri in scpredfeaturemax.items() -%}
+      <div class="png">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="img-wrapper">
+          <img src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%"> </img>
+        </div>
+      </div>
+    {% endfor %}
+
+      <div class="heading">
+        <h2> Predicted cell types </h2>
+      </div>
+    {% for file, datauri in scpredpredictumap.items() -%}
+      <div class="png">
+        <div class="heading">
+          <h2> {{ file }} </h2>
+        </div>
+        <div class="img-wrapper">
+          <img src="{{ datauri }}#fitW&toolbar=0" title="{{ file }}" width="100%"> </img>
+        </div>
+      </div>
+    {% endfor %}
+
+    {% endif %}
+    </div>
+
+  </body>
+
+</html>
