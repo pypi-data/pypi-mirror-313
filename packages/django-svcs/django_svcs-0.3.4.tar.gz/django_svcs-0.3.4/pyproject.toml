@@ -1,0 +1,94 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+dynamic = ["version"]
+name = "django_svcs"
+readme = "README.md"
+description = "A Django integration for SVCS"
+requires-python = ">=3.12"
+authors = [
+  {name = "Chris Rose", email = "offline@offby1.net"}
+]
+maintainers = [
+  {name = "Chris Rose", email = "offline@offby1.net"}
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
+license = {text = "BSD license"}
+dependencies = [
+  "djp>=0.0,<1.0",
+  "svcs",
+]
+
+[project.urls]
+bugs = "https://github.com/offbyone/django_svcs/issues"
+changelog = "https://github.com/django-svcs/django-svcs/blob/main/CHANGELOG.md"
+homepage = "https://github.com/django-svcs/django-svcs"
+issues = "https://github.com/django-svcs/django-svcs/issues"
+CI = "https://github.com/django-svcs/django-svcs/actions"
+
+[project.entry-points.djp]
+django_svcs = "django_svcs.plugin"
+
+[[tool.mypy.overrides]]
+# Don't require test functions to include types
+module = "tests.*"
+allow_untyped_defs = true
+disable_error_code = "attr-defined"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/django_svcs"]
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { local_scheme = "no-local-version" }
+
+[tool.ruff]
+src = ["src", "tests", "conftest.py", "docs"]
+line-length = 100
+
+[tool.pytest.ini_options]
+looponfailroots = ["tests", "src"]
+filterwarnings = [
+    # I know looponfailroots is 'deprecated' but ... i'm tired of seeing it
+    "ignore::DeprecationWarning:xdist.plugin"
+]
+asyncio_default_fixture_loop_scope = "function"
+DJANGO_SETTINGS_MODULE = "test_project.settings"
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["django_svcs", "tests"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  # Typing-related
+  "if TYPE_CHECKING:",
+  ": +\\.\\.\\.$",
+]
+
+[dependency-groups]
+dev = [
+    "autotyping>=24.9.0",
+    "django-types>=0.19.1",
+    "pyright>=1.1.387",
+    "pytest",
+    "pytest-xdist[psutil]",
+    "pytest-asyncio>=0.24.0",
+    "pytest-django>=4.9.0",
+    "django>=5.0",  # we don't force a Django version, but we do test against it.
+    "coverage[toml]>=5.3",
+]
