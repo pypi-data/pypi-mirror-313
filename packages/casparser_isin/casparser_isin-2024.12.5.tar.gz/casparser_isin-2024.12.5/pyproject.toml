@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "casparser_isin"
+version = "0"
+description = "ISIN database for casparser"
+authors = ["Sandeep Somasekharan <codereverser@gmail.com>"]
+homepage = "https://github.com/codereverser/casparser-isin"
+license = "MIT License"
+readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Operating System :: OS Independent"
+]
+include = [ "CHANGELOG.md" ]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+packaging = ">=20.9"
+rapidfuzz = "^3.9.0"
+
+[tool.poetry.dev-dependencies]
+coverage = {version = "^7.3.0", extras=["toml"]}
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+apsw = "^3.43.0"
+b2sdk = "^1.24.0"
+lxml = "^4.9.0"
+python-dotenv = "^1.0.0"
+requests = "^2.31.0"
+requests-cache = "^1.1.0"
+pre-commit = "^3.4.0"
+
+[tool.poetry.scripts]
+casparser-isin = "casparser_isin.cli:main"
+
+[build-system]
+requires = ["poetry-core >= 1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--cov=casparser_isin --cov-config=tox.ini --cov-report=xml --cov-report=html --exitfirst"
+testpaths = [
+    "tests",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+
+[tool.poetry-version-plugin]
+source = "init"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.format]
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
