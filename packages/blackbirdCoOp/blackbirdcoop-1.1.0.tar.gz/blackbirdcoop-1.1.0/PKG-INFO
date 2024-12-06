@@ -1,0 +1,204 @@
+Metadata-Version: 2.1
+Name: blackbirdCoOp
+Version: 1.1.0
+Summary: A Stealth-based pipeline that optimizes inserts for cyanobacterial transformations in non-model organisms.
+Home-page: https://gitlab.igem.org/2024/software-tools/ucsc
+License: MIT
+Author: Vibhitha Nandakumar
+Author-email: vinandak@ucsc.edu
+Requires-Python: >=3.9,<3.13
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Project-URL: Repository, https://gitlab.igem.org/2024/software-tools/ucsc
+Description-Content-Type: text/markdown
+
+# BLACKBIRDCoOp
+
+BLACKBIRD or BlackbirdCoOp is the software element for the 2024 UCSC iGem team, LIFT. BLACKBIRD is a software package that is able to optimize insert sequences for non-model cyanobacteria. 
+
+## Description
+
+BLACKBIRD is the software element of the 2024 UCSC iGem team, LIFT. 
+
+BLACKBIRD is built on Stealth, a bioinformatics tool developed by our PI, David L. Bernick, at UCSC. Stealth identifies and reports statistically underrepresented k-mer motifs within a genome in order to identify potential restriction enzyme cut-sites within an insert's coding region. For software related information about Stealth, please refer to this [repository](https://git.ucsc.edu/dbernick/stealth).
+
+BLACKBIRD is a versatile program that uses the genomes of a host organism, the origin of the gene insert, and the genome of a target organism to optimize the gene insert which would be free of RM cut sites.
+
+*This is an alpha version which is a pre-release version whos successor aims to produce an optimized insert sequence that is even more efficient in eradicating the maximum number of stealth hits. Any BLACKBIRD results that have been produced and integrated into the project are a result of version 0 of BLACKBIRD.*
+
+For more information about the project and its goals, please refer to our [team wiki](https://2024.igem.wiki/ucsc/software)
+
+## Installation
+
+#### Requirements
+**For Unix/macOS:**
+
+First, check if your system can run python and the pip installer. Python packages that are not downloaded to your system need to be retrived by an installer like pip. Use the following prompts to check:
+```bash
+usr:~$ python --version
+Python 3.x.x
+#OR
+usr:~$ python3 --version
+Python 3.x.x
+#OR
+usr:~$ python -m pip --version
+pip X.Y.Z from /<path>/<to>/<your>/pip (python 3.x.x)  
+```
+If you receive the following error, proceed to install python or pip on your system
+```bash
+usr:~$ python3 --version
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'python3' is not defined  
+```
+
+##### Installing Python / pip
+
+If you do not have Python, get started by installing Python 3.10 or above from [python.org](https://www.python.org/downloads/), or through a distriubtion such as [anaconda](https://www.anaconda.com/download).
+
+If you do not have a working pip installer, follow steps found [here](https://pip.pypa.io/en/stable/installation/).
+
+##### Installing BlackbirdCoOp
+
+Installing BlackbirdCoOp can be done by running the following command in your terminal with a valid pip installer to install the blackbirdCoOp package from the Python Package Index (PyPI):
+
+```bash
+usr:~$ pip install blackbirdCoOp
+```
+OR
+
+```bash
+usr:~$ python -m pip install blackbirdCoOp
+```
+
+**For Windows:**
+
+Windows requires a 'Path' environment in order to run the given CLI commands. 
+
+First, confirm if you have the compatible python and pip environments on your system
+```bash
+usr:~$ py --version
+Python 3.x.x
+#OR
+usr:~$ py -m pip --version
+pip X.Y.Z from /<path>/<to>/<your>/pip (python 3.x.x)  
+```
+Download python and pip with the links above and follow the instruction for a Windows OS based install
+
+##### Installing BlackbirdCoOp
+
+Installing BlackbirdCoOp can be done by running the following command in your terminal with a valid pip installer to install the blackbirdCoOp package from the Python Package Index (PyPI):
+
+```bash
+usr:~$ python -m pip install blackbirdCoOp
+```
+
+If you are unable to run the accompanying CLI commands, you need to set up a 'Path' environment with both Python and the 'Scripts' folder. Find the paths to both folders. Use the following command to find the location of BLACKBIRD:
+```bash
+usr:~$ pip show blackbirdCoOp
+```
+
+Follow the following commands to add to path via the GUI:
+_'Windows + X' -> 'System Properties' -> 'Advanced system settings' -> Environment variables -> System Variables_
+In this section, find the 'Path' and click 'Edit'. Now, click 'New' and add the following paths:
+```bash
+C:\Users\YourUsername\AppData\Local\Programs\Python\PythonXX\
+C:\Users\YourUsername\AppData\Local\Programs\Python\PythonXX\Scripts\
+```
+Replace 'PythonXX' with 'Python39' and save changes. 
+
+
+## Usage
+
+#### BLACKBIRD CLI
+Once installed, the main function can be easily run with the command `blackbirdcoop`
+```bash
+# usage
+blackbirdcoop --insert (-n) <insert infile> --stealth (-s) <stealth infile> --hostT (-ht) <host genome infile> --target (-t) <target genome infile> --outfile -o [outfile | default: stdout]
+```
+
+The `blackbirdcoop` command takes 4 required arguments `--insert (-n)`, `--stealth (-s))`, `--hostT (-ht)`, and `--target (-t)`. 
+`--insert (-n)` is the insert sequence of interest in Fasta format (.fa/.fasta)
+`--stealth (-s))` is the list of Stealth outputted kmers in a text file (.txt/.stealth)
+`--hostT (-ht)` is the host organism's codon usage table in TSV format (.tsv)
+`--target (-t)` is the target organism's complete genome in Fasta format (.fa/.fasta)
+
+An example of a insert sequence in Fasta format is as follows:
+```bash
+>pET28:EGFP CDS
+ATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGGGCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACCGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCCTGACCTACGGCGTGCAGTGCTTCAGCCGCTACCCCGACCACATGAAGCAGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTCTTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGGACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAGGTGAACTTCAAGATCCGCCACAACATCGAGGACGGCAGCGTGCAGCTCGCCGACCACTACCAGCAGAACACCCCCATCGGCGACGGCCCCGTGCTGCTGCCCGACAACCACTACCTGAGCACCCAGTCCGCCCTGAGCAAAGACCCCAACGAGAAGCGCGATCACATGGTCCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAA
+```
+A similar format can be applied to all input files in Fasta
+
+An example of the stealth input file is as follows:
+```bash
+N = 3081514
+CGCG	[100]	RC Palindrome
+GCGC	[98]	RC Palindrome
+GGCC	[100]	RC Palindrome
+AATAG	[92]	
+AATCG	[100] ...
+
+GAAGAC
+GTCTTC
+GGTCTC
+GAGACC
+```
+The sequences starting on the second line are the generated under-represented k-mers. By default, the k-mers will be within the range of 4-8 nucleotides. 'RC Palindrome' refers to the occurence of palindromic under-represented sequences. The numbers in the bracket is usually higher than the thresholds/cut-off values set by the user. (Note: the version of stealth that handles bootstrapping will not be added to this repository at this time) 
+
+The domestication protocol is also a very simple procedure. Simply add the known internal Type IIS restriction enzyme sites for Golden Gate Assembly at the end of the stealth file.
+
+An example of an organism's codon usage table in a tsv file is as follow:
+```bash
+TTT	22.31	-2414783
+TTC	16.54	-1789835
+TTA	13.76	-1489606
+TTG	13.65	-1477363 ...
+```
+In this version, BLACKBIRD considers the second values on each lines as the 'thousandths' value or the relative codon bias of each corresponding codon
+
+An example of the output file format is in a Fasta file as follows:
+```bash
+>pET28:EGFP CDS output [8]
+ATGTCAATATATCAA...
+```
+The number in the brackets refers to the current number of stealth hits of the outputted insert sequence
+
+### Post-Wiki freeze:
+
+Blackbird is operational with our most basic codon optimization algorithm. 
+While it functions as intended, this version is an initial implementation and may lack more extensive optimization results.
+
+For any most recent updates, enhancements, or potential future versions, please refer to Vibi's personal GitHub repository: https://github.com/vibhitha19
+
+### Alpha version - Tentative results:
+
+The team is currently and will continue to better the algorithm in order to bring the number of stealth hits down to a minimum (ideally 0). All previous gene blocks corresponding to the most optimized results that the team has already been physically working with in order to attempt to demonstrate how the transformation efficiency was improved, were all based on the previous version. 
+
+For the sake of demonstration purposes of the previous version, we have included documentation of one of our many target organisms at the time, PCC 11901's BLACKBIRD results (results which were already utilized to order gene blocks). This includes a complete genome file (as provided by [NCBI](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=2579791)), a GFP insert file (provided by [Addgene](https://www.addgene.org/browse/sequence/392768/)), an example of an open source [codon usage table of E. Coli](https://dnahive.fda.gov/dna.cgi?cmd=codon_usage&id=537&mode=cocoputs) (a recombinant host organism that is widely used to produce GFP) and a Stealth file containing a list of "stealth sites" or under-represented sites based on our PI David L. Bernick's software. 
+
+As a result, there will also be documentation of an example of a simple Fasta file output containing the most optimized GFP sequence for the strain PCC11901.
+
+
+## Contributing
+
+The LIFT, the 2024 UCSC iGem team consents to receiving any and all contributions offered. 
+
+This software is published under the MIT license. Feel free to use any and all code provided by the project in any way and for any purpose.
+
+
+## Authors and acknowledgment
+BLACKBIRD was written and contributed to by 
+* Vibhitha Nandakumar (email: vinandak@ucsc.edu)
+* Aurko Mahesh (email: amahesh@ucsc.edu)
+
+Special thanks 
+* David L. Bernick (email: dbernick@soe.ucsc.edu), our PI, allowing the further application of Stealth and for all the support and contributions throughout. 
+* Robin Rounthwaite (email: rrounthw@ucsc.edu) for consultance in software architecture and Git repository management
+* TABI 2023 UCSC iGem team ([github](https://gitlab.igem.org/2023/software-tools/ucsc)) for support regarding Git repository management and project packaging
+* Reto Stamm (email: rstamm@ucsc.edu | [github](https://github.com/retospect)) for guidance in developing and publishing a package to the Python Package Index
+
