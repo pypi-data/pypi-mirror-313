@@ -1,0 +1,101 @@
+Metadata-Version: 2.1
+Name: ebcc
+Version: 1.6.0
+Summary: Coupled cluster calculations on electron-boson systems
+Keywords: quantum,chemistry,electronic,structure,coupled,cluster,electron,boson,ccsd
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Scientific/Engineering
+Classifier: Topic :: Software Development
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: POSIX :: Linux
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+Requires-Dist: numpy>=1.19.0
+Requires-Dist: scipy>=1.11.0
+Requires-Dist: pyscf>=2.0.0
+Requires-Dist: h5py>=3.0.0
+Provides-Extra: numpy
+Provides-Extra: tensorflow
+Requires-Dist: tensorflow>=2.0.0; extra == "tensorflow"
+Requires-Dist: opt_einsum>=3.3.0; extra == "tensorflow"
+Provides-Extra: jax
+Requires-Dist: jax>=0.2.0; extra == "jax"
+Requires-Dist: opt_einsum>=3.3.0; extra == "jax"
+Requires-Dist: pyscfad>=0.1.8; extra == "jax"
+Provides-Extra: cupy
+Requires-Dist: cupy>=9.0.0; extra == "cupy"
+Requires-Dist: opt_einsum>=3.3.0; extra == "cupy"
+Provides-Extra: dev
+Requires-Dist: black>=22.6.0; extra == "dev"
+Requires-Dist: isort>=5.10.1; extra == "dev"
+Requires-Dist: flake8>=3.8.4; extra == "dev"
+Requires-Dist: flake8-pyproject>=1.2.3; extra == "dev"
+Requires-Dist: flake8-bugbear>=23.0.0; extra == "dev"
+Requires-Dist: flake8-docstrings>=1.6.0; extra == "dev"
+Requires-Dist: mypy>=1.8.0; extra == "dev"
+Requires-Dist: mypy_extensions>=0.4.3; extra == "dev"
+Requires-Dist: coverage[toml]>=5.5.0; extra == "dev"
+Requires-Dist: pytest>=6.2.4; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: mkdocs>=1.6.0; extra == "dev"
+Requires-Dist: mkdocs-gen-files>=0.5.0; extra == "dev"
+Requires-Dist: mkdocs-section-index>=0.3.0; extra == "dev"
+Requires-Dist: mkdocs-autorefs>=1.0.0; extra == "dev"
+Requires-Dist: mkdocs-include-markdown-plugin>=6.2.0; extra == "dev"
+Requires-Dist: mkdocstrings>=0.25.0; extra == "dev"
+Requires-Dist: mkdocstrings-python>=1.10.0; extra == "dev"
+
+# ebcc: Coupled cluster calculations on electron-boson systems
+
+[![CI](https://github.com/BoothGroup/ebcc/workflows/CI/badge.svg)](https://github.com/BoothGroup/ebcc/actions?query=workflow%3ACI+branch%3Amaster)
+[![codecov](https://codecov.io/gh/BoothGroup/ebcc/branch/master/graph/badge.svg?token=QZQZQ2ZQ2Z)](https://codecov.io/gh/BoothGroup/ebcc)
+[![PyPI version](https://badge.fury.io/py/ebcc.svg)](https://badge.fury.io/py/ebcc)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+The `ebcc` package implements various coupled cluster (CC) models for both purely electronic and coupled electron-boson models, with a focus on generality and model extensibility.
+
+For a summary of the implemented models, see the [FEATURES.md](FEATURES.md) file.
+
+### Installation
+
+From PyPI:
+
+```bash
+pip install ebcc
+```
+
+From source:
+
+```bash
+git clone https://github.com/BoothGroup/ebcc
+pip install .
+```
+
+### Usage
+
+The implemented models are built upon the mean-field objects of [`pyscf`](https://github.com/pyscf/pyscf):
+
+```python
+from pyscf import gto, scf
+from ebcc import EBCC
+mol = gto.M(atom="H 0 0 0; H 0 0 1", basis="cc-pvdz")
+mf = scf.RHF(mol)
+mf.kernel()
+ccsd = EBCC(mf, ansatz="CCSD")
+ccsd.kernel()
+```
+
+Many ansatzes for both fermionic and electron-boson coupled cluster calculations are available. For more details see the `tutorials` and `examples` directories.
+
+### Code generation
+
+The models implemented are generated algorithmically from expressions over second quantized operators. The scripts for generating these models are found in the `codegen` directory on the `bootstrap` branch.
+User-inputted models should operate seamlessly with the solvers by adding files under `ebcc/codegen`, so long as they satisfy the interface.
