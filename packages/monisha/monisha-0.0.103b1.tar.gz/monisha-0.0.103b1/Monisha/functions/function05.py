@@ -1,0 +1,7 @@
+class Doxo(object):
+
+    DATA01 = str("23:59:59")
+    DATA02 = str("%Y.%m.%d %H:%M:%S")
+    DATA03 = str("2020.01.01 00:00:00")
+    DATA04 = str("DD.MM.YYYY HH:mm:ss")
+    DATA05 = str("YYYY.MM.DD HH:mm:ss")
