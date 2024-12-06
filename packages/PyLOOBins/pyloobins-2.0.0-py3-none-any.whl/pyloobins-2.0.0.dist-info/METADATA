@@ -1,0 +1,132 @@
+Metadata-Version: 2.1
+Name: PyLOOBins
+Version: 2.0.0
+Summary: Python package for managing the LOOBins model and schema.
+Home-page: https://loobins.io/
+License: GPL-3.0-or-later
+Keywords: cybersecurity,cli,lol
+Author: infosecB
+Author-email: brendan@infosecb.com
+Requires-Python: >=3.8,<4.0
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: click (>=8.1.3,<9.0.0)
+Requires-Dist: jinja2 (>=3.1.2,<4.0.0)
+Requires-Dist: polyfactory (>=2.18.0,<3.0.0)
+Requires-Dist: pydantic (>=2,<3)
+Requires-Dist: pyyaml (>=6.0,<7.0)
+Requires-Dist: stix2 (>=3.0.1,<4.0.0)
+Project-URL: Repository, https://github.com/infosecB/LOOBins
+Description-Content-Type: text/markdown
+
+# PyLOOBins
+PyLOOBins is a Python SDK and command-line utility for programmatically interacting with [LOOBins](https://loobins.io).
+
+You can download PyLOOBins from PyPI by running the following command:
+`pip install pyloobins`
+
+PyLOOBins requires Python 3.8 or later.
+
+## Usage
+### Command-line
+
+You can run `pyloobins --help` to see the available commands and options.
+
+```
+>>> pyloobins --help
+
+Usage: pyloobins [OPTIONS] COMMAND [ARGS]...
+
+  Create, validate, and view LOOBin objects.
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  create       Create a YAML template file for a new LOOBin.
+  export-stix  Export the LOOBins STIX bundle file.
+  get          Get a LOOBin object.
+  validate     Validate a LOOBin YAML file.
+```
+
+You can run `pyloobins <command> --help` to see the available options for a specific command.
+```
+>>> pyloobins validate --help
+Usage: pyloobins validate [OPTIONS]
+
+  Validate a LOOBin YAML file.
+
+Options:
+  --path TEXT  The path of the LOOBin YAML file to validate.  [required]
+  --help       Show this message and exit.
+```
+
+### SDK
+
+You can use pyloobins as a Python SDK to programmatically interact with LOOBins.
+
+#### pyloobins.util
+The util module can be used to get LOOBin objects from the LOOBins API, validate LOOBin YAML files, and create LOOBin YAML templates.
+
+**Example:** get all LOOBins and print a list of the use case code.
+
+```
+from pyloobins import util
+
+loobins = util.get_loobins()
+
+for loobin in loobins:
+  for uc in loobin.example_use_cases:
+    print(f"{loobin.name}: {uc.code}")
+```
+
+#### pyloobins.models
+The models module contains the classes that represent a LOOBin and its various components. 
+
+**Example:** programmitcally create a LOOBin object.
+
+```
+from pyloobins.models import Detection, ExampleUseCase, LOOBin, Resource
+
+l = LOOBin(
+        name="",
+        short_description="A short description of the binary goes here.",
+        full_description="A full length description of the binary goes here.",
+        author="Enter your name or alias here.",
+        created=date.today(),
+        example_use_cases=[
+            ExampleUseCase(
+                name="An Example Use Case",
+                description="A description of the use case goes here.",
+                code="A code snippet goes here.",
+                tactics=["Discovery"],
+                tags=["example_tag", "another_tag"],
+            )
+        ],
+        paths=["/enter/binary/path/here"],
+        detections=[
+            Detection(
+                name="A detection source (e.g. Sigma)",
+                url="https://urltodetection.here",
+            )
+        ],
+        resources=[
+            Resource(
+                name="Name of resources.",
+                url="https://urlofexternalreference.here",
+            )
+        ],
+        acknowledgements=["Enter any acknowledgements here."],
+    )
+
+with open ("loobin.yaml", "w") as f:
+  f.write(l.to_yaml())
+```
+

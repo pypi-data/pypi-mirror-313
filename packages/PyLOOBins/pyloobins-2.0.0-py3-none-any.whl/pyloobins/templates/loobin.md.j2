@@ -1,0 +1,63 @@
+---
+title: {{ loobin.name }}
+description: {{ loobin.short_description }}
+date: {{ loobin.created }}
+draft: false
+menu:
+  showcase:
+    parent: "browse"
+weight: 100
+toc: false
+pinned: false
+featured: false
+tactics: {{ tactics }}
+tags: {{ tags }}
+---
+
+# {{ loobin.name }}
+*Created by {{ loobin.author }}*
+
+## Description
+{{ loobin.full_description }}
+| Created | Tactics | Tags |
+|---|---|---|
+| {{ loobin.created }} | {% for t in tactics %}<span class="badge text-bg-danger">{{ t }}</span> {% endfor %}  | {% for t in tags %}<span class="badge text-bg-secondary">{{ t }}</span> {% endfor %} | 
+
+## Paths
+{% for path in loobin.paths %}
+- `{{ path }}`
+{% endfor %}
+
+## Use Cases
+{% for example in loobin.example_use_cases %}
+#### {{ example.name }}
+{{ example.description }}
+
+```
+{{ example.code }}
+```
+
+{% endfor %}
+
+## Detections
+{% for detection in loobin.detections %}
+{% if detection.url in "N/A" %}
+- {{ detection.name }}
+{% else %}
+- [{{ detection.name }}]({{ detection.url }})
+{% endif %}
+{% endfor %}
+
+{% if loobin.resources %}
+## Resources
+{% for resource in loobin.resources %}
+- [{{ resource.name }}]({{ resource.url }})
+{% endfor %}
+{% endif %}
+
+{% if loobin.acknowledgements %}
+## Acknowledgements
+{% for acknowledgement in loobin.acknowledgements %}
+- {{ acknowledgement }}
+{% endfor %}
+{% endif %}
