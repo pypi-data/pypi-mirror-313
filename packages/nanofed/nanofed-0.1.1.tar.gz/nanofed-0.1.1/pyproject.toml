@@ -1,0 +1,100 @@
+[tool.poetry]
+name = "nanofed"
+version = "0.1.1"
+description = "A lightweight federated learning library"
+authors = ["camille-004 <dunningcamille@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/camille-004/nanofed"
+repository = "https://github.com/camille-004/nanofed"
+license = "GPL-3.0-or-later"
+keywords = ["federated-learning", "deep-learning", "pytorch"]
+packages = [{include = "nanofed"}]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[tool.poetry.scripts]
+nanofed = "nanofed.cli:main"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+numpy = "^2.1.2"
+pydantic = "^2.9.2"
+aiohttp = "^3.10.10"
+click = "^8.1.7"
+rich = "^13.9.4"
+
+[tool.poetry.group.ml]
+optional = true
+
+[tool.poetry.group.ml.dependencies]
+torch = ">=2.0.0"
+torchvision = ">=0.15.0"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.4.8"
+mypy = "^1.10.0"
+pre-commit = "^3.7.1"
+pytest = "^8.2.2"
+pytest-mock = "^3.14.0"
+pytest-asyncio = "^0.24.0"
+trio = "^0.27.0"
+pytest-aiohttp = "^1.0.5"
+setuptools = "^75.6.0"
+Sphinx = "^8.1.3"
+myst-parser = "^4.0.0"
+sphinx_design = "^0.6.1"
+sphinx-copybutton = "^0.5.2"
+sphinx-tabs = "^3.4.7"
+sphinx-togglebutton = "^0.3.2"
+sphinx-immaterial = "^0.12.4"
+tomlkit = "^0.13.2"
+
+[tool.poetry.extras]
+ml = ["torch", "torchvision"]
+
+[tool.ruff]
+line-length = 79
+lint.select = ["E", "F", "I", "A", "C", "B", "UP", "N", "DTZ", "T20"]
+lint.ignore = ["T201"]
+lint.extend-ignore = ["N812"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+show_error_codes = true
+show_column_numbers = true
+pretty = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+ignore_missing_imports = true
+follow_imports = "silent"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+markers = [
+    "asyncio: mark test as async",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:pytest_asyncio.*:",
+    "ignore::RuntimeWarning:unittest.mock.*:",
+]
