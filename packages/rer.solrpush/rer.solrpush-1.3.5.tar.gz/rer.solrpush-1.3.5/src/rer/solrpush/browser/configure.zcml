@@ -1,0 +1,111 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="rer.solrpush">
+
+  <plone:static
+      name="rer.solrpush"
+      type="plone"
+      directory="static"
+      />
+
+  <!-- controlpanel -->
+  <browser:page
+      name="solrpush-settings"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".controlpanel.RerSolrpushSettingsView"
+      permission="rer.solrpush.editSettings"
+      layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+      />
+  <browser:page
+      name="elevate-settings"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".elevate_settings.ElevateSettingsView"
+      permission="rer.solrpush.editElevate"
+      layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+      />
+
+  <browser:page
+    for="Products.CMFCore.interfaces.ISiteRoot"
+    name="reindex-solr"
+    permission="cmf.ManagePortal"
+    class=".maintenance.ReindexSolrView"
+    template="templates/reindex_solr.pt"
+    layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+    />
+    <browser:page
+    for="Products.CMFCore.interfaces.ISiteRoot"
+    name="sync-solr"
+    permission="cmf.ManagePortal"
+    class=".maintenance.SyncSolrView"
+    template="templates/reindex_solr.pt"
+    layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+    />
+
+   <browser:page
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        name="reindex-progress"
+        permission="cmf.ManagePortal"
+        class=".maintenance.ReindexProgressView"
+        layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+    />
+    <browser:page
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        name="do-reindex"
+        permission="cmf.ManagePortal"
+        class=".maintenance.DoReindexView"
+        layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+    />
+    <browser:page
+        for="Products.CMFCore.interfaces.ISiteRoot"
+        name="do-sync"
+        permission="cmf.ManagePortal"
+        class=".maintenance.DoSyncView"
+        layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+    />
+    
+    <browser:page
+          for="Products.CMFCore.interfaces.ISiteRoot"
+          name="reset-solr"
+          permission="cmf.ManagePortal"
+          class=".maintenance.ResetSolr"
+          layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+          />
+
+    <!-- return scaled image -->
+    <browser:page
+        name="solr-images"
+        class=".scales.SolrImages"
+        permission="zope2.View"
+        for="*"
+        layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+        />
+
+    <!-- CUSTOM COLLECTIONS -->
+    <browser:page
+        name="querybuilderresults"
+        class=".querybuilder.QueryBuilder"
+        permission="zope2.View"
+        for="*"
+        layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+        />
+    <browser:page
+        name="querybuilder_html_results"
+        class=".querybuilder.QueryBuilder"
+        permission="zope2.View"
+        attribute="html_results"
+        for="*"
+        layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+        />
+
+    <browser:viewlet
+        name="solrpush.querydebug"
+        manager="plone.app.layout.viewlets.interfaces.IBelowContent"
+        class=".query_debug.QueryDebug"
+        permission="cmf.ManagePortal"
+        template="templates/query_debug.pt"
+        layer="rer.solrpush.interfaces.IRerSolrpushLayer"
+        />
+
+</configure>

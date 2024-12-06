@@ -1,0 +1,17 @@
+<div class="query-debug"
+     tal:define="query view/query"
+     tal:condition="query">
+  <div class="portalMessage warning">
+    <strong>SOLR query url</strong>
+    <a href="${query/url}">${query/url}</a>
+  </div>
+  <div class="portalMessage warning"
+       tal:define="params python:query.get('params', {})">
+    <strong>Params details</strong>
+    <ul>
+      <li tal:repeat="k params">
+        <strong>${k}:</strong> <span tal:content="python:params[k]" />
+      </li>
+    </ul>
+  </div>
+</div>
