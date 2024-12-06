@@ -1,0 +1,15 @@
+services:
+    app:
+        container_name: wbmigrator
+        image: tholzheim/wbmigrator:latest
+        restart: always
+        ports:
+            - 8009:8080
+        environment:
+            - PUID=1000 # change this to your user id
+            - PGID=1000 # change this to your group id
+            - LOGGING_LEVEL=DEBUG
+        volumes:
+            - type: bind
+              source: $HOME/.config/WikibaseMigrator/profiles/WikibaseMigrationTest.yaml
+              target: /config.yaml
