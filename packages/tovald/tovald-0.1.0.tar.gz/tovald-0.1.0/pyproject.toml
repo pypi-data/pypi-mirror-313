@@ -1,0 +1,70 @@
+[project]
+name = "tovald"
+version = "0.1.0"
+description = "Publish rich markdown documentation to Confluence"
+readme = "README.md"
+authors = [
+    {name="Charles SENGES", email="charles.senges.io+github@protonmail.com"}
+]
+license = {text = "GNU GPLv3+"}
+requires-python = ">=3.12"
+dependencies = [
+    "myst-parser==4.0",
+    "sphinx==8.1",
+    "sphinx-toolbox==3.8",
+    "sphinxcontrib-confluencebuilder==2.8",
+]
+classifiers = [
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+]
+
+[project.scripts]
+tovald = "tovald.main:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "D203",   # one-blank-line-before-class (Conflicts with D211)
+  "D213",   # multi-line-summary-first-line (Conflicts with D212)
+  "COM812", # missing-trailing-comma (Conflicts with formatter)
+  "ISC001", # single-line-implicit-string-concatenation (Conflicts with formatter)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+  "S101",   # assert
+  "INP001", # implicit-namespace-package
+  "SIM110", # reimplemented-builtin
+]
+
+[tool.setuptools]
+license-files = []
+
+[tool.setuptools.package-data]
+tovald = [
+  "static/*", "static/.*",
+  "assets/*", "assets/.*",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "black",
+    "pre-commit",
+    "pytest-mock>=3.14.0",
+    "pytest>=8.3.3",
+    "ruff",
+    "yamllint",
+]
