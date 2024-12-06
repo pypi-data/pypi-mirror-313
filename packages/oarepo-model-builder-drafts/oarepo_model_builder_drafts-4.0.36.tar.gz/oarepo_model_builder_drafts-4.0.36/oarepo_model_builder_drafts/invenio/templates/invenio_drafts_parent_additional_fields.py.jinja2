@@ -1,0 +1,10 @@
+{% if "additional-fields" in vars %}
+{% for field in vars.additional_fields.values() %}
+{{ field|code_imports }}
+{% endfor %}
+
+class {{ vars.draft_parent_record|class_header }}:
+   {% for field_name, field in vars.additional_fields.items() %}
+   {{ field_name }} = {{ field|extra_code }}
+   {% endfor %}
+{% endif %}

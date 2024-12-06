@@ -1,0 +1,11 @@
+{{ vars.published_service_config|imports }}
+{% for c in vars.published_service_config.components %}
+{{ c|code_imports }}
+{% endfor %}
+
+class {{ vars.published_service_config|class_header }}:
+    service_id = "{{ vars.published_service_config.service_id }}"
+    @property
+    def components(self):
+        return [ *super().components {% for c in vars.published_service_config.components %}, {{ c|extra_code }} {% endfor %}]
+{{ vars.published_service_config|extra_code }}

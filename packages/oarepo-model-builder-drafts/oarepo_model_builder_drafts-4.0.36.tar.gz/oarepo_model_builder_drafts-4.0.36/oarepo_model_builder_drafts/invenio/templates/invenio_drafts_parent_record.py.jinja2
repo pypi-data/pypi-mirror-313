@@ -1,0 +1,17 @@
+{% if not vars.draft_parent_record.skip %}
+from invenio_records.systemfields import ConstantField
+{{ vars.draft_parent_record|imports }}
+{{ vars.draft_parent_record_metadata.class|generate_import }}
+
+{% for extra_field_value in vars.draft_parent_record.fields.values() %}
+{{ extra_field_value|code_imports }}
+{% endfor %}
+
+
+class {{ vars.draft_parent_record|class_header }}:
+    model_cls = {{ vars.draft_parent_record_metadata.class|base_name }}
+
+{% for extra_field_name, extra_field_value in vars.draft_parent_record.fields.items() %}
+    {{ extra_field_name }} = {{ extra_field_value|extra_code }}
+{% endfor %}
+{% endif %}

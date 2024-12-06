@@ -1,0 +1,16 @@
+def test_create_published(app, db, sample_metadata_list, search_clear):
+    from {{ published_record.proxy.module }} import {{ published_record.published_service.proxy }}
+    created_records = []
+    for sample_metadata_point in sample_metadata_list:
+        created_records.append(
+            {{ published_record.published_service.proxy }}.create(system_identity, sample_metadata_point)
+        )
+    for sample_metadata_point, created_record in zip(
+        sample_metadata_list, created_records
+    ):
+        created_record_reread = {{ published_record.published_service.proxy }}.read(
+            system_identity, created_record["id"]
+        )
+        assert (
+            created_record_reread.data["metadata"] == sample_metadata_point["metadata"]
+        )

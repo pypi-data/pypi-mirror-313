@@ -1,0 +1,20 @@
+from functools import cached_property
+
+class {{ vars.ext|class_header }}:
+    {% if not published_service.skip %}
+
+    @cached_property
+    def {{ published_service.ext_name }}(self):
+        {{ published_service_config.class|generate_import }}
+        {{ published_service.class|generate_import }}
+        return {{ published_service.class|base_name }}(
+            config={{ published_service_config.class|base_name }}(
+                {% if published_service_config.additional_args %}
+                    {{ published_service_config.additional_args|generate_list }}
+                {% endif %}
+            ),
+            {% if published_service.additional_args %}
+                {{ published_service.additional_args|generate_list }}
+            {% endif %}
+        )
+    {% endif %}
