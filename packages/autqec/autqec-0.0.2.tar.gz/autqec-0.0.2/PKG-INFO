@@ -1,0 +1,74 @@
+Metadata-Version: 2.1
+Name: autqec
+Version: 0.0.2
+Summary: Tools for finding logical Clifford gates of QEC stabilizer codes from code automorphisms.
+Home-page: https://github.com/hsayginel/autqec
+License: GNU General Public License v3.0, 29 June 2007
+Keywords: quantum computing,quantum error correction,quantum low-density parity check codes,LDPC
+Author: Hasan Sayginel
+Author-email: hasan.sayginel.17@ucl.ac.uk
+Requires-Python: >=3.11,<4.0
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: License :: Other/Proprietary License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Classifier: Topic :: Scientific/Engineering :: Physics
+Requires-Dist: matplotlib (==3.9.1)
+Requires-Dist: numba (==0.60.0)
+Requires-Dist: numpy (==1.26.2)
+Requires-Dist: pylatexenc (==2.10)
+Requires-Dist: pytest (==8.3.1)
+Requires-Dist: qiskit (==1.1.1)
+Project-URL: Repository, https://github.com/hsayginel/autqec
+Description-Content-Type: text/markdown
+
+# autqec
+autqec (optionally pronounced as 'oat cake') is a Python package for studying fault-tolerant logical Clifford gates on stabilizer quantum error correcting codes based on their symmetries. Given a set of stabilizer generators of a stabilizer code, it maps the stabilizer code to a related binary linear code, computes its automorphism group (using MAGMA software), and imposes constraints based on the Clifford operators permitted. The allowed permutation automorphisms translate to symplectic matrices which are represented as Clifford unitaries in $6$ layers of gates as $H-CNOT-S-CZ-X-C(X,X)$. The software also computes appropriate Pauli corrections to the physical circuits with a particular logical action by considering the destabilizers of the stabilizer code. 
+
+autqec can identify transversal, *SWAP*-transversal and short-depth arbitrary Clifford circuits that preserve the stabilizer group and has non-trivial logical action on the logical qubits. Outline of the algorithms for finding logical Clifford operators via code automorphisms is given below.
+
+![Algorithm Outline](autqec/algorithm_outline.png)
+
+## Installation 
+Run: `pip install autqec`
+
+## Dependencies (for full functionality)
+MAGMA V2.28-8: http://magma.maths.usyd.edu.au/magma/. 
+
+## Citation 
+H. Sayginel, S. Koutsioumpas, M. Webster, A. Rajput, and D. E. Browne, Fault-Tolerant Logical Clifford Gates from Code Automorphisms, (2024), arXiv:2409.18175 [quant-ph].
+
+```
+@article{autqec_paper,
+    author = "Sayginel, Hasan and Koutsioumpas, Stergios and Webster, Mark and Rajput, Abhishek and Browne, Dan E.",
+    title = "{Fault-Tolerant Logical Clifford Gates from Code Automorphisms}",
+    eprint = "2409.18175",
+    archivePrefix = "arXiv",
+    journal = "arXiv:2409.18175",
+    primaryClass = "quant-ph",
+    month = "9",
+    year = "2024"
+}
+```
+
+```
+@misc{autqec_code,
+    author = {Sayginel, Hasan},
+    license = {GPL-3.0},
+    month = aug,
+    title = {{autqec (Logical Clifford Gates from Code Automorphisms)}},
+    howpublished = {\url{https://github.com/hsayginel/autqec}},
+    version = {0.0.2},
+    year = {2024}
+    }
+```
+
+## Acknowledgements
+This work is supported by various EPSRC grants. 
+
