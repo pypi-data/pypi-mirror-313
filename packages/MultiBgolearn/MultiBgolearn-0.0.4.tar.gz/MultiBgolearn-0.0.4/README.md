@@ -1,0 +1,5 @@
+MultiBgolearn is a Python package designed for multi-objective Bayesian global optimization (MOBO), specifically tailored for materials design. It extends the functionalities of the Bgolearn package, which focuses on single-objective optimization, by enabling the simultaneous optimization of multiple material properties. This makes MultiBgolearn highly suitable for real-world applications where trade-offs between competing objectives are common.
+
+The repository provides the source code of the MultiBgolearn package along with several multi-objective Bayesian global optimization (MOBO) algorithms.
+
+For questions or suggestions, feel free to contact: Bin Cao: [bcao686@connect.hkust-gz.edu.cn](mailto:bcao686@connect.hkust-gz.edu.cn), GitHub: [https://github.com/Bin-Cao/MultiBgolearn](https://github.com/Bin-Cao/MultiBgolearn)
