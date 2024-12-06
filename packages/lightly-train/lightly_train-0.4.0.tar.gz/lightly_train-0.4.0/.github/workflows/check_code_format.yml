@@ -1,0 +1,79 @@
+name: Check Code Format
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # Virtual environment path used by uv and other tools.
+  # We create a new environment for each job to avoid conflicts.
+  # For more information, see: https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+  VIRTUAL_ENV: ${{ github.workspace }}/.venv
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-code-changes:
+    name: Detect Code Changes
+    runs-on: docker-cpu
+    outputs:
+      run-tests: ${{ steps.filter.outputs.run-tests }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: shell
+          filters: |
+            run-tests:
+              - '!docs/**'
+              - '!docker/**'
+              - '!.github/**'
+              - '.github/workflows/check_code_format.yml'
+  check-code-format:
+    name: Check Code Format
+    runs-on: docker-cpu
+    strategy:
+      matrix:
+        python: ["3.8"]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set Up uv
+        uses: astral-sh/setup-uv@v3
+        id: setup-uv
+        with:
+          # For more information about the settings, see: 
+          # https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+          version: 0.5.4
+          cache-local-path: /tmp/setup-uv-cache
+          prune-cache: false
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Set Up Environment
+        # For more information about the environment setup, see:
+        # https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+        run: |
+          rm -rf ${VIRTUAL_ENV}                                 # Make sure the venv is clean
+          uv venv ${VIRTUAL_ENV} --python ${{ matrix.python }}  # Create the venv
+          echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH             # Add the venv to the PATH
+          make install-pinned-${{ matrix.python }}
+      - name: Run Format Check
+        run: |
+          make format-check
+      - name: Run Type Check
+        run: |
+          make type-check
+      - name: Run Header Check
+        run: |
+          make add-header
+          git diff --name-only .
+          git diff --quiet --name-only . || exit -1
+    

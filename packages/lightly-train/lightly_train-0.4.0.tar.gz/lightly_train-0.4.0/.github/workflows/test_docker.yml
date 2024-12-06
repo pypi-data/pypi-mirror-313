@@ -1,0 +1,56 @@
+name: Test Docker
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-code-changes:
+    name: Detect Code Changes
+    runs-on: cpu
+    outputs:
+      run-tests: ${{ steps.filter.outputs.run-tests }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: shell
+          filters: |
+            run-tests:
+              - '!docs/**'
+              - '!.github/**'
+              - '.github/workflows/test_docker.yml'
+  test-docker:
+    name: Test Docker
+    needs: detect-code-changes
+    if: needs.detect-code-changes.outputs.run-tests == 'true'
+    runs-on: cpu
+    strategy:
+      matrix:
+        python: ["3.11"]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set Up Environment
+        run: |
+          make install-uv reset-venv
+          source .venv/bin/activate
+          # Store new PATH in GITHUB_ENV to keep environment enabled for subsequent steps.
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          make install-pinned-${{ matrix.python }}
+      - name: Build Docker Image
+        working-directory: docker
+        run: |
+          make build-docker-amd64-cuda
+      - name: Run Docker Tests
+        working-directory: docker
+        run: |
+          make test

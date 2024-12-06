@@ -1,0 +1,84 @@
+name: Build Docker Image
+
+# Pushes a release candidate build to lightly-main/train after a merge into main
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  BUILD_NUMBER: ${{ github.run_number }}
+  NAMESPACE: lightly-main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-docker-image:
+    name: Build Docker Image
+    runs-on: docker-cpu
+    timeout-minutes: 60
+    outputs:
+      job_status: ${{ job.status }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Set up gcloud sdk
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: "421.0.0" # fix version so that our runners don't download trash
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Configure docker to use gcloud as a credential helper for eu.gcr.io
+        run: gcloud auth configure-docker eu.gcr.io
+      - name: Build docker image and push to gcloud registry
+        run: |
+          cd ./docker && make main-deploy-amd64-cuda
+
+  slack-notification:
+    name: Send Slack Notification
+    needs:
+      - build-docker-image
+    if: always()
+    # runs-on: docker-cpu is not supported by the docker-in-docker/DinD architecture of the docker-runners due to how volumes within a container are mounted to the host instead of the container.
+    # for more information, see here; https://linear.app/lightly/issue/LIG-5676/docker-in-docker-does-not-work-when-volumes-are-used-or-when-github
+    runs-on: cpu
+    timeout-minutes: 5
+    steps:
+      - name: Slack Notification - Success
+        if: ${{ needs.build-docker-image.result == 'success' }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_RELEASES_DEV }}
+          SLACK_ICON_EMOJI: ":train:"
+          SLACK_USERNAME: "Build of LightlyTrain Docker Image"
+          SLACK_COLOR: "good"
+          SLACK_MESSAGE: |
+            :tada: Build status: :github-check-mark:
+            LightlyTrain docker image built successfully from main branch and pushed to private GCR.
+
+            Pull it from the registry with:
+            ```
+            docker pull eu.gcr.io/boris-250909/${{ env.NAMESPACE }}/train:${{ github.sha }}
+            ```
+
+            See it in the registry at:
+            https://console.cloud.google.com/artifacts/docker/boris-250909/europe/eu.gcr.io/${{ env.NAMESPACE }}%2Ftrain
+      - name: Slack Notification - Failure
+        if: ${{ needs.build-docker-image.result != 'success' }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_RELEASES_DEV }}
+          SLACK_ICON_EMOJI: ":x:"
+          SLACK_USERNAME: "Build of LightlyTrain Docker Image"
+          SLACK_COLOR: "danger"
+          SLACK_MESSAGE: |
+            :x: LightlyTrain docker image build failed.
+            Please check the logs and take necessary action.

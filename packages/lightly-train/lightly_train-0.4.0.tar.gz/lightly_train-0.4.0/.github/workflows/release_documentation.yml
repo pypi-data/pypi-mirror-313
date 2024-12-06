@@ -1,0 +1,101 @@
+name: Release Documentation
+
+on:
+  workflow_dispatch:
+
+env:
+  # Virtual environment path used by uv and other tools.
+  # We create a new environment for each job to avoid conflicts.
+  # For more information, see: https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+  VIRTUAL_ENV: ${{ github.workspace }}/.venv
+
+jobs:
+  release-documentation:
+    name: Build and release documentation
+    runs-on: docker-cpu
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checkout latest release tag
+        id: checkout_latest_release_tag
+        run: |
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          git checkout $LATEST_TAG
+          echo "tag_name=$LATEST_TAG" >> $GITHUB_OUTPUT;
+      - name: Assert Version in Code Matches Latest Release Tag
+        id: assert_version
+        run: |
+          LATEST_TAG=${{steps.checkout_latest_release_tag.outputs.tag_name}}
+          VERSION_FROM_INIT=$(grep -oP '(?<=__version__ = ")[^"]*' src/lightly_train/__init__.py)
+          VERSION_FROM_INIT="v$VERSION_FROM_INIT"
+          if [ "$VERSION_FROM_INIT" != "$LATEST_TAG" ]; then
+          echo "Version mismatch: Tag is $LATEST_TAG, but __version__ in __init__.py is $VERSION_FROM_INIT"
+          exit 1
+          fi
+          echo "__version__ from __init__.py $VERSION_FROM_INIT matches latest tag $LATEST_TAG"
+      - name: Set Up uv
+        uses: astral-sh/setup-uv@v3
+        id: setup-uv
+        with:
+          # For more information about the settings, see: 
+          # https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+          version: 0.5.4
+          cache-local-path: /tmp/setup-uv-cache
+          prune-cache: false
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Set Up Environment
+        # For more information about the environment setup, see:
+        # https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+        run: |
+          rm -rf ${VIRTUAL_ENV}                         # Make sure the venv is clean
+          uv venv ${VIRTUAL_ENV} --python 3.10          # Create the venv
+          echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH     # Add the venv to the PATH
+          make install-dev
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Set up gcloud sdk
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: "421.0.0" # fix version so that our runners don't download trash
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Build
+        run: |
+          cd docs && make docs docs-stable
+      - name: Release
+        id: build_and_release
+        run: |
+          gsutil -m rsync -r ./docs/build gs://docs-pip/lightly-train/build
+          gcloud compute scp \
+            --zone ${{ secrets.DOCS_INSTANCE_ZONE }} \
+            --recurse ./docs/build/* ${{ secrets.DOCS_INSTANCE_ID }}:${{ secrets.DOCS_INSTANCE_DIR }}/lightly-train/docs/build
+      - name: Convert Success/Failure Strings to Emojis
+        if: always()
+        id: emoji_status
+        run: |
+          function set-emoji-output {
+            if [ "$2" == "success" ];
+            then echo "$1=:github-check-mark:" >> $GITHUB_OUTPUT;
+            else echo "$1=:github-changes-requested:" >> $GITHUB_OUTPUT;
+            fi
+          }
+          set-emoji-output status ${{ steps.build_and_release.outcome }}
+      - name: Slack Notification
+        if: always()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_RELEASES }}
+          SLACK_ICON_EMOJI: ":books:"
+          SLACK_USERNAME: Release of LightlyTrain Docs ${{steps.checkout_latest_release_tag.outputs.tag_name}}
+          SLACK_COLOR: ${{ steps.build_and_release.outcome }}
+          SLACK_FOOTER: ""
+          SLACK_MESSAGE: |
+            Build status: ${{steps.emoji_status.outputs.status}}
+            https://docs.lightly.ai/train/stable/

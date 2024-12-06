@@ -1,0 +1,128 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lightly_train"
+description = "Train models with self-supervised learning in a single command"
+authors = [
+    { name = "Lightly Team" },
+]
+readme = "README.md"
+license = { "text" = "AGPL-3.0" }
+keywords = [
+    "machine-learning",
+    "computer-vision",
+    "deep-learning",
+    "self-supervised-learning",
+    "contrastive-learning",
+    "pytorch",
+    "python",
+    "pretrained-models",
+    "embeddings",
+]
+dynamic = ["version"]
+requires-python = ">=3.8"
+dependencies = [
+    "eval-type-backport>=0.2",  # Required for Pydantic. Allows 3.10 types in old Python versions.
+    "lightly>=1.5.14",
+    "omegaconf>=2.3",
+    "psutil>=5.0",
+    "pyarrow>=15.0.0",
+    "pytorch_lightning>=2.1",
+    "torch>=2.0.0",
+    "torchvision>=0.15.1",      # torchvision 0.15.0 was yanked
+    "tqdm>=4.0.0",
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "licenseheaders>=0.8.8",
+    "mdformat>=0.7.17",
+    "mypy>=1.10.0",
+    "pytest-mock>=3.14.0",
+    "pytest>=8.0.0",
+    "ruff>=0.4.0",
+    "types-pillow>=10.2.0",
+    "types-tqdm>=4.0.0",
+
+    # Docs
+    "furo>=2024.04.27",
+    "myst_parser>=3.0",
+    "sphinx-autoapi>=3.0",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-inline-tabs>=2023.4.21",
+    "sphinxcontrib-googleanalytics>=0.4",
+    "sphinx>=7.1",              # Allow old sphinx version for Python 3.8 compatibility
+]
+super-gradients = [
+    "super-gradients>=3.7",
+]
+tensorboard = [
+    "tensorboard>=2.10.0",
+]
+timm = [
+    "timm>=1.0.3",
+]
+ultralytics = [
+    "ultralytics>=8.1.0",
+]
+wandb = [
+    "wandb>=0.12.10", # required by pytorch-lightning
+]
+
+[project.scripts]
+lightly-train = "lightly_train._cli:_cli_entrypoint"
+
+[tool.setuptools]
+package-dir = {""= "src"}
+
+[tool.setuptools.dynamic]
+version = {attr = "lightly_train.__version__"}
+
+[tool.mypy]
+disallow_untyped_defs = true
+ignore_missing_imports = false
+
+[[tool.mypy.overrides]]
+module = [
+    "lightly.*",
+    "lightning_fabric.loggers.logger",
+    "lightning_fabric.utilities.rank_zero",
+    "super_gradients.*",
+    "tensorboard.*",
+    "timm.*",
+    "torchvision.*",
+    "ultralytics.*"
+]
+ignore_missing_imports = true
+
+[tool.ruff.lint]
+# Enable isort rules.
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+# Make sure that lightly_train is in the last import group.
+# For details, see https://github.com/lightly-ai/lightly-train/pull/67
+known-first-party = ["lightly_train"]
+
+[tool.ruff.lint.pydocstyle]
+# Use Google-style docstrings.
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore `E402` (import violations) in root `__init__.py`.
+"src/lightly_train/__init__.py" = ["E402"]
+
+[tool.uv]
+override-dependencies = [
+  "sphinx>=7.1",              # Override dependency from SuperGradients on sphinx<=4.1
+]
+
+
+[tool.pytest.ini_options]
+# Make pytest discover all files in the tests directory. This is usuful for showing
+# detailed assertion errors outside of the test file, for example when using a helper
+# function from `tests/helpers.py`.
+python_files = "tests/*.py tests/**/*.py"

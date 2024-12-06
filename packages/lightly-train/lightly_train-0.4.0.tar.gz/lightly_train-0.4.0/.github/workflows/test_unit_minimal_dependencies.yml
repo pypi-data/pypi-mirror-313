@@ -1,0 +1,78 @@
+name: Test Unit Minimal Dependencies
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # Virtual environment path used by uv and other tools.
+  # We create a new environment for each job to avoid conflicts.
+  # For more information, see: https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+  VIRTUAL_ENV: ${{ github.workspace }}/.venv
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-code-changes:
+    name: Detect Code Changes
+    runs-on: docker-cpu
+    outputs:
+      run-tests: ${{ steps.filter.outputs.run-tests }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: shell
+          filters: |
+            run-tests:
+              - '!docs/**'
+              - '!docker/**'
+              - '!.github/**'
+              - '.github/workflows/test_unit_minimal_dependencies.yml'
+  test-unit-minimal-dependencies:
+    name: Test Unit Minimal Dependencies
+    needs: detect-code-changes
+    if: needs.detect-code-changes.outputs.run-tests == 'true'
+    runs-on: docker-gpu
+    strategy:
+      matrix:
+        python: ["3.8"]
+        dependencies: ["minimal", "minimal-extras"]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set Up uv
+        uses: astral-sh/setup-uv@v3
+        id: setup-uv
+        with:
+          # For more information about the settings, see: 
+          # https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+          version: 0.5.4
+          cache-local-path: /tmp/setup-uv-cache
+          prune-cache: false
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Set Up FFmpeg
+        if: ${{ matrix.dependencies == 'minimal-extras' }}
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        with:
+          ffmpeg-version: 4.3.1
+      - name: Set Up Environment
+        # For more information about the environment setup, see:
+        # https://github.com/lightly-ai/lightly-train/.github/workflows/README.md
+        run: |
+          rm -rf ${VIRTUAL_ENV}                                 # Make sure the venv is clean
+          uv venv ${VIRTUAL_ENV} --python ${{ matrix.python }}  # Create the venv
+          echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH             # Add the venv to the PATH
+          make install-${{ matrix.dependencies }}
+      - name: Run Pytest
+        run: |
+          make test-ci

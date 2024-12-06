@@ -1,0 +1,61 @@
+name: Release DockerHub
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  release-dockerhub:
+    name: Release DockerHub
+    runs-on: docker-cpu
+    defaults:
+      run:
+        working-directory: ./docker
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v4
+      with:
+          ref: main
+    - name: push to DockerHub
+      id: push-to-dockerhub
+      run: |
+        echo "push up to docker hub"
+        docker login -u borislightly -p ${{ secrets.DOCKERHUB_PASSWORD_BORISLIGHTLY }}
+        make release
+  slack-notification:
+    name: Send Slack Notification
+    needs:
+      - release-dockerhub
+    if: always()
+    runs-on: docker-cpu
+    timeout-minutes: 5
+    steps:
+    - name: Slack Notification - Success
+      if: ${{ needs.release-dockerhub.result == 'success' }}
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_RELEASES }}
+        SLACK_ICON_EMOJI: ":train:"
+        SLACK_USERNAME: "Release of LightlyTrain Docker Image to DockerHub"
+        SLACK_COLOR: "good"
+        SLACK_MESSAGE: |
+          :tada: Release status: :github-check-mark:
+          LightlyTrain Docker Image pushed to DockerHub successfully.
+
+          Pull it from the registry with:
+          ```
+          docker pull lightly/train:latest
+          ```
+
+          See it in DockerHub at https://hub.docker.com/repository/docker/lightly/train/general
+    - name: Slack Notification - Failure
+      if: ${{ needs.release-dockerhub.result != 'success' }}
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_RELEASES }}
+        SLACK_ICON_EMOJI: ":x:"
+        SLACK_USERNAME: "Release of LightlyTrain Docker Image to DockerHub"
+        SLACK_COLOR: "danger"
+        SLACK_MESSAGE: |
+          :x: Push of LightlyTrain Docker Image to DockerHub failed.
+          Please check the logs and take necessary action.
