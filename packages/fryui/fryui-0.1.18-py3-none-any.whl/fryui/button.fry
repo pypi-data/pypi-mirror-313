@@ -1,0 +1,214 @@
+from fryweb import Element
+
+
+def Button (
+    primary    = False,
+    secondary  = False,
+    accent     = False,
+    info       = False,
+    success    = False,
+    warning    = False,
+    error      = False,
+    ghost      = False,
+    link       = False,
+    outline    = False,
+    active     = False,
+    disabled   = False,
+    lg         = False,
+    md         = False,
+    sm         = False,
+    xs         = False,
+    responsive = False,
+    wide       = False,
+    block      = False,
+    circle     = False,
+    square     = False,
+    children   = ['Button'],
+):
+    if (primary, secondary, accent,
+        info, success, warning, error, ghost,
+        link).count(True) > 1:
+        raise RuntimeError("Conflict primary types of Button")
+    if (outline, ghost, link).count(True) > 1:
+        raise RuntimeError("Conflict outline types of Button")
+    if (lg, md, sm, xs, responsive).count(True) > 1:
+        raise RuntimeError("Conflict size types of Button")
+    if (circle, square, wide, block).count(True) > 1:
+        raise RuntimeError("Conflict shape types of Button")
+
+    base = ['inline-flex', 'shrink-0', 'cursor-pointer', 
+            'select-none', 'flex-wrap', 'items-center', 'justify-center',
+            'text-center',
+            'disabled:pointer-events-none',
+            'gap-2', 'font-semibold', 
+            'transition-transform',
+            'duration-200', 'ease-out',
+            'active:scale-95',
+            'border',
+            'shadow-sm',
+           ]
+    if not circle:
+        base += ['rounded-lg', ]
+
+    if xs:
+        size = ['h-6', 'min-h-1.5rem', 'text-xs', ]
+    elif sm:
+        size = ['h-8', 'min-h-2rem', 'text-sm', ]
+    elif md:
+        size = ['h-12', 'min-h-3rem', 'text-sm', ]
+    elif lg:
+        size = ['h-16', 'min-h-4rem', 'text-lg', ]
+    elif responsive:
+        size = ['h-6', 'min-h-1.5rem', 'text-xs',
+                'sm:h-8', 'sm:min-h-2rem', 'sm:text-sm',
+                'md:h-12', 'md:min-h-3rem', 'md:text-sm',
+                'lg:h-16', 'lg:min-h-4rem', 'lg:text-lg',
+               ]
+    else:
+        size = ['h-12', 'min-h-3rem', 'text-sm', ]
+
+    if wide:
+        shape = ['w-64']
+    elif block:
+        shape = ['w-full']
+    elif square:
+        shape = ['p-0']
+        if xs:
+            shape += ['w-6']
+        elif sm:
+            shape += ['w-8']
+        elif md:
+            shape += ['w-12']
+        elif lg:
+            shape += ['w-16']
+        else:
+            shape += ['w-12']
+    elif circle:
+        shape = ['rounded-full', 'p-0']
+        if xs:
+            shape += ['w-6']
+        elif sm:
+            shape += ['w-8']
+        elif md:
+            shape += ['w-12']
+        elif lg:
+            shape += ['w-16']
+        else:
+            shape += ['w-12']
+    else:
+        if xs:
+            shape = ['px-2']
+        elif sm:
+            shape = ['px-3']
+        elif md:
+            shape = ['px-4']
+        elif lg:
+            shape = ['px-6']
+        else:
+            shape = ['px-4']
+
+    if outline:
+        color = ['bg-transparent', 'border-current', 'shadow-none', 'no-underline', ]
+        if primary:
+            color += ['text-primary', 'outline-primary',
+                      'hover:text-primary-contrast', 'hover:bg-primary',
+                      'hover:border-primary',
+                     ]
+        elif secondary:
+            color += ['text-secondary', 'outline-secondary',
+                      'hover:text-secondary-contrast', 'hover:bg-secondary',
+                      'hover:border-secondary',
+                     ]
+        elif accent:
+            color += ['text-accent', 'outline-accent',
+                      'hover:text-accent-contrast', 'hover:bg-accent',
+                      'hover:border-accent',
+                     ]
+        elif info:
+            color += ['text-info', 'outline-info',
+                      'hover:text-info-contrast', 'hover:bg-info', 'hover:border-info',
+                     ]
+        elif success:
+            color += ['text-success', 'outline-success',
+                      'hover:text-success-contrast', 'hover:bg-success',
+                      'hover:border-success',
+                     ]
+        elif warning:
+            color += ['text-warning', 'outline-warning',
+                      'hover:text-warning-contrast', 'hover:bg-warning',
+                      'hover:border-warning',
+                     ]
+        elif error:
+            color += ['text-error', 'outline-error',
+                      'hover:text-error-contrast', 'hover:bg-error',
+                      'hover:border-error',
+                     ]
+        else:
+            color = ['text-gray-tx', 'outline-gray-tx',
+                     'hover:bg-gray-bgx', 'hover:border-gray-bgx',
+                     'hover:text-gray-tx',
+                    ]
+    else:
+        if primary:
+            color = ['bg-primary', 'border-primary', 'text-primary-tx',
+                     'outline-primary', 'no-underline',
+                     'hover:bg-primaryx', 'hover:border-primaryx',
+                    ]
+        elif secondary:
+            color = ['bg-secondary', 'border-secondary', 'text-secondary-tx',
+                     'outline-secondary', 'no-underline',
+                     'hover:bg-secondaryx', 'hover:border-secondaryx',
+                    ]
+        elif accent:
+            color = ['bg-accent', 'border-accent', 'text-accent-tx',
+                     'outline-accent', 'no-underline',
+                     'hover:bg-accentx', 'hover:border-accentx',
+                    ]
+        elif info:
+            color = ['bg-info', 'border-info', 'text-info-tx',
+                     'outline-info', 'no-underline',
+                     'hover:bg-infox', 'hover:border-infox',
+                    ]
+        elif success:
+            color = ['bg-success', 'border-success', 'text-success-tx',
+                     'outline-success', 'no-underline',
+                     'hover:bg-successx', 'hover:border-successx',
+                    ]
+        elif warning:
+            color = ['bg-warning', 'border-warning', 'text-warning-tx',
+                     'outline-warning', 'no-underline',
+                     'hover:bg-warningx', 'hover:border-warningx',
+                    ]
+        elif error:
+            color = ['bg-error', 'border-error', 'text-error-tx',
+                     'outline-error', 'no-underline',
+                     'hover:bg-errorx', 'hover:border-errorx',
+                    ]
+        elif ghost:
+            color = ['border', 'border-transparent', 'bg-transparent',
+                     'text-current', 'shadow-none', 'outline-current',
+                     'hover:border-tranparent', 'hover:bg-gray-tax',
+                     'hover:text-gray-bg',
+                     'no-underline',
+                    ]
+        elif link:
+            color = ['text-primary', 'border-transparent', 'bg-transparent',
+                     'underline', 'shadow-none', 'outline-current',
+                     'hover:border-transparent', 'hover:bg-transparent',
+                     'hover:underline',
+                    ]
+        else:
+            color = ['bg-gray-el', 'border-gray-el', 'text-gray-tx',
+                     'outline-gray-tx', 'no-underline',
+                     'hover:bg-gray-elx', 'hover:border-gray-elx',
+                    ]
+    styles = base + size + shape + color
+
+    <template>
+      <button {*styles} ref=(dom)>
+        {children}
+      </button>
+    </template>
+    <script>
+      this.focus = () => { dom.focus(); };
+    </script>
