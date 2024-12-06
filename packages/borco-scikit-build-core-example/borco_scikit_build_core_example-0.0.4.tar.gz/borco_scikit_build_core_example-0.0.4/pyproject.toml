@@ -1,0 +1,55 @@
+[project]
+name = "borco_scikit_build_core_example"
+version = "0.0.4"
+description = "Example package using scikit-build-core and Qt6"
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Ioan Călin", email = "iborco@gmail.com" }
+]
+dependencies = []
+
+
+[build-system]
+requires = [
+    "scikit-build-core>=0.10",
+    "pybind11",
+]
+build-backend = "scikit_build_core.build"
+
+
+[dependency-groups]
+dev = [
+    "invoke>=2.2.0",
+    "pytest>=8.3.4",
+]
+
+
+[tool.pylint.main]
+extension-pkg-whitelist = [
+    "PySide6",
+    "borco_scikit_build_core_example",
+]
+
+ignore-patterns = [
+    "^.*_ui\\.py$",
+    "^.*_rc\\.py$",
+]
+
+source-roots = ["src"]
+
+disable = [
+    "C0114", # missing-module-docstring
+]
+
+
+[tool.pytest.ini_options]
+minversion = "8.3"
+testpaths = ["tests/python"]
+
+
+[tool.scikit-build]
+build.verbose = false
+logging.level = "INFO"
+minimum-version = "build-system.requires"
+build-dir = "build/{wheel_tag}"
