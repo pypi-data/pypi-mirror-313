@@ -1,0 +1,62 @@
+"""Custom checks for validating system configurations and dependencies.
+
+This module defines validation checks to ensure the proper configuration and
+functionality of system components. Checks are automatically executed during
+system initialization to ensure that all necessary conditions are met for
+the system to operate correctly.
+"""
+
+import importlib
+
+from django.core.checks import Error
+
+from .celery import celery_app
+
+__all__ = ['check_celery_beat_configuration']
+
+
+def check_celery_beat_configuration(*args, **kwargs) -> list[Error]:
+    """Verify all celery beat tasks are registered with celery."""
+
+    errors = []
+    beat_schedule = celery_app.conf.beat_schedule
+
+    for task_name, task_info in beat_schedule.items():
+        module_spec, obj_spec = task_info['task'].rsplit('.', maxsplit=1)
+
+        try:
+            module = importlib.import_module(module_spec)
+            obj = getattr(module, obj_spec)
+
+        except ModuleNotFoundError:
+            errors.append(
+                Error(
+                    f"module '{module_spec}' does not exist.",
+                    hint="Double check the task definition in the celery beat configuration.",
+                    obj=celery_app,
+                    id="apps.scheduler.E001",
+                )
+            )
+
+        except AttributeError:
+            errors.append(
+                Error(
+                    f"module '{module_spec}' has no attribute '{obj_spec}'.",
+                    hint="Double check the task definition in the celery beat configuration.",
+                    obj=celery_app,
+                    id="apps.scheduler.E002",
+                )
+            )
+
+        else:
+            if not obj.__module__ == module.__name__:
+                errors.append(
+                    Error(
+                        f"module '{module_spec}' is not absolute.",
+                        hint=f"Use the module definition {obj.__module__}.",
+                        obj=celery_app,
+                        id="apps.scheduler.E003",
+                    )
+                )
+
+    return errors
