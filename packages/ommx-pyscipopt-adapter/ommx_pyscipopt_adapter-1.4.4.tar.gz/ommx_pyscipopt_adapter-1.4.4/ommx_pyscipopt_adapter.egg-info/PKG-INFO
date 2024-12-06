@@ -1,0 +1,61 @@
+Metadata-Version: 2.1
+Name: ommx_pyscipopt_adapter
+Version: 1.4.4
+Summary: An adapter for the SCIP from OMMX.
+Author-email: "Jij Inc." <info@j-ij.com>
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: ommx<2.0.0,>=1.4.1
+Requires-Dist: PySCIPOpt<6.0.0,>=5.1.0
+Provides-Extra: dev
+Requires-Dist: markdown-code-runner; extra == "dev"
+Requires-Dist: pyright; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+
+# OMMX adapter for SCIP
+
+This package provides an adapter for the [SCIP](https://www.scipopt.org/) from [OMMX](https://github.com/Jij-Inc/ommx)
+
+## Usage
+
+`ommx-pyscipopt-adapter` can be installed from PyPI as follows:
+
+```bash
+pip install ommx-pyscipopt-adapter
+```
+
+SCIP can be used through `ommx-pyscipopt-adapter` by using the following:
+
+```python markdown-code-runner
+import ommx_pyscipopt_adapter as adapter
+from ommx.v1 import Instance, DecisionVariable
+
+x1 = DecisionVariable.integer(1, lower=0, upper=5)
+ommx_instance = Instance.from_components(
+    decision_variables=[x1],
+    objective=x1,
+    constraints=[],
+    sense=Instance.MINIMIZE,
+)
+
+# Convert from `ommx.v1.Instance` to `pyscipopt.Model`
+model = adapter.instance_to_model(ommx_instance)
+model.optimize()
+# Create `ommx.v1.State` from Optimized `pyscipopt.Model`
+ommx_state = adapter.model_to_state(model, ommx_instance)
+
+print(ommx_state)
+```
+
+## Reference
+
+TBW
