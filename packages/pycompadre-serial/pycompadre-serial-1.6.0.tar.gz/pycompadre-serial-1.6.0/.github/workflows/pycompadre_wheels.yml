@@ -1,0 +1,253 @@
+name: pycompadre WHEELS (Build/Upload)
+
+on: 
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'branch'
+        required: true
+        default: 'master'
+      publish:
+        description: 'Publish to PyPi? (y/n)'
+        required: true
+        default: 'n'
+      build_num:
+        description: 'Build number to append to wheel'
+        required: false
+        default: ''
+
+jobs:
+        
+  manylinux:
+    name: Linux wheels creation/test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.7]
+        pycompadre-type: ['pycompadre', 'pycompadre-serial']
+    steps:
+    - id: get-pycompadre_type
+      run: |
+        pycompadretype="${{ matrix.pycompadre-type }}"
+        newpycompadretype=`echo $pycompadretype | sed 's/-/_/'`
+        echo "::set-output name=pycompadre_type::$newpycompadretype"
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.inputs.branch }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install twine wheel setuptools numpy
+    - name: Set up pycompadre options (parallel)
+      if: ${{ matrix.pycompadre-type == 'pycompadre' }}
+      run: |
+        cp pycompadre/cmake_opts_gen.txt cmake_opts.txt
+        echo "cp pycompadre/cmake_opts_gen.txt cmake_opts.txt"
+    - name: Set up pycompadre options (serial)
+      if: ${{ matrix.pycompadre-type == 'pycompadre-serial' }}
+      run: |
+        cp pycompadre/cmake_opts_serial_gen.txt cmake_opts.txt
+        echo "cp pycompadre/cmake_opts_serial_gen.txt cmake_opts.txt"
+        perl -pi -e "s/name='pycompadre',/name='pycompadre-serial',/" -- setup.py
+    - name: Build manylinux Python wheels
+      uses: RalfG/python-wheels-manylinux-build@v0.3.3-manylinux2010_x86_64
+      with:
+        python-versions: 'cp36-cp36m cp37-cp37m cp38-cp38 cp39-cp39'
+        build-requirements: 'cython'
+        package-path: ''
+        pip-wheel-args: '-v -v -v'
+        # When locally testing, --no-deps flag is necessary (PyUtilib dependency will trigger an error otherwise)
+    - name: Consolidate wheels
+      run: |
+        sudo test -d dist || mkdir -v dist
+        sudo find . -name \*.whl | grep -v /dist/ | xargs -n1 -i mv -v "{}" dist/
+    - name: Delete linux wheels
+      run: |
+        sudo rm -rfv dist/*-linux_x86_64.whl
+        rm -rf ${{github.workspace}}/dist/numpy*
+    - name: Rename for build_num
+      if: ${{ github.event.inputs.build_num != ''}}
+      run: |
+        for fname in `ls ${{github.workspace}}/dist/*.whl`;
+          do echo $fname
+          new_fname="$(echo "$fname" | sed 's/\(${{steps.get-pycompadre_type.outputs.pycompadre_type}}-[^-]*-\)/\1${{ github.event.inputs.build_num }}-/')"
+          mv $fname $new_fname
+          echo $new_fname
+        done
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: manylinux-wheels-${{matrix.pycompadre-type}}
+        path: dist/
+        retention-days: 1
+    - name: Install pycompadre from artifact
+      run: |
+        cd ${{github.workspace}}/dist/
+        python3 -m pip -v -v -v install --no-cache `ls pycompadre*cp37*.whl`
+        cd ${{github.workspace}}
+    - name: Test pycompadre using unittests
+      run: |
+        cd ${{github.workspace}}/pycompadre/examples
+        python3 -m unittest
+    - name: Test pycompadre using .test()
+      run: |
+        cd ${{github.workspace}}
+        python3 -c "import pycompadre; pycompadre.test()" 2>&1 | tee tests.log
+    - name: Test unique install using .is_unique_installation()
+      run: |
+        cd ${{github.workspace}}
+        python3 -c "import pycompadre; pycompadre.is_unique_installation()" 2>&1 | tee tests.log
+    - uses: actions/upload-artifact@v2
+      with:
+        name: tests.log
+        path: ${{github.workspace}}/tests.log
+
+  osx_build:
+    name: OSX wheels creation
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-10.15]
+        python-version: [ '3.7', '3.8', '3.9', '3.10' ]
+        pycompadre-type: ['pycompadre', 'pycompadre-serial']
+    steps:
+    - id: get-pycompadre_type
+      run: |
+        pycompadretype="${{ matrix.pycompadre-type }}"
+        newpycompadretype=`echo $pycompadretype | sed 's/-/_/'`
+        echo "::set-output name=pycompadre_type::$newpycompadretype"
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.inputs.branch }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install twine wheel setuptools cython numpy
+    - name: Set up pycompadre options (parallel)
+      if: ${{ matrix.pycompadre-type == 'pycompadre' }}
+      run: |
+        cp pycompadre/cmake_opts_gen.txt cmake_opts.txt
+        echo "cp pycompadre/cmake_opts_gen.txt cmake_opts.txt"
+    - name: Set up pycompadre options (serial)
+      if: ${{ matrix.pycompadre-type == 'pycompadre-serial' }}
+      run: |
+        cp pycompadre/cmake_opts_serial_gen.txt cmake_opts.txt
+        echo "cp pycompadre/cmake_opts_serial_gen.txt cmake_opts.txt"
+        perl -pi -e "s/name='pycompadre',/name='pycompadre-serial',/" -- setup.py
+    - name: Build OSX Python wheels
+      run: |
+        python3 setup.py bdist_wheel
+    - name: Rename for build_num
+      if: ${{ github.event.inputs.build_num != ''}}
+      run: |
+        for fname in `ls ${{github.workspace}}/dist/*.whl`;
+          do echo $fname
+          new_fname="$(echo "$fname" | sed 's/\(${{steps.get-pycompadre_type.outputs.pycompadre_type}}-[^-]*-\)/\1${{ github.event.inputs.build_num }}-/')"
+          mv $fname $new_fname
+          echo $new_fname
+        done
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: osx-wheels-${{ matrix.python-version }}-${{matrix.pycompadre-type}}
+        path: dist/
+        retention-days: 1
+        
+  osx_test:
+    name: OSX wheels test
+    runs-on: ${{ matrix.os }}
+    needs: osx_build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-10.15, macos-11]
+        python-version: [ '3.7', '3.8', '3.9', '3.10' ]
+        pycompadre-type: ['pycompadre', 'pycompadre-serial']
+        # macOS 10.15 released Oct 2019, python 3.7 released June 2018
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.inputs.branch }}
+    - uses: actions/download-artifact@v4.1.7
+      with:
+        name: osx-wheels-${{ matrix.python-version }}-${{matrix.pycompadre-type}}
+        path: dist/
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+    - name: Install pycompadre from artifact
+      run: |
+        cd ${{github.workspace}}/dist/
+        python3 -m pip -v -v -v install --no-cache `ls pycompadre*.whl`
+        cd ${{github.workspace}}
+    - name: Test pycompadre using unittests
+      run: |
+        cd ${{github.workspace}}/pycompadre/examples
+        python3 -m unittest
+        cd ${{github.workspace}}
+    - name: Test pycompadre using .test()
+      run: |
+        python3 -c "import pycompadre; pycompadre.test()" 2>&1 | tee tests.log
+    - uses: actions/upload-artifact@v2
+      with:
+        name: tests.log
+        path: ${{github.workspace}}/tests.log
+      
+  pypi:
+    name: Upload all wheels to pypi
+    needs: [manylinux, osx_test]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pycompadre-type: ['pycompadre', 'pycompadre-serial']
+    steps:
+    - uses: actions/download-artifact@v4.1.7
+      with:
+        name: manylinux-wheels-${{matrix.pycompadre-type}}
+        path: dist/
+    - uses: actions/download-artifact@v4.1.7
+      with:
+        name: osx-wheels-3.7-${{matrix.pycompadre-type}}
+        path: dist/
+    - uses: actions/download-artifact@v4.1.7
+      with:
+        name: osx-wheels-3.8-${{matrix.pycompadre-type}}
+        path: dist/
+    - uses: actions/download-artifact@v4.1.7
+      with:
+        name: osx-wheels-3.9-${{matrix.pycompadre-type}}
+        path: dist/
+    - uses: actions/download-artifact@v4.1.7
+      with:
+        name: osx-wheels-3.10-${{matrix.pycompadre-type}}
+        path: dist/
+    # https://packaging.python.org/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+    - name: List all wheels
+      run: |
+        ls dist/
+    - name: Publish parallel distribution 📦 to PyPI (parallel)
+      if: ${{ matrix.pycompadre-type == 'pycompadre' && github.event.inputs.publish == 'y' }}
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PIP_PYCOMPADRE_SECRET }}
+    - name: Publish serial distribution 📦 to PyPI (serial)
+      if: ${{ matrix.pycompadre-type == 'pycompadre-serial' && github.event.inputs.publish == 'y' }}
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PIP_PYCOMPADRE_SERIAL_SECRET }}
