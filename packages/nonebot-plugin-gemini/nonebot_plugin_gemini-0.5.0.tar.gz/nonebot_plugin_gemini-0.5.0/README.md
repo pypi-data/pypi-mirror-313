@@ -1,0 +1,76 @@
+# Nonebot Plugin Gemini
+Google Gemini AI 对话插件
+
+## 功能
+| 命令 | 用途 | 示例 |
+| --- | --- | --- |
+| gemini <文本/图像> | 单次调用 Gemini 并获取回复 | gemini 编写一个 NoneBot2 的 echo 插件 |
+| geminichat [可选]<文本> | 开启一轮与 Gemini 的对话 | geminichat |
+| 结束对话 | 结束本轮对话 | 结束对话 |
+
+关于 `gemini` 命令的使用：
+1. 你可以回复某条消息，并在句首加上 `gemini` 来调用 Gemini，并将回复中的文本/图片发送给 Gemini
+2. 你可以在 `gemini` 后加上 Gemini 的模型名称来指定使用的模型，插件支持的模型有 `gemini-1.5-flash`(默认), `gemini-1.5-flash-8b`, `gemini-1.5-pro`。例如 `gemini gemini-1.5-pro 编写一个 NoneBot2 的 echo 插件`
+3. `geminichat` 仅支持调用 `gemini-1.5-flash` 模型，因为 `gemini-1.5-pro` 的每天免费调用次数仅为 50 次
+
+> 如果你配置了命令头，请在使用命令时将命令头加上
+
+## 安装方法
+<details open>
+<summary>使用 nb-cli 安装</summary>
+在 nonebot2 项目的根目录下打开命令行, 输入以下指令即可安装
+
+    nb plugin install nonebot-plugin-gemini
+
+</details>
+
+<details>
+<summary>使用包管理器安装</summary>
+在 nonebot2 项目的插件目录下, 打开命令行, 根据你使用的包管理器, 输入相应的安装命令
+
+<details>
+<summary>pip</summary>
+
+    pip install nonebot-plugin-gemini
+</details>
+<details>
+<summary>pdm</summary>
+
+    pdm add nonebot-plugin-gemini
+</details>
+<details>
+<summary>poetry</summary>
+
+    poetry add nonebot-plugin-gemini
+</details>
+<details>
+<summary>conda</summary>
+
+    conda install nonebot-plugin-gemini
+</details>
+
+打开 nonebot2 项目根目录下的 `pyproject.toml` 文件, 在 `[tool.nonebot]` 部分追加写入
+
+    plugins = ["nonebot_plugin_gemini"]
+
+</details>
+
+
+## 配置
+在 [Google AI Studio](https://makersuite.google.com/app/apikey) 获取 `GOOGLE_API_KEY` 后，在 .env 文件 或 环境变量 中添加 `GOOGLE_API_KEY`
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| GOOGLE_API_KEY | 无 | Google AI Studio 的 API Key |
+| PROXY | 无 | 可选。代理地址，格式为 `http://ip:port` 或 `socks5://ip:port` |
+| IMAGE_RENDER_LENGTH | 500 | 可选。超过这个数值的回复将会以 Markdown 渲染为图片 |
+
+下面是网络搜索相关配置
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| ENABLE_SEARCH | false | 是否启用网络搜索，启用会导致回答时间加长，但能提高回答的准确率 |
+| GOOGLE_CUSTOM_SEARCH_KEY | 无 | Google Custom Search 的 API Key，可到 [此处](https://developers.google.com/custom-search/v1/overview?hl=zh-cn) 获取 |
+| GOOGLE_CUSTOM_SEARCH_CX | 无 | 可选。Google Custom Search 的 CX，可到 [此处](https://cse.google.com/cse/create/new) 创建 |
+| GOOGLE_CUSTOM_SEARCH_NUM | 3 | 可选。Google Custom Search 的搜索结果数量 |
+| SEARCH_KEYWORDS_PROMPT | ... | 可选。用 Gemini 提取搜索关键词时使用的提示词 |
