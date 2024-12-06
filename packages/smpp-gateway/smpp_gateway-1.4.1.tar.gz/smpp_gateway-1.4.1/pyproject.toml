@@ -1,0 +1,25 @@
+[tool.black]
+target_version = [ 'py310' ]
+
+[tool.isort]
+py_version = 310
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+use_parentheses = true
+line_length = 100
+lines_between_types = 1
+src_paths = [ "src", "tests" ]
+
+[tool.pytest.ini_options]
+addopts = "--reuse-db"
+testpaths = [ "tests" ]
+django_find_project = false
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = [ ".", "src" ]
+
+[tool.mypy]
+plugins = [ "mypy_django_plugin.main" ]
+
+[tool.django-stubs]
+django_settings_module = "tests.settings"
