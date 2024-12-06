@@ -1,0 +1,1 @@
+import{j as r}from"./@radix-DeK6qiuw.js";import{S as o,a as n,b as m}from"./gcp-CFtm4BA7.js";import{n as t}from"./index-FO-p0GU7.js";function x({provider:c,className:e,...s}){const a=t("w-5 h-5 shrink-0",e);switch(c){case"aws":return r.jsx(m,{...s,className:a});case"azure":return r.jsx(n,{...s,className:a});case"gcp":return r.jsx(o,{...s,className:a})}}export{x as C};
