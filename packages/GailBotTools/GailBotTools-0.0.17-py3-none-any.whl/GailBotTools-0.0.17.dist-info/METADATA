@@ -1,0 +1,130 @@
+Metadata-Version: 2.1
+Name: GailBotTools
+Version: 0.0.17
+Summary: A set of tools for handling data to create GailBot plugins
+Author-email: HiLab <hil@elist.tufts.edu>
+License: MIT License
+        
+        Copyright (c) 2023 Muhammad Umair
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: homepage, https://github.com/GailBot-System/GailBotPlugins
+Keywords: gailbot,plugins,data,tools
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: lxml
+Requires-Dist: gailbot
+Requires-Dist: pydantic
+Requires-Dist: toml
+Requires-Dist: six
+Requires-Dist: pyannote.core
+Requires-Dist: google
+Requires-Dist: dict-to-dataclass
+Provides-Extra: whisperx
+Requires-Dist: whisperx; extra == "whisperx"
+
+# GailBotPluginsTools
+
+## Overview
+
+GailBotPluginsTools is a package designed to facilitate the creation and management of plugins for the GailBot platform. It simplifies the interaction with transcriptions, providing data handlers that manipulate XML markers and utterances.
+
+## Features
+
+- **Marker Utterance Dictionary**: Efficiently manages utterances, their timings, and speaker information.
+- **Structured Interaction**: Provides an outer layer that wraps around the marker utterance dictionary for enhanced functionality.
+- **Data Objects**: Defines necessary data structures for handling utterances effectively.
+
+## Usage
+
+The package includes several key modules:
+
+### `marker_utterance_dict.py`
+
+- **Class**: `MarkerUtteranceDict`
+- **Purpose**: Creates a dictionary to manage utterances, keeping track of speaker information, start and end times, and overlaps.
+- **Key Methods**:
+  - `__init__`: Initializes the dictionary with utterance data.
+  - `turn_criteria_overlaps`: Checks if the difference between two utterances meets a defined threshold.
+
+### `StructureInteract.py`
+
+- **Class**: `StructureInteract`
+- **Purpose**: Interacts with the marker utterance dictionary and manages the output path for plugin results.
+- **Key Methods**:
+  - `apply`: The main driver function that processes the input data and populates the data structure.
+  - `parse_xml_to_gbpluginmethods`: Converts XML data into a format usable by the GailBot Plugin methods.
+
+### `data_objects.py`
+
+- **Class**: `UttObj`
+- **Purpose**: Defines the structure for an utterance object, encapsulating its properties like start time, end time, speaker, and text.
+
+## Installation
+
+To install the package, use the following command:
+
+```bash
+pip install gailbottools
+```
+
+## Example
+
+Here is a simple example of how to use the package:
+
+```python
+from gailbot_plugin_tools import StructureInteract
+
+# Sample XML data
+xml_data = """
+<transcript>
+    <u speaker="Speaker1">
+        <w start="0.0" end="0.5">Hello</w>
+        <w start="0.6" end="1.0">World</w>
+    </u>
+</transcript>
+"""
+
+# Create an instance of StructureInteract
+interactor = StructureInteract()
+# Apply the XML data
+interactor.apply(xml_data)
+```
+
+## Contributing
+
+Contributions are welcome! Please submit a pull request or open an issue for suggestions and enhancements.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Authors
+
+- Hannah Shader
+- Jason Wu
+- Jacob Boyar
+- Vivian Li
+- Eva Caro
+- Manuel Pena
