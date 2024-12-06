@@ -1,0 +1,81 @@
+[project]
+name = "papai-unified-storage"
+version = "0.15.3"
+keywords = ["filesystem", "fsspec", "papai", "storage", "interface"]
+readme = "readme.md"
+description = "Supercharged fsspec filesystem classes with higher-level functions and utilitarians."
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+dependencies = [
+    "fsspec",
+    "adlfs",
+    "gcsfs",
+    "s3fs",
+    "pyarrow",
+    "pandas",
+    "google",  # to request google cloud token
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Topic :: Software Development",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+]
+maintainers = [
+  {name = "Datategy", email = "contact@datategy.net"},
+  {name = "Marc Bresson", email = "marc.bresson@datategy.net"}
+]
+authors = [
+  {name = "Marc Bresson", email = "marc.bresson@datategy.net"}
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-mock",
+    "pre-commit",
+    "twine",
+]
+
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.format]
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint]
+# Only ignore variables named "_".
+dummy-variable-rgx = "^_$"
+ignore = [
+    "COM812",   # Trailing comma missing
+    "D1",       # Missing docstrings
+    "D417",     # Missing argument description in the docstring
+    "E203",     # Whitespace before punctuation
+    "N806",     # Variable lowercase
+    "SLF001",   # Private member accessed
+]
+
+[tool.ruff.lint.flake8-annotations]
+ignore-fully-untyped = true
+mypy-init-return = true
+
+[tool.ruff.lint.flake8-unused-arguments]
+ignore-variadic-names = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-positional-args = 6
