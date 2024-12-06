@@ -1,0 +1,43 @@
+name: Build and Test with Mamba
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Micromamba
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        micromamba-version: 'latest'
+        environment-file: environment.yaml
+        init-shell: >-
+          bash
+        cache-environment: true
+        post-cleanup: 'all'
+
+    - name: Install dependencies
+      run: |
+        micromamba run -n mattersim uv pip install -e .
+
+    - name: Install test dependencies
+      run: |
+        micromamba run -n mattersim uv pip install -e ".[dev]"
+
+    - name: Build extension
+      run: |
+        micromamba run -n mattersim python setup.py build_ext --inplace
+
+    - name: Run tests
+      run: |
+        micromamba run -n mattersim pytest -s tests
