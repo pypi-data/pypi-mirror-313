@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<header>
+  <div class="jumbotron jumbotron-fluid">
+    <div class="container">
+      <h1 class="display-4">Appointments ({{ appt_id }})</h1>
+      <p class="lead">Showing details about appointmenmt {{ appt_id }}. To modify, hit the "Modify appointment" button.
+      </p>
+    </div>
+  </div>
+  <hr class="my-4">
+</header>
+
+<body>
+  <div class="row"></div>
+  <div class="col">
+    <div class="btn-group" role="group" aria-label="Basic example">
+      <a href="{{ url_for('appointment_modify', appt_id = appt_id, ppt_id = ppt_id) }}"><button type="button"
+          class="btn btn-warning" style="float: left; margin: 0.5em;"><i class="fa fa-pen"></i>&nbsp&nbspModify
+          appointment</button></a>
+      <a href="{{ url_for('questionnaire_new', ppt_id = ppt_id) }}"><button type="button" class="btn btn-secondary"
+          style="float: left; margin: 0.5em;"><i class="fa-regular fa-clipboard"></i></i>&nbsp&nbspAdd language
+          questionnaire</button></a>
+    </div>
+  </div>
+  </div>
+  <br>
+  <div style="text-align: left; width: 25%; float: left; margin-right: 2em;">
+    <h4>Appointment information</h4>
+    <ul class="list-group">
+      <li class="list-group-item">Participant ID: {{ ppt_id }}</li>
+      <li class="list-group-item">Appointment ID: {{ appt_id }}</li>
+      <li class="list-group-item">Study: {{ data["study"]}}</li>
+      <li class="list-group-item">Date: {{ data["date"] }}</li>
+      <li class="list-group-item">Made on the: {{ data["date_made"]}}</li>
+      <li class="list-group-item">Taxi address: {{ data["taxi_address"]}}</li>
+      <li class="list-group-item">Taxi booked?: {{ data["taxi_isbooked"]}}</li>
+      <li class="list-group-item">Appointment status: {{ data["status"]}}</li>
+      <li class="list-group-item">Comments: {{ data["comments"]}}</li>
+    </ul>
+  </div>
+  <div style="text-align: left; width: 25%; float: left; margin-right: 2em;">
+    <h4>Participant information</h4>
+    <ul class="list-group">
+      <li class="list-group-item">Name: {{ participant["name"] }}</li>
+      <li class="list-group-item">Added on: {{ participant["date_added"]}}</li>
+      <li class="list-group-item">Age: {{ participant["age_now_months"] + ":" + participant["age_now_days"] }}</li>
+      <li class="list-group-item">Sex: {{ participant["sex"]}}</li>
+      <li class="list-group-item">Comments: {{ participant["comments"]}}</li>
+    </ul>
+  </div>
+  <div style="text-align: left; width: 25%; float: left; margin-right: 2em;">
+    <h4>Contact details</h4>
+    <ul class="list-group">
+      <li class="list-group-item">Phone: {{ participant["phone1"] }}</li>
+      <li class="list-group-item">E-mail: {{ participant["email1"]}}</li>
+      <li class="list-group-item">Phone (secondary): {{ participant["phone2"] }}</li>
+      <li class="list-group-item">E-mail (secondary): {{ participant["email2"]}}</li>
+      <li class="list-group-item">Address: {{ participant["address"] }}</li>
+      <li class="list-group-item">Address: {{ participant["postcode"] }}</li>
+      <li class="list-group-item">City: {{ participant["City"]}}</li>
+    </ul>
+</body>
+{% endblock %}
