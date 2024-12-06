@@ -1,0 +1,1 @@
+EFFECTS_RESOURCES_FOLDER = 'resources/effects/'
