@@ -1,0 +1,1335 @@
+Metadata-Version: 2.1
+Name: zope.pluggableauth
+Version: 4.0
+Summary: Pluggable Authentication Utility
+Home-page: https://github.com/zopefoundation/zope.pluggableauth
+Author: Zope Foundation and Contributors
+Author-email: zope-dev@zope.dev
+License: ZPL 2.1
+Keywords: zope3 ztk authentication pluggable
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope :: 3
+Requires-Python: >=3.8
+License-File: LICENSE.txt
+Requires-Dist: persistent
+Requires-Dist: setuptools
+Requires-Dist: transaction
+Requires-Dist: zope.authentication
+Requires-Dist: zope.component
+Requires-Dist: zope.container
+Requires-Dist: zope.event
+Requires-Dist: zope.i18nmessageid
+Requires-Dist: zope.interface
+Requires-Dist: zope.password>=3.5.1
+Requires-Dist: zope.publisher>=3.12
+Requires-Dist: zope.schema
+Requires-Dist: zope.security
+Requires-Dist: zope.session
+Requires-Dist: zope.site
+Requires-Dist: zope.traversing
+Provides-Extra: test
+Requires-Dist: zope.testing; extra == "test"
+Requires-Dist: zope.testrunner; extra == "test"
+
+========================
+ ``zope.pluggableauth``
+========================
+
+.. image:: https://github.com/zopefoundation/zope.pluggableauth/actions/workflows/tests.yml/badge.svg
+        :target: https://github.com/zopefoundation/zope.pluggableauth/actions/workflows/tests.yml
+
+Based on ``zope.authentication``, this package provides a flexible and
+pluggable authentication utility, and provides a number of common plugins.
+
+
+==================================
+ Pluggable-Authentication Utility
+==================================
+
+The Pluggable-Authentication Utility (PAU) provides a framework for
+authenticating principals and associating information with them. It uses
+plugins and subscribers to get its work done.
+
+For a pluggable-authentication utility to be used, it should be
+registered as a utility providing the
+`zope.authentication.interfaces.IAuthentication` interface.
+
+Authentication
+==============
+
+The primary job of PAU is to authenticate principals. It uses two types of
+plug-ins in its work:
+
+- Credentials Plugins
+
+- Authenticator Plugins
+
+Credentials plugins are responsible for extracting user credentials from a
+request. A credentials plugin may in some cases issue a 'challenge' to obtain
+credentials. For example, a 'session' credentials plugin reads credentials
+from a session (the "extraction"). If it cannot find credentials, it will
+redirect the user to a login form in order to provide them (the "challenge").
+
+Authenticator plugins are responsible for authenticating the credentials
+extracted by a credentials plugin. They are also typically able to create
+principal objects for credentials they successfully authenticate.
+
+Given a request object, the PAU returns a principal object, if it can. The PAU
+does this by first iterating through its credentials plugins to obtain a
+set of credentials. If it gets credentials, it iterates through its
+authenticator plugins to authenticate them.
+
+If an authenticator succeeds in authenticating a set of credentials, the PAU
+uses the authenticator to create a principal corresponding to the credentials.
+The authenticator notifies subscribers if an authenticated principal is
+created. Subscribers are responsible for adding data, especially groups, to
+the principal. Typically, if a subscriber adds data, it should also add
+corresponding interface declarations.
+
+Simple Credentials Plugin
+-------------------------
+
+To illustrate, we'll create a simple credentials plugin:
+
+  >>> from zope import interface
+  >>> from zope.pluggableauth.authentication import interfaces
+
+  >>> @interface.implementer(interfaces.ICredentialsPlugin)
+  ... class MyCredentialsPlugin(object):
+  ...
+  ...     def extractCredentials(self, request):
+  ...         return request.get('credentials')
+  ...
+  ...     def challenge(self, request):
+  ...         pass # challenge is a no-op for this plugin
+  ...
+  ...     def logout(self, request):
+  ...         pass # logout is a no-op for this plugin
+
+As a plugin, MyCredentialsPlugin needs to be registered as a named utility:
+
+  >>> myCredentialsPlugin = MyCredentialsPlugin()
+  >>> provideUtility(myCredentialsPlugin, name='My Credentials Plugin')
+
+Simple Authenticator Plugin
+---------------------------
+
+Next we'll create a simple authenticator plugin. For our plugin, we'll need
+an implementation of IPrincipalInfo:
+
+  >>> @interface.implementer(interfaces.IPrincipalInfo)
+  ... class PrincipalInfo(object):
+  ...
+  ...     def __init__(self, id, title, description):
+  ...         self.id = id
+  ...         self.title = title
+  ...         self.description = description
+  ...
+  ...     def __repr__(self):
+  ...         return 'PrincipalInfo(%r)' % self.id
+
+Our authenticator uses this type when it creates a principal info:
+
+  >>> @interface.implementer(interfaces.IAuthenticatorPlugin)
+  ... class MyAuthenticatorPlugin(object):
+  ...
+  ...     def authenticateCredentials(self, credentials):
+  ...         if credentials == 'secretcode':
+  ...             return PrincipalInfo('bob', 'Bob', '')
+  ...
+  ...     def principalInfo(self, id):
+  ...         pass # plugin not currently supporting search
+
+As with the credentials plugin, the authenticator plugin must be registered
+as a named utility:
+
+  >>> myAuthenticatorPlugin = MyAuthenticatorPlugin()
+  >>> provideUtility(myAuthenticatorPlugin, name='My Authenticator Plugin')
+
+Configuring a PAU
+-----------------
+
+Finally, we'll create the PAU itself:
+
+  >>> from zope.pluggableauth import authentication
+  >>> pau = authentication.PluggableAuthentication('xyz_')
+
+and configure it with the two plugins:
+
+  >>> pau.credentialsPlugins = ('My Credentials Plugin', )
+  >>> pau.authenticatorPlugins = ('My Authenticator Plugin', )
+
+Using the PAU to Authenticate
+-----------------------------
+
+  >>> from zope.pluggableauth.factories import AuthenticatedPrincipalFactory
+  >>> provideAdapter(AuthenticatedPrincipalFactory)
+
+We can now use the PAU to authenticate a sample request:
+
+  >>> from zope.publisher.browser import TestRequest
+  >>> print(pau.authenticate(TestRequest()))
+  None
+
+In this case, we cannot authenticate an empty request. In the same way, we
+will not be able to authenticate a request with the wrong credentials:
+
+  >>> print(pau.authenticate(TestRequest(credentials='let me in!')))
+  None
+
+However, if we provide the proper credentials:
+
+  >>> request = TestRequest(credentials='secretcode')
+  >>> principal = pau.authenticate(request)
+  >>> principal
+  Principal('xyz_bob')
+
+we get an authenticated principal.
+
+Multiple Authenticator Plugins
+------------------------------
+
+The PAU works with multiple authenticator plugins. It uses each plugin, in the
+order specified in the PAU's authenticatorPlugins attribute, to authenticate
+a set of credentials.
+
+To illustrate, we'll create another authenticator:
+
+  >>> class MyAuthenticatorPlugin2(MyAuthenticatorPlugin):
+  ...
+  ...     def authenticateCredentials(self, credentials):
+  ...         if credentials == 'secretcode':
+  ...             return PrincipalInfo('black', 'Black Spy', '')
+  ...         elif credentials == 'hiddenkey':
+  ...             return PrincipalInfo('white', 'White Spy', '')
+
+  >>> provideUtility(MyAuthenticatorPlugin2(), name='My Authenticator Plugin 2')
+
+If we put it before the original authenticator:
+
+  >>> pau.authenticatorPlugins = (
+  ...     'My Authenticator Plugin 2',
+  ...     'My Authenticator Plugin')
+
+Then it will be given the first opportunity to authenticate a request:
+
+  >>> pau.authenticate(TestRequest(credentials='secretcode'))
+  Principal('xyz_black')
+
+If neither plugins can authenticate, pau returns None:
+
+  >>> print(pau.authenticate(TestRequest(credentials='let me in!!')))
+  None
+
+When we change the order of the authenticator plugins:
+
+  >>> pau.authenticatorPlugins = (
+  ...     'My Authenticator Plugin',
+  ...     'My Authenticator Plugin 2')
+
+we see that our original plugin is now acting first:
+
+  >>> pau.authenticate(TestRequest(credentials='secretcode'))
+  Principal('xyz_bob')
+
+The second plugin, however, gets a chance to authenticate if first does not:
+
+  >>> pau.authenticate(TestRequest(credentials='hiddenkey'))
+  Principal('xyz_white')
+
+Multiple Credentials Plugins
+----------------------------
+
+As with with authenticators, we can specify multiple credentials plugins. To
+illustrate, we'll create a credentials plugin that extracts credentials from
+a request form:
+
+  >>> @interface.implementer(interfaces.ICredentialsPlugin)
+  ... class FormCredentialsPlugin:
+  ...
+  ...     def extractCredentials(self, request):
+  ...         return request.form.get('my_credentials')
+  ...
+  ...     def challenge(self, request):
+  ...         pass
+  ...
+  ...     def logout(request):
+  ...         pass
+
+  >>> provideUtility(FormCredentialsPlugin(),
+  ...                name='Form Credentials Plugin')
+
+and insert the new credentials plugin before the existing plugin:
+
+  >>> pau.credentialsPlugins = (
+  ...     'Form Credentials Plugin',
+  ...     'My Credentials Plugin')
+
+The PAU will use each plugin in order to try and obtain credentials from a
+request:
+
+  >>> pau.authenticate(TestRequest(credentials='secretcode',
+  ...                              form={'my_credentials': 'hiddenkey'}))
+  Principal('xyz_white')
+
+In this case, the first credentials plugin succeeded in getting credentials
+from the form and the second authenticator was able to authenticate the
+credentials. Specifically, the PAU went through these steps:
+
+- Get credentials using 'Form Credentials Plugin'
+
+- Got 'hiddenkey' credentials using 'Form Credentials Plugin', try to
+  authenticate using 'My Authenticator Plugin'
+
+- Failed to authenticate 'hiddenkey' with 'My Authenticator Plugin', try
+  'My Authenticator Plugin 2'
+
+- Succeeded in authenticating with 'My Authenticator Plugin 2'
+
+Let's try a different scenario:
+
+  >>> pau.authenticate(TestRequest(credentials='secretcode'))
+  Principal('xyz_bob')
+
+In this case, the PAU went through these steps::
+
+- Get credentials using 'Form Credentials Plugin'
+
+- Failed to get credentials using 'Form Credentials Plugin', try
+  'My Credentials Plugin'
+
+- Got 'scecretcode' credentials using 'My Credentials Plugin', try to
+  authenticate using 'My Authenticator Plugin'
+
+- Succeeded in authenticating with 'My Authenticator Plugin'
+
+Let's try a slightly more complex scenario:
+
+  >>> pau.authenticate(TestRequest(credentials='hiddenkey',
+  ...                              form={'my_credentials': 'bogusvalue'}))
+  Principal('xyz_white')
+
+This highlights PAU's ability to use multiple plugins for authentication:
+
+- Get credentials using 'Form Credentials Plugin'
+
+- Got 'bogusvalue' credentials using 'Form Credentials Plugin', try to
+  authenticate using 'My Authenticator Plugin'
+
+- Failed to authenticate 'boguskey' with 'My Authenticator Plugin', try
+  'My Authenticator Plugin 2'
+
+- Failed to authenticate 'boguskey' with 'My Authenticator Plugin 2' --
+  there are no more authenticators to try, so lets try the next credentials
+  plugin for some new credentials
+
+- Get credentials using 'My Credentials Plugin'
+
+- Got 'hiddenkey' credentials using 'My Credentials Plugin', try to
+  authenticate using 'My Authenticator Plugin'
+
+- Failed to authenticate 'hiddenkey' using 'My Authenticator Plugin', try
+  'My Authenticator Plugin 2'
+
+- Succeeded in authenticating with 'My Authenticator Plugin 2' (shouts and
+  cheers!)
+
+Multiple Authenticator Plugins
+------------------------------
+
+As with the other operations we've seen, the PAU uses multiple plugins to
+find a principal. If the first authenticator plugin can't find the requested
+principal, the next plugin is used, and so on.
+
+  >>> @interface.implementer(interfaces.IAuthenticatorPlugin)
+  ... class AnotherAuthenticatorPlugin:
+  ...
+  ...     def __init__(self):
+  ...         self.infos = {}
+  ...         self.ids = {}
+  ...
+  ...     def principalInfo(self, id):
+  ...         return self.infos.get(id)
+  ...
+  ...     def authenticateCredentials(self, credentials):
+  ...         id = self.ids.get(credentials)
+  ...         if id is not None:
+  ...             return self.infos[id]
+  ...
+  ...     def add(self, id, title, description, credentials):
+  ...         self.infos[id] = PrincipalInfo(id, title, description)
+  ...         self.ids[credentials] = id
+
+
+To illustrate, we'll create and register two authenticators:
+
+  >>> authenticator1 = AnotherAuthenticatorPlugin()
+  >>> provideUtility(authenticator1, name='Authentication Plugin 1')
+
+  >>> authenticator2 = AnotherAuthenticatorPlugin()
+  >>> provideUtility(authenticator2, name='Authentication Plugin 2')
+
+and add a principal to them:
+
+  >>> authenticator1.add('bob', 'Bob', 'A nice guy', 'b0b')
+  >>> authenticator1.add('white', 'White Spy', 'Sneaky', 'deathtoblack')
+  >>> authenticator2.add('black', 'Black Spy', 'Also sneaky', 'deathtowhite')
+
+When we configure the PAU to use both searchable authenticators (note the
+order):
+
+  >>> pau.authenticatorPlugins = (
+  ...     'Authentication Plugin 2',
+  ...     'Authentication Plugin 1')
+
+we register the factories for our principals:
+
+  >>> from zope.pluggableauth.factories import FoundPrincipalFactory
+  >>> provideAdapter(FoundPrincipalFactory)
+
+we see how the PAU uses both plugins:
+
+  >>> pau.getPrincipal('xyz_white')
+  Principal('xyz_white')
+
+  >>> pau.getPrincipal('xyz_black')
+  Principal('xyz_black')
+
+If more than one plugin know about the same principal ID, the first plugin is
+used and the remaining are not delegated to. To illustrate, we'll add
+another principal with the same ID as an existing principal:
+
+  >>> authenticator2.add('white', 'White Rider', '', 'r1der')
+  >>> pau.getPrincipal('xyz_white').title
+  'White Rider'
+
+If we change the order of the plugins:
+
+  >>> pau.authenticatorPlugins = (
+  ...     'Authentication Plugin 1',
+  ...     'Authentication Plugin 2')
+
+we get a different principal for ID 'white':
+
+  >>> pau.getPrincipal('xyz_white').title
+  'White Spy'
+
+
+Issuing a Challenge
+===================
+
+Part of PAU's IAuthentication contract is to challenge the user for
+credentials when its 'unauthorized' method is called. The need for this
+functionality is driven by the following use case:
+
+- A user attempts to perform an operation he is not authorized to perform.
+
+- A handler responds to the unauthorized error by calling IAuthentication
+  'unauthorized'.
+
+- The authentication component (in our case, a PAU) issues a challenge to
+  the user to collect new credentials (typically in the form of logging in
+  as a new user).
+
+The PAU handles the credentials challenge by delegating to its credentials
+plugins.
+
+Currently, the PAU is configured with the credentials plugins that don't
+perform any action when asked to challenge (see above the 'challenge' methods).
+
+To illustrate challenges, we'll subclass an existing credentials plugin and
+do something in its 'challenge':
+
+  >>> class LoginFormCredentialsPlugin(FormCredentialsPlugin):
+  ...
+  ...     def __init__(self, loginForm):
+  ...         self.loginForm = loginForm
+  ...
+  ...     def challenge(self, request):
+  ...         request.response.redirect(self.loginForm)
+  ...         return True
+
+This plugin handles a challenge by redirecting the response to a login form.
+It returns True to signal to the PAU that it handled the challenge.
+
+We will now create and register a couple of these plugins:
+
+  >>> provideUtility(LoginFormCredentialsPlugin('simplelogin.html'),
+  ...                name='Simple Login Form Plugin')
+
+  >>> provideUtility(LoginFormCredentialsPlugin('advancedlogin.html'),
+  ...                name='Advanced Login Form Plugin')
+
+and configure the PAU to use them:
+
+  >>> pau.credentialsPlugins = (
+  ...     'Simple Login Form Plugin',
+  ...     'Advanced Login Form Plugin')
+
+Now when we call 'unauthorized' on the PAU:
+
+  >>> request = TestRequest()
+  >>> pau.unauthorized(id=None, request=request)
+
+we see that the user is redirected to the simple login form:
+
+  >>> request.response.getStatus()
+  302
+  >>> request.response.getHeader('location')
+  'simplelogin.html'
+
+We can change the challenge policy by reordering the plugins:
+
+  >>> pau.credentialsPlugins = (
+  ...     'Advanced Login Form Plugin',
+  ...     'Simple Login Form Plugin')
+
+Now when we call 'unauthorized':
+
+  >>> request = TestRequest()
+  >>> pau.unauthorized(id=None, request=request)
+
+the advanced plugin is used because it's first:
+
+  >>> request.response.getStatus()
+  302
+  >>> request.response.getHeader('location')
+  'advancedlogin.html'
+
+Challenge Protocols
+-------------------
+
+Sometimes, we want multiple challengers to work together. For example, the
+HTTP specification allows multiple challenges to be issued in a response. A
+challenge plugin can provide a `challengeProtocol` attribute that effectively
+groups related plugins together for challenging. If a plugin returns `True`
+from its challenge and provides a non-None challengeProtocol, subsequent
+plugins in the credentialsPlugins list that have the same challenge protocol
+will also be used to challenge.
+
+Without a challengeProtocol, only the first plugin to succeed in a challenge
+will be used.
+
+Let's look at an example. We'll define a new plugin that specifies an
+'X-Challenge' protocol:
+
+  >>> class XChallengeCredentialsPlugin(FormCredentialsPlugin):
+  ...
+  ...     challengeProtocol = 'X-Challenge'
+  ...
+  ...     def __init__(self, challengeValue):
+  ...         self.challengeValue = challengeValue
+  ...
+  ...     def challenge(self, request):
+  ...         value = self.challengeValue
+  ...         existing = request.response.getHeader('X-Challenge', '')
+  ...         if existing:
+  ...             value += ' ' + existing
+  ...         request.response.setHeader('X-Challenge', value)
+  ...         return True
+
+and register a couple instances as utilities:
+
+  >>> provideUtility(XChallengeCredentialsPlugin('basic'),
+  ...                name='Basic X-Challenge Plugin')
+
+  >>> provideUtility(XChallengeCredentialsPlugin('advanced'),
+  ...                name='Advanced X-Challenge Plugin')
+
+When we use both plugins with the PAU:
+
+  >>> pau.credentialsPlugins = (
+  ...     'Basic X-Challenge Plugin',
+  ...     'Advanced X-Challenge Plugin')
+
+and call 'unauthorized':
+
+  >>> request = TestRequest()
+  >>> pau.unauthorized(None, request)
+
+we see that both plugins participate in the challenge, rather than just the
+first plugin:
+
+  >>> request.response.getHeader('X-Challenge')
+  'advanced basic'
+
+
+Pluggable-Authentication Prefixes
+=================================
+
+Principal ids are required to be unique system wide. Plugins will often provide
+options for providing id prefixes, so that different sets of plugins provide
+unique ids within a PAU. If there are multiple pluggable-authentication
+utilities in a system, it's a good idea to give each PAU a unique prefix, so
+that principal ids from different PAUs don't conflict. We can provide a prefix
+when a PAU is created:
+
+  >>> pau = authentication.PluggableAuthentication('mypau_')
+  >>> pau.credentialsPlugins = ('My Credentials Plugin', )
+  >>> pau.authenticatorPlugins = ('My Authenticator Plugin', )
+
+When we create a request and try to authenticate:
+
+  >>> pau.authenticate(TestRequest(credentials='secretcode'))
+  Principal('mypau_bob')
+
+Note that now, our principal's id has the pluggable-authentication
+utility prefix.
+
+We can still lookup a principal, as long as we supply the prefix::
+
+  >> pau.getPrincipal('mypas_42')
+  Principal('mypas_42', "{'domain': 42}")
+
+  >> pau.getPrincipal('mypas_41')
+  OddPrincipal('mypas_41', "{'int': 41}")
+
+
+==================
+ Principal Folder
+==================
+
+Principal folders contain principal-information objects that contain principal
+information. We create an internal principal using the `InternalPrincipal`
+class:
+
+  >>> from zope.pluggableauth.plugins.principalfolder import InternalPrincipal
+  >>> p1 = InternalPrincipal('login1', '123', "Principal 1",
+  ...     passwordManagerName="SHA1")
+  >>> p2 = InternalPrincipal('login2', '456', "The Other One")
+
+and add them to a principal folder:
+
+  >>> from zope.pluggableauth.plugins.principalfolder import PrincipalFolder
+  >>> principals = PrincipalFolder('principal.')
+  >>> principals['p1'] = p1
+  >>> principals['p2'] = p2
+
+Authentication
+==============
+
+Principal folders provide the `IAuthenticatorPlugin` interface. When we
+provide suitable credentials:
+
+  >>> from pprint import pprint
+  >>> principals.authenticateCredentials({'login': 'login1', 'password': '123'})
+  PrincipalInfo('principal.p1')
+
+We get back a principal id and supplementary information, including the
+principal title and description.  Note that the principal id is a concatenation
+of the principal-folder prefix and the name of the principal-information object
+within the folder.
+
+None is returned if the credentials are invalid:
+
+  >>> principals.authenticateCredentials({'login': 'login1',
+  ...                                     'password': '1234'})
+  >>> principals.authenticateCredentials(42)
+
+Search
+======
+
+Principal folders also provide the IQuerySchemaSearch interface.  This
+supports both finding principal information based on their ids:
+
+  >>> principals.principalInfo('principal.p1')
+  PrincipalInfo('principal.p1')
+
+  >>> principals.principalInfo('p1')
+
+and searching for principals based on a search string:
+
+  >>> list(principals.search({'search': 'other'}))
+  ['principal.p2']
+
+  >>> list(principals.search({'search': 'OTHER'}))
+  ['principal.p2']
+
+  >>> list(principals.search({'search': ''}))
+  ['principal.p1', 'principal.p2']
+
+  >>> list(principals.search({'search': 'eek'}))
+  []
+
+  >>> list(principals.search({}))
+  []
+
+If there are a large number of matches:
+
+  >>> for i in range(20):
+  ...     i = str(i)
+  ...     p = InternalPrincipal('l'+i, i, "Dude "+i)
+  ...     principals[i] = p
+
+  >>> pprint(list(principals.search({'search': 'D'})), width=25)
+  ['principal.0',
+   'principal.1',
+   'principal.10',
+   'principal.11',
+   'principal.12',
+   'principal.13',
+   'principal.14',
+   'principal.15',
+   'principal.16',
+   'principal.17',
+   'principal.18',
+   'principal.19',
+   'principal.2',
+   'principal.3',
+   'principal.4',
+   'principal.5',
+   'principal.6',
+   'principal.7',
+   'principal.8',
+   'principal.9']
+
+We can use batching parameters to specify a subset of results:
+
+  >>> pprint(list(principals.search({'search': 'D'}, start=17)))
+  ['principal.7', 'principal.8', 'principal.9']
+
+  >>> pprint(list(principals.search({'search': 'D'}, batch_size=5)), width=60)
+  ['principal.0',
+   'principal.1',
+   'principal.10',
+   'principal.11',
+   'principal.12']
+
+  >>> pprint(list(principals.search({'search': 'D'}, start=5, batch_size=5)),
+  ...        width=25)
+  ['principal.13',
+   'principal.14',
+   'principal.15',
+   'principal.16',
+   'principal.17']
+
+There is an additional method that allows requesting the principal id
+associated with a login id.  The method raises KeyError when there is
+no associated principal:
+
+  >>> principals.getIdByLogin("not-there")
+  Traceback (most recent call last):
+  KeyError: 'not-there'
+
+If there is a matching principal, the id is returned:
+
+  >>> principals.getIdByLogin("login1")
+  'principal.p1'
+
+Changing credentials
+====================
+
+Credentials can be changed by modifying principal-information objects:
+
+  >>> p1.login = 'bob'
+  >>> p1.password = 'eek'
+
+  >>> principals.authenticateCredentials({'login': 'bob', 'password': 'eek'})
+  PrincipalInfo('principal.p1')
+
+  >>> principals.authenticateCredentials({'login': 'login1',
+  ...                                     'password': 'eek'})
+
+  >>> principals.authenticateCredentials({'login': 'bob',
+  ...                                     'password': '123'})
+
+
+It is an error to try to pick a login name that is already taken:
+
+  >>> p1.login = 'login2'
+  Traceback (most recent call last):
+  ...
+  ValueError: Principal Login already taken!
+
+If such an attempt is made, the data are unchanged:
+
+  >>> principals.authenticateCredentials({'login': 'bob', 'password': 'eek'})
+  PrincipalInfo('principal.p1')
+
+Removing principals
+===================
+
+Of course, if a principal is removed, we can no-longer authenticate it:
+
+  >>> del principals['p1']
+  >>> principals.authenticateCredentials({'login': 'bob',
+  ...                                     'password': 'eek'})
+
+
+===============
+ Group Folders
+===============
+
+Group folders provide support for groups information stored in the ZODB.  They
+are persistent, and must be contained within the PAUs that use them.
+
+Like other principals, groups are created when they are needed.
+
+Group folders contain group-information objects that contain group information.
+We create group information using the `GroupInformation` class:
+
+  >>> import zope.pluggableauth.plugins.groupfolder
+  >>> g1 = zope.pluggableauth.plugins.groupfolder.GroupInformation("Group 1")
+
+  >>> groups = zope.pluggableauth.plugins.groupfolder.GroupFolder('group.')
+  >>> groups['g1'] = g1
+
+Note that when group-info is added, a GroupAdded event is generated:
+
+  >>> from zope.pluggableauth import interfaces
+  >>> from zope.component.eventtesting import getEvents
+  >>> getEvents(interfaces.IGroupAdded)
+  [<GroupAdded 'group.g1'>]
+
+Groups are defined with respect to an authentication service.  Groups
+must be accessible via an authentication service and can contain
+principals accessible via an authentication service.
+
+To illustrate the group interaction with the authentication service,
+we'll create a sample authentication service:
+
+  >>> from zope import interface
+  >>> from zope.authentication.interfaces import IAuthentication
+  >>> from zope.authentication.interfaces import PrincipalLookupError
+  >>> from zope.security.interfaces import IGroupAwarePrincipal
+  >>> from zope.pluggableauth.plugins.groupfolder import setGroupsForPrincipal
+
+  >>> @interface.implementer(IGroupAwarePrincipal)
+  ... class Principal:
+  ...     def __init__(self, id, title='', description=''):
+  ...         self.id, self.title, self.description = id, title, description
+  ...         self.groups = []
+
+  >>> class PrincipalCreatedEvent:
+  ...     def __init__(self, authentication, principal):
+  ...         self.authentication = authentication
+  ...         self.principal = principal
+
+  >>> from zope.pluggableauth.plugins import principalfolder
+
+  >>> @interface.implementer(IAuthentication)
+  ... class Principals:
+  ...     def __init__(self, groups, prefix='auth.'):
+  ...         self.prefix = prefix
+  ...         self.principals = {
+  ...            'p1': principalfolder.PrincipalInfo('p1', '', '', ''),
+  ...            'p2': principalfolder.PrincipalInfo('p2', '', '', ''),
+  ...            'p3': principalfolder.PrincipalInfo('p3', '', '', ''),
+  ...            'p4': principalfolder.PrincipalInfo('p4', '', '', ''),
+  ...            }
+  ...         self.groups = groups
+  ...         groups.__parent__ = self
+  ...
+  ...     def getAuthenticatorPlugins(self):
+  ...         return [('principals', self.principals), ('groups', self.groups)]
+  ...
+  ...     def getPrincipal(self, id):
+  ...         if not id.startswith(self.prefix):
+  ...             raise PrincipalLookupError(id)
+  ...         id = id[len(self.prefix):]
+  ...         info = self.principals.get(id)
+  ...         if info is None:
+  ...             info = self.groups.principalInfo(id)
+  ...             if info is None:
+  ...                raise PrincipalLookupError(id)
+  ...         principal = Principal(self.prefix+info.id,
+  ...                               info.title, info.description)
+  ...         setGroupsForPrincipal(PrincipalCreatedEvent(self, principal))
+  ...         return principal
+
+This class doesn't really implement the full `IAuthentication` interface, but
+it implements the `getPrincipal` method used by groups. It works very much
+like the pluggable authentication utility.  It creates principals on demand. It
+calls `setGroupsForPrincipal`, which is normally called as an event subscriber,
+when principals are created. In order for `setGroupsForPrincipal` to find out
+group folder, we have to register it as a utility:
+
+  >>> from zope.pluggableauth.interfaces import IAuthenticatorPlugin
+  >>> from zope.component import provideUtility
+  >>> provideUtility(groups, IAuthenticatorPlugin)
+
+We will create and register a new principals utility:
+
+  >>> principals = Principals(groups)
+  >>> provideUtility(principals, IAuthentication)
+
+Now we can set the principals on the group:
+
+  >>> g1.principals = ['auth.p1', 'auth.p2']
+  >>> g1.principals
+  ('auth.p1', 'auth.p2')
+
+Adding principals fires an event.
+
+  >>> getEvents(interfaces.IPrincipalsAddedToGroup)[-1]
+  <PrincipalsAddedToGroup ['auth.p1', 'auth.p2'] 'auth.group.g1'>
+
+We can now look up groups for the principals:
+
+  >>> groups.getGroupsForPrincipal('auth.p1')
+  ('group.g1',)
+
+Note that the group id is a concatenation of the group-folder prefix
+and the name of the group-information object within the folder.
+
+If we delete a group:
+
+  >>> del groups['g1']
+
+then the groups folder loses the group information for that group's
+principals:
+
+  >>> groups.getGroupsForPrincipal('auth.p1')
+  ()
+
+but the principal information on the group is unchanged:
+
+  >>> g1.principals
+  ('auth.p1', 'auth.p2')
+
+It also fires an event showing that the principals are removed from the group
+(g1 is group information, not a zope.security.interfaces.IGroup).
+
+  >>> getEvents(interfaces.IPrincipalsRemovedFromGroup)[-1]
+  <PrincipalsRemovedFromGroup ['auth.p1', 'auth.p2'] 'auth.group.g1'>
+
+Adding the group sets the folder principal information.  Let's use a
+different group name:
+
+  >>> groups['G1'] = g1
+
+  >>> groups.getGroupsForPrincipal('auth.p1')
+  ('group.G1',)
+
+Here we see that the new name is reflected in the group information.
+
+An event is fired, as usual.
+
+  >>> getEvents(interfaces.IPrincipalsAddedToGroup)[-1]
+  <PrincipalsAddedToGroup ['auth.p1', 'auth.p2'] 'auth.group.G1'>
+
+In terms of member events (principals added and removed from groups), we have
+now seen that events are fired when a group information object is added and
+when it is removed from a group folder; and we have seen that events are fired
+when a principal is added to an already-registered group.  Events are also
+fired when a principal is removed from an already-registered group.  Let's
+quickly see some more examples.
+
+  >>> g1.principals = ('auth.p1', 'auth.p3', 'auth.p4')
+  >>> getEvents(interfaces.IPrincipalsAddedToGroup)[-1]
+  <PrincipalsAddedToGroup ['auth.p3', 'auth.p4'] 'auth.group.G1'>
+  >>> getEvents(interfaces.IPrincipalsRemovedFromGroup)[-1]
+  <PrincipalsRemovedFromGroup ['auth.p2'] 'auth.group.G1'>
+  >>> g1.principals = ('auth.p1', 'auth.p2')
+  >>> getEvents(interfaces.IPrincipalsAddedToGroup)[-1]
+  <PrincipalsAddedToGroup ['auth.p2'] 'auth.group.G1'>
+  >>> getEvents(interfaces.IPrincipalsRemovedFromGroup)[-1]
+  <PrincipalsRemovedFromGroup ['auth.p3', 'auth.p4'] 'auth.group.G1'>
+
+Groups can contain groups:
+
+  >>> g2 = zope.pluggableauth.plugins.groupfolder.GroupInformation("Group Two")
+  >>> groups['G2'] = g2
+  >>> g2.principals = ['auth.group.G1']
+
+  >>> groups.getGroupsForPrincipal('auth.group.G1')
+  ('group.G2',)
+
+  >>> old = getEvents(interfaces.IPrincipalsAddedToGroup)[-1]
+  >>> old
+  <PrincipalsAddedToGroup ['auth.group.G1'] 'auth.group.G2'>
+
+Groups cannot contain cycles:
+
+  >>> g1.principals = ('auth.p1', 'auth.p2', 'auth.group.G2')
+  ... # doctest: +NORMALIZE_WHITESPACE
+  Traceback (most recent call last):
+  ...
+  zope.pluggableauth.plugins.groupfolder.GroupCycle: ('auth.group.G2', ['auth.group.G2', 'auth.group.G1'])
+
+Trying to do so does not fire an event.
+
+  >>> getEvents(interfaces.IPrincipalsAddedToGroup)[-1] is old
+  True
+
+They need not be hierarchical:
+
+  >>> ga = zope.pluggableauth.plugins.groupfolder.GroupInformation("Group A")
+  >>> groups['GA'] = ga
+
+  >>> gb = zope.pluggableauth.plugins.groupfolder.GroupInformation("Group B")
+  >>> groups['GB'] = gb
+  >>> gb.principals = ['auth.group.GA']
+
+  >>> gc = zope.pluggableauth.plugins.groupfolder.GroupInformation("Group C")
+  >>> groups['GC'] = gc
+  >>> gc.principals = ['auth.group.GA']
+
+  >>> gd = zope.pluggableauth.plugins.groupfolder.GroupInformation("Group D")
+  >>> groups['GD'] = gd
+  >>> gd.principals = ['auth.group.GA', 'auth.group.GB']
+
+  >>> ga.principals = ['auth.p1']
+
+Group folders provide a very simple search interface.  They perform
+simple string searches on group titles and descriptions.
+
+  >>> list(groups.search({'search': 'gro'})) # doctest: +NORMALIZE_WHITESPACE
+  ['group.G1', 'group.G2',
+   'group.GA', 'group.GB', 'group.GC', 'group.GD']
+
+  >>> list(groups.search({'search': 'two'}))
+  ['group.G2']
+
+They also support batching:
+
+  >>> list(groups.search({'search': 'gro'}, 2, 3))
+  ['group.GA', 'group.GB', 'group.GC']
+
+
+If you don't supply a search key, no results will be returned:
+
+  >>> list(groups.search({}))
+  []
+
+Identifying groups
+==================
+The function, `setGroupsForPrincipal`, is a subscriber to
+principal-creation events.  It adds any group-folder-defined groups to
+users in those groups:
+
+  >>> principal = principals.getPrincipal('auth.p1')
+
+  >>> principal.groups
+  ['auth.group.G1', 'auth.group.GA']
+
+Of course, this applies to groups too:
+
+  >>> principal = principals.getPrincipal('auth.group.G1')
+  >>> principal.id
+  'auth.group.G1'
+
+  >>> principal.groups
+  ['auth.group.G2']
+
+In addition to setting principal groups, the `setGroupsForPrincipal`
+function also declares the `IGroup` interface on groups:
+
+  >>> [iface.__name__ for iface in interface.providedBy(principal)]
+  ['IGroup', 'IGroupAwarePrincipal']
+
+  >>> [iface.__name__
+  ...  for iface in interface.providedBy(principals.getPrincipal('auth.p1'))]
+  ['IGroupAwarePrincipal']
+
+Special groups
+==============
+Two special groups, Authenticated, and Everyone may apply to users
+created by the pluggable-authentication utility.  There is a
+subscriber, specialGroups, that will set these groups on any non-group
+principals if IAuthenticatedGroup, or IEveryoneGroup utilities are
+provided.
+
+Lets define a group-aware principal:
+
+  >>> import zope.security.interfaces
+  >>> @interface.implementer(zope.security.interfaces.IGroupAwarePrincipal)
+  ... class GroupAwarePrincipal(Principal):
+  ...     def __init__(self, id):
+  ...         Principal.__init__(self, id)
+  ...         self.groups = []
+
+If we notify the subscriber with this principal, nothing will happen
+because the groups haven't been defined:
+
+  >>> prin = GroupAwarePrincipal('x')
+  >>> event = interfaces.FoundPrincipalCreated(42, prin, {})
+  >>> zope.pluggableauth.plugins.groupfolder.specialGroups(event)
+  >>> prin.groups
+  []
+
+Now, if we define the Everybody group:
+
+  >>> import zope.authentication.interfaces
+  >>> @interface.implementer(zope.authentication.interfaces.IEveryoneGroup)
+  ... class EverybodyGroup(Principal):
+  ...     pass
+
+  >>> everybody = EverybodyGroup('all')
+  >>> provideUtility(everybody, zope.authentication.interfaces.IEveryoneGroup)
+
+Then the group will be added to the principal:
+
+  >>> zope.pluggableauth.plugins.groupfolder.specialGroups(event)
+  >>> prin.groups
+  ['all']
+
+Similarly for the authenticated group:
+
+  >>> @interface.implementer(
+  ...         zope.authentication.interfaces.IAuthenticatedGroup)
+  ... class AuthenticatedGroup(Principal):
+  ...     pass
+
+  >>> authenticated = AuthenticatedGroup('auth')
+  >>> provideUtility(authenticated, zope.authentication.interfaces.IAuthenticatedGroup)
+
+Then the group will be added to the principal:
+
+  >>> prin.groups = []
+  >>> zope.pluggableauth.plugins.groupfolder.specialGroups(event)
+  >>> prin.groups.sort()
+  >>> prin.groups
+  ['all', 'auth']
+
+These groups are only added to non-group principals:
+
+  >>> prin.groups = []
+  >>> interface.directlyProvides(prin, zope.security.interfaces.IGroup)
+  >>> zope.pluggableauth.plugins.groupfolder.specialGroups(event)
+  >>> prin.groups
+  []
+
+And they are only added to group aware principals:
+
+  >>> @interface.implementer(zope.security.interfaces.IPrincipal)
+  ... class SolitaryPrincipal:
+  ...     id = title = description = ''
+
+  >>> event = interfaces.FoundPrincipalCreated(42, SolitaryPrincipal(), {})
+  >>> zope.pluggableauth.plugins.groupfolder.specialGroups(event)
+  >>> prin.groups
+  []
+
+Member-aware groups
+===================
+The groupfolder includes a subscriber that gives group principals the
+zope.security.interfaces.IGroupAware interface and an implementation thereof.
+This allows groups to be able to get and set their members.
+
+Given an info object and a group...
+
+    >>> @interface.implementer(
+    ...         zope.pluggableauth.plugins.groupfolder.IGroupInformation)
+    ... class DemoGroupInformation(object):
+    ...     def __init__(self, title, description, principals):
+    ...         self.title = title
+    ...         self.description = description
+    ...         self.principals = principals
+    ...
+    >>> i = DemoGroupInformation(
+    ...     'Managers', 'Taskmasters', ('joe', 'jane'))
+    ...
+    >>> info = zope.pluggableauth.plugins.groupfolder.GroupInfo(
+    ...     'groups.managers', i)
+    >>> @interface.implementer(IGroupAwarePrincipal)
+    ... class DummyGroup(object):
+    ...     def __init__(self, id, title='', description=''):
+    ...         self.id = id
+    ...         self.title = title
+    ...         self.description = description
+    ...         self.groups = []
+    ...
+    >>> principal = DummyGroup('foo')
+    >>> zope.security.interfaces.IMemberAwareGroup.providedBy(principal)
+    False
+
+...when you call the subscriber, it adds the two pseudo-methods to the
+principal and makes the principal provide the IMemberAwareGroup interface.
+
+    >>> zope.pluggableauth.plugins.groupfolder.setMemberSubscriber(
+    ...     interfaces.FoundPrincipalCreated(
+    ...         'dummy auth (ignored)', principal, info))
+    >>> principal.getMembers()
+    ('joe', 'jane')
+    >>> principal.setMembers(('joe', 'jane', 'jaimie'))
+    >>> principal.getMembers()
+    ('joe', 'jane', 'jaimie')
+    >>> zope.security.interfaces.IMemberAwareGroup.providedBy(principal)
+    True
+
+The two methods work with the value on the IGroupInformation object.
+
+    >>> i.principals == principal.getMembers()
+    True
+
+Limitation
+----------
+
+The current group-folder design has an important limitation!
+
+There is no point in assigning principals to a group
+from a group folder unless the principal is from the same pluggable
+authentication utility.
+
+* If a principal is from a higher authentication utility, the user
+  will not get the group definition. Why? Because the principals
+  group assignments are set when the principal is authenticated. At
+  that point, the current site is the site containing the principal
+  definition. Groups defined in lower sites will not be consulted,
+
+* It is impossible to assign users from lower authentication
+  utilities because they can't be seen when managing the group,
+  from the site containing the group.
+
+A better design might be to store user-role assignments independent of
+the group definitions and to look for assignments during (url)
+traversal.  This could get quite complex though.
+
+While it is possible to have multiple authentication utilities long a
+URL path, it is generally better to stick to a simpler model in which
+there is only one authentication utility along a URL path (in addition
+to the global utility, which is used for bootstrapping purposes).
+
+
+=========
+ Changes
+=========
+
+4.0 (2024-12-04)
+================
+
+- Add support for Python 3.13.
+
+- Add support for Python 3.12.
+
+- Drop support for Python 3.7.
+
+3.0 (2023-02-14)
+================
+
+- Add support for Python 3.8, 3.9, 3.10, 3.11.
+
+- Drop support for Python 2.7, 3.5, 3.6.
+
+- Drop support for deprecated ``python setup.py test``.
+
+
+2.3.1 (2021-03-19)
+==================
+
+- Drop support for Python 3.4.
+
+- Add support for Python 3.7.
+
+- Import from zope.interface.interfaces to avoid deprecation warning.
+
+
+2.3.0 (2017-11-12)
+==================
+
+- Drop support for Python 3.3.
+
+
+2.2.0 (2017-05-02)
+==================
+
+- Add support for Python 3.6.
+
+- Fix a NameError in the idpicker under Python 3.6.
+  See `issue 7 <https://github.com/zopefoundation/zope.pluggableauth/issues/7>`_.
+
+2.1.0 (2016-07-04)
+==================
+
+- Add support for Python 3.5.
+
+- Drop support for Python 2.6.
+
+
+2.0.0 (2014-12-24)
+==================
+
+- Add support for Python 3.4.
+
+- Refactor ``zope.pluggableauth.plugins.session.redirectWithComeFrom``
+  into a reusable function.
+
+- Fix: allow password containing colon(s) in HTTP basic authentication
+  credentials extraction plug-in, to conform with RFC2617
+
+
+2.0.0a1 (2013-02-21)
+====================
+
+- Add ``tox.ini`` and ``MANIFEST.in``.
+
+- Add support for Python 3.3.
+
+- Replace deprecated ``zope.component.adapts`` usage with equivalent
+  ``zope.component.adapter`` decorator.
+
+- Replace deprecated ``zope.interface.implements`` usage with equivalent
+  ``zope.interface.implementer`` decorator.
+
+- Drop support for Python 2.4 and 2.5.
+
+
+1.3 (2011-02-08)
+================
+
+- As the ``camefrom`` information is most probably used for a redirect,
+  require it to be an absolute URL (see also
+  http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.30).
+
+1.2 (2010-12-16)
+================
+
+- Add a hook to ``SessionCredentialsPlugin`` (``_makeCredentials``) that can
+  be overriden in subclasses to store the credentials in the session
+  differently.
+
+  For example, you could use ``keas.kmi`` and encrypt the passwords of the
+  currently logged-in users so they don't appear in plain text in the ZODB.
+
+1.1 (2010-10-18)
+================
+
+- Move concrete ``IAuthenticatorPlugin`` implementations from
+  ``zope.app.authentication`` to ``zope.pluggableauth.plugins``.
+
+  As a result, projects that want to use the ``IAuthenticator`` plugins
+  (previously found in ``zope.app.authentication``) do not automatically
+  also pull in the ``zope.app.*`` dependencies that are needed to register
+  the ZMI views.
+
+1.0.3 (2010-07-09)
+==================
+
+- Fix dependency declaration.
+
+1.0.2 (2010-07-90)
+==================
+
+- Add ``persistent.Persistent`` and ``zope.container.contained.Contained`` as
+  bases for ``zope.pluggableauth.plugins.session.SessionCredentialsPlugin``,
+  so instances of ``zope.app.authentication.session.SessionCredentialsPlugin``
+  won't be changed.
+  (https://mail.zope.org/pipermail/zope-dev/2010-July/040898.html)
+
+1.0.1 (2010-02-11)
+==================
+
+* Declare adapter in a new ZCML file : `principalfactories.zcml`.  Avoids
+  duplication errors in ``zope.app.authentication``.
+
+1.0 (2010-02-05)
+================
+
+* Splitting off from zope.app.authentication
