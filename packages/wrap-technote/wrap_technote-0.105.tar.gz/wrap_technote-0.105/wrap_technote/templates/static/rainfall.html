@@ -1,0 +1,155 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+{% include "static/style.css" %}
+    </style>
+
+</head>
+<body>
+
+<div id="topBar">
+    SILO data charts:
+        <span class='silo toggle-indicator'>ON</span>
+        <button id="toggle_silo">Toggle</button>
+        |
+    Annual rainfall charts:
+        <span class='annual toggle-indicator'>ON</span>
+        <button id="toggle_annual">Toggle</button>
+        |
+    Annual (calendar) rainfall charts (internal analysis):
+        <span class='analysis_annual_calendar toggle-indicator'>ON</span>
+        <button id="toggle_analysis_annual_calendar">Toggle</button>
+        |
+    Annual (financial year) rainfall charts:
+        <span class='analysis_annual_financial toggle-indicator'>ON</span>
+        <button id="toggle_analysis_annual_financial">Toggle</button>
+        |
+    <br />
+    Monthly rainfall charts (Tech Note):
+        <span class='monthly toggle-indicator'>ON</span>
+        <button id="toggle_monthly">Toggle</button>
+        |
+    Monthly rainfall charts (internal analysis):
+        <span class='analysis_monthly toggle-indicator'>ON</span>
+        <button id="toggle_analysis_monthly">Toggle</button>
+
+</div>
+
+<div id="leftCol">
+    <p>Charts:</p>
+    {% for station, sdata in data.items() %}
+        <p><a href="#charts-{{ station }}">{{ station }} ({{ sdata['name'] }})</a></p>
+
+    {% endfor %}
+
+    <p>Data:</p>
+
+    {% for key, df in wide_data.items() %}
+        <p><a href="#data-{{ key }}">{{ key }}</a></p>
+
+    {% endfor %}
+
+    {% for station, sdata in data.items() %}
+        <p><a href="#data-{{ station }}">{{ station }} ({{ sdata['name'] }})</a></p>
+
+    {% endfor %}
+</div>
+
+<div id="content">
+
+    <h1>WRAP Rainfall: {{ report.report_key }}</h1>
+
+    <p>All data and figures at {{ report.rainfall_path|safe }}</p>
+
+    {% for station, sdata in data.items() %}
+        <h3><a class="anchor" id="charts-{{ station }}"></a>
+        {{ station }} ({{ sdata['name'] }})</h3>
+
+        <p>
+            <a href="http://www.bom.gov.au/jsp/ncc/cdio/weatherData/av?p_nccObsCode=139&p_display_type=dataFile&p_startYear=&p_c=&p_stn_num={{ station }}">BoM Climate Data</a>
+            | <a href="#toc">Return to table of contents</a></p>
+
+        <h4>SILO data quality figures (i.e. data missing or not)</h4>
+        {% for png in sdata['relative_silo_pngs'] %}
+            <p><img src="{{ png }}" class="silo" /></p>
+        {% endfor %}
+
+        <h4>Annual (financial "wu" year) - for Tech Note</h4>
+        {% for png in sdata['relative_annual_pngs'] %}
+            <p><img src="{{ png }}" class="annual" /></p>
+        {% endfor %}
+
+        <h4>Annual (calendar year) - ***for internal analysis***</h4>
+        {% for png in sdata['relative_analysis_annual_calendar_pngs'] %}
+            <p><img src="{{ png }}" class="analysis_annual_calendar" /></p>
+        {% endfor %}
+
+        <h4>Annual (financial/wu year) - ***for internal analysis***</h4>
+        {% for png in sdata['relative_analysis_annual_financial_pngs'] %}
+            <p><img src="{{ png }}" class="analysis_annual_financial" /></p>
+        {% endfor %}
+
+        <h4>Monthly rainfall - for Tech Note</h4>
+        {% for png in sdata['relative_monthly_pngs'] %}
+            <p><img src="{{ png }}" class="monthly" /></p>
+        {% endfor %}
+        
+        <h4>Monthly rainfall - for the past couple of years - ***for internal analysis***</h4>
+        {% for png in sdata['relative_analysis_monthly_pngs'] %}
+            <p><img src="{{ png }}" class="analysis_monthly" /></p>
+        {% endfor %}
+
+    {% endfor %}
+
+<h2>Data</h2>
+
+    {% for key, df in wide_data.items() %}
+        <h3><a class="anchor" id="data-{{ key }}"></a>{{ key }}</h3>
+        <p>{{ df.sort_index(ascending=False).to_html(index=True)|safe }}</p>
+
+    {% endfor %}
+
+    {% for station, sdata in data.items() %}
+        <h3><a class="anchor" id="data-{{ station }}"></a>
+        {{ station }} ({{ sdata['name'] }})</h3>
+
+        {% for name, df in sdata['dfs'].items() %}
+
+            <h4>{{ name }}</h4>
+
+            <p>{{ df.to_html(index=True)|safe }}</p>
+
+        {% endfor %}
+
+    {% endfor %}
+
+</div>
+
+<script  type="text/javascript">
+    $("#toggle_silo").click(function(){
+        $(".silo").toggle();
+    })
+    $("#toggle_annual").click(function(){
+        $(".annual").toggle();
+    })
+    $("#toggle_analysis_annual_calendar").click(function(){
+        $(".analysis_annual_calendar").toggle();
+    })
+    $("#toggle_analysis_annual_financial").click(function(){
+        $(".analysis_annual_financial").toggle();
+    })
+    $("#toggle_monthly").click(function(){
+        $(".monthly").toggle();
+    })
+    $("#toggle_analysis_monthly").click(function(){
+        $(".analysis_monthly").toggle();
+    })
+    $(".silo").toggle();
+</script>
+
+</body>
+</html>
