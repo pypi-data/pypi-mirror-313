@@ -1,0 +1,75 @@
+{% extends "app_layout_well.html" %}
+
+{% block head_extra %}
+<script type="text/javascript" src="/static/dygraph.js"></script>
+<link rel="stylesheet" type="text/css" src="/static/dygraph.css" />
+{% endblock %}
+
+{% block header_title %}
+{{ title }} - Manual water levels
+{% endblock %}
+
+{% block title %}
+Manual water levels - {{ title }}
+{% endblock %}
+
+{% block well_content %}
+
+
+    <p>Back to <a href="/app/well_summary?dh_no={{ well.dh_no }}&env={{ env }}">well summary</a></p>
+
+    <p>
+        <form>
+            <input type="hidden" name="dh_no" value="{{ well.dh_no }}" />
+            <label>Parameter:</label>
+            <input type="text" name="param" value="{{ param }}" /> (dtw, swl, or rswl)
+        <br>
+            <label>SA Geodata environment:</label>
+            <input type="text" name="env" value="{{ env }}" /> (prod, test, dev)
+        <br>
+            
+            <button type="submit" formaction="/app/well_manual_water_level">
+                Reload
+            </button>
+        </form>
+    </p>
+
+    {% if param == "dtw" or param == "swl" %}<p><em>For DTW & SWL, the legend which appears when you move the mouse over the 
+        chart will have the sign reversed. E.g. the true SWL of "4.34" will appear as "-4.34". RSWL values always have the correct sign in the mouse-over legend.
+        The Y axis labels are always correct, for all parameters.
+    </em></p>{% endif %}
+
+    <div id="chart-legend"></div><br />
+    <div id="chart" style="width: 1000px; height: 430px;"></div>
+
+    <br />
+
+    {{ table|safe }}
+
+<script type="text/javascript">
+Dygraph.onDOMready(function onDOMready() {
+    g = new Dygraph(
+        document.getElementById("chart"),
+        [{{ chart_data|safe }}],
+        {
+            labels: ["x", "{{ param }}"],
+            resizable: "both",
+            drawPoints: true,
+            pointSize: 3,
+            legend: "always",
+            labelsDiv: "chart-legend",
+            ylabel: "{{ param }}",
+            showRangeSelector: true,
+            axes: {
+                {% if param != "rswl" %} y: {
+                    axisLabelFormatter: function(v) {
+                        return Math.round(v * -1 * 100) / 100;                        
+                    }
+                } {% endif %}
+            }
+        } 
+    );
+});
+</script>
+
+{% endblock %}
