@@ -1,0 +1,76 @@
+// The class for the Primitive Candid Type: text
+
+#pragma once
+
+#include <algorithm>
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstring>
+
+#include "candid_type_base.h"
+#include "vec_bytes.h"
+
+class CandidTypePrincipal : public CandidTypeBase<CandidTypePrincipal> {
+public:
+  // Constructors
+  CandidTypePrincipal();
+  CandidTypePrincipal(const char *c);
+  // clang-format off
+  // docs start: demo_candid_type_principal
+  CandidTypePrincipal(const std::string v);
+
+  // Checks if the user is anonymous
+  // If the user is not anonymous, that means that the user is authenticated 
+  // with Internet Identity or other mechanisms that assign a unique 
+  // principal ID.
+  bool is_anonymous(); 
+
+  // Get the principal ID in text format
+  std::string get_text(); // docs end: demo_candid_type_principal
+  // clang-format on
+
+  CandidTypePrincipal(std::string *v);
+
+  CandidTypePrincipal(const std::vector<uint8_t> &bytes);
+
+  // Destructor
+  ~CandidTypePrincipal();
+
+  bool decode_T(VecBytes B, __uint128_t &offset, std::string &parse_error) {
+    return false; // type table for Primitives is empty
+  }
+  bool decode_M(CandidDeserialize &de, VecBytes B, __uint128_t &offset,
+                std::string &parse_error);
+  std::string get_v() { return m_v; }
+  std::string *get_pv() { return m_pv; }
+  const VecBytes &get_v_bytes() const { return m_v_bytes; }
+
+protected:
+  void set_pv(std::string *v);
+  void initialize(const std::string &v);
+  void set_datatype();
+  void encode_T() { m_T.clear(); } // type table for Primitives is empty
+  void encode_I();
+  void encode_M();
+  void bytes_from_string();
+  std::string string_from_bytes(const std::vector<uint8_t> &data_bytes);
+
+  void make_ascii_uppercase(std::string &s) {
+    std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+  }
+  void make_ascii_lowercase(std::string &s) {
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+  }
+  void ungroup(std::string &s);
+  void group(std::string &s);
+  std::vector<uint8_t> base32_decode(std::string &s);
+  std::string base32_encode(std::vector<uint8_t> &bytes);
+  void pad(std::string &s);
+  void nopad(std::string &s);
+  std::array<uint8_t, 4> crc32(std::vector<uint8_t> data_bytes);
+
+  std::string m_v;    // text representation of Principal
+  VecBytes m_v_bytes; // byte representation of Principal
+  std::string *m_pv{nullptr};
+};
