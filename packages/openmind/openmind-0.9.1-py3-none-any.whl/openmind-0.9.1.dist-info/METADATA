@@ -1,0 +1,147 @@
+Metadata-Version: 2.3
+Name: openmind
+Version: 0.9.1
+Summary: openMind is a magicain who takes you to experience the mystery and creativity of AI.
+Project-URL: Homepage, https://gitee.com/openmind-ai/openmind
+Project-URL: Repository, https://gitee.com/openmind-ai/openmind
+Author: The openMind Team
+Author-email: dev@public.openmind.cn
+License: 木兰宽松许可证， 第2版
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Mulan Permissive Software License v2 (MulanPSL-2.0)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: <3.11,>=3.8
+Requires-Dist: datasets<=2.21.0,>=2.18.0
+Requires-Dist: decorator
+Requires-Dist: docker>=4.34.2
+Requires-Dist: einops==0.8.0
+Requires-Dist: numpy<2.0.0
+Requires-Dist: openmind-hub==0.9.0
+Requires-Dist: packaging
+Requires-Dist: sentencepiece
+Requires-Dist: setuptools==69.5.1
+Requires-Dist: tabulate
+Requires-Dist: tiktoken
+Requires-Dist: tokenizers
+Requires-Dist: tqdm
+Provides-Extra: ci
+Requires-Dist: requests; extra == 'ci'
+Provides-Extra: lint
+Requires-Dist: black==24.8.0; extra == 'lint'
+Requires-Dist: ruff==0.6.1; extra == 'lint'
+Provides-Extra: ms
+Requires-Dist: mindformers==1.3.0; extra == 'ms'
+Requires-Dist: mindspore==2.4.0; extra == 'ms'
+Provides-Extra: pt
+Requires-Dist: accelerate<=1.0.0rc1,>=0.28.0; extra == 'pt'
+Requires-Dist: evaluate==0.4.1; extra == 'pt'
+Requires-Dist: lm-eval==0.4.3; extra == 'pt'
+Requires-Dist: torch-npu==2.1.0.post8; extra == 'pt'
+Requires-Dist: torch==2.1.0; extra == 'pt'
+Requires-Dist: transformers<=4.45.2,>=4.39.2; extra == 'pt'
+Provides-Extra: pt-cpu
+Requires-Dist: accelerate<=1.0.0rc1,>=0.28.0; extra == 'pt-cpu'
+Requires-Dist: evaluate==0.4.1; extra == 'pt-cpu'
+Requires-Dist: lm-eval==0.4.3; extra == 'pt-cpu'
+Requires-Dist: torch==2.1.0; extra == 'pt-cpu'
+Requires-Dist: transformers<=4.45.2,>=4.39.2; extra == 'pt-cpu'
+Provides-Extra: test
+Requires-Dist: accelerate<=1.0.0rc1,>=0.28.0; extra == 'test'
+Requires-Dist: evaluate==0.4.1; extra == 'test'
+Requires-Dist: lm-eval==0.4.3; extra == 'test'
+Requires-Dist: pillow; extra == 'test'
+Requires-Dist: pytest; extra == 'test'
+Requires-Dist: pytest-cov; extra == 'test'
+Requires-Dist: testtools; extra == 'test'
+Requires-Dist: torch==2.1.0; extra == 'test'
+Requires-Dist: transformers<=4.45.2,>=4.39.2; extra == 'test'
+Description-Content-Type: text/markdown
+
+# openMind Library
+
+## 简介
+
+openMind Library是一个深度学习开发套件，支持模型训练、推理等流程，兼容PyTorch和MindSpore等主流框架。
+
+## 安装
+
+关于openMind Library的安装步骤，推荐用户参考[《安装》](https://modelers.cn/docs/zh/openmind-library/install.html)文档，以确保顺利并正确地完成安装过程。
+
+openMind Library的安装过程还依赖于openmind_accelerate与openmind_hub，用户在进行安装时，可以参考[openmind-accelerate环境准备](https://modelers.cn/docs/zh/openmind-library/basic_tutorial/pretrainer.html#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87)与[openMind Hub Client安装](https://modelers.cn/docs/zh/openmind-hub-client/0.9/install.html)来进行操作。
+
+## 快速上手
+
+`pipeline()`提供了使用预训练模型进行推理的全流程，使用`pipeline()`可以轻松实现对文本、图像、音频等多种模态数据的多种任务，如文本情感分析、图像分割、语音识别等。
+
+本章以对文本的情感分析任务为例，展示如何使用`pipeline()`执行一个指定的任务。
+
+首先，实例化一个pipeline对象并指定任务类型，本示例中指定为`sentiment-analysis`（所有支持的任务类型详见 [**pipeline当前支持的推理任务与默认模型**](https://modelers.cn/docs/zh/openmind-library/basic_tutorial/pipeline.html#pipeline%E5%BD%93%E5%89%8D%E6%94%AF%E6%8C%81%E7%9A%84%E6%8E%A8%E7%90%86%E4%BB%BB%E5%8A%A1%E5%8F%8A%E5%85%B6%E9%BB%98%E8%AE%A4%E6%A8%A1%E5%9E%8B)）。此方法未指定模型，pipeline使用任务对应的预定义默认模型进行推理。
+
+```python
+from openmind import pipeline
+
+classifier = pipeline("sentiment-analysis")
+```
+
+在仅指定任务类型时，`pipeline()`会自动下载预定义默认预训练模型及分词器，本示例中的预训练模型和分词器用于情感分析，随后使用`classifier`对输入文本进行情感分析。
+
+```python
+classifier("Welcome to the openMind library!")
+
+'''
+输出：
+[{'label': 'POSITIVE', 'score': 0.999705970287323}]
+'''
+```
+
+当输入文本不只一条时，可以把所有输入放入到列表中，一次性传给`pipeline()`，`classifier`也将所有结果存储在一个字典列表内并返回：
+
+```python
+results = classifier(["Welcome to the openMind library!", "Have a great experience using it!"])
+for result in results:
+    print(f"label: {result['label']}, with score: {round(result['score'], 4)}")
+
+'''
+输出：
+label: POSITIVE, with score: 0.9997
+label: POSITIVE, with score: 0.9998
+'''
+```
+
+其余openMind Library的基础功能可参考[快速入门](https://modelers.cn/docs/zh/openmind-library/quick_start.html)。
+
+## 贡献
+
+1. 在上传PR之前，请确保所有测试都通过。首先在本地运行如下命令。
+
+```shell
+# The scripts below run on system default python version by default. If you want to use other python version, set the env
+# PY_VERSION. For example, `PY_VERSION=3.8 ./ci/lint.sh`
+# Lint check
+./ci/lint.sh
+# Unit test
+./ci/unit_test.sh
+# Functional test, Please generate the HUB_TOKEN from openmind by yourself and use it privatelly.
+HUB_TOKEN=your_hub_token ./ci/functional_test.sh
+```
+
+2. 当您推送或更新PR（Pull Request）后，系统将自动触发CI（持续集成）构建和测试流程。若所有CI构建和测试均顺利通过，`ci-success`标记将自动添加到您的PR中。然而，若出现CI故障，您可以点击CI日志链接以详细查看失败原因，并在本地进行必要的修复。一旦您完成了修复并希望重新运行CI作业，只需在PR中留下评论`/recheck`即可。
+
+3. 详细贡献指南请参考：
+    https://gitee.com/modelers/openmind/blob/v0.9.1/docs/zh/developer_tutorial/contribution.md
+
+## 安全声明
+
+为保障使用过程安全，推荐用户参考[《安全声明》](./security_statement.md)了解相关安全信息，进行必要的安全加固。
+
+## 许可证
+
+openMind Library使用木兰宽松许可证第2版（MulanPSL v2）。详见[LICENSE](http://license.coscl.org.cn/MulanPSL2)文件。
