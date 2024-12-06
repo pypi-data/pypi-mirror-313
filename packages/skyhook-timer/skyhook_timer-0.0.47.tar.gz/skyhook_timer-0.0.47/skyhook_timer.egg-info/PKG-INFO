@@ -1,0 +1,70 @@
+Metadata-Version: 2.1
+Name: skyhook-timer
+Version: 0.0.47
+Summary: A Skyhook Timer app for Alliance Auth.
+Author-email: kjelpw <kjelpw@protonmail.com>
+License: Copyright 2024 Kjel Pettenger-Willey
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/kjelpw/skyhook-app
+Project-URL: Source, https://github.com/kjelpw/skyhook-app
+Keywords: allianceauth,eve-online,skyhook,timers
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: django>=3.2
+
+# skyhook-app
+Alliance Auth (https://allianceauth.readthedocs.io/en/v4.4.2/index.html) plugin for tracking Skyhook timers
+
+https://pypi.org/project/skyhook-timer/
+
+
+## Installation
+
+### 1 - Install app
+
+Install into your Alliance Auth virtual environment from PyPI:
+
+```bash
+pip install skyhook-timer
+```
+
+### 2 - Configure AA settings
+
+Add `'skyhook_timer'` to `INSTALLED_APPS`
+
+### 3 - Finalize installation into AA
+
+Run migrations & copy static files
+
+```bash
+python manage.py migrate
+python manage.py collectstatic
+```
+
+Restart your supervisor services for AA
+
+### 4 - Setup permissions
+
+Now you can access Alliance Auth and setup permissions for your users. See below
+
+## Permissions
+
+This is an overview of all permissions used by this app:
+
+Name | Purpose | Code
+-- | -- | --
+Can add skyhook timer | Can create a unique skyhook timer with system/planet and time. If the system/planet timer exists already it overwrites | add_skyhooktimer
+Can change skyhook timer | Edit existing skyhook timers | change_skyhooktimer
+Can delete skyhook timer | Removes a skyhook timer from the list | delete_skyhooktimer
+Can view skyhook timer | Allows viewing of the nav menu link, and rendering of the skyhook timer page. This should be added to all users/members/states/groups that should be able to view skyhook timers | view_skyhooktimer
+
+# CHANGELOG
+
+### 0.0.43
+- Limited stable release
