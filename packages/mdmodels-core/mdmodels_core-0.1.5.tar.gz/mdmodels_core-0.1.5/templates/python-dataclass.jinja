@@ -1,0 +1,106 @@
+{#
+    This macro determines whether a given attributes default is a string
+#}
+{%- macro get_default(default) -%}
+    {%- if default == "false" or default == "true" -%}
+        {{ default | capitalize }}
+    {%- elif default == "False" or default == "True" -%}
+        {{ default | capitalize }}
+    {%- elif default is string -%}
+        "{{ default }}"
+    {%- else -%}
+        {{ default | capitalize }}
+    {%- endif -%}
+{%- endmacro -%}
+
+{% import "python-macros.jinja" as utils %}
+## This is a generated file. Do not modify it manually!
+
+from __future__ import annotations
+from dataclasses import dataclass, field
+from dataclasses_json import config, dataclass_json
+from typing import List, Optional
+from enum import Enum
+from uuid import uuid4
+from datetime import date, datetime
+
+{% for object in objects %}
+@dataclass_json
+@dataclass
+class {{ object.name }}:
+
+    {%- for attribute in object.attributes %}
+    {%- if attribute.name == "id" -%}
+    {%- elif attribute.multiple is true %}
+    {{ attribute.name }}: List[{{ attribute.dtypes[0] }}] = field(default_factory=list)
+    {%- elif 'default' in attribute%}
+    {{ attribute.name }}: {{ attribute.dtypes[0] }} = {{ get_default(attribute.default) }}
+    {%- elif attribute.required is true %}
+    {{ attribute.name }}: {{ attribute.dtypes[0] }}
+    {%- else %}
+    {{ attribute.name }}: Optional[{{ attribute.dtypes[0] }}] = field(default=None, metadata=config(exclude=lambda x: x is None))
+    {%- endif %}
+    {%- endfor %}
+
+    # JSON-LD fields
+    id: str = field(
+        metadata=config(field_name="@id"),
+        default_factory=lambda: "{{ prefix }}:{{ object.name }}/" + str(uuid4())
+    )
+    __type__: list[str] = field(
+        metadata=config(field_name="@type"),
+        default_factory = lambda: [
+            "{{ prefix }}:{{ object.name }}",
+            {%- if object.term -%}"{{ object.term }}"{%- endif %}
+        ],
+    )
+    __context__: dict[str, str | dict] = field(
+        metadata=config(field_name="@context"),
+        default_factory = lambda: {
+            "{{ prefix }}": "{{ repo }}",
+            {%- for prefix, address in prefixes %}
+            "{{ prefix }}": "{{ address }}",
+            {%- endfor %}
+            {%- for attribute in object.attributes %}
+            {%- if attribute.is_id %}
+            "{{ attribute.name }}": {
+                {%- if attribute.term %}
+                "@id": "{{ attribute.term }}",
+                {%- endif %}
+                "@type": "@id",
+            },
+            {%- elif attribute.term %}
+            "{{ attribute.name }}": "{{ attribute.term }}",
+            {%- endif -%}
+            {%- endfor %}
+        }
+    )
+    {% for attr in object.attributes %}
+    {% for dtype in attr.dtypes %}
+    {%- if dtype in object_names and attr.multiple is true %}
+    def add_to_{{ attr.name }}(
+        {{ utils.signature(objects, dtype) }}
+    ):
+        params = { {{ utils.params(objects, dtype) }}
+        }
+
+        if "id" in kwargs:
+            params["id"] = kwargs["id"]
+
+        self.{{ attr.name }}.append(
+            {{ dtype }}(**params)
+        )
+
+        return self.{{ attr.name }}[-1]
+
+    {%- endif %}
+    {%- endfor %}
+    {% endfor %}
+{%- endfor %}
+
+{%- for enum in enums %}
+class {{ enum.name }}(Enum):
+    {%- for key, value in enum.mappings | dictsort %}
+    {{ key }} = "{{ value }}"
+    {%- endfor %}
+{% endfor %}

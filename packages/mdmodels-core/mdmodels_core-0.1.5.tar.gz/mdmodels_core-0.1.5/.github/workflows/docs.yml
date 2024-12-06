@@ -1,0 +1,62 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "docs/**"
+      - "types/**"
+      - "mkdocs.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  pages: write
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Install MD-Models
+        run: cargo install --path .
+
+      - name: Run the generation pipeline
+        run: sh .github/scripts/generate_types.sh
+
+      - name: "Update docs"
+        shell: "bash"
+        run: |
+          if [[ `git status --porcelain` ]]; then
+              git add --all
+              git config --global user.name 'MD-Models Bot'
+              git config --global user.email 'mdmodels@bot.com'
+              git commit -am "Doc update"
+              git push
+          else
+            echo "Nothing changed!"
+          fi
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - uses: actions/cache@v2
+        with:
+          path: .cache
+          key: ${{ github.ref }}
+
+      - name: Install dependencies
+        run: pip install mkdocs-material jupyter nbconvert mkdocs-jupyter
+
+      - name: Deploy Documentation
+        run: mkdocs gh-deploy --force

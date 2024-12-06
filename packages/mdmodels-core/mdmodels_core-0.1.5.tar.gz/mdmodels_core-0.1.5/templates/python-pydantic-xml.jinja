@@ -1,0 +1,65 @@
+{% import "python-macros.jinja" as utils %}
+
+## This is a generated file. Do not modify it manually!
+
+from __future__ import annotations
+from typing import Dict, List, Optional
+from uuid import uuid4
+from datetime import date, datetime
+from xml.dom import minidom
+
+from lxml.etree import _Element
+from pydantic import PrivateAttr, model_validator
+from pydantic_xml import attr, element, BaseXmlModel
+
+{% for object in objects %}
+class {{object.name}}(
+    BaseXmlModel,
+    search_mode="unordered",
+):
+    {%- for attr in object.attributes -%}
+        {{ utils.create_attribute(attr) }}
+    {%- endfor %}
+
+    {% for attr in object.attributes %}
+    {%- for dtype in attr.dtypes %}
+    {%- if dtype in object_names and attr.multiple is true %}
+    def add_to_{{ attr.name }}(
+        {{ utils.signature(objects, dtype) }}
+    ):
+        params = { {{ utils.params(objects, dtype) }}
+        }
+
+        self.{{ attr.name }}.append(
+            {{ dtype }}(**params)
+        )
+
+        return self.{{ attr.name }}[-1]
+
+    {%- endif %}
+    {%- endfor %}
+    {%- endfor %}
+
+    def xml(self, encoding: str = "unicode") -> str | bytes:
+        """Converts the object to an XML string
+
+        Args:
+            encoding (str, optional): The encoding to use. If set to "bytes", will return a bytes string.
+                                      Defaults to "unicode".
+        """
+
+        if encoding == "bytes":
+            return self.to_xml()
+
+        raw_xml = self.to_xml(encoding=None)
+        parsed_xml = minidom.parseString(raw_xml)
+        return parsed_xml.toprettyxml(indent="  ")
+
+
+{% endfor %}
+{%- for enum in enums %}
+class {{ enum.name }}(Enum):
+    {%- for key, value in enum.mappings | dictsort %}
+    {{ key }} = "{{ value }}"
+    {%- endfor %}
+{% endfor %}
