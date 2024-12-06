@@ -1,0 +1,73 @@
+[tool.poetry]
+name = "pydantic-sqlalchemy-filter"
+version = "0.0.11"
+description = "Implement simple API filter interface for Sqlalchemy"
+authors = ["deskent <battenetciz@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = 'https://github.com/Deskent/pydantic_sqlalchemy_filter'
+
+[tool.poetry.dependencies]
+python = "^3.10"
+sqlalchemy = "^2.0.32"
+pydantic = "^2.7.2"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+black = "^24.4.2"
+ruff = "^0.4.10"
+flake8 = "^7.1.0"
+pytest-asyncio = "^0.23.7"
+pre-commit = "^3.7.1"
+isort = "^5.13.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.isort]
+line_length = 79
+multi_line_output = 3
+include_trailing_comma = true
+lines_after_imports = 2
+lexicographical = true
+sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+no_lines_before = ["STDLIB"]
+known_third_party = []
+known_local_folder = []
+profile = "hug"
+src_paths = ["src", "tests"]
+#skip_glob = ["migrations"]
+
+[tool.black]
+line-length = 79
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # The following are specific to Black, you probably don't want those.
+  tests/data
+  | profiling
+)/
+'''
+# We use preview style for formatting Black itself. If you
+# want stable formatting across releases, you should keep
+# this off.
+preview = false
+skip-string-normalization = true
+
+
+[tool.ruff.format]
+## Like Black, use single quotes for strings.
+quote-style = "single"
+
+## Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+## Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+## Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
