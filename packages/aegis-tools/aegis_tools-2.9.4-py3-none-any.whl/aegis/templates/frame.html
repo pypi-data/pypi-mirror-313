@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% block title %}<title>{{page_title}} {% if options.env != 'prod' %}[{{ options.env }}]{% end %}</title>{% end %}
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <link rel="icon" type="image/png" sizes="16x16" href="{{favicon_url}}">
+        <style nonce="aegis-webapp-frame-rstlne">
+          {% include w3.css %}
+          h3 { margin: 5px 0; }
+          form p {margin: 10px 0; }
+          #menu-bar span { margin: 0 .5em;}}
+          #home-link {text-decoration: none;}
+          #page-content {margin-top: 80px; max-width: initial; }
+          .top-element {margin-top: 50px;}
+          input.aegis-button {padding: 5px 6px;}
+          div.debug-panel {margin-top: 1em; background: #ddd; font-size: 14px;}
+          .aegis-shell { overflow-x: scroll; }
+          #report-textarea { font-family: monospace; }
+          #report-outer { overflow-x: auto; }
+          #report-body { margin-top: 0; width: fit-content; }
+          #report-body .w3-container { padding: 0; }
+          #report-body table { margin-top: 5px; }
+          #report-body table th { padding: 6px 8px; }
+          #report-body table td { padding: 4px 8px; }
+          #report-sql { background: #f8fcff; padding: 0px 8px 3px 8px; width: fit-content; }
+          @media only screen and (max-device-width: 418px), only screen and (max-width: 418px) {
+            #top-bar {font-size: 14px!important; }
+            #top-bar .w3-bar-item {padding: 5px!important;}
+            #menu-bar {padding: 5px!important;}
+            #menu-bar span { margin: 0 .3em;}}
+            #page-content {margin-top: 60px; }
+            .w3-large {font-size: 16px!important;}
+            h1 {font-size: 24px!important;}
+            #report-body h1 { font-size: 14pt!important; }
+            #report-sql h1 { font-size: 16pt!important; }
+            #report-body .report-name { max-width: calc(50vw); }
+            .w3-table-all th:first-child, .w3-table-all td:first-child {padding-left: 8px;}
+            .w3-table-all th, .w3-table-all td {padding-left: 4px; padding-right: 4px;}
+          }
+        </style>
+        {% block head %}{% end %}
+    </head>
+
+    <body class="w3-light-gray w3-large">
+        {# Header #}
+        <div class="w3-top">
+            <div class="w3-gray w3-large" id="top-bar">
+                <div class="w3-bar">
+                    <a id="home-link" href="{{home_link}}" class="w3-bar-item w3-padding-medium">{{page_title}} {% if options.env != 'prod' %}({{ options.env }}){% end %}</a>
+                    <div class="w3-right w3-bar-item w3-padding-medium">{{get_member_email()}}</div>
+                </div>
+            </div>
+            <div class="w3-bar w3-light-gray w3-padding-small w3-card" id="menu-bar">
+                <span><a href="/admin">Admin</a></span>
+                <span><a href="/admin/build">Builds</a></span>
+                <span><a href="/admin/hydra">Hydra</a></span>
+                <span><a href="/admin/report">Reports</a></span>
+                <span><a href="/admin/usage">Usage</a></span>
+            </div>
+        </div>
+
+        {# Page content #}
+        <div id="page-content" class="w3-content w3-padding w3-light-grey">
+            {% block body %} {% end %}
+        </div>
+
+        {# Footer #}
+        <footer class="w3-center w3-gray w3-padding-16">
+        </footer>
+
+    </body>
+</html>

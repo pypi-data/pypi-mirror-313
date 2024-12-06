@@ -1,0 +1,61 @@
+{% extends frame.html %}
+
+{% block head %}
+<meta http-equiv="refresh" content="30" />
+{% end %}
+
+{% block body %}
+<h1>Hydra Queue</h1>
+
+{{queue_cnt['queue_cnt']}} Queue Items
+
+{% if hydra_queues %}
+<form action="{{request.uri}}" method="POST">
+    {% raw xsrf_form_html() %}
+    <table class="w3-table-all w3-responsive w3-medium">
+        <tr>
+            <th>Queue ID</th>
+            <th>Priority</th>
+            <th>Type Name</th>
+            <th>Work Env</th>
+            <th>Work Host</th>
+            <th>Work Dttm</th>
+            <th>Work Data</th>
+            <th>Claimed</th>
+            <th>Tries</th>
+            <th>Errors</th>
+            <th>Finished</th>
+            <th>Actions</th>
+        </tr>
+
+        {% for hydra_queue in hydra_queues %}
+        <tr>
+            <td>{{hydra_queue['hydra_queue_id']}}</td>
+            <td>{{hydra_queue['priority_ndx']}}</td>
+            <td>{{hydra_queue['hydra_type_name']}}</td>
+            <td>{{hydra_queue['work_env']}}</td>
+            <td>{{hydra_queue['work_host']}}</td>
+            <td>{{hydra_queue['work_dttm']}}</td>
+            <td>{{hydra_queue['work_data']}}</td>
+            <td>{{hydra_queue['claimed_dttm']}}</td>
+            <td>{{hydra_queue['try_cnt']}}</td>
+            <td>{{hydra_queue['error_cnt']}}</td>
+            <td>{{hydra_queue['finish_dttm']}}</td>
+            <td>{% if hydra_queue['_running'] %}running...{% else %}    <input type="submit" class="w3-button w3-light-blue w3-small" name="run_{{hydra_queue['hydra_queue_id']}}" value="Run Now"/> {% end %}</td>
+        </tr>
+        {% end %}
+
+    </table>
+</form>
+{% end %}
+
+<div class="debug-panel">
+    Debug Info<br/>
+    UTC Now: {{datetime.datetime.utcnow()}}<br/>
+    Env: {{env}}<br/>
+    Hostname: {{host}}<br/>
+    Aegis Version: {{aegis_version}}<br/>
+    App Version: {{app_version}}
+</div>
+
+{% end %}
