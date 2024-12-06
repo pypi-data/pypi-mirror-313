@@ -1,0 +1,26 @@
+---
+# Jupyter LLM docker compose by Matthew Printz
+
+version: '3'
+services:
+  jupyter:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "8888:8888"
+    environment:
+      - DEBUG=1
+      - JUPYTER_SERVER=http://jupyter:8888
+      - JUPYTER_TOKEN=89f73481102c46c0bc13b2998f9a4fce
+      - TOOL_ENABLED_ASK_USER=true
+      - TOOL_ENABLED_RUN_CODE=true
+      - ENABLE_CHECKPOINTS=true
+      - OPENAI_API_KEY
+    env_file:
+      - .env      
+    volumes:
+      - ./climate-python:/jupyter/climate-python
+      - ./mimi-api:/jupyter/mimi-api
+    working_dir: /jupyter
+    command: ["beaker", "dev", "watch", "--ip", "0.0.0.0"]
