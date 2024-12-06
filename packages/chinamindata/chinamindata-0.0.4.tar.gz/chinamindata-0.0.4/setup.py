@@ -1,0 +1,1 @@
+from setuptools import setup, find_packagessetup(    name='chinamindata',    version='0.0.4',    author='li',    author_email='76@gmail.com',    # license='MIT License',    platforms='any',    install_requires=["requests", "pandas",])
