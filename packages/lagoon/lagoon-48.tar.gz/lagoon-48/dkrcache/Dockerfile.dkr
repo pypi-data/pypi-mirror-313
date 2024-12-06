@@ -1,0 +1,9 @@
+FROM busybox:1.36 AS key
+WORKDIR io
+CMD cat index.html
+COPY context context
+ARG discriminator
+
+FROM key
+ARG port
+RUN wget localhost:$port
