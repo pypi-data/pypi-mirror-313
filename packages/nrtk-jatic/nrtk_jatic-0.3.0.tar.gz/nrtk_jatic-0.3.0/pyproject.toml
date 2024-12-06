@@ -1,0 +1,249 @@
+# :auto build-system:
+[build-system]
+requires = ["poetry-core>=1.9"]
+build-backend = "poetry.core.masonry.api"
+# :auto build-system:
+
+# :auto package-meta:
+[tool.poetry]
+name = "nrtk-jatic"
+readme = "README.md"
+packages = [{include = "nrtk_jatic", from="src"}]
+documentation = "https://nrtk-jatic.readthedocs.io/"
+classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Unix',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+]
+# :auto package-meta:
+# package-specific meta, don't put this in "generated package-meta"
+authors = ["Kitware, Inc. <nrtk@kitware.com>"]
+license = "Apache-2.0"
+version = "0.3.0"
+description = ""
+
+[tool.poetry.dependencies]
+# :auto python-version:
+python = "^3.9"
+# :auto python-version:
+
+# Python capped to <3.13 because of:
+# https://stackoverflow.com/questions/77431252/why-doesnt-poetry-select-the-good-version-of-my-dependency
+numpy = {version = ">=1.22,<2.0", python = ">=3.9,<3.13" } # CVE-2021-34141
+maite = "^0.6.0"
+
+# This does not work with poetry install but does work with pip. Poetry
+# has a PR working on it and hopefully won't be too far into the future
+# https://github.com/python-poetry/poetry/pull/9553
+nrtk = [
+    {version = ">=0.15.1"},
+    {version = ">=0.15.1", extras=["pybsm-graphics"], markers = "extra == 'pybsm-graphics'", optional = true},
+    {version = ">=0.15.1", extras=["pybsm-headless"], markers = "extra == 'pybsm-headless'", optional = true},
+    {version = ">=0.15.1", extras=["graphics"], markers = "extra == 'graphics'", optional = true},
+    {version = ">=0.15.1", extras=["headless"], markers = "extra == 'headless'", optional = true},
+]
+
+# REST API deps
+fastapi = "^0.110.0"
+httpx = "^0.27.0"
+uvicorn = "^0.29.0"
+# JSON Schema
+pydantic = ">=2.6.4"
+pydantic_settings = ">=2.2.1"
+pyyaml = ">=6.0.1"
+# Interoperability
+responses = ">=0.25.0"
+#JSON-Schema
+
+# Optional for tools extra
+kwcoco = {version = ">=0.2.18", optional = true}
+# Optional for maite-cpu
+torch = {version = ">=1.7,!=1.12.0", optional = true, source = "pytorch_cpu"}
+torchvision = {version = ">=0.10.0", optional = true, source = "pytorch_cpu"}
+
+[tool.poetry.extras]
+tools = ["kwcoco"]
+maite-cpu = ["torch", "torchvision"]
+# these use the "markers" check in nrtk optional extras
+pybsm-graphics = ["nrtk"]
+pybsm-headless = ["nrtk"]
+graphics = ["nrtk"]
+headless = ["nrtk"]
+
+# :auto linting:
+# Linting
+[tool.poetry.group.linting]
+optional = true
+
+[tool.poetry.group.linting.dependencies]
+mypy = ">=0.991,!=1.11.0"
+pre-commit = ">=2.20"
+ruff = "^0.5.6"
+types-setuptools = ">=65.6.0.1"
+sphinx-lint = ">=1.0.0"
+# :auto linting:
+types-PyYAML = ">=6.0.12.11"
+types-requests = ">=2.31.0.10"
+
+# :auto docs:
+# Docs
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+Sphinx = ">=5.3.0"
+sphinx-copybutton = "^0.5.2"
+sphinx-rtd-theme = ">=1.1.1"
+sphinx-prompt = ">=1.5.0"
+sphinx-click = ">=5.0.0"
+livereload = ">=2.6.3"
+# :auto docs:
+
+# :auto tests:
+# Testing
+[tool.poetry.group.tests]
+optional = true
+
+[tool.poetry.group.tests.dependencies]
+coverage = ">=6.5.0"
+pytest = ">=7.2.0"
+pytest-cov = ">=4.0.0"
+syrupy = ">=4.0.0"
+# Jupyter notebook testing
+notebook = ">=7.2.2"
+papermill = ">=2.4.0"
+# :auto tests:
+maite = {version = "^0.6.0", extras = ["test"]}
+
+[tool.poetry.scripts]
+nrtk-perturber = "nrtk_jatic.utils.bin.nrtk_perturber_cli:nrtk_perturber_cli"
+
+[tool.poetry.plugins."smqtk_plugins"]
+
+
+###############################################################################
+
+[[tool.poetry.source]]
+# maite installs Torch with CUDA. In order to slim down installation for NRTKaaS
+# docker container, we override maite's default torch version with the CPU version
+name = "pytorch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
+
+# :auto pytest:
+[tool.pytest.ini_options]
+addopts = [
+    "-lv",                              # Show local in trace-backs.
+    "--doctest-modules",                # Increased verbosity.
+    "--tb=long",                        # Trace-back print mode.
+    "--cov=./src/nrtk_jatic",          # Cover our package specifically
+    "--cov=./tests",                    # Also cover our tests for dead spots
+    "--cov-report=term",                # Coverage report to terminal
+    "--cov-report=xml:coverage.xml",    # for external tool reporting
+]
+testpaths = [
+    "tests",
+    "src/nrtk_jatic",
+]
+doctest_optionflags = [
+    "NORMALIZE_WHITESPACE",
+    "IGNORE_EXCEPTION_DETAIL",
+]
+# :auto pytest:
+
+# :auto ruff:
+[tool.ruff]
+# Exclude content as appropriate.
+extend-exclude = [
+    "__pycache__",
+    "demos",
+    "scripts",
+    "docs/_build",
+    "docs/_implementations",
+]
+
+line-length = 120
+indent-width = 4
+
+# Assume Python 3.9
+target-version = "py39"
+
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = [
+    "F", "E", "W", "C90", "I", "N", "D1", "D200", "D201", "D211", "D403", "D419", "UP",
+    "YTT", "ANN", "S",  "BLE", "B", "A", "COM", "C4", "T10", "ISC", "ICN", "PYI", "PT", "Q",
+    "RSE", "RET", "SLF", "SIM", "TID252", "ARG", "FIX", "PD", "FLY", "NPY", "RUF027",
+    "RUF100", "PERF"
+]
+preview = true  # needed for RUF027
+explicit-preview-rules = true
+
+ignore = [
+  "ANN101",
+  "ANN102",
+  # -- Ignore these rules, since they contradict our coding standards
+  "C408",  # JATIC guidelines prefer "list()", rather than "[]", to create an empty list
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+  "S101",  # Allow asserts in tests
+  "SLF001",  # Allow private member access for introspection in tests
+  "D100", "D101", "D102", "D103", "D104", "D105", "D107"  # Allow missing docstring in test dir
+]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true  # Allow Any for *args and **kwargs
+
+[tool.ruff.lint.isort]
+known-first-party = ["nrtk_jatic"]
+
+[tool.ruff.lint.mccabe]
+# Flag errors (`C901`) whenever the complexity level exceeds 5.
+max-complexity = 5
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 120
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+# :auto ruff:
+
+# :auto mypy:
+[tool.mypy]
+python_version = "3.9"
+disallow_untyped_defs = true
+ignore_errors = false
+ignore_missing_imports = true
+strict_optional = false
+incremental = false
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
+# :auto mypy:
