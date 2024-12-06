@@ -1,0 +1,44 @@
+Metadata-Version: 2.1
+Name: fixinventory-plugin-dockerhub
+Version: 4.2.0
+Summary: Fix Docker Hub Collector Plugin
+Author: Some Engineering Inc.
+License: AGPLv3
+Project-URL: Documentation, https://inventory.fix.security
+Project-URL: Source, https://github.com/someengineering/fix/tree/main/plugins/dockerhub
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: Unix
+Classifier: Environment :: Console
+Classifier: Natural Language :: English
+Classifier: Topic :: Security
+Classifier: Topic :: Utilities
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: fixinventorylib==4.2.0
+Requires-Dist: requests
+
+# fix-plugin-dockerhub
+Docker Hub Collector Plugin for Fix
+
+This collector plugin is used to collect data from Docker Hub. It is used internally at Some Engineering to create metrics about image downloads.
+
+To export the number of image pulls add the following config to `fix.metrics`
+```
+fixmetrics:
+  [...]
+  metrics:
+    dockerhub_downloads_total:
+      # Metric help text
+      help: 'Docker Hub downloads'
+      # Aggregation search to run
+      search: 'aggregate(/ancestors.cloud.reported.name as cloud, /ancestors.account.reported.name as namespace, id as repository: sum(pull_count) as dockerhub_downloads_total): is(dockerhub_repository)'
+      # Type of metric (gauge or counter)
+      type: 'counter'
+```
+## License
+See [LICENSE](../../LICENSE) for details.
