@@ -1,0 +1,272 @@
+#!/bin/bash
+# SPDX-FileCopyrightText: (C) 2022 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+set -o errexit -o errtrace -o nounset
+
+if [ "${SCOTTY_DEBUG:-0}" == "1" ]; then
+  set -o xtrace
+fi
+
+trap 'echo -e "\033[1;31mscotty failed on line ${LINENO}\033[0m" >&2' ERR
+
+declare -r outdir=${PWD}/build
+
+declare -r scotty_whitelist_default="\
+	ACCEPT_FSL_EULA \
+	AVNET_EMBEDDED_RELEASE_BUILD \
+	COLUMNS \
+	DISTRO \
+	DISTRO_BASEVERSION \
+	DL_DIR \
+	GHCR_TOKEN \
+	GHCR_USER \
+	GITHUB_TOKEN \
+	KAS_CLONE_DEPTH \
+	LICENSE_FLAGS_ACCEPTED \
+	LINES \
+	MACHINE \
+	PYTHONUNBUFFERED \
+	RELEASE \
+	SAS_TOKEN \
+	SCOTTY_DEBUG \
+	SCOTTY_DEFAULT_MANIFEST_REVISION \
+	SCOTTY_EXTRA_CONF \
+	SCOTTY_EXTRA_DOWNLOAD \
+	SCOTTY_EXTRA_ENV \
+	SCOTTY_FEATURE_LAYERS \
+	SCOTTY_MANIFEST_FEATURES \
+	SCOTTY_MANIFEST_OVERLAYS \
+	SCOTTY_OVERLAYS \
+	SCOTTY_QEMUPARAMS \
+	SCOTTY_RECIPE_UPDATE_FILTER \
+	SCOTTY_REPO_OVERRIDE \
+	SCOTTY_SSTATE_MIRRORS \
+	SIMPLESWITCH_CONTAINER_TAG \
+	SSTATE_DIR \
+	TEMPLATECONF \
+	TERM \
+	UBOOT_ENV_VARS \
+	"
+declare -r scotty_whitelist=${SCOTTY_ALLOWLIST:-${scotty_whitelist_default}}
+
+_SCOTTY_DOCKER_DEFAULT_IMAGE="ghcr.io/avnet-embedded/scotty:2024.12rc3"
+
+if [ "${SCOTTY_DOCKER_IMAGE:-1}" == "1" ]; then
+    declare -r docker_default_image="${_SCOTTY_DOCKER_DEFAULT_IMAGE}"
+else
+    declare -r docker_default_image="${SCOTTY_DOCKER_IMAGE}"
+fi
+
+if [ "${SCOTTY_DEFAULT_MANIFEST_REVISION:-1}" == "1" ]; then
+	export SCOTTY_DEFAULT_MANIFEST_REVISION="refs/tags/2024.12rc3"
+else
+	export SCOTTY_DEFAULT_MANIFEST_REVISION="${SCOTTY_DEFAULT_MANIFEST_REVISION}"
+fi
+
+_SCOTTY_MANIFEST_OVERLAYS_DEFAULT="release"
+if [ "${SCOTTY_MANIFEST_OVERLAYS:-1}" == "1" ]; then
+	export SCOTTY_MANIFEST_OVERLAYS="${_SCOTTY_MANIFEST_OVERLAYS_DEFAULT}"
+else
+	export SCOTTY_MANIFEST_OVERLAYS="${SCOTTY_MANIFEST_OVERLAYS}"
+fi
+
+debug() {
+	if [ "${SCOTTY_DEBUG:-0}" == "1" ]; then
+		echo -e "\033[1;38m${*}\033[0m" >&2
+	fi
+}
+
+info() {
+	if [ "${SCOTTY_QUIET:-0}" != "1" ]; then
+		echo -e "\033[1;34m${*}\033[0m" >&2
+	fi
+}
+
+error() {
+    echo -e "\033[1;31m${*}\033[0m" >&2
+}
+
+check_docker() {
+    if ! command -v docker > /dev/null; then
+        error "\`docker\` command was not found. Please ensure docker is installed and in your path"
+        exit 1
+    fi
+    if ! docker info > /dev/null 2>/dev/null; then
+        error 'Failed to connect to docker daemon: are you in the docker group ?'
+        exit 1
+    fi
+    if ! command -v openssl > /dev/null; then
+        error "\`openssl\` command was not found. Please ensure openssl is installed and in your path"
+        exit 1
+    fi
+}
+
+prepare_docker() {
+	local ssh_auth_sock
+	declare -ga docker_args
+
+	# Create persistent home files
+	declare SCOTTY_HOME
+	SCOTTY_HOME=$(realpath "$(dirname "$0")")/scotty_home
+	readonly SCOTTY_HOME
+	mkdir -p "${SCOTTY_HOME}"
+	touch "${SCOTTY_HOME}/bash_history"
+
+	# Set docker parameters
+	read -ra docker_args <<< "${DOCKER_EXTRA_ARGS:-}"
+	docker_args+=(--privileged)
+	docker_args+=(--env "uid=$(id --user)")
+	docker_args+=(--env "gid=$(id --group)")
+	docker_args+=(--env "kvm_gid=$(getent group kvm | cut -d: -f3)")
+	if [ -n "${_SIMPLESWITCH_REGISTRY_USERNAME:-}" ]; then
+		docker_args+=(--env "_SIMPLESWITCH_REGISTRY_USERNAME=${_SIMPLESWITCH_REGISTRY_USERNAME}")
+	fi
+	if [ -n "${_SIMPLESWITCH_REGISTRY_PAT:-}" ]; then
+		docker_args+=(--env "_SIMPLESWITCH_REGISTRY_PAT=${_SIMPLESWITCH_REGISTRY_PAT}")
+	fi
+	if [ -e "/dev/net/tun" ]; then
+		docker_args+=(--cap-add=NET_ADMIN)
+		docker_args+=(--device "/dev/net/tun:/dev/net/tun")
+	fi
+	# work around issues with newer glibc and glib
+	docker_args+=(--security-opt seccomp=unconfined)
+	docker_args+=(--volume "${outdir}:${outdir}")
+	if [ -n "${SCOTTY_DOCKER_EXTRA_VOLUME:-}" ]; then
+    while read -r -d ',' volume
+      do
+        docker_args+=(--volume "${volume}:${volume}")
+      done <<< "${SCOTTY_DOCKER_EXTRA_VOLUME},"
+	fi
+	docker_args+=(--volume "${SCOTTY_HOME}/bash_history:/home/scotty/.bash_history")
+	docker_args+=(--workdir "${outdir}")
+	docker_args+=(--rm)
+	docker_args+=(--oom-score-adj=900)
+	if [ -f "${HOME}/.gitconfig" ]; then
+		docker_args+=(--volume "${HOME}/.gitconfig:/home/scotty/.gitconfig")
+	fi
+	if [ -z "${SSH_AUTH_SOCK:-}" ]; then
+		eval "$(ssh-agent)" >&2
+		if [ -z "${SSH_AUTH_SOCK:-}" ]; then
+			error "Could not start ssh-agent and no other SSH_AUTH_SOCK found.\nPlease make sure to have a suitable ssh-agent installed and configured"
+			exit 1
+		fi
+	fi
+	if [ ! "$(ssh-add -l &>/dev/null || ssh-add &>/dev/null)" ]; then
+		# in case the operation fails, we will just map the user's ssh keys
+		# into the container
+		docker_args+=(--volume "$HOME/.ssh:/home/scotty/.ssh")
+	fi
+	ssh_auth_sock=$(readlink --canonicalize "${SSH_AUTH_SOCK}")
+	docker_args+=(--volume "${ssh_auth_sock}:/ssh-agent")
+	docker_args+=(--env "SSH_AUTH_SOCK=/ssh-agent")
+	if [ -n "${DISPLAY:-}" ]; then
+		docker_args+=(--env "DISPLAY=${DISPLAY}")
+		docker_args+=(--volume "/tmp/.X11-unix:/tmp/.X11-unix")
+	fi
+	if [ -n "${SCOTTY_GIT_URL:-}" ]; then
+		docker_args+=(--env "SCOTTY_GIT_URL=${SCOTTY_GIT_URL}")
+	fi
+
+	# Allow some environment variables to be passed through docker
+	# Call env to force freezing of terminal defined variables, such as
+	# `COLUMNS` or `LINES`
+	env true
+	for var in ${scotty_whitelist}; do
+		if [ -n "${!var+x}" ]; then
+			debug "Adding environment variable ${var}=${!var}"
+			docker_args+=(--env "${var}=${!var}")
+		fi
+	done
+
+	# Test if the shell is interactive or not.
+	if [ -t 0 ]; then
+		docker_args+=(--interactive --tty)
+	fi
+
+	if grep -e "-WSL[[:digit:]]* " /proc/version; then
+		info "Running on WSL - enable host network sharing"
+		docker_args+=(--network=host)
+	fi
+
+	readonly docker_args
+}
+
+docker_update() {
+	info "Updating docker image"
+	docker pull "${docker_default_image}"
+}
+
+docker_update_on_demand() {
+	if [ -e "${outdir}/.do_docker_pull" ] ; then
+		rm "${outdir}/.do_docker_pull"
+		if [ "${SCOTTY_USE_LOCAL_DOCKERFILE:-0}" == "0" ]; then
+			docker_update
+		fi
+	fi
+}
+
+run_in_docker() {
+	# Run a command in a new docker instance
+	local docker_instance
+	local -a docker_cmd
+	local docker_image="${docker_default_image}"
+
+	if [ "${SCOTTY_USE_LOCAL_DOCKERFILE:-0}" == "1" ]; then
+		docker_dir=$(dirname "$0")/scotty_docker
+		info "Using local Dockerfile"
+		DOCKER_BUILDKIT=1 docker build "${docker_dir}"
+		docker_image=$(DOCKER_BUILDKIT=1 docker build --quiet "${docker_dir}")
+	fi
+
+	docker_instance=scotty_$(openssl rand -hex 8)
+	docker_cmd=(docker run --name "${docker_instance}" \
+		"${docker_args[@]}" "${docker_image}" "$@")
+	debug "Creating docker instance:" "${docker_cmd[@]}"
+
+	# Explicitly exit on fail so the error trap is not executed: docker
+	# executed command is responsible of showing errors.
+	"${docker_cmd[@]}" || exit
+}
+
+run_command() {
+	if [ "${SCOTTY_USE_DOCKER:-1}" == "1" ]; then
+		run_in_docker "${@}"
+	else
+		export SCOTTY_GIT_URL
+		(cd "${outdir}" && "${@}") || exit
+	fi
+}
+
+get_default_remote() {
+	local SCOTTY_GIT_DIR
+	declare -g SCOTTY_GIT_URL
+	SCOTTY_GIT_DIR=$(realpath "$(dirname "$0")")
+	SCOTTY_GIT_URL=$(git -C "${SCOTTY_GIT_DIR}" remote get-url origin 2>/dev/null || true)
+	readonly SCOTTY_GIT_DIR SCOTTY_GIT_URL
+}
+
+get_default_remote
+check_docker
+
+# Special case: if the command is exactly "${0} docker-update", run a docker
+# update.  Docker update is generally triggerred from the python script running
+# inside docker, but make sure we can update the docker in some extreme cases
+# where the docker image itself is bad.
+# Also update the docker on the first build (output dir does not exist).
+
+if [ $# -eq 1 ] && [ "${1}" == "docker-update" ]; then
+	docker_update
+	exit
+fi
+if [ ! -d "${outdir}" ] && [ "${SCOTTY_USE_LOCAL_DOCKERFILE:-0}" == "0" ]; then
+	docker_update
+fi
+
+mkdir -p "${outdir}"
+prepare_docker
+
+if [ "${BASH_SOURCE[0]}" == "${0}" ]; then
+    run_command scotty "${@}"
+    docker_update_on_demand
+fi

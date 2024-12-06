@@ -1,0 +1,226 @@
+#!python
+# SPDX-FileCopyrightText: (C) 2022 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+import argparse
+import json
+import logging
+import os
+import sys
+from typing import Dict
+
+from jsonpath_ng import parse
+
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+
+
+class ExtraVar:
+    """An extra key value pair."""
+
+    def __init__(self, spec: str):
+        """Initialize ExtraVar."""
+        specs = spec.split('=')
+        if len(specs) < 2:
+            raise Exception(f'Badly formatted extra bitbake var: {spec}')
+
+        self.key, self.value = spec.split('=', 1)
+        self.key = self.key.strip()
+        self.value = (self.value or '').strip()
+
+
+def get_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(prog='dynamic-matrix',
+                                     description='Calculate a dynamic matrix for the github action pipeline')
+    parser.add_argument('--extra', action='append', default=[],
+                        type=ExtraVar, help='extra vars to configure')
+    parser.add_argument('--extraenv', default='',
+                        help='extra vars to extract from environment (space separated list)')
+    parser.add_argument('mode', choices=['build', 'documentation', 'build-mapping'],
+                        help='Matrix to calculate')
+    parser.add_argument('sources', nargs='+', type=str,
+                        help='Path to config files')
+
+    res = parser.parse_args()
+
+    for item in res.extraenv.split(';'):
+        if not item.strip():
+            continue
+        res.extra.append(ExtraVar(f'{item}={os.environ.get(item, "")}'))
+    return res
+
+
+_key_tranlation_matrix = {
+    'ARCHIVE': 'do-archive',
+    'BUILDDIR': 'build-dir',
+    'BUILDIMAGES': 'do-build-images',
+    'CREATE_BUNDLE': 'do-create-bundle',
+    'EXPORTTESTS': 'do-export-tests',
+    'IMAGES': 'build-images',
+    'LIBVIRT_BUNDLES': 'libvirt-bundles',
+    'RUNTESTS': 'do-run-tests',
+    'SDK': 'do-build-sdk',
+    'SDK_IMAGES': 'build-sdk-images',
+    'SIMPLESWITCH': 'do-build-simpleswitch',
+    # move to environment
+    'ACCEPT_FSL_EULA': 'environment.ACCEPT_FSL_EULA',
+    'DISTRO': 'environment.DISTRO',
+    'FEATURE_LAYERS': 'environment.SCOTTY_FEATURE_LAYERS',
+    'LICENSE_FLAGS_ACCEPTED': 'environment.LICENSE_FLAGS_ACCEPTED',
+    'MACHINE': 'environment.MACHINE',
+    'SCOTTY_EXTRA_CONF': 'environment.SCOTTY_EXTRA_CONF',
+    'SCOTTY_EXTRA_ENV': 'environment.SCOTTY_EXTRA_ENV',
+    'SCOTTY_FEATURE_LAYERS': 'environment.SCOTTY_FEATURE_LAYERS',
+}
+
+_MATRIX_DEFAULT_ENTRY = {
+    # build control knobs
+    'archive-images': '{build-images}',
+    'build-dir': 'build_{buildname}',
+    'build-images': '',
+    'build-sdk-images': '{build-images}',
+    'buildname': 'build-{environment.MACHINE}-{environment.DISTRO}-{environment.SCOTTY_FEATURE_LAYERS}',
+    'do-archive': '1',
+    'do-build-images': '0',
+    'do-build-sdk': '0',
+    'do-build-simpleswitch': '0',
+    'do-create-bundle': '0',
+    'do-downstream-jobs': '0',
+    'do-export-tests': '0',
+    'do-run-tests': '0',
+    'do-testreport': '0',
+    'libvirt-bundles': '',
+    'test-images': '{build-images}',
+    # environment
+    'environment': {
+        'ACCEPT_FSL_EULA': '0',
+        'DISTRO': 'simplecore',
+        'LICENSE_FLAGS_ACCEPTED': '',
+        'MACHINE': '',
+        'SCOTTY_EXTRA_CONF': '',
+        'SCOTTY_EXTRA_DOWNLOAD': '',
+        'SCOTTY_EXTRA_ENV': '',
+        'SCOTTY_FEATURE_LAYERS': '',
+    }
+}
+
+
+def _prepare_in(args: argparse.Namespace, filename: str, buildname: str, in_: dict, internal_view: bool = False) -> dict:
+    new_ = {**_MATRIX_DEFAULT_ENTRY}
+    new_['buildname'] = buildname
+
+    value_store = {**new_}
+    # cleanup and translate in_
+    for k, v in in_.items():
+        if k in _key_tranlation_matrix:
+            logging.warning(
+                f'{filename}@{buildname}: uses old key {k}. Please change it to {_key_tranlation_matrix[k]}')
+            searchkey = _key_tranlation_matrix[k]
+        else:
+            searchkey = k
+        jsonpath_expr = parse(searchkey)
+        if not searchkey.startswith('_'):
+            jsonpath_expr.update_or_create(new_, v)
+
+        value_store[searchkey] = v
+        value_store[k] = v
+
+    # add extra args
+    for item in args.extra:
+        logging.info(f'Adding extra key {item.key}')
+        new_['environment'][item.key] = item.value
+
+    # expand references
+    def _expand_references(d: dict, value_store: dict) -> dict:
+        res = {}
+        for k, v in d.items():
+            if isinstance(v, dict):
+                res[k] = _expand_references(v, value_store)
+            else:
+                res[k] = v.format(**value_store)
+        return res
+    new_ = _expand_references(new_, value_store)
+
+    if not internal_view:
+        # flatten environment
+        new_[
+            'environment'] = f'{json.dumps(new_["environment"], sort_keys=True)}'
+        # filter out private keys
+        return {k: v for k, v in new_.items() if not k.startswith('_')}
+    return new_
+
+
+def get_jobs(args: argparse.Namespace, internal_view: bool = False) -> Dict:
+    res = {}
+    for s in args.sources:
+        try:
+            if s in ['-']:
+                cnt = json.loads(sys.stdin)
+            else:
+                with open(s) as i:
+                    cnt = json.load(i)
+        except json.JSONDecodeError as e:
+            logging.exception(e)
+        except FileNotFoundError:
+            logging.error(f'File {s} does not exist')
+        for k, v in cnt.items():
+            res[k] = _prepare_in(
+                args, i.name, k, v, internal_view=internal_view)
+        logging.info(f'Sucessfully loaded {i.name}')
+    return res
+
+
+def main():
+    """Calculate matrix"""
+    args = get_args()
+    res = {}
+    if args.mode == 'build':
+        jobs = get_jobs(args)
+        if jobs:
+            res = {'buildname': list(jobs.keys()), 'include': [*jobs.values()]}
+    elif args.mode == 'documentation':
+        jobs = get_jobs(args)
+        if jobs:
+            res = {'buildname': list(jobs.keys()), 'include': [*jobs.values()]}
+    elif args.mode == 'build-mapping':
+        jobs = get_jobs(args, internal_view=True)
+
+        def find_matching_sdk(machine: str) -> str:
+            if not hasattr(find_matching_sdk, 'map'):
+                find_matching_sdk.map = {}
+            if machine in find_matching_sdk.map:
+                return find_matching_sdk.map.get(machine)
+            for k, v in jobs.items():
+                if v.get('environment', {}).get('MACHINE') == machine and v.get('do-build-sdk') == '1':
+                    find_matching_sdk.map[machine] = k
+                    return k
+
+        res = {}
+        for k, v in jobs.items():
+            blobprefix = k
+            if v.get('do-build-sdk') == '1' or v.get('do-build-simpleswitch') == '1':
+                continue
+            machine = v.get('environment', {}).get('MACHINE')
+            images = v.get('build-images', '').split(' ')
+            if machine in ['qemux86-64']:
+                # Do not export qemu machines
+                continue
+            if machine not in res:
+                res[machine] = {}
+            for i in images:
+                res[machine][i] = {
+                    'image': f'/images/{blobprefix}-{i}.zip',
+                    'testexport': f'/testexport/testexport-{blobprefix}.zip',
+                    'sdk': f'/sdks/{find_matching_sdk(machine)}.zip',
+                }
+    res_ = json.dumps(res, sort_keys=True, separators=(',', ':')).strip('.')
+    logging.info(f'dynamic-matrix: {res_}')
+    if res:
+        # only print if we found jobs
+        print(res_, end='')
+    else:
+        print(json.dumps({'dummy': ['n.a.']}, sort_keys=True, separators=(',', ':')).strip('.'), end='')
+
+
+if __name__ == "__main__":
+    main()
