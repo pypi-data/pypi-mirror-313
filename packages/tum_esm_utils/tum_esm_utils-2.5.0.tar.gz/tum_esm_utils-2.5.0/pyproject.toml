@@ -1,0 +1,111 @@
+[project]
+name = "tum_esm_utils"
+version = "2.5.0"
+description = "Python utilities by the Professorship of Environmental Sensing and Modeling at the Technical University of Munich"
+authors = [
+    { name = "Moritz Makowski", email = "moritz.makowski@tum.de" },
+    { name = "Friedrich Klappenbach", email = "ge79wul@mytum.de" },
+]
+dependencies = [
+    "filelock>=3.13.4",
+    "requests>=2.31.0",
+    "psutil>=5.9.8",
+    "pydantic>=2.7.0",
+    "pytz>=2024.1",
+    "tailwind-colors>=1.3.0",
+]
+requires-python = ">=3.10,<4.0"
+readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+keywords = [
+    "tum",
+    "utils",
+    "utilities",
+    "environmental",
+    "sensing",
+    "modeling",
+    "python",
+    "library",
+    "utilities",
+    "pydoc-markdown",
+]
+
+[project.license]
+text = "GPL-3.0"
+
+[project.urls]
+repository = "https://github.com/tum-esm/utils"
+documentation = "https://tum-esm-utils.netlify.app"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.1.1",
+    "pydocstyle>=6.3.0",
+    "mypy>=1.13.0",
+    "pydoc-markdown>=4.8.2",
+    "types-psutil>=5.9.5.20240316",
+    "types-requests>=2.31.0.20240406",
+    "types-pytz>=2024.1.0.20240203",
+    "ruff>=0.8.1",
+]
+plotting = [
+    "matplotlib>=3.9.2",
+    "numpy>=2.0.2",
+]
+em27 = [
+    "polars>=1.4.1",
+]
+polars = [
+    "polars>=1.4.1",
+]
+all = [
+    "matplotlib>=3.9.2",
+    "numpy>=2.0.2",
+    "polars>=1.4.1",
+]
+opus = [
+    "numpy>=2.1.3",
+]
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::pytest.PytestUnhandledThreadExceptionWarning",
+]
+
+[tool.mypy]
+strict = true
+implicit_reexport = true
+plugins = [
+    "pydantic.mypy",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.build]
+includes = [
+    "tum_esm_utils",
+]
+excludes = [
+    "tests",
+    "tum_esm_utils/opus_file_validator/*.mod",
+    "tum_esm_utils/opus_file_validator/*.lock",
+    "tum_esm_utils/opus_file_validator/*.txt",
+    "tum_esm_utils/opus_file_validator/opus_file_validator",
+]
