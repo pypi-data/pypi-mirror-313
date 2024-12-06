@@ -1,0 +1,13 @@
+import logging
+
+DEFAULT_TIMEOUT = 10.0
+DEFAULT_TRANSPORT_RETRIES = 3
+DEFAULT_RETRY_COUNT = 3
+DEFAULT_RETRY_TIME_MAX = 30
+DEFAULT_RETRY_TIME_JITTER = 1
+DEFAULT_LOGGING_LEVEL = logging.INFO
+DEFAULT_USE_HTTP2 = True
+
+
+def _is_5xx(status: int) -> bool:
+    return status >= 500
