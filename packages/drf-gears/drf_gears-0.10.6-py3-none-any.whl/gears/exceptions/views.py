@@ -1,0 +1,2 @@
+class GearsViewException(Exception):
+    pass
