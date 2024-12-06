@@ -1,0 +1,123 @@
+[tool.poetry]
+name = "ipfabric"
+version = "v7.0.0b2"
+description = "Python package for interacting with IP Fabric"
+authors = [
+    "Justin Jeffery <justin.jeffery@ipfabric.io>",
+    "Cristian Cordero <cristian.cordero@ipfabric.io>",
+    "Solution Architecture <solution.architecture@ipfabric.io>"
+]
+license = "MIT"
+readme = "README.md"
+homepage = "https://gitlab.com/ip-fabric/integrations/python-ipfabric"
+repository = "https://gitlab.com/ip-fabric/integrations/python-ipfabric"
+keywords = ["ipfabric", "ip-fabric", "community-fabric"]
+
+[tool.poetry.urls]
+"IP Fabric" = "https://ipfabric.io/"
+"Changelog" = "https://gitlab.com/ip-fabric/integrations/python-ipfabric/-/blob/main/CHANGELOG.md"
+
+[tool.poetry.scripts]
+ipf_global_search = 'ipfabric.scripts.global_search:main'
+ipf_route_search = 'ipfabric.scripts.route_search:main'
+ipf_device_search = 'ipfabric.scripts.device_search:main'
+ipf_cve_report = 'ipfabric.scripts.cve_report:main'
+ipf_techsupport = 'ipfabric.scripts.techsupport:main'
+
+[tool.poetry.dependencies]
+python = "^3.8"
+httpx = ">=0.26,<0.28"
+h2 = "^4.1.0"
+pydantic = "^2.5"
+pydantic-settings = "^2.1.0"
+pydantic-extra-types = "^2.3.0"
+python-dateutil = "^2.8.2"
+pytz = ">=2024,<2025"
+python-dotenv = "^1.0"
+macaddress = "~2.0.2"
+deepdiff = ">=7.0.0, <8.0"
+case-insensitive-dictionary = "^0.2.1"
+importlib_resources = {version = "^5.13", python = "<3.9"}  # TODO: Remove after Python 3.8 https://importlib-resources.readthedocs.io/en/latest/using.html#migrating-from-legacy
+
+pandas = [
+    {version = "^2.0.0", optional = true, python = "<3.9"},  # TODO: Remove after Python 3.8
+    {version = "^2.1.4", optional = true, python = ">=3.9"}
+]
+openpyxl = {version = "^3.1.2", optional = true}
+tabulate = {version = ">=0.9.0,<0.10.0",  optional = true}
+python-json-logger = {version = "^2.0.7",  optional = true}
+pyyaml = {version = "^6.0.1", optional = true}
+typing-extensions = {version = "^4.9.0", python = "<3.9"}  # TODO: Remove after Python 3.8
+rich = {version = "^13.7.0", optional = true}
+jinja2 = {version = "^3.1.4", optional = true}
+pyjwt = "^2.9.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.2"
+pytest-cov = "^4.1.0"
+flake8 = [
+    {version = "^5.0", python = "<3.9"},  # TODO: Remove after Python 3.8
+    {version = "^7.0", python = ">=3.9"}
+]
+black = "^24.2.0"
+setuptools = "^69.1.1"
+pytest-mock = "^3.12.0"
+flake8-pyproject = "^1.2.3"
+
+[tool.poetry.extras]
+cve = ["pandas", "openpyxl"]
+matrix = ["pandas", "openpyxl", "jinja2"]
+cli = ["rich", "pandas", "openpyxl"]
+examples = ["tabulate", "pandas", "openpyxl", "python-json-logger", "pyyaml", "rich"]
+pd = ["pandas"]
+all = ["tabulate", "pandas", "openpyxl", "python-json-logger", "pyyaml", "rich", "jinja2"]
+
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+target-version = ['py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | examples
+    | internal_tools
+  )/
+  | settings.py     # This is where you define files that should not be stylized by black
+                     # the root of the project
+)
+'''
+
+[tool.flake8]
+exlcude = [
+    '.git',
+    '.venv',
+    'dist',
+    'examples',
+    'docs',
+    'tests',
+    'internal_tools'
+]
+max-complexity = 10
+max-line-length = 127
+count = true
+statistics = true
+
+[tool.pytest.ini_options]
+addopts = "--cov=ipfabric --cov-report term --cov-report xml:coverage.xml"
+testpaths = ["tests"]
+required_plugins = ["pytest-mock"]
