@@ -1,0 +1,91 @@
+[tool.poetry]
+name = "yaml-ld"
+version = "1.0.18"
+description = "YAML-LD for Python"
+authors = ["Anatoly Scherbakov <altaisoft@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [
+ { include = "yaml_ld" }
+]
+
+[tool.poetry.scripts]
+pyld = "yaml_ld.cli:app"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+PyLD = ">=2.0.4"
+pydantic = ">=2.7.4"
+pyyaml = ">=6.0.1"
+yarl = ">=1.9.4"
+requests-cache = ">=1.2.1"
+beautifulsoup4 = ">=4.12.3"
+rdflib-pyld-compat = ">=0.1.0"
+
+[tool.poetry.group.dev.dependencies]
+jeeves-yeti-pyproject = { version = ">=0.2.33", markers = "python_version >= '3.10'" }
+types-pyyaml = ">=6.0.12.11"
+lambdas = ">=0.2.0"
+dominate = ">=2.9.1"
+mkdocs-awesome-pages-plugin = ">=2.9.2"
+mkdocs-blogging-plugin = ">=2.2.11"
+mkdocstrings-python = ">=1.10.5"
+black = ">=24.4.2"
+dirty-equals = ">=0.7.1,<0.9.0"
+iolanta = ">=1.0.25"
+types-requests = ">=2.32.0.20240622"
+ipython = ">=8.30.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.flakeheaven.exceptions."**.py"]
+wemake-python-styleguide = [
+    # Wrong multiline string usage
+    # Conflicts with class method docstrings.
+    "-WPS462",
+
+    # Found incorrect multi-line string
+    # Conflicts with field docstrings.
+    "-WPS322",
+
+    # Found statement that has no effect
+    # Conflicts with field docstrings.
+    "-WPS428",
+
+    # Wrong multiline string usage
+    # This conflicts with variable docstrings.
+    "-WPS462",
+
+    # Found list comprehension with multiple `if`s
+    # I happen to like those ifs!
+    "-WPS307",
+
+    # Found upper-case constant in a class
+    # I use these for enums
+    "-WPS115",
+
+    # Found implicit string concatenation
+    # I happen to like that
+    "-WPS326",
+]
+
+[tool.flakeheaven.exceptions."**.md"]
+flake8-eradicate = [
+    # Found commented out code
+    # Well that's how Markdown linting works
+    "-E800",
+]
+
+wemake-python-styleguide = ["-*"]
+flake8-bugbear = ["-*"]
+flake8-quotes = ["-*"]
+pycodestyle = ["-*"]
+
+[tool.flakeheaven.exceptions."docs/examples/*py"]
+wemake-python-styleguide = [
+    # Found wrong function call: print
+    "-WPS421",
+]
