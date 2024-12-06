@@ -1,0 +1,1 @@
+from kurumii_events.events.singleton.event_manager import EventManager
