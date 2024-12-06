@@ -1,0 +1,133 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tm352-app"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+keywords = []
+authors = [{ name = "Mark Hall", email = "mark.hall@work.room3b.eu" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = ["psutil>=6.0.0,<7", "typer"]
+
+[project.scripts]
+tm352 = "tm352_app.cli:app"
+
+[project.urls]
+Documentation = "https://github.com/Mark Hall/tm352-app#readme"
+Issues = "https://github.com/Mark Hall/tm352-app/issues"
+Source = "https://github.com/Mark Hall/tm352-app"
+
+[tool.hatch.version]
+path = "tm352_app/__about__.py"
+
+[tool.hatch.envs.default]
+extra-dependencies = [
+  "jupyter-book>=1,<2",
+  "ou-book-theme>=1.1.1,<2",
+  "pytest>=8.2.2,<9",
+  "pytest-cov>=5.0.0,<6",
+  "ruff>=0.4.9,<1",
+]
+[tool.hatch.envs.default.scripts]
+lint = ["ruff format {args:.}", "ruff check --fix {args:.}"]
+cov = ["pytest --cov-config=pyproject.toml --cov=tm352_app {args}"]
+docs = ["jb build docs {args}"]
+docs-server = ["jb obt serve docs {args}"]
+
+[tool.coverage.run]
+source_pkgs = ["tm352_app", "tests"]
+branch = true
+parallel = true
+omit = ["tm352_app/__about__.py"]
+
+[tool.coverage.paths]
+tm352_app = ["tm352_app", "*/tm352-app/tm352_app"]
+tests = ["tests", "*/tm352-app/tests"]
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+skip_covered = true
+show_missing = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["dev/*"]
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "ANN",
+  "ARG",
+  "B",
+  "C",
+  "D",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  # "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+ignore = [
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105",
+  "S106",
+  "S107",
+  # Ignore complexity
+  "C901",
+  "PLR0911",
+  "PLR0912",
+  "PLR0913",
+  "PLR0915",
+  # Ignore implicit string concats
+  "ISC001",
+  # Ignore comment conflicts
+  "D203",
+  "D213",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["container_launcher"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
