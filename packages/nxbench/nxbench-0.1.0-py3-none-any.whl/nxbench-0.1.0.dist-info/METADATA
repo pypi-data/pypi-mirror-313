@@ -1,0 +1,235 @@
+Metadata-Version: 2.1
+Name: nxbench
+Version: 0.1.0
+Summary: A centralized benchmarking suite to facilitate comparative profiling of tools across graph analytic libraries and datasets
+Author-email: Derek Alexander <dpysalexander@example.com>
+Keywords: networkx,graph,network,benchmarking,profiling
+Platform: Linux
+Platform: Mac OSX
+Platform: Windows
+Platform: Unix
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3 :: Only
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.26
+Requires-Dist: scipy>=1.14.1
+Requires-Dist: networkx>=3.3
+Requires-Dist: psutil>=5.9
+Requires-Dist: pandas>=2.2.2
+Requires-Dist: pydantic>=2.8
+Requires-Dist: setuptools>=75.1
+Requires-Dist: nest-asyncio>=1.6
+Requires-Dist: asv>=0.6.4
+Requires-Dist: dash>=2.18.1
+Requires-Dist: dash-bootstrap-components>=1.6.0
+Requires-Dist: aiohttp>=3.9.5
+Requires-Dist: aiofiles>=24.1.0
+Requires-Dist: chardet>=4.0.0
+Requires-Dist: beautifulsoup4>=4.12.3
+Requires-Dist: multidict>=6.0.5
+Requires-Dist: yarl>=1.9.4
+Provides-Extra: cuda
+Requires-Dist: cugraph; extra == "cuda"
+Provides-Extra: test
+Requires-Dist: pre-commit>=3.8.0; extra == "test"
+Requires-Dist: pre-commit-hooks>=5.0.0; extra == "test"
+Requires-Dist: black>=22.6.0; extra == "test"
+Requires-Dist: ruff>=0.6.9; extra == "test"
+Requires-Dist: pytest-sugar>=0.9.3; extra == "test"
+Requires-Dist: pytest>=7.2; extra == "test"
+Requires-Dist: pytest-cov>=2.7.1; extra == "test"
+Requires-Dist: pytest-split>=0.7.0; extra == "test"
+Requires-Dist: pytest-xdist>=1.32.0; extra == "test"
+Requires-Dist: pytest-metadata>=2.0.2; extra == "test"
+Requires-Dist: pytest-env>=1.1.5; extra == "test"
+Requires-Dist: pytest-asyncio>=0.24.0; extra == "test"
+Requires-Dist: coverage>=7.6.1; extra == "test"
+Requires-Dist: build>=1.2.2; extra == "test"
+Requires-Dist: isort>=5.13.2; extra == "test"
+Provides-Extra: doc
+Requires-Dist: setuptools>=45.0.0; extra == "doc"
+Requires-Dist: pydata-sphinx-theme==0.15.4; extra == "doc"
+Requires-Dist: furo==2024.8.6; extra == "doc"
+Requires-Dist: sphinxcontrib-apidoc~=0.3.0; extra == "doc"
+Requires-Dist: sphinx-autobuild==2024.10.3; extra == "doc"
+Requires-Dist: sphinxcontrib-napoleon; extra == "doc"
+Requires-Dist: myst_parser>=4.0.0; extra == "doc"
+Requires-Dist: sphinx_autodoc_typehints>=2.4.4; extra == "doc"
+Requires-Dist: sphinx<9.0.0,>=8.0.2; extra == "doc"
+
+# nxbench
+
+**nxbench** is a comprehensive benchmarking suite designed to facilitate comparative profiling of graph analytic algorithms across NetworkX and compatible backends. Built with an emphasis on extensibility and detailed performance analysis, nxbench aims to enable developers and researchers to optimize their graph analysis workflows efficiently and reproducibly.
+
+## Key Features
+
+- **Cross-Backend Benchmarking**: Leverage NetworkX's backend system to profile algorithms across multiple implementations (NetworkX, nx-parallel, GraphBLAS, and CuGraph)
+- **Configurable Suite**: YAML-based configuration for algorithms, datasets, and benchmarking parameters
+- **Real-World Datasets**: Automated downloading and caching of networks and their metadata from NetworkRepository
+- **Synthetic Graph Generation**: Support for generating benchmark graphs using any of NetworkX's built-in generators
+- **Validation Framework**: Comprehensive result validation for correctness across implementations
+- **Performance Monitoring**: Track execution time and memory usage with detailed metrics
+- **Interactive Visualization**: Dynamic dashboard for exploring benchmark results using Plotly Dash
+- **Flexible Storage**: SQLite-based result storage with pandas integration for analysis
+- **CI Integration**: Support for automated benchmarking through ASV (Airspeed Velocity)
+
+## Installation
+
+```bash
+git clone https://github.com/dpys/nxbench.git
+cd nxbench
+pip install -e .[cuda]  # CUDA support is needed for CuGraph benchmarking
+```
+
+For benchmarking using CUDA-based tools like [CuGraph](https://github.com/rapidsai/cugraph):
+
+```bash
+pip install -e .[cuda]
+```
+
+## Quick Start
+
+1. Configure your benchmarks in a yaml file (see `configs/example.yaml`):
+
+```yaml
+algorithms:
+  - name: "pagerank"
+    func: "networkx.pagerank"
+    params:
+      alpha: 0.85
+    groups: ["centrality"]
+
+datasets:
+  - name: "karate"
+    source: "networkrepository"
+```
+
+2. Run benchmarks based on the configuration:
+
+```bash
+nxbench --config 'configs/example.yaml' benchmark run
+```
+
+3. Export results:
+
+```bash
+nxbench benchmark export 'results/results.csv' --output-format csv  # Convert benchmarked results into csv format.
+```
+
+
+4. View results:
+
+```bash
+nxbench viz serve  # Launch interactive dashboard
+```
+
+## Advanced Command Line Interface
+
+The CLI provides comprehensive management of benchmarks, datasets, and visualization:
+
+```bash
+# Validating asv configuration
+asv check
+
+# Data Management
+nxbench data download karate  # Download specific dataset
+nxbench data list --category social  # List available datasets
+
+# Benchmarking
+nxbench --config 'configs/example.yaml' -vvv benchmark run  # Debug benchmark runs
+nxbench benchmark export 'results/benchmarks.sqlite' --output-format sql # Export the results into a sql database
+nxbench benchmark compare HEAD HEAD~1  # Compare with previous commit
+
+# Visualization
+nxbench viz serve  # Launch parallel categories dashboard
+nxbench viz publish  # Generate static asv report
+```
+
+## Configuration
+
+Benchmarks are configured through YAML files with the following structure:
+
+```yaml
+algorithms:
+  - name: "algorithm_name"
+    func: "fully.qualified.function.name"
+    params: {}
+    requires_directed: false
+    groups: ["category"]
+    validate_result: "validation.function"
+
+datasets:
+  - name: "dataset_name"
+    source: "networkrepository"
+    params: {}
+```
+
+## Supported Backends
+
+- NetworkX (default)
+- CuGraph (requires separate CUDA installation and supported GPU hardware)
+- GraphBLAS Algorithms (optional)
+- nx-parallel (optional)
+
+## Development
+
+```bash
+# Install development dependencies
+pip install -e .[test,doc] # testing and documentation
+
+# Run tests
+make test
+```
+
+## Reproducible benchmarking through containerization
+
+```bash
+# Run benchmarks with GPU
+docker-compose up nxbench
+
+# Run benchmarks CPU-only
+NUM_GPU=0 docker-compose up nxbench
+
+# Start visualization dashboard
+docker-compose up dashboard
+
+# Run specific backend
+docker-compose run --rm nxbench benchmark run --backend networkx
+
+# View results
+docker-compose run --rm nxbench benchmark export results.csv
+```
+
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- Code style guidelines
+- Development setup
+- Testing requirements
+- Pull request process
+
+## License
+
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+
+## Acknowledgments
+
+- NetworkX community for the core graph library and dispatching support
+- NetworkRepository.com for harmonized dataset access
+- ASV team for benchmark infrastructure
+
+## Contact
+
+For questions or suggestions:
+
+- Open an issue on GitHub
+- Email: <dpysalexander@gmail.com>
