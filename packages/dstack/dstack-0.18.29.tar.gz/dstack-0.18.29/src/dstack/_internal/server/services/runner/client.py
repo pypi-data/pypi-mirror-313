@@ -1,0 +1,219 @@
+from dataclasses import dataclass
+from http import HTTPStatus
+from typing import BinaryIO, Dict, List, Optional, Union
+
+import requests
+import requests.exceptions
+
+from dstack._internal.core.models.envs import Env
+from dstack._internal.core.models.repos.remote import RemoteRepoCreds
+from dstack._internal.core.models.resources import Memory
+from dstack._internal.core.models.runs import ClusterInfo, JobSpec, RunSpec
+from dstack._internal.core.models.volumes import InstanceMountPoint, Volume, VolumeMountPoint
+from dstack._internal.server.schemas.runner import (
+    HealthcheckResponse,
+    MetricsResponse,
+    PullBody,
+    PullResponse,
+    ShimVolumeInfo,
+    StopBody,
+    SubmitBody,
+    TaskConfigBody,
+)
+from dstack._internal.utils.common import get_or_error
+
+REMOTE_SHIM_PORT = 10998
+REMOTE_RUNNER_PORT = 10999
+REQUEST_TIMEOUT = 15
+
+
+@dataclass
+class HealthStatus:
+    healthy: bool
+    reason: str
+
+    def __str__(self) -> str:
+        return self.reason
+
+
+class RunnerClient:
+    def __init__(
+        self,
+        port: int,
+        hostname: str = "localhost",
+    ):
+        self.secure = False
+        self.hostname = hostname
+        self.port = port
+
+    def healthcheck(self) -> Optional[HealthcheckResponse]:
+        try:
+            resp = requests.get(self._url("/api/healthcheck"), timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            return HealthcheckResponse.__response__.parse_obj(resp.json())
+        except requests.exceptions.RequestException:
+            return None
+
+    def get_metrics(self) -> Optional[MetricsResponse]:
+        resp = requests.get(self._url("/api/metrics"), timeout=REQUEST_TIMEOUT)
+        if resp.status_code == 404:
+            return None
+        resp.raise_for_status()
+        return MetricsResponse.__response__.parse_obj(resp.json())
+
+    def submit_job(
+        self,
+        run_spec: RunSpec,
+        job_spec: JobSpec,
+        cluster_info: ClusterInfo,
+        secrets: Dict[str, str],
+        repo_credentials: Optional[RemoteRepoCreds],
+        instance_env: Optional[Union[Env, Dict[str, str]]] = None,
+    ):
+        # XXX: This is a quick-and-dirty hack to deliver InstanceModel-specific environment
+        # variables to the runner without runner API modification.
+        if instance_env is not None:
+            if isinstance(instance_env, Env):
+                merged_env = instance_env.as_dict()
+            else:
+                merged_env = instance_env.copy()
+            merged_env.update(job_spec.env)
+            job_spec = job_spec.copy(deep=True)
+            job_spec.env = merged_env
+        body = SubmitBody(
+            run_spec=run_spec,
+            job_spec=job_spec,
+            cluster_info=cluster_info,
+            secrets=secrets,
+            repo_credentials=repo_credentials,
+        )
+        resp = requests.post(
+            # use .json() to encode enums
+            self._url("/api/submit"),
+            data=body.json(),
+            headers={"Content-Type": "application/json"},
+            timeout=REQUEST_TIMEOUT,
+        )
+        resp.raise_for_status()
+
+    def upload_code(self, file: Union[BinaryIO, bytes]):
+        resp = requests.post(self._url("/api/upload_code"), data=file, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+
+    def run_job(self):
+        resp = requests.post(self._url("/api/run"), timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+
+    def pull(self, timestamp: int) -> PullResponse:
+        resp = requests.get(
+            self._url("/api/pull"), params={"timestamp": timestamp}, timeout=REQUEST_TIMEOUT
+        )
+        resp.raise_for_status()
+        return PullResponse.__response__.parse_obj(resp.json())
+
+    def stop(self):
+        resp = requests.post(self._url("/api/stop"), timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+
+    def _url(self, path: str) -> str:
+        return f"{'https' if self.secure else 'http'}://{self.hostname}:{self.port}/{path.lstrip('/')}"
+
+
+class ShimClient:
+    def __init__(
+        self,
+        port: int,
+        hostname: str = "localhost",
+    ):
+        self.secure = False
+        self.hostname = hostname
+        self.port = port
+
+    def healthcheck(self, unmask_exeptions: bool = False) -> Optional[HealthcheckResponse]:
+        try:
+            resp = requests.get(self._url("/api/healthcheck"), timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            return HealthcheckResponse.__response__.parse_obj(resp.json())
+        except requests.exceptions.RequestException:
+            if unmask_exeptions:
+                raise
+            return None
+
+    def submit(
+        self,
+        username: str,
+        password: str,
+        image_name: str,
+        privileged: bool,
+        container_name: str,
+        container_user: Optional[str],
+        shm_size: Optional[Memory],
+        public_keys: List[str],
+        ssh_user: str,
+        ssh_key: str,
+        mounts: List[VolumeMountPoint],
+        volumes: List[Volume],
+        instance_mounts: List[InstanceMountPoint],
+    ):
+        """
+        Returns `True` if submitted and `False` if the shim already has a job (`409 Conflict`).
+        Other error statuses raise an exception.
+        """
+        _shm_size = int(shm_size * 1024 * 1024 * 1024) if shm_size else 0
+        volume_infos = [_volume_to_shim_volume_info(v) for v in volumes]
+        post_body = TaskConfigBody(
+            username=username,
+            password=password,
+            image_name=image_name,
+            privileged=privileged,
+            container_name=container_name,
+            container_user=container_user,
+            shm_size=_shm_size,
+            public_keys=public_keys,
+            ssh_user=ssh_user,
+            ssh_key=ssh_key,
+            mounts=mounts,
+            volumes=volume_infos,
+            instance_mounts=instance_mounts,
+        ).dict()
+        resp = requests.post(
+            self._url("/api/submit"),
+            json=post_body,
+            timeout=REQUEST_TIMEOUT,
+        )
+        if resp.status_code == HTTPStatus.CONFLICT:
+            return False
+        resp.raise_for_status()
+        return True
+
+    def stop(self, force: bool = False):
+        body = StopBody(force=force)
+        resp = requests.post(self._url("/api/stop"), json=body.dict(), timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+
+    def pull(self) -> PullBody:
+        resp = requests.get(self._url("/api/pull"), timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        return PullBody.__response__.parse_obj(resp.json())
+
+    def _url(self, path: str) -> str:
+        return f"{'https' if self.secure else 'http'}://{self.hostname}:{self.port}/{path.lstrip('/')}"
+
+
+def health_response_to_health_status(data: HealthcheckResponse) -> HealthStatus:
+    if data.service == "dstack-shim":
+        return HealthStatus(healthy=True, reason="Service is OK")
+    else:
+        return HealthStatus(
+            healthy=False,
+            reason=f"Service name is {data.service}, service version: {data.version}",
+        )
+
+
+def _volume_to_shim_volume_info(volume: Volume) -> ShimVolumeInfo:
+    return ShimVolumeInfo(
+        backend=volume.configuration.backend.value,
+        name=volume.name,
+        volume_id=get_or_error(volume.volume_id),
+        init_fs=not volume.external,
+    )
