@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn://x-artefacts-smev-gov-ru/esnsi/smev-integration/update/2.0.0" targetNamespace="urn://x-artefacts-smev-gov-ru/esnsi/smev-integration/update/2.0.0" elementFormDefault="qualified" attributeFormDefault="unqualified">
+    <xs:element name="ClassifierDataUpdateRequest">
+        <xs:annotation>
+            <xs:documentation>Данные классификатора</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:choice>
+                <xs:element name="record" type="tns:record" minOccurs="1" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>Список обновленных значений атрибутов простого справочника</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="data" type="tns:classifier-data" minOccurs="1" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>Список обновленных значений атрибутов вложенных классификаторов составного справочника</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+      <xs:complexType name="record">
+             <xs:sequence>
+                   <xs:element name="attribute-value" type="tns:attribute-value" minOccurs="1" maxOccurs="unbounded"/>
+             </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="attribute-value">
+             <xs:choice>
+                   <xs:element name="string">
+                          <xs:simpleType>
+                                 <xs:restriction base="xs:string">
+                                        <xs:minLength value="0"/>
+                                        <xs:maxLength value="255"/>
+                                 </xs:restriction>
+                          </xs:simpleType>
+                   </xs:element>
+                   <xs:element name="text">
+                          <xs:simpleType>
+                                 <xs:restriction base="xs:string">
+                                        <xs:minLength value="0"/>
+                                 </xs:restriction>
+                          </xs:simpleType>
+                   </xs:element>
+                   <xs:element name="bool" type="xs:boolean"/>
+                   <xs:element name="date" type="xs:date"/>
+                   <xs:element name="integer" type="xs:integer"/>
+                   <xs:element name="decimal" type="xs:decimal"/>
+                   <xs:choice>
+                          <xs:element name="reference">
+                                 <xs:simpleType>
+                                        <xs:restriction base="xs:string">
+                                              <xs:minLength value="2"/>
+                                              <xs:maxLength value="36"/>
+                                        </xs:restriction>
+                                 </xs:simpleType>
+                          </xs:element>
+                          <xs:sequence>
+                                 <xs:element name="code" type="xs:string">
+                                        <xs:annotation>
+                                              <xs:documentation>Код классификатора, на который указывает ссылка</xs:documentation>
+                                        </xs:annotation>
+                                 </xs:element>
+                                 <xs:choice>
+                                        <xs:element name="string-key">
+                                              <xs:simpleType>
+                                                     <xs:restriction base="xs:string">
+                                                            <xs:minLength value="0"/>
+                                                            <xs:maxLength value="255"/>
+                                                     </xs:restriction>
+                                              </xs:simpleType>
+                                        </xs:element>
+                                        <xs:element name="date-key" type="xs:date"/>
+                                        <xs:element name="integer-key" type="xs:integer"/>
+                                        <xs:element name="decimal-key" type="xs:decimal"/>
+                                 </xs:choice>
+                          </xs:sequence>
+                   </xs:choice>
+             </xs:choice>
+             <xs:attribute name="attribute-name" type="xs:string"/>
+             <xs:attribute name="attribute-ref">
+                   <xs:simpleType>
+                          <xs:restriction base="xs:string">
+                                 <xs:minLength value="2"/>
+                                 <xs:maxLength value="36"/>
+                          </xs:restriction>
+                   </xs:simpleType>
+             </xs:attribute>
+      </xs:complexType>
+      <xs:complexType name="classifier-data">
+             <xs:sequence>
+                   <xs:element name="record" type="tns:record" minOccurs="1" maxOccurs="unbounded"/>
+             </xs:sequence>
+             <xs:attribute name="code" type="xs:string"/>
+             <xs:attribute name="classifier-ref">
+                   <xs:simpleType>
+                          <xs:restriction base="xs:string">
+                                 <xs:minLength value="2"/>
+                                 <xs:maxLength value="36"/>
+                          </xs:restriction>
+                   </xs:simpleType>
+             </xs:attribute>
+      </xs:complexType>
+      <xs:element name="ClassifierDataDeleteRequest">
+             <xs:annotation>
+                   <xs:documentation>Данные классификатора</xs:documentation>
+             </xs:annotation>
+             <xs:complexType>
+                   <xs:choice>
+                          <xs:element name="record" type="tns:recordType" maxOccurs="unbounded">
+                                 <xs:annotation>
+                                        <xs:documentation>Список удаляемых записей простого классификатора</xs:documentation>
+                                 </xs:annotation>
+                          </xs:element>
+                          <xs:element name="data" maxOccurs="unbounded">
+                                 <xs:annotation>
+                                        <xs:documentation>Список образующих классификаторов</xs:documentation>
+                                 </xs:annotation>
+                                 <xs:complexType>
+                                        <xs:sequence>
+                                              <xs:element name="record" type="tns:recordType" maxOccurs="unbounded">
+                                                     <xs:annotation>
+                                                            <xs:documentation>Список удаляемых записей образующего классификатора</xs:documentation>
+                                                     </xs:annotation>
+                                              </xs:element>
+                                        </xs:sequence>
+                                        <xs:attribute name="code" type="xs:string"/>
+                                        <xs:attribute name="classifier-ref">
+                                              <xs:simpleType>
+                                                     <xs:restriction base="xs:string">
+                                                            <xs:minLength value="2"/>
+                                                            <xs:maxLength value="36"/>
+                                                     </xs:restriction>
+                                              </xs:simpleType>
+                                        </xs:attribute>
+                                 </xs:complexType>
+                          </xs:element>
+                   </xs:choice>
+             </xs:complexType>
+      </xs:element>
+      <xs:complexType name="recordType">
+             <xs:sequence>
+                   <xs:choice>
+                          <xs:element name="record-key">
+                                 <xs:annotation>
+                                        <xs:documentation>Идентификатор записи классификатора</xs:documentation>
+                                 </xs:annotation>
+                                 <xs:simpleType>
+                                        <xs:restriction base="xs:string">
+                                              <xs:minLength value="2"/>
+                                              <xs:maxLength value="36"/>
+                                        </xs:restriction>
+                                 </xs:simpleType>
+                          </xs:element>
+                          <xs:element name="string-key">
+                                 <xs:simpleType>
+                                        <xs:restriction base="xs:string">
+                                              <xs:minLength value="0"/>
+                                              <xs:maxLength value="255"/>
+                                        </xs:restriction>
+                                 </xs:simpleType>
+                          </xs:element>
+                          <xs:element name="date-key" type="xs:date"/>
+                          <xs:element name="integer-key" type="xs:integer"/>
+                          <xs:element name="decimal-key" type="xs:decimal"/>
+                   </xs:choice>
+             </xs:sequence>
+      </xs:complexType>
+ </xs:schema>

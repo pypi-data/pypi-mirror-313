@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nsi:document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:nsi="urn://x-artefacts-nsi-gov-ru/services/cnsi/2.0.0.0">
+    <nsi:simple-classifier code="{{ code }}" name="{{ name }}" uid="{{ uid }}" version="1" public-id="{{ public_id }}" checksum="0" key-attribute-ref="{{ key_attribute_ref }}">
+        {% for att in attributes %}<nsi:{{ att.type }}-attribute uid="{{ att.uid }}" name="{{ att.name }}" {% if att.length %} length="{{ att.length }}" {% endif %} required="{{ att.required }}" />{% endfor %}
+    </nsi:simple-classifier>
+    <nsi:data classifier-ref="{{ uid }}">
+        {% for rec in records %}<nsi:record uid="{{ rec.uid }}">
+            {% for att in rec.attributes %}<nsi:attribute-value attribute-ref="{{ att.uid }}">
+                <nsi:{{ att.type }}>{{ att.value }}</nsi:{{ att.type }}>
+            </nsi:attribute-value>{% endfor %}
+        </nsi:record>{% endfor %}
+    </nsi:data>
+</nsi:document>
