@@ -1,0 +1,70 @@
+name: GitHub Pages
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: s-weigand/setup-conda@v1
+        with:
+          update-conda: true
+          python-version: "3.11"
+          conda-channels: anaconda, conda-forge
+
+      - name: Install dependencies
+        run: |
+          conda install --file doc/pages_requirements.txt
+          python -m pip install .[test]
+
+      - name: Build documentation
+        run: |
+          cp examples/wcosmo_timing.ipynb doc/source/examples/timing.ipynb
+          cp examples/wcosmo_gwtc3.ipynb doc/source/examples/gwtc3.ipynb
+          cp examples/accuracy_comparisons_with_astropy.ipynb doc/source/examples/astropy_comparisons.ipynb
+          cp examples/integration_method_comparisons.ipynb doc/source/examples/integral_comparisons.ipynb
+          cd doc
+          make clean
+          make html
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'doc/build/html'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
