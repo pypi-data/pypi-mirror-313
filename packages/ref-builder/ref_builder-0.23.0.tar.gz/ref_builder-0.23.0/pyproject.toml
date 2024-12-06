@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "ref-builder"
+version = "0.23.0"
+description = ""
+authors = ["Ian Boyes <igboyes@gmail.com>", "Shelley Gao"]
+license = "MIT"
+maintainers = ["Ian Boyes <igboyes@gmail.com>"]
+readme = "readme.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+arrow = "^1.3.0"
+biopython = "^1.84"
+click = "^8.1.7"
+orjson = "^3.10.6"
+pydantic = "^2.8.2"
+requests = "^2.32.3"
+rich = "^13.7.1"
+structlog = "^24.2.0"
+platformdirs = "^4.2.2"
+
+
+[tool.poetry.group.dev.dependencies]
+faker = "^32.1.0"
+polyfactory = "^2.16.2"
+pytest = "^8.2.2"
+pytest-mock = "^3.14.0"
+pytest-socket = "^0.7.0"
+pytest-structlog = "^1.0"
+pytest-xdist = "^3.6.1"
+ruff = "^0.5.2"
+syrupy = "^4.6.1"
+
+[tool.poetry.scripts]
+ref-builder = "ref_builder.cli.main:entry"
+
+[tool.pytest.ini_options]
+markers = [
+    "ncbi: test requires request to NCBI"
+]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["ANN101", "COM812", "D203", "D205", "D213", "EM101", "EM102", "FBT001", "FBT003", "ISC001", "PTH123", "TRY003"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ANN201", "ANN202", "D205", "PLR2004", "S101", "S106"]
+
+# Don't require imperative mood for test fixtures.
+"tests/conftest.py"= ["D401"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
