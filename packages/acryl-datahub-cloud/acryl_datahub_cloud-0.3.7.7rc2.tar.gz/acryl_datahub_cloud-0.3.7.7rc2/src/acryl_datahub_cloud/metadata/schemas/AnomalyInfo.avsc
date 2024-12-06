@@ -1,0 +1,342 @@
+{
+  "type": "record",
+  "Aspect": {
+    "name": "anomalyInfo"
+  },
+  "name": "AnomalyInfo",
+  "namespace": "com.linkedin.pegasus2avro.anomaly",
+  "fields": [
+    {
+      "Searchable": {
+        "addToFilters": true,
+        "filterNameOverride": "Type"
+      },
+      "type": {
+        "type": "enum",
+        "symbolDocs": {
+          "DATASET_COLUMN": "An inferred assertion on a particular column(s) of a Dataset has triggered the anomaly.",
+          "DATASET_ROWS": "An inferred assertion on the row count of a Dataset has triggered the anomaly.",
+          "FRESHNESS": "An inferred Freshness Assertion has failed, triggering the anomaly."
+        },
+        "name": "AnomalyType",
+        "namespace": "com.linkedin.pegasus2avro.anomaly",
+        "symbols": [
+          "FRESHNESS",
+          "DATASET_COLUMN",
+          "DATASET_ROWS"
+        ],
+        "doc": "A type of an anomaly"
+      },
+      "name": "type",
+      "doc": "The type of anomaly"
+    },
+    {
+      "type": [
+        "null",
+        "string"
+      ],
+      "name": "description",
+      "default": null,
+      "doc": "Optional description associated with the anomaly. e.g. an explanation in human-readable form."
+    },
+    {
+      "Relationship": {
+        "entityTypes": [
+          "dataset",
+          "chart",
+          "dashboard",
+          "dataFlow",
+          "dataJob",
+          "schemaField"
+        ],
+        "name": "AnomalyOn"
+      },
+      "Searchable": {
+        "fieldType": "URN"
+      },
+      "java": {
+        "class": "com.linkedin.pegasus2avro.common.urn.Urn"
+      },
+      "type": "string",
+      "name": "entity",
+      "doc": "A reference to the entity associated with the anomaly.",
+      "Urn": "Urn",
+      "entityTypes": [
+        "dataset",
+        "chart",
+        "dashboard",
+        "dataFlow",
+        "dataJob",
+        "schemaField"
+      ]
+    },
+    {
+      "Searchable": {
+        "addToFilters": true,
+        "filterNameOverride": "Severity"
+      },
+      "type": [
+        "int",
+        "null"
+      ],
+      "name": "severity",
+      "default": 0,
+      "doc": "A numeric severity for the anomaly.\nThis reflects the significance of the anomaly and is based on\nhow far out of the norm the anomaly resides."
+    },
+    {
+      "type": {
+        "type": "record",
+        "name": "AnomalyStatus",
+        "namespace": "com.linkedin.pegasus2avro.anomaly",
+        "fields": [
+          {
+            "Searchable": {
+              "addToFilters": true,
+              "filterNameOverride": "State"
+            },
+            "type": {
+              "type": "enum",
+              "symbolDocs": {
+                "ACTIVE": "The anomaly is ongoing, or active.",
+                "RESOLVED": "The anomaly is resolved."
+              },
+              "name": "AnomalyState",
+              "namespace": "com.linkedin.pegasus2avro.anomaly",
+              "symbols": [
+                "ACTIVE",
+                "RESOLVED"
+              ]
+            },
+            "name": "state",
+            "doc": "The state of the anomaly"
+          },
+          {
+            "type": [
+              "null",
+              {
+                "type": "record",
+                "name": "AnomalyStatusProperties",
+                "namespace": "com.linkedin.pegasus2avro.anomaly",
+                "fields": [
+                  {
+                    "type": [
+                      "null",
+                      "long"
+                    ],
+                    "name": "assertionRunEventTime",
+                    "default": null,
+                    "doc": "The timestampMillis field of the AssertionRunEvent which altered the anomaly status the anomaly (if applicable)."
+                  }
+                ],
+                "doc": "Ad-hoc properties about an anomaly status."
+              }
+            ],
+            "name": "properties",
+            "default": null,
+            "doc": "Additional properties about the status, for example which evaluation\nof an assertion generated an Anomaly."
+          },
+          {
+            "Searchable": {
+              "/time": {
+                "fieldName": "lastUpdated",
+                "fieldType": "DATETIME"
+              }
+            },
+            "type": {
+              "type": "record",
+              "name": "AuditStamp",
+              "namespace": "com.linkedin.pegasus2avro.common",
+              "fields": [
+                {
+                  "type": "long",
+                  "name": "time",
+                  "doc": "When did the resource/association/sub-resource move into the specific lifecycle stage represented by this AuditEvent."
+                },
+                {
+                  "java": {
+                    "class": "com.linkedin.pegasus2avro.common.urn.Urn"
+                  },
+                  "type": "string",
+                  "name": "actor",
+                  "doc": "The entity (e.g. a member URN) which will be credited for moving the resource/association/sub-resource into the specific lifecycle stage. It is also the one used to authorize the change.",
+                  "Urn": "Urn"
+                },
+                {
+                  "java": {
+                    "class": "com.linkedin.pegasus2avro.common.urn.Urn"
+                  },
+                  "type": [
+                    "null",
+                    "string"
+                  ],
+                  "name": "impersonator",
+                  "default": null,
+                  "doc": "The entity (e.g. a service URN) which performs the change on behalf of the Actor and must be authorized to act as the Actor.",
+                  "Urn": "Urn"
+                },
+                {
+                  "type": [
+                    "null",
+                    "string"
+                  ],
+                  "name": "message",
+                  "default": null,
+                  "doc": "Additional context around how DataHub was informed of the particular change. For example: was the change created by an automated process, or manually."
+                }
+              ],
+              "doc": "Data captured on a resource/association/sub-resource level giving insight into when that resource/association/sub-resource moved into a particular lifecycle stage, and who acted to move it into that specific lifecycle stage."
+            },
+            "name": "lastUpdated",
+            "doc": "The time at which the anomaly state last changed"
+          }
+        ],
+        "doc": "The status of an anomaly raised on an asset"
+      },
+      "name": "status",
+      "doc": "The current status of the anomaly, whether it is active or resolved."
+    },
+    {
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "AnomalyReview",
+          "namespace": "com.linkedin.pegasus2avro.anomaly",
+          "fields": [
+            {
+              "Searchable": {
+                "addToFilters": true,
+                "filterNameOverride": "Review Status"
+              },
+              "type": {
+                "type": "enum",
+                "symbolDocs": {
+                  "CONFIRMED": "The anomaly has been confirmed by a human reviewer. This means the anomaly was validated.",
+                  "PENDING": "The anomaly is pending human review.",
+                  "REJECTED": "The anomaly has been dismissed, or ignored, by a human reviewer. This means the anomaly should have been ignored."
+                },
+                "name": "AnomalyReviewState",
+                "namespace": "com.linkedin.pegasus2avro.anomaly",
+                "symbols": [
+                  "PENDING",
+                  "CONFIRMED",
+                  "REJECTED"
+                ]
+              },
+              "name": "state",
+              "doc": "The state of the anomaly"
+            },
+            {
+              "type": [
+                "null",
+                "string"
+              ],
+              "name": "message",
+              "default": null,
+              "doc": "An optional explanation of the review."
+            },
+            {
+              "Searchable": {
+                "/time": {
+                  "fieldName": "reviewLastUpdated",
+                  "fieldType": "DATETIME"
+                }
+              },
+              "type": "com.linkedin.pegasus2avro.common.AuditStamp",
+              "name": "lastUpdated",
+              "doc": "The time at which the anomaly review state last changed"
+            }
+          ],
+          "doc": "The human-provided review of the anomaly."
+        }
+      ],
+      "name": "review",
+      "default": null,
+      "doc": "The review of the anomaly, based on human-provided feedback.\nIf this is not present, then the Anomaly has not yet been reviewed."
+    },
+    {
+      "type": {
+        "type": "record",
+        "name": "AnomalySource",
+        "namespace": "com.linkedin.pegasus2avro.anomaly",
+        "fields": [
+          {
+            "Searchable": {
+              "addToFilters": true,
+              "filterNameOverride": "Source Type"
+            },
+            "type": {
+              "type": "enum",
+              "symbolDocs": {
+                "INFERRED_ASSERTION_FAILURE": "An assertion has failed, triggering the anomaly."
+              },
+              "name": "AnomalySourceType",
+              "namespace": "com.linkedin.pegasus2avro.anomaly",
+              "symbols": [
+                "INFERRED_ASSERTION_FAILURE"
+              ]
+            },
+            "name": "type",
+            "doc": "Message associated with the anomaly"
+          },
+          {
+            "Searchable": {
+              "fieldType": "URN"
+            },
+            "java": {
+              "class": "com.linkedin.pegasus2avro.common.urn.Urn"
+            },
+            "type": [
+              "null",
+              "string"
+            ],
+            "name": "sourceUrn",
+            "default": null,
+            "doc": "Reference to an URN related to the source of an anomaly.\nIf this anomaly was raised due to an inferred assertion failure, then this will contain the urn of the source Assertion.",
+            "Urn": "Urn"
+          },
+          {
+            "type": [
+              "null",
+              {
+                "type": "record",
+                "name": "AnomalySourceProperties",
+                "namespace": "com.linkedin.pegasus2avro.anomaly",
+                "fields": [
+                  {
+                    "type": [
+                      "null",
+                      "long"
+                    ],
+                    "name": "assertionRunEventTime",
+                    "default": null,
+                    "doc": "The timestampMillis field of the AssertionRunEvent which altered the anomaly status the anomaly (if applicable)."
+                  }
+                ],
+                "doc": "Ad-hoc properties about an anomaly source."
+              }
+            ],
+            "name": "properties",
+            "default": null,
+            "doc": "Additional properties about the source, for example which evaluation\nof an assertion generated an Anomaly."
+          }
+        ],
+        "doc": "Information about the source of an anomaly raised on an asset."
+      },
+      "name": "source",
+      "doc": "The source of an anomaly, i.e. how it was generated."
+    },
+    {
+      "Searchable": {
+        "/time": {
+          "fieldName": "created",
+          "fieldType": "DATETIME"
+        }
+      },
+      "type": "com.linkedin.pegasus2avro.common.AuditStamp",
+      "name": "created",
+      "doc": "The time at which the request was initially created"
+    }
+  ],
+  "doc": "Information about an anomaly raised on an asset."
+}
