@@ -1,0 +1,95 @@
+[project]
+name = "siun"
+version = "1.1.0"
+description = 'Report urgency of package upgrades'
+authors = [
+    { name = "Thomas Kager", email = "t4k1t+dev@protonmail.com" },
+]
+dependencies = [
+    "click>=8.1",
+    "pydantic>=2.7",
+]
+readme = "README.md"
+requires-python = ">= 3.11"
+license = "MIT"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+
+[project.urls]
+Documentation = "https://github.com/t4k1t/siun#readme"
+Issues = "https://github.com/t4k1t/siun/issues"
+Source = "https://github.com/t4k1t/siun"
+
+[project.scripts]
+"siun" = "siun.main:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "ruff>=0.6.4",
+    "pytest>=8.3.2",
+    "coverage>=7.6.1",
+    "basedpyright>=1.17.2",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/siun"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "B",
+    "C4", 
+    "D", 
+    "DTZ", 
+    "E", 
+    "EM",
+    "F", 
+    "G",
+    "I",
+    "ICN",
+    "LOG", 
+    "PIE", 
+    "PT", 
+    "PTH",
+    "S",
+    "SIM", 
+    "T20", 
+    "UP",
+    "W", 
+]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.basedpyright]
+ignore = ["tests"]
+reportAny = false
+reportImplicitOverride = false
+reportMissingSuperCall = false
+
+[tool.coverage.run]
+source = [
+    "src/siun"
+]
+omit = [
+    "src/siun/__main__.py"
+]
