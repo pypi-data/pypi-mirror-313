@@ -1,0 +1,114 @@
+Metadata-Version: 2.1
+Name: jilutil
+Version: 0.3.0
+License: MIT License
+        
+        Copyright (c) 2018 Michael Scribellito
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: build; extra == "dev"
+Requires-Dist: twine>=4.0.2; extra == "dev"
+Requires-Dist: pytest>=7.4; extra == "dev"
+Requires-Dist: pytest-cov>=4.1; extra == "dev"
+Requires-Dist: pytest-sugar>=0.9.7; extra == "dev"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: pre-commit>=3.6.0; python_version >= "3.9" and extra == "dev"
+Requires-Dist: detect-secrets>=1.4.0; extra == "dev"
+
+> [!NOTE]
+> This repository has been forked from https://github.com/mscribellito/jilutil, and credit is given to the original author.
+
+# JIL Utility
+AutoSys JIL command line utility
+
+This utility provides functionality to:
+* **Export to CSV** - makes jobs easier to read for non-technical people
+* **Format JIL** - aids in comparison of jobs in different environments
+* **Output to console** - allows quick inspection of jobs contained within
+
+Additionally, the functionality to parse JIL files is provided as a library.
+
+## What is JIL?
+Job Information Language (JIL) is a scripting language that lets you define and modify assets such as jobs, global variables, machines, job types, external instances, and blobs.
+
+## Basic Usage
+
+Basic usage for working with a JIL file.
+
+```usage: jilutil.py [-h] [-e] [-f] [-n] [-o] [-r] [-v] path```
+
+### Positional Arguments
+* path - path to JIL source file
+
+### Optional Arguments
+* -h, --help - show this help message and exit
+* -e, --export - Exports jobs contained in the JIL source file in ascending order by name to a CSV file.
+* -f, --format - Formats jobs contained in the JIL source file in ascending order by name.
+* -o, --output - Outputs jobs contained in the JIL source file in ascending order by name to standard out.
+* -a, --attributes - Attributes to list when outputting jobs (ex: job_type,box_name).
+* -n, --new - Formats as new file.
+* -r, --reverse - Sorts jobs in descending order by name.
+* -v, --verbose - Increases output verbosity.
+
+## Functionality
+
+### Export
+Exports jobs contained in the JIL source file in ascending order by name to a CSV file.
+
+Export jobs contained in JIL file:
+```python -m jilutil sample.jil -e```
+
+### Format
+Formats jobs contained in the JIL source file in ascending order by name.
+
+Format JIL file in place:
+```python -m jilutil sample.jil -f```
+
+Format JIL file as new file:
+```python -m jilutil sample.jil -f -n```
+
+### Output
+Outputs jobs contained in the JIL source file in ascending order by name to standard out.
+
+Output jobs contained in JIL file:
+```python -m jilutil sample.jil -o```
+
+```
+SAMPLE_BOX_JOB
+SAMPLE_CMD_JOB_1
+SAMPLE_CMD_JOB_2
+```
+
+Output jobs contained in JIL file with extra attributes:
+```python -m jilutil sample.jil -o -a box_name,job_type,condition```
+
+```
+SAMPLE_BOX_JOB -> box_name:  ; job_type: BOX ; condition:
+SAMPLE_CMD_JOB_1 -> box_name: SAMPLE_BOX_JOB ; job_type: CMD ; condition:
+SAMPLE_CMD_JOB_2 -> box_name: SAMPLE_BOX_JOB ; job_type: CMD ; condition: s(SAMPLE_CMD_JOB_1)
+```
+
+## Executable
+Stand alone executable (no Python required) can be compiled using pyinstaller and the build.ps1 script included. Executable will be placed in "dist" folder.

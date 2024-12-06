@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools >= 68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.dynamic]
+version = { attr = "jilutil.__version__" }
+
+[tool.setuptools.packages.find]
+exclude = [
+    "*venv", "*venv.*",
+    "*tests.*", "*tests",
+    "*build", "*build.*",
+    "*dist", "*dist.*"
+]
+
+[project]
+dynamic = ["version"]
+name = "jilutil"
+requires-python = ">= 3.9"
+readme = "README.md"
+license = {file = "LICENSE"}
+
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+
+    # package
+    "build",
+    "twine>=4.0.2",
+
+    # test
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "pytest-sugar>=0.9.7",
+
+    # lint
+    "ruff>=0.1.0",
+
+    # pre-commit
+    "pre-commit>=3.6.0; python_version >= '3.9'",
+    "detect-secrets>=1.4.0",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+skips = []
+
+[tool.ruff]
+line-length = 120
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+norecursedirs = ["venv", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
+testpaths = ["jilutil", "tests"]
+
+doctest_optionflags = ["ELLIPSIS", "NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
+addopts = [
+    "-s",
+    "--continue-on-collection-errors",
+    "--strict-markers",
+    "--tb=short",
+    "--disable-warnings",
+    "--no-header",
+    "--doctest-modules",
+    "--doctest-continue-on-failure",
+]
