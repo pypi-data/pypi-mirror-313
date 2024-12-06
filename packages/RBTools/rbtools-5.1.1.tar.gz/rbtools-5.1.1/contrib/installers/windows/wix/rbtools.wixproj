@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project ToolsVersion="4.0"
+         DefaultTargets="Build"
+         xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+ <!-- Common properties for building the installer. -->
+ <PropertyGroup>
+  <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+  <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+  <ProductVersion>3.11</ProductVersion>
+  <ProjectGuid>45BB4178-86BF-44FC-BE19-A54763BCA4CC</ProjectGuid>
+  <SchemaVersion>2.0</SchemaVersion>
+
+  <OutputName>RBTools</OutputName>
+  <OutputType>Package</OutputType>
+  <Cultures>en-us</Cultures>
+
+  <DefineConstants>root=$(root);Version=$(Version)</DefineConstants>
+  <SuppressAllWarnings>False</SuppressAllWarnings>
+  <Pedantic>True</Pedantic>
+  <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  <SuppressPdbOutput>True</SuppressPdbOutput>
+ </PropertyGroup>
+
+ <!--
+  Harvest the files from the root of the installer directory, turning it
+  into a rbtools.wxs file.
+ -->
+ <PropertyGroup>
+  <PreBuildEvent>"$(WIX)\bin\heat.exe" dir "$(root)" -gg -ag -dr INSTALLFOLDER -cg rbgroup -srd -sreg -scom -var var.root -out rbtools.wxs</PreBuildEvent>
+ </PropertyGroup>
+
+ <!-- Compile the generated rbtools.wxs and our provided product.wxs. -->
+ <ItemGroup>
+  <Compile Include="$(OutputPath)\rbtools.wxs">
+   <Link>rbtools.wxs</Link>
+  </Compile>
+  <Compile Include="product.wxs" />
+ </ItemGroup>
+
+ <ItemGroup>
+  <EmbeddedResource Include="Product_en-us.wxl"/>
+ </ItemGroup>
+
+ <Import Project="common.props"/>
+
+ <!-- Import Wix.targets -->
+ <Import Project="$(WixTargetsPath)"
+         Condition=" '$(WixTargetsPath)' != '' " />
+ <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets"
+         Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
+ <Target Name="EnsureWixToolsetInstalled"
+         Condition=" '$(WixTargetsImported)' != 'true' ">
+  <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
+ </Target>
+
+ <!-- Sign the bundled cabinet files -->
+ <Target Name="SignCabs">
+  <SignFile CertificateThumbprint="$(CertificateThumbprint)"
+            TimestampUrl="$(TimestampUrl)"
+            SigningTarget="%(SignCabs.FullPath)"/>
+ </Target>
+
+ <!-- Sign the installer -->
+ <Target Name="SignMsi">
+  <Exec Command='"$(SignToolPath)" sign /fd SHA256 /sha1 $(CertificateThumbprint) /t $(TimestampUrl) "%(SignMsi.FullPath)"' />
+ </Target>
+</Project>

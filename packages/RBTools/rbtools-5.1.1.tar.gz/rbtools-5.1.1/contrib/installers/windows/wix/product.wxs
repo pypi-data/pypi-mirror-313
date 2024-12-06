@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+ <?include defines.wxi ?>
+
+ <Product Id="*"
+          Name="!(loc.ProductName)"
+          Language="!(loc.Language)"
+          Version="$(var.Version)"
+          Manufacturer="!(loc.Manufacturer)"
+          UpgradeCode="$(var.UpgradeCode)">
+  <Package InstallerVersion="200"
+           Compressed="yes"
+           InstallScope="perMachine"
+           Languages="1033"/>
+
+  <MajorUpgrade DowngradeErrorMessage="!(loc.NewerVersionAlreadyInstalled)"/>
+  <MediaTemplate EmbedCab="yes"/>
+
+   <!-- Make sure the architecture is compatible. -->
+  <?if $(var.Platform) = x64 ?>
+   <Condition Message="!(loc.x86VersionRequired)">
+    <![CDATA[VersionNT64]]>
+   </Condition>
+  <?endif ?>
+
+  <Feature Id="ProductFeature"
+           Title="!(loc.ProductName)"
+           Description="!(loc.RBToolsDescription)"
+           Level="1">
+   <ComponentGroupRef Id="rbgroup"/>
+   <ComponentRef Id="rbt_cmd"/>
+   <ComponentRef Id="rbt_sh"/>
+  </Feature>
+ </Product>
+
+ <!-- Specify where we're placing RBTools -->
+ <Fragment>
+  <Directory Id="TARGETDIR" Name="SourceDir">
+   <Directory Id="$(var.PlatformProgramFilesFolder)">
+    <Directory Id="INSTALLFOLDER" Name="RBTools">
+     <Directory Id="bin" Name="bin"/>
+    </Directory>
+   </Directory>
+  </Directory>
+ </Fragment>
+
+ <Fragment>
+  <Component Id="rbt_cmd" Directory="bin">
+   <Environment Id="rbt_cmd_path_env" Action="set" System="yes" Part="first"
+                Permanent="no" Name="Path" Value="[INSTALLFOLDER]bin"/>
+   <File Source="files\rbt.cmd"/>
+  </Component>
+  <Component Id="rbt_sh" Directory="bin">
+   <Environment Id="rbt_sh_path_env" Action="set" System="yes" Part="first"
+                Permanent="no" Name="Path" Value="[INSTALLFOLDER]bin"/>
+   <File Source="files\rbt"/>
+  </Component>
+ </Fragment>
+</Wix>

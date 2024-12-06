@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+ <?include defines.wxi ?>
+
+ <Bundle Name="!(loc.ProductName)"
+         Version="$(var.Version)"
+         Manufacturer="!(loc.Manufacturer)"
+         UpgradeCode="0FB6BD50-77A5-416C-BE2E-BCFF8F265F9D"
+         DisableModify="yes"
+         IconSourceFile="files\favicon.ico"
+         Copyright="!(loc.Copyright)"
+         AboutUrl="https://www.reviewboard.org/"
+         HelpUrl="https://www.reviewboard.org/support/">
+
+  <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLargeLicense">
+   <bal:WixStandardBootstrapperApplication LicenseUrl="" ShowVersion="yes"
+                                           LogoFile="files\logo.png"/>
+  </BootstrapperApplicationRef>
+
+  <Variable Name="InstallFolder"
+            Type="string"
+            Value="[$(var.PlatformProgramFilesFolder)][WixBundleName]"/>
+  <Chain>
+   <MsiPackage SourceFile="$(var.rbtools.TargetPath)"
+               SuppressSignatureVerification="yes">
+    <MsiProperty Name='INSTALLFOLDER' Value='[InstallFolder]'/>
+   </MsiPackage>
+  </Chain>
+ </Bundle>
+</Wix>
