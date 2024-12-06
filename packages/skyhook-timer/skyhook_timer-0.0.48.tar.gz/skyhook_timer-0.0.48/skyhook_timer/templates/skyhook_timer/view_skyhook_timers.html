@@ -1,0 +1,41 @@
+{% extends 'allianceauth/base.html' %}
+{% load i18n %}
+{% load navactive %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="text-center">Skyhook Timers</h1>
+    {% if perms.skyhook_timer.add_skyhooktimer %}
+        <a href="{% url 'skyhook_timer:add_skyhook_timer' %}" class="btn btn-primary">Add Timer</a>
+    {% endif %}
+    
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">System</th>
+                <th scope="col">Planet</th>
+                <th scope="col">Countdown</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for timer in timers %}
+            <tr>
+                <td>{{ timer.eve_system }}</td>
+                <td>{{ timer.planet_number }}</td>
+                <td>
+                    {% if timer.time_remaining %}
+                        <div class="{% if timer.time_remaining.total_seconds < 3600 %}text-warning{% endif %}">
+                            <p>
+                                {{ timer.time_remaining.days }}d {{ timer.hours_remaining }}h {{ timer.minutes_remaining }}m {{ timer.seconds_remaining }}s
+                            </p>
+                        </div>
+                    {% else %}
+                        <span class="text-danger">Timer expired</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
