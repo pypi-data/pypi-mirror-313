@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mach_client"
+version = "0.1.2"
+authors = [{ name = "Richard Dong", email = "richard@tristero.xyz" }]
+description = "A Python client for the Mach exchange."
+readme = "README.md"
+requires-python = ">=3.13.0"
+classifiers = [
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+keywords = [
+    "crypto",
+    "cryptocurrency",
+    "cryptocurrencies",
+    "defi",
+    "exchange",
+    "liquidity",
+    "mach",
+    "pool",
+    "swap",
+    "tristero",
+]
+dependencies = [
+    "aiohttp",
+    "borsh-construct",
+    "cachebox",
+    "construct",
+    "eth_typing",
+    "hexbytes",
+    "metaplex_python",
+    "pydantic",
+    "pyyaml",
+    "solana",
+    "solders",
+    "tronpy",
+    "trontxsize",
+    "typing_extensions",
+    "web3",
+]
+
+[project.optional-dependencies]
+dev = ["build", "construct-typing", "ipykernel", "hatch", "twine"]
+
+[project.urls]
+Homepage = "https://github.com/tristeroresearch/mach-client-py"
+Issues = "https://github.com/tristeroresearch/mach-client-py/issues"
+
+[tool.hatch.build]
+include = ["abi/**/*.json", "src/mach_client/**/*.py"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mach_client"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"abi/" = "/abi"
+
+[tool.hatch.envs.default]
+installer = "uv"
+
+[tool.ruff]
+target-version = "py313"
+
+[tool.uv.sources]
+solana = { git = "https://github.com/tristeroresearch/solana-py" }
