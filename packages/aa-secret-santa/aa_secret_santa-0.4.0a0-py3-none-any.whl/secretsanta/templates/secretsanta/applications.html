@@ -1,0 +1,53 @@
+{% extends "secretsanta/base-bs5.html" %}
+{% load i18n %}
+{% load humanize %}
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">{% translate "Secret Santa Applications" %}</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover" id="table-secret-santa-applications">
+                <thead>
+                    <tr>
+                        <th class="text-left">{% translate "Application" %}</th>
+                        <th class="text-left">{% translate "Affiliation" %}</th>
+                        <th class="text-left">{% translate "Manage" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                        <tr>
+                            <td>{{ application.user.profile.main_character }}</td>
+                            <td>{{ application.user.profile.main_character.corporation_name }} / {{ user.profile.main_character.alliance_name|default_if_none:"" }}</td>
+                            <td><a class="btn btn-danger" href="{% url 'secretsanta:admin_delete_application' application.id %}" role="button"><span class="fa fas fa-skull-crossbones"></span></a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if year.open %}
+        <a class="btn btn-danger" href="{% url 'secretsanta:generate_pairs' year.year %}" role="button">
+            <span class="fa fas fa-skull-crossbones"></span> {% translate "Generate Pairs" %} <span class="fa fas fa-skull-crossbones"></span></a>
+    {% endif %}
+{% endblock content %}
+{% block extra_javascript %}
+    {% include "bundles/datatables-js-bs5.html" %}
+    {% include "bundles/moment-js.html" %}
+{% endblock extra_javascript %}
+{% block extra_css %}
+    {% include "bundles/datatables-css-bs5.html" %}
+{% endblock extra_css %}
+{% block extra_script %}
+    $(document).ready( function () {
+    $('#table-secret-santa-applications').DataTable({
+    lengthMenu: [
+    [10, 25, 50, 100, -1],
+    [10, 25, 50, 100, 'All'],
+    ],
+    "stateSave": true,
+    "stateDuration": 0
+    });
+    } );
+{% endblock extra_script %}
