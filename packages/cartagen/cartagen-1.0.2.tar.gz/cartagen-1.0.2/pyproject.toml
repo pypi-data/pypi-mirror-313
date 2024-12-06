@@ -1,0 +1,63 @@
+[build-system]
+requires = [
+    "setuptools",
+    "tomli; python_version < '3.11'",
+    "versioneer",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cartagen"
+dynamic = ["version", "readme"]
+authors = [
+    { name = "Guillaume Touya" },
+    { name = "Justin Berli" },
+    { name = "Azelle Courtial" },
+]
+maintainers = [
+    { name = "CartAGen contributors" },
+]
+
+description = "Cartographic generalisation of spatial objects"
+keywords = ["gis", "cartography", "generalisation"]
+license = { text = "EUPL-1.2" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "shapely",
+    "geopandas",
+    "matplotlib",
+    "networkx",
+]
+
+[project.urls]
+Documentation = "https://cartagen.readthedocs.io/"
+Repository = "https://github.com/LostInZoom/cartagen"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["cartagen", "cartagen.*"]
+exclude = ["build*", "docs*", "issues*", "test*"]
+
+[tool.coverage.run]
+source = ["cartagen"]
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "cartagen/_version.py"
+versionfile_build = "cartagen/_version.py"
+parentdir_prefix = "cartagen-"
