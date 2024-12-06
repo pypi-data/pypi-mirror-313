@@ -1,0 +1,108 @@
+Metadata-Version: 2.3
+Name: invenio-config-tuw
+Version: 2024.4.4
+Summary: Workflow customizations and config overrides for TU Wien.
+Project-URL: Repository, https://gitlab.tuwien.ac.at/crdm/invenio-config-tuw
+Author-email: "Team of the Center for Research Data Management (TU Wien)" <tudata@tuwien.ac.at>
+License: MIT
+Keywords: configuration,invenio,tu wien
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.9
+Requires-Dist: flask-minify>=0.47
+Requires-Dist: flask>=2.0.2
+Requires-Dist: invenio-app-rdm<13.0.0,>=12.0.0
+Requires-Dist: invenio-damap>=0.1.1
+Requires-Dist: invenio-search<3.0.0,>=2.1.0
+Provides-Extra: tests
+Requires-Dist: invenio-search[opensearch2]<3.0.0,>=2.1.0; extra == 'tests'
+Requires-Dist: pytest-black>=0.3.0; extra == 'tests'
+Requires-Dist: pytest-invenio>=1.4.0; extra == 'tests'
+Requires-Dist: pytest-ruff>=0.4.1; extra == 'tests'
+Description-Content-Type: text/x-rst
+
+..
+    Copyright (C) 2020-2024 TU Wien.
+
+    Invenio-Config-TUW is free software; you can redistribute it and/or
+    modify it under the terms of the MIT License; see LICENSE file for more
+    details.
+
+====================
+ Invenio-Config-TUW
+====================
+
+Invenio package for tweaking InvenioRDM to the needs of TU Wien.
+
+The following list is a quick overview of the most relevant customizations happening in this package:
+
+* Configuration values
+* Permission policies
+* OIDC authentication handling
+* E-Mail notification on errors
+* User profile extension
+* Integration with other TU Wien services
+
+
+Details
+=======
+
+Configuration values
+--------------------
+
+The primary purpose of this Invenio package is to provide some baseline configuration for InvenioRDM to suit deployment at TU Wien.
+These updated configurations include (but are not limited to) setting default values for record metadata and enabling access requests for restricted records per default.
+
+
+Permission policies
+-------------------
+
+InvenioRDM is not just some sort of cheap storage platform where users can upload their data and update it at any time.
+Instead, it is a platform intended to host digital objects that get [DOIs](https://www.doi.org/) assigned.
+Since the idea behind DOIs (and persistent identifiers in general) is to point at the same content over time, it does not allow users to change the files after publication.
+
+This is one of the unique features that the system offers that may not be immediately obvious to users.
+To make sure that users understand the implications of using the system, we require a brief communication between the users and operators.
+
+In contrast to vanilla InvenioRDM, having an account is not enough to create uploads in our system.
+Instead, the creation of records requires the ``trusted-user`` role, which typically has to be given out by administrators.
+
+Also, communities can be quite confusing in the beginning.
+Thus, we restrict the creation of new communities for non-administrators.
+
+
+OIDC authentication handling
+----------------------------
+
+We do not want to handle certain aspects like password management of user management in our system.
+Instead, we offload authentication to a separate service, with which InvenioRDM communicates via OIDC.
+Sometimes we have slightly non-standard requirements, which are satisfied by the authentication handler logic in this package.
+
+
+E-Mail notification on errors
+-----------------------------
+
+This module defines a custom log handler for error-level logs which sends out notifications as e-mail to a set of configured recipient addresses.
+
+
+User profile extension
+----------------------
+
+We forgot to secure the rights to curate metadata for uploads in our system in the first version of the terms of use.
+So instead, we extended the user profiles to collect consent for curation individually per user.
+
+
+Integration with other TU Wien services
+---------------------------------------
+
+One of the benefits of hosting InvenioRDM as an institutional repository is that it enables some conveniences by integrating with the local environment more.
+For example, we integrate with [TISS](https://tiss.tuwien.ac.at/) by periodically querying it for TU Wien employees and adding their names to the controlled vocabulary of known ``names``.
