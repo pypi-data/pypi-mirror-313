@@ -1,0 +1,132 @@
+Metadata-Version: 2.1
+Name: skchange
+Version: 0.9.1
+Summary: Sktime-compatible change and anomaly detection
+Author-email: Martin Tveten <tveten@nr.no>
+Maintainer-email: Martin Tveten <tveten@nr.no>, Johannes Voll Kolstø <jvkolsto@nr.no>
+Project-URL: Homepage, https://skchange.readthedocs.io
+Keywords: data-science,machine-learning,statistics,scikit-learn,time-series,change-detection,anomaly-detection
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python
+Classifier: Topic :: Scientific/Engineering
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: <3.13,>=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.21
+Requires-Dist: pandas>=1.1
+Requires-Dist: sktime>=0.33
+Provides-Extra: numba
+Requires-Dist: numba>=0.56; extra == "numba"
+Provides-Extra: all-extras
+Requires-Dist: optuna>=3.1.1; extra == "all-extras"
+Requires-Dist: plotly>=5.13.0; extra == "all-extras"
+Requires-Dist: numba>=0.56; extra == "all-extras"
+Provides-Extra: dev
+Requires-Dist: pre-commit; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-cov; extra == "dev"
+Requires-Dist: ipykernel; extra == "dev"
+Requires-Dist: plotly; extra == "dev"
+Requires-Dist: nbformat>=4.2.0; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: myst-parser; extra == "docs"
+Requires-Dist: numpydoc; extra == "docs"
+Requires-Dist: pydata-sphinx-theme; extra == "docs"
+Requires-Dist: Sphinx!=7.2.0,<9.0.0; extra == "docs"
+Requires-Dist: sphinx-copybutton; extra == "docs"
+Requires-Dist: sphinx-design<0.7.0; extra == "docs"
+Requires-Dist: sphinx-gallery<0.18.0; extra == "docs"
+Requires-Dist: sphinx-issues<5.0.0; extra == "docs"
+Requires-Dist: tabulate; extra == "docs"
+
+# [`skchange`](https://skchange.readthedocs.io/en/latest/)
+
+[![codecov](https://codecov.io/gh/NorskRegnesentral/skchange/graph/badge.svg?token=QSS3AY45KY)](https://codecov.io/gh/NorskRegnesentral/skchange)
+[![tests](https://github.com/NorskRegnesentral/skchange/actions/workflows/tests.yaml/badge.svg)](https://github.com/NorskRegnesentral/skchange/actions/workflows/tests.yaml)
+[![docs](https://readthedocs.org/projects/skchange/badge/?version=latest)](https://skchange.readthedocs.io/en/latest/?badge=latest)
+[![BSD 3-clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/sktime/sktime/blob/main/LICENSE)
+[![!black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Python](https://img.shields.io/pypi/pyversions/skchange)](https://pypi.org/project/skchange/)
+
+[`skchange`]((https://skchange.readthedocs.io/en/latest/)) provides [`sktime`](https://www.sktime.net/)-compatible change detection and changepoint-based anomaly detection algorithms.
+
+Experimental but maturing.
+
+## Documentation
+[Docs](https://skchange.readthedocs.io/) | [Notebook tutorial](https://github.com/sktime/sktime-tutorial-pydata-global-2024)
+
+
+## Installation
+It is recommended to install skchange with [`numba`](https://numba.readthedocs.io/en/stable/) for faster performance:
+```sh
+pip install skchange[numba]
+```
+
+Alternatively, you can install `skchange` without `numba`:
+```sh
+pip install skchange
+```
+
+## Quickstart
+
+### Changepoint detection / time series segmentation
+```python
+from skchange.change_detectors.moving_window import MovingWindow
+from skchange.datasets.generate import generate_alternating_data
+
+df = generate_alternating_data(n_segments=10, segment_length=50, mean=5, random_state=1)
+
+detector = MovingWindow(bandwidth=10)
+detector.fit_predict(df)
+```
+```python
+   ilocs
+0     50
+1    100
+2    150
+3    200
+4    250
+5    300
+6    350
+7    400
+8    450
+```
+
+### Multivariate anomaly detection
+```python
+import numpy as np
+from skchange.anomaly_detectors import MVCAPA
+from skchange.datasets.generate import generate_anomalous_data
+
+n = 300
+anomalies = [(100, 120), (250, 300)]
+means = [[8.0, 0.0, 0.0], [2.0, 3.0, 5.0]]
+df = generate_anomalous_data(n, anomalies, means, random_state=3)
+
+detector = MVCAPA()
+detector.fit_predict(df)
+```
+```python
+        ilocs  labels   icolumns
+0  [100, 120)       1        [0]
+1  [250, 300)       2  [2, 1, 0]
+```
+
+
+<!-- Optional dependencies:
+- Penalty tuning: `optuna` >= 3.1.1
+- Plotting: `plotly` >= 5.13.0. -->
+
+
+## License
+
+`skchange` is a free and open-source software licensed under the [BSD 3-clause license](https://github.com/NorskRegnesentral/skchange/blob/main/LICENSE).
