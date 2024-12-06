@@ -1,0 +1,43 @@
+# Available orderbook depth levels for each exchange
+EXCHANGES = {
+    'ascendex': {'available_depth': range(51)},
+    'binance': {'available_depth': range(51)},
+    'binancecoinm': {'available_depth': [5, 10, 20]},
+    'binanceus': {'available_depth': range(51)},
+    'binanceusdm': {'available_depth': [5, 10, 20]},
+    'bitget': {'available_depth': range(51)},
+    'bitmart': {'available_depth': range(51)},
+    'bitmex': {'available_depth': [25]},
+    'bingx': {'available_depth': range(51)},
+    'bitrue': {'available_depth': range(51)},
+    'bitstamp': {'available_depth': range(51)},
+    'bybit': {'available_depth': [1, 50, 200]},
+    'coinbase': {'available_depth': range(51)},
+    'cryptocom': {'available_depth': [10, 50]},
+    'deribit': {'available_depth': range(51)},
+    'gate': {'available_depth': range(51)},
+    'gemini': {'available_depth': range(51)},
+    'htx': {'available_depth': [20, 150]},
+    'hyperliquid': {'available_depth': range(51)},
+    'kraken': {'available_depth': [10, 25, 100, 500, 1000]},
+    'krakenfutures': {'available_depth': range(51)},
+    'kucoin': {'available_depth': [5, 20, 50, 100]},
+    'kucoinfutures': {'available_depth': [20, 100]},
+    'lbank': {'available_depth': range(51)},
+    'mexc': {'available_depth': range(51)},
+    'okx': {'available_depth': range(50)},
+    'p2b': {'available_depth': [5, 10, 20, 30, 50]},
+    'paradex': {'available_depth': range(51)},
+    'phemex': {'available_depth': range(51)},
+    'probit': {'available_depth': range(51)},
+    'upbit': {'available_depth': range(51)},
+    'xt': {'available_depth': range(51)},
+}
+
+# Sandbox exchanges with their available depth levels
+SANDBOX_EXCHANGES = {
+    'binanceusdm': {'available_depth': [5, 10, 20]},
+    'bybit': {'available_depth': [1, 50, 200]},
+    'deribit': {'available_depth': range(51)},
+    'bitmex': {'available_depth': [25]},
+}
