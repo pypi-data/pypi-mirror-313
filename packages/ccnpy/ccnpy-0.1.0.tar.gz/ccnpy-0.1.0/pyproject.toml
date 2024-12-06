@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "ccnpy"
+version = "0.1.0"
+description = "A pure python implementation of the CCNx client."
+authors = ["Marc Mosko <marc@mosko.org>"]
+license = "Apache 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+cryptography = "^43.0.1"
+jsbeautifier = "^1.15.1"
+crc32c = "^2.7.1"
+pytest = "^8.3.3"
+coverage = "^7.6.4"
+networkx = "^3.4.2"
+matplotlib = "^3.9.2"
+pydot = "^3.0.2"
+
+
+[tool.poetry.group.dev.dependencies]
+coverage = "^7.6.4"
+pytest = "^8.3.3"
+
+[tool.coverage.run]  
+branch = true  
+source = ["./ccnpy"]  
+dynamic_context = "test_function" 
+
+[tool.coverage.report]  
+show_missing = true  
+fail_under = 75
+
+[tool.coverage.html]  
+directory = "htmlcov"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+manifest_writer  = "ccnpy.apps.manifest_writer:run"
+manifest_reader  = "ccnpy.apps.manifest_reader:run"
+packet_reader    = "ccnpy.apps.packet_reader:run"
+
