@@ -1,0 +1,155 @@
+[project]
+name = "airbase"
+dynamic = ["version"]
+requires-python = ">=3.8,<4"
+description = "An easy downloader for the AirBase air quality data."
+readme = {file = "README.md", content-type = "text/markdown"}
+authors = [{name="John Paton", email="john@johnpaton.net"}]
+maintainers = [{name="John Paton", email="john@johnpaton.net"}, {name="Alvaro Valdebenito"}]
+license = {file = "LICENSE"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+
+dependencies = [
+    "aiohttp; python_version < '3.12'",
+    "aiohttp >= 3.9.0; python_version >= '3.12'",
+    "async_property >=0.2.2",
+    "aiofiles >=24.1.0",
+    "importlib_resources; python_version < '3.11'",
+    "tqdm",
+    "typer >=0.9.1",
+    "typing_extensions >=4.12.2; python_version < '3.11'",
+]
+
+[project.urls]
+Repository = "https://github.com/johnpaton/airbase"
+Documentation = "https://airbase.readthedocs.io"
+
+[project.scripts]
+airbase = "airbase.cli:main"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+index-url = "https://pypi.org/simple"
+dev-dependencies = [
+    "pytest>=6.0",
+    "aioresponses",
+    "pytest-asyncio",
+    "pytest-cov",
+    "mypy>=1.11.2",
+    "ruff>=0.6.7",
+    "sphinx>=7.1.2",
+    "sphinx-rtd-theme>=2.0.0",
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.envs.default]
+installer = "uv"
+
+[tool.hatch.build.targets.wheel]
+packages = ["airbase"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--showlocals"
+required_plugins = ["pytest-asyncio"]
+testpaths = ["tests"]
+filterwarnings = [
+    # DeprecationWarning are errors
+    "error::DeprecationWarning:(airbase|tests).*:",
+]
+
+[tool.coverage.run]
+source = ["airbase"]
+
+[tool.coverage.report]
+skip_covered = true
+skip_empty = true
+show_missing = true
+
+[tool.ruff]
+target-version = "py38"
+line-length = 80
+extend-exclude = ["docs", "build"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP"]
+ignore = [
+    "E501", # https://docs.astral.sh/ruff/rules/line-too-long/
+]
+
+[tool.ruff.lint.per-file-ignores]
+"cli.py" = [ # typer needs typing.Optional and typing.List
+    "UP006", # https://docs.astral.sh/ruff/rules/non-pep585-annotation/
+    "UP007", # https://docs.astral.sh/ruff/rules/non-pep604-annotation/
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_unused_configs = true
+warn_unused_ignores = false
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
+show_error_codes = true
+pretty = true
+sqlite_cache = true
+exclude = "docs|scripts|build"
+
+[[tool.mypy.overrides]]
+module = ["tqdm.*", "async_property"]
+ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py38, py39, py310, py311, py312, lint, docs, integration
+skip_missing_interpreters = True
+isolated_build = True
+
+[testenv]
+commands_pre =
+    python --version
+commands =
+    pytest -ra -q {posargs:--cov -k "not integration"}
+extras = 
+    test
+
+[testenv:integration]
+commands_pre =
+    python --version
+commands =
+    pytest -ra -q {posargs:--cov -k integration}
+extras = 
+    test
+
+[testenv:lint]
+skipsdist=True
+commands =
+    pre-commit run --all-files --show-diff-on-failure
+deps =
+    pre-commit
+
+[testenv:docs]
+skipsdist=True
+commands =
+    sphinx-build {posargs:-M html} docs/source docs/build
+extras = 
+    docs
+"""

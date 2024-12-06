@@ -1,0 +1,73 @@
+name: CI/CD
+on:
+  push:
+  schedule:
+    - cron:  '0 12 1 * *'  # On the first day of the month
+  pull_request:
+
+env:
+  UV_FROZEN: "true"
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        prerelease: [false]
+        include:
+          - python: '3.13'
+            prerelease: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-project
+        name: Setup project
+        with:
+          python-version: ${{ matrix.python }}
+          allow-python-prereleases: ${{ matrix.prerelease }}
+      - name: Run unit tests
+        continue-on-error: ${{ matrix.prerelease }}
+        run: uv run pytest -lk "not integration" --cov
+
+  integration-test:
+    needs: unit-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-project
+        name: Setup project
+      - run: uv run pytest -lvk "integration"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-project
+        name: Setup project
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
+
+  build-and-deploy:
+    needs: [unit-test, lint, integration-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-project
+        name: Setup project
+      - run: git diff --exit-code
+        name: Assert workdir is clean
+      - run: |
+          uv build
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        if: |
+          github.repository == 'JohnPaton/airbase' &&
+          github.event_name == 'push' &&
+          startsWith(github.ref, 'refs/tags')
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+          skip_existing: true
