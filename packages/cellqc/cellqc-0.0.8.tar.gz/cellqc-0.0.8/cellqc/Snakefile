@@ -1,0 +1,35 @@
+from snakemake.utils import min_version
+min_version("7.0")
+
+include: "rules/config.smk"
+
+rule all:
+  input:
+    expand(
+    [
+      "result/{sample}.h5ad",
+      "postproc/{sample}.h5ad",
+    ],
+    sample=samples["sample"].tolist(),
+    ),
+    "result/report.html",
+
+include: "rules/common.smk"
+
+include: "rules/soupx.smk"
+
+if not config["dropkick"]["skip"]:
+  include: "rules/dropkick.smk"
+  include: "rules/h5subset.smk"
+
+include: "rules/filterbycount.smk"
+
+if not config["doubletfinder"]["skip"]:
+  include: "rules/doubletfinder.smk"
+
+if not config["scpred"]["skip"]:
+  include: "rules/scpred.smk"
+
+include: "rules/h5seurat2h5ad.smk"
+include: "rules/qcreport.smk"
+include: "rules/postproc.smk"
