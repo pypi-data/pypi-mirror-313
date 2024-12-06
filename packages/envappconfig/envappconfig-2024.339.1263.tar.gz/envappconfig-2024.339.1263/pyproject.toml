@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "envappconfig"
+version = "2024.339.1263"
+description = "Simple app configuration via environment variables, in the spirit of argparse."
+authors = ["Spectric Labs <foss@spectric.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/spectriclabs/envappconfig"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 120
+disable = [
+    "too-many-nested-blocks",
+    "too-many-branches",
+    "too-many-statements",
+    "R0801",
+    "R0902",
+    "R0903",
+    "R0911",
+    "R0913",
+    "R0914",
+    "C0103",
+    "C0114",
+    "C0115",
+    "C0116",
+    "C0123",
+    "C0301",
+    "C0302",
+    "fixme",
+]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py36,py39,py310
+isolated_build = true
+recreate = true
+[gh-actions]
+python =
+  3.6: py36
+  3.9: py39
+  3.10: py310
+[testenv]
+deps =
+  pylint
+  flake8
+  pytest
+  pytest-cov
+  pytest-mock
+commands =
+  flake8 --select E201,E202,E231,E262,E265 envappconfig
+  pylint envappconfig
+  pytest --cov-report term-missing --cov=envappconfig
+"""
