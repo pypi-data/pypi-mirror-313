@@ -1,0 +1,66 @@
+# Make sure you have a valid LSL configuration!
+# Check the test directory for an example lsl_api.cfg
+# See: https://labstreaminglayer.readthedocs.io/info/lslapicfg.html
+
+graphs:
+
+  - id: Sender
+    nodes:
+    - id: random_1
+      module: timeflux.nodes.random
+      class: Random
+    - id: outlet_1
+      module: timeflux.nodes.lsl
+      class: Send
+      params:
+        name: test_1
+        type: random
+    - id: random_2
+      module: timeflux.nodes.random
+      class: Random
+    - id: outlet_2
+      module: timeflux.nodes.lsl
+      class: Send
+      params:
+        name: test_2
+    edges:
+      - source: random_1
+        target: outlet_1
+      - source: random_2
+        target: outlet_2
+    rate: 1
+
+  - id: Receiver1
+    nodes:
+    - id: inlet
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: type
+        value: random
+        clocksync: false
+    - id: display
+      module: timeflux.nodes.debug
+      class: Display
+    edges:
+      - source: inlet
+        target: display
+    rate: 1
+
+  - id: Receiver2
+    nodes:
+    - id: inlet
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: name
+        value: test_2
+        clocksync: false
+    - id: display
+      module: timeflux.nodes.debug
+      class: Display
+    edges:
+      - source: inlet
+        target: display
+    rate: 1
+

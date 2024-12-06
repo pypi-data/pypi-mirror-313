@@ -1,0 +1,22 @@
+graphs:
+  - nodes:
+    - id: replay
+      module: timeflux.nodes.hdf5
+      class: Replay
+      params:
+        filename: test/data/data.hdf5
+        keys:
+          - /eeg/signal/raw
+          - /game/events
+    - id: display_signal
+      module: timeflux.nodes.debug
+      class: Display
+    - id: display_events
+      module: timeflux.nodes.debug
+      class: Display
+    edges:
+    - source: replay:eeg_signal_raw
+      target: display_signal
+    - source: replay:game_events
+      target: display_events
+    rate: 10
