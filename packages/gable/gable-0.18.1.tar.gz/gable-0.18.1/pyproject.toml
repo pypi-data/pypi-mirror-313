@@ -1,0 +1,105 @@
+[tool.poetry]
+name = "gable"
+version = "0.18.1"
+description = "Command line interface (CLI) and software development kit (SDK) to interact with Gable API"
+authors = ["Gable.ai <engineers@gable.ai>"]
+readme = "README.md"
+packages = [{include = "gable"}]
+# By default Poetry excludes all files and directories listed in .gitignore,
+# so we need to override this for the generated openapi file
+include = ["gable/openapi.py"]
+# Exclude things we don't want shipping in our published package, including the
+# gable/local.py file which contains paths within our repo that we shouldn't expose
+exclude = ["tests", "scripts", "gable/cli/local.py"]
+
+[tool.poetry.dependencies]
+GitPython = "^3.1.0"
+python = ">=3.9,<3.14"
+click = "^8.1.3"
+pydantic = {extras = ["email"], version = "^1.10.11"}
+requests = "^2.31.0"
+pyyaml = "^6.0.0"
+psycopg2-binary = {version = '>=2.7', optional = true}
+mysql-connector-python = {version = "^9.1.0", optional = true}
+click-option-group = "^0.5.6"
+giturlparse = "^0.10.0"
+rich = "^13.4.0"
+loguru = "^0.7.0"
+jsonpickle = "^3.0.0"
+jsonref = "^1.1.0"
+pycryptodome = "^3.17.0"
+# !!! IMPORTANT !!!
+# S3 dependencies - make sure to add these to the `s3` and `all` extras lists as wel
+boto3 = "^1.0.0"
+botocore = "^1.0.0"
+deepdiff = "^7.0.1"
+fastparquet = ">=2023.0.0,<2025.0.0"
+fsspec = ">=2023.0.0,<2025.0.0"
+mypy-boto3-s3 = "^1.0.0"
+mypy-boto3-apigateway = "^1.0.0"
+numpy = "^1.0.0"
+pandas = ">=1.5.3,<3.0.0"
+pyarrow = ">=11,<17"
+s3fs = ">=2023.0.0,<2025.0.0"
+pymssql = "^2.2.8"
+
+[tool.poetry.scripts]
+gable = "gable.cli.cli_setup:cli"
+
+[tool.poetry.group.dev.dependencies]
+autoflake = "^2.3.1"
+black = "^24.4.0"
+boto3-stubs = {extras = ["essential,apigateway"], version = "^1.0.0"}
+build = "^0.10.0"
+datamodel-code-generator = "0.25.8"
+flask = "^3.0.3"
+flask_cors = "^4.0.1"
+isort = "^5.12.0"
+moto = "^5.0.5"
+poethepoet = "^0.20.0"
+pytest = "^7.3.1"
+pyright = "^1.1.374"
+requests-mock = "^1.12.1"
+twine = "^4.0.2"
+waiting = "^1.4.1"
+tox = "^4.11.3"
+pytest-timeout = "^2.2.0"
+syrupy = "^3.0.0"
+
+[tool.poetry.extras]
+postgres = ['psycopg2-binary']
+mysql = ['mysql-connector-python']
+mssql = ['pymssql']
+s3 = ['boto3', 'botocore', 'deepdiff', 'fastparquet',  'fsspec',  'mypy-boto3-s3', 'mypy-boto3-apigateway', 'numpy', 'pandas', 'pyarrow', 's3fs']
+all = ['psycopg2-binary', 'mysql-connector-python', 'pymssql', 'boto3', 'botocore', 'deepdiff', 'fastparquet',  'fsspec',  'mypy-boto3-s3', 'mypy-boto3-apigateway', 'numpy', 'pandas', 'pyarrow', 's3fs']
+
+[tool.poe.tasks.generate_types]
+shell = "bash scripts/generate_types.sh"
+
+[tool.poe.tasks.publish_pypi_pre]
+shell = "sh scripts/publish_pypi.sh prerelease"
+
+[tool.poe.tasks.check_deps]
+shell = "deptry ."
+
+[tool.deptry]
+ignore = ["DEP001", "DEP003", "DEP004"]
+
+[tool.deptry.per_rule_ignores]
+DEP002 = ["fsspec", "mypy-boto3-apigateway"]
+# fsspec needed for pandas to have s3 access
+
+[tool.deptry.package_module_name_map]
+psycopg2-binary = "psycopg2"
+mysql-connector-python = "mysql"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+include = ["gable/cli/", "gable/sdk/"]
+exclude = ["gable/openapi.py"]
+
+[tool.isort]
+profile = "black"
