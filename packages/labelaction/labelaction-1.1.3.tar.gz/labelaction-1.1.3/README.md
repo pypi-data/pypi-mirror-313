@@ -1,0 +1,54 @@
+# Animal Behavior Annotation Tool(labelaction)
+
+This is a GUI-based tool for annotating animal behavior in video files. Built using Python and PyQt5, this application allows users to load a video, navigate through frames, and label different behaviors for multiple subjects (referred to as "pigeons" in this tool).
+
+## Features
+
+- **Simultaneous annotation of behaviors and postures**: Users can annotate both behaviors (e.g. feeding, drinking, etc.) and postures (e.g. standing, lying down, etc.) of pigeons during video playback, and each annotation can be done independently.
+- **Timeline visualization**: The program provides a visual timeline for each pigeon to show the behavior and posture annotations for quick viewing and editing.
+
+- **Video frame navigation**: the user can use buttons or shortcut keys (such as 'D' and 'S') to quickly advance or rewind video frames for easy and precise labeling.
+
+- **Color coding**: Different behaviors and gestures are identified using different colors, making annotation more intuitive and allowing users to quickly identify information by color.
+
+- **Export function**: Users can export annotation data to CSV file, supporting two formats: original annotation and sorted annotation data, which is convenient for subsequent data analysis and processing.
+
+- **Multi-pigeon support**:  the program allows independent annotation of multiple pigeons for complex experimental scenarios.
+
+## Prerequisites
+
+- **Python** (>= 3.6)
+- **Libraries**: The following libraries are required:
+  - `PyQt5`
+  - `OpenCV`
+  - `pandas`
+
+## License
+
+This tool is licensed under the MIT License. Feel free to modify and use it as needed.
+
+## Acknowledgments
+
+- PyQt5 for the GUI and OpenCV for video processing
+- GEMlab : https://www.gemlab.site
+
+## Update log
+'1.1.3' Add some functionality
+- Support undo when marking, press ctrl+z.
+- Click the annotated area of ​​the status bar to display the annotated information, such as the start frame, end frame, etc.
+- Support annotation review and modification
+
+'1.1.2' Modify the behavior list and posture list
+
+'1.1.1' fix some bugs, add posture "Tail up" and the posture "lying down" was changed to "Squatting"
+
+'1.1.0'    
+- Supports simultaneous annotation of actions and gestures in videos.  
+- Export similar to mot format, export each frame's information to csv file, replace no behavior or gesture with -1
+- Optimize GUI interface and functional details to improve user usability
+
+'1.0.2' automatically install dependent packages
+
+'1.0.1' fix some bugs
+
+'1.0.0' first release
