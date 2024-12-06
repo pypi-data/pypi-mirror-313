@@ -1,0 +1,6 @@
+DESCRIPTION="Ebuild with invalid RESTRICT"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+SLOT="0"
+IUSE="used"
+RESTRICT="!used ( test )"

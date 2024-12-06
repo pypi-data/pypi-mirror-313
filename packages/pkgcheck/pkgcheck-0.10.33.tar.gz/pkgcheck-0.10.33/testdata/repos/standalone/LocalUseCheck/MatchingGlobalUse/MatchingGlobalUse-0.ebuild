@@ -1,0 +1,5 @@
+DESCRIPTION="Ebuild has local USE flag matching a global"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+SLOT="0"
+IUSE="matching probable used"

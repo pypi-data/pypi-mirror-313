@@ -1,0 +1,5 @@
+DESCRIPTION="Ebuild with missing conditional test RESTRICT"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+SLOT="0"
+IUSE="test"

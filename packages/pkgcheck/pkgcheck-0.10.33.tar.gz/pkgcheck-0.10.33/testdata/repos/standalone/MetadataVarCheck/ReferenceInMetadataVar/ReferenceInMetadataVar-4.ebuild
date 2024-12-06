@@ -1,0 +1,6 @@
+DESCRIPTION="Ebuild with variable in LICENSE"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+LICENSE="${LICENSE} ${LICENSE/B/B}"
+SLOT="0"
+KEYWORDS="~amd64 ~x86"

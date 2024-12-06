@@ -1,0 +1,41 @@
+diff -Naur standalone/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-0.ebuild fixed/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-0.ebuild
+--- standalone/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-0.ebuild
++++ fixed/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-0.ebuild
+@@ -6,5 +6,6 @@
+ SLOT="0"
+
+ src_install() {
+-	dohtml doc/*
++	docinto html
++	dodoc doc/*
+ }
+
+diff -Naur standalone/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-1.ebuild fixed/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-1.ebuild
+--- standalone/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-1.ebuild
++++ fixed/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-1.ebuild
+@@ -6,8 +6,8 @@ SLOT="0"
+ SLOT="0"
+
+ src_install() {
+-	if has_version --host-root stub/stub1; then
++	if has_version -b stub/stub1; then
+ 		:
+ 	fi
+-	H=$(best_version --host-root stub/stub1:2)
++	H=$(best_version -b stub/stub1:2)
+ }
+diff -Naur standalone/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-2.ebuild fixed/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-2.ebuild
+--- standalone/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-2.ebuild
++++ fixed/BadCommandsCheck/BannedEapiCommand/BannedEapiCommand-2.ebuild
+@@ -4,11 +4,3 @@ DESCRIPTION="Ebuild using banned commands"
+ HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+ SLOT="0"
+ SLOT="0"
+-
+-pkg_preinst() {
+-	usermod -s /bin/bash uucp || die
+-}
+-
+-pkg_postrm() {
+-	usermod -s /bin/false uucp || die
+-}

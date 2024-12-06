@@ -1,0 +1,5 @@
+EAPI="invalid!"
+DESCRIPTION="Ebuild using invalid EAPI"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+SLOT="0"

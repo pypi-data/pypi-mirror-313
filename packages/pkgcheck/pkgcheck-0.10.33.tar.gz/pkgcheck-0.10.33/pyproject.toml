@@ -1,0 +1,98 @@
+[build-system]
+requires = [
+	"flit_core >=3.8,<4",
+	# repeat all normal runtime dependencies here
+	"chardet",
+	"lazy-object-proxy",
+	"lxml",
+	"pathspec",
+	"tree-sitter>=0.23.0",
+	"tree-sitter-bash>=0.21.0",
+	"snakeoil~=0.10.8",
+	"pkgcore~=0.12.25",
+]
+build-backend = "py_build"
+backend-path = ["."]
+
+[project]
+name = "pkgcheck"
+description = "pkgcore-based QA utility for ebuild repos"
+readme = "README.rst"
+license = {file = "LICENSE"}
+requires-python = "~=3.10"
+# alphabetical by surname.
+authors = [
+	{name = "Michał Górny", email = "mgorny@gentoo.org"},
+	{name = "Tim Harder", email = "radhermit@gmail.com"},
+	{name = "Brian Harring", email = "ferringb@gmail.com"},
+	{name = "Arthur Zamarin", email = "arthurzam@gentoo.org"},
+	{name = "Marien Zwart"},
+]
+maintainers = [
+	{name = "Arthur Zamarin", email = "arthurzam@gentoo.org"},
+]
+classifiers = [
+	"License :: OSI Approved :: BSD License",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+	"Topic :: Software Development :: Quality Assurance",
+]
+dynamic = ["version"]
+
+dependencies = [
+	"chardet",
+	"lazy-object-proxy",
+	"lxml",
+	"pathspec",
+	"tree-sitter>=0.23.0",
+	"tree-sitter-bash>=0.21.0",
+	"snakeoil~=0.10.8",
+	"pkgcore~=0.12.25",
+]
+
+[project.optional-dependencies]
+test = [
+	"pytest>=6.0",
+	"pytest-cov",
+	"requests",
+]
+doc = [
+	"sphinx",
+	"tomli; python_version < '3.11'",
+	"snakeoil~=0.10.4",
+]
+network = [
+	"requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/pkgcore/pkgcheck"
+Documentation = "https://pkgcore.github.io/pkgcheck/"
+Source = "https://github.com/pkgcore/pkgcheck"
+
+[project.scripts]
+pkgcheck = "pkgcheck.scripts.__init__:main"
+
+[tool.flit.external-data]
+directory = "data"
+
+[tool.flit.sdist]
+include = [
+	"Makefile", "py_build.py", "tox.ini",
+	"NEWS.rst", "doc", "tests", "testdata", "contrib",
+	"build/sphinx/man/pkgcheck.1",
+]
+exclude = [
+	".github/", ".gitignore",
+	"doc/api/", "doc/generated/", "doc/_build/",
+]
+
+[tool.black]
+line-length = 100
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-vv -ra -l"
+testpaths = ["tests"]

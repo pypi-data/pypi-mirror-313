@@ -1,0 +1,5 @@
+DESCRIPTION="Ebuild with manifest entry for unknown fetchable"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+SRC_URI="https://github.com/pkgcore/pkgcheck/${P}.tar.gz"
+LICENSE="BSD"
+SLOT="0"

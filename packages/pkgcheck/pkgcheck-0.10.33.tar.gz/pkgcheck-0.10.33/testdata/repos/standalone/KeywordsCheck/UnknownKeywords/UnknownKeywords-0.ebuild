@@ -1,0 +1,5 @@
+DESCRIPTION="Ebuild with unknown KEYWORDS"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+SLOT="0"
+KEYWORDS="amd64 unknown"

@@ -1,0 +1,5 @@
+DESCRIPTION="Ebuild with unknown PROPERTIES"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+SLOT="0"
+PROPERTIES="foo"

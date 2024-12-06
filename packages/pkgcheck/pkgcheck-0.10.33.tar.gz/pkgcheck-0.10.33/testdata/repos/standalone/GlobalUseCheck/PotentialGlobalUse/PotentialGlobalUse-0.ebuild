@@ -1,0 +1,5 @@
+DESCRIPTION="Ebuild with potential global USE flag"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+SLOT="0"
+IUSE="potential-global"

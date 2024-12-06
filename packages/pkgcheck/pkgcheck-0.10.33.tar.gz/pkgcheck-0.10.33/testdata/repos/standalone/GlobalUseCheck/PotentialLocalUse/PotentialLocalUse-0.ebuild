@@ -1,0 +1,5 @@
+DESCRIPTION="Ebuild with potential local USE flag"
+HOMEPAGE="https://github.com/pkgcore/pkgcheck"
+LICENSE="BSD"
+SLOT="0"
+IUSE="potential-local"
