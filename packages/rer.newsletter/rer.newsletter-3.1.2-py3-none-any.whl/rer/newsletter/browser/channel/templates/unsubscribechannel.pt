@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      lang="en"
+      metal:use-macro="here/main_template/macros/master"
+      xml:lang="en"
+      i18n:domain="rer.newsletter"
+>
+
+  <body>
+    <metal:main fill-slot="main">
+      <metal:main-macro define-macro="main">
+        <div id="content-core"
+             tal:condition="view/form_instance/isVisible"
+             tal:content="structure view/contents"
+        ></div>
+        <button title="chiudi"
+                type="button"
+                tal:define="
+                  plone_6 context/@@plone_version/is_plone_6_or_above;
+                "
+                tal:attributes="
+                  class python: plone_6 and 'button-plone-modal-close btn' or 'button-plone-modal-close plone-btn';
+                "
+        >Chiudi</button>
+        <div class="filter">
+          <div class="portalMessage error"
+               role="alert"
+               tal:condition="not: view/form_instance/isVisible"
+          >
+            <strong>Error</strong>
+            <span>Channel non attivo.</span>
+          </div>
+        </div>
+      </metal:main-macro>
+    </metal:main>
+  </body>
+
+</html>

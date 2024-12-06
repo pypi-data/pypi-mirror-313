@@ -1,0 +1,96 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="rer.newsletter"
+    >
+
+  <!-- view for message preview -->
+  <browser:page
+      name="messagepreview_view"
+      for="*"
+      class=".messagepreview.MessagePreview"
+      template="templates/messagepreview.pt"
+      permission="zope2.View"
+      />
+
+  <!-- view for sending test of message -->
+  <browser:page
+      name="sendingtest_view"
+      for="rer.newsletter.behaviors.ships.IShippableMarker"
+      class=".sendingtest.message_sending_test"
+      permission="zope2.View"
+      />
+
+  <!-- default view for message -->
+  <browser:page
+      name="view"
+      for="rer.newsletter.interfaces.IMessage"
+      class=".messageview.MessageView"
+      template="templates/messageview.pt"
+      permission="zope2.View"
+      layer="rer.newsletter.interfaces.IRerNewsletterLayer"
+      />
+
+  <!-- view for send message -->
+  <browser:page
+      name="send_message_view"
+      for="rer.newsletter.behaviors.ships.IShippableMarker"
+      class=".sendmessageview.message_sending_view"
+      permission="rer.newsletter.SendMessage"
+      />
+
+  <!-- vista da usare come template per inviare le collezioni -->
+  <browser:page
+      name="collection_sending_view"
+      for="*"
+      class=".collectionview.CollectionView"
+      template="templates/collection_sending_view.pt"
+      permission="zope2.View"
+      layer="rer.newsletter.interfaces.IRerNewsletterLayer"
+      />
+
+  <!-- vista che controlla che il messaggio sia stato inviato -->
+  <browser:page
+      name="is_message_sent"
+      for="*"
+      class=".checkmessageview.CheckMessage"
+      permission="zope2.View"
+      layer="rer.newsletter.interfaces.IRerNewsletterLayer"
+      />
+
+  <!-- message viewlet -->
+  <browser:viewlet
+      name="manage_message_viewlet"
+      for="rer.newsletter.behaviors.ships.IShippableMarker"
+      manager="plone.app.layout.viewlets.interfaces.IAboveContentTitle"
+      class=".messageviewlet.MessageManagerViewlet"
+      template="templates/messageviewlet.pt"
+      permission="rer.newsletter.SendMessage"
+      layer="rer.newsletter.interfaces.IRerNewsletterLayer"
+      />
+
+  <!-- overwrite batch view for Sendable Collection -->
+  <browser:page
+      name="batchnavigation"
+      for="rer.newsletter.interfaces.IShippableCollection"
+      class=".shippablecollection.ShippableCollectionBatchView"
+      permission="zope.Public"
+      />
+
+  <!-- Message version-view -->
+  <browser:page
+      name="version-view"
+      for="rer.newsletter.interfaces.IMessage"
+      class=".versionview.MessageVersionView"
+      permission="zope2.View"
+      />
+  <browser:page
+      name="content-core"
+      for="rer.newsletter.interfaces.IMessage"
+      class="plone.dexterity.browser.view.DefaultView"
+      template="templates/messagecontentcore.pt"
+      permission="zope2.View"
+      />
+
+</configure>

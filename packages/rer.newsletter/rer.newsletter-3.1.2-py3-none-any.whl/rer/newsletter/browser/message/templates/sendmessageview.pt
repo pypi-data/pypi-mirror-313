@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      lang="en"
+      metal:use-macro="here/main_template/macros/master"
+      xml:lang="en"
+      i18n:domain="rer.newsletter"
+>
+
+  <!-- disattivo le portlet in questa view -->
+  <metal:override fill-slot="top_slot"
+                  tal:define="
+                    disable_column_one python:request.set('disable_plone.leftcolumn',1);
+                    disable_column_two python:request.set('disable_plone.rightcolumn',1);
+                  "
+  />
+
+  <metal:content-core fill-slot="content-title">
+    <a class="link-parent"
+       href=""
+       tal:attributes="
+         href python:context.absolute_url();
+       "
+       i18n:translate="come_back"
+    >
+          Come Back
+    </a>
+    <h1 tal:content="context/title">Title</h1>
+  </metal:content-core>
+  <body>
+    <metal:content-core fill-slot="content-core">
+      <p>Stai per inviare questo messaggio a
+        <span tal:define="
+                active_users view/form_instance/active_subscriptions;
+              "
+              tal:replace="active_users"
+        >
+              n
+        </span>
+        iscritti al canale, sei sicuro ?</p>
+      <div id="content-core"
+           tal:content="structure view/contents"
+      ></div>
+    </metal:content-core>
+  </body>
+</html>

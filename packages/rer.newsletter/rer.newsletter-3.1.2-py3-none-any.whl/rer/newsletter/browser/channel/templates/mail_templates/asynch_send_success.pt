@@ -1,0 +1,19 @@
+<tal:root define="
+            header python:options['header'];
+            footer python:options['footer'];
+            style python:options['style'];
+            channel_name python:options['channel_name'];
+            message_title python:options['message_title'];
+            subscribers python:options.get('subscribers', '');
+          ">
+  <span tal:replace="structure header"></span>
+  <style tal:content="style"></style>
+  <br />
+  <p class="message_core">
+  L'invio del messaggio <b>${message_title}</b>
+    <tal:subscribers condition="subscribers">a ${subscribers} iscritti</tal:subscribers>
+  del canale <b>${channel_name}</b> &egrave; andato a buon fine.
+  </p>
+  <br />
+  <span tal:replace="structure footer"></span>
+</tal:root>

@@ -1,0 +1,96 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="rer.newsletter"
+    >
+
+  <include package="plone.contentrules" />
+  <include
+      package="plone.contentrules"
+      file="meta.zcml"
+      />
+  <include package="plone.app.contentrules" />
+
+  <!-- Event -->
+
+  <interface
+      interface="rer.newsletter.contentrules.events.IUnsubscriptionEvent"
+      type="plone.contentrules.rule.interfaces.IRuleEventType"
+      name="Utente conferma la disiscrizione dal canale della newsletter"
+      />
+
+  <interface
+      interface="rer.newsletter.contentrules.events.ISubscriptionEvent"
+      type="plone.contentrules.rule.interfaces.IRuleEventType"
+      name="Utente conferma iscrizione al canale della newsletter"
+      />
+
+  <subscriber
+      for="rer.newsletter.contentrules.events.ISubscriptionEvent"
+      handler=".handlers.subscribeNotification"
+      />
+
+  <subscriber
+      for="rer.newsletter.contentrules.events.IUnsubscriptionEvent"
+      handler=".handlers.unsubscribeNotification"
+      />
+
+  <!-- Content rule -->
+
+  <adapter factory=".executors.NotifyOnSubscribeExecutor" />
+
+  <browser:page
+      name="plone.actions.NotificationOnSubscribe"
+      for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+      class=".forms.NotificationOnSubscribeAddFormView"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+  <browser:page
+      name="edit"
+      for="rer.newsletter.contentrules.interfaces.INotifyOnSubscribe"
+      class=".forms.NotificationOnsubscribeEditFormView"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+  <plone:ruleAction
+      name="plone.actions.NotificationOnSubscribe"
+      title="Manda una email quando un utente conferma iscrizione"
+      for="rer.newsletter.interfaces.IChannel"
+      event="rer.newsletter.contentrules.events.ISubscriptionEvent"
+      schema=".interfaces.INotifyOnSubscribe"
+      factory=".actions.NotifyOnSubscribeAction"
+      addview="plone.actions.NotificationOnSubscribe"
+      editview="edit"
+      />
+
+  <adapter factory=".executors.NotifyOnUnsubscribeExecutor" />
+
+  <browser:page
+      name="plone.actions.NotificationOnUnsubscribe"
+      for="plone.app.contentrules.browser.interfaces.IRuleActionAdding"
+      class=".forms.NotificationOnUnsubscribeAddFormView"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+  <browser:page
+      name="edit"
+      for="rer.newsletter.contentrules.interfaces.INotifyOnUnsubscribe"
+      class=".forms.NotificationOnUnsubscribeEditFormView"
+      permission="plone.app.contentrules.ManageContentRules"
+      />
+
+  <plone:ruleAction
+      name="plone.actions.NotificationOnUnsubscribe"
+      title="Manda una email quando un utente conferma la disiscrizione"
+      for="rer.newsletter.interfaces.IChannel"
+      event="rer.newsletter.contentrules.events.IUnsubscriptionEvent"
+      schema=".interfaces.INotifyOnUnsubscribe"
+      factory=".actions.NotifyOnUnsubscribeAction"
+      addview="plone.actions.NotificationOnUnsubscribe"
+      editview="edit"
+      />
+
+</configure>

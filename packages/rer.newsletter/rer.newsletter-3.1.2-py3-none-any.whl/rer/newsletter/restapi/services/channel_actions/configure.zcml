@@ -1,0 +1,26 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:cache="http://namespaces.zope.org/cache"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    >
+
+  <!-- expander -->
+  <plone:service
+      method="GET"
+      factory=".get.ChannelActionsGet"
+      for="rer.newsletter.interfaces.IChannel"
+      permission="zope2.View"
+      name="@channel-actions"
+      />
+
+  <adapter
+      factory=".get.ChannelActions"
+      name="channel-actions"
+      />
+
+  <cache:ruleset
+      for=".get.ChannelActionsGet"
+      ruleset="plone.content.dynamic"
+      />
+
+</configure>

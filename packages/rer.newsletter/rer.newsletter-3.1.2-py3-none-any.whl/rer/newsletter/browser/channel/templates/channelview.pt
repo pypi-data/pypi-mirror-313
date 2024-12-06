@@ -1,0 +1,92 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      metal:use-macro="here/main_template/macros/master"
+      xml:lang="en"
+      i18n:domain="rer.newsletter"
+>
+
+  <metal:block metal:fill-slot="style_slot">
+  </metal:block>
+
+  <metal:block metal:fill-slot="javascript_head_slot">
+  </metal:block>
+
+  <!-- disattivo le portlet in questa view -->
+  <metal:override fill-slot="top_slot"
+                  tal:define="
+                    disable_column_one python:request.set('disable_plone.leftcolumn',1);
+                    disable_column_two python:request.set('disable_plone.rightcolumn',1);
+                  "
+  />
+
+  <metal:content-core fill-slot="content-title">
+    <a class="link-parent"
+       href=""
+       tal:attributes="
+         href python:context.absolute_url();
+       "
+       i18n:translate="come_back"
+    >
+          Come Back
+    </a>
+    <h1 tal:content="context/title">Title</h1>
+  </metal:content-core>
+  <metal:content-core fill-slot="content-description">
+  </metal:content-core>
+  <body>
+    <metal:content-core fill-slot="content-core">
+      <ul>
+        <li><a href=""
+             tal:attributes="
+               href string:${context/absolute_url}/@@subscribe;
+             "
+          >Subscribe</a></li>
+        <li><a href=""
+             tal:attributes="
+               href string:${context/absolute_url}/@@unsubscribe;
+             "
+          >Unsubscribe</a></li>
+        <li><a href=""
+             tal:attributes="
+               href string:${context/absolute_url}/@@manageusers;
+             "
+          >Users Manage</a></li>
+        <li><a href=""
+             tal:attributes="
+               href string:${context/absolute_url}/@@channelhistory;
+             "
+          >Channel History</a></li>
+      </ul>
+
+
+
+      <h1>Lista di Messaggi</h1>
+      <ul tal:define="
+            messages view/getMessageList;
+          "
+          tal:condition="messages"
+      >
+        <li tal:repeat="message messages">
+          <div>
+            <a href="link"
+               tal:content="message/title"
+               tal:attributes="
+                 href message/absolute_url;
+               "
+            >Title</a>
+          </div>
+          <div>
+            <span tal:define="
+                    state python:view.getState(message);
+                  "
+                  tal:content="state"
+            ></span>
+          </div>
+        </li>
+      </ul>
+    </metal:content-core>
+  </body>
+
+</html>
