@@ -1,0 +1,52 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="c-PMAT",
+    version="0.2.0",
+    author="Priya Narayanan",
+    author_email="priya.narayanan@icr.ac.uk",
+    description="Quantification of extra cellular matrix from whole slide images through preprocessing using PMAT",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/yourusername/your-repo",
+    packages=find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires=">=3.8",
+    install_requires=[
+        "napari==0.4.19",
+        "napari-console==0.0.9",
+        "napari-ome-zarr==0.5.2",
+        "napari-plugin-engine==0.2.0",
+        "napari-plugin-manager==0.1.0a2",
+        "napari-svg==0.1.10",
+        "napari-wsi==0.1.4",
+        "pillow==10.2.0",
+        "imagecodecs==2024.1.1",
+        "imageio==2.34.0",
+        "imagesize==1.4.1",
+        "numba==0.59.0",
+        "numcodecs==0.12.1",
+        "numpy==1.26.4",
+        "numpydoc==1.6.0",
+        "oauthlib==3.2.2",
+        "ome-zarr==0.8.3",
+        "opencv-python==3.4.16.59",
+        "openslide-python==1.3.1",
+        "PyQt5==5.15.10",
+        "PyQt5-Qt5==5.15.2",
+        "PyQt5-sip==12.13.0",
+        "QtPy==2.4.1",
+        "rasterio==1.3.9",
+        "scikit-image==0.22.0",
+        "scipy==1.12.0",
+        "setuptools==68.0.0",
+        "tifffile==2024.2.12",
+        "zarr==2.17.0"
+
+
+    ],
+)
