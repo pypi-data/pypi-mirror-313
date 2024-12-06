@@ -1,0 +1,83 @@
+Metadata-Version: 2.3
+Name: evaluation-lumo
+Version: 0.1.5
+Summary: evaluation_lumo is a package for evaluating the LUMO damage detection system.
+Author-email: Yacine Bel-Hadj <yacine.bel-hadj@vub.be>
+Maintainer-email: Yacine Bel-Hadj <yacine.bel-hadj@vub.be>
+Requires-Python: >=3.9.0
+Description-Content-Type: text/markdown
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Natural Language :: English
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering
+Requires-Dist: pandas>2
+Requires-Dist: black==24.* ; extra == "ci"
+Requires-Dist: mypy==1.* ; extra == "ci"
+Requires-Dist: pycln==2.4.* ; extra == "ci"
+Requires-Dist: isort==5.* ; extra == "ci"
+Requires-Dist: ruff==0.* ; extra == "ci"
+Requires-Dist: commitizen==3.* ; extra == "ci"
+Requires-Dist: pre-commit==3.* ; extra == "ci"
+Requires-Dist: types-PyYAML ; extra == "ci"
+Requires-Dist: types-pytz ; extra == "ci"
+Requires-Dist: types-requests ; extra == "ci"
+Requires-Dist: jupytext ; extra == "ci"
+Requires-Dist: sphinx ; extra == "docs"
+Requires-Dist: sphinx_design ; extra == "docs"
+Requires-Dist: autoclasstoc ; extra == "docs"
+Requires-Dist: myst-parser ; extra == "docs"
+Requires-Dist: pydata-sphinx-theme ; extra == "docs"
+Requires-Dist: sphinx-autoapi ; extra == "docs"
+Requires-Dist: sphinx-copybutton ; extra == "docs"
+Requires-Dist: pytest==8.3.2 ; extra == "test"
+Requires-Dist: pytest-mock==3.14.0 ; extra == "test"
+Requires-Dist: hypothesis==6.111.2 ; extra == "test"
+Requires-Dist: pytest-cov==5.0.0 ; extra == "test"
+Requires-Dist: pytest-randomly==3.15.0 ; extra == "test"
+Requires-Dist: pandas-stubs ; extra == "test"
+Project-URL: Repository, https://github.com/YacineBelHadj/evaluation_lumo
+Provides-Extra: ci
+Provides-Extra: docs
+Provides-Extra: test
+
+# LUMO Damage Detection Evaluation Package
+
+This package provides a standardized framework for evaluating damage detection and localization strategies using the LUMO dataset. Users can input timestamps alongside their corresponding anomaly indices, and the package computes various performance scores for each damage case, promoting consistency in damage detection evaluation.
+
+## Features
+
+- **Standardized Evaluation Metrics**: Calculates TPR and FPR at a threshold set such as FPR for training data is 1%.
+The training dataset should be only the first moth of data
+- **Damage Case Analysis**: Provides detailed performance evaluations for each specific damage scenario within the LUMO dataset.
+
+
+## Installation
+
+To install the package, run:
+
+```bash
+pip install evaluation_lumo
+
+## Usage
+
+To use the package, import the `evaluation_lumo.evaluation` module and call the `compute_tr_by_events` function or `compute_mean_variation` function.
+
+```python
+from evaluation_lumo.evaluation import compute_tr_by_events, compute_mean_variation
+
+# Example usage
+
+date_index = pd.date_range(start='2021-08-01', ends="2022-08-01", freq='10T')
+associated_damage_index = np.random.random(len(date_index))
+compute_tr_by_events(date_index, associated_damage_index)
+compute_mean_variation(date_index, associated_damage_index)
+```
+
