@@ -1,0 +1,132 @@
+# NeuroPrompt
+
+A smart prompt compression and optimization tool for Large Language Models that automatically adapts to different types of content and provides comprehensive quality evaluation.
+
+## Installation
+
+To install NeuroPrompt, follow these steps:
+
+1. Set up your OpenAI API key. NeuroPrompt relies on OpenAI services, so make sure you have access to the OpenAI API.
+
+```bash
+export OPENAI_API_KEY=<your_openai_key>
+```
+
+2. Install NeuroPrompt via `pip`:
+
+```bash
+pip install neuroprompt
+```
+
+You can find more information about OpenAI API keys [here](https://beta.openai.com/signup/).
+
+## Features
+
+- **Smart Prompt Compression**: Compresses prompts while retaining the core information, optimizing token usage.
+- **Content-Aware Parameter Optimization**: Automatically adapts to different types of content like code, technical lists, and text.
+- **Comprehensive Response Quality Evaluation**: Evaluates the quality of compressed responses using standard metrics.
+- **Cost Optimization for OpenAI API Calls**: Helps reduce the cost of API calls by minimizing token counts.
+- **Automatic Token Counting and Cost Estimation**: Estimates the number of tokens and calculates associated costs.
+
+## Quick Start
+
+To start using NeuroPrompt, follow the example below to implement a basic prompt compression decorator.
+
+```python
+from neuroprompt import NeuroPromptCompress
+from openai import OpenAI
+
+@NeuroPromptCompress()
+def chat_completion(messages, model="gpt-4o", temperature=0.7):
+    client = OpenAI()
+    return client.chat.completions.create(
+        messages=messages,
+        model=model,
+        temperature=temperature
+    )
+
+# Example usage
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Your prompt here..."}
+]
+
+response = chat_completion(messages=messages)
+print(response)
+```
+
+## Documentation
+
+### Basic Usage
+
+NeuroPrompt provides two main decorators that help you utilize prompt compression and quality evaluation features:
+
+1. **`NeuroPromptCompress`**: Use this for basic prompt compression without any extra evaluation. It helps to optimize token usage and cost without checking response quality.
+2. **`NeuroPromptCompressWithEval`**: This decorator compresses prompts while also evaluating the compressed response's quality. It provides detailed insights into metrics such as relevance, coherence, and accuracy.
+
+### Advanced Features
+
+#### Quality Metrics
+
+The quality of compressed responses is measured using various standard metrics:
+
+- **ROUGE Scores**: Measures the overlap of key elements between original and compressed responses.
+- **BLEU Score**: Evaluates the similarity of the compressed response to the original text based on word overlap.
+- **Semantic Similarity**: Uses embeddings to calculate the semantic consistency of the compressed response.
+- **Information Coverage**: Assesses whether critical information is retained in the compressed output.
+- **Expert Evaluation (using GPT-4o)**: Applies GPT-4o to evaluate the quality of the response in terms of accuracy, completeness, and coherence.
+
+### Examples
+
+#### Compressing a Chat with Evaluation
+
+To use NeuroPrompt with evaluation metrics:
+
+```python
+from neuroprompt import NeuroPromptCompressWithEval
+from openai import OpenAI
+
+@NeuroPromptCompressWithEval()
+def chat_completion(messages, model="gpt-4o", temperature=0.7):
+    client = OpenAI()
+    return client.chat.completions.create(
+        messages=messages,
+        model=model,
+        temperature=temperature
+    )
+
+# Example usage with evaluation
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Explain quantum computing in simple terms."}
+]
+
+response = chat_completion(messages=messages)
+print(response)
+```
+
+The above code will compress the prompt and provide comprehensive quality metrics, ensuring that the response remains relevant and complete.
+
+### Cost Optimization
+
+One of NeuroPrompt's key features is reducing token usage, which directly impacts the cost of using models like GPT-4. By reducing prompt size, NeuroPrompt helps make OpenAI API usage more affordable.
+
+## License
+
+```
+Copyright © 2024 Tejas Chopra.
+
+All rights reserved.
+
+This is proprietary software. Unauthorized copying, modification, distribution, or use of this software, in whole or in part, is strictly prohibited.
+```
+
+### Third-Party Components
+
+This software uses LLMLingua under the MIT license. See the `LICENSE` file for full terms.
+
+For more details about MIT licensing, visit the [Open Source Initiative](https://opensource.org/licenses/MIT).
+
+## Support and Contributions
+
+We welcome contributions to NeuroPrompt! If you have suggestions or find bugs, please feel free to email `chopratejas@gmail.com`
