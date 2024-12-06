@@ -1,0 +1,112 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "idefix_cli"
+version = "6.0.0"
+description = "A command line utility belt for Idefix"
+authors = [
+    { name = "C.M.T. Robert" },
+]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Typing :: Typed",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "inifix>=4.2.2",
+    "packaging>=21.0",
+    "termcolor>=2.3.0",
+    "typing-extensions>=4.1.0;python_version < '3.11'",
+]
+
+[project.license]
+text = "GPL-3.0"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.scripts]
+idfx = "idefix_cli.__main__:idfx_entry_point"
+baballe = "idefix_cli.__main__:baballe_entry_point"
+
+[project.urls]
+Homepage = "https://github.com/neutrinoceros/idefix_cli"
+
+[dependency-groups]
+covcheck = [
+    "coverage[toml]>=6.5.0",
+]
+test = [
+    "pytest-check>=2.1.2",
+    "pytest>=7.2.1",
+]
+typecheck = [
+    "mypy>=1.11.2",
+]
+
+[tool.hatch.build.targets.sdist]
+exclude = [".*"] # exclude dot files (.gitignore is still included)
+
+[tool.ruff.lint]
+exclude = ["*__init__.py"]
+ignore = ["E501", "ISC001"]
+select = [
+    "E",
+    "F",
+    "W",
+    "C4",  # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "YTT", # flake8-2020
+    "ISC", # flake8-implicit-string-concatenation
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["idefix_cli"]
+
+[tool.coverage.run]
+branch = true
+source = [
+    "src/idefix_cli",
+    "tests",
+]
+omit = [
+    # this test generates fake source files that are removed in teardown
+    "*test_broken_command_plugin*"
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    # a more strict default pragma
+    "\\# pragma: no cover\\b",
+
+    # allow defensive code
+    "^\\s*raise NotImplementedError\\b",
+
+    ": \\.\\.\\.(\\s*#.*)?$",
+    "^ +\\.\\.\\.$",
+    "-> ['\"]?NoReturn['\"]?:",
+]
+
+[tool.mypy]
+python_version = '3.10'
+show_error_codes = true
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_unreachable = true
+show_error_context = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra --doctest-modules"
+filterwarnings = [
+    "error",
+]
