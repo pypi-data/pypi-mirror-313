@@ -1,0 +1,58 @@
+[project]
+name = "tcloud"
+description = "Tobiko Cloud CLI"
+readme = "README.md"
+authors = [
+    { name = "TobikoData Inc.", email = "engineering@tobikodata.com" }
+]
+license = { text = "Apache License 2.0" }
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: SQL",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dynamic = ["version"]
+
+dependencies = [
+    "click",
+    "requests",
+    "ruamel.yaml",
+]
+
+[project.optional-dependencies]
+dev = [
+    "devpi-client",
+    "ruff~=0.4.0",
+    "mypy~=1.10.0",
+    "pre-commit",
+    "pytest",
+    "pytest-mock",
+    "responses",
+    "types-requests==2.28.8",
+]
+
+[project.scripts]
+tcloud = "tcloud.cli:cli"
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_file = "tcloud/_version.py"
+fallback_version = "0.0.0"
+local_scheme = "no-local-version"
+
+[tool.mypy]
+disallow_untyped_defs = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = [
+    "sqlmesh_enterprise.*",
+    "ruamel.*",
+]
+ignore_missing_imports = true
