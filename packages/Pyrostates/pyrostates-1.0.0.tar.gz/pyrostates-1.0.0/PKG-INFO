@@ -1,0 +1,73 @@
+Metadata-Version: 2.1
+Name: Pyrostates
+Version: 1.0.0
+Summary: A state handling extension for Pyrogram
+Author-email: Sajjad <sajjadalipour2006@gmail.com>
+License: Copyright (c) 2024-present SajjadAlipour2006
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Project-URL: Homepage, https://github.com/SajjadAlipour2006/Pyrostates
+Project-URL: Tracker, https://github.com/SajjadAlipour2006/Pyrostates/issues
+Keywords: python,bot,telegram,pyrogram
+Classifier: License :: OSI Approved :: MIT License
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+## Pyrostates
+
+> A state handling extension for [Pyrogram](https://github.com/pyrogram/pyrogram)
+
+``` python
+from pyrogram import Client, filters
+from pyrostates import at_state, set_state, del_state
+
+app = Client("my_account")
+
+
+@app.on_message(at_state(None) & filters.private & filters.text)
+async def home_state(_, message):
+    await message.reply("Hello, I'm the conversation bot. What is your name?")
+    set_state(message, "NAME")
+
+
+@app.on_message(at_state("NAME") & filters.private & filters.text)
+async def name_state(_, message):
+    name = message.text
+    await message.reply(f"Nice to meet you, {name}! How old are you?")
+    set_state(message, "AGE")
+
+
+@app.on_message(at_state("AGE") & filters.private & filters.text)
+async def age_state(_, message):
+    age = message.text
+    await message.reply(f"You are {age} years old, good for you! Have a nice day!")
+    del_state(message)
+
+
+app.run()
+```
+
+**Pyrostates** is a ready, easy and elegant extension for the [Pyrogram](https://github.com/pyrogram/pyrogram)
+framework. It enables you to handle the states of your users in the most simple, efficient and reliable way.
+
+### Installing
+
+``` bash
+pip3 install pyrostates
+```
