@@ -1,0 +1,42 @@
+[package]
+name = "starlark-pyo3"
+version = "0.1.0"
+authors = ["Andreas Kloeckner <inform@tiker.net>"]
+license = "MIT"
+
+description = "Python bindings for starlark-rust"
+homepage = "https://github.com/inducer/starlark-pyo3"
+repository = "https://github.com/inducer/starlark-pyo3"
+readme = "README.rst"
+edition = "2021"
+
+exclude = [
+        "dist/*",
+        ]
+
+[lib]
+crate-type = ["cdylib"]
+name = "starlark"
+
+[dependencies]
+starlark = "^0.12.0"
+starlark_derive = "^0.10.0"
+anyhow = "^1.0.65"
+pyo3 = { version = "0.22.6", features = ["extension-module"] }
+
+# needed to resolve contradictory constraints in dependencies
+syn = "^1.0.96"
+
+serde_json = "1.0"
+num-bigint = "0.4.3"
+thiserror = "^1.0.35"
+gazebo = "^0.8.0"
+allocative = "^0.3"
+dupe = "^0.9.0"
+
+proc-macro2 = "^1.0.63"
+
+# [patch.crates-io]
+# starlark = { git = 'https://github.com/facebookexperimental/starlark-rust/' }
+# allocative = { git = 'https://github.com/facebookexperimental/starlark-rust/' }
+# dupe = { git = 'https://github.com/facebookexperimental/starlark-rust/' }
