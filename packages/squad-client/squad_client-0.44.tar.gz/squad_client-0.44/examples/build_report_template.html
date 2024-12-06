@@ -1,0 +1,192 @@
+{% set base_url = [server, '%s/%s/' % (group.slug, project.slug)]|join %}
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <style>
+            .table {
+                border: 1px solid #DDD;
+                margin-bottom: 0px;
+            }
+
+            .table td, .table th {
+                vertical-align: middle;
+                text-align: left;
+            }
+
+            .break-word{
+                word-break: break-word;
+
+            }
+
+            .no-border {
+                border-top: none;
+            }
+
+            .spacer {
+                height: 20px;
+            }
+
+            .p {
+                background-color: #FFFFFF; 
+            }
+
+            .f {
+                background-color: #E04051;
+            }
+
+            .x {
+                background-color: #45B8E3;
+            }
+
+            .s {
+                background-color: #DDDD0D;
+            }
+
+            .u {
+                color: blue;
+                text-decoration: underline;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="content" class="container">
+            {% if intro %}
+                <div id="introduction">{{ intro }}</div>
+            {% endif %}
+            <div id="build">
+                <h2>Details for <a href="{{ base_url + 'build/' + build.version + '/' }}">build {{ build.version }}</a></h2>
+                <div id="build-details">
+                    <table class="table">
+                        {% for key, value in build.metadata.__dict__.items() %}
+                            {% if value is iterable and value is not string %}
+                                <th rowspan="{{ value|length + 1}}" scope="row">{{key}}</th>
+                                <td>
+                                    {% for v in value %}
+                                        <tr>
+                                            <td style="border: none;">
+                                                {% if v|string and v is not mapping and v.startswith('http') %}
+                                                    <a href="{{ v }}">{{ v }}</a>
+                                                {% else %}
+                                                    {{ v }}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                               </td>
+                            {% else %}
+                                <tr>
+                                    <th scope="row">{{key}}</th>
+                                    <td style="border: none;">
+                                        {% if value is not number and value is string and value.startswith('http') %}
+                                            <a href="{{ value }}">{{ value }}</a>
+                                        {% else %}
+                                            {{ value }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% for env in env_summaries.keys() %}
+                            <tr>
+                                <th scope="row"> {{env}}</th>
+                                <td>
+                                    <table>
+                                        <tr>
+                                            <th scope="col"> Pass </th>
+                                            <th scope="col"> Fail </th>
+                                            <th scope="col"> Xfail </th>
+                                            <th scope="col"> Skip </th>
+                                        </tr>
+                                        <tr>
+                                            <td> {{env_summaries[env]['pass']}}</td>
+                                            <td> {{env_summaries[env]['fail']}}</td>
+                                            <td> {{env_summaries[env]['xfail']}}</td>
+                                            <td> {{env_summaries[env]['skip']}}</td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <th scope="row">Total Pass Summary</th>
+                            <td>{{ build.status.tests_pass if build.status.tests_pass else 0 }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Fail Summary</th>
+                            <td>{{ build.status.tests_fail if build.status.tests_fail else 0 }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Skip Summary</th>
+                            <td>{{ build.status.tests_skip if build.status.tests_skip else 0}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Xfail Summary</th>
+                            <td>{{ build.status.xfail if build.status.xfail else 0}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Tests</th>
+                            <td>{{ build.status.tests_total }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="testrun-list">
+                <h2>LAVA test results</h2>
+                    {% for env_name, env_results in table.items() %}
+                        <h3>{{ env_name }}</h3>
+                        <table class="table" border="1">
+                            <tr>
+                                <th class="col-2">Test Suite</th>
+                                <th class="col-5">Test</th>
+                                <th class="col-1">Result</th>
+                            </tr>
+                            {% for test_type, suites in env_results.items() %}
+                              {% for suite_name, tests in suites.items() %}
+                                <tr>
+                                    <td class="col-2" rowspan="{{ tests|length}}">{{ suite_name }}</td>
+                                {% for test in tests %}
+                                    {% if test.status  %}
+                                        {% set __class = test.status[0] %}
+                                        {% set func = 't' %}
+                                    {% else %}
+                                        {% set func = 'm' %}
+                                        {% set __class = '' %}
+                                    {% endif %}
+                                    {# the line below is likely to repeat thousands of times, we're saving some precious bytes of storage #}
+<td class="col-5 u" onclick="{{ func }}({{test.test_run|getid}}, '{{suite_name}}', this)">{{ test.short_name }}</td><td class="{{ __class }}">{{ test.status if test.status else test.result}}</td></tr>
+                                {% endfor %}
+                              {% endfor %}
+                            {% endfor %}
+                         </table>
+                    {% endfor %}
+                <div class="spacer"></div>
+            </div>
+        </div>
+    </body>
+    <script>
+        // Avoid creating <a> tags for tests, given that those are going
+        // to be thousands of thousands
+        function go_to(testrun_id, suite_slug, link) {
+            var url = "{{ base_url }}";
+            url += "build/"
+            url += "{{ build.version }}/";
+            url += "testrun/"
+            url += testrun_id.toString() + '/'
+            url += 'suite/' + suite_slug + '/'
+            url += link
+            console.log(url);
+            window.location = url;
+        }
+
+        function t(testrun_id, suite_slug, td_tag) {
+            test_name = td_tag.innerHTML;
+            link = 'test/' + test_name + '/details/'
+            go_to(testrun_id, suite_slug, link)
+        }
+
+        function m(testrun_id, suite_slug, tag) {
+            go_to(testrun_id, suite_slug, 'metrics/')
+        }
+    </script>
+</html>

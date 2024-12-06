@@ -1,0 +1,13 @@
+#!/bin/bash
+
+tag="$1"
+v="${tag:1}"
+
+twine upload dist/*
+
+# Push to dockerhub
+echo 'Login to hub.docker.com:'
+docker login
+docker tag squadproject/squad-client:$v squadproject/squad-client:latest
+docker push squadproject/squad-client:$v
+docker push squadproject/squad-client:latest

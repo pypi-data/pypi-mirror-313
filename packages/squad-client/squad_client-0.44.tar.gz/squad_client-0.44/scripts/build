@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -eu
+
+tag="$1"
+v="${tag:1}"
+
+# Build pip package
+rm -rf build/ dist/ *.egg-info/
+python3 -m build
+
+# test
+tar=$(mktemp tar.XXXXXXXXX)
+git=$(mktemp git.XXXXXXXXX)
+trap cleanup INT TERM EXIT
+cleanup() {
+    rm -rf "$tar" "$git"
+}
+git ls-tree -r --name-only HEAD | grep -v '\(\.tar\|\.gitlab-ci.yml\)$' | sort > "$git"
+
+tar taf dist/squad_client-${v}.tar.gz | cut -d / -f 2- | grep -v '\(/$\|^$\|PKG-INFO\|egg-info\|\.pyc\|\.sqlite3\)' | sort > "$tar"
+diff -u "$tar" "$git"

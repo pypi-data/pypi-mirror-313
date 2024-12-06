@@ -1,0 +1,68 @@
+from collections import defaultdict
+
+import json
+import re
+
+
+def first(_dict):
+    if _dict is None or len(_dict) == 0:
+        return None
+    return next(iter(_dict.values()))
+
+
+def parse_test_name(name):
+    suite_name, test_name = name.split('/', 1)
+    return (suite_name, test_name)
+
+
+def parse_metric_name(name):
+    return parse_test_name(name)
+
+
+def split_group_project_slug(group_project_slug):
+    group_slug, project_slug = group_project_slug.split('/')
+    return (group_slug, project_slug)
+
+
+def split_build_url(build_slug):
+    group_slug, project_slug, _, build_version = build_slug.split('/')
+    return (group_slug, project_slug, build_version)
+
+
+def to_json(thing):
+    return json.dumps(thing)
+
+
+def get_class_name(obj):
+    return obj.__class__.__name__
+
+
+def getid(url):
+    try:
+        matches = re.search(r'^.*/(\d+)/$', url)
+        if matches:
+            _id = int(matches.group(1))
+            return _id
+    except (ValueError, TypeError):
+        pass
+
+    return -1
+
+
+__data__ = defaultdict(dict)
+
+
+def get_or_fetch(klass, id):
+    global __data__
+
+    # id might be a squad.url/api/klass/<id>
+    if type(id) is str:
+        id = getid(id)
+
+    try:
+        return __data__[klass][id]
+    except KeyError:
+        pass
+
+    __data__[klass][id] = klass(id)
+    return __data__[klass][id]
