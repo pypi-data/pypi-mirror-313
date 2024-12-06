@@ -1,0 +1,99 @@
+Metadata-Version: 2.1
+Name: bitcoin-usb
+Version: 0.7.0
+Summary: Wrapper around hwi, such that one can sign bdk PSBTs directly
+Home-page: https://github.com/andreasgriffin/bitcoin-usb
+License: GPL-3.0
+Author: andreasgriffin
+Author-email: andreasgriffin@proton.me
+Requires-Python: >=3.8.1,<3.13
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: bdkpython (>=0.31.0,<0.32.0)
+Requires-Dist: hwi (>=3.0.0,<4.0.0)
+Requires-Dist: mnemonic (>=0.21,<0.22)
+Requires-Dist: pyqt6 (>=6.6.1,<7.0.0)
+Requires-Dist: python-bitcointx (==1.1.4)
+Requires-Dist: requests (>=2.32.3,<3.0.0)
+Requires-Dist: trezor (>=0.13.9,<0.14.0)
+Description-Content-Type: text/markdown
+
+# Wrapper around hwi, such that one can sign bdk PSBTs directly
+
+* This provides an abstraction layer ontop of hwi, such that only bdk is needed from the outside
+* Currently supported are
+  - Coldcard
+  - Bitbox02
+  - Jade
+
+
+* It also provides 
+  - AddressTypes, which are the commonly used bitcoin output descriptor templates
+  - seed_tools.derive_spk_provider  to derive xpubs from seeds for all AddressTypes  (bdk does not support multisig templates currently https://github.com/bitcoindevkit/bdk/issues/1020)
+  - SoftwareSigner which can sign single and multisig PSBTs, this doesn't do any security checks, so only use it on testnet
+  - HWIQuick to list the connected devices without the need to unlock them
+
+
+### Demo
+
+Run the demo with
+
+```
+python demo.py
+```
+
+
+### Tests
+
+Run tests
+
+```
+python -m pytest -vvv  --log-cli-level=0
+```
+
+### Library Usage
+
+* For xpub derivation bip_utils is used
+* For signing a psbt python-bitcointx is used
+
+
+# Install package
+
+
+
+### From pypi
+
+```shell
+pip install bitcoin_usb
+```
+
+
+
+###  From git
+
+* Install  requirements:
+
+```shell
+poetry install
+```
+
+* Automatic commit formatting
+
+```shell
+pip install pre-commit
+pre-commit install
+```
+
+
+* Run the precommit manually for debugging
+
+```shell
+pre-commit run --all-files
+```
+
+
+
