@@ -1,0 +1,51 @@
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
+
+class SolverRequest(BaseModel):
+    """
+    Request for a solver, with inputs and quality guarantees.
+    """
+
+    solverInput: Optional[BaseModel] = None
+    falsePositiveRate: float = 0.01
+
+
+class SolverReceipt(BaseModel):
+    """
+    Solver receipt as bloom filter and number of inserted items.
+    """
+
+    bloomFilter: bytes = b"BgAAAAAAAADYxCJU"
+    countItems: int = 0
+
+
+class SolverResponse(BaseModel):
+    """
+    Solver response with output and receipt.
+    """
+
+    solverOutput: Optional[BaseModel] = None
+    solverReceipt: SolverReceipt = SolverReceipt()
+
+
+class VerifierRequest(BaseModel):
+    """
+    Verifier request, with solver request and solver receipt as
+    input, as well as K to control the minimum required confidence.
+    """
+
+    solverRequest: SolverRequest = SolverRequest()
+    solverReceipt: SolverReceipt = SolverReceipt()
+    K: int = Field(10, ge=0, le=100)
+
+
+class VerifierResponse(BaseModel):
+    """
+    Verifier response, with number of verified items and
+    the verification outcome.
+    """
+
+    countItems: int = 0
+    isVerified: bool = False
