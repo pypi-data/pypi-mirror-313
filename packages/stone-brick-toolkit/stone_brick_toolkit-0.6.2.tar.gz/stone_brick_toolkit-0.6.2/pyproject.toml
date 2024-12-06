@@ -1,0 +1,97 @@
+[project]
+name = "stone-brick-toolkit"
+version = "0.6.2"
+description = "Stone Brick is a toolkit providing some commonly used utilities."
+authors = [
+    { name = "Yanli", email = "mail@yanli.one" },
+]
+requires-python = ">=3.9"
+readme = "README.md"
+dependencies = []
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+Repository = "https://github.com/BeautyyuYanli/Stone-Brick-Toolkit"
+
+[project.optional-dependencies]
+all = [
+    "stone-brick-toolkit[llm, retry, observability]",
+]
+llm = [
+    "stone-brick-toolkit[retry]",
+    "openai>=1.55.1",
+]
+retry = [
+    "tenacity>=8.5.0",
+]
+observability = [
+    "opentelemetry-api>=1.28.2",
+]
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
+
+[tool.pyright]
+venvPath = ".venv"
+
+[tool.ruff]
+target-version = "py39"
+exclude = [
+    ".venv",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "G",
+    "B",
+    "I",
+    "SIM",
+    "TID",
+    "PL",
+    "RUF",
+]
+ignore = [
+    "RUF001",
+    "RUF003",
+    "E501",
+    "E402",
+    "PLR0911",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+    "SIM105",
+    "SIM102",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "stone_brick",
+]
+
+[tool.pytest.ini_options]
+log_cli_level = "INFO"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "ruff>=0.8.1",
+    "python-dotenv>=1.0.1",
+    "pytest>=8.3.3",
+    "rich>=13.9.4",
+    "logfire>=2.5.0",
+]
+
+[tool.pdm.scripts.fix]
+shell = "ruff check --fix && ruff format"
+
+[tool.pdm.scripts.check]
+shell = "ruff check && ruff format --check"
