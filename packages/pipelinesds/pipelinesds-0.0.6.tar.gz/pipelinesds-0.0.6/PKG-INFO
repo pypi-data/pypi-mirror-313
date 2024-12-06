@@ -1,0 +1,142 @@
+Metadata-Version: 2.1
+Name: pipelinesds
+Version: 0.0.6
+Summary: Solution for DS Team
+Author: DS Team
+Author-email: ds@sts.pl
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: google-cloud-bigquery>=3.22.0
+Requires-Dist: google-cloud-bigquery-storage>=2.25.0
+Requires-Dist: google-cloud-storage>=2.16.0
+Requires-Dist: pandas>=2.2.2
+Requires-Dist: db-dtypes>=1.2.0
+Requires-Dist: evidently==0.4.39
+
+# pipelinesds
+
+Pipelinesds is a library that includes functions used in Kubeflow pipelines such as:
+
+## vertex_pipeline.py
+
+### `get_data_from_bq()`
+
+Returns data from BigQuery as a DataFrame.
+
+- **Parameters:**
+  - `bq_client`: BigQuery client.
+  - `bq_storage_client`: BigQuery Storage client.
+  - `table`: Name of the table/view to get data from.
+  - `where_clause`: Optional SQL WHERE clause to filter data.
+
+- **Returns:**
+  - `pd.DataFrame`: Data from the view/table.
+
+### `call_procedure_and_get_data_from_bq()`
+
+Calls a stored procedure in BigQuery and returns the results as a DataFrame.
+
+- **Parameters:**
+  - `bq_client`: BigQuery client.
+  - `procedure_name`: Name of the stored procedure to call.
+  - `parameters`: Optional list of parameters to pass to the procedure. If no parameters are provided, an empty list is used.
+
+- **Returns:**
+  - `pd.DataFrame`: The result of the procedure call as a DataFrame.
+
+### `delete_old_data()`
+
+Deletes old data from a BigQuery table.
+
+- **Parameters:**
+  - `bq_client`: BigQuery client.
+  - `table`: Name of the table/view to delete data from.
+  - `where_clause`: SQL WHERE clause to filter data for deletion.
+
+### `write_dataframe_to_bq()`
+
+Writes a DataFrame to a BigQuery table.
+
+- **Parameters:**
+  - `bq_client`: BigQuery client.
+  - `df`: DataFrame to write.
+  - `table_id`: Table in BigQuery to write the DataFrame.
+  - `write_disposition`: Type of write operation ('WRITE_APPEND', 'WRITE_TRUNCATE', or 'WRITE_EMPTY').
+  - `job_config`: Configuration for the load job.
+
+### `read_gcs_file()`
+
+Reads a file from a specific path on Google Cloud Storage.
+
+- **Parameters:**
+  - `gcs_client`: Google Cloud Storage client.
+  - `bucket_name`: Name of the bucket on GCS where the file is stored.
+  - `destination_blob_name`: Path in the bucket to read the file.
+
+- **Returns:**
+  - `object`: The object read from the file.
+
+### `save_gcs_file()`
+
+Saves content to a specific path on Google Cloud Storage.
+
+- **Parameters:**
+  - `gcs_client`: Google Cloud Storage client.
+  - `bucket_name`: Name of the bucket on GCS where the file will be saved.
+  - `destination_blob_name`: Path in the bucket to save the file.
+  - `content`: The content to be saved.
+  - `content_type`: The MIME type of the content (e.g., 'text/html' or 'application/json').
+
+## monitoring.py
+
+### `mapping()`
+
+Creates a column mapping from a configuration file.
+
+- **Parameters:**
+  - `mapping_file`: Dictionary containing mapping configuration with possible keys:
+    - `numerical_features`
+    - `categorical_features`
+    - `datetime`
+    - `id`
+
+- **Returns:**
+  - `ColumnMapping`: Evidently ColumnMapping object with configured mappings.
+
+### `test_data()`
+
+Tests data for issues using a test suite.
+
+- **Parameters:**
+  - `current_data`: Current data to test.
+  - `reference_data`: Reference data.
+  - `config_file`: Tests configuration file.
+  - `stage`: Stage of the pipeline ('test_input' or 'test_output').
+
+- **Returns:**
+  - `pd.DataFrame`: Test results.
+
+### `check_data_drift()`
+
+Checks data for drift.
+
+- **Parameters:**
+  - `current_data`: Current data to check.
+  - `reference_data`: Reference data.
+  - `config_file`: Tests configuration file.
+
+- **Returns:**
+  - `pd.DataFrame`: Test results.
+
+### `send_email_with_table()`
+
+Sends an email with an HTML table.
+
+- **Parameters:**
+  - `credentials_frame`: DataFrame with credentials.
+  - `subject`: Subject of the email.
+  - `html_table`: Data to send in the email.
+  - `receiver_email`: Email address to send the email to.
