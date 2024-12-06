@@ -1,0 +1,2 @@
+class VerNumError(Exception):
+    pass
