@@ -1,0 +1,63 @@
+[package]
+name = "deltalake-python"
+version = "0.22.3"
+authors = ["Qingping Hou <dave2008713@gmail.com>", "Will Jones <willjones127@gmail.com>"]
+homepage = "https://github.com/delta-io/delta-rs"
+license = "Apache-2.0"
+description = "Native Delta Lake Python binding based on delta-rs with Pandas integration"
+readme = "README.md"
+edition = "2021"
+keywords = ["deltalake", "delta", "datalake", "pandas", "arrow"]
+
+[lib]
+name = "deltalake"
+crate-type = ["cdylib"]
+doc = false
+
+[dependencies]
+delta_kernel.workspace = true
+
+# arrow
+arrow-schema = { workspace = true, features = ["serde"] }
+
+# datafusion
+datafusion-ffi = { workspace = true }
+
+# serde
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# "stdlib"
+chrono = { workspace = true }
+env_logger = "0"
+lazy_static = "1"
+regex = { workspace = true }
+thiserror = { workspace = true }
+
+# runtime
+futures = { workspace = true }
+num_cpus = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+
+# reqwest is pulled in by azure sdk, but not used by python binding itself
+# for binary wheel best practice, statically link openssl
+reqwest = { version = "*", features = ["native-tls-vendored"] }
+
+deltalake-mount = { path = "../crates/mount" }
+
+[dependencies.pyo3]
+version = "0.22.2"
+features = ["extension-module", "abi3", "abi3-py39"]
+
+[dependencies.deltalake]
+path = "../crates/deltalake"
+version = "0"
+features = ["azure", "gcs", "python", "datafusion", "unity-experimental", "hdfs"]
+
+[features]
+default = ["rustls"]
+native-tls = ["deltalake/s3-native-tls", "deltalake/glue"]
+rustls = ["deltalake/s3", "deltalake/glue"]
+
+[build-dependencies]
+openssl-src = "=300.3.1"
