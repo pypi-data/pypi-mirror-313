@@ -1,0 +1,68 @@
+{% extends 'generic/object.html' %}
+{% load render_table from django_tables2 %}
+{% block content %}
+  {% spaceless %}
+    <div class="row mb-3">
+      <div class="col col-md-7">
+        <div class="card">
+          <h5 class="card-header">LLDP neigbors</h5>
+          <table class="table table-hover attr-table">
+            <tr>
+              <th scope="row">Status</th>
+              <td>{% badge object.get_status_display bg_color=object.get_status_color %}</td>
+          </tr>
+            <tr>
+              <th scope="row">Device A</th>
+              <td>{{ object.device_a|linkify }}</td>
+            </tr>
+            <tr>
+              <th scope="row">interface A</th>
+              <td>{{ object.interface_a|linkify }}</td>
+            </tr>
+            <tr>
+              <th scope="row">Device B</th>
+              <td>{{ object.device_b|linkify }}</td>
+            </tr>        
+            <tr>
+              <th scope="row">interface B</th>
+              <td>{{ object.interface_b|linkify }}</td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <div class="card">
+                  <div class="accordion accordion-flush" id="importedData">
+                    <div class="card-body">
+                      <div class="accordion-item">
+                        <h2 class="accordion-header" id="importedDataHeading">
+                          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsedImportedData" aria-expanded="false" aria-controls="collapsedRenderConfig">
+                            Imported data
+                          </button>
+                        </h2>
+                        <div id="collapsedImportedData" class="accordion-collapse collapse" aria-labelledby="importedDataHeading" data-bs-parent="#importedData">
+                          <div class="accordion-body">
+                            <pre class="card-body">{{ object.imported_data|pprint }}</pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>                 
+              </td>
+            </tr>
+          </table>
+        </div>
+        {% include 'inc/panels/custom_fields.html' %}
+      </div>
+      <div class="col col-md-5">
+        <div class="card">
+          <h5 class="card-header">Interface A - connection</h5>
+          {% include  '../details/detail_interface_inc.html' with object=object.interface_a %}
+          <h5 class="card-header">Interface B - connection</h5>
+          {% include  '../details/detail_interface_inc.html' with object=object.interface_b %}
+        </div>
+        {% include 'inc/panels/tags.html' %}
+        {% include 'inc/panels/comments.html' %}
+      </div>
+    </div>
+  {% endspaceless %}
+{% endblock content %}

@@ -1,0 +1,69 @@
+{% extends 'generic/object.html' %}
+{% load render_table from django_tables2 %}
+{% block content %}
+  {% spaceless %}
+    <div class="row mb-3">
+      <div class="col col-md-6">
+        <div class="card">
+          <h5 class="card-header">BGP Connections</h5>
+            <table class="table table-hover attr-table">
+              <tr>
+                <th scope="row">Role</th>
+                <td>{{ object.get_role_display }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Device</th>
+                <td>{{ object.device|linkify }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Next Hop</th>
+                <td>{{ object.raw_next_hop }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Next Hop Link</th>
+                <td>{{ object.next_hop|linkify }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Next Hop interface</th>
+                <td>{{ object.next_hop_interface|linkify }}</td>
+              </tr>
+              <tr>
+                <th scope="row">BGP Prefix</th>
+                <td>{{ object.raw_bgp_prefix }}</td>
+              </tr>
+              <tr>
+                <th scope="row">BGP Prefix Link</th>
+                {% if object.bgp_prefix %}<td>{{ object.bgp_prefix|linkify}}</td>{% endif %}
+                {% if not object.bgp_prefix %}<td></td>{% endif %}
+              </tr>
+              <tr>
+                <th scope="row">BGP Prefix Tenant</th>
+                {% if object.bgp_prefix %}<td>{{ object.bgp_prefix_tenant|linkify }}</td>{% endif %}
+                {% if not object.bgp_prefix %}<td></td>{% endif %}
+              </tr>
+              <tr>
+                <th scope="row">VRF</th>
+                <td>{{ object.raw_vrf }}</td>
+              </tr>
+              <tr>
+                <th scope="row">VRF Link</th>
+                <td>{{ object.vrf|linkify }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Imported data</th>
+                <td>
+                  <pre class="card-body">{{ object.import_data|json}}</pre>
+                </td>
+              </tr>
+            </table>
+        </div>
+        {% include 'inc/panels/custom_fields.html' %}
+      </div>
+      <div class="col col-md-6">
+        {% include 'inc/panel_table.html' with table=parent_prefix_table heading='BGP Parent Prefixes' %}
+        {% include 'inc/panels/tags.html' %}
+        {% include 'inc/panels/comments.html' %}
+      </div>
+    </div>
+  {% endspaceless %}
+{% endblock content %}
