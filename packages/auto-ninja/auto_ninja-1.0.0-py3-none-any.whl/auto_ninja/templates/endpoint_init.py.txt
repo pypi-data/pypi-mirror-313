@@ -1,0 +1,7 @@
+from {{ app.name }}.api.endpoints import {% for _, module in path_modules %}{{ module }}{% if not forloop.last %}, {% endif %}{% endfor %}
+from {{ settings }}.api.utils import AliasRouter
+
+router = AliasRouter()
+
+{% for path, module in path_modules %}router.add_router("/{{ path }}", {{ module }}.router)
+{% endfor %}
