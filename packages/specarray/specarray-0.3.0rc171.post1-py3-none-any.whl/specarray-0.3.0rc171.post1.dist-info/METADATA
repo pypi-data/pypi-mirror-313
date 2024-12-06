@@ -1,0 +1,97 @@
+Metadata-Version: 2.3
+Name: specarray
+Version: 0.3.0rc171.post1
+Summary: Working with hyperspectral data
+Author-email: Thomas Gölles <thomas.goelles@gmail.com>
+Requires-Python: >=3.10.1
+Description-Content-Type: text/markdown
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Image Processing
+Classifier: Topic :: Scientific/Engineering :: Physics
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Dist: xarray
+Requires-Dist: numpy
+Requires-Dist: dask
+Requires-Dist: dask[diagnostics]
+Requires-Dist: spectral
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: bump-my-version ; extra == "dev"
+Requires-Dist: bandit[toml]==1.7.5 ; extra == "test"
+Requires-Dist: black==23.9.1 ; extra == "test"
+Requires-Dist: check-manifest==0.49 ; extra == "test"
+Requires-Dist: flake8-bugbear==24.1.17 ; extra == "test"
+Requires-Dist: flake8-docstrings ; extra == "test"
+Requires-Dist: flake8-formatter_junit_xml ; extra == "test"
+Requires-Dist: flake8 ; extra == "test"
+Requires-Dist: flake8-pyproject ; extra == "test"
+Requires-Dist: pre-commit==3.3.1 ; extra == "test"
+Requires-Dist: pylint==3.0.3 ; extra == "test"
+Requires-Dist: pylint_junit ; extra == "test"
+Requires-Dist: pytest-cov==4.1.0 ; extra == "test"
+Requires-Dist: pytest-mock<3.10.1 ; extra == "test"
+Requires-Dist: pytest-runner ; extra == "test"
+Requires-Dist: pytest==7.4.2 ; extra == "test"
+Requires-Dist: pytest-check ; extra == "test"
+Requires-Dist: coverage-badge ; extra == "test"
+Requires-Dist: pytest-github-actions-annotate-failures ; extra == "test"
+Requires-Dist: shellcheck-py==0.9.0.6 ; extra == "test"
+Requires-Dist: scipy ; extra == "test"
+Requires-Dist: mypy ; extra == "test"
+Project-URL: Documentation, https://tgoelles.github.io/specarray/
+Project-URL: Source, https://github.com/tgoelles/specarray
+Project-URL: Tracker, https://github.com/tgoelles/specarray/issues
+Provides-Extra: dev
+Provides-Extra: test
+
+[![Test and Coverage](https://github.com/tgoelles/specarray/actions/workflows/test_docker.yml/badge.svg)](https://github.com/tgoelles/specarray/actions/workflows/test_docker.yml)
+[![Coverage Status](coverage.svg)](https://your-project-url)
+
+# SPECARRAY
+
+To read, analyze and plot hyperspectral data from Specim devices. Currently only tested with FX10 data.
+
+## Core features
+
+* read Specim instrument data 
+* support for large files thanks to dask
+* using xarray for data handling and data analysis
+* computation of spectral albedo and braodband albedo if white and dark reference is available
+
+## Installation
+
+```bash
+pip install specarray
+```
+
+## Usage
+
+```python
+from specarray import SpecArray
+from pathlib import Path
+import matplotlib.pyplot as plt
+
+data_dir = Path("data/white_weathering_crust_2_2023-07-15_15-25-24/")
+
+white_weathering_crust = SpecArray.from_folder(data_dir)
+
+white_weathering_crust.capture
+
+white_weathering_crust.spectral_albedo.sel(sample=0, point=0).plot.line()
+plt.ylim(0, 1)
+```
+
+The resulting imgage should look like this:
+
+![Spectrum](https://github.com/tgoelles/specarray/blob/main/images/output.png?raw=true)
+
+
+
+For more examples see the [notebooks](https://github.com/tgoelles/specarray/tree/main/notebooks) folder.
+
