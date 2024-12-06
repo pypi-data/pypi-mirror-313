@@ -1,0 +1,219 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ewatercycle"
+version = "2.4.0"
+description = "A Python package for running and validating a hydrology model"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+authors = [
+    { name = "Stefan Verhoeven", email = "s.verhoeven@esciencecenter.nl" },
+]
+keywords = [
+    "BMI",
+    "FAIR",
+    "Geoscience",
+    "ewatercycle",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Hydrology",
+    "Typing :: Typed",
+]
+dependencies = [
+    "bmipy",
+    "cftime>=1.6.2",
+    # esmvalcore is not here as it is installed with conda-lock
+    # otherwise pip installation fails on esmpy
+    "Fiona",
+    "grpc4bmi>=0.4.0",
+    "remotebmi",
+    "hydrostats",
+    "matplotlib>=3.5.0",
+    "numpy",
+    "pandas",
+    "pydantic>=2",
+    "pyoos",
+    "python-dateutil",
+    "ruamel.yaml",
+    "Shapely",
+    "xarray",
+    "fsspec",
+    "cartopy",
+    # Pin pyopenssl (conda installs old version) https://github.com/conda/conda/issues/13619
+    "pyopenssl>=24.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ipython",
+    "mypy",
+    "myst-nb",
+    "pre-commit>=2.15.0",
+    "pytest",
+    "pytest-cov",
+    "pytest-runner",
+    "rich",
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinx-copybutton",
+    "sphinx-rtd-theme",
+    "types-python-dateutil",
+    "types-PyYAML",
+    "types-requests",
+    "tomli",
+    "ruff",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/eWaterCycle/ewatercycle/issues"
+Documentation = "https://ewatercycle.readthedocs.io/"
+Homepage = "https://www.ewatercycle.org/"
+"Source Code" = "https://github.com/eWaterCycle/ewatercycle"
+
+[tool.hatch.build]
+exclude = [
+  "tests", "docs"
+]
+
+[tool.conda-lock]
+channels = [
+    'conda-forge'
+]
+platforms = [
+    'linux-64',
+    'osx-64',
+    'osx-arm64',
+    # Unable to support win-64 as not all esmvaltool deps are available for that platform
+    # 'win-64',
+    # Unable to support linux-aarch64 as not all esmvaltool deps are available for that platform
+    # 'linux-aarch64',  # aka arm64, use for Docker on Apple Silicon
+]
+
+[tool.conda-lock.dependencies]
+esmvaltool-python = ">=2.11"
+# grpc4bmi is not available on conda-forge, so we use the pypi version
+# The grpc4bmi dependencies are not locked
+# As workaround grpc4bmi deps are listed here as conda deps
+# TODO publish grpc4bmi on conda-forge
+grpc4bmi = {source = 'pypi'}
+grpcio = '*'
+grpcio-reflection = '*'
+grpcio-status = '*'
+protobuf = '>=4,<5'
+packaging = '*'
+typeguard = '*'
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = ["tests/*"]
+
+[tool.coverage.paths]
+source = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+plugins = ["pydantic.mypy", "numpy.typing.mypy_plugin"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+check_untyped_defs = true
+files = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = [
+    "A",
+    # TODO enable ANN and make code more typed
+    # "ANN",
+    "ARG",
+    "B",
+    "BLE",
+    "C",
+    "D",
+    "DTZ",
+    "E",
+    "EM",
+    "ERA",
+    "F",
+    # TODO enable FBT and factor out booleans args to seperate functions
+    # "FBT",
+    "FURB",
+    "I",
+    "ICN",
+    "ISC",
+    "LOG",
+    "N",
+    # TODO enable NPT and use modern random
+    # "NPY",
+    "PD",
+    "PERF",
+    "PGH",
+    "PLC",
+    "PLE",
+    # TODO enable PLR and make code less complex
+    # "PLR",
+    # TODO enable PT for tests/**
+    # "PT",
+    "PTH",
+    "PLW",
+    "Q",
+    "RET",
+    "RSE",
+    "RUF",
+    "S",
+    "SLOT",
+    "SIM",
+    "T",
+    "TCH",
+    "TID",
+    "TRY",
+    "UP",
+    "W",
+    "YTT"
+]
+ignore = [
+    # Conflicts with formatting
+    "ISC001",
+    # Conflicts with default rules
+    "PLC0414",
+    # Misidentifies xarrary.DataArray as pandas.DataFrame
+    "PD003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = [
+    "ARG", "ANN", "D", "E501", "DTZ001", "N802", "S101", "S108", "PLR2004"
+]
+"docs/**/*.ipynb" = [
+    # Allow wide lines in notebooks
+    "E501",
+    # Allow prints
+    "T201",
+    # Allow shadowing builtins
+    "A004",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+known-first-party = ["ewatercycle"]
