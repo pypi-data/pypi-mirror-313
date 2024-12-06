@@ -1,0 +1,116 @@
+type: workflow
+name: my-test-workflow5
+source:
+  type: remote
+  remote_uri: s3://tfy-mlfoundry-tfy-ctl-euwe1-devtest20221012173221749100000002/tfy-ctl-euwe1-devtest:nikhil-ws/my-test-workflow5/clyhb79w4013l01oyfq1iawd5/package.tar.gz
+workflow_file_path: hello_world_package/workflow.py
+docker_registry: docker.io/nikp-test
+flyte_entities:
+- template:
+    id:
+      resourceType: TASK
+      name: hello_world_package.workflow.say_hello
+    type: python-task
+    metadata:
+      runtime:
+        type: FLYTE_SDK
+        version: 1.12.2
+        flavor: python
+      retries: {}
+    interface:
+      inputs: {}
+      outputs:
+        variables:
+          o0:
+            type:
+              simple: STRING
+            description: o0
+    custom:
+      truefoundry:
+        type: python-task-config
+        image:
+          type: task-python-build
+          python_version: '3.9'
+          pip_packages:
+          - flytekit==1.10.3
+        resources:
+          cpu_request: 0.2
+          cpu_limit: 0.5
+          memory_request: 200
+          memory_limit: 500
+          ephemeral_storage_request: 1000
+          ephemeral_storage_limit: 2000
+    container:
+      image: ':'
+      args:
+      - pyflyte-execute
+      - --inputs
+      - '{{.input}}'
+      - --output-prefix
+      - '{{.outputPrefix}}'
+      - --raw-output-data-prefix
+      - '{{.rawOutputDataPrefix}}'
+      - --checkpoint-path
+      - '{{.checkpointOutputPrefix}}'
+      - --prev-checkpoint
+      - '{{.prevCheckpointPrefix}}'
+      - --resolver
+      - flytekit.core.python_auto_container.default_task_resolver
+      - --
+      - task-module
+      - hello_world_package.workflow
+      - task-name
+      - say_hello
+      resources: {}
+  description:
+    longDescription:
+      format: DESCRIPTION_FORMAT_RST
+- template:
+    id:
+      resourceType: WORKFLOW
+      name: hello_world_package.workflow.hello_world_wf
+    metadata: {}
+    interface:
+      inputs: {}
+      outputs:
+        variables:
+          o0:
+            type:
+              simple: STRING
+            description: o0
+    nodes:
+    - id: n0
+      metadata:
+        name: say_hello
+        retries: {}
+      taskNode:
+        referenceId:
+          resourceType: TASK
+          name: hello_world_package.workflow.say_hello
+        overrides: {}
+    outputs:
+    - var: o0
+      binding:
+        promise:
+          nodeId: n0
+          var: o0
+    metadataDefaults: {}
+  description:
+    longDescription:
+      format: DESCRIPTION_FORMAT_RST
+- id:
+    resourceType: LAUNCH_PLAN
+    name: hello_world_package.workflow.hello_world_wf
+  spec:
+    workflowId:
+      resourceType: WORKFLOW
+      name: hello_world_package.workflow.hello_world_wf
+    entityMetadata: {}
+    defaultInputs: {}
+    fixedInputs: {}
+    labels: {}
+    annotations: {}
+    rawOutputDataConfig: {}
+  closure:
+    expectedInputs: {}
+    expectedOutputs: {}
