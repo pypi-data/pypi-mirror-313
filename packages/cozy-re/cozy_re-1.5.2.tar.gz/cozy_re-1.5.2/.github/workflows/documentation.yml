@@ -1,0 +1,37 @@
+name: documentation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: Install dependencies
+        run: |
+          pip install sphinx sphinx-autoapi
+      - name: Sphinx build
+        run: TZ=UTC make -C docs html
+        # set timezone explitly as workaround for https://github.com/nektos/act/issues/1853
+      - name: Add cozy-viz to pages deployment
+        run: |
+          DEST=./docs/build/html/cozy-viz/
+          mkdir -p $DEST
+          cp ./cozy-viz/{index.*,cozy-viz.js} $DEST
+          cp -r ./cozy-viz/{components,data,util} $DEST
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html/
+          force_orphan: true
