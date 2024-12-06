@@ -1,0 +1,93 @@
+import datetime
+import platform
+from fastapi.responses import FileResponse
+import uvicorn, os, sys
+from fastapi import FastAPI, Depends
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
+from ws_bom_robot_app.auth import authenticate
+from ws_bom_robot_app.config import config
+from ws_bom_robot_app.llm.api import router as llm
+from ws_bom_robot_app.task_manager import router as task
+from ws_bom_robot_app.cron_manager import (
+    router as cron,
+    cron_manager)
+from ws_bom_robot_app.util import _log
+
+_uptime = datetime.datetime.now()
+cron_manager.start()
+app = FastAPI(redoc_url=None,docs_url=None,openapi_url=None)
+app.include_router(llm,dependencies=[Depends(authenticate)])
+app.include_router(task,dependencies=[Depends(authenticate)])
+app.include_router(cron,dependencies=[Depends(authenticate)])
+
+@app.get("/")
+async def root():
+    return health()
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse("./favicon.ico")
+
+@app.get("/docs", include_in_schema=False)
+async def get_swagger_documentation(authenticate: bool = Depends(authenticate)):
+    return get_swagger_ui_html(openapi_url="/openapi.json", title="docs")
+@app.get("/openapi.json", include_in_schema=False)
+async def openapi(authenticate: bool = Depends(authenticate)):
+    return get_openapi(title=app.title, version=app.version, routes=app.routes)
+
+@app.get("/api/health",tags=["diag"])
+def health():
+    return {"status": "ok"}
+
+@app.get("/api/diag",tags=["diag"])
+def diag(authenticate: bool = Depends(authenticate)):
+    import pkg_resources
+    from ws_bom_robot_app.llm.vector_store.loader.base import Loader as wsll
+    from ws_bom_robot_app.llm.vector_store.integration.manager import IntegrationManager as wsim
+    from ws_bom_robot_app.llm.tools.tool_manager import ToolManager as wstm
+    from ws_bom_robot_app.llm.agent_description import AgentDescriptor as wsad
+    return {
+        "status":"ok",
+        "uptime": {'from':_uptime,'elapsed':str(datetime.datetime.now()-_uptime)},
+        "system": {
+            "platform": {
+                "node": platform.node(),
+                "system": platform.system(),
+                "version": platform.version(),
+                "type": platform.machine(),
+                "processor": platform.processor(),
+                "cpu": os.cpu_count(),
+                "architecture": platform.architecture()
+            },
+            "sys": {
+                "version": sys.version,
+                "platform": sys.platform,
+                "executable": sys.executable,
+                "args": {k: arg for k, arg in enumerate(sys.argv)}
+            },
+            "os": {
+                "ppid": os.getppid(),
+                "pid": os.getpid(),
+                "cwd": os.getcwd(),
+                "ws_bom_robot_app": pkg_resources.get_distribution("ws_bom_robot_app").version,
+                "env": os.environ,
+            },
+        },
+        "config":config,
+        "runtime":config.runtime_options(),
+        "extension": {
+            "loader": ({item[0]: item[1].loader.__name__ if item[1] else None} for item in sorted(wsll._list.items(), key=lambda x: x[0]) if item[1]),
+            "integration":({item[0]: type(item[1]).__name__} for item in wsim._list.items()),
+            "tool": ({item[0]: item[1].function.__name__} for item in wstm._list.items()),
+            "agent":({item[0]: type(item[1]).__name__} for item in wsad._list.items())
+            }
+        }
+@app.post("/diag/reload",tags=["diag"])
+def reset(authenticate: bool = Depends(authenticate)):
+    _log.info("restart server")
+    with open(".reloadfile","w") as f:
+        f.write("")
+
+# Start the FastAPI server
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=6001, env_file="../.env", reload=True, log_level="debug")
