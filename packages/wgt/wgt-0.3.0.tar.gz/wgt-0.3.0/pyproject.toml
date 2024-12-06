@@ -1,0 +1,110 @@
+[project]
+name = "wgt"
+dynamic = ["version"]
+description = "Command line tool for quick API testing"
+authors = [{name="Daniel Hjertholm", email="8713259+danhje@users.noreply.github.com"}]
+requires-python = ">=3.9"
+dependencies = [
+  "requests",
+  "toolz",
+  "rich",
+]
+
+[tool.uv]
+dev-dependencies = [
+  "pytest",
+  "pytest-randomly",
+  "ruff",
+  "pre-commit",
+]
+
+[project.scripts]
+wgt = "wgt.wgt:main"
+
+[tool.setuptools_scm]
+version_scheme="release-branch-semver"
+local_scheme = "no-local-version"
+
+[tool.ruff]
+target-version = "py39"
+
+line-length = 120
+
+[tool.ruff.lint]
+
+select = [
+  "A", # flake8-builtins
+  "ANN", # flake8-annotations
+  "ARG", # flake8-unused-arguments
+  "B", # flake8-bugbear
+  "C4", # flake8-comprehensions
+  "C90", # mccabe
+  "COM", # flake8-commas
+  "DTZ", # flake8-datetimez
+  "E", "W", # pycodestyle
+  "F", # Pyflakes
+  "G", # flake8-logging-format
+  "I", # isort
+  "LOG", # flake8-logging
+  "N", # pep8-nameing
+  "PIE", # flake8-pie
+  "RUF", # Ruff specific rules
+  "S", # flake8-bandit
+  "SIM", # flake8-simplify
+  "T20", # flake8-print
+  "T100", # debug statements
+  "TCH", # flake8-type-checking
+  "UP", # pyupgrade
+  "YTT", # flake8-2020
+]
+
+ignore = ['ANN002', 'ANN003', 'S101', 'COM812', 'ANN401', 'T201']
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.pytest.ini_options]
+log_file = "pytest.log"
+log_level = "DEBUG"
+log_file_format = "%(asctime)s - %(name)s - %(levelname)s: %(message)s"
+norecursedirs = "_build tmp*  __pycache__ src prof wheel_files"
+markers = [
+  "integration: Mark test as an integration test",
+]
+filterwarnings = [
+  "ignore:PyArray_GetNumericOps.*",
+  "ignore:PyArray_SetNumericOps.*",
+]
+
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
