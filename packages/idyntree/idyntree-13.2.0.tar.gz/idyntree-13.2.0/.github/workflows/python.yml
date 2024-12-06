@@ -1,0 +1,142 @@
+name: Python CI/CD
+
+on:
+  push:
+    branches: [ '**' ]
+    tags-ignore: [ '**' ]
+  pull_request:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+  schedule:
+  # * is a special character in YAML so you have to quote this string
+  # Execute a "weekly" build at 2 AM UTC on Thursday
+  - cron:  '0 2 * * *'
+
+jobs:
+
+  # sdist can be built from any os and against any python version
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version:
+          - "3.10"
+
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            coinor-libipopt-dev \
+            libeigen3-dev \
+            swig \
+            libxml2-dev \
+            libassimp-dev \
+            libirrlicht-dev \
+            libglfw3-dev
+          pip install build
+
+      - name: Build sdist
+        run: python -m build --sdist
+
+      - name: Install sdist
+        run: pip -v install dist/*.tar.gz
+
+      - name: Test import
+        run: python -c 'import idyntree.bindings'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  build_wheels:
+    name: Build wheels [${{ matrix.os }}]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+        os:
+          - ubuntu-22.04
+          #- macos-latest
+          #- windows-latest
+
+    steps:
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install cibuildwheel
+        run: pip install cibuildwheel
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BUILD: cp39-*manylinux*_x86_64 cp310-*manylinux*_x86_64 cp311-*manylinux*_x86_64 cp312-*manylinux*_x86_64
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_ENVIRONMENT_LINUX: AUDITWHEEL_PLAT=manylinux_2_28_x86_64
+          CIBW_BEFORE_BUILD_LINUX: |
+            # workaround for https://almalinux.org/blog/2023-12-20-almalinux-8-key-update/
+            rpm --import https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux &&\
+            dnf update -y &&\
+            dnf install -y eigen3-devel libxml2-devel
+            # Pre-install NumPy > 2.0
+            pip install "numpy>=2.0.0"
+          CIBW_TEST_COMMAND: "python -c 'import idyntree.bindings'"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels
+          path: ./wheelhouse/*.whl
+
+  upload_pypi:
+    needs:
+      - build_sdist
+      - build_wheels
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    # Devel branch produces pre-releases.
+    # Master branch produces stable releases linked to GitHub releases.
+
+    steps:
+
+      - uses: actions/download-artifact@v4
+
+      - name: Move sdist and wheels
+        run: |
+          mkdir -p dist/
+          mv sdist/* dist/
+          mv wheels/* dist/
+
+      - name: Inspect dist folder
+        run: ls -lah dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        if: |
+          github.repository == 'robotology/idyntree' &&
+          ((github.event_name == 'release' && github.event.action == 'published') ||
+           (github.event_name == 'push' && github.ref == 'refs/heads/devel'))
