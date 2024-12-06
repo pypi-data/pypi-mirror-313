@@ -1,0 +1,196 @@
+Metadata-Version: 2.1
+Name: dottxt
+Version: 0.1.1
+Summary: .txt Python SDK
+Author: .txt Developers
+Project-URL: repository, https://github.com/dottxt-ai/dottxt-python
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic-settings>=2
+Requires-Dist: pydantic>=2
+Requires-Dist: python_dateutil>=2.8.2
+Requires-Dist: typing-extensions>=4.7.1
+Requires-Dist: urllib3<3.0.0,>=1.25.3
+Requires-Dist: backoff>=2.2.1
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-cov; extra == "test"
+
+# .txt Python SDK
+
+`dottxt` is the official Python SDK for using the .txt API service.
+
+## Installation
+
+```bash
+pip install dottxt
+```
+
+### Configure your API Key
+
+To configure the SDK with your key, set the `DOTTXT_API_KEY` environment variable:
+
+```unix
+export DOTTXT_API_KEY=YOUR_DOTTXT_API_KEY
+```
+
+Alternatively, set the `api_key` parameter when creating a `Dottxt` client:
+
+```python
+from dottxt.client import Dottxt
+
+dottxt = Dottxt(api_key="YOUR_DOTTXT_API_KEY")
+```
+
+## Use the SDK
+
+All SDK operations are available as methods of the `Dottxt` client:
+
+```python
+from dottxt.client import Dottxt
+
+dottxt = Dottxt()
+```
+
+### `.json`
+
+`.json` is the simplest method for performing structured generation.
+
+Below we use a Pydantic model for our schema and ask the .txt API to create a user:
+
+
+```python
+from pydantic import BaseModel
+
+class User(BaseModel):
+    first_name: str
+    last_name: str
+    user_id: int
+
+user = dottxt.json("Create a user", User)
+print(user.data)
+#> { "first_name": "Douglas", "last_name": "Adams", "user_id": 42 }
+print(user.usage)
+#> prompt_tokens=4 completion_tokens=29
+```
+
+ The API returns a `CompletionAPI` object which contains the model response in `data` and API usage statistics in `usage`.
+
+Behind the scenes, `.json` checks to see if the schema has compiled. If not, the client will create a new schema and wait for compilation to complete. Once the schema is available, `.json` sends the prompt to the API in a completion request.
+
+For more advanced use cases, each of these steps can be performed separately.
+
+## Use the SDK: Advanced
+
+### Create a JSON schema
+
+You can create a new schema with `create_schema` using a Pydantic model, JSON schema, or callable. When you call `create_schema`, the API will return a `JSONSchemaStatus` object. By default, the client will wait until the schema compiles to return a status.
+
+```python
+schema_status = dottxt.create_schema(name="user", schema=User)
+print(schema_status.status)
+#> <Status.COMPLETE: 'complete'>
+```
+
+### Check schema status
+
+Suppose you create a schema and choose not to wait for its compilation to finish:
+
+```python
+schema_status = dottxt.create_schema(schema=User, name="user", wait=False)
+js_id = schema_status.js_id
+```
+
+**Schema status can be retrieved in 3 ways:**
+
+#### 1. Using a schema's `js_id`
+The `js_id` is a unique identifier for your JSON schemas. It can be used for several SDK operations including `delete_schema`, `get_schema`, `create_completion`, and `get_schema_status`:
+
+```python
+schema_status = dottxt.get_schema_status(js_id=js_id)
+print(schema_status.status.value)
+#> 'complete'
+```
+
+#### 2. Using a schema's `name`
+If you provide a `name` when you call `create_schema`, you can use it to retrieve the `schema_status`:
+
+```python
+schema_status = dottxt.get_schema_status_by_name("user")
+print(schema_status.compilation_duration)
+#> 4321
+```
+
+#### 3. Using a schema's source
+Schema status can also be retrieved using a schema's source. The source can be a JSON string, Pydantic model, or a callable:
+
+```python
+schema_status = dottxt.get_schema_status_by_source(User)
+print(schema_status.name)
+#> user
+```
+
+### List schemas
+You can iterate through all of your schemas with `list_schemas`. The iterator yields `JSONSchemaStatus` objects, allowing you to access fields including `status`, `compilation_duration`, and `js_id`.
+```python
+schemas = list(dottxt.list_schemas())
+print(len(schemas))
+#> 8
+```
+
+### Get a schema source
+Use `get_schema` to retrieve a JSON schema's source. This will return a `JSONSchemaAPI` object with fields `name` and `json_schema`, which is a string representation of the JSON schema source.
+
+```python
+import json
+schema = dottxt.get_schema(js_id)
+print(schema.name)
+#> user
+schema_string = schema.json_schema
+schema_dict = json.loads(schema_string)
+print(json.dumps(schema_dict, indent=2))
+#> {
+#  "properties": {
+#    "first_name": {
+#      "title": "First Name",
+#      "type": "string"
+#    },
+#    "last_name": {
+#      "title": "Last Name",
+#      "type": "string"
+#    },
+#    "user_id": {
+#      "title": "User Id",
+#      "type": "integer"
+#    }
+#  },
+#  "required": [
+#    "first_name",
+#    "last_name",
+#    "user_id"
+#  ],
+#  "title": "User",
+#  "type": "object"
+# }
+```
+
+### Create completions using a schema
+
+Use a schema's `js_id` to call `create_completion`. This method accepts optional parameters `max_tokens` and `seed`:
+
+```python
+completion = dottxt.create_completion(
+    "Create a power user:", js_id, max_tokens=100, seed=9000
+)
+print(completion.data)
+#> { "first_name":"Frank","last_name":"Herbert","user_id":1 }
+print(completion.usage)
+#> prompt_tokens=5 completion_tokens=24
+```
+
+### Delete a schema
+To delete a schema, use its `js_id`:
+```python
+delete = dottxt.delete_schema(js_id=js_id)
+print(delete)
+#> Success(success=True)
+```
