@@ -1,0 +1,2 @@
+# Calute
+Calute is a powerful Python library for orchestrating and coordinating Large Language Model (LLM) agents, inspired by neural networks and cognitive architectures. It provides an intuitive framework for building sophisticated multi-agent systems that can collaborate, reason, and solve complex problems with direct client connect to EasyDeL.
