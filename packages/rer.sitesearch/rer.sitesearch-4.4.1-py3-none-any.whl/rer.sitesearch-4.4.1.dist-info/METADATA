@@ -1,0 +1,585 @@
+Metadata-Version: 2.1
+Name: rer.sitesearch
+Version: 4.4.1
+Summary: A product that change the base site search of Plone with some new features.
+Home-page: https://github.com/RegioneER/rer.sitesearch
+Author: RedTurtle Technology
+Author-email: sviluppo@redturtle.it
+License: GPL version 2
+Project-URL: PyPI, https://pypi.python.org/pypi/rer.sitesearch
+Project-URL: Source, https://github.com/RegioneER/rer.sitesearch
+Project-URL: Tracker, https://github.com/RegioneER/rer.sitesearch/issues
+Keywords: Python Plone Search
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Framework :: Plone :: 5.1
+Classifier: Framework :: Plone :: 5.2
+Classifier: Framework :: Plone :: Addon
+Classifier: Framework :: Plone
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python
+Requires-Dist: setuptools
+Requires-Dist: plone.api >=1.8.4
+Requires-Dist: plone.restapi
+Requires-Dist: plone.app.dexterity
+Requires-Dist: collective.z3cform.jsonwidget
+Provides-Extra: test
+Requires-Dist: plone.app.testing ; extra == 'test'
+Requires-Dist: plone.testing >=5.0.0 ; extra == 'test'
+Requires-Dist: plone.app.contenttypes ; extra == 'test'
+Requires-Dist: plone.app.robotframework[debug] ; extra == 'test'
+Requires-Dist: collective.MockMailHost ; extra == 'test'
+
+Introduction
+============
+A product that override basic Plone search template.
+
+It has a left column with the search form and some additional fields to refine the search:
+
+- Group results by content-types
+- List of facets to refine the search
+
+These are all configurable through Plone control panel.
+
+
+Settings
+========
+In the control panel (RER Sitesearch) you can set some search parameters.
+
+Types grouping
+--------------
+
+You can create groups of portal_types (with custom label) to filter results by type.
+
+For example you can add a "Documents" group that contains Document and File contents.
+Another tab "News and Events" that may contain News Items and Events.
+
+And so on.
+
+Indexes
+-------
+The search view shows a list of parameters (indexes in catalog) in the left column to refine the results.
+
+In Sitesearch control-panel you can define which indexes to show, with which label and the order.
+
+
+Advanced filters for groups
+===========================
+
+In each group types you can select an advanced filter.
+
+Advanced filters are a list of preset filters that allow to add some extra filters when that group is selected in search.
+
+In rer.sitesearch there are only one advanced filter called "Events" that add start and end date filters, but you can add more
+presets in your custom package.
+
+Register new advanced filters
+-----------------------------
+
+Advanced filters are a list of named adapters, so you can add more and override existing ones if needed.
+
+You just need to register a new named adapter::
+
+    <adapter
+      factory = ".my_filters.MyNewFilters"
+      name= "my-filters"
+    />
+
+And you adapter should have a `label` attribute (needed to show a human-readable name in sitesearch-settings view) and 
+return the schema for the additional indexes::
+
+    from zope.component import adapter
+    from zope.interface import implementer
+    from rer.sitesearch.interfaces import ISiteSearchCustomFilters
+    from zope.interface import Interface
+    from my.package import _
+    from zope.i18n import translate
+
+
+    @adapter(Interface, Interface)
+    @implementer(ISiteSearchCustomFilters)
+    class MyNewFilters(object):
+    """
+    """
+
+    label = _("some_labelid", default=u"Additional filters")
+
+    def __init__(self, context, request):
+        self.context = context
+        self.request = request
+
+    def __call__(self):
+        return {
+            "index_a": {
+                "type": "string",
+                "label": translate(
+                    _("filter_index_a_label", default=u"Index A"),
+                    context=self.request,
+                ),
+            },
+            "index_b": {
+                "type": "date",
+                "label": translate(
+                    _("filter_index_b_label", default=u"Index B"),
+                    context=self.request,
+                ),
+            },
+        }
+
+Where `index_a` and `index_b` are Plone's catalog indexes.
+
+ 
+Restapi endpoint
+================
+
+@search-filters
+---------------
+
+There is an helper api endpoint that returns the list of available groups and indexes for the search interface: *@search-filters*::
+
+    > curl -i http://localhost:8080/Plone/@search-filters -H 'Accept: application/json'
+
+And will return a response like this::
+
+    {
+      "grouping": [
+        {
+          "label":
+            "Documents"
+          ],
+          "types": [
+            "Document",
+            "File"
+          ]
+        },
+        {
+          "label": "News and Events",
+          "types": [
+            "News Item",
+            "Event"
+          ]
+        },
+      ],
+      "indexes": [
+        {
+          "label": [
+            "Type"
+          ],
+          "index": "portal_type"
+        },
+        {
+          "label": "Keywords",
+          "index": "Subject"
+        },
+      ]
+    }
+
+Dependencies
+============
+
+This product works only on Plone > 5.1 and with Python 2 and 3.
+
+Since version 4.0.0, we made an hard rewrite of the package and we now use plone.restapi `@search` endpoint
+and React.
+
+Contribute
+==========
+
+- Issue Tracker: https://github.com/RegioneER/rer.sitesearch/issues
+- Source Code: https://github.com/RegioneER/rer.sitesearch
+
+
+Credits
+=======
+
+Developed with the support of
+
+.. image:: http://www.regione.emilia-romagna.it/rer.gif
+   :alt: Regione Emilia-Romagna
+   :target: http://www.regione.emilia-romagna.it/
+
+Regione Emilia Romagna supports the `PloneGov initiative`__.
+
+__ http://www.plonegov.it/
+
+Authors
+=======
+
+This product was developed by RedTurtle Technology team.
+
+.. image:: https://avatars1.githubusercontent.com/u/1087171?s=100&v=4
+   :alt: RedTurtle Technology Site
+   :target: http://www.redturtle.net/
+
+Changelog
+=========
+
+4.4.1 (2024-12-05)
+------------------
+
+- Fix grouping in header.
+  [cekk]
+
+
+4.4.0 (2023-09-07)
+------------------
+
+- Improve accessibility.
+  [cekk]
+
+
+4.3.1 (2023-06-27)
+------------------
+
+- Fix release: do not force python version.
+  [cekk]
+
+
+4.3.0 (2023-03-30)
+------------------
+
+- Search only content-types enabled in control-panel when using Plone catalog tool.
+  [cekk]
+
+
+4.2.2 (2022-09-30)
+------------------
+
+- Fix wrong release.
+  [cekk]
+
+4.2.1 (2022-09-30)
+------------------
+
+- Support rer.solrpush ``search_enabled`` flag to temporary disable search on SOLR.
+  [cekk]
+
+
+4.2.0 (2022-09-29)
+------------------
+
+- Improve customizations.
+  [cekk]
+- Add support for Boolean and Date indexes.
+  [cekk]
+
+
+4.1.3 (2022-02-24)
+------------------
+
+- Do not show sites filters when solr is disabled.
+  [cekk]
+
+
+4.1.2 (2022-02-03)
+------------------
+
+- Fix location filters logic.
+  [cekk]
+
+
+4.1.1 (2022-02-03)
+------------------
+
+- Fix search logic for filters.
+  [cekk]
+
+
+4.1.0 (2022-01-20)
+------------------
+
+- Interface improvements.
+  [cekk]
+
+4.0.1 (2021-12-20)
+------------------
+
+- Fix label for LocationFilter.
+  [cekk]
+
+
+4.0.0 (2021-12-20)
+------------------
+
+- New sitesearch layout and logic (included rer.solrpush support).
+  [cekk]
+
+
+3.2.6 (2020-09-21)
+------------------
+
+- Fix bug in query serialization.
+  [cekk]
+
+
+3.2.5 (2020-08-13)
+------------------
+
+- Fix query serialization and sort order.
+  [cekk]
+
+
+3.2.4 (2020-04-22)
+------------------
+
+- Sort by date now is for *modified* index.
+  [cekk]
+- Now take care also for sort_order.
+  [cekk]
+
+
+3.2.3 (2019-09-11)
+------------------
+
+- Fix translations.
+  [cekk]
+
+3.2.2 (2019-02-17)
+------------------
+
+- Remove unused upgrade-step for previous revert.
+  [cekk]
+
+
+3.2.1 (2019-01-17)
+------------------
+
+- Reverted changes for custom persistent fields. We have some problems with shared zeoserver.
+  [cekk]
+
+
+3.2.0 (2019-01-09)
+------------------
+- Fix solr support: now if solr is installed but disabled in the control panel,
+  all searches doesn't pass through it
+  [cekk]
+- Remove custom persistent fields in registry.
+  [cekk]
+- a11y: Added role attribute for portalMessage
+  [nzambello]
+
+
+3.1.1 (2018-10-11)
+------------------
+
+- Updated mobile styles
+  [pnicolli]
+- Accessibility fixes
+  [nzambello]
+
+
+3.1.0 (2017-12-21)
+------------------
+
+- Move resources to a separate bundle
+  [cekk]
+- Improve IE11 compatibility
+  [cekk]
+- Improve documentation
+  [cekk]
+
+
+3.0.1 (2017-09-18)
+------------------
+
+- Fix query generation in sitesearch.js. Now doesn't include ajax_load in the url
+  [cekk]
+
+
+3.0.0 (2017-09-13)
+------------------
+
+- more like this
+  [mamico]
+- Plone 5 compatibility. Drop Plone 4. Use `plone4` branch.
+  [cekk]
+
+2.4.3 (2015-12-02)
+------------------
+
+- Fix tests
+  [mamico]
+
+- Plone 4.3 compatibility
+  [cekk]
+
+
+2.4.2 (2015-01-19)
+------------------
+
+- Fix controlpanel icon [cekk]
+
+
+2.4.1 (2014-12-09)
+------------------
+
+- If search term string changes (searchableText) and the form is submitted,
+  reset the all query and start with a new one
+  [cekk]
+
+
+2.4.0 (2014-11-24)
+------------------
+
+- Add support to collective.solr [cekk]
+- Add configuration to limit word length and number of words in SearchableText
+  [cekk]
+- Rewrite html for search results [cekk]
+
+2.3.3 (2014-02-20)
+------------------
+
+- Fixed search results structure [cekk]
+
+
+2.3.2 (2014-01-13)
+------------------
+
+- Fixed timezone handling [cekk]
+
+
+2.3.1 (2013-12-06)
+------------------
+
+- fixed tabs order results [cekk]
+- fixed bug in Plone timezones handling for start and end dates [cekk]
+
+
+2.3.0 (2013-07-08)
+------------------
+
+- refactored view to support plone.app.search [cekk]
+- moved configuration from site_properties to registry [cekk]
+- added tests [cekk]
+- customized "skip_links" viewlet for search view [cekk]
+
+2.2.1 (2012-10-12)
+------------------
+
+- fixed indexes column population [cekk]
+
+
+2.2.0 (2012-10-08)
+------------------
+
+- refactoring for Plone 4: now the template is removed and replaced by a view [cekk]
+
+
+2.1.1 (2012-10-04)
+------------------
+
+- fixed update step [cekk]
+- fixed first tab selection [cekk]
+
+
+2.1.0 (2012-10-04)
+------------------
+
+- moved search from skins to a view, for Plone4 compatibility (it isn't new-search like yet) [cekk]
+- added uninstall profile to remove skins [cekk]
+
+
+2.0.2 (2012-08-23)
+------------------
+
+- fixed style for results [cekk]
+
+
+2.0.1 (2012-08-03)
+------------------
+
+- removed search_form.pt [cekk]
+
+
+2.0.0 (2012-08-02)
+------------------
+
+- cleanup old Plone 3.2 garbage [keul]
+- fixed search view styles [cekk]
+- added configlet to manage sitesearch options [cekk]
+
+1.5.1 (2012/04/23)
+------------------
+
+- added class to hidden indexes info div [cekk]
+- fixed hidden indexes management [cekk]
+
+1.5.0 (2012/04/16)
+------------------
+
+- refactoring sitesearch_view to speed up searches [cekk]
+
+1.4.1 (2012/03/26)
+------------------
+
+- fix translation [cekk]
+
+1.4.0 (2012/03/12)
+------------------
+
+- Customized Date index for events [cekk]
+- Show date and location in events [cekk]
+- Use Date index to sort on dates [cekk]
+- Add "hidden indexes" configuration [cekk]
+
+1.3.1 (2011/11/28)
+------------------
+
+- Fix error in title whent the path is incorrect [cekk]
+
+1.3.0 (2011/11/28)
+------------------
+
+- Fix layout and css [nekorin]
+
+1.2.0 (2011/06/20)
+------------------
+
+- Add tabs customization [cekk]
+
+1.1.1 (2011/04/07)
+------------------
+
+- Remove alphabetical sorting for indexes. Now indexes are sorted in the configuration panel [cekk]
+
+1.1.0 (2011/04/04)
+------------------
+
+- Remove taxonomies specific tab. Now needs to be set in the config panel [cekk]
+
+1.0.6 (2010/11/08)
+------------------
+
+- Fix js for batching [cekk]
+
+1.0.5 (2010/11/08)
+------------------
+
+- Categories are filtered beside the selected type [cekk]
+
+1.0.4 (2010/11/04)
+------------------
+
+- Remove setup.cfg [cekk]
+
+1.0.3 (2010/11/04)
+------------------
+
+- Refectoring for browser history [cekk]
+
+1.0.2 (2010/10/28)
+------------------
+
+- Remove folder title in the view [cekk]
+
+1.0.1 (2010/10/28)
+------------------
+
+- Remove searchSubject index [cekk]
+- Change fieldname for sorting [cekk]
+- Add header with folder name [jacopo e cekk]
+
+1.0.0 (2010/09/23)
+------------------
+
+- Initial release
