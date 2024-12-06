@@ -1,0 +1,111 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"dynamodb:GetItem",
+				"dynamodb:PutItem",
+				"dynamodb:UpdateItem",
+				"dynamodb:DeleteItem",
+				"dynamodb:Scan",
+				"dynamodb:Query",
+				"dynamodb:BatchGetItem",
+				"dynamodb:BatchWriteItem",
+				"dynamodb:UpdateTable",
+				"dynamodb:CreateTable",
+				"dynamodb:UpdateTimeToLive"
+			],
+			"Resource": "arn:aws:dynamodb:*:*:table/prod-{{project}}*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"s3:GetObject",
+				"s3:PutObject",
+				"s3:DeleteObject",
+				"s3:ListBucket",
+				"s3:PutObjectAcl"
+			],
+			"Resource": [
+				"arn:aws:s3:::prod-{{project}}*",
+				"arn:aws:s3:::prod-{{project}}*/*",
+				"arn:aws:s3:::s3-accelerate.amazonaws.com/prod-{{project}}*",
+				"arn:aws:s3:::s3-accelerate.amazonaws.com/prod-{{project}}*/*"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"secretsmanager:GetSecretValue"
+			],
+			"Resource": "arn:aws:secretsmanager:*:*:secret:prod/{{project}}*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"firehose:PutRecord",
+				"firehose:PutRecordBatch"
+			],
+			"Resource": "arn:aws:firehose:*:*:deliverystream/prod-{{project}}*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": "ses:SendEmail",
+			"Resource": "arn:aws:ses:*:*:identity/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"xray:PutTraceSegments",
+				"xray:PutTelemetryRecords",
+				"xray:GetSamplingRules",
+				"xray:GetSamplingTargets",
+				"xray:GetSamplingStatisticSummaries"
+			],
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"sqs:ReceiveMessage",
+				"sqs:DeleteMessage",
+				"sqs:GetQueueAttributes",
+				"sqs:SendMessage"
+			],
+			"Resource": "arn:aws:sqs:*:*:prod_{{project}}*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ssm:SendCommand",
+				"ssm:GetCommandInvocation"
+			],
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"codebuild:BatchGetBuilds",
+				"logs:GetLogEvents"
+			],
+			"Resource": [
+				"arn:aws:codebuild:*:*:project/prod_{{project}}",
+				"arn:aws:logs:*:*:log-group:/aws/codebuild/prod_{{project}}:*"
+			]
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"codepipeline:GetPipeline",
+				"codepipeline:GetPipelineExecution",
+				"codepipeline:GetPipelineState",
+				"codepipeline:ListPipelineExecutions",
+				"codepipeline:ListActionExecutions",
+				"codepipeline:ListPipelines",
+				"codepipeline:ListTagsForResource"
+			],
+			"Resource": "arn:aws:codepipeline:*:*:prod_{{project}}"
+		}
+	]
+}
