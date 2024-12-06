@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "a5py"
+version = "0.1"
+description = "a5 hydrometeorologic database management system"
+authors = [
+    { name = "SSIyAH-INA", email = "jbianchi@ina.gob.ar" },
+]
+license = { file = "LICENCE" }
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "gdal==3.8.4",
+    "numpy",
+    "psycopg2",
+    "sqlalchemy",
+    "geoalchemy2",
+    "rasterio",
+    "shapely"
+]
+
+[project.urls]
+"Homepage" = "http://github.com/jbianchi81/a5py"
+
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["a5py*"]
+
+[project.scripts]
+a5py = "a5py.a5py_cli:main"
+a5py_config = "a5py.config:run"
