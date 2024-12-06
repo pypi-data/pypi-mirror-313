@@ -1,0 +1,101 @@
+Metadata-Version: 2.1
+Name: baserowsdk
+Version: 0.1.1
+Summary: Baserow OpenAPI Python SDK
+Author: shenyubao.
+Author-email: ssybb1988@gmail.com
+Requires-Python: >=3.8,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: certifi (>=2023.7.22,<2024.0.0)
+Requires-Dist: charset-normalizer (>=3.2.0,<4.0.0)
+Requires-Dist: environs (>=9.5.0,<10.0.0)
+Requires-Dist: idna (>=3.4,<4.0)
+Requires-Dist: marshmallow (>=3.20.1,<4.0.0)
+Requires-Dist: requests (>=2.31.0,<3.0.0)
+Requires-Dist: urllib3 (>=2.0.4,<3.0.0)
+Description-Content-Type: text/markdown
+
+# Baserowsdk
+
+
+# Requirements
+
+python3.8 +
+
+# Installation
+
+```shell
+pip install --upgrade baserowsdk
+```
+
+# Getting started
+
+### 初始化客户端
+```python
+from baserowsdk import Client
+
+client = Client(
+    api_key="your_api_key",
+    base_url="http://your.baserow.domain"
+)
+```
+
+### 获取字段信息
+```python
+# 获取表的所有字段定义
+fields = client.fields(table_id=182)
+print(fields)
+```
+
+### 查询数据
+```python
+# 单条查询
+base = client.base(39)
+row = base.table(182).row(row_id=1)
+print(row)
+
+# 批量查询
+rows = base.table(182).select(page_size=100)
+print(rows)
+
+# 查询同时种缓存
+# 注意: 缓存是基于 client 对象的, 不同 client 对象之间互不干扰
+# 注意: 缓存 Key 为 select 的所有查询条件进行 Hash, 仅查询条件完全相同才会命中缓存
+rows = base.table(182).select(page_size=100, cache_senconds=10)
+print(rows)
+```
+
+### 创建数据
+```python
+# 创建新记录
+row = client.base(39).table(182).create(
+    fields={"黑话改写_输入": "1234567890","黑话改写_输出": "1234567890"}
+)
+print(row)
+```
+
+### 更新数据
+```python
+# 更新记录
+updated_row = client.base(39).table(182).update(
+    row_id=6,
+    fields={
+        "执行批次ID": "BATCH-001",
+        "测试用例": [1, 2, 3]  # 关联字段支持多值
+    },
+    user_field_names=True  # 使用用户定义的字段名
+)
+print(updated_row)
+```
+
+### 删除数据
+```python
+# 删除记录
+client.base(39).table(182).delete(row_id=7)
+```
