@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["findus", "findus.analyzer", "findus.helper"]
+
+[project]
+name = "findus"
+description = "Library to perform fault injection attacks with the PicoGlitcher, Chipwhisperer Husky or Chipwhisperer Pro"
+version = "0.9.6"
+license = {file = "LICENSE"}
+authors = [{name = "Matthias Kesenheimer", email = "m.kesenheimer@gmx.net"}]
+dependencies = [
+  "setuptools",
+  "adafruit-ampy",
+  "pyserial",
+  "termcolor",
+  "plotly",
+  "pandas",
+  "dash",
+  "dash_bootstrap_components",
+  "chipwhisperer",
+  "minimalmodbus",
+  "mkdocs",
+  "mkdocstrings[python]",
+]
+
+[project.scripts]
+analyzer = "findus.analyzer.analyzer:main"
+upload = "findus.helper.upload:main"
+power-cycle-and-read = "findus.helper.power_cycle_and_read:main"
+power-cycle = "findus.helper.power_cycle:main"
+bootloader-com = "findus.BootloaderCom:main"
+
+[project.urls]
+Homepage = "https://mkesenheimer.github.io"
+Documentation = "https://fault-injection-library.readthedocs.io/en/latest/"
+Repository = "https://github.com/MKesenheimer/fault-injection-library.git"
+Issues = "https://github.com/MKesenheimer/fault-injection-library/issues"
