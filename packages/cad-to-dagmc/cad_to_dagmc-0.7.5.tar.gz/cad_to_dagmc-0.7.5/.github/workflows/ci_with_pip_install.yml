@@ -1,0 +1,61 @@
+
+# This CI does not currently include particle transport tests as openmc is not installed
+
+name: CI with pip install
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '.gitignore'
+      - '*.md'
+      - 'CITATION.cff'
+      - 'LICENSE.txt'
+      - 'readthedocs.yml'
+  push:
+    branches:
+      - main
+
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    container:
+      image: openmc/openmc:develop-dagmc
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: install non pypi dependencies
+        shell: bash
+        run: |
+          apt-get --allow-releaseinfo-change update
+          apt-get update -y
+          apt-get upgrade -y
+          apt-get install -y libblas-dev liblapack-dev libgl1 libglx-mesa0 libgl1-mesa-dev libglu1-mesa-dev freeglut3-dev libosmesa6 libosmesa6-dev libgles2-mesa-dev libarchive-dev libpangocairo-1.0-0 libxcursor-dev libxft2 libxinerama-dev make cmake libeigen3-dev
+          apt install python3
+          apt install python3-pip
+          python -m pip install --upgrade pip
+          git clone --single-branch -b master --depth 1 https://bitbucket.org/fathomteam/moab/
+          cd moab
+          python -m pip install . --config-settings=cmake.args=-DENABLE_HDF5=ON
+          cd ..
+          python -c "import pymoab"
+          python -m pip install .[tests]
+          python -c "import cad_to_dagmc"
+          pytest -v tests
+          python examples/surface_mesh/cadquery_assembly.py
+          python examples/surface_mesh/cadquery_compound.py
+          python examples/surface_mesh/cadquery_object_and_stp_file.py
+          python examples/surface_mesh/cadquery_text.py
+          python examples/surface_mesh/curved_cadquery_object_to_dagmc_surface_mesh.py
+          python examples/surface_mesh/multiple_cadquery_objects.py
+          python examples/surface_mesh/multiple_stp_files.py
+          python examples/surface_mesh/single_stp_file_multiple_volumes.py
+          python examples/surface_mesh/single_cadquery_object.py
+          python examples/surface_mesh/single_stp_file.py
+          python examples/surface_mesh/from_gmsh_mesh_file.py
+          python examples/unstrucutred_volume_mesh/curved_cadquery_object_to_dagmc_volume_mesh.py
+          python examples/unstrucutred_volume_mesh/simulate_unstrucutred_volume_mesh_with_openmc.py
+          python examples/surface_mesh/cadquery_assembly_with_scaled_geometry.py
