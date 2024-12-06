@@ -1,0 +1,2611 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://github.com/NVIDIA/nautobot-app-fsus/dev/dev_env.html">
+      
+      
+        <link rel="prev" href="contributing.html">
+      
+      
+        <link rel="next" href="code_reference/index.html">
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.47">
+    
+    
+      
+        <title>Development Environment - Nautobot Field Serviceable Units</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#building-your-development-environment" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../index.html" title="Nautobot Field Serviceable Units" class="md-header__button md-logo" aria-label="Nautobot Field Serviceable Units" data-md-component="logo">
+      
+  <img src="../assets/nvidia-logo-vert-rgb-wht-for-screen.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Nautobot Field Serviceable Units
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Development Environment
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/NVIDIA/nautobot-app-fsus" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="m503.5 204.6-.7-1.8-69.7-181.78c-1.4-3.57-3.9-6.59-7.2-8.64-2.4-1.55-5.1-2.515-8-2.81s-5.7.083-8.4 1.11c-2.7 1.02-5.1 2.66-7.1 4.78-1.9 2.12-3.3 4.67-4.1 7.44l-47 144H160.8l-47.1-144c-.8-2.77-2.2-5.31-4.1-7.43-2-2.12-4.4-3.75-7.1-4.77a18.1 18.1 0 0 0-8.38-1.113 18.4 18.4 0 0 0-8.04 2.793 18.1 18.1 0 0 0-7.16 8.64L9.267 202.8l-.724 1.8a129.57 129.57 0 0 0-3.52 82c7.747 26.9 24.047 50.7 46.447 67.6l.27.2.59.4 105.97 79.5 52.6 39.7 32 24.2c3.7 1.9 8.3 4.3 13 4.3s9.3-2.4 13-4.3l32-24.2 52.6-39.7 106.7-79.9.3-.3c22.4-16.9 38.7-40.6 45.6-67.5 8.6-27 7.4-55.8-2.6-82"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.html" class="md-tabs__link">
+        
+  
+    
+  
+  Introduction
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../user/index.html" class="md-tabs__link">
+          
+  
+  User Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../admin/install.html" class="md-tabs__link">
+          
+  
+  Administrator Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="contributing.html" class="md-tabs__link">
+          
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../index.html" title="Nautobot Field Serviceable Units" class="md-nav__button md-logo" aria-label="Nautobot Field Serviceable Units" data-md-component="logo">
+      
+  <img src="../assets/nvidia-logo-vert-rgb-wht-for-screen.png" alt="logo">
+
+    </a>
+    Nautobot Field Serviceable Units
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/NVIDIA/nautobot-app-fsus" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.7.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="m503.5 204.6-.7-1.8-69.7-181.78c-1.4-3.57-3.9-6.59-7.2-8.64-2.4-1.55-5.1-2.515-8-2.81s-5.7.083-8.4 1.11c-2.7 1.02-5.1 2.66-7.1 4.78-1.9 2.12-3.3 4.67-4.1 7.44l-47 144H160.8l-47.1-144c-.8-2.77-2.2-5.31-4.1-7.43-2-2.12-4.4-3.75-7.1-4.77a18.1 18.1 0 0 0-8.38-1.113 18.4 18.4 0 0 0-8.04 2.793 18.1 18.1 0 0 0-7.16 8.64L9.267 202.8l-.724 1.8a129.57 129.57 0 0 0-3.52 82c7.747 26.9 24.047 50.7 46.447 67.6l.27.2.59.4 105.97 79.5 52.6 39.7 32 24.2c3.7 1.9 8.3 4.3 13 4.3s9.3-2.4 13-4.3l32-24.2 52.6-39.7 106.7-79.9.3-.3c22.4-16.9 38.7-40.6 45.6-67.5 8.6-27 7.4-55.8-2.6-82"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    User Guide
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user/fsus.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Field Serviceable Units
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Model Details
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Model Details
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/cputype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CPU Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/cputemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CPU Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/cpu.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CPU
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/disktype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Disk Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/disktemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Disk Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/disk.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Disk
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/fantype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fan Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/fantemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fan Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/fan.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Fan
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/gputype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GPU Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/gputemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GPU Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/gpu.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GPU
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/gpubaseboardtype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GPU Baseboard Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/gpubaseboardtemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GPU Baseboard Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/gpubaseboard.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GPU Baseboard
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/hbatype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HBA Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/hbatemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HBA Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/hba.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HBA
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/mainboardtype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Mainboard Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/mainboardtemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Mainboard Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/mainboard.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Mainboard
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/nictype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NIC Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/nictemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NIC Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/nic.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    NIC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/otherfsutype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Other FSU Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/otherfsutemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Other FSU Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/otherfsu.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Other FSU
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/psutype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PSU Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/psutemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PSU Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/psu.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    PSU
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/rammoduletype.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RAM Module Type
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/rammoduletemplate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RAM Module Template
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/rammodule.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RAM Module
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Administrator Guide
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Administrator Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../admin/install.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../admin/upgrade.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Upgrade
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../admin/uninstall.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Uninstall
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../admin/compatibility_matrix.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Compatibility Matrix
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Release Notes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            Release Notes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../admin/release_notes/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release Notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../admin/release_notes/version_1.0.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    v1.0
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Developer Guide
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="contributing.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing to the App
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Development Environment
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="dev_env.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Development Environment
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quickstart Guide
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quickstart Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      Invoke
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Development Environment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker Development Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-time-updates-how-cool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-Time Updates? How Cool!
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Logs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Development Environment
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-the-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating the Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-helper-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Helper Commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI Helper Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Utility
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tips
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-superuser" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a Superuser
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-shell" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Shell
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipython-shell-plus" class="md-nav__link">
+    <span class="md-ellipsis">
+      iPython Shell Plus
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#to-rebuild-or-not-to-rebuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      To Rebuild or Not to Rebuild
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="To Rebuild or Not to Rebuild">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#updating-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-additional-python-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing Additional Python Packages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-additional-nautobot-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing Additional Nautobot Apps
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-python-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Python Version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-nautobot-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Nautobot Version
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Code Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            Code Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="code_reference/index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Code Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="code_reference/package.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Package
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="code_reference/api.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="code_reference/models.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#quickstart-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quickstart Guide
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quickstart Guide">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invoke" class="md-nav__link">
+    <span class="md-ellipsis">
+      Invoke
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Development Environment
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker Development Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#real-time-updates-how-cool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Real-Time Updates? How Cool!
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Logs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#local-development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Development Environment
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-the-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating the Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cli-helper-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI Helper Commands
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI Helper Commands">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Utility
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tips
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tips">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-superuser" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating a Superuser
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-shell" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Shell
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipython-shell-plus" class="md-nav__link">
+    <span class="md-ellipsis">
+      iPython Shell Plus
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#to-rebuild-or-not-to-rebuild" class="md-nav__link">
+    <span class="md-ellipsis">
+      To Rebuild or Not to Rebuild
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="To Rebuild or Not to Rebuild">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#updating-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-additional-python-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing Additional Python Packages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#installing-additional-nautobot-apps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing Additional Nautobot Apps
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-python-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Python Version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-nautobot-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Nautobot Version
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="building-your-development-environment">Building Your Development Environment<a class="headerlink" href="#building-your-development-environment" title="Permanent link">&para;</a></h1>
+<h2 id="quickstart-guide">Quickstart Guide<a class="headerlink" href="#quickstart-guide" title="Permanent link">&para;</a></h2>
+<p>The development environment can be used in two ways:</p>
+<ol>
+<li><strong>(Recommended)</strong> All services, including Nautobot, are spun up using <a href="#docker-development-environment">Docker and a local mount</a> - the plugin source code is mounted in the service docker container so that you may continue to develop locally, and your changes will be reflected in the running container automatically.</li>
+<li>With a <a href="#local-development-environment">local Poetry environment</a> if you wish to develop outside of Docker, with the caveat that external services for the database (PostgreSQL by default, MySQL optionally) and Redis will be provided via Docker.</li>
+</ol>
+<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These are required no matter which development environment you choose.</p>
+</div>
+<ol>
+<li>Install Poetry, see the <a href="https://python-poetry.org/docs/#installation">Poetry Documentation</a> for your operating system.</li>
+<li>Install Docker, see the <a href="https://docs.docker.com/get-docker/">Docker documentation</a> for your operating system.</li>
+<li>Create your poetry python virtual environment, including the <code>invoke</code> tool.</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>➜ poetry env use python3.10
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>➜ poetry install
+</code></pre></div>
+</div>
+<ol start="4">
+<li>Copy <code>development/creds.example.env</code> to <code>development/creds.env</code> (this file will be ignored by Git and Docker).</li>
+<li>Copy <code>invoke.example.yml</code> to <code>invoke.yml</code> (also ignored by Git), and edit it as necessary.</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To use MySQL as your database backend, copy <code>invoke.mysql.yml</code> to <code>invoke.yml</code> instead.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Poetry can be use either with its shell (aka virtualenv) activated, or as a wrapper command.
+With the shell activated, your prompt will change to indicate the environment, and you can use all modules and commands installed in the poetry environment directly.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>➜ poetry shell
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>(nautobot-fsus-py3.10)➜ invoke start
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>...
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>(nautobot-fsus-py3.10)➜ invoke test.everything -k
+</code></pre></div>
+Alternatively, you can preface commands installed in the poetry environment with <code>poetry run</code>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>➜ poetry run invoke start
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>...
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>➜ poetry run invoke test.everything -k
+</code></pre></div></p>
+</div>
+<h3 id="invoke">Invoke<a class="headerlink" href="#invoke" title="Permanent link">&para;</a></h3>
+<p>The <a href="http://www.pyinvoke.org/">Invoke</a> library is used to provide some helper commands based on the environment.
+There are a few configuration parameters which can be passed to Invoke to override the default configuration:</p>
+<ul>
+<li><code>nautobot_ver</code>: the version of Nautobot to use as a base for any built docker containers.</li>
+<li><code>project_name</code>: the default docker compose project name (default: <code>nautobot_fsus</code>).</li>
+<li><code>python_ver</code>: the version of Python to use as a base for any built docker containers (default: 3.10).</li>
+<li><code>local</code>: a boolean flag indicating if invoke tasks should be run on the host or inside the docker containers (default: False, commands will be run in docker containers).</li>
+<li><code>compose_dir</code>: the full path to a directory containing the project compose files.</li>
+<li><code>compose_files</code>: a list of compose files applied in order (see <a href="https://docs.docker.com/compose/extends/#multiple-compose-files">Multiple Compose files</a> for more information).</li>
+</ul>
+<p>Using <strong>Invoke</strong> these configuration options can be overridden using <a href="https://docs.pyinvoke.org/en/stable/concepts/configuration.html">several methods</a>. Perhaps the simplest is setting an environment variable <code>INVOKE_NAUTOBOT_CONSUMABLES_VARIABLE_NAME</code> where <code>VARIABLE_NAME</code> is the variable you are trying to override.
+The only exception is <code>compose_files</code>, because it is a list it must be overridden in a YAML file.
+There is an example <code>invoke.yml</code> (<code>invoke.example.yml</code>) in this directory which can be used as a starting point.</p>
+<h2 id="docker-development-environment">Docker Development Environment<a class="headerlink" href="#docker-development-environment" title="Permanent link">&para;</a></h2>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>This is the recommended option for development.</p>
+</div>
+<p>Once the <a href="#prerequisites">prerequisite steps</a> have been completed, build and start the development server:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>➜<span class="w"> </span>poetry<span class="w"> </span>shell
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>➜<span class="w"> </span>poetry<span class="w"> </span>install
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>➜<span class="w"> </span>invoke<span class="w"> </span>build
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>➜<span class="w"> </span>invoke<span class="w"> </span>start
+</code></pre></div></p>
+<p>The Nautobot server can now be accessed at <a href="http://localhost:8080">http://localhost:8080</a>, and the live documentation at <a href="http://localhost:8001">http://localhost:8001</a></p>
+<p>To either stop or destroy the development environment use the following options.</p>
+<dl>
+<dt><code>invoke stop</code></dt>
+<dd>Stop the containers, but keep all underlying systems intact</dd>
+<dt><code>invoke destroy</code></dt>
+<dd>Stop and remove all containers, volumes, etc. (This results in data loss due to the volume being deleted)</dd>
+</dl>
+<p>With the environment up, you should see five running Docker containers:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>➜<span class="w"> </span>docker<span class="w"> </span>ps
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w">                                         </span>COMMAND<span class="w">                  </span>CREATED<span class="w">          </span>STATUS<span class="w">                    </span>PORTS<span class="w">                    </span>NAMES
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>acc98ecb33bb<span class="w">   </span>nautobot-fsus/nautobot:1.6.25-py3.10<span class="w">          </span><span class="s2">&quot;sh -c &#39;nautobot-ser…&quot;</span><span class="w">   </span><span class="m">56</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">44</span><span class="w"> </span>seconds<span class="w"> </span><span class="o">(</span>healthy<span class="o">)</span><span class="w">   </span><span class="m">8080</span>/tcp<span class="w">                 </span>nautobot-fsus-worker-1
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>760cb8d52eb0<span class="w">   </span>nautobot-fsus/nautobot:1.6.25-py3.10<span class="w">          </span><span class="s2">&quot;/docker-entrypoint.…&quot;</span><span class="w">   </span><span class="m">56</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">44</span><span class="w"> </span>seconds<span class="w"> </span><span class="o">(</span>healthy<span class="o">)</span><span class="w">   </span><span class="m">0</span>.0.0.0:8080-&gt;8080/tcp<span class="w">   </span>nautobot-fsus-nautobot-1
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>045232a98222<span class="w">   </span>nautobot-fsus/nautobot:1.6.25-py3.10<span class="w">          </span><span class="s2">&quot;mkdocs serve -v -a …&quot;</span><span class="w">   </span><span class="m">56</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">55</span><span class="w"> </span>seconds<span class="w">             </span><span class="m">0</span>.0.0.0:8001-&gt;8080/tcp<span class="w">   </span>nautobot-fsus-docs-1
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>d2e6933582d2<span class="w">   </span>postgres:14-alpine<span class="w">                            </span><span class="s2">&quot;docker-entrypoint.s…&quot;</span><span class="w">   </span><span class="m">56</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">55</span><span class="w"> </span>seconds<span class="w"> </span><span class="o">(</span>healthy<span class="o">)</span><span class="w">   </span><span class="m">5432</span>/tcp<span class="w">                 </span>nautobot-fsus-db-1
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>585ba6cf6197<span class="w">   </span>redis:6-alpine<span class="w">                                </span><span class="s2">&quot;docker-entrypoint.s…&quot;</span><span class="w">   </span><span class="m">56</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">55</span><span class="w"> </span>seconds<span class="w">             </span><span class="m">6379</span>/tcp<span class="w">                 </span>nautobot-fsus-redis-1
+</code></pre></div></p>
+<h3 id="real-time-updates-how-cool">Real-Time Updates? How Cool!<a class="headerlink" href="#real-time-updates-how-cool" title="Permanent link">&para;</a></h3>
+<p>Your environment should now be fully setup, all necessary Docker containers are created and running, and you're logged into Nautobot in your web browser.
+Now what?</p>
+<p>Now you can start developing your Nautobot app in the project folder!</p>
+<p>The magic here is the root directory is mounted inside your Docker containers when built and ran, so <strong>any</strong> changes made to the files in here are directly updated to the Nautobot app code running in Docker.
+This means that as you modify the code in your Nautobot app folder, the changes will be instantly updated in Nautobot.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>There are a few exceptions to this, as outlined in the section <a href="#to-rebuild-or-not-to-rebuild">To Rebuild or Not To Rebuild</a>.</p>
+</div>
+<p>The back-end Django process is setup to automatically reload itself (it only takes a couple of seconds) every time a file is updated (saved).
+So for example, if you were to update one of the files like <code>tables.py</code>, then save it, the changes will be visible right away in the web browser!</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may get connection refused while Django reloads, but it should be refreshed fairly quickly.</p>
+</div>
+<h3 id="docker-logs">Docker Logs<a class="headerlink" href="#docker-logs" title="Permanent link">&para;</a></h3>
+<p>When trying to debug an issue, one helpful thing you can look at are the logs within the Docker containers.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>logs<span class="w"> </span>-f
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code>-f</code> tag will keep the logs open, and output them in realtime as they are generated.
+By default this will show the logs from the <code>nautobot</code> container, to view the logs from a different container use the <code>-s</code> option with the container's service name, e.g. <code>invoke logs -f -s db</code>.</p>
+</div>
+<h2 id="local-development-environment">Local Development Environment<a class="headerlink" href="#local-development-environment" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Uncomment the <code>NAUTOBOT_DB_HOST</code>, <code>NAUTOBOT_REDIS_HOST</code>, and <code>NAUTOBOT_CONFIG</code> variables in <code>development/creds.env</code>.</li>
+<li>Create an <code>invoke.yml</code> file with the following contents at the root of the repo and edit as necessary - e.g. set <code>compose_files</code> to <code>docker-compose-requirements-mysql.yml</code> to use MySQL as the database backend.
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nn">---</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">nautobot_fsus</span><span class="p">:</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">local</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">compose_dir</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;development&quot;</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">compose_files</span><span class="p">:</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;docker-compose.requirements.yml&quot;</span>
+</code></pre></div></li>
+<li>Install the local development dependencies and start the supporting services.
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>➜<span class="w"> </span>poetry<span class="w"> </span>shell
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>➜<span class="w"> </span>poetry<span class="w"> </span>install
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>➜<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="k">$(</span>cat<span class="w"> </span>development/dev.env<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s1">&#39;^#&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="k">)</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>➜<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="k">$(</span>cat<span class="w"> </span>development/creds.env<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s1">&#39;^#&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="k">)</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>➜<span class="w"> </span>invoke<span class="w"> </span>start<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sleep<span class="w"> </span><span class="m">5</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>➜<span class="w"> </span>nautobot-server<span class="w"> </span>migrate
+</code></pre></div>
+    !!! tip
+        If you want to develop on the latest develop branch of Nautobot, run the following command: <code>poetry add --optional git+https://github.com/nautobot/nautobot@develop</code>. After the <code>@</code> symbol must match either a branch or a tag.</li>
+<li>You can now run nautobot-server commands as you would from the <a href="https://nautobot.readthedocs.io/en/latest/">Nautobot documentation</a> for example to start the development server:
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>➜<span class="w"> </span>nautobot-server<span class="w"> </span>runserver<span class="w"> </span><span class="m">0</span>.0.0.0:8080<span class="w"> </span>--insecure
+</code></pre></div></li>
+</ol>
+<p>Nautobot server can now be accessed at <a href="http://localhost:8080">http://localhost:8080</a>.</p>
+<p>It is typically recommended to launch the Nautobot <code>runserver</code> command in a separate shell so you can keep developing and manage the webserver separately.</p>
+<p>With the environment up, you should see three running Docker containers:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>➜<span class="w"> </span>docker<span class="w"> </span>ps
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>CONTAINER<span class="w"> </span>ID<span class="w">   </span>IMAGE<span class="w">                              </span>COMMAND<span class="w">                  </span>CREATED<span class="w">         </span>STATUS<span class="w">                            </span>PORTS<span class="w">                    </span>NAMES
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>9a3ef787dae6<span class="w">   </span>postgres:14-alpine<span class="w">                 </span><span class="s2">&quot;docker-entrypoint.s…&quot;</span><span class="w">   </span><span class="m">9</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">8</span><span class="w"> </span>seconds<span class="w"> </span><span class="o">(</span>health:<span class="w"> </span>starting<span class="o">)</span><span class="w">   </span><span class="m">0</span>.0.0.0:5432-&gt;5432/tcp<span class="w">   </span>nautobot-fsus-postgres-1
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>4b435ababbab<span class="w">   </span>redis:6-alpine<span class="w">                     </span><span class="s2">&quot;docker-entrypoint.s…&quot;</span><span class="w">   </span><span class="m">9</span><span class="w"> </span>seconds<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">8</span><span class="w"> </span>seconds<span class="w">                      </span><span class="m">0</span>.0.0.0:6379-&gt;6379/tcp<span class="w">   </span>nautobot-fsus-redis-1
+</code></pre></div></p>
+<h2 id="updating-the-documentation">Updating the Documentation<a class="headerlink" href="#updating-the-documentation" title="Permanent link">&para;</a></h2>
+<p>Documentation dependencies are pinned to exact versions to ensure consistent results.
+For the development environment, they are defined in the <code>pyproject.toml</code> file.</p>
+<p>If you need to update any of the documentation dependencies to a newer version, make sure you copy the exact same versions pinned in <code>pyproject.toml</code> to the <code>docs/requirements.txt</code> file as well.
+The latter is used in the automated build pipeline on ReadTheDocs to build the live version of the documentation.</p>
+<h2 id="cli-helper-commands">CLI Helper Commands<a class="headerlink" href="#cli-helper-commands" title="Permanent link">&para;</a></h2>
+<p>CLI helper commands are all based on <a href="https://www.pyinvoke.org/">Invoke</a>, and are listed below in 3 categories:</p>
+<ul>
+<li>Environment Management</li>
+<li>Utility</li>
+<li>Testing</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To see the list of available <code>invoke</code> commands, use the <code>-l</code> option
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>➜ invoke -l
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Available tasks:
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>build             Build the Nautobot docker image with the plugin installed.
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>...
+</code></pre></div></p>
+</div>
+<p>Each command can be executed with <code>invoke &lt;command&gt;</code>.
+Environment variables <code>INVOKE_NAUTOBOT_CONSUMABLES_PYTHON_VER</code> and <code>INVOKE_NAUTOBOT_CONSUMABLES_NAUTOBOT_VER</code> may be specified to override the default versions.
+Each command also has its own help <code>invoke &lt;command&gt; --help</code></p>
+<h3 id="environment-management">Environment Management<a class="headerlink" href="#environment-management" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><strong>Local</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>destroy          Destroy the suppporting containers and volumes.
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>restart          Restart suppporting containers.
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>start            Start suppporting containers.
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>stop             Stop suppporting containers.
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Docker</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>build               Build the Nautobot docker image with the plugin installed.
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>debug               Start Nautobot and/or its dependencies in debug mode.
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>destroy             Destroy containers and volumes for Nautobot and/or its dependencies.
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>exec                Run a command inside a container (defaults to bash shell inside nautobot container).
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>export              Export docker compose configuration to `compose.yaml` file.
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>logs                View the logs of a docker-compose service.
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>restart             Restart the virtual cluster.
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>start               Start Nautobot and/or its dependencies in detached mode.
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>stop                Stop Nautobot and/or its dependencies.
+</code></pre></div></p>
+</li>
+</ul>
+<h3 id="utility">Utility<a class="headerlink" href="#utility" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>cli                 Launch a bash shell inside the running Nautobot container.
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>create-env          Add a base set of data to Nautobot to make development easier.
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>createsuperuser     Create a new Nautobot superuser account (default: &quot;admin&quot;), will prompt for password.
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>dbshell             Start database client inside the running `db` container.
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>generate-packages   Generate all python packages inside a docker container and copy them to ./dist
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>help                Show the help messages for all configured tasks.
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>import-db           Stop the Nautobot containers and import a database dump file.
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>lock                Generate the poetry.lock file in the Nautobot container
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>makemigrations      Perform the Django `makemigrations` operation.
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>migrate             Perform the Django migrate operation.
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>mkdocs              Runs `mkdocs` to create the static documentation for the plugin.
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>nbshell             Launch an interactive nbshell session.
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>post-upgrade        Performs common Nautobot post-upgrade operations using a single entrypoint.
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>shell-plus          Launch and interactive shell_plus session.
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>showmigrations      Show the list of all applied migrations.
+</code></pre></div>
+<h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>test.bandit         Run bandit to validate basic static code security analysis.
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>test.coverage       Report on test coverage as measured by `invoke test.unittests`.
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>test.everything     Run all the linters and pytest with coverage.
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>test.flake8         Check for PEP8 compliance and style issues.
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>test.mypy           Check for proper type hinting.
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>test.pydocstyle     Validate docstring formats.
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>test.pylint         Run pylint code analysis.
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>test.unittests      Run the plugin tests with coverage.
+</code></pre></div>
+<h2 id="tips">Tips<a class="headerlink" href="#tips" title="Permanent link">&para;</a></h2>
+<h3 id="creating-a-superuser">Creating a Superuser<a class="headerlink" href="#creating-a-superuser" title="Permanent link">&para;</a></h3>
+<p>The Nautobot development image will automatically provision a superuser when specifying the following variables within <code>creds.env</code> which is the default when copying <code>creds.example.env</code> to <code>creds.env</code>:</p>
+<ul>
+<li><code>NAUTOBOT_CREATE_SUPERUSER=true</code></li>
+<li><code>NAUTOBOT_SUPERUSER_API_TOKEN=0123456789abcdef0123456789abcdef01234567</code></li>
+<li><code>NAUTOBOT_SUPERUSER_PASSWORD=admin</code></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The default username is <strong>admin</strong>, but can be overridden by specifying <strong>NAUTOBOT_SUPERUSER_USERNAME</strong>.</p>
+</div>
+<p>If you need to create additional superusers, run the follow commands.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>createsuperuser
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>Running<span class="w"> </span>docker-compose<span class="w"> </span><span class="nb">command</span><span class="w"> </span><span class="s2">&quot;ps --services --filter status=running&quot;</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>Running<span class="w"> </span>docker-compose<span class="w"> </span><span class="nb">command</span><span class="w"> </span><span class="s2">&quot;exec nautobot nautobot-server createsuperuser --username admin&quot;</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>Error:<span class="w"> </span>That<span class="w"> </span>username<span class="w"> </span>is<span class="w"> </span>already<span class="w"> </span>taken.
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>Username:<span class="w"> </span>batman
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>Email<span class="w"> </span>address:<span class="w"> </span>batman@example.com
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>Password:
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>Password<span class="w"> </span><span class="o">(</span>again<span class="o">)</span>:
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>Superuser<span class="w"> </span>created<span class="w"> </span>successfully.
+</code></pre></div>
+<h3 id="python-shell">Python Shell<a class="headerlink" href="#python-shell" title="Permanent link">&para;</a></h3>
+<p>To drop into a Django shell for Nautobot (in the Docker container) run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>nbshell
+</code></pre></div>
+<p>This is the same as running:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>cli
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>➜<span class="w"> </span>nautobot-server<span class="w"> </span>nbshell
+</code></pre></div>
+<h3 id="ipython-shell-plus">iPython Shell Plus<a class="headerlink" href="#ipython-shell-plus" title="Permanent link">&para;</a></h3>
+<p>Django also has a more advanced shell that uses iPython and that will automatically import all the models:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>shell-plus
+</code></pre></div>
+<p>This is the same as running:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>cli
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>➜<span class="w"> </span>nautobot-server<span class="w"> </span>shell_plus
+</code></pre></div>
+<h3 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h3>
+<p>To run tests against your code, you can run all of the tests that TravisCI runs against any new PR with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>test.everything
+</code></pre></div>
+<p>To run an individual test, you can run any or all of the following:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>test.pylint
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>➜<span class="w"> </span>invoke<span class="w"> </span>test.flake8
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>➜<span class="w"> </span>invoke<span class="w"> </span>test.pydocstyle
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>➜<span class="w"> </span>invoke<span class="w"> </span>test.mypy
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>➜<span class="w"> </span>invoke<span class="w"> </span>test.bandit
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>➜<span class="w"> </span>invoke<span class="w"> </span>test.unittests
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>➜<span class="w"> </span>invoke<span class="w"> </span>test.coverage
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To speed testing up when developing, use the <code>-k</code> flag with <code>test.unittests</code> or <code>test.everything</code> to preserve the test database.
+The data created during tests will still be cleaned out, but the database itself will be maintained, meaning that the test suite doesn't have to create it and run the full set of migrations every time.</p>
+</div>
+<h2 id="to-rebuild-or-not-to-rebuild">To Rebuild or Not to Rebuild<a class="headerlink" href="#to-rebuild-or-not-to-rebuild" title="Permanent link">&para;</a></h2>
+<p>Most of the time, you will not need to rebuild your images. Simply running <code>invoke start</code> and <code>invoke stop</code> is enough to keep your environment going.
+However there are a couple of instances when you will want to.</p>
+<h3 id="updating-environment-variables">Updating Environment Variables<a class="headerlink" href="#updating-environment-variables" title="Permanent link">&para;</a></h3>
+<p>To add environment variables to your containers, thus allowing Nautobot to use them, you will update/add them in the <code>development/development.env</code> file.
+However, doing so is considered updating the underlying container shell, instead of Django (which auto restarts itself on changes).</p>
+<p>To get new environment variables to take effect, you will need stop any running images, rebuild the images, then restart them.
+This can easily be done with 3 commands:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>stop
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>➜<span class="w"> </span>invoke<span class="w"> </span>build
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>➜<span class="w"> </span>invoke<span class="w"> </span>start
+</code></pre></div>
+<p>Once completed, the new/updated environment variables should now be live.</p>
+<h3 id="installing-additional-python-packages">Installing Additional Python Packages<a class="headerlink" href="#installing-additional-python-packages" title="Permanent link">&para;</a></h3>
+<p>If you want your Nautobot app to leverage another available Nautobot app or another Python package, you can easily add them into your Docker environment.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>➜<span class="w"> </span>poetry<span class="w"> </span>shell
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>➜<span class="w"> </span>poetry<span class="w"> </span>add<span class="w"> </span>&lt;package_name&gt;
+</code></pre></div>
+<p>Once the dependencies are resolved, stop the existing containers, rebuild the Docker image, and then start all containers again.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>stop
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>➜<span class="w"> </span>invoke<span class="w"> </span>build
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>➜<span class="w"> </span>invoke<span class="w"> </span>start
+</code></pre></div>
+<h3 id="installing-additional-nautobot-apps">Installing Additional Nautobot Apps<a class="headerlink" href="#installing-additional-nautobot-apps" title="Permanent link">&para;</a></h3>
+<p>Let's say for example you want the new Nautobot app you're creating to integrate with Nautobot Consumables.
+To do this, you will want to add the Nautobot Consumables app to your environment.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>➜<span class="w"> </span>poetry<span class="w"> </span>shell
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>➜<span class="w"> </span>poetry<span class="w"> </span>add<span class="w"> </span>nautobot-fsus
+</code></pre></div>
+<p>Once you activate the virtual environment via Poetry, you then tell Poetry to install the new Nautobot app.</p>
+<p>Before you continue, you'll need to update the file <code>development/nautobot_config.py</code> accordingly, adding <code>nautobot_fsus</code> to the <code>PLUGINS</code> and any relevant settings as necessary under <code>PLUGINS_CONFIG</code>.
+Since you're modifying the underlying OS (not just Django files), you need to rebuild the image.
+This is a similar process to updating environment variables, which was explained earlier.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>➜<span class="w"> </span>invoke<span class="w"> </span>stop
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>➜<span class="w"> </span>invoke<span class="w"> </span>build
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>➜<span class="w"> </span>invoke<span class="w"> </span>start
+</code></pre></div>
+<p>Once the containers are up and running, you should now see the new Nautobot app installed in your Nautobot instance.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can even launch an <code>ngrok</code> service locally on your laptop, pointing to port 8080 (such as for SSoT development), and it will point traffic directly to your Docker images.</p>
+</div>
+<h3 id="updating-python-version">Updating Python Version<a class="headerlink" href="#updating-python-version" title="Permanent link">&para;</a></h3>
+<p>To update the Python version, you can update it in your <code>invoke.yml</code> file:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nt">nautobot_fsus</span><span class="p">:</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="w">  </span><span class="nt">project_name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nautobot-fsus&quot;</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="w">  </span><span class="nt">project_source</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;nautobot_fsus&quot;</span>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="w">  </span><span class="nt">nautobot_ver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;1.6.21&quot;</span>
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="w">  </span><span class="nt">local</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="w">  </span><span class="nt">python_ver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.12&quot;</span>
+</code></pre></div>
+<p>Or in <code>tasks/__init__.py</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="n">namespace</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>    <span class="p">{</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>        <span class="s2">&quot;nautobot_fsus&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>            <span class="o">...</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>            <span class="s2">&quot;python_ver&quot;</span><span class="p">:</span> <span class="s2">&quot;3.12&quot;</span><span class="p">,</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>        <span class="o">...</span>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>        <span class="p">}</span>
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a>    <span class="p">}</span>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="p">)</span>
+</code></pre></div>
+<p>Or set the <code>INVOKE_NAUTOBOT_CONSUMABLES_PYTHON_VER</code> variable.</p>
+<h3 id="updating-nautobot-version">Updating Nautobot Version<a class="headerlink" href="#updating-nautobot-version" title="Permanent link">&para;</a></h3>
+<p>To update the Nautobot version, you can update it within <code>pyproject.toml</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="k">[tool.poetry.dependencies]</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="c1"># Used for local development</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="n">python</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&gt;=3.10,&lt;3.12&quot;</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="n">nautobot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^1.6.21&quot;</span>
+</code></pre></div>
+<p>Or set it directly in <code>tasks/__init__.py</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="n">namespace</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>    <span class="p">{</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>        <span class="s2">&quot;nautobot_fsus&quot;</span><span class="p">:</span> <span class="p">{</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>            <span class="o">...</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a>            <span class="s2">&quot;nautobot_ver&quot;</span><span class="p">:</span> <span class="s2">&quot;1.6.25&quot;</span><span class="p">,</span>
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a>        <span class="o">...</span>
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a>        <span class="p">}</span>
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a>    <span class="p">}</span>
+<a id="__codelineno-30-9" name="__codelineno-30-9" href="#__codelineno-30-9"></a><span class="p">)</span>
+</code></pre></div>
+<p>Or set the <code>INVOKE_NAUTOBOT_SSOT_NAUTOBOT_VER</code> variable.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.copy", "navigation.tabs", "navigation.tabs.sticky", "navigation.tracking", "search.highlight", "search.share", "search.suggest"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>
