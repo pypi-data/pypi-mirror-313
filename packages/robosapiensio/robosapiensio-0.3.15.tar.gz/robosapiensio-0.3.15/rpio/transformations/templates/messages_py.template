@@ -1,0 +1,40 @@
+{% for message in messages %}
+class {{message.name}}(object):
+    def __init__(self):
+
+        self.name= "{{message.name}}"
+        {% for data in message.features %}
+        {% if data.dataType == 'string' or data.dataType == 'char' %}
+        self._{{data.name}}= 'TBD'
+        {% elif data.dataType == 'bool' %}
+        self._{{data.name}}= False
+        {% elif data.dataType == 'int8' or data.dataType == 'uint8' or data.dataType == 'int16' or data.dataType == 'uint16' or data.dataType == 'int64' or data.dataType == 'uint64' %}
+        self._{{data.name}}= 0
+        {% elif data.dataType == 'Integer_8' or data.dataType == 'Unsigned_8' or data.dataType == 'Integer_16' or data.dataType == 'Unsigned_16' or data.dataType == 'Integer_64' or data.dataType == 'Unsigned_64' %}
+        self._{{data.name}}= 0
+        {% elif data.dataType == 'float32' or data.dataType == 'float64' or data.dataType == 'Float_32' or data.dataType == 'Float_64' %}
+        self._{{data.name}}= 0.0
+        {% elif data.dataType == 'Float_32' or data.dataType == 'Float_64' %}
+        self._{{data.name}}= 0.0
+        {% elif data.dataType == 'Array' %}
+        self._{{data.name}}= []
+        {% else %}
+        self._{{data.name}}= None
+        {% endif %}
+        {% endfor %}
+
+
+    {% for data in message.features %}
+    @property
+    def {{data.name}}(self):
+        """The {{data.name}} (read-only)."""
+        return self._{{data.name}}
+
+    @{{data.name}}.setter
+    def {{data.name}}(self, cmp):
+        """The {{data.name}} (write)."""
+        self._{{data.name}} = cmp
+
+    {% endfor %}
+
+{% endfor %}
