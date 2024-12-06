@@ -1,0 +1,234 @@
+Metadata-Version: 2.3
+Name: scirpy
+Version: 0.20.0
+Summary: Python library for single-cell adaptive immune receptor repertoire (AIRR) analysis
+Project-URL: Documentation, https://scirpy.readthedocs.io/
+Project-URL: Source, https://github.com/scverse/scirpy
+Project-URL: Home-page, https://github.com/scverse/scirpy
+Author: Gregor Sturm, Tamas Szabo
+Maintainer-email: Gregor Sturm <mail@gregor-sturm.de>
+License: BSD 3-Clause License
+        
+        Copyright (c) 2020 Gregor Sturm
+        Copyright (c) 2020 Tamas Szabo
+        Copyright (c) 2020 Francesca Finotello
+        Copyright (c) 2020 Institute of Bioinformatics, Medical University of Innsbruck
+        All rights reserved.
+        
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are met:
+        
+        1. Redistributions of source code must retain the above copyright notice, this
+           list of conditions and the following disclaimer.
+        
+        2. Redistributions in binary form must reproduce the above copyright notice,
+           this list of conditions and the following disclaimer in the documentation
+           and/or other materials provided with the distribution.
+        
+        3. Neither the name of the copyright holder nor the names of its
+           contributors may be used to endorse or promote products derived from
+           this software without specific prior written permission.
+        
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+        AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+        DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+        FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+        DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+        SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+        CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+        OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+        OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Requires-Python: >=3.10
+Requires-Dist: adjusttext>=0.7
+Requires-Dist: airr>=1.4.1
+Requires-Dist: anndata>=0.9
+Requires-Dist: awkward>=2.1.0
+Requires-Dist: igraph!=0.10.0,!=0.10.1
+Requires-Dist: joblib>=1.3.1
+Requires-Dist: logomaker
+Requires-Dist: mudata>=0.2.3
+Requires-Dist: networkx>=2.5
+Requires-Dist: numba>=0.41.0
+Requires-Dist: numpy>=1.17.0
+Requires-Dist: pandas!=2.1.2,>=1.5
+Requires-Dist: pooch>=1.7.0
+Requires-Dist: pycairo>=1.20; sys_platform == 'win32'
+Requires-Dist: python-levenshtein
+Requires-Dist: scanpy>=1.9.3
+Requires-Dist: scikit-learn
+Requires-Dist: scipy
+Requires-Dist: squarify
+Requires-Dist: tqdm>=4.63
+Provides-Extra: dandelion
+Requires-Dist: sc-dandelion>=0.3.5; extra == 'dandelion'
+Provides-Extra: dev
+Requires-Dist: pre-commit; extra == 'dev'
+Provides-Extra: diversity
+Requires-Dist: scikit-bio>=0.5.7; extra == 'diversity'
+Provides-Extra: doc
+Requires-Dist: docutils!=0.18.*,!=0.19.*,>=0.8; extra == 'doc'
+Requires-Dist: ipykernel; extra == 'doc'
+Requires-Dist: ipython; extra == 'doc'
+Requires-Dist: jupyter-client; extra == 'doc'
+Requires-Dist: jupytext; extra == 'doc'
+Requires-Dist: leidenalg; extra == 'doc'
+Requires-Dist: muon>0.1.6; extra == 'doc'
+Requires-Dist: myst-nb; extra == 'doc'
+Requires-Dist: myst-nb>=1.1.0; extra == 'doc'
+Requires-Dist: nbconvert; extra == 'doc'
+Requires-Dist: pycairo; extra == 'doc'
+Requires-Dist: sc-dandelion; extra == 'doc'
+Requires-Dist: sphinx-autodoc-typehints; extra == 'doc'
+Requires-Dist: sphinx-book-theme>=1.0.0; extra == 'doc'
+Requires-Dist: sphinx-copybutton; extra == 'doc'
+Requires-Dist: sphinx<7.4,>=7; extra == 'doc'
+Requires-Dist: sphinxcontrib-bibtex>=1.0.0; extra == 'doc'
+Requires-Dist: sphinxext-opengraph; extra == 'doc'
+Requires-Dist: zarr; extra == 'doc'
+Provides-Extra: parasail
+Requires-Dist: parasail!=1.2.1; extra == 'parasail'
+Provides-Extra: rpack
+Requires-Dist: rectangle-packer; extra == 'rpack'
+Provides-Extra: test
+Requires-Dist: black; extra == 'test'
+Requires-Dist: coverage; extra == 'test'
+Requires-Dist: parasail!=1.2.1; extra == 'test'
+Requires-Dist: pytest; extra == 'test'
+Requires-Dist: rectangle-packer; extra == 'test'
+Requires-Dist: sc-dandelion>=0.3.5; extra == 'test'
+Requires-Dist: scikit-bio>=0.5.7; extra == 'test'
+Description-Content-Type: text/markdown
+
+# Scirpy: single-cell immune receptor analysis in Python
+
+[![Tests][badge-tests]][link-tests]
+[![Documentation][badge-docs]][link-docs]
+[![PyPI][badge-pypi]][link-pypi]
+[![bioconda][badge-bioconda]][link-bioconda]
+[![airr][badge-airr]][link-airr]
+[![Powered by NumFOCUS][badge-numfocus]][link-numfocus]
+
+Scirpy is a package to analyse T cell receptor (TCR) or B cell receptor (BCR)
+repertoires from single-cell RNA sequencing (scRNA-seq) data in Python.
+It seamlessly integrates with [scanpy][] and [mudata][] and provides various modules for data import, analysis and visualization.
+
+[//]: # "numfocus-fiscal-sponsor-attribution"
+
+Scirpy is part of the scverse project ([website](https://scverse.org), [governance](https://scverse.org/about/roles)) and is fiscally sponsored by [NumFOCUS](https://numfocus.org/).
+Please consider making a tax-deductible [donation](https://numfocus.org/donate-to-scverse) to help the project pay for developer time, professional services, travel, workshops, and a variety of other needs.
+
+<a href="https://numfocus.org/project/scverse">
+  <img
+    src="https://raw.githubusercontent.com/numfocus/templates/master/images/numfocus-logo.png"
+    width="200"
+  >
+</a>
+
+[badge-tests]: https://img.shields.io/github/actions/workflow/status/scverse/scirpy/test.yaml?branch=main
+[link-tests]: https://github.com/scverse/scirpy/actions/workflows/test.yml
+[badge-docs]: https://img.shields.io/readthedocs/scirpy
+[badge-pypi]: https://img.shields.io/pypi/v/scirpy?logo=PyPI
+[link-pypi]: https://pypi.org/project/scirpy/
+[link-bioconda]: http://bioconda.github.io/recipes/scirpy/README.html
+[badge-bioconda]: https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat
+[badge-airr]: https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=flat
+[link-airr]: https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html
+[scverse]: https://scverse.org
+[scanpy]: https://scanpy.readthedocs.io/
+[mudata]: https://github.com/scverse/mudata
+[badge-numfocus]: https://img.shields.io/badge/powered%20by-NumFOCUS-orange.svg?style=flat&colorA=E1523D&colorB=007D8A
+[link-numfocus]: http://numfocus.org
+
+## Getting started
+
+Please refer to the [documentation][link-docs]. In particular, the
+
+-   [Tutorial][link-tutorial], and the
+-   [API documentation][link-api].
+
+## Installation
+
+You need to have Python 3.10 or newer installed on your system. If you don't have
+Python installed, we recommend installing [Mambaforge](https://github.com/conda-forge/miniforge#mambaforge).
+
+There are several alternative options to install scirpy:
+
+1. Install the latest release of `scirpy` from [PyPI](https://pypi.org/project/scirpy/):
+
+    ```bash
+    pip install scirpy
+    ```
+
+2. Get it from [Bioconda][link-bioconda]:
+
+    First **setup conda channels [as described here](https://bioconda.github.io/#usage)**. Then install scirpy:
+
+    ```bash
+    conda install scirpy
+    ```
+
+3. Install the latest development version:
+
+    ```bash
+    pip install git+https://github.com/scverse/scirpy.git@main
+    ```
+
+4. Run it in a container using [Docker][] or [Podman][]:
+
+    ```bash
+    docker pull quay.io/biocontainers/scirpy:<tag>
+    ```
+
+where `tag` is one of [these tags](https://quay.io/repository/biocontainers/scirpy?tab=tags).
+
+## Release notes
+
+See the [changelog][changelog].
+
+## Support and Contact
+
+We are happy to assist with problems when using scirpy.
+
+-   If you need help with scirpy or have questions regarding single-cell immune-cell receptor analysis in general, please join us in the [scverse discourse][scverse-discourse].
+-   For bug report or feature requests, please use the [issue tracker][issue-tracker].
+
+We try to respond within two working days, however fixing bugs or implementing new features
+can take substantially longer, depending on the availability of our developers.
+
+## Citation
+
+If you use `scirpy` in your work, please cite the `scirpy`
+publication as follows:
+
+> **Scirpy: A Scanpy extension for analyzing single-cell T-cell
+> receptor sequencing data**
+>
+> Gregor Sturm, Tamas Szabo, Georgios Fotakis, Marlene Haider, Dietmar
+> Rieder, Zlatko Trajanoski, Francesca Finotello
+>
+> _Bioinformatics_ 2020 Sep 15. doi:
+> [10.1093/bioinformatics/btaa611](https://doi.org/10.1093/bioinformatics/btaa611).
+
+You can cite the scverse publication as follows:
+
+> **The scverse project provides a computational ecosystem for
+> single-cell omics data analysis**
+>
+> Isaac Virshup, Danila Bredikhin, Lukas Heumos, Giovanni Palla, Gregor
+> Sturm, Adam Gayoso, Ilia Kats, Mikaela Koutrouli, Scverse Community,
+> Bonnie Berger, Dana Pe’er, Aviv Regev, Sarah A. Teichmann, Francesca
+> Finotello, F. Alexander Wolf, Nir Yosef, Oliver Stegle & Fabian J.
+> Theis
+>
+> _Nat Biotechnol._ 2023 Apr 10. doi:
+> [10.1038/s41587-023-01733-8](https://doi.org/10.1038/s41587-023-01733-8).
+
+[scverse-discourse]: https://discourse.scverse.org/
+[issue-tracker]: https://github.com/scverse/scirpy/issues
+[changelog]: https://scirpy.readthedocs.io/latest/changelog.html
+[link-docs]: https://scirpy.readthedocs.io
+[link-api]: https://scirpy.readthedocs.io/latest/api.html
+[link-tutorial]: https://scirpy.scverse.org/en/latest/tutorials.html
+[Docker]: https://www.docker.com/
+[Podman]: https://podman.io/
