@@ -1,0 +1,1 @@
+hubm_path = "/etc/hubm"
