@@ -1,0 +1,167 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "djtools"
+version = "2.9.0-rc4"
+authors = [
+    {name = "Alex Richards", email = "alex.richards006@gmail.com"},
+]
+description = "DJ Tools is a library for managing a collection of music."
+readme = {file = "README.md", content-type = "text/markdown"}
+# long_description = file: "README.md"
+keywords = [
+    "DJ",
+    "Collections",
+    "Rekordbox",
+    "Playlists",
+    "Spotify",
+    "Reddit",
+    "Audio", 
+]
+requires-python=">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Other Audience",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Other/Nonlisted Topic"
+]
+dependencies = [
+    "asyncpraw",
+    "awscli",
+    "beautifulsoup4",
+    "fuzzywuzzy",
+    "Jinja2",
+    "lxml",
+    "pydantic",
+    "pydub",
+    "pyperclip",
+    "python-dateutil",
+    "PyYAML",
+    "requests",
+    "spotipy",
+    "tqdm",
+    "youtube-dl"
+]
+
+
+[project.urls]
+"Repository" = "https://github.com/a-rich/DJ-tools"
+"Documentation" = "https://a-rich.github.io/DJ-Tools"
+"Documentation (dev)" = "https://a-rich.github.io/DJ-Tools-dev-docs"
+
+
+[project.optional-dependencies]
+dev = [
+    "aiohttp",
+    "black",
+    "build",
+    "mkdocs",
+    "mkdocs-material",
+    "mkdocstrings-python",
+    "pre-commit",
+    "pylint",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "semver",
+    "setuptools",
+    "twine",
+]
+accelerated = [
+    "python-Levenshtein" 
+]
+
+[project.scripts]
+djtools = "djtools:main"
+
+[tool.black]
+line-length = 79
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["src/djtools/__main__.py"]
+
+[tool.pylint.DESIGN]
+disable = [
+    "abstract-class-instantiated",
+    "broad-except",
+    "import-outside-toplevel",
+    "logging-not-lazy",
+    "no-name-in-module",
+    "too-many-positional-arguments",
+    "too-many-return-statements"
+]
+good-names = [
+    "user"
+]
+max-args = 10
+max-attributes = 15
+max-branches = 25
+max-locals = 35
+max-statements = 100
+min-public-methods = 0
+max-returns = 8
+
+[tool.pylint.LOGGING]
+disable = [
+    "logging-fstring-interpolation"
+]
+
+[tool.pylint.SPELLING]
+spelling-ignore-words = [
+    "/dj/", "dj/",
+    "arg", "args", "argparse", "argparser", "args", "async", "async", "asyncpraw", "aws", "awscli",
+    "bandcamp", "beatcloud", "beatcloud", "beatgrid", "beatport", "bitrate", "bool", "boolean",
+    "cfg", "cli", "cmd", "config", "configs", "cp",
+    "datetime", "deduplicate", "de", "del", "denon", "deserialize", "deserializes", "dest", "dirs", "dj", "djtools", "dicts", "dl", "dnb", "dubstep", "dunder", "dunder",
+    "entrypoint", "exc",
+    "ffmpeg", "fixturename", "formatter", "fullloader", "func",
+    "hh", "hh:mm:ss", "hookimpl", "hookwrapper",
+    "init",
+    "json",
+    "kbps", "kwarg", "kwargs",
+    "levenshtein", "lookups",
+    "misformattings",
+    "namespace", "namespace",
+    "pathlib", "parsers", "picard", "popen", "pragma", "praw", "pre", "proc", "pydantic", "pytest",
+    "reddit", "reddit", "rekordbox", "rekordbox", "rekordbox's", "relocations", "repr",
+    "s3", "serato", "serializable", "spotipy", "soundcloud", "spotify", "spotify", "stderr", "stdout", "str", "subprocess", "subreddit", "subreddits", "substrings", "superclass", "symlink", "symlinks",
+    "teardown", "techstep", "tmpdir", "trackid", "traktor",
+    "unattributable", "unioned", "unioning", "unix", "url", "utils",
+    "validator",
+    "wav", "wb", "webhook", "whitespace",
+    "xml", "xml's",
+    "yaml", "youtube",
+]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = [
+    "djtools",
+    "djtools.configs",
+    "djtools.collection",
+    "djtools.logs",
+    "djtools.spotify",
+    "djtools.sync",
+    "djtools.utils",
+]
