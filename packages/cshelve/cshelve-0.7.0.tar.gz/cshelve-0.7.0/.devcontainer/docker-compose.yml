@@ -1,0 +1,27 @@
+services:
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+
+  cshelve:
+    user: "1000:1000"
+    build:
+      context: ..
+      dockerfile: ./.devcontainer/Dockerfile
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      # Forwards the local Docker socket to the container.
+      - /var/run/docker.sock:/var/run/docker-host.sock
+      # Update this to wherever you want VS Code to mount the folder of your project
+      - ..:/workspaces/package:cached
+
+    depends_on:
+      - azurite
+
+    command: sleep infinity
