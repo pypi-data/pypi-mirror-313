@@ -1,0 +1,109 @@
+site_name: Qseek - Earthquake Detection and Localization
+site_description: The friendly earthquake detector
+site_author: Marius Paul Isken
+
+repo_url: https://github.com/pyrocko/qseek
+repo_name: pyrocko/qeek
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  custom_dir: docs/theme
+  palette:
+  - scheme: default
+    primary: blue grey
+    toggle:
+       icon: material/eye
+       name: Switch to dark mode
+    # Palette toggle for dark mode
+  - scheme: slate
+    primary: blue grey
+    toggle:
+      icon: material/eye-outline
+      name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/git-alt
+  logo: images/logo.webp
+  features:
+    - navigation.tabs
+    - search.suggest
+    - announce.dismiss
+    - content.code.copy
+    - content.action.edit
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.snippets
+  - pymdownx.tilde
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+  - pymdownx.details
+  - pymdownx.tasklist
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - def_list
+  - attr_list
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+watch:
+  - src/qseek
+
+plugins:
+  - search
+  - markdown-exec
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          import:
+          - https://docs.python.org/3/objects.inv
+          - https://docs.pydantic.dev/latest/objects.inv
+          options:
+            extensions:
+              - griffe_pydantic:
+                  schema: false
+            inherited_members: true
+            show_signature_annotations: true
+            show_symbol_type_toc: true
+            separate_signature: true
+            show_root_heading: true
+            show_source: false
+            show_symbol_type_heading: true
+            signature_crossrefs: true
+            summary: true
+
+
+nav:
+  - The Earthquake Detector:
+    - Welcome: index.md
+    - Getting Started 🚀: getting_started.md
+    - Visualising Detections: visualizing_results.md
+    - Benchmark: benchmark.md
+  - Configuration:
+    - The Search: components/configuration.md
+    - Station Metadata: components/station_metadata.md
+    - Waveform Data: components/waveform_data.md
+    - Octree: components/octree.md
+    - Ray Tracer: components/ray_tracer.md
+    - Image Function: components/image_function.md
+    - Station Corrections: components/station_corrections.md
+    - EQ Feature Extraction: components/feature_extraction.md
+    - General Configuration: components/general.md
