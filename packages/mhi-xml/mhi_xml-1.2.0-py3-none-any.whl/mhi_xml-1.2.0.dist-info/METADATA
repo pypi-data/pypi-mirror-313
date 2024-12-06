@@ -1,0 +1,53 @@
+Metadata-Version: 2.1
+Name: mhi-xml
+Version: 1.2.0
+Summary: Manitoba Hydro International: XML file updaters
+Author-email: "Manitoba Hydro International Ltd." <pscad@mhi.ca>
+License: BSD-3-Clause-Clear
+Project-URL: Homepage, https://www.pscad.com/support/support-resources
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: Microsoft :: Windows
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: lxml>=5.1.0
+Provides-Extra: dev
+Requires-Dist: coverage>=7.4.3; extra == "dev"
+Requires-Dist: pytest>=8.0.1; extra == "dev"
+Requires-Dist: pylint-gitlab>=2.0.0; extra == "dev"
+
+# MHI XML File Readers & Updaters
+
+Support for directly manipulating the following XML files:
+
+- PSCAD
+  - Workspace (`*.pswx`)
+  - Library and Case projects (`*.pslx` & `*.pscx`)
+
+# Examples
+
+## PSCAD
+
+Change the simulation duration of all cases in a workspace to 2.0 seconds:
+
+```
+import mhi.xml.pscad
+
+ws = mhi.xml.pscad.WorkspaceFile(r'C:\Path\To\Workspace.pswx')
+
+for project_name, project_node in ws.project.items():
+    if project_node.is_case:
+        project = project_node.open()
+        project.parameters.time_duration = "2.0 [sec]"
+        project.save()
+```
+
+# Documentation
+
+Use `py -m mhi.xml help` to access the module documentation.
