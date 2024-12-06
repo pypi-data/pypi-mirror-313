@@ -1,0 +1,49 @@
+{# -*- coding: utf-8 -*-
+
+  This file is part of Invenio.
+  Copyright (C) 2016-2024 CERN.
+  Copyright (C)      2021 Graz University of Technology.
+
+  Invenio is free software; you can redistribute it and/or modify it
+  under the terms of the MIT License; see LICENSE file for more details.
+#}
+
+{# Generate a list different ways to embed a badge. #}
+{%- macro badges_formats_list(image_filename, target, alternative='DOI') %}
+
+    <h3 class="ui small header">
+      {{ _("Markdown") }}
+    </h3>
+    <div class="ui message code">
+      <pre>[![{{ alternative }}]({{ image_filename }})]({{ target }})</pre>
+    </div>
+
+    <h3 class="ui small header">
+      {{ _("reStructuredText") }}
+    </h3>
+      <div class="ui message code">
+        <pre>.. image:: {{ image_filename }}
+  :target: {{ target }}</pre>
+      </div>
+
+    <h3 class="ui small header">
+      {{ _("HTML") }}
+    </h3>
+    <div class="ui message code">
+      <pre>&lt;a href="{{ target }}"&gt;&lt;img src="{{ image_filename }}" alt="{{ alternative }}"&gt;&lt;/a&gt;</pre>
+    </div>
+
+    <h3 class="ui small header">
+      {{ _("Image URL") }}
+    </h3>
+    <div class="ui message code">
+      <pre>{{ image_filename }}</pre>
+    </div>
+
+    <h3 class="ui small header">
+    {{ _("Target URL") }}
+    </h3>
+    <div class="ui message code">
+      <pre>{{ target }}</pre>
+    </div>
+{%- endmacro %}
