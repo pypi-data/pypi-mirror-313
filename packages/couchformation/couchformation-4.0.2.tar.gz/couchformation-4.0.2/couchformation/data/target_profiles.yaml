@@ -1,0 +1,243 @@
+---
+aws:
+  base:
+    couchformation.aws.driver.base:
+      module: CloudBase
+      test: test_session
+  network:
+    couchformation.aws.network:
+      module: AWSNetwork
+      deploy: create_vpc
+      destroy: destroy_vpc
+      peer: peer_vpc
+      unpeer: unpeer_vpc
+      info: info
+      compose: null
+  node:
+    couchformation.aws.node:
+      module: AWSDeployment
+      deploy: deploy
+      destroy: destroy
+      peer: null
+      unpeer: null
+      info: info
+      compose: null
+  parameters:
+    - region
+    - zone
+    - auth_mode
+    - profile
+    - ssh_key
+    - cidr
+    - os_id
+    - os_version
+    - os_arch
+    - feature
+    - machine_type
+    - machine_name
+    - quantity
+    - services
+    - options
+    - volume_iops
+    - volume_size
+    - sw_version
+    - upload
+    - domain
+    - ports
+    - hosted_zone
+    - provider_id
+    - tags
+    - ephemeral
+  required:
+    - region
+    - os_id
+    - os_version
+    - quantity
+  boolean:
+    - ephemeral
+gcp:
+  base:
+    couchformation.gcp.driver.base:
+      module: CloudBase
+      test: test_session
+  network:
+    couchformation.gcp.network:
+      module: GCPNetwork
+      deploy: create_vpc
+      destroy: destroy_vpc
+      peer: peer_vpc
+      unpeer: unpeer_vpc
+      info: info
+      compose: null
+  node:
+    couchformation.gcp.node:
+      module: GCPDeployment
+      deploy: deploy
+      destroy: destroy
+      peer: null
+      unpeer: null
+      info: info
+      compose: null
+  parameters:
+    - region
+    - zone
+    - auth_mode
+    - profile
+    - ssh_key
+    - cidr
+    - os_id
+    - os_version
+    - feature
+    - machine_type
+    - machine_name
+    - quantity
+    - services
+    - options
+    - volume_size
+    - sw_version
+    - upload
+    - domain
+    - ports
+    - peer_gcp_project
+    - peer_gcp_network
+    - managed_gcp_zone
+  required:
+    - region
+    - os_id
+    - os_version
+    - quantity
+  boolean: []
+azure:
+  base:
+    couchformation.azure.driver.base:
+      module: CloudBase
+      test: test_session
+  network:
+    couchformation.azure.network:
+      module: AzureNetwork
+      deploy: create_vpc
+      destroy: destroy_vpc
+      peer: peer_vpc
+      unpeer: unpeer_vpc
+      info: info
+      compose: null
+  node:
+    couchformation.azure.node:
+      module: AzureDeployment
+      deploy: deploy
+      destroy: destroy
+      peer: null
+      unpeer: null
+      info: info
+      compose: null
+  parameters:
+    - region
+    - zone
+    - auth_mode
+    - profile
+    - ssh_key
+    - cidr
+    - os_id
+    - os_version
+    - feature
+    - machine_type
+    - machine_name
+    - quantity
+    - services
+    - options
+    - volume_iops
+    - volume_size
+    - volume_tier
+    - ultra
+    - sw_version
+    - upload
+    - domain
+    - ports
+  required:
+    - region
+    - os_id
+    - os_version
+    - quantity
+  boolean:
+    - ultra
+capella:
+  base:
+    couchformation.capella.driver.base:
+      module: CloudBase
+      test: test_session
+  network:
+    couchformation.null:
+      module: NullClass
+      deploy: null_f
+      destroy: null_f
+      peer: null_f
+      unpeer: null_f
+      info: null_f
+      compose: null_f
+  node:
+    couchformation.capella.node:
+      module: CapellaDeployment
+      deploy: deploy
+      destroy: destroy
+      peer: null
+      unpeer: null
+      info: info
+      compose: compose
+  parameters:
+    - profile
+    - provider
+    - region
+    - cidr
+    - machine_type
+    - quantity
+    - services
+    - options
+    - volume_size
+    - allow
+    - username
+    - password
+    - account_email
+    - type
+    - sw_version
+    - peer_project
+    - peer_region
+  required:
+    - machine_type
+    - quantity
+  boolean: []
+docker:
+  base:
+    couchformation.docker.driver.base:
+      module: CloudBase
+      test: test_session
+  network:
+    couchformation.docker.network:
+      module: DockerNetwork
+      deploy: create_vpc
+      destroy: destroy_vpc
+      peer: peer_vpc
+      unpeer: unpeer_vpc
+      info: info
+      compose: null
+  node:
+    couchformation.docker.node:
+      module: DockerDeployment
+      deploy: deploy
+      destroy: destroy
+      peer: null
+      unpeer: null
+      info: info
+      compose: null
+  parameters:
+    - cidr
+    - image
+    - quantity
+    - services
+    - options
+    - volume_size
+    - dir_mount
+    - ports
+    - username
+    - password
+  required: []
+  boolean: []
