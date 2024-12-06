@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
+#
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "amirispy"
+version = "3.0.0"
+description = "Python tools for the electricity market model AMIRIS"
+license = "Apache-2.0"
+authors = [
+    "Christoph Schimeczek <amiris@dlr.de>",
+    "Felix Nitsch <amiris@dlr.de>",
+]
+maintainers = [
+    "Christoph Schimeczek <amiris@dlr.de>",
+]
+readme = "README.md"
+homepage = "https://dlr-ve.gitlab.io/esy/amiris/home/"
+repository = "https://gitlab.com/dlr-ve/esy/amiris/amiris-py/"
+keywords = ["AMIRIS", "agent-based modelling", "electricity market"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+]
+packages = [{ include = "amirispy", from = "src" }]
+include = ["CHANGELOG.md"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fameio = "^3.0.0"
+wget = "^3.2"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1"
+coverage = { version = "^7.3", extras = ["toml"] }
+black = "^23.10"
+
+[tool.poetry.scripts]
+amiris = "amirispy.scripts.amiris:amiris_cli"
+
+[tool.black]
+line-length = 120
+
+[tool.coverage.run]
+branch = true
+source = ["amirispy.source"]
+command_line = "-m pytest"
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+skip_empty = true
+precision = 2
+sort = "Cover"
+
+[tool.coverage.xml]
+output = "coverage.xml"
+
