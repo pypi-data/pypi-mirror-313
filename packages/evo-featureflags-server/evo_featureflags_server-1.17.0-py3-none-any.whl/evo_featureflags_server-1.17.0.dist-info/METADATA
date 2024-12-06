@@ -1,0 +1,114 @@
+Metadata-Version: 2.1
+Name: evo-featureflags-server
+Version: 1.17.0
+Summary: Feature flags server
+Author-Email: "d.zakharchuk" <d.zakharchuk@smartweb.com.ua>, "m.kindritskiy" <m.kindritskiy@smartweb.com.ua>, Vladimir Magamedov <vladimir@magamedov.com>
+License: MIT
+Requires-Python: >=3.11
+Requires-Dist: grpclib==0.4.6
+Requires-Dist: hiku==0.7.1
+Requires-Dist: protobuf<4.0.0
+Requires-Dist: sqlalchemy[mypy]==1.4.42
+Requires-Dist: aiopg[sa]==1.4.0
+Requires-Dist: psycopg2==2.9.7
+Requires-Dist: graphql-core==3.2.3
+Requires-Dist: prometheus-client==0.17.1
+Requires-Dist: alembic==1.12.0
+Requires-Dist: metricslog==0.1.3
+Requires-Dist: pyyaml==6.0.1
+Requires-Dist: pyjwt==2.8.0
+Requires-Dist: ldap3==2.9.1
+Requires-Dist: pydantic>=2.3.0
+Requires-Dist: pydantic-settings>=2.0.3
+Requires-Dist: setuptools==68.2.2
+Requires-Dist: fastapi>=0.103.2
+Requires-Dist: orjson>=3.9.8
+Requires-Dist: uvloop>=0.17.0
+Requires-Dist: httptools>=0.6.0
+Requires-Dist: uvicorn[standart]>=0.23.2
+Requires-Dist: typer>=0.9.0
+Requires-Dist: jinja2>=3.1.2
+Requires-Dist: dependency-injector>=4.41.0
+Requires-Dist: grpcio>=1.59.0
+Requires-Dist: prometheus-fastapi-instrumentator>=6.1.0
+Provides-Extra: sentry
+Requires-Dist: sentry-sdk[fastapi,grpcio]>=1.40.5; extra == "sentry"
+Description-Content-Type: text/markdown
+
+FeatureFlags service
+
+Overview
+--------
+
+Server requires Python >= 3.11.
+Server consists of actual web application and API handlers (HTTP, gRPC):
+
+- Web application:
+
+    - `fastapi_` + `hiku_` + `aiopg_` on backend
+    - `react.js`_ + `Apollo`_ on frontend
+
+- gRPC API handler:
+
+    - `grpclib_` + `hiku_`
+
+- HTTP API handler:
+
+    - `fastapi_` + `hiku_`
+
+ADR
+---
+
+Check important architecture decisions in ``adr/`` directory.
+
+
+Installation
+------------
+
+On PyPi: https://pypi.org/project/evo-featureflags-server
+
+To install with Sentry integration:
+`pip3 install evo-featureflags-server[sentry]`
+
+To install client library follow instructions
+here: [evo-featureflags-client](https://github.com/evo-company/featureflags-py)
+
+Development
+-----------
+
+Run all this commands:
+
+- ``lets postgres``
+- ``lets apply-migrations-dev``
+- ``lets apply-seeds-dev``  # if you have data in ``seeds/`` directory
+- ``lets web`` # in separate terminal
+- ``lets ui`` # in separate terminal
+
+To start API handlers (not required for web application):
+
+- ``lets http`` # in separate terminal
+- ``lets rpc`` # in separate terminal
+
+To build UI and copy it to ``web/static`` directory:
+
+- ``lets build-copy-ui-bundle``
+
+To release package:
+
+- ``lets release 1.0.0 --message="Added feature"``
+
+Pre-commit
+
+``./scripts/enable-hooks.sh``
+
+``./scripts/disable-hooks.sh``
+
+TODO:
+
+- add docs, automate docs build
+- add more tests
+
+.. _fastapi: https://github.com/tiangolo/fastapi
+.. _hiku: https://github.com/vmagamedov/hiku
+.. _aiopg: https://github.com/aio-libs/aiopg
+.. _grpclib: https://github.com/vmagamedov/grpclib
