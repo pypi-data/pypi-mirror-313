@@ -1,0 +1,19 @@
+from ninja import ModelSchema
+
+from {{ app.name }} import models
+from {{ settings }}.api.utils import AliasMixin, InMeta, OutMeta, FilterModelSchema
+
+
+class {{ model }}In(AliasMixin, ModelSchema):
+    class Meta(InMeta):
+        model = models.{{ model }}
+
+
+class {{ model }}Out(AliasMixin, ModelSchema):
+    class Meta(OutMeta):
+        model = models.{{ model }}
+
+
+class {{ model }}Filter(AliasMixin, FilterModelSchema):
+    class Meta(InMeta):
+        model = models.{{ model }}
