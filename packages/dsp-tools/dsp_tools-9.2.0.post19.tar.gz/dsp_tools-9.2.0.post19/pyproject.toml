@@ -1,0 +1,188 @@
+# See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#writing-pyproject-toml
+
+[project]
+name = "dsp-tools"
+version = "9.2.0.post19"
+description = "DSP-TOOLS is a Python package with a command line interface that helps you interact with a DaSCH service platform (DSP) server."
+authors = [{name = "DaSCH - Swiss National Data and Service Center for the Humanities", email = "info@dasch.swiss"}]
+readme = "docs/index.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.12"
+dependencies = [
+    "argparse>=1.4.0",
+    "jsonpath-ng>=1.6.1",
+    "jsonschema>=4.23.0",
+    "loguru>=0.7.2",
+    "lxml>=5.3.0",
+    "namedentities>=1.9.4",
+    "networkx>=3.3",
+    "openpyxl>=3.1.5",
+    "packaging>=24.1",
+    "pandas[excel]>=2.2.2",
+    # pandas: "excel" is an extra that contains xlrd that is necessary for reading old .xls Excel files
+    "pyld>=2.0.4",
+    "pyyaml>=6.0.2",
+    "rdflib==7.0.0",
+    # rdflib: don't upgrade until backend allows parsing of different types of json-ld formats
+    "regex>=2024.9.11",
+    "requests>=2.32.3",
+    "rustworkx>=0.15.1",
+    "tqdm>=4.66.5",
+    "typing-extensions>=4.12.2",
+]
+
+
+[project.urls]
+Homepage = "https://www.dasch.swiss/"
+Documentation = "https://docs.dasch.swiss/latest/DSP-TOOLS/"
+Repository = "https://github.com/dasch-swiss/dsp-tools.git"
+
+
+[project.scripts]
+dsp-tools = "dsp_tools.cli.entry_point:main"  # definition of the CLI entry point
+
+
+[build-system]
+# Tells “frontend” build tools (like pip, build, or uv) what “backend” build tool to use (e.g. setuptools, hatchling).
+# The "backend" doesn't need to be installed. It will be installed by the "frontend" in a temporary, isolated
+# environment for use during the build process.
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.uv]
+dev-dependencies = [
+    "darglint>=1.8.1",
+    "docker>=7.1.0",
+    "mkdocs-include-markdown-plugin>=6.2.2",
+    "mkdocs-material>=9.5.34",
+    "mkdocs>=1.6.1",
+    "mkdocstrings[python]>=0.26.2",
+    "mypy>=1.11.2",
+    "pandas-stubs>=2.2.2.240909",
+    "pre-commit>=3.8.0",
+    "pytest-cov>=5.0.0",
+    "pytest-unordered>=0.6.1",
+    "pytest==8.0.2",
+    # pytest: don't upgrade until https://github.com/pytest-dev/pytest/issues/12044 is fixed
+    "requests-mock>=1.12.1",
+    "ruff>=0.6.7",
+    "testcontainers==4.7.2",
+    # testcontainers: don't upgrade until https://github.com/dasch-swiss/dsp-tools/pull/1122#discussion_r1723055599 is fixed
+    "tomlkit>=0.13.2",
+    "types-docker>=7.1.0.20240827",
+    "types-jsonschema>=4.23.0.20240813",
+    "types-lxml>=2024.8.7",
+    "types-networkx>=3.2.1.20240907",
+    "types-openpyxl>=3.1.5.20240822",
+    "types-pyyaml>=6.0.12.20240808",
+    "types-regex>=2024.9.11.20240912",
+    "types-requests>=2.32.0.20240907",
+    "types-tqdm>=4.66.0.20240417",
+    "viztracer>=0.16.3",
+    "yamllint>=1.35.1",
+]
+
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+# see https://docs.pytest.org/en/latest/explanation/goodpractices.html#tests-outside-application-code
+pythonpath = [".", "src", "test"]
+
+
+[tool.mypy]
+show_column_numbers = true
+strict = true
+enable_error_code = ["possibly-undefined"]
+exclude = [
+    "src/dsp_tools/models/datetimestamp.py",                  # TODO: activate this
+    "src/dsp_tools/models/langstring.py",                     # TODO: activate this
+    "src/dsp_tools/models/projectContext.py",                 # TODO: activate this
+    "src/dsp_tools/commands/project/models/context.py",       # TODO: activate this
+    "src/dsp_tools/commands/project/models/group.py",         # TODO: activate this
+    "src/dsp_tools/commands/project/models/helpers.py",       # TODO: activate this
+    "src/dsp_tools/commands/project/models/listnode.py",      # TODO: activate this
+    "src/dsp_tools/commands/project/models/ontology.py",      # TODO: activate this
+    "src/dsp_tools/commands/project/models/project.py",       # TODO: activate this
+    "src/dsp_tools/commands/project/models/propertyclass.py", # TODO: activate this
+    "src/dsp_tools/commands/project/models/resourceclass.py", # TODO: activate this
+    "src/dsp_tools/commands/project/models/user.py",          # TODO: activate this
+]
+
+
+[[tool.mypy.overrides]]
+# For these packages, no type stubs are available yet:
+module = ["jsonpath_ng.*", "viztracer.*", "pyld.*", "testcontainers.*"]
+ignore_missing_imports = true
+
+
+[tool.ruff]
+line-length = 120
+
+
+[tool.ruff.lint]
+select = [
+    "RUF",      # ruff-specific rules
+    "PL",       # pylint
+    "I",        # isort
+    "E",        # pycodestyle errors
+    "F",        # pyflakes
+    "A",        # flake8-builtins
+    "BLE",      # flake8-blind-except
+    "ARG",      # flake8-unused-arguments
+    "S",        # flake8-bandit plugin which checks for security issues
+    "YTT",      # flake8-2020 plugin, which checks for misuse of `sys.version` or `sys.version_info`
+    "ASYNC",    # flake8-async plugin, which checks for bad async / asyncio practices
+    "ISC",      # flake8-implicit-str-concat plugin, which checks for problematic string concatenation
+    "INP",      # flake8-no-pep420 plugin, which checks for missing __init__.py files
+    "PIE",      # flake8-pie plugin, which does miscellaneous checks
+    "PT",       # flake8-pytest-style plugin
+    "TID",      # flake8-tidy-imports plugin
+    "ICN",      # flake8-import-conventions plugin, which checks for import conventions
+    "ARG",      # flake8-unused-arguments
+    "PGH",      # pygrep-hooks: A collection of fast, cheap, regex based pre-commit hooks
+    "UP031",    # pyupgrade: printf-string-formatting
+    "D101",     # pydocstyle: undocumented-public-class
+    "D102",     # pydocstyle: undocumented-public-method
+    "D103",     # pydocstyle: undocumented-public-function
+    "D417",     # pydocstyle: undocumented-param
+    "B023",     # flake8-bugbear: function-uses-loop-variable
+    "FIX",      # flake8-fixme: checks for FIXME, TODO, XXX, etc.
+]
+ignore = [
+    "ISC001",   # flake8-implicit-str-concat: single-line-implicit-string-concatenation  # incompatible with the formatter
+    "S105",     # flake8-bandit: hardcoded password
+    "S106",     # flake8-bandit: hardcoded password
+    "S603",     # flake8-bandit: subprocess-without-shell-equals-true
+    "S320",     # flake8-bandit: xml parsing vulnerable to XML attacks
+]
+
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401",     # unused-import
+    "F403",     # undefined-local-with-import-star
+    "PLC0414",  # useless-import-alias
+]
+"testdata/**" = [
+    "INP001",   # implicit-namespace-package    # there are some python files, but no __init__.py
+]
+"test/*" = [
+    "D103",     # pydocstyle: undocumented-public-function
+    "D102",     # pydocstyle: undocumented-public-method
+    "D101",     # pydocstyle: undocumented-public-class
+    "S101",     # flake8-bandit: use of assert
+]
+
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
