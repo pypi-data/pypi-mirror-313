@@ -1,0 +1,65 @@
+version: 1.4.3
+queue: slurm #Select the queuing system, divided into Slurm and local.
+vasp_job: 10 #The number of tasks submitted when calculating single-point energy with VASP.
+#所有任务提交的根目录
+work_path: ./cache  #Root directory for all task submissions.
+current_job: nep  #If the current_job has three states: nep, gpumd, vasp, and if train.xyz has not been calculated, set it to vasp; otherwise, directly set it to use nep to train the potential function, or use gpumd.
+generation: 1  #Marking resume tasks.
+init_train_xyz: ./train.xyz  #Initial training set; if not calculated, set current_job to vasp.
+init_nep_txt: ./nep.txt  #If current_job is set to gpumd, a potential function must be provided; otherwise, it can be ignored.
+nep:
+  #Does it support restarting? If true, the potential function for the next step will continue from this step for nep_restart_step steps.
+  #The program will automatically set lambda_1 to 0.
+  #If false, retrain from scratch every time.
+  nep_restart: true
+  nep_restart_step: 20000
+  #Optional; if you need to modify the number of steps, simply provide a file in the current path.
+  #If there is no such file, the number of steps will be automatically generated based on the training set.
+  nep_in_path: ./nep.in
+  #Optional
+  test_xyz_path: ./test.xyz
+vasp:
+
+  cpu_core: 64
+  kpoints_use_gamma: true  #ASE defaults to using M-point k-mesh, but here we default to using the gamma-centered grid; this can be set to false.
+
+  incar_path: ./INCAR
+
+  use_k_stype: kpoints
+  #--ka
+  kpoints:
+    - 20 #a
+    - 20 #b
+    - 20 #c
+  kspacing: 0.1
+gpumd:
+#Time for iterative progressive learning in units of picoseconds.
+#The first active learning is at 10ps, the second at 100ps, with a total of four active learning sessions.
+  step_times:
+    - 10
+    - 100
+    - 500
+    - 1000
+#Each time active learning is performed, all structures in model_path will undergo molecular dynamics (MD) simulations at the following temperatures, followed by sampling.
+  temperature_every_step:
+    - 50
+    - 100
+    - 150
+    - 200
+    - 250
+    - 300
+  model_path: ./structure
+  run_in_path: ./run.in
+  filter_by_bonds: true  #Enable bond length detection, and determine structures with bond lengths below 60% of the equilibrium model bond lengths as non-physical structures.
+
+select:
+  #After completing this round of MD, a maximum of max_selected structures will be selected from all trajectories.
+  max_selected: 50
+  min_distance: 0.01   #Hyperparameters for farthest point sampling
+
+limit:
+  force: 50  #Limit the force of the structure to between -force and force
+
+
+
+

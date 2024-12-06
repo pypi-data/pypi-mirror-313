@@ -1,0 +1,74 @@
+[build-system]
+requires = [
+"wheel",
+"setuptools>=68.0.0",
+"pybind11>=2.12.0"
+]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "NepTrain"
+authors = [{ name = "Chen Cheng bing", email = "1747193328@qq.com" }]
+
+
+description = """
+NEP自动训练
+"""
+readme = "README.md"
+requires-python = ">=3.8,<3.13"
+license= { "file"="LICENSE" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+"ase>=3.23.0",
+"rich",
+"argcomplete",
+"watchdog",
+"scikit-learn",
+"ruamel.yaml",
+"dscribe",
+"umap-learn>=0.5.7"
+]
+version = "1.5.0"
+
+[project.urls]
+Homepage = "https://github.com/aboys-cb/NepTrain"
+Documentation = "https://github.com/aboys-cb/NepTrain"
+Repository = "https://github.com/aboys-cb/NepTrain"
+Issues = "https://github.com/aboys-cb/NepTrain/issues"
+
+
+
+[project.scripts]
+NepTrain = "NepTrain.cli.cli:main"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["NepTrain", "NepTrain.*"]
+
+[tool.setuptools.package-data]
+"NepTrain" = ["config.ini" ]
+"NepTrain.core.vasp" = ["INCAR" ]
+"NepTrain.core.train" = ["job.yaml" ]
+"NepTrain.core.gpumd" = ["run.in" ]
+
+
+[tool.cibuildwheel.linux]
+archs = ["auto64"]
+
