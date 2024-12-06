@@ -1,0 +1,59 @@
+{% extends "layouts/base.html" %}
+{% from "macros/show_menu.html"  import show_menu  %}
+
+{%  block content %}
+
+    <div class="page-breadcrumb">
+        <div class="align-items-center">
+            {{ show_menu(menu_links('/dev')) }}
+        </div>
+    </div>
+
+
+
+    <style>
+
+        .container-fluid {
+            min-height: 100%;      /* Minimum height to fill the parent */
+            display: flex;          /* Enable flexbox */
+            flex-direction: column; /* Stack children vertically */
+            padding: 0;
+
+        }
+        .row {
+            flex: 1; /* Allow each row to grow */
+            display: flex; /* Enable flexbox for direct children, which are the columns */
+            margin: 0; /* Remove any default margin */
+            flex-wrap: nowrap;          /* with wrap we had the side effect that panels with small size where show in the middle */
+        }
+        /*.col-3, .col-4, .col-6, .col-12 {
+            display: flex;
+            padding: 0;
+        }*/
+
+        .col-style {
+            /*border: 3px solid red;*/
+            flex-grow: 1;
+            margin: 0;
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center;    /* Center vertically */
+            padding:20px
+        }
+        </style>
+        {% block extra_css %}{% endblock extra_css %}
+
+        <div class="container-fluid"> <!-- Full height container -->
+            {% block content_container %}{% endblock content_container %}
+            <div class="row">
+                {% block content_row %}{% endblock content_row %}
+                <div class="col-12 col-style">
+                    {% block content_one_panel %}{% endblock content_one_panel %}
+                </div>
+            </div>
+        </div>
+
+
+
+
+{% endblock %}
