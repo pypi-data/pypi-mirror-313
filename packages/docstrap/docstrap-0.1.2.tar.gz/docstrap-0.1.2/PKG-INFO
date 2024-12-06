@@ -1,0 +1,130 @@
+Metadata-Version: 2.1
+Name: docstrap
+Version: 0.1.2
+Summary: A tool for bootstrapping and managing documentation project structures
+Home-page: https://github.com/tjcunliffe/docstrap
+License: MIT
+Keywords: documentation,bootstrap,scaffold,structure,generator
+Author: Tom Cunliffe
+Author-email: tom.cunliffe@onoclea.io
+Requires-Python: >=3.9,<4.0
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Documentation
+Classifier: Topic :: Software Development :: Documentation
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Typing :: Typed
+Requires-Dist: poetry (>=1.8.4,<2.0.0)
+Requires-Dist: pyyaml (>=6.0.1,<7.0.0)
+Requires-Dist: types-PyYAML (>=6.0.12.12,<7.0.0.0)
+Project-URL: Documentation, https://github.com/tjcunliffe/docstrap
+Project-URL: Repository, https://github.com/tjcunliffe/docstrap
+Description-Content-Type: text/markdown
+
+# DocStrap
+
+A tool for creating structured documentation hierarchies with optional MkDocs integration.
+
+## Features
+
+- Create consistent documentation structures
+- Optional numbered prefixes for ordering (010_, 020_, etc.)
+- Automatic markdown headings
+- MkDocs integration with navigation structure
+- Interactive, silent, or dry-run modes
+
+## Installation
+
+```bash
+pipx install docstrap  # Recommended
+# or: pip install docstrap
+```
+
+## Quick Start
+
+1. Generate config:
+```bash
+docstrap init
+```
+
+2. Create structure:
+```bash
+docstrap create -c docstrap.yaml
+```
+
+Additional options:
+```bash
+docstrap create -c docstrap.yaml [options]
+  -d DIR        # Target directory
+  --dry-run     # Preview changes
+  -y            # Skip prompts
+  --mkdocs      # Generate mkdocs.yaml
+```
+
+## Configuration
+
+Example `docstrap.yaml`:
+```yaml
+# Base settings
+docs_dir: "docs"
+use_numbered_prefix: false  # Optional file/dir prefixes (010_, 020_, etc.)
+use_markdown_headings: true
+
+# Documentation structure
+directories:
+  guides:
+    - getting-started.md
+    - configuration.md
+  reference:
+    - api.md
+
+top_level_files:
+  - index.md
+
+# MkDocs integration (optional)
+generate_mkdocs: true
+mkdocs_config:
+  site_name: "My Documentation"
+  theme:
+    name: "material"
+  markdown_extensions:
+    - toc
+    - admonition
+    - pymdownx.highlight
+```
+
+## Python API
+
+```python
+from docstrap import DocumentationManager, StructureConfig, SilentFileHandler
+
+config = StructureConfig.from_yaml("docstrap.yaml")
+# or: config = StructureConfig(docs_dir="docs", ...)
+
+manager = DocumentationManager(config, SilentFileHandler())
+manager.create_structure()
+```
+
+## Development
+
+```bash
+git clone https://github.com/yourusername/docstrap.git
+cd docstrap
+poetry install
+poetry run pre-commit install
+poetry run pytest
+```
+
+## License
+
+MIT - see [LICENSE.md](LICENSE.md)
+
