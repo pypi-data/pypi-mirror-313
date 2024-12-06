@@ -1,0 +1,60 @@
+Metadata-Version: 2.1
+Name: baseapp-profiles
+Version: 0.3.2
+Summary: BaseApp Profiles
+Home-page: https://github.com/silverlogic/baseapp-backend
+Author: The SilverLogic
+Author-email: dev@tsl.io
+License: BSD-3-Clause  # Example license
+Description: # BaseApp Profiles
+        
+        Reusable app to handle profiles, URL's paths and metadata. It provides useful models and GraphQL Interfaces.
+        
+        ## How to install:
+        
+        And install the package with `pip install baseapp-profiles`.
+        
+        If you want to develop, [install using this other guide](#how-to-develop).
+        
+        ## How to use
+        
+        Add `baseapp_profiles` to your project's `INSTALLED_APPS` and run `./manage.py migrate` as any other django model:
+        
+        ```python
+        INSTALLED_APPS = [
+            'baseapp_profiles',
+        ]
+        ```
+        
+        Add `baseapp_profiles.middleware.CurrentProfileMiddleware` to the `MIDDLEWARE` list in your django settings file, make sure it is **after** `django.contrib.auth.middleware.AuthenticationMiddleware`.
+        
+        Add `baseapp_profiles.permissions.ProfilesPermissionsBackend` to the `AUTHENTICATION_BACKENDS` list in your django settings file.
+        
+        Expose `ProfilesMutations` and `ProfilesQuery` in your GraphQL/graphene endpoint, like:
+        
+        ```python
+        from baseapp_profiles.graphql.mutations import ProfilesMutations
+        from baseapp_profiles.graphql.queries import ProfilesQuery
+        
+        class Query(graphene.ObjectType, ProfilesQuery):
+            pass
+        
+        class Mutation(graphene.ObjectType, ProfilesMutations):
+            pass
+        
+        schema = graphene.Schema(query=Query, mutation=Mutation)
+        ```
+        
+        ### ProfileInterface
+        
+        `ProfileInterface` is a GraphQL interface that can be used to query for profiles. It has the following fields:
+        
+        - `profile` return the `Profile` for the object
+        
+        ## How to develop
+        
+        General development instructions can be found in [main README](..#how-to-develop).
+        
+Platform: UNKNOWN
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
