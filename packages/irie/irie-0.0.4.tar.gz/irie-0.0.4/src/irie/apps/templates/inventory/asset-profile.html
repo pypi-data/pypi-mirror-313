@@ -1,0 +1,212 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ asset.calid }} {% endblock %} 
+
+{% block stylesheets %}
+<style>
+@media print {
+  @page {
+    /* size:210mm 297mm;  */ 
+    size: 8.5in 11in;
+  }
+  #event-table, #rendering, #structureProfile {
+    display:    none;
+    visibility: hidden;
+    max-width:  0;
+  }
+  #page {
+    width: 100%; 
+    margin-left:   0;
+    margin-right:  0;
+    margin-top:    0.5in;
+    margin-bottom: 0.75in;
+    float: none !important;
+  }
+  html, body {
+    margin:  0 !important;
+    padding: 0 !important;
+    height: 99%;
+    width: 100%;
+    float: none !important;
+  }
+  body {
+    font: 10pt "Computer Modern", Georgia, "Times New Roman", Times, serif;
+    line-height: 1.1;
+    background: #fff !important;
+    color: #000;
+  }
+  h1 {
+    font-size: 16pt;
+/*  position: fixed;
+    top: 0; */
+  }
+  h2, h3, h4 {
+    font-size: 14pt;
+    /* margin-top: 25px; */
+  }
+  main, div.print {
+    visibility: visible;
+    width: auto; /* 100%; */
+    font-size: 10pt;
+    margin: 0; /* 0.50in 0.5in 0.5in 0.5in; */
+    float: none ! important;
+    page-break-inside:auto ;
+    /* height: 900px; */
+  }
+  tr    { page-break-inside:avoid; page-break-after:auto }
+  thead { display:table-header-group }
+  tfoot { display:table-footer-group }
+  table {
+    border-bottom: 2px solid black;
+    border-top: 2px solid black;
+    font-size: 8pt;
+    visibility: visible;
+    width: 100%; 
+    margin: 0; 
+    float: none;
+    page-break-inside:auto ; 
+    page-break-after:auto;
+  }
+  hr, img, nav, footer, .button, #rendering, #event-table {
+    visibility: hidden;
+    display: none;
+    max-height: 0;
+    max-width: 0;
+  }
+  details > summary {
+    list-style: none;
+  }
+  details > summary::marker {
+    display:none;
+  }
+  .ssid-data {
+    visibility: visible;
+    display: block;
+  }
+}
+.ct-series-a .ct-point, .ct-series-a .ct-line, .ct-series-a .ct-bar, .ct-series-a .ct-slice-donut{
+  stroke: #506690;
+}
+.ct-series-b .ct-point, .ct-series-b .ct-line, .ct-series-b .ct-bar, .ct-series-b .ct-slice-donut {
+  stroke: #61DAFB;
+}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="print">
+    <h1 class="fs-2 lh-2 me-3"><code>{{ asset.calid }}</code> {{ asset.name }}</h1>
+    <span id="structureProfile" class="fs-2 lh-2 me-3">Structure Profile</span>
+
+    <div class="py-4 align-right">
+      <a role="button" class="button btn btn-outline-primary"
+         href="/inventory/{{ asset.calid }}/predictors/" class="me-1">Configure Predictors</a>
+    </div>
+
+    {% if asset.cesmd %}
+    {# BRIDGE RENDERING #}
+    <details id="asset-sensors" open><summary><h3>Sensor Layout</h3></summary>
+    <div id="rendering" class="row">
+      <div class="col-10 mb-4">
+        <div class="card h-100 bg-white-100 border-0 shadow">
+          <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+          </div>
+          <div class="card-body align-items-center p-2">
+            <img src="{{ ASSETS_ROOT }}/inventory/ll{{ asset.cesmd|slice:"2:" }}.svg">
+          </div>
+        </div>
+      </div>
+    </div>
+    </details>
+    {% endif %}
+
+    {% if asset.cesmd %}
+    <details id="event-table" open><summary><h3>Event History</h3></summary>
+    <div class="row">
+        <div class="col-10 mb-4">
+          <div class="card bg-white-100 border-0 shadow table-wrapper table-responsive">
+    {% include 'includes/asset-event-table.html' with evaluations=evaluations %}
+          </div>
+        </div>
+    </div>
+    </details>
+    <hr>
+    {% endif %}
+
+    {# STRUCTURE PROFILE #}
+
+    {# CSMIP SUMMARY TABLES #}
+    <details open><summary><h3>Structure Details</h3></summary>
+
+    <div class="row">
+        <div class="col-10 mb-4">
+          {% for table in tables %}
+          <div class="card bg-white-100 border-0 shadow table-wrapper table-responsive">
+            <div class="card card-body shadow table-wrapper table-responsive">
+              <table class="table table-hover" style="display: block;">
+                <caption>{{asset.calid}} Table {{forloop.counter}}</caption>
+                {# <thead><tr><th>Key</th> <th>Value</th></tr></thead> #}
+                <tbody>
+                  {# <tr><td><b>CESMD</b></td><td>{{ asset_data.cesmd }}</td></tr> #}
+                  {% for key,val in table.items %}
+                  {% if val %}
+                  <tr>
+                    <th scope="row" style="text-align:left; width:40%;">{{ key }}</th>
+                    <!-- The inline style here ensures that 
+                         there are line breaks in rows with long text -->
+                    <td style="width: 60%; white-space: normal !important;word-wrap: break-word;">{{ val }}</td>
+                  </tr>
+                  {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+          </div>
+        </div>
+                  <br>
+              {% endfor %}
+    </div>
+    </details>
+
+
+</div>
+{% endblock content %}
+
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
+{% block javascripts %}
+<script>
+  const table_keys = [
+    {% for method in evaluations.0.evaluation %}
+            "{{ method }}",
+    {% endfor %}];
+  for (const key of table_keys) {
+    let elem = document.querySelector(`#ssid-set-${key}`);
+    elem.onclick = () => {
+      // Unhide
+      [...document.querySelectorAll(`.ssid-method-${key}`)].map((x) => {
+        console.log(x);
+        x.style.display = null;
+      });
+      document.querySelector("#ssid-name").textContent = elem.innerText;
+      // Hide rest
+      for (const oth of table_keys) {
+        if (oth != key)
+          [...document.querySelectorAll(`.ssid-method-${oth}`)].map((x) => {
+            console.log(x);
+            x.style.display = 'none';
+          });
+      }
+    };
+  }
+</script>
+<script type="text/javascript">
+  function printTables() {
+    var myWindow = window.open('','','width=200,height=100')
+    myWindow.document.write("This is 'myWindow'")
+    myWindow.print();
+  }
+</script>
+
+{% endblock javascripts %}
