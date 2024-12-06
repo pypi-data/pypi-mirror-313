@@ -1,0 +1,26 @@
+[package]
+name = "qirrunner"
+description = "JIT compiles and executes programs written in QIR (Quantum Intermediate Representation)."
+readme = "README.md"
+version= "0.7.5"
+authors= ["Microsoft"]
+homepage= "https://github.com/qir-alliance/qir-runner"
+repository= "https://github.com/qir-alliance/qir-runner"
+edition= "2021"
+license= "MIT"
+resolver = "2"
+
+[dependencies]
+runner = { path = "local_dependencies/runner" }
+
+[target.'cfg(not(any(target_os = "windows")))'.dependencies]
+pyo3 = { version = "0.20", features = ["abi3-py38", "extension-module"] }
+
+[target.'cfg(any(target_os = "windows"))'.dependencies]
+pyo3 = { version = "0.20", features = ["abi3-py38", "extension-module", "generate-import-lib"] }
+
+[lib]
+crate-type = ["cdylib"]
+
+[package.metadata.maturin]
+name = "qirrunner._native"
