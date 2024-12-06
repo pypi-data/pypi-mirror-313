@@ -1,0 +1,34 @@
+"""
+Type annotations for {{ package.service_name.boto3_name }} service type definitions.
+
+[Open documentation]({{ package.get_doc_link("type_defs") }})
+
+Usage::
+
+    ```python
+    from {{ package.name }}.type_defs import {{ package.type_defs[0].name }}
+
+    data: {{ package.type_defs[0].name }} = ...
+    ```
+
+{{ copyright }}
+"""
+{% for import_record in package.get_type_defs_required_import_records() -%}
+    {{ import_record -}}{{ "\n" -}}
+{% endfor -%}
+
+{{ "\n\n" -}}
+
+__all__ = (
+{% for type_def_name in package.get_type_defs_all_names() -%}
+    {{ '"' -}}
+    {{ type_def_name -}}
+    {{ '"' -}}
+    {{ ",\n" if not loop.last or loop.first else "\n" }}
+{% endfor -%}
+)
+
+{% for type_def in package.type_defs -%}
+    {{ type_def.render_definition() -}}
+    {{ "\n" -}}
+{% endfor -%}

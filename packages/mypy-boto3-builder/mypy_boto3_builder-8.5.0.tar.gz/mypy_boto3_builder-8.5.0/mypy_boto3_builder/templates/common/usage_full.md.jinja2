@@ -1,0 +1,140 @@
+## Usage
+
+### VSCode
+
+- Install [Python extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
+- Install [Pylance extension](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance)
+- Set `Pylance` as your Python Language Server
+- Install `{{ package.data.pypi_name }}` in your environment:
+
+```bash
+python -m pip install '{{ package.data.pypi_stubs_name }}[full]'
+```
+
+Both type checking and code completion should now work.
+No explicit type annotations required, write your `{{ package.library_name }}` code as usual.
+
+### PyCharm
+
+{% if package.data.has_pypi_lite_package() %}
+> ⚠️ Due to slow PyCharm performance on `Literal` overloads
+(issue [PY-40997](https://youtrack.jetbrains.com/issue/PY-40997)),
+it is recommended to use [{{ package.data.pypi_lite_name }}]({{ package.url.stubs_lite_pypi }})
+until the issue is resolved.
+
+> ⚠️ If you experience slow performance and high CPU usage, try to disable `PyCharm` type checker and use
+[mypy](https://github.com/python/mypy) or [pyright](https://github.com/microsoft/pyright) instead.
+
+> ⚠️ To continue using `PyCharm` type checker, you can try to replace `{{ package.data.pypi_stubs_name }}` with
+[{{ package.data.pypi_lite_name }}]({{ package.url.stubs_lite_pypi }}):
+
+```bash
+python -m pip uninstall -y {{ package.data.pypi_stubs_name }}
+python -m pip install '{{ package.data.pypi_lite_name }}[full]'
+```
+{% endif %}
+
+Install `{{ package.data.pypi_lite_name or package.data.pypi_name }}` in your environment:
+
+```bash
+python -m pip install '{{ package.data.pypi_lite_name or package.data.pypi_stubs_name }}[full]'
+```
+
+Both type checking and code completion should now work.
+
+### Emacs
+
+- Install `{{ package.data.pypi_name }}` in your environment:
+
+```bash
+python -m pip install '{{ package.data.pypi_stubs_name }}[full]'
+```
+
+- Install
+  [use-package](https://github.com/jwiegley/use-package),
+  [lsp](https://github.com/emacs-lsp/lsp-mode/),
+  [company](https://github.com/company-mode/company-mode) and
+  [flycheck](https://github.com/flycheck/flycheck) packages
+- Install [lsp-pyright](https://github.com/emacs-lsp/lsp-pyright) package
+
+```elisp
+(use-package lsp-pyright
+  :ensure t
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-pyright)
+                          (lsp)))  ; or lsp-deferred
+  :init (when (executable-find "python3")
+          (setq lsp-pyright-python-executable-cmd "python3"))
+  )
+```
+
+- Make sure emacs uses the environment where you have installed `{{ package.data.pypi_name }}`
+
+Type checking should now work.
+No explicit type annotations required, write your `{{ package.library_name }}` code as usual.
+
+### Sublime Text
+
+- Install `{{ package.data.pypi_name }}` in your environment:
+
+```bash
+python -m pip install '{{ package.data.pypi_stubs_name }}[full]'
+```
+
+- Install [LSP-pyright](https://github.com/sublimelsp/LSP-pyright) package
+
+Type checking should now work.
+No explicit type annotations required, write your `{{ package.library_name }}` code as usual.
+
+### Other IDEs
+
+Not tested, but as long as your IDE supports `mypy` or `pyright`, everything should work.
+
+### mypy
+
+- Install `mypy`: `python -m pip install mypy`
+- Install `{{ package.data.pypi_name }}` in your environment: 
+
+```bash
+python -m pip install '{{ package.data.pypi_stubs_name }}[full]'
+```
+
+Type checking should now work.
+No explicit type annotations required, write your `{{ package.library_name }}` code as usual.
+
+### pyright
+
+- Install `pyright`: `npm i -g pyright`
+- Install `{{ package.data.pypi_name }}` in your environment: 
+
+```bash
+python -m pip install '{{ package.data.pypi_stubs_name }}[full]'
+```
+
+Optionally, you can install `{{ package.data.pypi_name }}` to `typings` directory.
+
+Type checking should now work.
+No explicit type annotations required, write your `{{ package.library_name }}` code as usual.
+
+### Pylint compatibility
+
+It is totally safe to use `TYPE_CHECKING` flag in order to avoid `{{ package.pypi_name }}`
+dependency in production.
+However, there is an issue in `pylint` that it complains about undefined
+variables. To fix it, set all types to `object` in non-`TYPE_CHECKING` mode.
+
+```python
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from {{ package.data.service_prefix }}_ec2 import EC2Client, EC2ServiceResource
+    from {{ package.data.service_prefix }}_ec2.waiters import BundleTaskCompleteWaiter
+    from {{ package.data.service_prefix }}_ec2.paginators import DescribeVolumesPaginator
+else:
+    EC2Client = object
+    EC2ServiceResource = object
+    BundleTaskCompleteWaiter = object
+    DescribeVolumesPaginator = object
+
+...
+```

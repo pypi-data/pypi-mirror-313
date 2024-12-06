@@ -1,0 +1,147 @@
+Metadata-Version: 2.1
+Name: mypy-boto3-builder
+Version: 8.5.0
+Summary: Type annotations generator for types-boto3, boto3-stubs, types-aiobotocore, and types-aioboto3.
+Author-email: Vlad Emelianov <vlad.emelianov.nz@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2023 Vlad Emelianov
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/youtype/mypy_boto3_builder
+Project-URL: Documentation, https://youtype.github.io/mypy_boto3_builder/
+Project-URL: Repository, https://github.com/youtype/mypy_boto3_builder
+Project-URL: Changelog, https://github.com/youtype/mypy_boto3_builder/releases
+Project-URL: Issues, https://github.com/youtype/mypy_boto3_builder/issues
+Keywords: boto3,type-annotations,pyright,mypy,boto3-stubs
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: 3.14
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Typing :: Typed
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: jinja2
+Requires-Dist: mdformat
+Requires-Dist: packaging
+Requires-Dist: botocore
+Requires-Dist: requests
+Requires-Dist: ruff
+Requires-Dist: setuptools
+Requires-Dist: questionary
+Requires-Dist: colorama
+Requires-Dist: prompt-toolkit
+Provides-Extra: build
+Requires-Dist: setuptools; extra == "build"
+Provides-Extra: check
+Requires-Dist: boto3-stubs; extra == "check"
+Requires-Dist: types-aiobotocore; extra == "check"
+Requires-Dist: types-aioboto3; extra == "check"
+
+# Mypy Boto3 Builder
+
+[![PyPI - mypy-boto3-builder](https://img.shields.io/pypi/v/mypy-boto3-builder.svg?color=blue&label=mypy-boto3-builder)](https://pypi.org/project/mypy-boto3-builder)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/boto3-stubs.svg?color=blue)](https://pypi.org/project/boto3-stubs)
+[![Docs](https://img.shields.io/readthedocs/mypy-boto3-builder.svg?color=blue&label=builder%20docs)](https://youtype.github.io/mypy_boto3_builder/)
+
+[![PyPI - boto3-stubs](https://img.shields.io/pypi/v/boto3-stubs.svg?color=blue&label=boto3-stubs)](https://pypi.org/project/boto3-stubs)
+[![PyPI - boto3](https://img.shields.io/pypi/v/boto3.svg?color=blue&label=boto3)](https://pypi.org/project/boto3)
+[![Docs](https://img.shields.io/readthedocs/boto3-stubs.svg?color=blue&label=boto3-stubs%20docs)](https://youtype.github.io/boto3_stubs_docs/)
+[![PyPI - Downloads](https://static.pepy.tech/badge/boto3-stubs)](https://pepy.tech/project/boto3-stubs)
+[![PyPI - Monthly Downloads](https://img.shields.io/pypi/dm/boto3-stubs?color=blue)](https://pypistats.org/packages/boto3-stubs)
+
+[![PyPI - types-aiobotocore](https://img.shields.io/pypi/v/types-aiobotocore.svg?color=blue&label=types-aiobotocore)](https://pypi.org/project/types-aiobotocore)
+[![PyPI - aiobotocore](https://img.shields.io/pypi/v/aiobotocore.svg?color=blue&label=aiobotocore)](https://pypi.org/project/aiobotocore)
+[![Docs](https://img.shields.io/readthedocs/types-aiobotocore.svg?color=blue&label=types-aiobotocore%20docs)](https://youtype.github.io/types_aiobotocore_docs/)
+[![PyPI - Downloads](https://static.pepy.tech/badge/types-aiobotocore)](https://pepy.tech/project/types-aiobotocore)
+[![PyPI - Monthly Downloads](https://img.shields.io/pypi/dm/types-aiobotocore?color=blue)](https://pypistats.org/packages/types-aiobotocore)
+
+[![PyPI - types-aioboto3](https://img.shields.io/pypi/v/types-aioboto3.svg?color=blue&label=types-aioboto3)](https://pypi.org/project/types-aioboto3)
+[![PyPI - aioboto3](https://img.shields.io/pypi/v/aioboto3.svg?color=blue&label=aioboto3)](https://pypi.org/project/aioboto3)
+[![Docs](https://img.shields.io/readthedocs/types-aioboto3.svg?color=blue&label=types-aioboto3%20docs)](https://youtype.github.io/types_aioboto3_docs/)
+[![PyPI - Downloads](https://static.pepy.tech/badge/types-aioboto3)](https://pepy.tech/project/types-aioboto3)
+[![PyPI - Monthly Downloads](https://img.shields.io/pypi/dm/types-aioboto3?color=blue)](https://pypistats.org/packages/types-aioboto3)
+
+![boto3.typed](https://github.com/youtype/mypy_boto3_builder/raw/main/logo.png)
+
+Type annotations generator for [types-boto3](https://pypi.org/project/types-boto3/),
+[boto3-stubs](https://pypi.org/project/boto3-stubs/),
+[types-aiobotocore](https://pypi.org/project/types-aiobotocore/),
+and [types-aioboto3](https://pypi.org/project/types-aioboto3/) projects.
+Compatible with
+[VSCode](https://code.visualstudio.com/),
+[PyCharm](https://www.jetbrains.com/pycharm/),
+[Emacs](https://www.gnu.org/software/emacs/),
+[Sublime Text](https://www.sublimetext.com/),
+[mypy](https://github.com/python/mypy),
+[pyright](https://github.com/microsoft/pyright)
+and other tools.
+
+See how it helps to find and fix potential bugs:
+
+![types-boto3 demo](https://raw.githubusercontent.com/youtype/mypy_boto3_builder/main/demo.gif)
+
+Do you want more? Check the [documentation](https://youtype.github.io/boto3_stubs_docs/) and use `boto3` like a pro!
+
+- [Mypy Boto3 Builder](#mypy-boto3-builder)
+  - [Quickstart](#quickstart)
+  - [Type annotations documentation](#type-annotations-documentation)
+  - [Builder documentation](#builder-documentation)
+  - [Versioning](#versioning)
+  - [Latest changes](#latest-changes)
+
+## Quickstart
+
+- Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- Run `uvx mypy-boto3-builder`
+- Answer some questions, get your custom package
+- Install a generated package
+
+## Type annotations documentation
+
+- If you use `boto3` or `botocore`, follow [types-boto3 documentation](https://youtype.github.io/types_boto3_docs/)
+- For `aiobotocore` follow [types-aiobotocore documentation](https://youtype.github.io/types_aiobotocore_docs/)
+- For `aioboto3` follow [types-aioboto3 documentation](https://youtype.github.io/types_aioboto3_docs/)
+
+## Builder documentation
+
+- [How to use pre-built libraries](./docsmd/pre_build.md)
+- [How builder works](./docsmd/how_it_works.md)
+- [How to build type annotations](./docsmd/how_to_build.md)
+- [Development](./docsmd/development.md)
+- [Contributors](./docsmd/thank_you.md)
+
+## Versioning
+
+`mypy_boto3_builder` version is not related to `boto3` version and follows
+[PEP 440](https://www.python.org/dev/peps/pep-0440/).
+
+## Latest changes
+
+Full changelog can be found in [Releases](https://github.com/youtype/mypy_boto3_builder/releases).
