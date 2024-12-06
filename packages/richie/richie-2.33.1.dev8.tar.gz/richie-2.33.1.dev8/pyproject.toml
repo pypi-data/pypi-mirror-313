@@ -1,0 +1,140 @@
+#
+# Richie package
+#
+[build-system]
+requires = ["setuptools>=60", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "richie"
+dynamic = ["version"]
+description = "A CMS to build learning portals for open education"
+readme = "README.md"
+authors = [{ "name" = "Open FUN (France Université Numérique)", "email" = "fun.dev@fun-mooc.fr" }]
+license = { file = "LICENSE" }
+keywords = ["Django", "Django-CMS", "Open edX"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Django",
+    "Framework :: Django :: 4",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "arrow<2",
+    "Django<5",
+    "djangocms-file<4",
+    "djangocms-googlemap<3",
+    "djangocms-link>=5.0.0,<6",
+    "djangocms-picture<5",
+    "djangocms-text-ckeditor<6",
+    "djangocms-video<4",
+    "djangorestframework<4",
+    "django-autocomplete-light<4",
+    "django-cms>=3.11.0,<4.0.0",
+    "django-parler>=2.3,<3",
+    "django-redis>=4.11.0,<6",
+    "django-treebeard<5",
+    "dj-pagination<3",
+    "easy_thumbnails[svg]>=2.8,<3",
+    "elasticsearch>=6.0.0,<7.0.0",
+    "exrex<1",
+    "importlib-metadata<9",
+    "oauthlib>=3.2.2,<4",
+    "requests>=2.32.3,<3",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/openfun/richie/issues/new"
+"Changelog" = "https://github.com/openfun/richie/blob/master/CHANGELOG.md"
+"Homepage" = "https://github.com/openfun/richie"
+"Repository" = "https://github.com/openfun/richie"
+"Documentation" = "https://richie.education/"
+"Demonstration website" = "https://demo.richie.education/"
+
+[tool.setuptools]
+packages = { find = { where = ["src"], exclude = ["tests"] } }
+zip-safe = true
+
+[tool.distutils.bdist_wheel]
+universal = true
+
+[project.optional-dependencies]
+dev = [
+    "bandit==1.8.0",
+    "black==24.10.0",
+    "pyRdfa3==3.6.4",
+    "cssselect==1.2.0",
+    "factory-boy==3.3.1",
+    "flake8==7.1.1",
+    "flake8-pyproject==1.2.3",
+    "htmlmin==0.1.12",
+    "ipdb==0.13.13",
+    "ipython==8.30.0",
+    "isort==5.13.2",
+    "lxml==5.3.0",
+    "msgpack==1.1.0",
+    "mysqlclient==2.2.6",
+    "pylint==3.3.2",
+    "pylint-django==2.6.1",
+    "pytest==8.3.4",
+    "pytest-cov==6.0.0",
+    "pytest-django==4.9.0",
+    "responses==0.25.3",
+]
+ci = [
+    "twine==6.0.1",
+]
+sandbox = [
+    "django-configurations==2.5.1",
+    "dockerflow==2024.4.2",
+    "factory-boy==3.3.1",
+    "gunicorn==23.0.0",
+    "psycopg2-binary==2.9.10",
+    "sentry-sdk==2.19.0",
+]
+
+[tool.flake8]
+max-line-length = 99
+exclude = [
+    ".git",
+    ".venv",
+    "build",
+    "venv",
+    "__pycache__",
+    "node_modules",
+    "*/migrations/*",
+]
+
+[tool.isort]
+profile = "black"
+known_django = "django"
+known_richie = "richie"
+include_trailing_comma = true
+line_length = 88
+multi_line_output = 3
+sections = ["FUTURE","STDLIB","DJANGO","THIRDPARTY","RICHIE","FIRSTPARTY","LOCALFOLDER"]
+skip_glob = "src/frontend/node_modules/**/*,venv"
+
+[tool.pytest.ini_options]
+addopts = "-v --cov-report term-missing"
+python_files = [
+    "test_*.py",
+    "tests.py"
+]
+testpaths = [
+    "tests",
+]
+filterwarnings = [
+    "ignore:::(?!(tests|richie))",
+]
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
