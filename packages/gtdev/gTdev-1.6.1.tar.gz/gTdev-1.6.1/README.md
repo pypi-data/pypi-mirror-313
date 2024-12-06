@@ -1,0 +1,286 @@
+# 高效碳基测试运算模块
+gTixi适用于高效碳基芯片测试的函数库  
+由魏楠和李若铭开发  
+联系开发者：<lxwk1spectre@foxmail.com>  
+gitee项目：<https://gitee.com/lxwk1spectre/gtdevj>
+# 功能介绍
+该模块主要用于芯片开发过程中的各种数据处理。包括从测试文件中提取数据，对曲线进行各种基本操作，以及各种类型器件的性能参数提取。
+# 使用说明
+## 安装gTixi库
+在命令行中输入 pip3 install gTdev
+## 一个简单的使用范例
+
+```python
+import pandas as pd
+import gTdev#导入gTdev模块
+
+#读取文件，测试文件已经放到同文件夹的data目录下，支持同时放入多个文件批量处理
+testFiles = gTdev.gtfile(location='./data',X_Axis='GateV',Y_Axis='BulkV')
+#gtfile的返回值为list，list里的元素为gTdev.gtfile.curve
+
+#提取参数
+result = []#用于存储提取到的参数
+for curve in testFiles.curves:#对每个提取到的曲线分别处理
+    #根据curve的x,y实例化反相器
+    inv = gTdev.inverter(curve.x,curve.y)
+    #提取反相器的转换阈值电压，增益，回滞，噪声容限-高，噪声容限-低，并放入result中
+    result.append([curve.name, inv.Vm, inv.gain, inv.hys, inv.NMH, inv.NML])
+#添加表头，转化为pandas的DataFrame格式化输出
+result = pd.DataFrame(result,columns=['name',"Vm","gain","hys","NMH","NML"])
+print(result)
+```
+# 文档
+## 文件处理
+### 曲线：curve
+- class
+- 用于存储单条曲线数据的类
+#### curve(x, y, name='', info={})
+- x,y
+    - list
+    - 曲线的x轴数据和y轴数据
+- name
+    - str
+    - 曲线的名字
+- info
+    - dict
+    - 曲线包含的其他信息，例如输出特性曲线的Vgs等信息
+#### curve.curve
+- turple
+    - 值为(self.x,self.y)
+#### curve.x, curve.y, curve.name, curve.info
+见[构造函数说明](#曲线curve)
+### 文件解析：gtfile()？
+- class
+- 从excel文件中获取特定列的数据
+#### gtfile(key='.xls',location='./',X_Axis='GateV',Y_Axis="DrainI")
+- key
+    - str
+    - 过滤excel文件的关键字
+- location
+    - str
+    - 搜索文件的目录
+- X_Axis, Y_Axis
+    - str
+    - X轴、Y轴的列名
+- absY
+    - bool
+    - 提取曲线数据时，是否对Y取绝对值。
+#### gtfile.files
+- set
+    - str
+    - 被过滤出来的文件名
+- gtfile.files.add(str)
+    - 手动添加文件
+- gtfile.files.clear(str)
+    - 清空所有文件。
+#### gtfile.curves
+- list
+    - curve
+    - 提取到的曲线
+#### gtfile.getFile()
+根据self.key和self.location获取文件。文件会被保存到self.files中，可以使用set类的所有操作，比如使用self.files.add("/b.xls")手动添加文件。
+#### gtfile.getcurves(absY=True)
+根据self.X_Axis和self.Y_Axis获取曲线。
+- absY
+    - bool
+    - 在提取Y_Axis时，默认会对Y的值取绝对值。设置为False时，Y轴数据不会取绝对值。
+
+在实例化gtfile类时，会自动运行getfile()和getcurves()函数进行提取曲线，一般不需要使用这两个函数进行手动添加。
+
+#### gtfile.cutcurve(start,end)
+根据start和end的值，对曲线进行截取
+
+## 通用: gTdev.gtdevCommon
+### 物理量: gTdev.gtdevCommon.physicalQuantity
+- class
+- 用于存储提取出的参数的类
+#### physicalQuantity(num,unit)
+- 根据物理量的值和单位初始化物理量
+#### physicalQuantity.num
+- float
+- 物理量的值
+#### physicalQuantity.unit
+- str
+- 物理量的单位
+#### physicalQuantity.__str__()
+- 用于print物理量实例，默认保留4位有效数字，输出格式为 "{:.4g}{}".format(self.num,self.unit)
+
+## 晶体管 gtmos
+### gtmos.transcurve
+分析转移曲线的类
+#### transcurve(Vgs:list,Id:list)
+- Vgs, Id
+    - list
+    - 源漏电流与栅压
+#### transcurve.Ion, transcurve.Ioff, transcurve.OOR, 
+#### transcurve.Vth, transcurve.Gm, transcurve.SS 
+实例化类之后，不需要进行任何操作，即可直接读取电学参数,相应的计算会在读取的时候自动进行。  
+返回值为physicalQuantity。可以直接print(output)或者使用output.num读取数值进行进一步计算。
+- 提取方法
+    - Ion：饱和电流
+        - 曲线的最大值
+    - Ioff：关态电流
+        - 曲线的最小值
+    - OOR：开关比
+        - log(Ion/Ioff)
+    - Vth:阈值电压
+        - 见[VthMod](#transcurvevthmod)
+    - Gm:跨导
+        - 跨导的定义是dVgs/dId
+        - 这里取的是跨导的最大值，
+            - 以相邻两个点的斜率作为该点的导数dy/dx|x=x1 = (y1-y2)/(x1-x2)
+    - SS:亚阈值摆幅
+        - 定义：亚阈值区域中dVgs/dlog(Ids)
+        - 对数坐标中求导，找到斜率最大的Vgs点
+        - 在跨导最大的点两侧，将斜率大于0.85最大斜率的所有点作为线性区
+        - 对线性区的点进行线性拟合的斜率即为亚阈值摆幅
+#### transcurve.vthMod
+- int
+- 提取阈值电压的方法
+    - 1：线性反向延长法
+        - 求斜率，以斜率最大点左右，斜率大于0.8倍最大斜率的所有点为线性区
+        - 线性回归，然后反向延长，与x轴的交点作为阈值电压
+    - 0: 印刷电子学法
+        - 将电流开根号
+        - 一下步骤同线性反向延长法
+    - 2：最大跨导法
+        - 以跨导最大值的Vgs作为阈值电压
+    - 3：指定电流法
+        - 以指定的电流与转移特性曲线的交点作为阈值电压
+#### transcurve.getVth(mod=None,x=None,y=None,limitCurr=10-7)
+- 根据指定的计算方法，重新计算阈值电压。
+- limitCurr
+    - float
+    - 用于提取阈值电压的参考电流，仅在指定电流法中生效。
+#### transcurve.isFailure(failIg = 1e-7, failIonUp=0.001, failIonLow=1e-6,failOOR=1,failVth=3,failSS=2)
+- 器件失效分析
+- failIg = 1e-7
+    - 栅电流过高则判断为栅漏电
+- failIonUp=0.001
+    - 饱和电流过高则判断为沟道短路
+- failIonLow=1e-6
+    - 饱和电流过低则判断为沟道断路
+- failOOR=1
+    - 开关比过低则判断为逻辑错误
+- failVth=3
+    - 阈值电压过高则判断为阈值异常
+- failSS=2
+    - 亚阈值摆幅过高则判断为亚阈值异常。
+- 返回
+    - list or False
+    - 如果失效，则返回list，内容为所有可能的失效类型
+    - 如果有效则返回False
+## 反相器 gtInv
+### gtInv.inverter
+分析反相器参数的类
+#### inverter(vin:float,vout:float,vdd:float)
+- vin
+    - 输入电压
+- vout
+    - 输出电压
+- vdd
+    - 工作电压
+#### inverter.Vm, inverter.NMH, inverter.NML
+#### inverter.hys, inverter.gain
+实例化类之后，不需要进行任何操作，即可直接读取电学参数,相应的计算会在读取的时候自动进行。  
+返回值为physicalQuantity。可以直接print(output)或者使用output.num读取数值进行进一步计算。
+- 提取方法
+    - Vm：转换阈值
+        - 反相器曲线与y=x的交点的Vin作为转换阈值
+    - NMH, NML：噪声容限
+        - 反相器曲线上斜率为-1的点有两个，分别为(xH,yH)和(xL,yL)
+        - NMH = xH-yL, NML = yH - xL
+    - hys: 回滞
+        - 反相器曲线与 y = (max(Vout)+min(Vout)) / 2 有两个交点
+        - 两个交点的差作为回滞
+    - gain：增益
+        - dVout/dVin的最大值作为反相器增益
+## 曲线处理工具 gtcurve
+### gtcurve.smooth(args:list)
+- 平滑曲线
+- args
+    - list
+    - 待平滑的曲线
+- 返回
+    - list
+    - 平滑后的list
+### gtcurve.linearOfCurve(x,y,thres=0.8)
+- 提取线性区
+- x,y
+    - list
+    - 需要搜索线性区的曲线
+- thres
+    - float
+    - 线性区搜索阈值
+- 返回
+    - list
+    - 线性区的横坐标组成的列表
+### gtcurve.findhys(x,y,type=0)
+- 提取回滞
+- x,y
+    - list
+    - 需要提取回滞的曲线
+- type
+    - int:0 or 1
+    - 0: 以算数平均值为参考线提取回滞
+    - 1: 以集合平均值为参考线提取回滞
+- 返回
+    - float
+    - 提取到的回滞值
+### gtcurve.wicNoise(data,fComplianceA=0.99e-2,dataOnly = False)
+- 噪声评估
+- data
+    - list
+    - 待分析的数据列表
+- fComplianceA
+    - float
+    - 高于该值的电流不予分析
+- dataOnly
+    - bool
+    - True：仅提取噪底
+    - False：提取的同时生成图像
+- 返回
+    - float
+    - 噪底值
+# 版本迭代
+## 1.6.0
+- 241204
+    - 添加指定电流法提取阈值电压的算法
+## 1.5.4
+- 241010
+    - 添加失效分类的判断
+## 1.5.2
+- 240801
+    - 修改失效分析函数的参量
+## 1.5.2
+- 240723
+    - 修正Gm提取方案，避免PMOS的Gm会被提取为负值
+    - 修改失效判断的逻辑，避免因数据类型带来的bug
+## 1.5.0
+- 240723
+    - trancurve类添加GateI的记录
+    - trancurve类添加判断器件失效的函数
+## 1.4.0
+- 240312
+    - 修改了回滞的算法，以Vth或者Vm的变化作为回滞的值
+    - 关态电流先平滑后提取
+## 1.3.0
+- 240125
+    - 增加了listpara和paraname功能
+    - 增加了提取噪声的功能
+## 1.2.0
+- 231008
+    - 增加了稳定性
+    - 曲线名添加了文件名以示区分不同的文件
+    - 可以修改sheetName以适应不同的规范
+## 1.1.0
+- 230628
+    - 优化了亚阈值摆幅的算法，如果关态附近电流波动太大，会尝试用不同的limit切除一部分数据，最终判断出最合适的线性区，再进行亚阈值摆幅的提取。
+    - 将优化关态波动的算法应用的阈值电压的提取，和最大跨导的提取上
+    - 曲线增加cut函数，可以截取一部分曲线进行分析。
+## 1.0.0
+- 230601
+    - 正式上线
+## 0.0.3
+- 230522
+    - 初始版本发布。
