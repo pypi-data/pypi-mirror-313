@@ -1,0 +1,33 @@
+[package]
+name = "bt_decode"
+version = "0.4.0"
+edition = "2021"
+
+[lib]
+name = "bt_decode"
+# "cdylib" is necessary to produce a shared library for Python to import from.
+#
+# Downstream Rust code (including code in `bin/`, `examples/`, and `tests/`) will not be able
+# to `use string_sum;` unless the "rlib" or "lib" crate type is also included, e.g.:
+# crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
+
+[dependencies.pyo3]
+version = "0.23.3"
+features = ["extension-module"]
+
+[dependencies.custom_derive]
+path = "libs/custom-derive"
+
+[dependencies]
+frame-metadata = { version = "16.0.0", features = [ "current", "decode", "serde_full" ], default-features = false }
+scale-decode = { version = "0.13.0", default-features = false }
+
+codec = { package = "parity-scale-codec", version = "3.2.2", default-features = false, features = [
+	"derive",
+] }
+scale-info = { version = "2.11.2", features = [ "serde" ], default-features = false }
+serde_json = { version = "1.0.127", features = [ "alloc" ], default-features = false }
+scale-bits = { version = "0.4.0", default-features = false }
+scale-value = { version = "0.16.2", default-features = false }
+pythonize = "0.23.0"
