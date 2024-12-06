@@ -1,0 +1,80 @@
+[tests]
+min_version = 'v0.13.0'
+copy = [
+    "garbage.xml",
+]
+
+[tests.mounts.netrc]
+target = "/home/ctr-user/.netrc"
+source = "~/.netrc"
+secret = true
+
+[client]
+name = "podman"
+
+[tests.steps]
+install = [
+    "python -m pip install setuptools",
+]
+
+[tests.steps.touch]
+command = "cp /etc/hosts garbage.xml"
+requires = [
+    "env"
+]
+
+[tests.steps.env]
+command = "env"
+check = "test -f /etc/hosts1323"
+
+
+[tests.environment]
+AWS_ACCESS_KEY_ID = "keyid"
+AWS_SECRET_ACCESS_KEY = "secret"
+
+[services.testapp.import]
+repo = "tests/testapp"
+
+[services.database]
+image = "docker.io/postgres:12"
+
+[services.database.ports]
+"5432/tcp" = ""
+
+[services.database.environment]
+POSTGRES_USER = "bebop"
+POSTGRES_PASSWORD = "secret"
+POSTGRES_DB = "bebop"
+
+[services.database.export]
+SQLALCHEMY_DATABASE_URI = "postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{HOST}:{PORT;5432/tcp}/{POSTGRES_DB}"
+POSTGRES_MAIN_USER = "{POSTGRES_USER}"
+POSTGRES_MAIN_PASSWORD = "{POSTGRES_PASSWORD}"
+POSTGRES_MAIN_HOST = "{HOST}"
+POSTGRES_MAIN_RDS_HOST = "{HOST}"
+POSTGRES_MAIN_PORT = "{PORT;5432/tcp}"
+POSTGRES_MAIN_DBNAME = "{POSTGRES_DB}"
+
+[services.rabbit]
+image = "docker.io/rabbitmq:3.8"
+
+[services.rabbit.ports]
+"5672/tcp" = ""
+"15672/tcp" = ""
+
+[services.rabbit.environment]
+
+[services.rabbit.export]
+BROKER_URL = "amqp://guest:guest@{HOST}:{PORT;5672/tcp}//"
+
+[services.cache]
+build = "tests/redis"
+
+[services.cache.ports]
+"6379/tcp" = ""
+
+[services.cache.export]
+REDIS_URL = "redis://{HOST}:{PORT;6379/tcp}/0"
+
+[services.cache.buildargs]
+REDIS_VERSION = "latest"
