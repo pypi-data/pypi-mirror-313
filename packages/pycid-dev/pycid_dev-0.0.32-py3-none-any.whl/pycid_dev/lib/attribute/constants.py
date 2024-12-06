@@ -1,0 +1,1 @@
+kInheritanceSourceTrait = "inheritance_source"
