@@ -1,0 +1,69 @@
+Metadata-Version: 2.1
+Name: wetest-gautomator3
+Version: 2.1.3
+Author: Tencent WeTest
+Author-email: WeTest@wetest.net
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: lxml>=4.6.1
+Requires-Dist: tidevice
+Requires-Dist: adbutils
+Requires-Dist: numpy
+
+# Wetest GAutomator3 Python Client
+
+**Wetest GAutomator3 Python Client** 是一款用于配合 [**Wetest GAutomator3 Plugins**](https://git.woa.com/CloudTesting/automation/GAutomator3) 使用的客户端框架.
+
+GAutomator3 Python client 能够实现XML控件树导出、指令输入、强大的元素搜索和多样化的元素交互功能。
+
+## 使用
+
+### 安装
+
+1. 从公网 Pypi 进行安装
+
+    ```Shell
+    pip install --upgrade wetest-gautomator3
+    ```
+
+2. 从腾讯内部 Pypi 源进行安装
+
+    ```Shell
+    pip install wetest-gautomator3 --upgrade --extra-index-url https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple
+    ```
+
+3. 在仓库release中下载 `.whl` 包进行安装
+
+### 样例
+
+样例可以在仓库根目录下找到:  `/examples.py`。
+
+样例是依据 UE demo 项目 [**ActionRPG Demo**](https://git.woa.com/CloudTesting/automation/GA-UEGameDemo/) 编写的，请自行下载、编译 demo 并安装插件。
+
+### Startup
+
+```Python
+from wetest.gautomator3 import Client, By, Context
+
+# Create socket by address or socket, including sockets created from adbutils and tidevice.
+sock = socket.socket()
+sock.connect(("127.0.0.1", 27029))
+
+# Create client through socket
+client = Client(addr=sock, timeout=5)
+
+element = client.find_element(Context.Slate, By.widget_path, "MainFrameModule.cpp(111)/SWindow.cpp(597)")
+print(element.address, element.get_attribute("x"))
+element_parent = client.get_parent(element)
+print(element_parent.get_attribute("widgetPath"))
+```
+
+APIs 文档： *建设中*
+
+## 作者信息 & 致谢
+
+### [**Tencent WeTest Team**](wetest.qq.com)
+
+特别感谢以下开源项目的启发:
+
+* <https://github.com/alibaba/taobao-iphone-device>
