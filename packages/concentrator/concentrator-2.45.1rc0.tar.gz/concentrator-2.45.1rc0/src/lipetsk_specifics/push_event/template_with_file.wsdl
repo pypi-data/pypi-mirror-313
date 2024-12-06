@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:rev="http://smev.gosuslugi.ru/rev120315" xmlns:v25="http://idecs.atc.ru/orderprocessing/ws/eventservice/v25/">
+<soapenv:Header>
+    <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" soapenv:actor="http://smev.gosuslugi.ru/actors/smev">
+        <wsse:BinarySecurityToken xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary" ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3" wsu:Id="CertId-3CF2D2F537EE34547713593702730181" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">{smev_cert}</wsse:BinarySecurityToken>
+        <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature-1">
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#gostr34102001-gostr3411"/>
+<ds:Reference URI="#id-2">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#gostr3411"/>
+<ds:DigestValue>##digest_value##</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>##signature_value##</ds:SignatureValue>
+<ds:KeyInfo Id="KeyId-3CF2D2F537EE34547713593702730272">
+<wsse:SecurityTokenReference xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="STRId-3CF2D2F537EE34547713593702730293" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><wsse:Reference URI="#CertId-3CF2D2F537EE34547713593702730181" ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"/></wsse:SecurityTokenReference>
+</ds:KeyInfo>
+</ds:Signature><wsu:Timestamp xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><wsu:Created>2013-01-28T10:51:15Z</wsu:Created><wsu:Expires>2013-01-28T10:56:15Z</wsu:Expires></wsu:Timestamp></wsse:Security>
+        <rev:NodeId>00</rev:NodeId>
+        <rev:MessageId>{message_id}</rev:MessageId>
+        <rev:TimeStamp>{time_stamp}</rev:TimeStamp>
+        <rev:MessageClass>REQUEST</rev:MessageClass>
+    </soapenv:Header>
+    <soapenv:Body xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="id-2">
+        <v25:pushEventRequest>
+         <rev:Message>
+            <rev:Sender>
+               <rev:Code>{sender_code}</rev:Code>
+               <rev:Name>{sender_name}</rev:Name>
+            </rev:Sender>
+            <rev:Recipient>
+               <rev:Code>{recipient_code}</rev:Code>
+               <rev:Name>{recipient_name}</rev:Name>
+            </rev:Recipient>
+            <rev:Originator>
+               <rev:Code>{originator_code}</rev:Code>
+               <rev:Name>{originator_name}</rev:Name>
+            </rev:Originator>
+            <rev:TypeCode>GSRV</rev:TypeCode>
+            <rev:Status>RESULT</rev:Status>
+            <rev:Date>{request_date}</rev:Date>
+    <rev:ExchangeType>1</rev:ExchangeType>
+            <rev:RequestIdRef/>
+            <rev:OriginRequestIdRef/>
+            <rev:ServiceCode>7</rev:ServiceCode>
+            <rev:CaseNumber>{case_number}</rev:CaseNumber>
+         </rev:Message>
+         <rev:MessageData>
+            <rev:AppData>
+               <orderId>{order_id}</orderId>
+               <eventComment><![CDATA[{comments}]]></eventComment>
+               <eventAuthor></eventAuthor>
+               <event>
+                  <orderStatusEvent>
+                     <statusCode>
+                        <techCode>{status_code}</techCode>
+                     </statusCode>
+                     <cancelAllowed></cancelAllowed>
+                  </orderStatusEvent>
+               </event>
+      </rev:AppData>
+      <rev:AppDocument>
+        <rev:RequestCode>archive-description</rev:RequestCode>
+        <rev:BinaryData>{file}</rev:BinaryData>
+      </rev:AppDocument>
+        </rev:MessageData>
+      </v25:pushEventRequest>
+    </soapenv:Body>
+</soapenv:Envelope>

@@ -1,0 +1,43 @@
+<FormData xmlns="http://epgu.gosuslugi.ru/concentrator/kindergarten/3.2.1" xmlns:ns2="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/basic/1.2" xmlns:ns3="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/faults/1.2" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" oktmo="92701000001">
+	<ApplicationOrderInfoRequest>
+		<orderId>{{ order_id|default:"1234567890" }} </orderId>
+		<ServicesType>-10014112022</ServicesType>
+		<PersonInfo>
+			<PersonSurname>{{ person.surname }}</PersonSurname>
+			<PersonName>{{ person.name }}</PersonName>
+			<PersonMiddleName>Сергеевич</PersonMiddleName>
+			<PersonPhone>{{ person.phone }}</PersonPhone>
+			<PersonEmail>{{ person.email }}</PersonEmail>
+			<Parents>true</Parents>
+		</PersonInfo>
+		<PersonIdentityDocInfo>
+			<IdentityDocName code="{{ person_doc_info.dul_type_doc_ensi }}">Паспорт гражданина Российской Федерации</IdentityDocName>
+			<IdentityDocSeries>{{ person_doc_info.series }}</IdentityDocSeries>
+			<IdentityDocNumber>{{ person_doc_info.number }}</IdentityDocNumber>
+			<IdentityDocIssueDate>{{ person_doc_info.issue_date }}</IdentityDocIssueDate>
+			<IdentityDocIssueCode>{{ person_doc_info.issue_code }}</IdentityDocIssueCode>
+			<IdentityDocIssued>{{ person_doc_info.issued_by }}</IdentityDocIssued>
+		</PersonIdentityDocInfo>
+		<ChildInfo>
+			<ChildSurname>{{ child.surname }}</ChildSurname>
+			<ChildName>{{ child.name }}</ChildName>
+			<ChildMiddleName>Павлович</ChildMiddleName>
+			<ChildBirthDate>{{ child.birth_date }}</ChildBirthDate>
+			{% if child_rf_doc_info %}<ChildBirthDocRF>
+				<ChildBirthDocSeries>{{ child_rf_doc_info.series }}</ChildBirthDocSeries>
+				<ChildBirthDocNumber>{{ child_rf_doc_info.number }}</ChildBirthDocNumber>
+				<ChildBirthDocIssueDate>{{ child_rf_doc_info.issue_date }}</ChildBirthDocIssueDate>
+				<ChildBirthDocActNumber>{{ child_rf_doc_info.act_number }}</ChildBirthDocActNumber>
+				<ChildBirthDocActDate>{{ child_rf_doc_info.act_date }}</ChildBirthDocActDate>
+				<ChildBirthDocIssued>{{ child_rf_doc_info.issued_by }}</ChildBirthDocIssued>
+			</ChildBirthDocRF>
+			{% elif child_foreign_doc_info %}<ChildBirthDocForeign>
+				<ChildBirthDocName>{{ child_foreign_doc_info.name }}</ChildBirthDocName>
+				<ChildBirthDocSeries>{{ child_foreign_doc_info.series }}</ChildBirthDocSeries>
+				<ChildBirthDocNumber>{{ child_foreign_doc_info.number }}</ChildBirthDocNumber>
+				<ChildBirthDocIssueDate>{{ child_foreign_doc_info.issue_date }}</ChildBirthDocIssueDate>
+				<ChildBirthDocIssued>{{ child_foreign_doc_info.issued_by }}</ChildBirthDocIssued>
+			</ChildBirthDocForeign>{% endif %}
+		</ChildInfo>
+	</ApplicationOrderInfoRequest>
+</FormData>
