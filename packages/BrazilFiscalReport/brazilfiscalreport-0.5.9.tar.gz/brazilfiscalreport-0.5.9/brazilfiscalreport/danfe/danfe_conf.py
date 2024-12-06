@@ -1,0 +1,4 @@
+URL = ".//{http://www.portalfiscal.inf.br/nfe}"
+DEFAULT_FIELD_HEIGHT = 6
+DEFAULT_HEIGHT_FONT_CONTENT = 3
+HEIGHT_FONT_BLOCK_DESC = 3
