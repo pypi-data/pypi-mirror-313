@@ -1,0 +1,17 @@
+module Stdlib.Data.String;
+
+import Stdlib.Data.String.Base open public;
+
+import Stdlib.Trait.Eq open;
+import Stdlib.Trait.Show open;
+
+import Stdlib.Data.String.Ord as String;
+
+instance
+eqStringI : Eq String := mkEq (String.==);
+
+instance
+showStringI : Show String :=
+  let
+    go (s : String) : String := "\"" ++str s ++str "\"";
+  in mkShow go;

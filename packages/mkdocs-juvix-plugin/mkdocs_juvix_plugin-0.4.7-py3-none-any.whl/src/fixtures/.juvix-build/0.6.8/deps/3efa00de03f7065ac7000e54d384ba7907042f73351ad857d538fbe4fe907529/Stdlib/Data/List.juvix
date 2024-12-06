@@ -1,0 +1,104 @@
+module Stdlib.Data.List;
+
+import Stdlib.Data.List.Base open public;
+import Stdlib.Data.Bool.Base open;
+import Stdlib.Data.String.Base open;
+import Stdlib.Function open;
+
+import Stdlib.Trait.Eq open;
+import Stdlib.Trait.Ord open;
+import Stdlib.Trait.Show open;
+import Stdlib.Trait open;
+import Stdlib.Trait.Partial open;
+import Stdlib.Trait.Foldable open using {
+  Foldable;
+  module Polymorphic;
+  fromPolymorphicFoldable;
+};
+
+--- 𝒪(1). Partial function that returns the first element of a ;List;.
+phead {A} {{Partial}} : List A -> A
+  | (x :: _) := x
+  | nil := fail "head: empty list";
+
+instance
+eqListI {A} {{Eq A}} : Eq (List A) :=
+  let
+    go : List A -> List A -> Bool
+      | nil nil := true
+      | nil _ := false
+      | _ nil := false
+      | (x :: xs) (y :: ys) :=
+        if
+          | Eq.eq x y := go xs ys
+          | else := false;
+  in mkEq go;
+
+isMember {A} {{Eq A}} (elem : A) (list : List A) : Bool :=
+  isElement (Eq.eq) elem list;
+
+instance
+ordListI {A} {{Ord A}} : Ord (List A) :=
+  let
+    go : List A -> List A -> Ordering
+      | nil nil := Equal
+      | nil _ := LessThan
+      | _ nil := GreaterThan
+      | (x :: xs) (y :: ys) :=
+        case Ord.cmp x y of
+          | LessThan := LessThan
+          | GreaterThan := GreaterThan
+          | Equal := go xs ys;
+  in mkOrd go;
+
+instance
+showListI {A} {{Show A}} : Show (List A) :=
+  let
+    go : List A -> String
+      | nil := "nil"
+      | (x :: xs) := Show.show x ++str " :: " ++str go xs;
+  in mkShow@{
+       show (list : List A) : String :=
+         case list of
+           | nil := "nil"
+           | s := "(" ++str go s ++str ")";
+     };
+
+{-# specialize: true, inline: case #-}
+instance
+functorListI : Functor List :=
+  mkFunctor@{
+    map := listMap;
+  };
+
+{-# specialize: true, inline: true #-}
+instance
+monomorphicFunctorListI {A} : Monomorphic.Functor (List A) A :=
+  fromPolymorphicFunctor;
+
+{-# specialize: true, inline: case #-}
+instance
+polymorphicFoldableListI : Polymorphic.Foldable List :=
+  Polymorphic.mkFoldable@{
+    for := listFor;
+    rfor := listRfor;
+  };
+
+{-# specialize: true, inline: true #-}
+instance
+foldableListI {A} : Foldable (List A) A := fromPolymorphicFoldable;
+
+instance
+applicativeListI : Applicative List :=
+  mkApplicative@{
+    pure {A} (a : A) : List A := [a];
+    ap {A B} : (listOfFuns : List (A -> B)) -> (listOfAs : List A) -> List B
+      | [] _ := []
+      | (f :: fs) l := map f l ++ ap fs l;
+  };
+
+instance
+monadListI : Monad List :=
+  mkMonad@{
+    bind := flip concatMap;
+  };
