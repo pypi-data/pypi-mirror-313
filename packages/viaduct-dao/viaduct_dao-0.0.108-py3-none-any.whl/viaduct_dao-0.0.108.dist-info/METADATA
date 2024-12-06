@@ -1,0 +1,174 @@
+Metadata-Version: 2.3
+Name: viaduct-dao
+Version: 0.0.108
+Summary: python dao client
+Author-email: John Pugliesi <john@viaduct.ai>
+Requires-Python: >=3.9
+Requires-Dist: grpcio-tools<1.63,>=1.62
+Requires-Dist: grpcio>=1.66
+Requires-Dist: httpx>=0.25
+Requires-Dist: mypy-protobuf>=3.6.0
+Requires-Dist: protobuf>=4.25
+Requires-Dist: types-protobuf~=5.27
+Description-Content-Type: text/markdown
+
+# Durable Asset Observability (DAO)
+
+DAO is an Asset Observability platform. It allows you to understand the health and status of assets by querying Event and Asset data in your data warehouse using a domain-specific query language: DAOQL.
+
+## Installation and Usage
+
+DAO has two components: a server, and clients.
+
+### Run the Server
+
+Assuming you have Docker installed and running, get the latest DAO docker image:
+
+```sh
+docker pull viaductai/dao:latest
+```
+
+Then start the DAO container:
+
+```sh
+docker run --platform linux/amd64 --rm -it -p 9090:9090 -v dao-data:/data --name dao viaductai/dao:latest
+```
+
+Once startup completes, you can access the DAO server at <http://localhost:9090>.
+
+This will start the dao server, expose it on port 9090, and persist data in the `dao-data` docker volume across container restarts.
+
+### Python Client
+
+With the server up and running, you can interact with it via the `viaduct-dao` python package.
+
+You can install the `viaduct-dao` python package to interact with a DAO server via python (ie in jupyterhub, or your laptop).
+
+Install the dao python package (e.g. in your terminal, or venv):
+
+```sh
+pip install viaduct-dao
+```
+
+and use it via python - here, we load some example datasets that are included with dao:
+
+```python
+from viaduct.dao.client import get_client, daoql, BasicAuthPlugin
+from viaduct.dao.v1 import dao_pb2
+from viaduct.dao.examples import load_examples
+import pandas as pd
+
+
+# Authenticate
+client = get_client("localhost:9090", secure=False, auth_plugin=BasicAuthPlugin())
+
+# Load example data
+load_examples(client)
+
+# Show example DataSources
+client.ListDataSources(dao_pb2.ListDataSourcesRequest())
+
+# Query
+daoql(client, """
+assets()
+""", limit=100)
+
+df = pd.DataFrame(daoql(client, """
+events()
+""", limit=100))
+```
+
+### Example Data
+
+DAO's example data is defined in ./example/ - see the ./examples/README.md for more information on how to update those datasets
+
+## Development
+
+Dependenices:
+
+- [Docker](https://docs.docker.com/engine/install/)
+- [Go 1.22](https://go.dev/doc/install)
+- [direnv](https://direnv.net/docs/installation.html) for environment management
+- [earthly](https://earthly.dev/get-earthly) for container builds
+- [rye](https://rye.astral.sh/guide/installation/) for python package management
+
+### Quickstart
+
+Here are the essential commands to get started
+
+```shell
+# see help commands
+make help
+
+# ensure environment variables are set
+direnv allow
+
+# install dev tools
+make install-dev-tools
+
+# reset and start services in docker (postgres, clickhouse, ...)
+make reset-services
+
+# start the server with live reload (defaults to port 9090)
+make run/live
+
+# tests
+make test
+
+# run tests with live reload
+make test/live
+
+# database migration
+go run ./cmd/dbtool/dbtool.go --help
+```
+
+### Typical Development Workflow
+
+For local development, DAO requires the following services to be running:
+
+- A postgres database (for dao's internal data)
+- A clickhouse database (as the default database for assets + event data)
+
+Dependencies can be started locally using docker compose:
+
+```sh
+# spin up dependencies
+make start-services
+
+# or, remove all existing data and restart from scratch
+make reset-services
+```
+
+Then, the dao server can be started with live reload:
+
+```sh
+make run/live
+```
+
+Tests can be run with:
+
+```sh
+make test
+
+# or with live reload
+make test/live
+```
+
+### About the Local Setup
+
+`make start-services` and `make reset-services` will start a dao container with only postgres and clickhouse exposed to the host machine. Then, the dao server can be started separately with `make run/live`. This is useful for development, so that the dao server can be rebuilt easily, independent of the databases.
+
+### Deployment Modes
+
+The dao docker image can be run in two deployment modes:
+
+- local mode (default): a complete dao instance with a dao server, postgres and clickhouse. This is useful for local usage and development, but not for production.
+- server-only mode: a dao server without postgres or clickhouse. This is used for production deployments where postgres and clickhouse are running elsewhere. This can be started with the `--server-only` flag:
+
+```sh
+docker run --platform linux/amd64 --rm -it -p 9090:9090 -v dao-data:/data --name dao viaductai/dao:latest --server-only
+```
+
+# License
+
+This project is licensed under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html). For more details, please refer to the [LICENSE](./LICENSE).
