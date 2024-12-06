@@ -1,0 +1,20 @@
+digraph {
+	graph [compound=false concentrate=false rankdir=TB ranksep=0.4]
+	setup [label=setup shape=box style=rounded]
+	input__num_required_topics [label="input: num_required_topics" shape=oval style=dashed]
+	input__num_required_topics -> setup
+	input__outline [label="input: outline" shape=oval style=dashed]
+	input__outline -> setup
+	creator [label=creator shape=box style=rounded]
+	input__attempts [label="input: attempts" shape=oval style=dashed]
+	input__attempts -> creator
+	get_topic_feedback [label=get_topic_feedback shape=box style=rounded]
+	update_topics_so_far [label=update_topics_so_far shape=box style=rounded]
+	terminal [label=terminal shape=box style=rounded]
+	setup -> creator [style=solid]
+	creator -> get_topic_feedback [style=solid]
+	get_topic_feedback -> update_topics_so_far [label="topic_feedback is None" style=dashed]
+	get_topic_feedback -> creator [style=solid]
+	update_topics_so_far -> terminal [label="len(topics_so_far) == num_required_topics" style=dashed]
+	update_topics_so_far -> creator [style=solid]
+}

@@ -1,0 +1,24 @@
+digraph {
+	graph [compound=false concentrate=false rankdir=TB ranksep=0.4]
+	process_input [label=process_input shape=box style=rounded]
+	input__email_to_respond [label="input: email_to_respond" shape=oval style=dashed]
+	input__email_to_respond -> process_input
+	input__response_instructions [label="input: response_instructions" shape=oval style=dashed]
+	input__response_instructions -> process_input
+	determine_clarifications [label=determine_clarifications shape=box style=rounded]
+	clarify_instructions [label=clarify_instructions shape=box style=rounded]
+	input__clarification_inputs [label="input: clarification_inputs" shape=oval style=dashed]
+	input__clarification_inputs -> clarify_instructions
+	formulate_draft [label=formulate_draft shape=box style=rounded]
+	process_feedback [label=process_feedback shape=box style=rounded]
+	input__feedback [label="input: feedback" shape=oval style=dashed]
+	input__feedback -> process_feedback
+	final_result [label=final_result shape=box style=rounded]
+	process_input -> determine_clarifications [style=solid]
+	determine_clarifications -> clarify_instructions [label="len(clarification_questions) > 0" style=dashed]
+	determine_clarifications -> formulate_draft [style=solid]
+	clarify_instructions -> formulate_draft [style=solid]
+	formulate_draft -> process_feedback [style=solid]
+	process_feedback -> formulate_draft [label="len(feedback) > 0" style=dashed]
+	process_feedback -> final_result [style=solid]
+}

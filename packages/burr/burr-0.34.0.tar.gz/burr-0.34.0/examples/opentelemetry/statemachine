@@ -1,0 +1,32 @@
+digraph {
+	graph [compound=false concentrate=false rankdir=TB ranksep=0.4]
+	node [fillcolor="#b4d8e4" fontname=Helvetica margin=0.15]
+	prompt [label=prompt shape=box style="rounded,filled"]
+	input__prompt [label="input: prompt" shape=rect style=dashed]
+	input__prompt -> prompt
+	check_safety [label=check_safety shape=box style="rounded,filled"]
+	decide_mode [label=decide_mode shape=box style="rounded,filled"]
+	generate_image [label=generate_image shape=box style="rounded,filled"]
+	input__model [label="input: model" shape=rect style=dashed]
+	input__model -> generate_image
+	generate_code [label=generate_code shape=box style="rounded,filled"]
+	input__model [label="input: model" shape=rect style=dashed]
+	input__model -> generate_code
+	answer_question [label=answer_question shape=box style="rounded,filled"]
+	input__model [label="input: model" shape=rect style=dashed]
+	input__model -> answer_question
+	prompt_for_more [label=prompt_for_more shape=box style="rounded,filled"]
+	response [label=response shape=box style="rounded,filled"]
+	prompt -> check_safety [style=solid]
+	check_safety -> decide_mode [label="safe=True" style=dashed]
+	check_safety -> response [style=solid]
+	decide_mode -> generate_image [label="mode=generate_image" style=dashed]
+	decide_mode -> generate_code [label="mode=generate_code" style=dashed]
+	decide_mode -> answer_question [label="mode=answer_question" style=dashed]
+	decide_mode -> prompt_for_more [style=solid]
+	generate_image -> response [style=solid]
+	answer_question -> response [style=solid]
+	generate_code -> response [style=solid]
+	prompt_for_more -> response [style=solid]
+	response -> prompt [style=solid]
+}

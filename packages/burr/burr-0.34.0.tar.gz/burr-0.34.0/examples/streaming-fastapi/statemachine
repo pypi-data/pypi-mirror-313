@@ -1,0 +1,31 @@
+digraph {
+	graph [compound=false concentrate=false rankdir=TB ranksep=0.4]
+	prompt [label=prompt shape=box style=rounded]
+	input__prompt [label="input: prompt" shape=oval style=dashed]
+	input__prompt -> prompt
+	check_safety [label=check_safety shape=box style=rounded]
+	unsafe_response [label=unsafe_response shape=box style=rounded]
+	decide_mode [label=decide_mode shape=box style=rounded]
+	generate_code [label=generate_code shape=box style=rounded]
+	input__model [label="input: model" shape=oval style=dashed]
+	input__model -> generate_code
+	answer_question [label=answer_question shape=box style=rounded]
+	input__model [label="input: model" shape=oval style=dashed]
+	input__model -> answer_question
+	generate_poem [label=generate_poem shape=box style=rounded]
+	input__model [label="input: model" shape=oval style=dashed]
+	input__model -> generate_poem
+	prompt_for_more [label=prompt_for_more shape=box style=rounded]
+	prompt -> check_safety [style=solid]
+	check_safety -> decide_mode [label="safe=True" style=dashed]
+	check_safety -> unsafe_response [style=solid]
+	decide_mode -> generate_code [label="mode=generate_code" style=dashed]
+	decide_mode -> answer_question [label="mode=answer_question" style=dashed]
+	decide_mode -> generate_poem [label="mode=generate_poem" style=dashed]
+	decide_mode -> prompt_for_more [style=solid]
+	answer_question -> prompt [style=solid]
+	generate_poem -> prompt [style=solid]
+	generate_code -> prompt [style=solid]
+	prompt_for_more -> prompt [style=solid]
+	unsafe_response -> prompt [style=solid]
+}
