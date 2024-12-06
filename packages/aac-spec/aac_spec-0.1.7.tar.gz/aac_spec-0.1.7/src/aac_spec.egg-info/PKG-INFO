@@ -1,0 +1,89 @@
+Metadata-Version: 2.1
+Name: aac-spec
+Version: 0.1.7
+Summary: Specification plugin for AaC
+Author-email: AaC Dev Team <asdfasdaf@email.com>
+License: MIT License
+Project-URL: Homepage, https://github.com/DevOps-MBSE/aac-spec
+Project-URL: Issues, https://github.com/DevOps-MBSE/aac-spec/issues
+Keywords: SysML,Architecture-as-Code,System Engineering,MBSE
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.9.13
+Description-Content-Type: text/markdown
+Requires-Dist: aac>=0.4.3
+Provides-Extra: doc
+Requires-Dist: sphinx>=7.2.6; extra == "doc"
+Requires-Dist: sphinx-autobuild~=2021.3.14; extra == "doc"
+Requires-Dist: sphinx_contributors>=0.2.7; extra == "doc"
+Requires-Dist: sphinx-copybutton>=0.5.2; extra == "doc"
+Requires-Dist: sphinxcontrib-applehelp~=1.0.2; extra == "doc"
+Requires-Dist: sphinxcontrib-devhelp~=1.0.2; extra == "doc"
+Requires-Dist: sphinxcontrib-htmlhelp~=2.0.0; extra == "doc"
+Requires-Dist: sphinxcontrib-jsmath~=1.0.1; extra == "doc"
+Requires-Dist: sphinxcontrib-qthelp~=1.0.3; extra == "doc"
+Requires-Dist: sphinxcontrib-serializinghtml~=1.1.9; extra == "doc"
+Requires-Dist: sphinx-simplepdf~=1.6.0; extra == "doc"
+Requires-Dist: docutils~=0.19; extra == "doc"
+Requires-Dist: furo>=2024.1.29; extra == "doc"
+Requires-Dist: myst-parser>=2.0.0; extra == "doc"
+Requires-Dist: pytz~=2023.3; extra == "doc"
+Provides-Extra: test
+Requires-Dist: behave>=1.2.6; extra == "test"
+Requires-Dist: build>=1.1.1; extra == "test"
+Requires-Dist: coverage>=7.4.3; extra == "test"
+Requires-Dist: flake8>=4.0.0; extra == "test"
+Requires-Dist: nose2>=0.10.0; extra == "test"
+Requires-Dist: pipdeptree>=2.16.1; extra == "test"
+Requires-Dist: pyflakes>=2.4; extra == "test"
+Requires-Dist: tox>=3.24; extra == "test"
+Provides-Extra: all
+Requires-Dist: aac>=0.4.3; extra == "all"
+Requires-Dist: aac-spec[doc]; extra == "all"
+Requires-Dist: aac-spec[test]; extra == "all"
+
+# aac-spec
+
+Specification and requirement tracing plugins for Architecture-as-Code
+
+## PYTHON VERSION COMPATIBILITY
+
+Currently, Python version 3.9.13 is required to avoid certain dependency version issues.
+
+## pyproject.toml vs setup.py
+
+Previously, this project was built with dependency information kept in a setup.py script.
+However, the preferred method is to use pyproject.toml to set the project-level options.
+Required modules are kept in the dependency sections of the pyproject.toml, and then the
+pip-compile command is used to add hashes to the requirements.txt file for enhanced security
+(see additional instructions below).
+
+To coincide with these changes, some changes to tox.ini and the addition of a MANIFEST.ini file were also necessary.
+
+These lines were added to tox.ini:
+   isolated_build = True
+   skipsdist = True
+
+A MANIFEST file with these lines was added:
+   graft src
+   graft tests
+   include tox.ini
+   include src/puml/.aac
+
+## TO BUILD FROM TERMINAL
+
+cd python
+pip install -e .
+
+## TO TEST FROM TERMINAL
+
+cd python
+pip install -e .
+python -m unittest
+
+## Generate a requirements.txt file populated with hashes
+
+pip install pip-tools
+pip-compile --generate-hashes pyproject.toml
