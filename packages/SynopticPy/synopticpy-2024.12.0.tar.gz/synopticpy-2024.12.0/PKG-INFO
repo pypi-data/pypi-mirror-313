@@ -1,0 +1,185 @@
+Metadata-Version: 2.3
+Name: SynopticPy
+Version: 2024.12.0
+Summary: Retrieve mesonet weather data as Polars DataFrames from Synoptic's Weather API.
+Project-URL: Homepage, https://github.com/blaylockbk/SynopticPy
+Project-URL: Documentation, https://synopticpy.readthedocs.io/
+Project-URL: Repository, https://github.com/blaylockbk/SynopticPy
+Project-URL: Changelog, https://github.com/blaylockbk/SynopticPy/releases
+Project-URL: Bug Tracker, https://github.com/blaylockbk/SynopticPy/issues
+Author-email: "Brian K. Blaylock" <blaylockbk@gmail.com>
+Maintainer-email: "Brian K. Blaylock" <blaylockbk@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2019-2024 Brian Blaylock
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Keywords: atmosphere,mesonet,meteorology,weather
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Scientific/Engineering :: Atmospheric Science
+Requires-Python: >=3.11
+Requires-Dist: numpy
+Requires-Dist: polars[plot,style,timezone]>=1.9.0
+Requires-Dist: requests
+Requires-Dist: toml
+Provides-Extra: docs
+Requires-Dist: autodocsumm; extra == 'docs'
+Requires-Dist: esbonio; extra == 'docs'
+Requires-Dist: ipython; extra == 'docs'
+Requires-Dist: linkify-it-py; extra == 'docs'
+Requires-Dist: myst-parser; extra == 'docs'
+Requires-Dist: nbconvert; extra == 'docs'
+Requires-Dist: nbsphinx; extra == 'docs'
+Requires-Dist: pydata-sphinx-theme; extra == 'docs'
+Requires-Dist: recommonmark; extra == 'docs'
+Requires-Dist: sphinx; extra == 'docs'
+Requires-Dist: sphinx-autosummary-accessors; extra == 'docs'
+Requires-Dist: sphinx-copybutton; extra == 'docs'
+Requires-Dist: sphinx-design; extra == 'docs'
+Requires-Dist: sphinx-markdown-tables; extra == 'docs'
+Requires-Dist: sphinxcontrib-mermaid; extra == 'docs'
+Provides-Extra: extras
+Requires-Dist: altair; extra == 'extras'
+Requires-Dist: cartopy; extra == 'extras'
+Requires-Dist: herbie-data; extra == 'extras'
+Requires-Dist: matplotlib; extra == 'extras'
+Requires-Dist: metpy; extra == 'extras'
+Requires-Dist: pyarrow; extra == 'extras'
+Requires-Dist: seaborn; extra == 'extras'
+Provides-Extra: test
+Requires-Dist: pytest; extra == 'test'
+Requires-Dist: pytest-cov; extra == 'test'
+Requires-Dist: ruff; extra == 'test'
+Description-Content-Type: text/markdown
+
+<div
+    align='center'
+>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/blaylockbk/SynopticPy/refs/heads/56-rewrite-using-polars/docs/_static/SynopticPy_white.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/blaylockbk/SynopticPy/refs/heads/56-rewrite-using-polars/docs/_static/SynopticPy_blue.svg">
+  <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://raw.githubusercontent.com/blaylockbk/SynopticPy/refs/heads/56-rewrite-using-polars/docs/_static/SynopticPy_blue.svg" width=300>
+</picture>
+
+## Synoptic API for Python
+
+<!-- Badges -->
+
+[![PyPI](https://img.shields.io/pypi/v/SynopticPy)](https://pypi.python.org/pypi/SynopticPy/)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/synopticpy.svg)](https://anaconda.org/conda-forge/synopticpy)
+[![DOI](https://zenodo.org/badge/288617886.svg)](https://zenodo.org/badge/latestdoi/288617886)
+
+![License](https://img.shields.io/github/license/blaylockbk/SynopticPy)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Tests (Python)](https://github.com/blaylockbk/SynopticPy/actions/workflows/tests-python.yml/badge.svg)](https://github.com/blaylockbk/SynopticPy/actions/workflows/tests-python.yml)
+[![Documentation Status](https://readthedocs.org/projects/synopticpy/badge/?version=latest)](https://synopticpy.readthedocs.io/?badge=latest)
+[![Python](https://img.shields.io/pypi/pyversions/SynopticPy.svg)](https://pypi.org/project/SynopticPy/)
+[![Conda Recipe](https://img.shields.io/badge/recipe-synopticpy-green.svg)](https://anaconda.org/conda-forge/synopticpy)
+[![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/synopticpy.svg)](https://anaconda.org/conda-forge/synopticpy)
+
+<!-- (Badges) -->
+
+## 📘 [Documentation](https://synopticpy.readthedocs.io/) | [💬 Discussions](https://github.com/blaylockbk/SynopticPy/discussions) | [🚑 Issues](https://github.com/blaylockbk/SynopticPy/issues)
+
+</div>
+
+[Synoptic's Weather API](https://synopticdata.com/weatherapi/) provides real-time and historical surface-based weather and environmental observations for thousands of mesonet stations, and the [open-access data](https://synopticdata.com/pricing/open-access-pricing/) is _free_. More data and enhanced services may be purchased (from Synoptic, not me).
+
+I'm a Synoptic user. I wrote this package to conveniently request data from Synoptic in a Pythonic way and convert its returned JSON to a **[Polars DataFrame](https://docs.pola.rs/user-guide/getting-started/)**.
+
+```python
+from datetime import timedelta
+from synoptic import TimeSeries
+
+df = TimeSeries(
+    stid="wbb",
+    recent=timedelta(minutes=30)
+).df()
+```
+
+![alt text](docs/_static/json_to_polars.png)
+
+I'm sharing this package to improve my skills with Polars and gain more experience in building and maintaining open-source Python packages. If you came across this package, I hope you find it valuable.
+
+**Best of Luck 🍀**  
+-Brian
+
+# 🐍 Install
+
+```bash
+pip install SynopticPy
+```
+
+```bash
+conda install -c conda-forge synopticpy
+```
+
+## Configure Token
+
+> [!IMPORTANT]
+>
+> ## 🎟️ To use SynopticPy you need a [Synoptic API token](https://customer.synopticdata.com/).
+
+There are three ways you can configure your Synoptic API token:
+
+1. Set an environment variable `SYNOPTIC_TOKEN` with your token. For example, in bash:
+   ```bash
+   export SYNOPTIC_TOKEN="yourTokenHere123456789"
+   ```
+1. Create a file `~/.config/SynopticPy/config.toml` with the following
+   ```toml
+   token = "yourTokenHere123456789"
+   ```
+1. Pass your token whenever you use one of SynopticPy's classes.
+   ```python
+   TimeSeries(
+       stid="wbb",
+       recent=30,
+       token="yourTokenHere123456789"
+   )
+   ```
+
+# How to Cite and Acknowledge
+
+If SynopticPy played an important role in your work, please [tell me about it](https://github.com/blaylockbk/SynopticPY/discussions/categories/show-and-tell)! Also, consider including a citation or acknowledgement in your article or product.
+
+**_Suggested Citation_**
+
+> Blaylock, B. K. (YEAR). SynopticPy: Synoptic API for Python (Version 20??.?.?) [Computer software]. https://github.com/blaylockbk/SynopticPy
+
+**_Suggested Acknowledgment_**
+
+> A portion of this work used code generously provided by Brian Blaylock's SynopticPy Python package (https://github.com/blaylockbk/SynopticPy)
+
+<br>
+<hr>
+
+> [!TIP]
+>
+> ### 📈 See also my [SynopticPy Web App](https://blaylockbk.github.io/SynopticPy) which lets you plot station data in your browser powered by [pyscript](https://pyscript.net/)!

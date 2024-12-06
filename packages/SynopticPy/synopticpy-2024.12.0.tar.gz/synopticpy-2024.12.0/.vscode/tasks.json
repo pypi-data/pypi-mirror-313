@@ -1,0 +1,48 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo Hello ${env:USER} ${env:USERNAME}"
+        },
+        {
+            "label": "Conda: create environment",
+            "type": "shell",
+            "command": "conda env create -f environment.yml"
+        },
+        {
+            "label": "Conda: update environment",
+            "type": "shell",
+            "command": "conda env update -f environment.yml --prune"
+        },
+        {
+            "label": "Sphinx: Build docs",
+            "type": "shell",
+            "command": "cd docs && ./remake_docs.sh"
+        },
+        {
+            "label": "PyPI: publish",
+            "type": "shell",
+            "command": "conda activate pypi && python setup.py sdist bdist_wheel && twine check dist/* && twine upload --skip-existing dist/*"
+        },
+        //
+        // Tasks for developing the 11ty site
+        {
+            "label": "Build 11ty - Develop",
+            "detail": "Builds the full site in 'develop' mode.",
+            "type": "shell",
+            "command": "(cd 11ty-site && npm run dev)",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build 11ty - Develop (pyscript off)",
+            "detail": "Builds the site without pyscript in 'develop' mode.",
+            "type": "shell",
+            "command": "(cd 11ty-site && npm run dev:site)",
+            "problemMatcher": []
+        }
+    ]
+}
