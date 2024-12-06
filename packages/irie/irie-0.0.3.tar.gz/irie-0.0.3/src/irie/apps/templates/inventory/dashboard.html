@@ -1,0 +1,102 @@
+{% extends "layouts/base.html" %}
+{% load indexing %}
+
+{% block title %} Dashboard {% endblock %} 
+
+{% block content %}
+    <h1>Dashboard</h1>
+    <i class="fa-thin fa-bridge"></i>
+    <div class="row">
+        <div class="col-xl-4">
+            <div class="card border-0 shadow">
+                <div class="card-header">
+                <div class="row align-items-center">
+                  <div class="col">
+                      <h2 class="fs-5 fw-bold mb-0">Recent Events</h2>
+                      <p>Most recent first</p>
+                  </div>
+                  <div class="col text-end">
+                    <a href="{% url 'event_table' %}" class="btn btn-sm btn-primary">See all</a>
+                  </div>
+                </div>
+                </div>
+                
+                <div class="table-responsive">
+                  <table class="table align-items-center table-flush">
+                    <thead class="thead-light">
+                    <tr>
+                        <th class="border-bottom" scope="col">Bridge No.</th>
+                        <th class="border-bottom" scope="col">PGA (g)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for evaluation, event in recent_evaluations %}
+                    <tr style="cursor: pointer;" 
+                        onClick="window.location='{% url 'asset_event_summary' event=event.id cesmd=event.cesmd %}';">
+                      <td><code>{{ calid|index:event.cesmd }}</code></td>
+                  
+                      <td class="fw-bolder text-gray-800">
+                        {{ event.pga|floatformat:2 }}
+                    {% comment %}
+                    {% with station_name_list=event.motion_data.station_name.split %}
+                        {% if "interchange" in station_name_list|last|lower %}
+                        {{ event.motion_data.station_name|slice:"2:"|title }}
+                        {% else %}
+                        {{ station_name_list|slice:"1:-1"|join:" "|title }}
+                        {% endif %}
+                    {% endwith %}
+                    {% endcomment %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+        <!-- dashboard-cards.html -->
+        </div>
+        {% comment %}
+        <div class="col-12 col-xl-4">
+            <div class="col-12 px-0 mb-4">
+                <div class="card border-0 shadow">
+                    <div class="card-header d-flex flex-row align-items-center flex-0 border-bottom">
+                        <div class="d-block">
+                            <div class="h6 fw-normal text-gray mb-2">Total orders</div>
+                            <h2 class="h3 fw-extrabold">452</h2>
+                            <div class="small mt-2">                               
+                                <span class="fas fa-angle-up text-success"></span>                                   
+                                <span class="text-success fw-bold">18.2%</span>
+                            </div>
+                        </div>
+                        <div class="d-block ms-auto">
+                            <div class="d-flex align-items-center text-end mb-2">
+                                <span class="dot rounded-circle bg-gray-800 me-2"></span>
+                                <span class="fw-normal small">July</span>
+                            </div>
+                            <div class="d-flex align-items-center text-end">
+                                <span class="dot rounded-circle bg-secondary me-2"></span>
+                                <span class="fw-normal small">August</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="ct-chart-ranking ct-golden-section ct-series-a"></div>
+                    </div>
+                </div>
+            </div> 
+            {% endcomment %}
+
+        <div class="col-xl-8">
+          <div class="card bg-white-100 border-0 shadow">
+            <div class="card-body p-2">
+              {{ asset_map|safe }}
+            </div>
+          </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block javascripts %}
+{% endblock javascripts %}
+
