@@ -1,0 +1,1 @@
+from yta_multimedia.video.edition.resize import resize_video
