@@ -1,0 +1,158 @@
+spotpython 0.19.1:
+
+- objectivefunctions.py:
+    - vectorized versions
+
+spotpython 0.19.0:
+
+- objectivefunctions.py:
+    - class analytical capitalized to analytical
+
+- kriging.py:
+    exp_imp() function updated. Using (y_min - y0) / s0 to ensure that the value is a scalar.
+
+spotpython 0.18.15:
+
+- "numpy>=2.1.0" changed to "numpy>=2.0.0 updated in the dependencies to enable tensorflow compatibility
+
+spotpython 0.18.14:
+
+- "river>=0.22.0" and   "numpy>=2.1.0" updated in the dependencies
+
+
+- objectivefunctions.py:
+    doc updated
+
+
+spotpackage 0.18.13:
+
+- listgenerator.py:
+    - New class class ListGenerator:
+
+spotpython 0.18.11:
+
+- testmodel, predictmodel, and cvmodel functions updated, so that they can handle DataModules specified by the user in fun_control.
+
+
+spotpython 0.18.8:
+
+- lightdatamodule.py:
+    - New function: setup restructured
+- lightcrossvalidationdatamodule.py:
+    - accepts verbosity as an argument
+
+
+spotpython 0.18.7:
+
+- Separate train and test data sets can be passed to Lightning DataModules
+
+spotpython 0.18.6:
+
+- split.py:
+    New function: compute_lengths_from_fractions()
+- lightdatamodule.py:
+    train, val, test set computation updated
+
+spotpython 0.18.4:
+- architecture.py:
+    documentation updated
+
+spotpython 0.18.3:
+
+- init.py:
+    show_config=True set as Default 
+
+
+spotpython 0.18.2:
+
+- spot.py: 
+    Class Spot has new attribute "verbosity. Can be set via fun_control["verbosity"].
+
+
+spotpython 0.18.1:
+
+- nn_linear_regression.py: 
+train steo uses log as follows:
+    self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=False)
+
+
+spotpython 0.18.0
+
+spor.set_self_attribute() removed
+
+
+spotpython 0.17.2:
+
+
+- trainmodel.py:
+    Tensorboard logger uses the argument name="".
+
+    doumentation updated
+
+- init.py:
+    fun_control_init() function accepts additional arguments for Lightning.
+
+
+spotpython-0.17.1
+
+- improved get_device function
+
+spotpython-0.17.0
+
+- designs.py and spacefilling.py:
+Naming Conventions: The class names have been capitalized to follow the PEP 8 convention for class naming:
+1. `designs` -> `Designs`
+2. `spacefilling` -> `SpaceFilling`
+
+- The dimension of the design, k (int), must be specified by the user. There is not default dimension "2" anymore.
+
+
+spotpython-0.16.19:
+
+- kriging.py update completed
+
+spotpython-0.16.15:
+
+- initialize_matrices:
+1. Simplified Penalty Calculation: Cached the variance calculation to a variable for clean reuse; reused it to set `pen_val` with efficient branching.
+2. Consistent Attribute Initialization: Set `dtype` for arrays like `self.one` for float precision; ensured all attributes are either properly initialized or set to `None`.
+
+
+spotpython-0.16.14:
+
+- spotpython.utils.aggregate.py: aggregate_mean_var() updated:
+    1. Imports: Ensured that necessary imports (`numpy` and `pandas`) are included.
+    2. Input Validation: Added checks to ensure that `X` and `y` are `numpy` arrays, `X` is 2D, `y` is 1D, and they have matching shapes, helping prevent common input errors.
+    3. Use of Pandas Group Functionality: Improved grouping and aggregation by explicitly handling multi-index resulting from `agg`.
+    4. Return Type Consistency: Ensured that the description in the documentation matches the actual operation and expected shapes for return arrays `y_mean` and `y_var`.
+
+- initialize_variables:
+    1. Input Validation: Added checks to ensure correct shapes for `nat_X` and `nat_y`, which prevent unexpected errors during execution.
+    2. Proper Initialization Instead of Assigning in Tuples: Decomposed the tuple assignment directly for clarity.
+
+- set_variable_types:
+    1. Corrected Initialization of `var_type`: If the length of `var_type` is less than `k`, the variable types are now all set to `'num'` consistently, rather than attempting to multiply the list.
+    2. NumPy Vectorization: Moved from `map` and list comprehension to NumPy vectorized operations, which are more efficient and readable when handling large data.
+    3. Simplified Ordered Mask Logic: Used NumPy's `isin` function, which directly checks membership in a list of types relevant for `ordered_mask`.
+
+
+spotpython-0.16.12:
+
+- kriging.py: method extract_from_bounds() updated.
+
+spotpython-0.16.11:
+
+- documentation: update documentation of the Kriging class
+
+spotpython-0.16.10:
+
+- documentation: update documentation of the Kriging class
+
+spotpython-0.16.9:
+
+- xai.py: add new function viz_net to visualize the network architecture (linear nets)
+- dimensions.py: add new function extract_linear_dims that extracts the input and output dimensions of the Linear layers in a PyTorch model.
+
+spotpython-0.16.8:
+
+- xai.py: automatically handle the orientation of the colorbar in the plot_nn_values_scatter function
