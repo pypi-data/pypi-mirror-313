@@ -1,0 +1,103 @@
+Metadata-Version: 2.1
+Name: python-ulid-django
+Version: 1.2.0
+Summary: ULID (Universally Unique Lexicographically Sortable Identifier) support for Django.
+Author-Email: Xdynix <Lizard.rar@gmail.com>
+License: MIT
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 4
+Classifier: Framework :: Django :: 4.1
+Classifier: Framework :: Django :: 4.2
+Classifier: Framework :: Django :: 5.0
+Classifier: Framework :: Django :: 5.1
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Project-URL: Homepage, https://github.com/Xdynix/python-ulid-django
+Requires-Python: >=3.10
+Requires-Dist: django>=4.2.0
+Requires-Dist: python-ulid<4.0.0,>=3.0.0
+Description-Content-Type: text/markdown
+
+# python-ulid-django
+
+[ULID (Universally Unique Lexicographically Sortable Identifier)][ulid-spec] support for
+Django.
+
+This package uses the ULID type implemented by [`python-ulid`][python-ulid].
+
+> This package is heavily inspired by [`django-ulid`][django-ulid]. The reason I'm
+> reinventing the wheel is that I want to use [`python-ulib`][python-ulid]'s
+> ULID implementation.
+
+## Usage
+
+### Installation
+
+```shell
+pip install python-ulid-django
+```
+
+### Model Field
+
+You can then add `ULIDField` to your Django model just like other fields.
+
+Example:
+
+```python
+from django.contrib.auth.models import AbstractUser
+from ulid import ULID
+from ulid_django.models import ULIDField
+
+
+class User(AbstractUser):
+    id = ULIDField(primary_key=True, default=ULID, editable=False)
+```
+
+### URL Converter
+
+There is also a URL converter can be used.
+
+```python
+from django.urls import path, register_converter
+from ulid import ULID
+from ulid_django.converters import ULIDConverter
+
+
+def user_detail_view(request, user_id):
+    assert isinstance(user_id, ULID)
+    ...
+
+
+register_converter(ULIDConverter, "ulid")
+
+urlpatterns = [
+    path("user/<ulid:user_id>/", user_detail_view),
+    ...,
+]
+```
+
+## Development
+
+Prerequisite: [PDM](https://pdm-project.org/latest/)
+
+Environment setup: `pdm sync`
+
+Run linters: `pdm lint`
+
+Test: `pdm test`
+
+[ulid-spec]: https://github.com/ulid/spec
+
+[python-ulid]: https://github.com/mdomke/python-ulid
+
+[django-ulid]: https://github.com/ahawker/django-ulid

@@ -1,0 +1,162 @@
+[project]
+name = "python-ulid-django"
+version = "1.2.0"
+description = "ULID (Universally Unique Lexicographically Sortable Identifier) support for Django."
+authors = [
+    { name = "Xdynix", email = "Lizard.rar@gmail.com" },
+]
+dependencies = [
+    "django>=4.2.0",
+    "python-ulid<4.0.0,>=3.0.0",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Django",
+    "Framework :: Django :: 4",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+Homepage = "https://github.com/Xdynix/python-ulid-django"
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
+
+[dependency-groups]
+lint = [
+    "pre-commit>=4.0.1",
+    "mypy~=1.13.0",
+    "django-stubs[compatible-mypy]~=5.1.1",
+]
+test = [
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "pytest-django>=4.9.0",
+]
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.scripts.post_install]
+cmd = [
+    "pre-commit",
+    "install",
+]
+help = "install pre-commit hooks"
+
+[tool.pdm.scripts.lint]
+cmd = [
+    "pre-commit",
+    "run",
+    "--all-files",
+]
+help = "execute linters"
+
+[tool.pdm.scripts.lint.env]
+PYTHONUTF8 = "1"
+
+[tool.pdm.scripts.test]
+cmd = [
+    "pytest",
+    "--cov",
+    "ulid_django",
+]
+help = "execute test cases"
+
+[tool.ruff]
+cache-dir = ".cache/ruff"
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "F",
+    "E",
+    "W",
+    "I",
+    "UP",
+    "S",
+    "B",
+    "C",
+    "DJ",
+    "T20",
+    "SIM",
+    "ARG",
+    "PTH",
+    "FURB",
+    "RUF",
+]
+ignore = [
+    "W191",
+    "E111",
+    "E114",
+    "E117",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = [
+    "S101",
+]
+
+[tool.mypy]
+strict = true
+cache_dir = ".cache/mypy"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+testpaths = "tests"
+pythonpath = [
+    ".",
+    "src",
+]
+cache_dir = ".cache/pytest"
+addopts = [
+    "--import-mode",
+    "importlib",
+    "--cov-config",
+    "pyproject.toml",
+    "--cov-report",
+    "term",
+    "--cov-report",
+    "html",
+    "--cov-fail-under",
+    "100",
+]
+
+[tool.coverage.run]
+branch = true
+data_file = ".cache/coverage/data.db"
+disable_warnings = [
+    "no-data-collected",
+]
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+]
+
+[tool.coverage.html]
+directory = ".cache/cov-report"
