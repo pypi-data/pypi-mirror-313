@@ -1,0 +1,6 @@
+KEYS = {
+    "CASTOR_TABLEAU_USER": "Test",
+    "CASTOR_TABLEAU_SERVER_URL": "http://test",
+    "CASTOR_TABLEAU_PASSWORD": "Test",
+    "CASTOR_TABLEAU_SITE_ID": "dad65087-b08b-4603-af4e-2887b8aafc67",
+}
