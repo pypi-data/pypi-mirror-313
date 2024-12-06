@@ -1,0 +1,160 @@
+enable_backends:
+  enable_txt2img_backends:
+    comfyui: [0]
+    a1111webui: [0,1]
+    novelai: [{"0": "queue"}]  # 使用队列管理 (禁止并发)
+  enable_sdapi_backends:
+    a1111webui: [0,1]
+  enable_img2img_backends:
+    a1111webui: [0,1]
+  enable_comfyui_backends:
+    comfyui: [0]
+
+backends:
+  civitai: # {"token": []}
+    api:
+      - b0ab2e10591a....
+    name:
+      - civitaiAPI
+  a1111webui:
+    api:
+      - http://192.168.1.104:7860
+      - http://127.0.0.1:20224
+    name:
+      - RTX2060
+      - RTX2080
+    auth:
+      - false
+      - false
+    username:
+      - admin
+      - admin
+    password:
+      - admin
+      - admin
+  fal_ai:
+    api:
+      - 6e3c0665-f...
+    name:
+      - myfirsttoken
+  replicate:
+    api:
+      - r8_bBAjALaO..
+    name:
+      - default
+  liblibai:
+  # https://www.liblib.art/ # 按下F12 -> 应用 -> cookies -> https://www.liblib.art -> usertoken 的值 d812c12d83c640.....
+    api:  #
+      - f45123447d # 大号
+      - 4de16d49bf7c44c0 # 2580120068
+      - 66c70f855fd # 微信
+    name:
+      - google
+      - 2580120068
+      - wechat
+    override:
+      -
+        model_path: 2931607
+        model: NoobXL
+        prompt:
+        negative_prompt:
+        xl: true
+        steps: 35
+
+      - model_path: 2675606
+        model: liblib.art/modelinfo/fe3aac47589d4a20b24d0a6b045d607e
+        prompt:
+        negative_prompt: easynegative
+        xl: false
+        steps: 20
+
+      - model_path: 2676318
+        model: liblib.art/modelinfo/5ecc3218f1ef483ab63eeb4e4cff30cc
+        prompt: "score_9,score_8_up,score_7_up,score_anime,score_anime_8_up"
+        negative_prompt: "score_3,poorly drawn,bad anatomy,bad proportions, watercolor painting, brush strokes,3d,2.5d,signature,watermark,bad face,distorted face,messed up eyes,deformed,(low quality, bad quality, worst quality:1.2),bad hand"
+        xl: true
+        steps: 28
+
+  tusiart:
+    api:
+      - eyJhbGciOiJIUzI1NiIsInR5...
+    name:
+      - 移动
+    referer:
+      - https://tusiart.com/u/759779980971380287
+    override:
+      - model_path: 758751795863586176
+        prompt: "best quality"
+
+  seaart:
+    api:
+      - eyJhbGciOiJSUzUxMiIs...
+    name:
+      - default
+
+  yunjie:
+    api:
+      - "rsat:NUh5MOBfEccVuUmuwsyqT4fmX7O"
+    name:
+        - 移动
+
+  comfyui:
+    api:
+      - http://10.147.20.155:8188
+    name:
+      - RTX2080TI
+    override:
+      - model_path: noobaiXLNAIXL_epsilonPred075.safetensors
+        prompt: "best quality"
+        negative_prompt: ",bad hands, worst quality, low quality,"
+        comfyui_api_json: sdbase_txt2img
+
+  novelai:
+    api:
+      - eyJhbGciOi...
+    name:
+      - default
+    override:
+      - model_path: nai-diffusion-3
+  midjourney:
+    api:
+      - http://192.168.5.206:8081
+    name:
+      - myserver
+    auth_toekn:
+      - null
+
+
+server_settings:
+  redis_server:
+    - 127.0.0.1
+    - 6379
+    - null
+    - 2
+  enable_nsfw_check:
+    false
+  save_image:
+    true
+  build_in_tagger:
+    false
+  llm_caption:
+    enable:
+      false
+    clip:
+      google/siglip-so400m-patch14-384
+    llm:
+      unsloth/Meta-Llama-3.1-8B-bnb-4bit
+    image_adapter:  # https://huggingface.co/spaces/fancyfeast/joy-caption-pre-alpha/tree/main/wpkklhc6
+      image_adapter.pt
+  build_in_photoai:
+    exec_path:
+      "C:\\Program Files\\Topaz Labs LLC\\Topaz Photo AI\\tpai.exe"
+
+  start_gradio:
+    False
+  same_port_with_api:
+    False
+
+  proxy:
+    null
+
