@@ -1,0 +1,54 @@
+Metadata-Version: 2.1
+Name: dsock
+Version: 0.5
+Summary: File-based socket server
+Home-page: https://git.bobc.io/bobc/dsock
+Author: Bob Carroll
+Author-email: bob.carroll@alum.rit.edu
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Environment :: No Input/Output (Daemon)
+Classifier: Framework :: AsyncIO
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: System :: Networking
+Description-Content-Type: text/markdown
+License-File: COPYING
+
+# dsock
+
+dsock is a bi-directional, multiplexing socket server that acts as a proxy between two machines
+sharing a common file system. This is useful in situations where there is no direct network
+connectivity. For example, dsock would enable connectivity to a service over a Windows remote
+desktop session.
+
+## Quick Start
+
+There are no dependencies other than Python 3.12. Clone the repository and update the configuration
+dictionary in `server.py`. The library package can be installed in site-packages although it isn't
+necessary for running the server.
+
+As an example scenario, connecting to machine A's port 8080 will reach machine B's port 80:
+
+```python
+config = {
+    'a': {'pipes': [], 'tcp-sockets': [('127.0.0.1', 8080, '127.0.0.1', 80, '/mnt/share/web.sock')]},
+    'b': {'pipes': ['/mnt/share/web.sock'], 'tcp-sockets': []}}
+```
+
+Then start the server on A:
+
+```
+$ python server.py a
+```
+
+And also on B:
+
+```
+$ python server.py b
+```
