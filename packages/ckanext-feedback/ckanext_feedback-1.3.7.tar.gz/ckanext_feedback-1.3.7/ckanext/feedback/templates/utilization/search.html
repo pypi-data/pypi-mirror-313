@@ -1,0 +1,126 @@
+{% if h.is_enabled_utilizations() %}
+
+  {% extends "page.html" %}
+
+  {% block styles %}
+    {{ super() }}
+    {% asset 'feedback/feedback-search-css' %}
+  {% endblock %}
+
+  {% block breadcrumb_content %}
+    {{ super() }}
+    <li class="active"><a href="{{ h.url_for('utilization.search') }}">{{ _('Utilization') }}</a></li>
+  {% endblock %}
+
+  {% block title %}{{ _('Search for Utilizations') }} - CKAN{% endblock %}
+
+  {% block primary %}
+    <form class="top-centered-content" method="get">
+      {% block search_by_keyword %}
+        <br>
+        {% if not disable_keyword %}
+          <h4>{{ _('Keyword Search') }}</h4>
+          {% if c.pkg_dict %}
+            <input type="hidden" name="organization"  value="{{ c.pkg_dict['organization']['name'] }}">
+          {% endif %}
+          <div class="input-group search-input-group">
+            <input id="field-giant-search" type="text" class="form-control input-lg" name="keyword" placeholder="{{ _('Keyword Search...') }}" aria-label="{{ _('Search utilization data') }}" autocomplete="off" value="{{ keyword }}"/>
+            <span class="input-group-btn">
+              <button class="btn btn-default btn-lg" type="submit" aria-label="{{ _('Submit') }}"><i class="fa fa-search"></i></button>
+            </span>
+          </div>
+        {% endif %}
+      {% endblock %}
+      {% if c.userobj.sysadmin or h.is_organization_admin() %}
+        {% block select_status %}
+          <span><h4>{{ _('Status') }}</h4>
+          <input type="checkbox" id="waiting" name="waiting" onclick="refreshTable()" {% if unapproved_status == 'on' %}checked{% endif %} disabled>
+          <label for="waiting" class="normal-font-weight middle-vertical-aligned">{{ _('Unapproved') }}</label>
+          <input class="spaced-left" type="checkbox" id="approval" name="approval" onclick="refreshTable()" {% if approval_status == 'on' %}checked{% endif %} disabled>
+          <label for="approval" class="normal-font-weight middle-vertical-aligned">{{ _('Approved') }}</label>
+          </span>
+        {% endblock %}
+      {% endif %}
+    </form>
+    {% if not disable_keyword or c.userobj.sysadmin or h.is_organization_admin() %}
+      <hr>
+    {% endif %}
+    {% block result_table %}
+      <h4 class="bottom-centered-content" id="data-count">
+        {{ _('Results: ') }}
+        <span id="utilization-results-count">{{ page.item_count }}</span>
+      </h4>
+      <table class="table table-striped table-bordered table-condensed table-toggle-more bottom-centered-content" id="results-table">
+        <thead class="table-header">
+          <tr>
+            <th class="big-column">{{ _('Title') }}</th>
+            <th class="small-column">{{ _('Issue resolutions') }}</th>
+            <th class="medium-column">{{ _('Organization') }}</th>
+            <th class="big-column">{{ _('Dataset') }}</th>
+            <th class="medium-column">{{ _('Data resource') }}</th>
+            <th class="small-column">{{ _('Comments') }}</th>
+            <th class="small-column">{{ _('Registered') }}</th>
+            {% if c.userobj.sysadmin or h.is_organization_admin() %}
+              <th class="small-column">{{ _('Status') }}</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in page.collection %}
+            <tr>
+              <td class="left-aligned-text"><a href="{{ h.url_for('utilization.details', utilization_id=row.id) }}">{{ row.title }}</a></td>
+              <td>
+                <div class="division-flex-outer">
+                  <div class="division-flex-inner-icon">
+                    {% if row.issue_resolution > 0 %}
+                      <img id="issue-resolution" src="/images/issue_resolution_badge_medium.png" alt="issue resolution badge"/>
+                    {% endif %}
+                  </div>
+                  <div class="division-flex-inner-num">{{ row.issue_resolution }}</div>
+                </div>
+              </td>
+              <td>
+                {{ h.get_organization(row.owner_org).display_name|truncate(20) }}
+              </td>
+              <td>{{ row.package_name|truncate(30) }}</td>
+              <td>{{ row.resource_name|truncate(20) }}</td>
+              <td>{{ row.comment }}</td>
+              <td>{{ row.created.strftime('%Y/%m/%d') }}</td>
+              {% if c.userobj.sysadmin %}
+                {% if row.approval == True %}
+                  <td data-approval="true">{{ _('Approved') }}</td>
+                {% else %}
+                  <td data-waiting="true">{{ _('Unapproved') }}</td>
+                {% endif %}
+              {% elif h.is_organization_admin() %}
+                {% if h.has_organization_admin_role(row.owner_org) %}
+                  {% if row.approval == True %}
+                    <td data-approval="true">{{ _('Approved') }}</td>
+                  {% else %}
+                    <td data-waiting="true">{{ _('Unapproved') }}</td>
+                  {% endif %}
+                {% else %}
+                  {% if row.approval == True %}
+                    <td data-approval="true"></td>
+                  {% else %}
+                    <td data-waiting="true"></td>
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endblock %}
+    {% block page_pagination %}
+      {{ page.pager() }}
+    {% endblock %}
+  {% endblock %}
+
+  {% block secondary %}{% endblock %}
+
+  {%- block scripts %}
+    {{ super() }}
+    {% asset 'feedback/feedback-search-js' %}
+  {% endblock -%}
+{% endif %}
