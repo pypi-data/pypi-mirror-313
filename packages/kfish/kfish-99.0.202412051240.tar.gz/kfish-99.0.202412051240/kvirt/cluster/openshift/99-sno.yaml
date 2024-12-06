@@ -1,0 +1,34 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  name: sno-custom
+  labels:
+    machineconfiguration.openshift.io/role: master
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    storage:
+      files:
+{% for file in files %}
+        - contents:
+            source: data:text/plain;charset=utf-8;base64,{{ file['data']|base64 }}
+            verification: {}
+          mode: {{ file['mode']|default(420) }}
+          path: {{ file['path'] }}
+{% endfor %}
+{% if relocate %}
+    systemd:
+      units:
+      - name: relocate-ip.service
+        enabled: true
+        contents: |
+          [Unit]
+          After=network.target ovs-configuration.service
+          Before=network-online.target kubelet.service crio.service
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/bin/relocate-ip.sh
+          [Install]
+          WantedBy=multi-user.target
+{% endif %}
