@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+""
+This utility reads a knowledge core in msgpack format and outputs its
+contents in JSON form to standard output.  This is useful only as a
+diagnostic utility.
+"""
+
+import msgpack
+import sys
+import argparse
+
+def run(input_file):
+
+    with open(input_file, 'rb') as f:
+
+        unpacker = msgpack.Unpacker(f, raw=False)
+
+        for unpacked in unpacker:
+            print(unpacked)
+
+def main():
+    
+    parser = argparse.ArgumentParser(
+        prog='tg-dump-msgpack',
+        description=__doc__,
+    )
+
+    parser.add_argument(
+        '-i', '--input-file',
+        required=True,
+        help=f'Input file'
+    )
+
+    args = parser.parse_args()
+
+    run(**vars(args))
+
+main()
+
