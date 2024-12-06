@@ -1,0 +1,160 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scim2-cli"
+version = "0.2.1"
+description = "SCIM application development CLI"
+authors = [{name="Yaal Coop", email="contact@yaal.coop"}]
+license = {file = "LICENSE.md"}
+readme = "README.md"
+keywords = ["scim", "scim2", "provisioning", "rfc7643", "rfc7644"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "License :: OSI Approved :: Apache Software License",
+    "Environment :: Web Environment",
+    "Programming Language :: Python",
+    "Operating System :: OS Independent",
+]
+
+requires-python = ">= 3.10"
+dependencies = [
+    "click>=8.1.7",
+    "scim2-client>=0.4.2",
+    "scim2-tester[httpx]>=0.1.10",
+    "sphinx-click-rst-to-ansi-formatter>=0.1.0",
+    "pydanclick>=0.3.0",
+    "pygments>=2.18.0",
+]
+
+[project.urls]
+documentation = "https://scim2-cli.readthedocs.io"
+repository = "https://github.com/python-scim/scim2-cli"
+changelog = "https://scim2-cli.readthedocs.io/en/latest/changelog.html"
+funding = "https://github.com/sponsors/python-scim"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13.0",
+    "pre-commit-uv>=4.1.4",
+    "pytest>=8.2.1",
+    "pytest-coverage>=0.0",
+    "pytest-httpserver>=1.0.10",
+    "tox-uv>=1.16.0",
+]
+doc = [
+    "shibuya>=2024.5.15",
+    "sphinx>=7.3.7",
+    "sphinx-click>=6.0.0",
+    "sphinx-issues >= 5.0.0",
+    "myst-parser>=3.0.1",
+]
+bundle = [
+    "pyinstaller>=6.10.0",
+]
+
+[project.scripts]
+scim = "scim2_cli:cli"
+scim2 = "scim2_cli:cli"
+
+[tool.coverage.run]
+source = [
+    "scim2_cli",
+    "tests",
+]
+omit = [".tox/*"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "@pytest.mark.skip",
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "except ImportError",
+    "if app.debug",
+]
+
+[tool.ruff.lint]
+select = [
+    "B", # flake8-bugbear
+    "D", # pydocstyle
+    "E", # pycodestyle
+    "F", # pyflakes
+    "I", # isort
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line-too-long
+    "E722", # bare-except
+    "D100", # public module
+    "D101", # public class
+    "D102", # public method
+    "D103", # public function
+    "D104", # public package
+    "D105", # magic method
+    "D106", # nested class
+    "D107", # public init
+    "D203", # no-blank-line-before-class
+    "D213", # multi-line-summary-second-line
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+plugins = [
+  "pydantic.mypy"
+]
+
+[tool.tox]
+requires = ["tox>=4.19"]
+env_list = [
+    "style",
+    "py310",
+    "py311",
+    "py312",
+    "py313",
+    "minversions",
+    "doc",
+    "coverage",
+]
+
+[tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
+dependency_groups = ["dev"]
+commands = [
+    ["pytest", "--showlocals", "--full-trace", "{posargs}"],
+]
+
+[tool.tox.env.style]
+runner = "uv-venv-runner"
+commands = [
+    ["pre-commit", "run", "--all-files", "--show-diff-on-failure"],
+]
+
+[tool.tox.env.minversions]
+runner = "uv-venv-lock-runner"
+uv_resolution = "lowest-direct"
+
+[tool.tox.env.doc]
+dependency_groups = ["doc"]
+commands = [
+    ["sphinx-build", "--builder", "html", "doc", "build/sphinx/html"],
+    ["sphinx-build", "--builder", "man", "doc", "build/sphinx/html"],
+]
+
+[tool.tox.env.coverage]
+commands = [
+    ["pytest", "--cov", "--cov-fail-under=100", "--cov-report", "term:skip-covered", "{posargs}"],
+    ["coverage", "html"],
+]
