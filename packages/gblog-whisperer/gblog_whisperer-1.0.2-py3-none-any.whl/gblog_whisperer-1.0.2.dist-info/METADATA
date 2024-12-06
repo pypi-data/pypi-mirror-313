@@ -1,0 +1,190 @@
+Metadata-Version: 2.1
+Name: gblog_whisperer
+Version: 1.0.2
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: google-auth-oauthlib>=1.2.1
+Requires-Dist: google-api-python-client>=2.154.0
+
+# GblogWhisperer
+
+**GblogWhisperer** is the low-key G.O.A.T Python package for leveling up your Google Blogger game. Whether you’re tryna vibe-check your blog with instant posts, keep it demure with scheduled drops, or delete those cheugy duplicates, this package slaps.
+
+---
+
+## Features
+
+- **Instant Posts**: When you gotta post now, this is bussin’.
+- **Scheduled Drops**: Flex with planned posts that hit at the perfect time.
+- **Delete Like a Pro**: Handle duplicate titles without a vibe-killer moment.
+
+---
+
+## Requirements
+
+- **Python**: 3.6 or higher (keep it fresh, no cheugy versions).
+- **Google Blogger Access**: If you know, you know.
+- **OAuth Credentials**: Get that **Client ID JSON file** for the rizz with Google.
+
+---
+
+## Installation
+
+### From PyPI
+
+```bash
+pip install gblog-whisperer  
+```
+
+### From Source
+
+1. Clone this repo (low-key optional if you already have the source).
+    
+2. Install the package and dependencies like a boss:
+    
+    ```bash
+    pip install .  
+    ```
+    
+    Or, if you grabbed a `.tar.gz` or `.whl` file:
+    
+    ```bash
+    pip install GblogWhisperer-1.0.1.tar.gz  
+    ```
+    
+3. Make sure you’re locked in with all the extras:
+    
+    ```bash
+    pip install -r requirements.txt  
+    ```
+    
+
+---
+
+## Usage
+
+### Authenticate First
+
+First-time vibe check: the package will ask you to log in. After that, you’re golden with `token.json`—just smooth sailing for all your future runs.
+
+### Import the Tools
+
+```python
+from GblogWhisperer import post_instantly, schedule_post, delete_post  
+```
+
+### Instant Post
+
+```python
+post_instantly(  
+    blog_id="YOUR_BLOG_ID",  
+    client_secret_file="path/to/client_secret.json",  
+    title="Your Blog Title",  
+    content="Your Blog Content"  
+)  
+```
+
+### Schedule the Drop
+
+```python
+schedule_post(  
+    blog_id="YOUR_BLOG_ID",  
+    client_secret_file="path/to/client_secret.json",  
+    title="Your Scheduled Blog Title",  
+    content="Your Blog Content",  
+    publish_time="DD/MM/YYYY-HH:MM:SS",  # Example: 25/12/2024-15:30:00  
+    utc_offset="+05:30"  # Make timezone moves effortlessly  
+)  
+```
+
+### Delete the Cheugy Posts
+
+```python
+delete_post(  
+    blog_id="YOUR_BLOG_ID",  
+    client_secret_file="path/to/client_secret.json",  
+    title="Title of the Blog Post to Delete"  
+)  
+```
+
+If there are duplicate titles, you’ll get a vibe-check prompt to choose which one gets axed.
+
+---
+
+## Pro Tip: Use `time.sleep`
+
+Don’t be that person spamming the Blogger API. Stay mindful with a short breather between calls using `time.sleep()`. It’s low-key essential for avoiding rate-limit drama.
+
+```python
+import time  
+
+# Instant drop  
+post_instantly(blog_id, client_secret_file, "Title 1", "Content 1")  
+time.sleep(2)  # Low-key chill for 2 seconds  
+
+# Scheduled vibe  
+schedule_post(blog_id, client_secret_file, "Title 2", "Content 2", "10/12/2024-15:30:00", "+05:30")  
+time.sleep(2)  
+
+# Delete that cheugy post  
+delete_post(blog_id, client_secret_file, "Title 1")  
+```
+
+---
+
+## File Vibes
+
+```
+GblogWhisperer/  
+├── GblogWhisperer/  
+│   ├── __init__.py  
+│   ├── authenticate.py  
+│   ├── post_instantly.py  
+│   ├── schedule_post.py  
+│   ├── delete_post.py  
+├── setup.py  
+├── requirements.txt  
+└── README.md  
+```
+
+---
+
+## Dependencies
+
+- **`google-auth-oauthlib`**: For keeping your login game strong.
+- **`google-api-python-client`**: Talks to Blogger so you don’t have to.
+
+---
+
+## Setting Up Your Rizz with OAuth
+
+1. Slide into the [Google Cloud Console](https://console.cloud.google.com/).
+2. Make a new project or pick one you’re already vibing with.
+3. Turn on the **Blogger API** for your project.
+4. Set up OAuth creds for a **Desktop App**—no cap.
+5. Download the JSON file, name it `client_secret.json`, and stash it somewhere safe.
+
+---
+
+## Notes
+
+- **Timezone Rizz**: `schedule_post` flexes UTC offsets like `+05:30` or `-08:00` to keep your drops sharp.
+- **No Login Loops**: With `token.json`, you’re set after the first vibe check.
+- **Rate Limit Respect**: Sprinkle `time.sleep()` to keep things mindful.
+
+---
+
+## License
+
+This project is [licensed](LICENSE) under MIT, which slaps. Feel free to do your thing.
+
+---
+
+## Contributing
+
+Got ideas? Found a bug? Fork it, fix it, and slide us a pull request. Collaboration is low-key bussin’.
+
+---
