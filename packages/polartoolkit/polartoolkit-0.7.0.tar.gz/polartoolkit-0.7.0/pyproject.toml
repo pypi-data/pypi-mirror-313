@@ -1,0 +1,277 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polartoolkit"
+authors = [
+    {name = "Matt Tankersley", email = "matt.d.tankersley@gmail.com"},
+]
+description = "Helpful tools for polar researchers"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+]
+readme = "README.md"
+version = "0.7.0"
+license = {file = "LICENSE"}
+
+keywords = ["cryosphere", "antarctica", "arctic", "greenland", "maps", "plotting", "pygmt", "cross-section"]
+
+dependencies = [
+    "pandas",
+    "openpyxl",
+    "pooch",
+    "tqdm",
+    "verde>=1.8.0",
+    "xarray[io]", # includes netCDF4, h5netcdf, scipy, pydap, zarr, fsspec, cftime, rasterio, cfgrib, pooch
+    "harmonica>=0.6.0",
+    "pyproj",
+    "matplotlib",
+    "pyogrio",
+    "rioxarray",
+    "scipy",
+    "numpy",
+    "pygmt>=0.10.0", # need parameter "log" for colorbar
+    "geopandas<1.0",
+    "zarr",
+    "python-dotenv",
+    "requests",
+    "deprecation",
+    "earthaccess",
+]
+
+[project.optional-dependencies]
+interactive = [
+    "geoviews",
+    "cartopy",
+    "ipyleaflet",
+    "ipython",
+]
+viz = [
+    "seaborn",
+]
+test = [
+  "pytest >=6",
+  "pytest-cov >=3",
+  "deepdiff",
+]
+docs = [
+  "sphinx>=4.0",
+  "myst_parser",
+  "sphinx_copybutton",
+  "sphinx_autoapi",
+  "sphinx_autodoc_typehints",
+  "sphinx-book-theme>=0.3",
+  "sphinx_design",
+  "nbsphinx",
+  "nbconvert",
+  "sphinxcontrib-bibtex",
+  "ipython",
+]
+dev = [
+    "polartoolkit[interactive,viz,test,docs]",
+    "nox",
+    "pre-commit",
+    "pylint>=3.2",
+    "python-semantic-release >=8",
+    "ipykernel",
+    "jupyterlab",
+    "mypy",
+    "pathspec",
+]
+all = [
+  "polartoolkit[interactive,viz,test,dev,docs]",
+]
+
+[project.urls]
+Homepage = "https://github.com/mdtanker/polartoolkit"
+Documentation = "https://polartoolkit.readthedocs.io/"
+"Bug Tracker" = "https://github.com/mdtanker/polartoolkit/issues"
+Discussions = "https://github.com/mdtanker/polartoolkit/discussions"
+Changelog = "https://polartoolkit.readthedocs.io/en/latest/changelog.html"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["antarctic_plots", "polartoolkit"]
+namespaces = false
+
+[tool.coverage]
+run.source = ["polartoolkit"]
+port.exclude_lines = [
+  'pragma: no cover',
+  '\.\.\.',
+  'if typing.TYPE_CHECKING:',
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+  "-rA",
+  "--showlocals",
+  "--strict-markers",
+  "--strict-config",
+  "--cov", "--cov-report", "term-missing",
+  ]
+xfail_strict = true
+filterwarnings = [
+  "error",
+  "ignore::DeprecationWarning",
+  "ignore::PendingDeprecationWarning",
+  "ignore::FutureWarning",
+]
+log_cli_level = "INFO"
+testpaths = [
+  "tests",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "earthdata: marks tests as requiring earthdata login info (deselect with '-m \"not earthdata\"')",
+    "issue: mark tests with current issues (deselect with '-m \"not issues\"')",
+    "fetch: marks tests which fetch data",
+]
+
+[tool.mypy]
+files = ["src"]
+python_version = "3.9"
+warn_unused_configs = true
+strict = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+warn_unreachable = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+ignore_missing_imports = true
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+module = "polartoolkit.*"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+
+[tool.ruff]
+lint.select = [
+  "E", "F", "W", # flake8
+  "B",           # flake8-bugbear
+  "I",           # isort
+  "ARG",         # flake8-unused-arguments
+  "C4",          # flake8-comprehensions
+  "EM",          # flake8-errmsg
+  "ICN",         # flake8-import-conventions
+  "ISC",         # flake8-implicit-str-concat
+  "G",           # flake8-logging-format
+  "PGH",         # pygrep-hooks
+  "PIE",         # flake8-pie
+  "PL",          # pylint
+  "PT",          # flake8-pytest-style
+  "PTH",         # flake8-use-pathlib
+  "RET",         # flake8-return
+  "RUF",         # Ruff-specific
+  "SIM",         # flake8-simplify
+  "T20",         # flake8-print
+  "UP",          # pyupgrade
+  "YTT",         # flake8-2020
+  "EXE",         # flake8-executable
+  "NPY",         # NumPy specific rules
+  "PD",          # pandas-vet
+]
+lint.ignore = [
+  "PLR",    # Design related pylint codes
+  "G004",   # Logging with f-strings
+  "PD901",  # Bad variable name warning
+  "PD003", # Changes .isna to .isnull
+  "PD004", # Changes .notna to .notnull
+  "PD011", # Changes .values() to .to_numpy()
+]
+src = ["src"]
+lint.unfixable = [
+  "T20",  # Removes print statements
+  "F841", # Removes unused variables
+  "PD003", # Changes .isna to .isnull
+  "PD004", # Changes .notna to .notnull
+  "PD011", # Changes .values() to .to_numpy()
+]
+exclude = ["docs/index.md", "CHANGELOG.md", "tools/license_notice.py"]
+line-length = 88 # Set the maximum line length to 88.
+lint.flake8-unused-arguments.ignore-variadic-names = true
+# lint.isort.required-imports = ["from __future__ import annotations"]
+# Uncomment if using a _compat.typing backport
+# typing-modules = ["polartoolkit._compat.typing"]
+extend-include = ["*.ipynb"]
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20"]
+"noxfile.py" = ["T20"]
+"*.ipynb" = ["E402", "B018", "T201", "F821"]
+
+
+[tool.pylint]
+py-version = "3.9"
+ignore-paths = ["CHANGELOG.md"]
+reports.output-format = "colorized"
+similarities.ignore-imports = "yes"
+similarities.min-similarity-lines = 5
+messages_control.disable = [
+  "design",
+  "fixme",
+  "line-too-long",
+  "missing-module-docstring",
+  "wrong-import-position",
+  "cyclic-import",
+]
+
+
+[tool.semantic_release]
+version_variables = ["src/polartoolkit/__init__.py:__version__"]
+version_toml = ["pyproject.toml:project.version"]
+major_on_zero = false
+build_command = """
+    python -m pip install build
+    python -m build .
+"""
+commit_parser = "angular"
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.branches.notmain]
+match = "(?!main)"
+prerelease = true
+
+[tool.semantic_release.changelog]
+template_dir = "templates"
+
+[tool.semantic_release.changelog.environment]
+trim_blocks = true
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = [
+    "build",    # Changes that affect the build system or external dependencies
+    "chore",    # Changes to the build process or auxiliary tools and libraries such as documentation generation
+    "ci",       # CI related changes
+    "docs",     # Documentation only changes
+    "feat",     # A new feature
+    "fix",      # A bug fix
+    "perf",     # A code change that improves performance
+    "style",    # Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+    "refactor", # A code change that neither fixes a bug nor adds a feature
+    "test",     # Adding missing or correcting existing tests
+]
+# including BREAKING CHANGE: in the commit message will trigger a major release
+minor_tags = ["feat"] # tags which result in minor releases
+patch_tags = ["fix", "perf"] # tags which result in patch releases
