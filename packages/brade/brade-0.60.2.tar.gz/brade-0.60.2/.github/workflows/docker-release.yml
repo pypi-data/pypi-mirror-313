@@ -1,0 +1,52 @@
+name: Docker Release
+
+# TODO: Add automated testing of the Docker images after building and before pushing.
+# This could include:
+# - Basic smoke tests to verify the images can run
+# - Verification of included features (full vs core)
+# - Security scanning
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'brade-v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  docker_build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./docker/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/brade:${{ github.ref_name }}
+          ${{ secrets.DOCKERHUB_USERNAME }}/brade:latest
+        target: brade-full
+
+    - name: Update Docker Hub Description
+      uses: peter-evans/dockerhub-description@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        repository: ${{ secrets.DOCKERHUB_USERNAME }}/brade
+        readme-filepath: ./docker/README.md
