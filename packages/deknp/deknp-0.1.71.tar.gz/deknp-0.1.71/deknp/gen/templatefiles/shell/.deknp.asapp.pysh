@@ -1,0 +1,22 @@
+@pyo var_cwd cwd()
+@pyo var_pn [x for x in mp.os.listdir("{fpp}/server/.material") if x.endswith(".yaml")][0]
+@pyo var_pn mp.os.path.splitext("{var_pn}")[0]
+@cc chdir {fpp}/server/{var_pn}
+
+@pyoc var_cwd repr $var_cwd
+@text var_npm
+@eval
+import os
+os.chdir(r{var_cwd})
+os.system('npm run dev -- --host 0.0.0.0 --port 5173')
+@end
+@end
+
+@pyoc var_npm rs $var_npm
+
+@with .
+@shell sync=False
+    {shr} .shell.runserver.pysh port**5000
+    {shr} .shell.celery.pysh
+    {shrs} {var_npm}
+@end
