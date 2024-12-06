@@ -1,0 +1,25 @@
+name: 'Build coverage report'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - collections
+  schedule:
+    - cron: '0 6 * * *'
+  
+jobs:
+# Unit tests with coverage 
+  unit:
+    name: Unit Tests to generate coverage report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Perform unit testing with ansible-test and generate coverage report
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          testing-type: units
+          coverage: 'always'
+          ansible-core-version: 'stable-2.17'
+          target-python-version: '3.11'
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
