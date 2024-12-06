@@ -1,0 +1,82 @@
+{% extends "ausleihe/base.html" %}
+{% load static %}
+
+{% block js %}
+<script src="{% static 'ausleihe/js/helpers.js' %}"></script>
+<script charset="utf-8">
+  const table_rows_sel = "#buecher > tbody > tr";
+
+  function on_input_filter(event) {
+    let v = event.target.value;
+    if (v == '') {
+      document.querySelectorAll(table_rows_sel).forEach(
+        elem => { show(elem) }
+      );
+    } else {
+      display_filter(table_rows_sel, v);
+    }
+  }
+
+  function setup_event_listeners() {
+    document.getElementById("filter").addEventListener("input", on_input_filter);
+  }
+
+  document.addEventListener("DOMContentLoaded", setup_event_listeners);
+</script>
+{% endblock js %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page">{{ buch_list.count }} <a href="{% url 'ausleihe:buch-list' %}"><strong>Bücher</strong></a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:autor-list' %}">Autoren</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:verlag-list' %}">Verlage</a></li>
+      {% if perms.ausleihe.add_buch %}
+      <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'ausleihe:buch-create' %}">hinzufügen</a></li>
+      {% endif %}
+    </ol>
+  </nav>
+  <div class="row">
+    <div class="col">
+      {% if buch_list %}
+      <input type="search" class="form-control" placeholder="Suche" id="filter">
+      <table class="table" id="buecher">
+        <thead>
+          <tr>
+            <th>Mediatheknr.</th>
+            <th>Titel</th>
+            <th>Autoren</th>
+            <th>ISBN</th>
+            <th>Verlag</th>
+            <th>Ausgabe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for buch in buch_list %}
+          <tr>
+            <td><a href="{% url 'ausleihe:medium-detail' buch.medium.id %}">{{ buch.medium }}</a></td>
+            <td><a href="{% url 'ausleihe:buch-detail' buch.id %}">{{ buch.titel }}</a></td>
+            <td>
+              {% include "ausleihe/buch_autoren_links.html" %}
+            </td>
+            <td>{{ buch.isbn }}</td>
+            <td>
+              {% if buch.verlag %}
+              <a href="{% url 'ausleihe:verlag-detail' buch.verlag.id %}">{{ buch.verlag }}</a>
+              {% endif %}
+            </td>
+            <td>{{ buch.ausgabe }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Bisher sind keine Bücher vorhanden.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
