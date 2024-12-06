@@ -1,0 +1,169 @@
+name: Python CI/CD
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+  release:
+    types:
+      - published
+  schedule:
+  # Execute a nightly build at 2am UTC.
+  - cron:  '0 2 * * *'
+
+
+jobs:
+
+  package:
+    name: Package the project
+    runs-on: ubuntu-22.04
+
+    steps:
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python tools
+        run: pip install build twine
+
+      - name: Create distributions
+        run: python -m build -o dist/
+
+      - name: Inspect dist folder
+        run: ls -lah dist/
+
+      - name: Check wheel's abi and platform tags
+        run: test $(find dist/ -name *-none-any.whl | wc -l) -gt 0
+
+      - name: Run twine check
+        run: twine check dist/*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: dist/*
+          name: dist
+
+  test:
+    name: 'Python${{ matrix.python }}@${{ matrix.os }}'
+    needs: package
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-latest
+          - windows-latest
+        python:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+
+    steps:
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Download Python packages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          name: dist
+
+      - name: Install wheel (ubuntu)
+        if: contains(matrix.os, 'ubuntu')
+        shell: bash
+        run: pip install "$(find dist/ -type f -name '*.whl')[all]"
+
+      - name: Install wheel (macos|windows)
+        if: contains(matrix.os, 'macos') || contains(matrix.os, 'windows')
+        shell: bash
+        run: pip install "$(find dist/ -type f -name '*.whl')"
+
+      - name: Document installed pip packages
+        shell: bash
+        run: pip list --verbose
+
+      - name: Import the package
+        run: python -c "import jaxsim"
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            conf: &conf
+              - 'pyproject.toml'
+              - 'setup.cfg'
+              - 'setup.py'
+            src: &src
+              - 'src/**'
+            tests: &tests
+              - 'tests/**'
+            all:
+              - *conf
+              - *src
+              - *tests
+
+      - name: Install 'gz sdf' system command
+        if: |
+          contains(matrix.os, 'ubuntu') &&
+          (github.event_name != 'pull_request' ||
+           steps.changes.outputs.all == 'true')
+        run: |
+          sudo apt-get update
+          sudo apt-get install lsb-release wget gnupg
+          sudo wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends libsdformat13 gz-tools2
+
+      - name: Run the Python tests
+        if: |
+          contains(matrix.os, 'ubuntu') &&
+          (github.event_name != 'pull_request' ||
+           steps.changes.outputs.all == 'true')
+        run: pytest
+        env:
+          # https://github.com/pytest-dev/pytest/issues/7443#issuecomment-656642591
+          PY_COLORS: "1"
+          JAX_PLATFORM_NAME: cpu
+
+  publish:
+    name: Publish to PyPI
+    needs: test
+    runs-on: ubuntu-22.04
+    permissions:
+        id-token: write
+
+    steps:
+
+      - name: Download Python packages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          name: dist
+
+      - name: Inspect dist folder
+        run: ls -lah dist/
+
+      - name: Publish to PyPI
+        if: |
+          github.repository == 'ami-iit/jaxsim' &&
+          ((github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+           (github.event_name == 'release'))
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
