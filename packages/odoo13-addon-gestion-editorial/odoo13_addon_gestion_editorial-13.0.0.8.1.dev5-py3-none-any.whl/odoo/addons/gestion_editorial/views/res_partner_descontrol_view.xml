@@ -1,0 +1,46 @@
+<odoo>
+    <record id="res_partner_descontrol_form_view" model="ir.ui.view">
+      <field name="name">res.partner.descontrol.form.view</field>
+      <field name="model">res.partner</field>
+      <field name="inherit_id" ref="base.view_partner_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='company_type']" position="after">
+            <field name="is_author"/>
+            <label for="is_author"/>
+        </xpath>
+        <xpath expr="//field[@name='type']" position="before">
+            <field name="cliente_num"/>
+        </xpath>
+        <xpath expr="//field[@name='vat']" position="attributes">
+            <attribute name="string">NIF</attribute>
+        </xpath>
+        <xpath expr="//span[hasclass('o_vat_label')]" position="replace">
+            <span class="o_vat_label">NIF</span>
+        </xpath>
+        <xpath expr="//field[@name='vat']" position="after">
+            <field name="contact_type" widget="many2many_tags"/>
+        </xpath>
+        <xpath expr="//field[@name='property_supplier_payment_term_id']" position="after">
+            <field name="purchase_liq_pricelist"/>
+        </xpath>
+        <xpath expr="//field[@name='purchase_liq_pricelist']" position="after">
+            <field name="default_purchase_type"/>
+        </xpath>
+         <xpath expr="//field[@name='contact_type']" position="after">
+            <div>
+                <button name="export_sales_deposit" type="object"
+                        string="Exportar depósito de ventas" class="oe_highlight"
+                        icon="fa-download" style="margin-bottom: 10px; margin-top: 10px"/>
+                <button name="export_purchases_deposit" type="object" default_focus="1"
+                        string="Exportar depósito de compras" class="oe_highlight"
+                        icon="fa-download"/>
+            </div>           
+        </xpath>
+         <!-- <xpath expr="//group[@name='sale']" position="attributes">
+            <attribute name="attrs">{'invisible': [('customer_rank' , '=', 0)]}</attribute>
+            <attribute name="modifiers">{'invisible': [('customer_rank' , '=', 0)]}</attribute>
+        </xpath> -->
+      </field>
+
+    </record>
+</odoo>

@@ -1,0 +1,51 @@
+<odoo>
+  <data>
+    <template id="report_invoice_document_descontrol_view" inherit_id="account.report_invoice_document">
+
+      <xpath expr="//t[@t-set='colspan']" position="replace">
+          <t t-set="colspan" t-value="8"/>
+      </xpath>
+
+      <xpath expr="//th[@name='th_description']" position="before">
+        <th name="th_isbn" class="text-left"><span>Código barras / ISBN</span></th>
+      </xpath>
+
+      <xpath expr="//th[@name='th_priceunit']" position="before">
+        <th name="th_isbn" class="text-left"><span>PVP</span></th>
+      </xpath>
+
+      <xpath expr="//th[@name='th_taxes']" position="before">
+        <th name="th_desc_tarifa" class="text-right"><span>% Desc Tarifa</span></th>
+      </xpath>
+
+      <xpath expr="//td[@name='account_invoice_line_name']" position="before">
+        <td name="account_invoice_line_isbn"><span t-field="line.product_barcode"/></td>
+      </xpath>
+
+      <xpath expr="//td[@name='account_invoice_line_name']/following-sibling::td[1]" position="after">
+        <td name="account_invoice_line_product_pvp"><span t-field="line.product_id.list_price"/></td>
+      </xpath>
+
+      <xpath expr="//span[@id='line_tax_ids']/parent::*" position="before">
+        <td class="text-right">
+          <t t-set="descuento_tarifa" t-value="((line.product_id.list_price != 0) and ((line.product_id.list_price - line.price_unit) / line.product_id.list_price) * 100 or 0)"/>
+          <span class="text-nowrap" t-esc="descuento_tarifa" t-options='{"widget": "float", "precision": 2}'/>     
+        </td> 
+      </xpath>
+
+      <xpath expr="//h2" position="replace">
+        <h2>
+            <span t-if="o.type == 'out_invoice' and o.state == 'posted'">Invoice</span>
+            <span t-if="o.type == 'out_invoice' and o.state == 'draft'">Draft Invoice</span>
+            <span t-if="o.type == 'out_invoice' and o.state == 'cancel'">Cancelled Invoice</span>
+            <span t-if="o.type == 'out_refund' and not o.is_sales_deposit_return">Credit Note</span>
+            <span t-if="o.type == 'in_refund' and not o.is_sales_deposit_return">Vendor Credit Note</span>
+            <span t-if="o.type == 'in_invoice'">Vendor Bill</span>
+            <span t-if="o.is_sales_deposit_return">Albarán de devolución</span>
+            <span t-if="o.name != '/'" t-field="o.name"/>
+        </h2>
+      </xpath>
+
+    </template>
+  </data>
+</odoo>

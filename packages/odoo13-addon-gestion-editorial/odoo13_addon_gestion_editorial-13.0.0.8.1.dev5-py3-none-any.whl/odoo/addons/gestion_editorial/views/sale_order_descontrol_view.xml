@@ -1,0 +1,72 @@
+<odoo>
+    <record id="sale_order_form_descontrol_view" model="ir.ui.view">
+      <field name="name">sale.order.descontrol.form.view</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.view_order_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//page[@name='order_lines']/field[@name='order_line']/form/group/group/field[@name='product_id']" position="after">
+          <field name="product_barcode"/>
+        </xpath>
+        <xpath expr="//page[@name='order_lines']/field[@name='order_line']/tree/field[@name='product_id']" position="after">
+           <field name="product_barcode"/>
+        </xpath>
+        <xpath expr="//page[@name='order_lines']/field[@name='order_line']/form/group/group/field[@name='price_unit']" position="after">
+          <field name="product_list_price"/>
+        </xpath>
+        <xpath expr="//page[@name='order_lines']/field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+           <field name="product_list_price"/>
+        </xpath>
+
+        <xpath expr="//field[@name='partner_id']" position="after">
+            <field name="is_deposit_sale_order" invisible="1"/>
+            <field name="is_client_default_pricelist" invisible="1"/>
+        </xpath>
+
+        <!-- Hide Create Invoice button for deposit sales ss-->
+        <xpath expr="//button[@name='%(sale.action_view_sale_advance_payment_inv)d' and contains(@class, 'btn-primary')]" position="attributes">
+            <attribute name="attrs">{'invisible': ['|', ('invoice_status', '!=', 'to invoice'), ('is_deposit_sale_order', '=', True)]}</attribute>
+        </xpath>
+        <xpath expr="//button[@name='%(sale.action_view_sale_advance_payment_inv)d' and not(contains(@class, 'btn-primary'))]" position="attributes">
+            <attribute name="attrs">{'invisible': ['|','|',('invoice_status', '!=', 'no'), ('state', '!=', 'sale'), ('is_deposit_sale_order', '=', True)]}</attribute>
+        </xpath>
+
+
+        <!-- Add confirm dialog when client default pricelist != sale order pricelist -->
+        <xpath expr="//button[@name='action_confirm']" position="replace">
+        </xpath>
+
+        <xpath expr="//button[@name='action_confirm']" position="replace">
+          <button name="action_confirm" 
+                  string="Confirm" 
+                  confirm="La tarifa de esta venta es diferente a la tarifa que tiene este cliente por defecto. ¿Deseas continuar?"
+                  type="object"
+                  attrs="{'invisible': ['|', ('state', 'not in', ['draft']), 
+                                              ('is_client_default_pricelist', '=', True)]}"/>
+
+          <button name="action_confirm" 
+                  string="Confirm"
+                  type="object"
+                  attrs="{'invisible': ['|', ('state', 'not in', ['draft']), 
+                                              ('is_client_default_pricelist', '!=', True)]}"/>
+        </xpath>
+
+        <!-- View mods for (i) function in sale order line -->
+        <xpath expr="//field[@name='virtual_available_at_date']" position="after">
+          <field name="in_stock_qty" invisible="1"/>
+          <field name="in_distribution_qty" invisible="1"/>
+        </xpath>
+        <xpath expr="//widget[@name='qty_at_date_widget']" position="replace">
+          <widget name="sale_order_widget" width="20px"/>
+        </xpath>
+
+      </field>
+    </record>
+
+    <!-- View mod for (i) function in sale order line -->
+    <template id="sale_order_line_view_list_editorial" name="sale.order.line.view.list" inherit_id="web.assets_backend">
+        <xpath expr="//script[@src='/sale_stock/static/src/js/qty_at_date_widget.js']" position="replace">
+            <script type="text/javascript" src="/gestion_editorial/static/src/js/sale_order_widget.js"></script>
+        </xpath>
+    </template>
+
+</odoo>
