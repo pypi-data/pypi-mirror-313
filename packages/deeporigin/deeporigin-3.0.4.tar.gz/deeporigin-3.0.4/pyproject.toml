@@ -1,0 +1,125 @@
+[project]
+name = "deeporigin"
+description = "Command line tool and Python client for working with Deep Origin"
+authors = [
+    {name = "Deep Origin", email = "support@deeporigin.com"},
+]
+readme = "README.md"
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "cement >= 3",
+    "confuse",
+    "pydantic >= 2.5.0",
+    "python-crontab",
+    "python-dotenv",
+    "pyyaml",
+    "requests",
+    "termcolor",
+    "validators",
+    "pandas",
+    "beartype",
+    "tabulate",
+    "filetype",
+    "httpx",
+    "deeporigin-data-sdk==0.1.0a29",
+    "humanize",
+    "packaging",
+    "diskcache",
+    "tqdm",
+    "pyjwt",
+    "cryptography",
+    "python-box",
+    "do-sdk-platform==1.0.0",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+lint = [
+    "ruff",
+]
+test = [
+    "pytest",
+    "parameterized",
+    "coverage",
+    "interrogate",
+    "pytest-xdist",
+]
+dev = [
+    "ipykernel",
+    "jupyter-black",
+    "icecream",
+]
+docs = [
+    "mkdocs", 
+    "mkdocs-material-extensions", 
+    "mkdocs-material", 
+    "mkdocstrings",
+    "mkdocstrings-python",
+    "black"
+]
+plots = ["bokeh"]
+
+[tool.setuptools]
+package-dir = {"deeporigin" = "src"}
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {file = ["src/VERSION"]}
+
+[project.scripts]
+deeporigin = "deeporigin.cli:main"
+
+[build-system]
+requires = [
+  "setuptools >= 40.9.0",
+]
+build-backend = "setuptools.build_meta"
+
+
+[tool.ruff]
+include = [
+    "**/src/**/*.py",
+    "**/tests/**/*.py",
+]
+
+
+
+[tool.ruff.lint]
+ignore = ["E203", "E266", "E501"]
+
+
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+
+[tool.distutils.bdist_wheel]
+universal = true
+
+[tool.coverage.run]
+omit = [
+    "src/data_hub/client.py",
+    "tests/*.py",
+]
+
+
+[tool.interrogate]
+fail-under = 100
+exclude = ["setup.py", "docs", "build","tests","variables","conftest.py"]
+ignore-init-method = true
+ignore-init-module = true
+ignore-magic = true
+ignore-semiprivate = true
+ignore-private = true
+ignore-property-decorators = true
+ignore-nested-functions = true
+ignore-nested-classes = true
+ignore-setters = false
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+color = true
