@@ -1,0 +1,110 @@
+# This workflow is executed as part of CI/CD on Github.
+# It runs OpenDAPI to validate and suggest improvements to data documentation.
+
+name: {{ org_name }} OpenDAPI CI
+on:
+  # Invoke for every Pull Request and push to main branch
+  pull_request:
+  push:
+    branches:
+      - '{{ mainline_branch_name }}'
+
+concurrency:
+{%- raw %}
+  # set the concurrency group at the workflow+pr/branch level so they dont conflict
+  group: ${{ github.workflow }}-${{ (github.event.pull_request && github.event.pull_reqest.number) || github.ref }}
+  # for PRs, we want to cancel in progress, so if number is not null, we set to true
+  # for pushes (mainline branch), we want to allow multiple runs, but have them queued one
+  # at a time, and so cancel-in-progress is set to false
+  cancel-in-progress: ${{ !!github.event.pull_request }}
+{%- endraw %}
+
+env:
+{%- raw %}
+  GITHUB_BRANCH: ${{ github.event.pull_request.head.ref || github.ref }}
+  PYPI_INDEX_URL: ${{ vars.OPENDAPI_PINNED_VERSION && 'https://test.pypi.org/simple/' || 'https://pypi.org/simple/' }}
+  OPENDAPI_VERSION: ${{ vars.OPENDAPI_PINNED_VERSION || 'opendapi' }}
+  WOVEN_INTEGRATION_MODE: ${{ vars.WOVEN_INTEGRATION_MODE || 'active' }}
+  WOVEN_CONFIGURATION: ${{ vars.WOVEN_CONFIGURATION }}
+{%- endraw %}
+
+{% raw %}
+# Allows this action to create PRs to suggest DAPI improvements
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        # Fetch all branches and history to help create a suggestion PR
+        fetch-depth: 0
+        # Checkout the working branch for PRs instead of merge branch
+        ref: ${{ env.GITHUB_BRANCH }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Run OpenDAPI generation prerequisites
+      run: |
+        echo "Running DAPI generation prerequisites"
+        # example: run DBT docs generation, pynamodb tests, etc
+        # cd /path/to/dbt/package
+        # make requirements
+        # dbt run --target ci --profiles-dir .github/dbt
+        # dbt docs generate --target ci --profiles-dir .github/dbt
+
+    - name: OpenDAPI CI
+      shell: bash
+      run: |
+        # Back to root of the repository
+        cd ${{ github.workspace }}
+        pip install --index-url ${{ env.PYPI_INDEX_URL }}                   \
+                    --extra-index-url https://pypi.org/simple               \
+                    ${{ env.OPENDAPI_VERSION }}
+        opendapi run
+{% endraw %}
+
+      env:
+        DAPI_SERVER_HOST: '{{ dapi_server_hostname }}'
+        MAINLINE_BRANCH_NAME: "{{ mainline_branch_name }}"
+
+{% raw %}
+        # Store credentials in Github as a secret
+        DAPI_SERVER_API_KEY: ${{ secrets.DAPI_SERVER_API_KEY }}
+
+        # Configure when DAPIs should be registered.
+        # PRs do not register but only validate and provide suggestions
+        REGISTER_ON_MERGE_TO_MAINLINE: True
+
+        # Github token to create PRs for DAPI suggestions
+        GITHUB_TOKEN: ${{ github.token }}
+
+        # Other github environment variables needed for opendapi
+        GITHUB_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+{% endraw %}
+{%- if include_dbt %}
+  {% raw %}
+        # DBT Cloud settings (used only if dbt is enabled)
+        # The Github admin has to configure the following repo secrets
+        # (optional) the URL of the DBT Cloud instance
+        DAPI_DBT_CLOUD_URL: ${{ vars.DAPI_DBT_CLOUD_URL }}
+
+        # (optional) - a read-only token is sufficient
+        DAPI_DBT_CLOUD_API_TOKEN: ${{ secrets.DAPI_DBT_CLOUD_API_TOKEN }}
+
+        # (optional) - retry count for fetching dbt artifacts
+        DAPI_DBT_CLOUD_RETRY_COUNT: ${{ github.event_name == 'push' && 1 || vars.DAPI_DBT_CLOUD_RETRY_COUNT }}
+
+        # (optional) - retry interval for fetching dbt artifacts
+        DAPI_DBT_CLOUD_RETRY_INTERVAL: ${{ github.event_name == 'push' && 1 || vars.DAPI_DBT_CLOUD_RETRY_INTERVAL }}
+  {% endraw %}
+{%- endif %}
