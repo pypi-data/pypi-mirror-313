@@ -1,0 +1,127 @@
+[build-system]
+requires = [
+    "setuptools>=69",
+    "setuptools_scm>=8",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "larch6"
+dynamic = ["version"]
+authors = [
+    {name = "Jeff Newman", email = "jeff@driftless.xyz"},
+]
+dependencies = [
+    "numpy >=1.19",
+    "pandas >=1.5",
+    "pyarrow",
+    "xarray",
+    "numba >=0.60.0",
+    "numexpr",
+    "filelock",
+    "dask",
+    "networkx",
+    "addicty",
+    "xmle >=0.1.25",
+    "rich",
+    "sparse",
+    "scipy",
+    "Jinja2",
+    # sharrow is not here because it is part of the wheel for larch6
+]
+readme = "README.md"
+requires-python = ">= 3.10"
+
+[project.optional-dependencies]
+# development dependency groups
+test = [
+    "pytest >=4.6",
+    "jax",
+    "tables",
+    "geopandas",
+    "matplotlib",
+    "seaborn",
+    "nbmake",
+    "xlsxwriter",
+    "zarr",
+    "tabulate",
+    "altair",
+    "vl-convert-python",
+    "xlogit",
+    "pydot",
+]
+jax = [
+    "jax",
+]
+
+[tool.setuptools.packages.find]
+where = ["src", "subs/sharrow"]
+include = ["larch*", "sharrow*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+data_warehouse = ["*.csv.gz", "*.omx", "*.zarr.zip", "*.parquet"]
+
+[tool.setuptools_scm]
+fallback_version = "6.0"
+write_to = "src/larch/_version.py"
+
+[tool.isort]
+profile = "black"
+skip_gitignore = true
+float_to_top = true
+default_section = "THIRDPARTY"
+known_first_party = "larch"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-v --nbmake --disable-warnings --ignore=sandbox"
+testpaths = [
+    "tests",
+    "docs/examples",
+    "docs/user-guide",
+]
+
+[tool.ruff]
+fix = true
+line-length = 88
+target-version = "py310"
+extend-include = ["*.ipynb"]
+extend-exclude = ["sandbox"]
+
+[tool.ruff.lint]
+ignore = ["B905", "D1", "E731", "UP038"]
+select = [
+    "F", # Pyflakes
+    "E", # Pycodestyle Errors
+    "W", # Pycodestyle Warnings
+    "I", # isort
+    "UP", # pyupgrade
+    "D", # pydocstyle
+    "B", # flake8-bugbear
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = [
+    "E402", # allow imports to appear anywhere in Jupyter Notebooks
+    "E501", # allow long lines in Jupyter Notebooks
+    "F811", # allow redefinition of unused variables in Jupyter Notebooks
+    "I002", # allow required imports to be missing
+]
+"tests/*.py" = [
+    "E501", # allow long lines in tests
+]
+"docs/*.py" = [
+    "I002", # allow required imports to be missing
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["larch"]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 105
+ignore-overlong-task-comments = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
