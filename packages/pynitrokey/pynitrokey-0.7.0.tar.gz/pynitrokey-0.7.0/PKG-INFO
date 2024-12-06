@@ -1,0 +1,125 @@
+Metadata-Version: 2.3
+Name: pynitrokey
+Version: 0.7.0
+Summary: Python Library for Nitrokey devices.
+Author-email: Nitrokey <pypi@nitrokey.com>
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Classifier: License :: OSI Approved :: MIT License
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: cffi
+Requires-Dist: click >=8.0, <=8.1.3
+Requires-Dist: cryptography >=41.0.4,<44
+Requires-Dist: ecdsa
+Requires-Dist: fido2 >=1.1.2,<2
+Requires-Dist: intelhex
+Requires-Dist: nkdfu
+Requires-Dist: nitrokey ~=0.2.1
+Requires-Dist: pyusb
+Requires-Dist: requests
+Requires-Dist: tqdm
+Requires-Dist: tlv8
+Requires-Dist: click-aliases
+Requires-Dist: semver
+Requires-Dist: nethsm >=1.2.1, <2
+Requires-Dist: black >=22.1.0,<23 ; extra == "dev"
+Requires-Dist: flake8 ; extra == "dev"
+Requires-Dist: flit >=3.2,<4 ; extra == "dev"
+Requires-Dist: ipython ; extra == "dev"
+Requires-Dist: isort ; extra == "dev"
+Requires-Dist: mypy >=1.4,<1.5 ; extra == "dev"
+Requires-Dist: pyinstaller ~=6.5.0 ; extra == "dev"
+Requires-Dist: pyinstaller-versionfile ==2.1.1 ; extra == "dev" and ( sys_platform=='win32')
+Requires-Dist: types-requests ; extra == "dev"
+Requires-Dist: types-tqdm ; extra == "dev"
+Requires-Dist: pytest ; extra == "dev"
+Requires-Dist: pytest-reporter-html1 ; extra == "dev"
+Requires-Dist: oath ; extra == "dev"
+Requires-Dist: pyscard >=2.0.0,<3 ; extra == "pcsc"
+Project-URL: Source, https://github.com/Nitrokey/pynitrokey
+Provides-Extra: dev
+Provides-Extra: pcsc
+
+# pynitrokey
+
+A command line interface for the Nitrokey FIDO2, Nitrokey Start, Nitrokey 3 and NetHSM.
+
+## Quickstart
+
+```
+$ pipx install pynitrokey
+$ nitropy --help
+```
+
+## Documentation
+
+The user documentation for the `nitropy` CLI is available on [docs.nitrokey.com](https://docs.nitrokey.com/software/nitropy/index.html). See also the product documentation for more information on the available commands:
+- [Nitrokey 3](https://docs.nitrokey.com/nitrokey3/index.html)
+- [Nitrokey FIDO2](https://docs.nitrokey.com/fido2/index.html)
+- [Nitrokey Start](https://docs.nitrokey.com/start/index.html)
+- [NetHSM](https://docs.nitrokey.com/nethsm/index.html)
+
+### Switching Nitrokey Start identities
+
+#### Alternative MI switching method
+
+<details>
+
+`pynitrokey` installation is not always possible, hence describing below alternative method to change the Identity on the Nitrokey Start. It suffices to have any CCID application installed, and send the following APDU `00 85 00 {ID}` (hex), where `ID` is in range `[0;2]`. After receiving this command Nitrokey Start will reboot with the selected identity.
+
+Here is how to do it using GnuPG:
+```text
+# Setting ID to 2
+$ gpg-connect-agent --hex "scd apdu  00 85 00 02" /bye
+ERR 65539 Unknown version in packet <Unspecified source>
+
+# Alternative error messsage
+ERR 65572 Bad certificate <Unspecified source>
+```
+
+The error message here is expected due to immediate reboot of the device, and with losing the connection.
+
+When the ID change is attempted to be done immediately, the following response could be received:
+```
+ERR 100663406 Card removed <SCD>
+```
+To restore the communication, either kill the `gpg-agent` or run `gpg --card-status` again.
+
+Tip: alternative `gpg-connect-agent reloadagent /bye` is not sufficient.
+</details>
+
+## Compatibility
+
+`nitropy` requires Python 3.9 or later.
+
+## Development
+
+Information for developers and contributors can be found in the [Developer Guide](./docs/developer-guide.rst).
+
+## Contributors
+
+`pynitrokey` development has been supported by these contributors:
+- [@Laborratte5](https://github.com/Laborratte5)
+- [@runcom](https://github.com/runcom)
+
+## Maintainers
+
+Current maintainers can be found in [MAINTAINERS.md](MAINTAINERS.md) file.
+
+## License
+
+Licensed similarly to upstream, under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or
+  http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
+

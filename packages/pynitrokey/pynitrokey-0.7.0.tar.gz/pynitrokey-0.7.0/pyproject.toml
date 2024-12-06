@@ -1,0 +1,145 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "pynitrokey"
+authors = [
+  { name = "Nitrokey", email = "pypi@nitrokey.com" },
+]
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "cffi",
+  "click >=8.0, <=8.1.3",
+  "cryptography >=41.0.4,<44",
+  "ecdsa",
+  "fido2 >=1.1.2,<2",
+  "intelhex",
+  "nkdfu",
+  "nitrokey ~=0.2.1",
+  "pyusb",
+  "requests",
+  "tqdm",
+  "tlv8",
+  "click-aliases",
+  "semver",
+  "nethsm >=1.2.1, <2",
+]
+dynamic = ["version", "description"]
+
+[project.optional-dependencies]
+dev = [
+  "black >=22.1.0,<23",
+  "flake8",
+  "flit >=3.2,<4",
+  "ipython",
+  "isort",
+  "mypy >=1.4,<1.5",
+  "pyinstaller ~=6.5.0",
+  "pyinstaller-versionfile ==2.1.1; sys_platform=='win32'",
+  "types-requests",
+  "types-tqdm",
+  "pytest",
+  "pytest-reporter-html1",
+  "oath"
+]
+pcsc = ["pyscard >=2.0.0,<3"]
+
+[project.urls]
+Source = "https://github.com/Nitrokey/pynitrokey"
+
+[project.scripts]
+nitropy = "pynitrokey.cli:main"
+
+[tool.black]
+target-version = ["py39"]
+
+[tool.isort]
+py_version = "39"
+profile = "black"
+
+[tool.mypy]
+mypy_path = "stubs"
+show_error_codes = true
+python_version = "3.9"
+strict = true
+
+# disable strict checks for old code, see
+# - https://github.com/python/mypy/issues/11401
+# - https://mypy.readthedocs.io/en/stable/existing_code.html#introduce-stricter-options
+[[tool.mypy.overrides]]
+module = [
+    "pynitrokey.cli",
+    "pynitrokey.cli.pro",
+    "pynitrokey.cli.program",
+    "pynitrokey.cli.start",
+    "pynitrokey.cli.storage",
+    "pynitrokey.cli.update",
+    "pynitrokey.conftest",
+    "pynitrokey.libnk",
+    "pynitrokey.start.*",
+    "pynitrokey.test_secrets_app",
+]
+check_untyped_defs = false
+disallow_any_generics = false
+disallow_incomplete_defs = false
+disallow_subclassing_any = false
+disallow_untyped_calls = false
+disallow_untyped_decorators = false
+disallow_untyped_defs = false
+no_implicit_reexport = false
+strict_concatenate = false
+strict_equality = false
+warn_unused_ignores = false
+warn_return_any = false
+
+# libraries without annotations
+[[tool.mypy.overrides]]
+module = [
+    "cbor.*",
+    "cffi.*",
+    "click.*",
+    "ecdsa.*",
+    "intelhex.*",
+    "nacl.*",
+    "nkdfu.*",
+    "ruamel.*",
+    "serial.*",
+    "usb.*",
+    "usb1.*",
+    "tlv8.*",
+    "pytest.*",
+    "click_aliases.*",
+    "smartcard.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+log_cli = false
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)3s] %(message)s"
+log_cli_date_format = "%H:%M:%S"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+[tool.ruff]
+line-length = 120
+exclude = [
+    "venv",
+    "start",
+    "nk3",
+]
+target-version = "py39"
