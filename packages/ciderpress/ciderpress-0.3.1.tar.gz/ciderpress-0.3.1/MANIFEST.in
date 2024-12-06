@@ -1,0 +1,22 @@
+include MANIFEST.in
+include README.md setup.py LICENSE NOTICE
+
+include ciderpress/data/*.npy
+
+prune pyscf/lib/build
+include ciderpress/lib/*.so
+include ciderpress/lib/*.so*
+recursive-include ciderpress/lib/deps *.so
+recursive-include ciderpress/lib/deps *.so.*
+
+# macos dynamic libraries
+include ciderpress/lib/*.dylib
+
+# source code
+recursive-include ciderpress/lib *.c *.h *.h.in CMakeLists.txt
+recursive-exclude ciderpress/lib *.cl
+
+global-exclude *.py[cod]
+
+# docs
+recursive-exclude docs/
