@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "babylab"
+dynamic = ["version"]
+description = 'A GUI for the SJD Babylab REDCap database'
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "gongcastro", email = "gongarciacastro@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Operating System :: Microsoft :: Windows"
+]
+dependencies = [
+  "pandas",
+  "requests",
+  "python-dotenv",
+]
+
+[project.urls]
+Documentation = "https://github.com/gongcastro/babylab-redcap#readme"
+Issues = "https://github.com/gongcastro/babylab-redcap/issues"
+Source = "https://github.com/gongcastro/babylab-redcap"
+
+[tool.hatch.version]
+path = "babylab/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:babylab tests}"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  ".env",
+  ".gitignore",
+]
+
+[tool.coverage.run]
+source_pkgs = ["babylab", "tests"]
+branch = true
+parallel = true
+omit = [
+  "babylab/__about__.py",
+]
+
+[tool.coverage.paths]
+babylab = ["babylab", "*/babylab-redcap/babylab"]
+tests = ["tests", "*/babylab/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
