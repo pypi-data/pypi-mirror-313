@@ -1,0 +1,131 @@
+[project]
+name = "rio-ui"
+description = "Build modern Websites and Apps just with Python"
+dynamic = ["version"]
+authors = [
+    { name = "Jakob Pinterits", email = "jakob.pinterits@gmail.com" },
+    { name = "Paul Pinterits", email = "rawing7@gmail.com" },
+]
+dependencies = [
+    "crawlerdetect~=0.1.7",
+    "fastapi~=0.110",
+    "fuzzywuzzy~=0.18",
+    "gitignore-parser==0.1.11",
+    "imy[docstrings]>=0.4.0",
+    "introspection~=1.9.2",
+    "isort~=5.13",
+    "keyring~=24.3",
+    "langcodes>=3.4.0",
+    "narwhals>=1.12.1",
+    "ordered-set>=4.1.0",
+    "path-imports>=1.1.2",
+    "pillow~=10.2",
+    "python-levenshtein~=0.23",
+    "python-multipart~=0.0.6",
+    "pytz~=2024.1",
+    "revel~=0.9.1",
+    "timer-dict~=1.0",
+    "tomlkit~=0.12",
+    "typing-extensions>=4.5",
+    "unicall~=0.1.5",
+    "uniserde~=0.3.14",
+    "uvicorn[standard]~=0.29.0",
+    "watchfiles~=0.21",
+    "yarl>=1.9",
+]
+requires-python = ">= 3.10"
+readme = "README.md"
+license.file = "LICENSE.txt"
+keywords = [
+    "web-development",
+    "web-framework",
+    "framework",
+    "functional",
+    "type-safe",
+    "typing",
+    "typed",
+    "react",
+    "web",
+    "app",
+    "user-interface",
+    "web-app",
+    "local-app",
+    "modern",
+    "rio",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.optional-dependencies]
+window = [
+    "aiofiles~=24.1",
+    "copykitten~=1.2",
+    "platformdirs~=4.3",
+    "pywebview[pyside6]>=5.3.2",
+]
+
+[project.urls]
+homepage = "https://rio.dev"
+repository = "https://github.com/rio-labs/rio"
+documentation = "https://rio.dev/docs"
+
+[project.scripts]
+rio = "rio.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+dev-dependencies = [
+    "aiofiles>=23.2.1",
+    "alt-pytest-asyncio~=0.7.2",
+    "coverage~=7.2",
+    "matplotlib>=3.8",
+    "pandas>=2.2",
+    "playwright>=1.44",
+    "plotly>=5.22",
+    "polars>=0.20",
+    "pre-commit~=3.1",
+    "pytest~=8.2.1",
+    "pywebview",
+    "requests~=2.31",
+    "ruff>=0.4.7",
+    "selenium>=4.22",
+    "hatch>=1.11.1",
+    "pyfakefs>=5.7.1",
+]
+managed = true
+
+[tool.rye.scripts]
+build = { call = "scripts.build_frontend:build" }
+dev-build = { call = "scripts.build_frontend:dev_build" }
+publish = { call = "scripts.publish_new_release:main" }
+
+[tool.hatch.version]
+path = "rio/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["rio"]
+artifacts = ["rio/frontend files/*"]
+
+[tool.hatch.build.targets.sdist]
+artifacts = ["rio/frontend files/*"]
+
+[tool.ruff]
+line-length = 80
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::rio.warnings.RioPotentialMistakeWarning"]
