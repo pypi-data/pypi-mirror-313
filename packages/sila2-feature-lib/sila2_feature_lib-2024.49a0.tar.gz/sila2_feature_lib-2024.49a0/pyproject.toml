@@ -1,0 +1,82 @@
+[project]
+name = "sila2-feature-lib"
+version = "v2024.49a0"
+authors = [
+  { name="Erik Trygg", email="etrg@novonordisk.com" },
+]
+description = "SiLA2 feature library"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+]
+
+
+
+[project.optional-dependencies]
+sila2 = [
+    "sila2",
+]
+
+unitelabs = [
+    "unitelabs-cdk >= 0.2.7",
+]
+
+httpx = [
+    "httpx"
+]
+
+dev = [
+    "black == 24.4.2",
+    "bumpver",
+    "flake8 == 7.0.0",
+    "isort == 5.13.2",
+]
+
+test = [
+    "pytest",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/Firefly78/sila2-feature-lib"
+"Repository" = "https://github.com/Firefly78/sila2-feature-lib"
+"Bug Tracker" = "https://github.com/Firefly78/sila2-feature-lib/issues"
+
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["sila2_feature_lib*"]
+
+[tool.setuptools.package-data]
+"sila2_feature_lib" = [
+    "*/*/*.sila.xml",
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.bumpver]
+current_version = "v2024.49a0"
+version_pattern = "vYYYY.WW[PYTAGNUM]"
+commit_message = "bump version {old_version} -> {new_version}"
+tag_message = "{new_version}"
+tag_scope = "default"
+commit = true
+tag = true
+push = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+    'version = "{version}"',
+]

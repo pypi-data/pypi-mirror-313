@@ -1,0 +1,88 @@
+Metadata-Version: 2.1
+Name: sila2-feature-lib
+Version: 2024.49a0
+Summary: SiLA2 feature library
+Author-email: Erik Trygg <etrg@novonordisk.com>
+License: MIT
+Project-URL: Homepage, https://github.com/Firefly78/sila2-feature-lib
+Project-URL: Repository, https://github.com/Firefly78/sila2-feature-lib
+Project-URL: Bug Tracker, https://github.com/Firefly78/sila2-feature-lib/issues
+Classifier: Development Status :: 3 - Alpha
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+License-File: AUTHORS.rst
+Provides-Extra: sila2
+Requires-Dist: sila2; extra == "sila2"
+Provides-Extra: unitelabs
+Requires-Dist: unitelabs-cdk>=0.2.7; extra == "unitelabs"
+Provides-Extra: httpx
+Requires-Dist: httpx; extra == "httpx"
+Provides-Extra: dev
+Requires-Dist: black==24.4.2; extra == "dev"
+Requires-Dist: bumpver; extra == "dev"
+Requires-Dist: flake8==7.0.0; extra == "dev"
+Requires-Dist: isort==5.13.2; extra == "dev"
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+
+# SiLA2 Feature Library
+
+## Introduction
+
+This library provides a set of SiLA2 feature templates that can be used to create SiLA2-compliant devices.
+It fills two use cases:
+
+1. Make it simple to add features to any SiLA server, with standard implementations that does what you want in 90% of the cases. :)
+2. Or just get the feature definition and implement it yourself.
+
+## Example
+
+Example using the unitelabs framework.
+
+Install sila2-feature-library, with the `unitelabs` dependency.
+
+```bash
+$ pip install sila2-feature-lib[unitelabs]
+```
+
+Import and add a feature from the library to your SiLA server.
+
+```python
+from unitelabs import Connector
+from sila2_feature_lib.simulation.v001_0.feature_ul import SimulatorController
+
+# Create SiLA server
+app = Connector({...})
+
+# Append feature to SiLA server
+app.register(SimulatorController())
+
+# Run server
+asyncio.get_event_loop().run_until_complete(app.start())
+```
+
+That's it. You now have a running SiLA server with the default implementation of the `SimulatorController` feature running.
+
+## Resources
+
+- [SiLA Standard Homepage (https://sila-standard.com/)](https://sila-standard.com/)
+- [SiLA on GitLab (https://gitlab.com/SiLA2)](https://gitlab.com/SiLA2)
+
+## Library Structure
+
+TBD
+
+## Change log
+
+### v2024.46
+
+- Updated all features from the old `unitelabs-connector-framework` to the newer `unitelabs-cdk` package
+- Fixed `pyyaml` to be an optional requirement when using the `ResourcesService` feature
+
+### v2024.40 and older
+
+- See [Releases](https://github.com/Firefly78/sila2-feature-lib/releases) for details on older versions
