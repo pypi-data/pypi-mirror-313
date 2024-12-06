@@ -1,0 +1,219 @@
+"""Representation of coordinates in different systems."""
+
+__all__ = ["AbstractAcc"]
+
+from abc import abstractmethod
+from functools import partial
+from typing import TYPE_CHECKING, Any, TypeVar
+
+import equinox as eqx
+import jax
+from quax import register
+
+import quaxed.numpy as jnp
+import unxt as u
+from dataclassish import field_items
+from quaxed import lax as qlax
+
+from .base import AbstractVector
+from .base_pos import AbstractPos
+from .base_vel import AbstractVel
+from coordinax._src.utils import classproperty
+
+if TYPE_CHECKING:
+    from typing import Self
+
+AccT = TypeVar("AccT", bound="AbstractAcc")
+
+ACCELERATION_CLASSES: set[type["AbstractAcc"]] = set()
+
+
+class AbstractAcc(AbstractVector):  # pylint: disable=abstract-method
+    """Abstract representation of vector differentials in different systems."""
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Initialize the subclass.
+
+        The subclass is registered.
+        """
+        ACCELERATION_CLASSES.add(cls)
+
+    @classproperty
+    @classmethod
+    @abstractmethod
+    def _cartesian_cls(cls) -> type["AbstractVector"]:
+        """Return the corresponding Cartesian vector class.
+
+        Examples
+        --------
+        >>> import coordinax as cx
+
+        >>> cx.CartesianAcc3D._cartesian_cls
+        <class 'coordinax...CartesianAcc3D'>
+
+        >>> cx.SphericalAcc._cartesian_cls
+        <class 'coordinax...CartesianAcc3D'>
+
+        """
+        # TODO: something nicer than this for getting the corresponding class
+        raise NotImplementedError
+
+    @classproperty
+    @classmethod
+    @abstractmethod
+    def integral_cls(cls) -> type[AbstractVel]:
+        """Return the corresponding vector class.
+
+        Examples
+        --------
+        >>> import coordinax as cx
+
+        >>> cx.RadialAcc.integral_cls.__name__
+        'RadialVel'
+
+        >>> cx.SphericalAcc.integral_cls.__name__
+        'SphericalVel'
+
+        """
+        raise NotImplementedError
+
+    # ===============================================================
+    # Quax
+
+    def aval(self) -> jax.core.ShapedArray:
+        """Return the vector as a JAX array."""
+        raise NotImplementedError
+
+    # ===============================================================
+    # Unary operations
+
+    def __neg__(self) -> "Self":
+        """Negate the vector.
+
+        Examples
+        --------
+        >>> import unxt as u
+        >>> import coordinax as cx
+
+        >>> d2r = cx.RadialAcc.from_([1], "m/s2")
+        >>> -d2r
+        RadialAcc( d2_r=Quantity[...](value=i32[], unit=Unit("m / s2")) )
+
+        >>> d2p = cx.PolarAcc(u.Quantity(1, "m/s2"), u.Quantity(1, "mas/yr2"))
+        >>> negd2p = -d2p
+        >>> negd2p.d2_r
+        Quantity['acceleration'](Array(-1., dtype=float32), unit='m / s2')
+        >>> negd2p.d2_phi
+        Quantity['angular acceleration'](Array(-1., dtype=float32), unit='mas / yr2')
+
+        """
+        return jax.tree.map(jnp.negative, self)
+
+    # ===============================================================
+    # Convenience methods
+
+    @partial(eqx.filter_jit, inline=True)
+    def norm(
+        self, velocity: AbstractVel, position: AbstractPos, /
+    ) -> u.Quantity["speed"]:
+        """Return the norm of the vector."""
+        return self.represent_as(self._cartesian_cls, velocity, position).norm()
+
+
+# ===============================================================
+
+
+@register(jax.lax.mul_p)  # type: ignore[misc]
+def _mul_acc_time(lhs: AbstractAcc, rhs: u.Quantity["time"]) -> AbstractVel:
+    """Multiply the vector by a :class:`unxt.Quantity`.
+
+    Examples
+    --------
+    >>> from quaxed import lax
+    >>> import unxt as u
+    >>> import coordinax as cx
+
+    >>> d2r = cx.RadialAcc(u.Quantity(1, "m/s2"))
+    >>> vec = lax.mul(d2r, u.Quantity(2, "s"))
+    >>> vec
+    RadialVel( d_r=Quantity[...]( value=...i32[], unit=Unit("m / s") ) )
+    >>> vec.d_r
+    Quantity['speed'](Array(2, dtype=int32, ...), unit='m / s')
+
+    >>> (d2r * u.Quantity(2, "s")).d_r
+    Quantity['speed'](Array(2, dtype=int32, ...), unit='m / s')
+
+    """
+    # TODO: better access to corresponding fields
+    return lhs.integral_cls.from_(
+        {k.replace("2", ""): jnp.multiply(v, rhs) for k, v in field_items(lhs)}
+    )
+
+
+@register(jax.lax.mul_p)  # type: ignore[misc]
+def _mul_time_acc(lhs: u.Quantity["time"], rhs: AbstractAcc) -> AbstractVel:
+    """Multiply a scalar by an acceleration.
+
+    Examples
+    --------
+    >>> from quaxed import lax
+    >>> import unxt as u
+    >>> import coordinax as cx
+
+    >>> d2r = cx.RadialAcc(u.Quantity(1, "m/s2"))
+    >>> vec = lax.mul(u.Quantity(2, "s"), d2r)
+    >>> vec
+    RadialVel( d_r=Quantity[...]( value=...i32[], unit=Unit("m / s") ) )
+    >>> vec.d_r
+    Quantity['speed'](Array(2, dtype=int32, ...), unit='m / s')
+
+    """
+    return qlax.mul(rhs, lhs)  # pylint: disable=arguments-out-of-order
+
+
+@register(jax.lax.mul_p)  # type: ignore[misc]
+def _mul_acc_time2(lhs: AbstractAcc, rhs: u.Quantity["s2"]) -> AbstractPos:
+    """Multiply an acceleration by a scalar.
+
+    Examples
+    --------
+    >>> from quaxed import lax
+    >>> import unxt as u
+    >>> import coordinax as cx
+
+    >>> d2r = cx.RadialAcc(u.Quantity(1, "m/s2"))
+    >>> vec = lax.mul(d2r, u.Quantity(2, "s2"))
+    >>> vec
+    RadialPos(r=Distance(value=f32[], unit=Unit("m")))
+    >>> vec.r
+    Distance(Array(2., dtype=float32), unit='m')
+
+    >>> (d2r * u.Quantity(2, "s2")).r
+    Distance(Array(2., dtype=float32), unit='m')
+
+    """
+    # TODO: better access to corresponding fields
+    return lhs.integral_cls.integral_cls.from_(
+        {k.replace("d2_", ""): v * rhs for k, v in field_items(lhs)}
+    )
+
+
+@register(jax.lax.mul_p)  # type: ignore[misc]
+def _mul_time2_acc(lhs: u.Quantity["s2"], rhs: AbstractAcc) -> AbstractPos:
+    """Multiply a scalar by an acceleration.
+
+    Examples
+    --------
+    >>> from quaxed import lax
+    >>> import unxt as u
+    >>> import coordinax as cx
+
+    >>> d2r = cx.RadialAcc(u.Quantity(1, "m/s2"))
+    >>> vec = lax.mul(u.Quantity(2, "s2"), d2r)
+    >>> vec
+    RadialPos(r=Distance(value=f32[], unit=Unit("m")))
+    >>> vec.r
+    Distance(Array(2., dtype=float32), unit='m')
+
+    """
+    return qlax.mul(rhs, lhs)  # pylint: disable=arguments-out-of-order
