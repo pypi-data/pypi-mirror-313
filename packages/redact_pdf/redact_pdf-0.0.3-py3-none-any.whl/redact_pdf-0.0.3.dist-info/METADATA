@@ -1,0 +1,62 @@
+Metadata-Version: 2.1
+Name: redact_pdf
+Version: 0.0.3
+Summary: redact a phrase off a pdf file
+Home-page: https://github.com/levyvix/redact-pdf
+Author: Levy Nunes
+Author-email: levy.vix@gmail.com
+Requires-Python: >=3.9,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: loguru (>=0.7.2,<0.8.0)
+Requires-Dist: pymupdf (>=1.24.14,<2.0.0)
+Project-URL: Documentation, https://levyvix.github.io/redact-pdf/
+Project-URL: Repository, https://github.com/levyvix/redact-pdf
+Description-Content-Type: text/markdown
+
+# redact-pdf
+
+[![Release](https://img.shields.io/github/v/release/levyvix/redact-pdf)](https://img.shields.io/github/v/release/levyvix/redact-pdf)
+[![Build status](https://img.shields.io/github/actions/workflow/status/levyvix/redact-pdf/main.yml?branch=main)](https://github.com/levyvix/redact-pdf/actions/workflows/main.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/levyvix/redact-pdf/branch/main/graph/badge.svg)](https://codecov.io/gh/levyvix/redact-pdf)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/levyvix/redact-pdf)](https://img.shields.io/github/commit-activity/m/levyvix/redact-pdf)
+[![License](https://img.shields.io/github/license/levyvix/redact-pdf)](https://img.shields.io/github/license/levyvix/redact-pdf)
+
+Redact a phrase off a pdf file
+
+- **Github repository**: <https://github.com/levyvix/redact-pdf/>
+- **Documentation** <https://levyvix.github.io/redact-pdf/>
+
+---
+
+## Installation
+
+```bash
+pip install redact-pdf
+```
+
+## Usage
+
+Use the project in a python file
+
+```python
+from redact_pdf.redact import TextRedactor
+
+from pathlib import Path
+
+pdf_file = Path(__file__).parent / "pdf_test.pdf"
+save_path = Path(__file__).parent / "pdf_test_redacted.pdf"
+
+tr = TextRedactor()
+tr.redact_text(
+	file_path=pdf_file,
+	text_to_redact="XXX",
+	output_file_name=save_path,
+)
+```
+
+This will result in a .pdf file called `pdf_test_redacted.pdf` with the phrase `XXX` **removed from every page**.
+
