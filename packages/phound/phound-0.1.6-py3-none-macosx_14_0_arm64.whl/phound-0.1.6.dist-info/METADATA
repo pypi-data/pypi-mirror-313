@@ -1,0 +1,243 @@
+Metadata-Version: 2.1
+Name: phound
+Version: 0.1.6
+Summary: Phound SDK
+Author: Konstantin Seravin
+Author-email: kseravin@freeconferencecall.com
+License: MIT
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: python-dotenv ==1.0.1
+Requires-Dist: pillow ==10.3.0
+
+## Installing
+
+```
+pip install phound
+```
+
+## Usage
+
+Create and fill in `.env` file within your project's directory with:
+
+```
+PERSONAS=<uid1> <uid2> ...
+TOKEN=<token>
+```
+where uid1 uid2 etc. represent personas to listen. If no one specified(or omitted), all personas within an account will be listened to.
+
+Please refer to support@phound.app to get a token
+
+Simple python chatbot could look like:
+
+```python
+import os
+import time
+
+from phound import Phound
+from phound.handlers import BaseChatHandler
+
+
+class ChatHandler(BaseChatHandler):
+    def on_start(self):
+        self.chat_history = self.get_history(depth=5)
+
+    def on_message(self, message):
+        print(f"Got new message: {message}")
+        self.chat_history.append(message)
+        self.show_typing()
+        time.sleep(1)
+        reply_items = [f"Initial message: {message.text}",
+                       f"Response: {message.text[::-1]}",
+                       f"Also has chat history with last {len(self.chat_history)} messages"]
+        reply = self.send_message(os.linesep.join(reply_items))
+        self.chat_history.append(reply)
+
+
+if __name__ == "__main__":
+    with Phound() as phound:
+        phound.register_chat_handler(ChatHandler)
+        phound.start_listen_events()
+```
+
+## API Reference
+
+### Phound
+#### Methods:
+- `register_chat_handler(self, handler, chat_types=("private",))` - Registers specified chat handler.
+    - `handler: BaseChatHandler` - The chat handler to register.
+    - `chat_types: Tuple[str, ...]` - The chat types to handle, valid values are `private` and `group`
+- `start_listen_events()` - Starts listen events
+- `send_message(self, text, from_persona_uid, chat_id="", persona_uid="", phone_number="", text_format=MessageTextFormat.PLAIN, attachments=None, app_meta=None)` - Sends a message with the specified text to the chat.
+    - `text: str` - The text content of the message.
+    - `from_persona_uid: str` - The unique ID of the persona from which the message originated.
+    - `chat_id: str` - The ID of the chat to send the message to.
+    - `persona_uid: str` - The unique ID of the persona to send the message to.
+    - `phone_number: str` - The phone number to send the message to.
+    - `text_format: MessageTextFormat` - The text format of the message. One of `MessageTextFormat.HTML`, `MessageTextFormat.PLAIN` or `MessageTextFormat.GPTMARKDOWN`.
+    - `attachments: List[str] | None` - A list of attachment as path to be added to the message.
+    - `app_meta: Dict[str, Any] | None` - A dictionary of additional metadata to be added to the message.
+    NOTE: `from_persona_uid` or `chat_id`or `phone_number` must be specified.
+- `make_call(self, from_persona_uid, phone_number)` - Makes a call to the specified phone number.
+<br><br>
+
+### BaseChatHandler
+- `persona_uid: str` - The unique ID of the persona listening to the chat.
+- `chat_type: str` - Either "private" or "group".
+- `chat_id: str` - The ID of the chat.
+#### Event handlers:
+- `on_start(self)` - Called once when the chat handler is started.
+- `on_message(self, message)` - Called when a new message is received in the chat.
+    - `message: ChatMessage` - The message object.
+- `on_message_status_changed(self, message)` - Called when the status of a message changes.
+    - `message: ChatMessage` - The message object.
+#### Methods:
+Same as for `Chat` object, please refer to the documentation bellow.
+<br><br>
+
+### BaseCallHandler
+- `persona_uid: str` - The unique ID of the persona listening to the call.
+- `chat: Chat` - The chat object associated with the call.
+#### Event handlers:
+- `on_start(self)` - Called once when the call handler is started.
+- `on_incoming_call(self, call)` - Called when an incoming call is received.
+    - `call: Call` - The call object.
+- `on_call_ready(self)` - Called when a call is ready.
+- `on_playback_status(self, status)` - Called when the playback status changes.
+    - `status: PlaybackStatus` - Enum, one of `PlaybackStatus.IN_PROGRESS` or `PlaybackStatus.COMPLETE`.
+- `on_audio_chunk_recorded(self, audio_chunk)` - Called when an audio chunk is recorded.
+    - `audio_chunk: AudioChunk` - The audio chunk object.
+- `on_hangup(self)` - Called when the call is hung up.
+- `on_attendee_join(self, attendee)` - Called when an attendee joins the call.
+    - `attendee: CallAttendee` - The `CallAttendee` object.
+- `on_attendee_drop(self, attendee)` - Called when an attendee drops the call.
+    - `attendee: CallAttendee` - The `CallAttendee` object.
+- `on_dtmf(self, dtmf)` - Called when a DTMF digit is received. Make sure to call `start_listen_dtmf()` first.
+    - `dtmf: str` - The DTMF digit.
+#### Methods:
+- `answer(self)` - Answers the call.
+- `reject(self)` - Rejects the call.
+- `hangup(self)` - Hangs up the call.
+- `play(self, file_path)` - Plays the specified audio file in the call.
+    - `file_path: str` - The path to the audio file.
+- `record(self, file_path, min_chunk_len=0, max_chunk_len=0, chunk_overlap=0)` - Records the call and saves it to the specified file.
+    - `file_path: str` - The path to the audio file.
+    - `min_chunk_len: int` - The minimum length of the audio chunk in seconds.
+    - `max_chunk_len: int` - The maximum length of the audio chunk in seconds.
+    - `chunk_overlap: int` - The overlap of the audio chunks in seconds.
+- `get_active_attendees(self)` - Returns a list of active attendees (`CallAttendee`) in the call.
+- `get_all_attendees(self)` - Returns a list of all attendees (`CallAttendee`) in the call.
+- `start_listen_dtmf(self)` - Starts listening for DTMF digits. Note, call must be ready.
+- `send_dtmf(self, dtmf)` - Sends a DTMF digit to the call.
+    - `dtmf: str` - The DTMF digit.
+<br>
+
+### Chat
+- `persona_uid: str` - The unique ID of the persona listening to the chat.
+- `chat_id: str` - The ID of the chat.
+#### Methods:
+- `show_typing(self, timeout=60, chat_id="", persona_uid="", phone_number="")` - Displays a typing indicator in the chat. The indicator is shown for the specified `timeout` or until the next message is sent.
+    - `timeout: int` - The timeout in seconds.
+    - `chat_id: str` - The ID of the chat to show the typing indicator in. If not specified, the typing indicator is shown in the handled chat.
+    - `persona_uid: str` - The unique ID of the persona to show the typing indicator in chat with. If not specified, the typing indicator is shown in the handled chat.
+    - `phone_number: str` - The phone number to show the typing indicator in chat with. If not specified, the typing indicator is shown in the handled chat.
+- `send_message(self, text, text_format=MessageTextFormat.PLAIN, attachments=None, app_meta=None, chat_id="", persona_uid="", phone_number="")` - Sends a message with the specified text to the chat.
+    - `text: str` - The text content of the message. Please see also the "Text helpers" section bellow.
+    - `text_format: MessageTextFormat | None` - The text format of the message. One of `MessageTextFormat.HTML`, `MessageTextFormat.PLAIN` or `MessageTextFormat.GPTMARKDOWN`.
+    - `attachments: List[str] | None` - A list of attachment as path to be added to the message.
+    - `app_meta: Dict[str, Any] | None` - A dictionary of additional metadata to be added to the message.
+    - `chat_id: str` - The ID of the chat to send the message to. If not specified, the message is sent to the handled chat.
+    - `persona_uid: str` - The unique ID of the persona to send the message to. If not specified, the message is sent to the handled chat.
+    - `phone_number: str` - The phone number to send the message to. If not specified, the message is sent to the handled chat.
+- `wipe_message(self, message_id, chat_id="", persona_uid="", phone_number="")` - Wipes the specified message from the chat.
+    - `message_id: str` - The ID of the message to wipe.
+    - `chat_id: str` - The ID of the chat to wipe the message from. If not specified, the message is wiped from the handled chat.
+    - `persona_uid: str` - The unique ID of the persona to wipe the message from chat with. If not specified, the message is wiped from the handled chat.
+    - `phone_number: str` - The phone number to wipe the message from chat with. If not specified, the message is wiped from the handled chat.
+- `get_history(self, depth=10, start_message_id="0", chat_id="", persona_uid="", phone_number="")` - Retrieves the chat history as a list of `ChatMessage` or `VoiceMessage` objects.
+    - `depth: int` - The number of messages to retrieve.
+    - `start_message_id: str` - The ID of the message to start from. Use `"0"`(default) to start from the last message.
+    - `chat_id: str` - The ID of the chat to retrieve the history from. If not specified, the history is retrieved from the handled chat.
+    - `persona_uid: str` - The unique ID of the persona to retrieve the history from chat with. If not specified, the history is retrieved from the handled chat.
+    - `phone_number: str` - The phone number to retrieve the history from chat with. If not specified, the history is retrieved from the handled chat.
+
+### Call
+- `id: str` - The ID of the call.
+- `persona_uid: str` - The unique ID of the persona who is listening to the call.
+- `from_persona_uid: str` - The unique ID of the persona who is calling.
+- `from_name: str` - The name of the persona who is calling.
+
+### CallAttendee
+- `id: str` - The ID of the attendee.
+- `number: str` - The phone number of the attendee.
+- `name: str` - The name of the attendee.
+- `persona_uid: str` - The unique persona ID of the attendee.
+
+### AudioChunk
+- `audio_file_path: str` - The path to the audio file.
+- `asn_file_path: str | None` - The path to the ASN file.
+- `duration: float` - The duration of the audio file in seconds.
+- `last_chunk: bool` - Indicates whether the audio chunk is the last in the recording.
+- `full_audio_file_path: str | None` - The path to the full audio file, if available.
+- `full_duration: float | None` - The duration of the full audio file in seconds, if available.
+
+### ChatMessage
+- `id: str` - The ID of the message.
+- `text: str` - The text content of the message.
+- `from_uid: str` - The unique ID of the persona from which the message originated.
+- `from_name: str` - The name of the persona from which the message originated.
+- `tagged: bool` - Indicates whether the persona listening to the chat was tagged in the message.
+- `quote: MessageQuote | None` - The quote of the message, if any.
+- `attachments: List[MessageAttachment]` - A list of `MessageAttachment` objects.
+- `status_code: str` - The status code of the message.
+
+### VoiceMessage
+- `id: str` - The ID of the message.
+- `text: str` - The text transcription of the voice message.
+- `from_uid: str` - The unique ID of the persona from which the message originated.
+- `from_name: str` - The name of the persona from which the message originated.
+- `temporary_url: str | None` - The temporary URL of the voice message.
+- `permanent_url: str` - The permanent URL of the voice message.
+
+### MessageQuote
+- `text: str` - The text content of the quote.
+- `from_uid: str` - The unique ID of the persona from which the quoted message originated.
+- `from_name: str` - The name of the persona from which the quoted message originated.
+- `message_id: str` - The ID of the quoted message.
+
+### MessageAttachment
+- `name: str` - The name of the attachment.
+- `size: int` - The size of the attachment.
+- `url: str` - The URL of the attachment.
+
+## Text helpers
+Text helpers are the set of functions that are used to help to format the text of the message.
+
+- `mention(persona_uid, label="")`
+    - `persona_uid: str` - The unique ID of the persona to mention.
+    - `label: str` - The label of the persona to mention. If not specified, the label is the same as the `persona_uid`.
+
+- `bold(text)`
+    - `text: str` - The text to bold.
+
+- `italic(text)`
+    - `text: str` - The text to italicize.
+
+- `underline(text)`
+    - `text: str` - The text to underline.
+
+### Example
+```python
+from phound.chats.text_helpers import bold, italic, underline, mention
+
+class ChatHandler(BaseChatHandler):
+    ...
+    text = (f"It's possible to use pure html tags to make text <b>bold</b>, or do it with {bold('helper')}\n"
+            f"same for <i>italic</i> and <u>underline</u> ({italic('italic')}, {underline('underline')})\n"
+            f"To mention someone use {mention('<uid>', 'name')}")
+    self.send_message(text)
+```
