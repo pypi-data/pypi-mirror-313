@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load orbit %}
+
+{% block title %}
+  {% trans "Demande d'accès aux informations" %}
+{% endblock %}
+
+{% block content %}
+<div class="segment full whitespace-normal form">
+  <form class="segment half sm-full whitespace-normal" method="post" action="{% url 'oidc_provider:authorize' %}">
+    <h2 class="text-semibold text-left text-color-secondary">{% trans "Demande d'autorisation" %}</h2>
+    {% csrf_token %}
+    {{ hidden_inputs }}
+    <div class="segment full text-left">
+      {% if scopes|length > 0 %}
+      <p class="text-semibold text-color-heading">{% trans "L'application" %} <strong>{{ client.name }}</strong> {% trans "demande à accéder à ces informations vous concernant :" %}</p>
+      <ul>
+        {% for scope in scopes %}
+        <li><strong>{{ scope.name }}</strong><br><i>{{ scope.description }}</i></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-semibold text-color-heading">{% trans "L'application" %} <strong>{{ client.name }}</strong> {% trans "demande à accéder à votre compte." %}</p>
+      {% endif %}
+    </div>
+    <div class="segment full margin-top-xlarge">
+      <div class="segment block labelled-avatar two-lines">
+        <div class="segment margin-right-xsmall">
+          <div class="avatar">
+            <img src="{% if user.account.picture %}{{ user.account.picture }}{% else %}{% orbit 'client.defaultAvatar' %}{% endif %}">
+          </div>
+        </div>
+        <div class="segment text-left">
+          <div class="text-semibold text-color-heading">{% firstof user.name user.username user.email %}</div>
+          <div class="text-color-heading">{% firstof user.email %}</div>
+        </div>
+      </div>
+    </div>
+    <div class="segment full whitespace-normal margin-top-xxlarge">
+      <div class="submit-button segment full margin-top-xsmall text-xsmall children-link-button children-link-text-bold children-link-text-uppercase children-link-reversed color-secondary bordered">
+        <input class="segment half" name="allow" type="submit" value="{% trans 'Continuer' %}" />
+      </div>
+      <div class="segment full margin-top-xsmall">
+        <a class="segment half text-xsmall button text-bold text-uppercase color-secondary bordered" href="{% url 'logout' %}">{% trans "Changer de compte" %}</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

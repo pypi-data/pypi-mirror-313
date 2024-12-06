@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}
+  {% trans "Se connecter" %}
+{% endblock %}
+
+{% block content %}
+
+<div class="segment full whitespace-normal form">
+
+  {% if user.is_authenticated %}
+    <div class="segment full whitespace-normal">
+        {% blocktrans trimmed %}
+            You are authenticated as {{ username }}, but are not authorized to
+            access this page. Would you like to login to a different account?
+        {% endblocktrans %}
+    </div>
+  {% endif %}
+
+  <form class="segment half sm-full whitespace-normal" method="post" action="{{ app_path }}">
+    {% csrf_token %}
+    <div class="segment margin-bottom-medium full padding-right-small sm-padding-none text-small text-semibold text-uppercase text-color-heading">
+      {{ form.username.errors }}
+      <label for="id_username">{% trans "Nom d'utilisateur ou e-mail:" %}</label>
+      {{ form.username }}
+    </div>
+    <div class="segment margin-bottom-medium full padding-right-small sm-padding-none text-small text-semibold text-uppercase text-color-heading">
+      {{ form.password.errors }}
+      {{ form.password.label_tag }}
+      {{ form.password }}
+    </div>
+
+    {% if form.errors and not form.non_field_errors %}
+    <div class='segment full margin-bottom-xsmall whitespace-normal'>
+      <span class='text-bold text-color-primary'>{% if form.errors.items|length == 1 %}{% trans "Please correct the error below." %}{% else %}{% trans "Please correct the errors below." %}{% endif %}</span>
+    </div>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+    <div class='segment full margin-bottom-xsmall whitespace-normal'>
+      <span class='text-bold text-color-primary'>{{ error }}</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="submit-button segment full margin-top-xsmall text-xsmall children-link-button children-button-icon children-link-text-bold children-link-text-uppercase children-link-reversed color-secondary bordered children-icon-rocket children-icon-small children-icon-margin-right-xsmall">
+      <button type="submit">{% trans 'Se connecter' %}</button>
+    </div>
+    {% url 'admin_password_reset' as password_reset_url %}
+    {% if password_reset_url %}
+    <div class="segment full margin-top-xsmall">
+      <a class="link" href="{{ password_reset_url }}">{% trans "Mot de passe oublié ?" %}</a>
+    </div>
+    {% endif %}
+  </form>
+
+</div>
+{% endblock %}

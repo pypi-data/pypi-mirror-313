@@ -1,0 +1,68 @@
+{% extends "base.html" %} {% load i18n %} {% block title %} {% trans
+"Enregistrer un compte" %} {% endblock %} {% block content %}
+<div class="segment full whitespace-normal form">
+  <form class="segment half sm-full whitespace-normal" method="POST">
+    {% if form.errors %}
+    <div class="segment full margin-bottom-xsmall whitespace-normal">
+      <span class="text-bold" style="color: red;">
+            {% trans "Il y a une erreur. Veuillez vérifier le contenu du formulaire." %}
+      </span
+      >
+    </div>
+    {% endif %}
+    {% csrf_token %}
+    <div
+      class="segment margin-bottom-medium full padding-right-small sm-padding-none text-small text-semibold text-uppercase text-color-heading"
+    >
+      <label for="id_username">{% trans "Prénom :" %}</label>
+      {{ form.first_name }}
+      <span class="small" style="color: red; text-transform: lowercase;">
+        {{ form.first_name.errors }}
+      </span>
+    </div>
+    <div
+      class="segment margin-bottom-medium full padding-right-small sm-padding-none text-small text-semibold text-uppercase text-color-heading"
+    >
+      <label for="id_email">{% trans "Nom de famille :" %}</label>
+      {{ form.last_name }}
+      <span class="text-bold" style="color: red; text-transform: lowercase;">
+        {{ form.last_name.errors }}
+      </span>
+    </div>
+
+    <input name="username" type="hidden" value="generate-an-username" />
+
+    <div
+      class="segment margin-bottom-medium full padding-right-small sm-padding-none text-small text-semibold text-uppercase text-color-heading"
+    >
+      <label for="id_email">{% trans "E-mail :" %}</label>
+      {{ form.email }}
+      <span class="text-bold" style="color: red; text-transform: lowercase;">
+        {{ form.email.errors }}
+      </span>
+    </div>
+    <div
+      class="segment margin-bottom-medium full padding-right-small sm-padding-none text-small text-semibold text-uppercase text-color-heading"
+    >
+      {{ form.password1.label_tag }} {{ form.password1 }}
+    </div>
+    <div
+      class="segment margin-bottom-medium full padding-right-small sm-padding-none text-small text-semibold text-uppercase text-color-heading"
+    >
+      {{ form.password2.label_tag }} {{ form.password2 }}
+    </div>
+
+    <div
+      class="submit-button segment full margin-top-xsmall text-xsmall children-link-button children-button-icon children-link-text-bold children-link-text-uppercase children-link-reversed color-secondary bordered children-icon-rocket children-icon-small children-icon-margin-right-xsmall"
+    >
+      <button type="submit">
+        {% trans "Envoyer un e-mail d'activation" %}
+      </button>
+    </div>
+    <div class="segment full margin-top-xsmall">
+      <a class="link" href="{% url 'login' %}">{% trans "Retour" %}</a>
+    </div>
+    <input type="hidden" name="next" value="{{ next }}" />
+  </form>
+</div>
+{% endblock %}
