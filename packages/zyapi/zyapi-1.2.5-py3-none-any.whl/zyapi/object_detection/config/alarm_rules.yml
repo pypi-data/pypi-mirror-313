@@ -1,0 +1,101 @@
+_BASE_: [
+  'base.yml',
+]
+
+wait_time: 5
+threshold: 0.6
+
+sample_behavior:
+    behavior_5000001:
+        behavior_info: 人脸识别
+        alarm_time: 5
+        thr: 0.5
+        rate: 0.2
+        mode: half_in
+        target: []
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000002:
+        behavior_info: 疲劳驾驶
+        alarm_time: 10
+        thr: 0.38
+        rate: 0.5
+        mode: half_in
+        target: ['cleye', 'telephone', 'callphone', 'opeye']
+        kwargs: {'post_process': {'behavior': '5000002', 'iou': 0.5}}
+        function: ['target_filter', 'post_process', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000003:
+        behavior_info: 接打电话
+        alarm_time: 15
+        thr: 0.33
+        rate: 0.8
+        mode: overlap_in
+        target: ['telephone', 'callphone']
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000004:
+        behavior_info: 吸烟
+        alarm_time: 15
+        thr: 0.30
+        rate: 0.7
+        mode: overlap_in
+        target: ['smokeperson']
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000005:
+        behavior_info: 视线偏离
+        alarm_time: 20
+        thr: 0.6
+        rate: 0.6
+        mode: overlap_in
+        target: ['twhead']
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000006:
+        behavior_info: 离岗
+        alarm_time: 15
+        thr: 0.4
+        rate: 0.9
+        mode: half_out
+        target: ['head', 'twhead', 'cleye', 'opeye', 'mask', 'nomask', 'stand']
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000007:
+        behavior_info: 未戴口罩
+        alarm_time: 15
+        thr: 0.5
+        rate: 0.4
+        mode: overlap_in
+        target: ['nomask']
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000008:
+        behavior_info: 手势
+        alarm_time: 0
+        thr: 0.42
+        rate: 0.5
+        mode: overlap_in
+        target: ['handpose']
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000009:
+        behavior_info: 坐姿不正确
+        alarm_time: 20
+        thr: 0.5
+        rate: 0.5
+        mode: overlap_in
+        target: ['incline']
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000010:
+        behavior_info: 双司机上岗
+        alarm_num: 2
+        alarm_time: 5
+        thr: 0.5
+        rate: 0.4
+        mode: overlap_in
+        target: ['dual']
+        function: ['target_filter', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
+    behavior_5000011:
+        behavior_info: 相机遮挡
+        alarm_time: 20
+        thr: 0.5
+        rate: 0.8
+        detect_interval: 10
+        mode: overlap_in
+        occlusion: {}
+        target: ['occlusion', 'nomask', 'head', 'twhead', 'mask']
+        kwargs: {'post_process': {'behavior': '5000011', 'iou': 0.5}}
+        function: ['target_filter', 'post_process', 'package_bbox', 'check_bbox', 'check_ftime', 'transform_result']
