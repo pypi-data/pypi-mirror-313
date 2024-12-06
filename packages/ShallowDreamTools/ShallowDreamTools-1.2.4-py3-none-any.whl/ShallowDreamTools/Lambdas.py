@@ -1,0 +1,1 @@
+test_lambda = lambda : print("Lambda Success!")
