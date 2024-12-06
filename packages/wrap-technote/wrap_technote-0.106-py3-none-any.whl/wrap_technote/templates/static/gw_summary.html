@@ -1,0 +1,166 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+{% include "static/style.css" %}
+    </style>
+    <title>{{ report.report_key }}</title>
+</head>
+<body>
+
+<div id="topBar">
+
+</div>
+
+<div id="leftCol">
+{% for section_name, section in report.report_settings.resources.items() %}
+    <p><u>{{ section_name }}</u></p>
+    {% for param, resource_keys in section.items() %}
+        {% for resource_key in resource_keys %}
+        <p><a href="#{{ resource_key }}">{{ resource_key.replace('_', ' ') }}</a></p>
+        {% endfor %}
+    {% endfor %}
+{% endfor %}
+</div>
+
+<div id="content">
+
+<h1>WRAP groundwater data summary: {{ report.report_key }}</h1>
+
+<h2>Links to resources</h2>
+
+<ul>
+    {% for section_name, section in report.report_settings.resources.items() %}
+    <li>{{ section_name }}</li>
+    <ul>
+        {% for param, resource_keys in section.items() %}
+        <li>{{ param }}</li>
+        <ul>
+            {% for resource_key in resource_keys %}
+            <li>
+                <a href="{{ resource_key_paths[resource_key] }}">
+                    {{ resource_key }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+    </ul>
+    {% endfor %}
+</ul>
+
+<h2>Rankings and trends for aggregate and single resources</h2>
+
+<p><img src="{{ page_path }}\{{ report.report_key }}_aggregate_current_WL_rankings.png" /></p>
+
+<p><img src="{{ page_path }}\{{ report.report_key }}_aggregate_5yr_WL_trends_triclass.png" /></p>
+
+<p><img src="{{ page_path }}\{{ report.report_key }}_aggregate_5yr_TDS_trends_triclass.png" /></p>
+
+{% for section_name, section in report.report_settings.resources.items() %}
+
+    <h1>{{ section_name }}</h1>
+
+    {% for param, resource_keys in section.items() %}
+
+        <h2>{{ param }}</h2>
+
+        {% for resource_key in resource_keys %}
+
+            <h3><a class="anchor" id="{{ resource_key }}"></a>
+                <a href="{{ resource_key_paths[resource_key] }}">
+                {{ resource_key }}
+            </a></h3>
+
+            {% if param == 'WL' %}
+
+            {% for sentence in resource_sentences[resource_key] %}
+            <p>{{ sentence|safe }}</p>
+            {% endfor %}
+
+                <div class="row">
+                    <div class="column">
+                        <img class="chart" src="{{ page_path }}\{{ resource_key }}_rankings.png" />
+                    </div>
+                    <div class="column">
+                        <img class="map" src="{{ page_path }}\{{ resource_key }}_rankings_map.png" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="column">
+                        <img class="trend-chart" src="{{ page_path }}\{{ resource_key }}_trend_triclass.png" />
+                    </div>
+                    <div class="column">
+                        <img class="map" src="{{ page_path }}\{{ resource_key }}_trend_triclass_map.png" />
+                    </div>
+                </div>
+
+            {% elif param == 'TDS' %}
+
+            {% for sentence in resource_sentences[resource_key] %}
+            <p>{{ sentence|safe }}</p>
+            {% endfor %}
+
+                <div class="row">
+                    <div class="column">
+                        <img class="chart" src="{{ page_path }}\{{ resource_key }}_current.png" />
+                    </div>
+                    <div class="column">
+                        <img class="map" src="{{ page_path }}\{{ resource_key }}_current_map.png" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="column">
+                        <img class="chart" src="{{ page_path }}\{{ resource_key }}_curr_pct_diff_bars.png" />
+                    </div>
+                    <div class="column">
+                        <img class="map" src="{{ page_path }}\{{ resource_key }}_curr_pct_diff_map.png" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="column">
+                        <img class="chart" src="{{ page_path }}\{{ resource_key }}_tds_trend_pct_change_bars.png" />
+                    </div>
+                    <div class="column">
+                        <img class="map" src="{{ page_path }}\{{ resource_key }}_tds_trend_pct_change_map.png" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="column">
+                        <img class="trend-chart" src="{{ page_path }}\{{ resource_key }}_trend_triclass.png" />
+                    </div>
+                    <div class="column">
+                        <img class="map" src="{{ page_path }}\{{ resource_key }}_trend_triclass_map.png" />
+                    </div>
+                </div>
+
+            {% endif %}
+
+        {% endfor %}
+
+    {% endfor %}
+
+{% endfor %}
+
+
+<script  type="text/javascript">
+    $("#toggle_silo").click(function(){
+        $(".silo").toggle();
+    })
+    $("#toggle_annual").click(function(){
+        $(".annual").toggle();
+    })
+    $("#toggle_monthly").click(function(){
+        $(".monthly").toggle();
+    })
+</script>
+
+</body>
+</html>
