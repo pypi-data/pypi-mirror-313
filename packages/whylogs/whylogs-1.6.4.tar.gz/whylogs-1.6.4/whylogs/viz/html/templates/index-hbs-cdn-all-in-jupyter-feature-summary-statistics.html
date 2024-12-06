@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <title>Profile Visualizer | whylogs</title>
+
+    <link rel="icon" href="images/whylabs-favicon.png" type="image/png" sizes="16x16" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" />
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"
+      integrity="sha512-RNLkV3d+aLtfcpEyFG8jRbnWHxUqVZozacROI4J2F1sTaDqo1dPQYs01OMi1t1w9Y2FdbSCDSQ2ZVdAC8bzgAg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <style type="text/css">
+
+      /* Screen on smaller screens */
+      .no-responsive {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1031;
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--tealBackground);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      @media screen and (min-width: 1000px) {
+        .desktop-content {
+          display: block;
+        }
+        .no-responsive {
+          display: none;
+        }
+      }
+
+      .no-responsive__content {
+        max-width: 600px;
+        width: 100%;
+        padding: 0 24px;
+      }
+
+      .no-responsive__title {
+        font-size: 96px;
+        font-weight: 300;
+        color: var(--brandSecondary900);
+        line-height: 1.167;
+      }
+
+      .no-responsive__text {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--brandSecondary900);
+        line-height: 1.5;
+      }
+
+      .header-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #444444;
+      }
+
+      .statistics-header-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #444444;
+      }
+
+      .statistic-number-title {
+        font-family: Arial;
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 20px;
+        color: #6C757D;
+      }
+
+      .statistic-number {
+        font-family: Arial;
+        font-weight: bold;
+        font-size: 20px;
+        line-height: 140%;
+        display: flex;
+        align-items: center;
+        color: #4F595B;
+      }
+
+      .full-summary-statistics-wrap {
+        padding: 20px;
+      }
+
+      .statistics {
+        width: 100%;
+      }
+
+      .statistics-list {
+        width: 49% ;
+      }
+
+      .notif-circle-container{
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        padding: 5.3px;
+        border-radius: 50%;
+        background-color: var(--brandSecondary100);
+        cursor: pointer;
+      }
+
+      .notif-circle {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        font-size: 10px;
+        color: #fff;
+        background-color: #ECB100;
+      }
+
+      .border-solid-gray {
+        border: 1px solid #CED4DA;
+        border-radius: 4px;
+        padding: 10px;
+      }
+
+      .display-flex {
+        display: flex;
+      }
+
+      .justify-content-space-between {
+        justify-content: space-between;
+      }
+
+      .justify-content-center {
+        justify-content: center;
+      }
+
+      .align-items-center {
+        align-items: center;
+      }
+
+      .padding-right-30 {
+        padding-right: 30px;
+      }
+
+      @media screen and (min-width: 500px) {
+        .desktop-content {
+          display: block;
+        }
+        .no-responsive {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body id="generated-html"></body>
+
+  <script id="entry-template" type="text/x-handlebars-template">
+    {{{{raw}}}}
+      <div class="desktop-content">
+        <div class="full-summary-statistics-wrap">
+          <div class="full-summary-statistics">
+            <div class="mb-4">
+                <strong class="header-title">{{featureName this}}: Summary Statistics</strong>
+            </div>
+            <div class="statistics-wrap border-solid-gray display-flex justify-content-center mb-5">
+              <div class="statistics display-flex justify-content-space-between">
+                  <div class="statistic-item padding-right-30">
+                    <div class="statistic-number-title">Distinct (%)</div>
+                    <div class="statistic-number">{{distinct this}}</div>
+                  </div>
+                  <div class="statistic-item padding-right-30">
+                    <div class="statistic-number-title">Missing</div>
+                    <div class="statistic-number">{{missing this}}</div>
+                  </div>
+                  <div class="statistic-item padding-right-30">
+                    <div class="statistic-number-title">Mean</div>
+                    <div class="statistic-number">{{mean this}}</div>
+                  </div>
+                  <div class="statistic-item padding-right-30">
+                    <div class="statistic-number-title">Minimum</div>
+                    <div class="statistic-number">{{minimum this}}</div>
+                  </div>
+                  <div class="statistic-item padding-right-30">
+                    <div class="statistic-number-title">Maximum</div>
+                    <div class="statistic-number">{{maximum this}}</div>
+                  </div>
+              </div>
+            </div>
+            <div>
+              <div class="display-flex justify-content-space-between">
+                <div class="statistics-list border-solid-gray">
+                  <div>
+                    <div class="mb-3">
+                      <strong class="statistics-header-title">Quantile statistics</strong>
+                    </div>
+                    <div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>5-th percentile</div>
+                        <div>{{fifthPercentile this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>Q1</div>
+                        <div>{{q1 this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>median</div>
+                        <div>{{median this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>Q3</div>
+                        <div>{{q3 this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>95-th percentile</div>
+                        <div>{{ninetyFifthPercentile this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>Range</div>
+                        <div>{{range this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>Interquartile range (IQR)</div>
+                        <div>{{iqr this}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="statistics-list border-solid-gray">
+                  <div>
+                    <div class="mb-3">
+                      <strong class="statistics-header-title">Descriptive statistics</strong>
+                    </div>
+                    <div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>Standard deviation</div>
+                        <div>{{stddev this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>Coefficient of variation (CV)</div>
+                        <div>{{coefficientOfVariation this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>Sum</div>
+                        <div>{{getSum this}}</div>
+                      </div>
+                      <div class="display-flex justify-content-space-between mb-2">
+                        <div>Variance</div>
+                        <div>{{variance this}}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="no-responsive">
+        <div class="no-responsive__content">
+          <h1 class="no-responsive__title">Hold on! :)</h1>
+          <p class="no-responsive__text">
+            It looks like your current screen size or device is not yet supported by the WhyLabs Sandbox. The Sandbox is
+            best experienced on a desktop computer. Please try maximizing this window or switching to another device. We
+            are working on adding support for a larger variety of devices.
+          </p>
+        </div>
+      </div>
+    {{{{/raw}}}}
+  </script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js" integrity="sha512-cd6CHE+XWDQ33ElJqsi0MdNte3S+bQY819f7p3NUHgwQQLXSKjE4cPZTeGNI+vaxZynk1wVU3hoHmow3m089wA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    function registerHandlebarHelperFunctions() {
+      //helper fun
+      // function formatLabelDate(timestamp) {
+      //   const date = new Date(timestamp);
+      //   const format = d3.timeFormat("%Y-%m-%d %I:%M:%S %p %Z");
+      //   return format(date);
+      // }
+
+      function fixNumberTo(number, decimals = 3) {
+        return parseFloat(number).toFixed(decimals);
+      }
+
+      Handlebars.registerHelper("variance", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.descriptive_statistics && typeof feature.descriptive_statistics.variance === 'number') {
+          if (isNaN(feature.descriptive_statistics.variance)){return "-"}
+          if (feature.descriptive_statistics.variance==null){return "-"}
+          return fixNumberTo(feature.descriptive_statistics.variance,2);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("coefficientOfVariation", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.descriptive_statistics && typeof feature.descriptive_statistics.coefficient_of_variation === 'number') {
+          if (isNaN(feature.descriptive_statistics.coefficient_of_variation)){return "-"}
+          if (feature.descriptive_statistics.coefficient_of_variation==null){return "-"}
+          return fixNumberTo(feature.descriptive_statistics.coefficient_of_variation,2);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("median", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.quantile_statistics && typeof feature.quantile_statistics.median === 'number') {
+          if (isNaN(feature.quantile_statistics.median)){return "-"}
+          if (feature.quantile_statistics.median==null){return "-"}
+          return fixNumberTo(feature.quantile_statistics.median);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("fifthPercentile", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.quantile_statistics && typeof feature.quantile_statistics.fifth_percentile === 'number') {
+          if (isNaN(feature.quantile_statistics.fifth_percentile)){return "-"}
+          if (feature.quantile_statistics.fifth_percentile==null){return "-"}
+          return fixNumberTo(feature.quantile_statistics.fifth_percentile);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("ninetyFifthPercentile", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.quantile_statistics && typeof feature.quantile_statistics.ninety_fifth_percentile === 'number') {
+          if (isNaN(feature.quantile_statistics.ninety_fifth_percentile)){return "-"}
+          if (feature.quantile_statistics.ninety_fifth_percentile==null){return "-"}
+          return fixNumberTo(feature.quantile_statistics.ninety_fifth_percentile);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("range", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.range && typeof feature.range === 'number') {
+          if (isNaN(feature.range)){return "-"}
+          if (feature.range==null){return "-"}
+          return fixNumberTo(feature.range);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("q3", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.quantile_statistics && typeof feature.quantile_statistics.q3 === 'number') {
+          if (isNaN(feature.quantile_statistics.q3)){return "-"}
+          if (feature.quantile_statistics.q3==null){return "-"}
+          return fixNumberTo(feature.quantile_statistics.q3);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("q1", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.quantile_statistics && typeof feature.quantile_statistics.q1 === 'number') {
+          if (isNaN(feature.quantile_statistics.q1)){return "-"}
+          if (feature.quantile_statistics.q1==null){return "-"}
+          return fixNumberTo(feature.quantile_statistics.q1);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("getSum", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.descriptive_statistics && typeof feature.descriptive_statistics.sum === 'number') {
+          if (isNaN(feature.descriptive_statistics.sum)){return "-"}
+          if (feature.descriptive_statistics.sum==null){return "-"}
+          return fixNumberTo(feature.descriptive_statistics.sum,2);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("iqr", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.quantile_statistics && typeof feature.quantile_statistics.iqr === 'number' ) {
+          if (isNaN(feature.quantile_statistics.iqr)){return "-"}
+          if (feature.quantile_statistics.iqr==null){return "-"}
+          return fixNumberTo(feature.quantile_statistics.iqr);
+        }
+        return "-";
+      });
+
+
+      Handlebars.registerHelper("distinct", function (column) {
+        const feature = Object.values(column)[0]
+        const distinct_pct = feature.distinct
+
+        return fixNumberTo(distinct_pct,2);
+      });
+
+      Handlebars.registerHelper("missing", function (column) {
+        const feature = Object.values(column)[0]
+        if (feature.missing) {
+          return feature.missing;
+        }
+        return "0";
+      });
+
+      Handlebars.registerHelper("mean", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.descriptive_statistics && typeof feature.descriptive_statistics.mean === 'number') {
+          if (isNaN(feature.descriptive_statistics.mean)){return "-"}
+          if (feature.descriptive_statistics.mean==null){return "-"}
+          return fixNumberTo(feature.descriptive_statistics.mean);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("stddev", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (feature.descriptive_statistics && typeof feature.descriptive_statistics.stddev === 'number') {
+          if (isNaN(feature.descriptive_statistics.stddev)){return "-"}
+          if (feature.descriptive_statistics.stddev==null){return "-"}
+          return fixNumberTo(feature.descriptive_statistics.stddev);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("minimum", function (column) {
+        const feature = Object.values(column)[0]
+        if (typeof feature.min === 'number') {
+          if (isNaN(feature.min)){return "-"}
+          if (feature.min==null){return "-"}
+          return fixNumberTo(feature.min);
+        }
+        return "-";
+      });
+
+      Handlebars.registerHelper("maximum", function (column) {
+        const feature = Object.values(column)[0]
+
+        if (typeof feature.max === 'number') {
+          if (isNaN(feature.max)){return "-"}
+          if (feature.max==null){return "-"}
+          return fixNumberTo(feature.max);
+        }
+        return "-";
+      });
+
+      // Handlebars.registerHelper("getProfileTimeStamp", function (column) {
+      //   return formatLabelDate(+column.properties.dataTimestamp)
+      // });
+
+      // Handlebars.registerHelper("getProfileName", function (column) {
+      //   return column.properties.tags.name
+      // });
+
+      Handlebars.registerHelper("featureName", function (column) {
+        const featureName = Object.keys(column)[0]
+        return featureName
+      });
+    }
+
+    function initHandlebarsTemplate() {
+      // Replace this context with JSON from .py file
+      const context = {{{profile_feature_statistics_from_whylogs}}};
+      // Config handlebars and pass data to HBS template
+      const source = document.getElementById("entry-template").innerHTML;
+      const template = Handlebars.compile(source);
+      const html = template(context);
+      const target = document.getElementById("generated-html");
+      target.innerHTML = html;
+    }
+
+    // Invoke functions -- keep in mind invokation order
+    registerHandlebarHelperFunctions();
+    initHandlebarsTemplate();
+  </script>
+</html>
