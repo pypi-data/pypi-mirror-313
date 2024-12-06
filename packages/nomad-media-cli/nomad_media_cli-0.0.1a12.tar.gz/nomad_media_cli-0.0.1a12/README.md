@@ -1,0 +1,75 @@
+# Nomad Media CLI Tool
+
+Command line interface for managing Nomad Media media assets.
+
+## Installation
+
+```bash
+pip install nomad-media-cli
+```
+
+## Configuration
+- Default config location: %APPDATA%\Local\nomad_media_cli\config.json
+- Custom config location: Use --config-path option
+
+## Commands
+
+### init
+Initializes CLI configuration
+
+Options:
+- `--service-api-url`: API endpoint URL (required)
+- `--api-type`: API type [admin|portal]
+- `--debug-mode`: Enable debug logging [true|false]
+- `--singleton`: Enable singleton mode [true|false]
+
+### list-config-path
+Lists the path of the config
+
+### update-config
+Updates CLI configuration
+
+Options:
+- `--service-api-url`: API endpoint URL
+- `--api-type`: API type [admin|portal]
+- `--debug-mode`: Enable debug logging [true|false]
+- `--singleton`: Enable singleton mode [true|false]
+
+### list-assets
+List assets by ID or path
+
+Options:
+- `--id`: Asset UUID, collection ID, or saved search ID.
+- `--path`: Object key path (format: bucket::path). "::" is required if bucket is not set. Can set bucket with set-bucket.
+
+### upload-assets
+Uploads an asset to nomad (next release)
+
+Options:
+- `-r`: Recursive upload.
+- `--file`: Path of the file/folder to upload.
+- `--id`: Id of folder to upload file to.
+- `--path`: Object key path (format: bucket::path). "::" is required if bucket is not set. Can set bucket with set-bucket.
+
+### list-buckets
+Lists all of the buckets
+
+### set-bucket
+Set bucket for user in config. Used for path.
+
+Options:
+- `--bucket`: Name of the bucket to set in config.
+
+### list-tags
+Lists all of the tags
+
+Options:
+- `--size`: The number of results shown. Default is 10.
+- `--offset`: The offset of the page.
+
+### set-tag
+Set the tag(s) for user in config.
+
+Options:
+- `--tag`: Name of the tag(s) to set in config. Use multiple flags for multiple tags.
+
