@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>= 65.5.1"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    "eo4eu_data_utils",
+    "eo4eu_data_utils.config",
+    "eo4eu_data_utils.drivers",
+    "eo4eu_data_utils.pipeline",
+    "eo4eu_data_utils.metainfo",
+]
+
+[project]
+name = "eo4eu_data_utils"
+version = "0.18.0"
+authors = [
+    {name = "Apollon Grigoras", email = "apollon@uoa.gr"},
+]
+description = "General data access utilities for EO4EU"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "eo4eu_base_utils ~= 0.2.0",
+]
+[project.optional-dependencies]
+s3 = [
+    "boto3        ~= 1.26.137; python_version <= '3.11'",
+    "cloudpathlib ~= 0.15.1;   python_version <= '3.11'",
+    "boto3        >= 1.26.137; python_version >= '3.12'",
+    "cloudpathlib >= 0.15.1;   python_version >= '3.12'",
+]
+full = [
+    "eo4eu_data_utils[s3]"
+]
