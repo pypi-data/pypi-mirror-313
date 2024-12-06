@@ -1,0 +1,561 @@
+- 1.10.1
+  - Command-line:
+    - Fix crash in 'build' command due to undefined 'build_root' variable
+  - Spec:
+    - Add missing python3-ruamel.yaml BuildRequires
+    - Fix rpmlint error about creating the /usr/libexec/git/obs symlink
+
+- 1.10.0
+  - Command-line:
+    - New git-obs executable with several subcommands
+    - Support parameters on token triggers
+    - Change 'update' command to treat empty '.osc/_in_update/_files' as missing
+    - Change 'checkout' command to allow checkout obs imported sources of scmsync sources
+    - Change 'creq' command to allow specifying source and target repository
+    - Change the help output to determine executable name from the command-line arguments
+    - Add '--no-timestamps' parameter to 'build' command
+    - Fix 'token' command to avoid crash  when a wipe token exists
+    - Fix crash in 'results' command by skipping non-status elements in project results
+    - Fix crash in 'build' command when building with --local-package --alternative-project from a locally initialized .osc package
+    - Print buildroot directory when build or chroot finishes
+  - Library:
+    - Add 'gitea_api' module
+    - Support the mkosi build type
+    - Support copy of scmsync packages
+    - Support Dockerfile.* in _multibuild packages
+    - Implement obs_api.Status.data property that returns status data as a dictionary
+    - Implement obs_api.Package.cmd_fork()
+    - Fix meter by setting default of use_pb_fallback to False
+    - Fix store migration from 1.0 to 2.0 when there is a 'sources' file that would conflict with 'sources' directory
+    - Fix revision'd checkout of scmsync package
+    - Refactor code handling _scmsync.obsinfo to obs_api.scmsync_obsinfo.ScmsyncObsinfo class
+    - Store the container annotation in the "containers" directory
+  - Spec:
+    - Install symlink /usr/bin/git-obs to /usr/libexec/git/obs to make git-obs available as a git sub-command
+
+- 1.9.2
+  - Command-line:
+    - Fix 'resolved' command to skip subdirectories in package checkouts
+    - Fix 'comment' command to resolve project name
+    - Implement meter.SimpleTextMeter that prints what's being downloaded
+  - Connection:
+    - Use configured 'http_headers' in HTTP requests
+  - Library:
+    - Fix storing _buildinfo and _buildconfig files in .osc rather than among the source files
+    - Use findtext() instead of find().text
+  - Spec:
+    - Recommend python3-zstandard to support opening control.tar.zst
+
+- 1.9.1
+  - Command-line:
+    - Add 'createrequest release' subcommand
+    - Change 'review list' command to omit requests with 'declined' state
+    - Fix `osc build --local-package`
+    - Fix typos
+  - Library:
+    - Fix extraction of the 'ar' archives when they don't contain header with long filenames
+    - Fix iterating through arch_list in core.get_repos_of_project()
+    - Check for None & len() of ET.Element instead of bool() in PackageBase.get_meta_value()
+  - Spec:
+    - Replace 'setup.py test' that was removed in setuptools 72 with 'python3 -m unittest'
+
+- 1.9.0
+  - Security:
+    - Fix possibility to overwrite special files in .osc (CVE-2024-22034 boo#1225911)
+      Source files are now stored in the 'sources' subdirectory which prevents
+      name collisons. This requires changing version of '.osc' store to 2.0.
+  - Command-line:
+    - Introduce build --checks parameter
+  - Library:
+    - OscConfigParser: Remove automatic __name__ option
+
+- 1.8.3
+  - Command-line:
+    - Change 'repairwc' command to always run all repair steps
+  - Library:
+    - Make most of the fields in KeyinfoPubkey and KeyinfoSslcert models optional
+    - Fix colorize() to avoid wrapping empty string into color escape sequences
+    - Provide default values for kwargs.get/pop in get_results() function
+
+- 1.8.2
+  - Library:
+    - Change 'repairwc' command to fix missing .osc/_osclib_version
+    - Make error message in check_store_version() more generic to work for both projects and packages
+    - Fix check_store_version in project store
+
+- 1.8.1
+  - Command-line:
+    - Fix 'linkpac' command crash when used with '--disable-build' or '--disable-publish' option
+
+- 1.8.0
+  - Command-line:
+    - Improve 'submitrequest' command to inherit description from superseded request
+    - Fix 'mv' command when renaming a file multiple times
+    - Improve 'info' command to support projects
+    - Improve 'getbinaries' command by accepting '-M' / '--multibuild-package' option outside checkouts
+    - Add architecture filtering to 'release' command
+    - Change 'results' command so the normal and multibuild packages have the same output
+    - Change 'results' command to use csv writer instead of formatting csv as string
+    - Add couple mutually exclusive options errors to 'results' command
+    - Set a default value for 'results --format' only for the csv output
+    - Add support for 'results --format' for the default text mode
+    - Update help text for '--format' option in 'results' command
+    - Add 'results --fail-on-error/-F' flag
+    - Redirect venv warnings from stderr to debug output
+  - Configuration:
+    - Fix config parser to throw an exception on duplicate sections or options
+    - Modify conf.get_config() to print permissions warning to stderr rather than stdout
+  - Library:
+    - Run check_store_version() in obs_scm.Store and fix related code in Project and Package
+    - Forbid extracting files with absolute path from 'cpio' archives (boo#1122683)
+    - Forbid extracting files with absolute path from 'ar' archives (boo#1122683)
+    - Remove no longer valid warning from core.unpack_srcrpm()
+    - Make obs_api.KeyinfoSslcert keyid and fingerprint fields optional
+    - Fix return value in build build.create_build_descr_data()
+    - Fix core.get_package_results() to obey 'multibuild_packages' argument
+  - Tests:
+    - Fix tests so they don't modify fixtures
+
+- 1.7.0
+  - Command-line:
+    - Add 'person search' command
+    - Add 'person register' command
+    - Add '-M/--multibuild-package' option to '[what]dependson' commands
+    - Update '-U/--user' option in 'maintainer' command to accept also an email address
+    - Fix 'branch' command to allow using '--new-package' option on packages that do not exist
+    - Fix 'buildinfo' command to include obs:cli_debug_packages by default
+    - Fix 'buildinfo' command to send complete local build environment as the 'build' command does
+    - Fix 'maintainer --devel-project' to raise an error if running outside a working copy without any arguments
+    - Fix handling arguments in 'service remoterun prj/pac'
+    - Fix 'rebuild' command so the '--all' option conflicts with the 'package' argument
+    - Fix crash when removing 'scmsync' element from dst package meta in 'linkpac' command
+    - Fix crash when reading dst package meta in 'linkpac' command
+    - Allow `osc rpmlint` to infer prj/pkg from CWD
+    - Propagate exit code from the run() and do_() commandline methods
+    - Give a hint where a scmsync git is hosted
+    - Fix crash in 'updatepacmetafromspec' command when working with an incomplete spec
+    - Improve 'updatepacmetafromspec' command to expand rpm spec macros by calling rpmspec to query the data
+    - Improve 'build' and 'buildinfo' commands by uploading *.inc files to OBS for parsing BuildRequires (boo#1221340)
+    - Improve 'service' command by printing names of running services
+    - Improve 'getbinaries' command by ignoring source and debuginfo filters when a binary name is specified
+    - Change 'build' command to pass '--jobs' option to 'build' tool only if 'build_jobs' > 0
+    - Clarify 'list' command's help that that listing binaries doesn't contain md5 checksums
+    - Improve 'log' command: produce proper CSV and XML outputs, add -p/--patch option for the text output
+    - Allow setlinkrev to set a specific vrev
+    - Document '--buildtool-opt=--noclean' example in 'build' command's help
+    - Fix handling the default package argument on the command-line
+  - Configuration:
+    - Document loading configuration from env variables
+  - Connection:
+    - Don't retry on error 400
+    - Remove now unused 'retry_on_400' http_request() option from XmlModel
+    - Revert "Don't retry on 400 HTTP status code in core.server_diff()"
+    - Revert "connection: Allow disabling retry on 400 HTTP status code"
+  - Authentication:
+    - Update SignatureAuthHandler to support specifying ssh key by its fingerprint
+    - Use ssh key from ssh agent that contains comment 'obs=<apiurl-hostname>'
+    - Use strings instead of bytes in SignatureAuthHandler
+    - Cache password from SecretService to avoid spamming user with an accept dialog
+    - Never ask for credentials when displaying help
+    - Remove unused SignatureAuthHandler.get_fingerprint()
+  - Library:
+    - Add rootless build support for 'qemu' VM type
+    - Support package linking of packages from scmsync projects
+    - Fix do_createrequest() function to return None instead of request id
+    - Replace invalid 'if' with 'elif' in BaseModel.dict()
+    - Fix crash when no prefered packages are defined
+    - Add XmlModel class that encapsulates manipulation with XML
+    - Add obs_api.Person.cmd_register() for registering new users
+    - Fix conf.get_config() to ignore file type bits when comparing oscrc perms
+    - Fix conf.get_config() to correctly handle overrides when env variables are set
+    - Fix output.tty.IS_INTERACTIVE when os.isatty() throws OSError
+    - Improve cmdln.HelpFormatter to obey newline characters
+    - Update list of color codes in 'output.tty' module
+    - Remove core.setDevelProject() in favor of core.set_devel_project()
+    - Move removing control characters to output.sanitize_text()
+    - Improve sanitize_text() to keep selected CSI escape sequences
+    - Add output.pipe_to_pager() that pipes lines to a pager without creating an intermediate temporary file
+    - Fix output.safe_write() in connection with NamedTemporaryFile
+    - Modernize output.run_pager()
+    - Extend output.print_msg() to accept 'error' and 'warning' values of 'to_print' argument
+    - Add XPathQuery class for translating keyword arguments to an xpath query
+    - Add obs_api.Keyinfo class
+    - Add obs_api.Package class
+    - Add Package.get_revision_list() for listing commit log
+    - Add obs_api.PackageSources class for handling OBS SCM sources
+    - Add obs_api.Person class
+    - Add obs_api.Project class
+    - Add obs_api.Request class
+    - Add obs_api.Token class
+    - Allow storing apiurl in the XmlModel instances
+    - Allow retrieving default field value from top-level model
+    - Fix BaseModel to convert dictionaries to objects on retrieving a model list
+    - Fix BaseModel to always deepcopy mutable defaults on first use
+    - Implement do_snapshot() and has_changed() methods to determine changes in BaseModel
+    - Implement total ordering on BaseModel
+    - Add comments with available attributes/elements to edited XML
+  - Refactoring:
+    - Migrate repo {list,add,remove} commands to obs_api.Project
+    - Migrate core.show_package_disabled_repos() to obs_api.Package
+    - Migrate core.Package.update_package_meta() to obs_api.Package
+    - Migrate core.get_repos_of_project() to obs_api.Project
+    - Migrate core.get_repositories_of_project() to obs_api.Project
+    - Migrate core.show_scmsync() to obs_api.{Package,Project}
+    - Migrate core.set_devel_project() to obs_api.Package
+    - Migrate core.show_devel_project() to obs_api.Package
+    - Migrate Fetcher.run() to obs_api.Keyinfo
+    - Migrate core.create_submit_request() to obs_api.Request
+    - Migrate 'token' command to obs_api.Token
+    - Migrate 'whois/user' command to obs_api.Person
+    - Migrate 'signkey' command to obs_api.Keyinfo
+    - Move print_msg() to the 'osc.output' module
+    - Move run_pager() and get_default_pager() from 'core' to 'output' module
+    - Move core.Package to obs_scm.Package
+    - Move core.Project to obs_scm.Project
+    - Move functions manipulating store from core to obs_scm.store
+    - Move store.Store to obs_scm.Store
+    - Move core.Linkinfo to obs_scm.Linkinfo
+    - Move core.Serviceinfo to obs_scm.Serviceinfo
+    - Move core.File to obs_scm.File
+    - Merge _private.project.ProjectMeta into obs_api.Project
+  - Spec:
+    - Remove dependency on /usr/bin/python3 using %python3_fix_shebang macro (bsc#1212476)
+
+- 1.6.1
+  - Command-line:
+    - Use busybox compatible commands for completion
+    - Change 'wipe' command to use the new get_user_input() function
+    - Fix error 500 in running 'meta attribute <prj>'
+  - Configuration:
+    - Fix resolving config symlink to the actual config file
+    - Honor XDG_CONFIG_HOME and XDG_CACHE_HOME env vars
+    - Warn about ignoring XDG_CONFIG_HOME and ~/.config/osc/oscrc if ~/.oscrc exists
+  - Library:
+    - Error out when branching a scmsync package
+    - New get_user_input() function for consistent handling of user input
+    - Move xml_indent, xml_quote and xml_unquote to osc.util.xml module
+    - Refactor makeurl(), deprecate query taking string or list arguments, drop osc_urlencode()
+    - Remove all path quoting, rely on makeurl()
+    - Always use dict query in makeurl()
+    - Fix core.slash_split() to strip both leading and trailing slashes
+
+- 1.6.0
+  - Command-line:
+    - The 'token --trigger' command no longer sets '--operation=runservice' by default.
+    - Change 'token --create' command to require '--operation'
+    - Fix 'linkdiff' command error 400: prj/pac/md5 not in repository
+    - Update 'build' command to support building 'productcompose' build type with updateinfo.xml data
+    - Don't show meter in terminals that are not interactive
+    - Fix traceback when running osc from an arbitrary git repo that fails to map branch to a project (boo#1218170)
+  - Configuration:
+    - Implement reading credentials from environmental variables
+    - Allow starting with an empty config if --configfile is either empty or points to /dev/null
+    - Implement 'quiet' conf option
+    - Password can be an empty string (commonly used with ssh auth)
+  - Connection:
+    - Allow -X HEAD on osc api requests as well
+  - Library:
+    - Fix credentials managers to consistently return Password
+    - Fix Password.encode() on python < 3.8
+    - Refactor 'meter' module, use config settings to pick the right class
+    - Convert to using f-strings
+    - Use Field.get_callback to handle quiet/verbose and http_debug/http_full_debug options
+    - Implement get_callback that allows modifying returned value to the Field class
+    - Add support for List[BaseModel] type to Field class
+    - Report class name when reporting an error during instantiating BaseModel object
+    - Fix exporting an empty model field in  BaseModel.dict()
+    - Fix initializing a sub-model instance from a dictionary
+    - Implement 'Enum' support in models
+    - Fix Field.origin_type for Optional types
+    - Drop unused 'exclude_unset' argument from BaseModel.dict() method
+    - Store cached model defaults in self._defaults, avoid sharing references to mutable defaults
+    - Limit model attributes to predefined fields by forbidding creating new attributes on fly
+    - Store model values in self._values dict instead of private attributes
+  - Spec:
+    - Recommend openssh-clients for ssh-add that is required during ssh auth
+    - Add 0%{?amzn} macro that wasn't usptreamed
+
+- 1.5.1
+  - Library:
+    - Avoid using '/public/' API routes
+    - Update 'osc.util.models' to avoid including lazy defaults in the rendered man pages
+  - Spec:
+    - Simplify distro-specific macros
+    - Use %{?rhel} macros
+
+- 1.5.0
+  - Command-line:
+    - Change 'rdiff' command to display diff for _project if no package is specified
+    - Update 'build' command with initial support for 'productcompose' build type
+    - Change 'build' command to disable preinstall images in rootless builds
+  - Configuration:
+    - Fix conf.write_initial_config() to use read_file() instead of deprecated readfp()
+  - Other:
+    - Support installing osc into virtualenv
+  - Spec:
+    - Recommend 'build' on openSUSE/SLE and 'obs-build' on all other distros
+
+- 1.4.4
+  - Command-line:
+    - Fix autocompletion for new locations
+  - Configuration:
+    - Fix apiurl_aliases handling in OscOptions.__getitem__
+    - Fix crash when there's no [general]/apiurl option in the config file
+  - Spec:
+    - Install bash completion with .bash suffix rather than .sh
+
+- 1.4.3
+  - Configuration:
+    - Allow undefined fields in Options and HostOptions
+
+- 1.4.2
+  - Command-line:
+    - Change NoPBTextMeter to display no output at all
+    - Fix retrieving the configured user in 'user' command
+  - Configuration:
+    - Restore 'passx' host option that contains an obfuscated password
+    - Fix retrieving a password in case a function returns another callable
+    - Fix retrieving config values in core.vc_export_env()
+
+- 1.4.1
+  - Configuration:
+    - Always display apiurl when asking for credentials
+    - Ask for new credentials when user is missing from an apiurl section in the config file
+  - Library:
+    - Fix testing revision for being empty
+    - Fix core.change_request_state_template() to always return a string
+  - Tests:
+    - Replace 'git init -b' with 'git init' and 'git checkout -b'
+  - Spec:
+    - Run fdupes after install
+    - List the python sitelib paths explicitly
+    - Mark csh completion files as configs
+    - Own zsh completion dirs to mute rpmlint errors
+    - Move bash completion from /etc to /usr/share
+
+- 1.4.0
+  - Command-line:
+    - Add rootless build support to 'build' command for 'kvm' and 'podman' vm types
+    - Print a hint to clean the build root after a failed build
+    - Avoid adding a newline to prompt in 'wipe' command
+    - Fix 'build' command to pass '--vm-type' option to the underlying build tool
+    - Add '--just-print-buildroot' option to print build root path and exit to 'build' command
+    - Add support for keep_packages_locked on request revoke
+    - Import zsh completition made by Holger Macht and improve it
+    - Use XDG locations in completion
+    - Fix 'search' command to resolve '-B .' to the current project
+    - Add '-M/--multibuild-package' option to 'checkconstraints' command
+    - Allow constraints file with remote request in 'checkconstraints' command
+    - Unify how the 'commit' and 'build' commands work with '--noservice' option
+    - Fix 'request show' command to print superseded_by information
+    - Fix 'service' command to support already documented 'r' abbreviation for 'run'
+  - Configuration:
+    - Implement 'exclude_files' and 'include_files' config options that allow skipping files in the 'checkout' command
+    - Fix api_host_options for custom CAs (cafile and capath options work again)
+    - Switch 'osc.conf.config' from dict to Options class with type checking
+    - Rename conf.Options.build_type to vm_type to be consistent with obs build and osc --vm-type option
+    - Update list of supported vm_type values in conf.Options.vm_type
+    - Remove any duplicated code loading configuration from ENV
+  - Library:
+    - Add 'osc.util.models' module implementing an alternative pydantic-like data validation
+    - Add 'osc.util.xdg' module for handling XDG paths
+    - Fix handling empty vm_type in Store.last_buildroot
+  - Spec:
+    - Install zsh completion
+    - Build and install oscrc man page
+
+- 1.3.1
+  - Command-line:
+    - Fix string + int concatenation errors in 'build' command by using f-strings instead
+    - Fix '--all' option in 'rebuild' command
+    - Fix 'build' command when '--alternative-project' option is specified and the git branch cannot be mapped to a project
+    - Stop suggesting that the working directory is git/mercurial/svn/cvs
+    - Be helpful in deprecating commands
+  - Configuration:
+    - Add more config options among integer options
+  - Library:
+    - Fix GitStore to error out properly if there is no 'origin' remote in the git repo
+    - print_buildlog: Remove control characters from build log before printing (CVE-2012-1095)
+
+- 1.3.0
+  - Command-line:
+    - Add experimental support of Git SCM to the 'build' command
+    - Add experimental support of Git SCM to the 'service' command
+    - Make 'meta' command capable of editing attributes
+    - Change '--add' option in 'meta attribute' command to skip duplicate values
+    - Add an interactive option to display build log in 'request list -i' command
+    - Add '--setopt' option for setting config options from the command-line
+    - Fix '--prefer-pkgs' option for noinstall="1" packages in kiwi builds
+    - Change 'checkout' command to print open requests only when running in an interactive terminal
+    - Enhance '--force' option description in the 'request' command
+  - Connection:
+    - Fix crash when HTTP_PROXY env contains no auth
+  - Library:
+    - Add 'git_scm' module for handling packages that live in git scm rather than usual obs scm
+    - Change pop_project_package_from_args() to use get_store() to support Git SCM
+    - Change osc.build module to use 'store' object instead of calling core.store_*() functions
+    - Use alternative project if specified in parse_repoarchdescr()
+    - Fix xml indent() on Python 3.6
+    - Fix less pager by adding '-R' to LESS env
+    - Improve print_msg() and migrate some arbitrary prints to it
+
+- 1.2.0
+  - Command-line:
+    - Add 'repo' command and subcommands for managing repositories in project meta
+    - Extend 'browse' command to open requests in a web browser
+    - Add highlighting for 'osc diff' and similar commands
+    - Fix 'api' command to stream output to avoid running out of memory
+    - Fix printing utf-8 characters to stdout
+  - Connection:
+    - Fix ValueError: Cannot set verify_mode to CERT_NONE when check_hostname is enabled
+  - Authentication:
+    - Correctly handle passwords with utf-8 characters
+  - Library:
+    - Fix crash when submiting a SCM package which has no _link
+    - Fix local service execution of scmsync packages
+    - Detect target package by its full name, instead of assuming its origin is identical to the source package type
+  - Other:
+    - Spell openSUSE correctly
+
+- 1.1.4
+  - Command-line:
+    - Change 'review list' command to display open requests (state: new, review, declined)
+    - Fix running osc in an AppImage by switching to the correct working directory
+    - Handle ProtocolError exception
+  - Library:
+    - Add 'req_states' parameter to osc.core.get_review_list()
+  - Connection:
+    - Fix grabber to work with old urllib3 versions that do not contain URLSchemeUnknown exception
+
+- 1.1.3
+  - Command-line:
+    - Backup edited messages and notify user about them when osc errors out
+    - Consider only open requests when listing requests with a given review state
+    - Fix 'diff' command when no files are specified
+  - Configuration:
+    - Add glob support to the 'trusted_prj' config option
+  - Library:
+    - Fix core.xmlindent() to work with ElementTree objects
+
+- 1.1.2
+  - Command-line:
+    - Add '--buildtool-opt' option passing options to underlying rpmbuild to the 'build' command
+    - Fix 'diff' command to support diffing selected files only
+    - Identify inherited packages in the 'dependson' command output
+    - Bring the '--debug' option back to the 'buildinfo' command
+    - Fix 'buildhistory' command by setting the type of the '--limit' option to int
+  - Library:
+    - Fix a traceback when failed to unlock a keyring
+    - Don't retry on 400 HTTP status code in core.server_diff()
+    - Clean-up the '.old' folder if an exception happens
+    - Document 'popt' attribute in the _link template
+    - Fix build.get_repo() to return only directory that contains 'repodata/repomd.xml'
+  - Connection:
+    - Retry on receiving the following HTTP status codes: 400, 500, 502, 503, 504
+    - Allow disabling retry on 400 HTTP status code
+    - Fix urlgrab to skip mirrors with invalid scheme
+
+- 1.1.1
+  - Command-line:
+    - Fix 'creq' command that wasn't working at all
+    - Fix 'ls' command when listing all projects by setting project argument to '/'
+    - Fix regression: Run interactive config setup on missing config or credentials
+    - Append plugin dirs to sys.path to allow loading modules installed next to the plugins
+    - Do not recurse into subdirs when loading plugins
+  - Configuration:
+    - Display apiurl when asking for a username or a password
+    - If apiurl is not set in interactive_config_setup(), use apiurl from DEFAULTS
+  - Library:
+    - Decode entities in HTTPError message body
+
+- 1.1.0
+  - Command-line:
+    - New class-based commands
+    - Sort commands before printing help
+    - No longer read plugins from /var/lib/osc-plugins
+  - Configuration:
+    - Do not error out on setting oscrc permissions if the file is owned by another user
+  - Library:
+    - Restore 'include_request_from_project' conf option functionality
+    - Simplify how babysitter works with options and config
+    - Prefer f-strings over c-style string expansion
+
+- 1.0.1
+  - Configuration:
+    - Fix a cut&paste error in setting 'disable_hdrmd5_check' config option
+  - Connection:
+    - Set Content-Type of POST requests without data to 'application/x-www-form-urlencoded'
+
+- 1.0.0
+  - Command-line:
+    - Use '.' as a wildcard that resolves to a project or a package name from the current working copy, for example 'osc rdiff ./. -c <num>'
+    - Add 'create-pbuild-config' (cpc) command
+    - Add '--disable-build' option to the 'branch' command
+    - Add '--disable-build' option to the 'linkpac' command
+    - Add '-X/--extra-pkgs-from' option to the 'build' command
+    - Add '--add' option to the 'meta' command that appends new values to the existing values
+    - Replace '-q/--hide-legend' option in 'prjresults' command with global '-q/--quiet' option
+    - Replace '--debug' option in the 'getbinaries' command with '--debuginfo' to avoid conflicts with the global '--debug'
+    - Replace '--verbose' option in the 'build' command with '--verbose-mode' to avoid conflicts with the global '--verbose'
+    - Replace '--version' option with 'version' command
+    - Enable forwarding requests to the parent projects in 'rq list -i' and 'sr accept' commands
+    - Make use of '-M/--multibuild' option consistent across the commands
+    - Enhance '--force' option in the 'commit' command to allow deleting packages even if other packages depend on them
+    - Print URLs and xpaths in the debug rather than the verbose mode
+    - Fix 'add' command for github /archive/ URLs
+    - Fix 'buildhistory' command to produce proper output using build_table() and a CSV writer
+    - Fix 'linkpac' command to avoid copying a lock from a locked package to the target package
+    - Fix 'setlinkrev' command to write a log message on setting a revision
+    - Fix 'submitrequest' command not to error out on using an alias to apiurl
+    - Fix 'update' command on project level for scm packages
+    - Fix '--mine' option in the 'request' command to show only requests created by the user
+    - Fix the documentation url in the 'maintenancerequest' and 'createincident' commands
+    - Remove '--skip-validation' option from the 'commit' command
+    - Remove '--oldpkg', '--oldprj' options from the 'rdiff' command
+    - Remove 'create', 'list', 'log', 'show', 'decline', 'accept', 'delete', 'revoke' subcommands from the 'submitrequest' command
+    - Remove '--seperate-requests' option from the 'submitrequest' command
+    - Remove '--raw' option from the 'develproject' command
+    - Remove '--maintained' option from the 'search' command
+    - Remove 'deleteprj' command
+    - Remove 'deletepac' command
+    - Remove 'editmeta' command
+    - Remove 'results_meta' command
+    - Remove 'rlog' command
+    - Remove 'rprjresults' command
+    - Remove 'rresults' command
+  - Configuration:
+    - Add 'project_separator' config option
+    - Add 'disable_hdrmd5_check' config option to ignore hdrmd5 mismatches
+    - Remove 'plaintext_passwd' config option
+  - Library:
+    - Add Store class that will replace store_{read,write}* functions
+    - Remove 'GnomeKeyringCredentialsManager' and related code
+    - Remove Request.get_creator() method
+    - Replace unmaintained cmdln.py with a custom code based on argparse
+    - Replace core.findpacs() with Package.from_paths() and Package.from_paths_nofail()
+    - Drop Python 2 support, Python 3.6 is the lowest supported version
+    - Code cleanups, following PEP 8 and the latest best practices now
+    - Improve handling of hdrmd5 mismatches
+    - Handle uncompressed Debian packages
+    - Replace arbitrary XML escaping code with xml_escape()
+    - Fix race condition in using .old directory in Serviceinfo.execute()
+    - Fix manual run of source service
+  - Connection:
+    - Switch http_request() to urllib3 and cryptography (drop M2Crypto dependency)
+    - Warn when using HTTP connection, make HTTPS the default
+    - Send HTTP header Accept: application/xml
+    - Wait between retries
+  - Authentication:
+    - Support signature (ssh) auth including ssh-agent forwarding
+    - Lock cookiejar to prevent unnecessary signature auth by waiting for a session cookie
+    - Print user and apiurl when prompting for a password
+    - Fix a crash when deleting a password
+  - Known issues:
+    - Commandline option values cannot start with '-', for example: osc build -x -vim
+      Background: This is a limitation of underlying Python's argparse
+      How to fix: Use '=' to join the option with its value: osc build -x=-vim
+      URL: https://github.com/openSUSE/osc/issues/1227
+    - Commandline positional arguments no longer recognize '/' as a universal argument separator
+      Background: This is an attempt to bring some consistency into argument parsing, reducing number of separators and value combinations
+      How to fix: Separate <project>/<package> from <repo>/<arch> with a space
+      URL: https://github.com/openSUSE/osc/issues/1272
