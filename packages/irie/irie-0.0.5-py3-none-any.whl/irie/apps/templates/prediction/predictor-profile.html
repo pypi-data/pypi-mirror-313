@@ -1,0 +1,155 @@
+{% extends "layouts/base.html" %}
+{% load predictor %}
+{% block title %} {{ asset.calid }} | {{ predictor.name }} {% endblock %} 
+{% block stylesheets %}
+<style>
+@media print {
+  @page {
+    /* size:210mm 297mm;  */ 
+    size: 8.5in 11in;
+  }
+  #event-table, #rendering, #predictorProfile {
+    display:    none;
+    visibility: hidden;
+    max-width:  0;
+  }
+  #page {
+    width: 100%; 
+    margin-left:   0;
+    margin-right:  0;
+    margin-top:    0.5in;
+    margin-bottom: 0.75in;
+    float: none !important;
+  }
+  html, body {
+    margin:  0 !important;
+    padding: 0 !important;
+    height: 99%;
+    width: 100%;
+    float: none !important;
+  }
+  body {
+    font: 10pt "Computer Modern", Georgia, "Times New Roman", Times, serif;
+    line-height: 1.1;
+    background: #fff !important;
+    color: #000;
+  }
+  h1 {
+    font-size: 16pt;
+/*  position: fixed;
+    top: 0; */
+  }
+  h2, h3, h4 {
+    font-size: 14pt;
+    /* margin-top: 25px; */
+  }
+  main, div.print {
+    visibility: visible;
+    width: auto; /* 100%; */
+    font-size: 10pt;
+    margin: 0; /* 0.50in 0.5in 0.5in 0.5in; */
+    float: none ! important;
+    page-break-inside:auto ;
+    /* height: 900px; */
+  }
+  tr    { page-break-inside:avoid; page-break-after:auto }
+  thead { display:table-header-group }
+  tfoot { display:table-footer-group }
+  table {
+    border-bottom: 2px solid black;
+    border-top: 2px solid black;
+    font-size: 8pt;
+    visibility: visible;
+    width: 100%; 
+    margin: 0; 
+    float: none;
+    page-break-inside:auto ; 
+    page-break-after:auto;
+  }
+  hr, img, nav, footer, .button, #rendering, #event-table {
+    visibility: hidden;
+    display: none;
+    max-height: 0;
+    max-width: 0;
+  }
+  details > summary {
+    list-style: none;
+  }
+  details > summary::marker {
+    display:none;
+  }
+
+  /*
+  #header,
+  #footer,
+  #nav {
+    display: none !important;
+  }
+  */
+  .ssid-data {
+    visibility: visible;
+    display: block;
+  }
+}
+.ct-series-a .ct-point, .ct-series-a .ct-line, .ct-series-a .ct-bar, .ct-series-a .ct-slice-donut{
+  stroke: #506690;
+}
+.ct-series-b .ct-point, .ct-series-b .ct-line, .ct-series-b .ct-bar, .ct-series-b .ct-slice-donut {
+  stroke: #61DAFB;
+}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="print">
+    <h1 class="fs-2 lh-2 me-3"><code>{{ asset.calid }}</code> {{ asset.name }}</h1>
+    <span id="predictorProfile" class="fs-2 lh-2 me-3">Predictor Profile</span>
+
+    {# BRIDGE RENDERING #}
+    <div id="rendering" class="row">
+      <div class="col-12 mb-4">
+        <div class="card h-100 bg-white-100 border-0 shadow">
+          <div class="card-header d-sm-flex flex-row align-items-center flex-0">
+          </div>
+          <div class="card-body p-2">
+            {% if predictor.rendering %}
+            <model-viewer alt="Model rendering" 
+                          src="{{ predictor.rendering.path }}" ar 
+                          style="width: 100%; height: 300px;"
+                          shadow-intensity="1" camera-controls touch-action="pan-y">
+            </model-viewer>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <details id="event-table" open><summary><h3>Configuraion</h3></summary>
+      <div class="table-responsive">
+      {{ predictor|display_predictor }}
+      </div>
+    <div class="row">
+        <div class="col-12 mb-4">
+        </div>
+    </div>
+    </details>
+    <hr>
+
+</div>
+{% endblock content %}
+
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
+{% block javascripts %}
+
+<script type="text/javascript">
+  function printTables() {
+    var myWindow = window.open('','','width=200,height=100')
+    myWindow.document.write("This is 'myWindow'")
+    myWindow.print();
+  }
+</script>
+
+{% endblock javascripts %}
