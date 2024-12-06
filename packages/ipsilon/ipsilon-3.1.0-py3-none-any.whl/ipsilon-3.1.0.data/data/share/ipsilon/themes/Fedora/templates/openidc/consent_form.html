@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block maincontent %}
+<div class="row mb-3">
+    <div class="col text-center">
+            <p class="h4"> 
+                <strong>
+                    {% if client['homepage'] %}
+                        <a href="{{ client['homepage'] }}">{{ client['name'] }}</a>
+                    {% else %}
+                      {{ client['name'] }}
+                    {% endif %}
+                </strong> 
+                is asking Fedora Accounts to authorize access for <strong>{{ username }}</strong>.
+            </p>
+            {%- if client['policy'] %}
+              <p><a href="{{ client['policy'] }}">Client privacy policy</a></p>
+            {% endif %}
+            {%- if client['tos'] %}
+              <p><a href="{{ client['tos'] }}">Client terms of service</a></p>
+            {%- endif %}
+    </div>
+</div>
+<div class="row justify-content-around">
+    <div class="col-10">
+      <form class="form-horizontal" role="form" id="consent_form" action="{{ action }}" method="post" enctype="application/x-www-form-urlencoded">
+
+        <div class="card">
+          <div class="card-body p-0">
+              <input type="hidden" name="ipsilon_transaction_id" id="ipsilon_transaction_id" value="{{ ipsilon_transaction_id }}">
+              <h4 class="p-3 font-weight-bold border-bottom text-muted mb-0">Authorization Details</h4>
+              <div class="list-group list-group-flush">
+          {%- for item in claim_requests|dictsort %}
+                  <div class="list-group-item">
+                      <div class="row align-items-center">
+                          <div class="col"><strong>{{ item[1]['display_name'] }}</strong></div>
+                          {%- if item[1]['value'] is iterable and not item[1]['value'] is string -%}
+                          <div class="col-auto">{{ item[1]['value'] | join(', ') }}</div>
+                          {%- else -%}
+                          <div class="col-auto">{{ item[1]['value'] }}</div>
+                          {%- endif -%}
+                      </div>
+                  </div>
+          {%- endfor %}
+                </div>
+          {% if scopes %}
+          <h4 class="p-3 font-weight-bold border-bottom text-muted mb-0">Scopes</h4>
+          <div class="list-group list-group-flush">
+          {%- for item in scopes|dictsort %}
+              <div class="list-group-item">
+                  <div class="row align-items-center">
+                      <div class="col"><strong>{{ item[0] }}</strong></div>
+                      <div class="col-auto">
+                      {%- for i in item[1]|dictsort %}
+                        {{ i[1] }}{{ ", " if not loop.last else "" }}
+                      {%- endfor %}
+                      </div>
+                  </div>
+              </div>
+          {%- endfor %}
+          </div>
+          {% endif %}
+          </div>
+          <div class="card-footer">
+              <div class="d-flex justify-content-end">
+                  <input class="btn btn-outline-danger mr-1" name="decided_deny" type="submit" value="Reject" />
+                  <input class="btn btn-primary" name="decided_allow" type="submit" value="Approve" />
+              </div>
+          </div>
+        </div>
+      </form>
+    </div>
+</div>
+{% endblock %}

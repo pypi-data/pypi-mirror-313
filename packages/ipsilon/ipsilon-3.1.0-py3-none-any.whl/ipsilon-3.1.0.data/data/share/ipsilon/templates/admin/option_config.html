@@ -1,0 +1,274 @@
+{% extends "master-admin.html" %}
+{% block scripts %}
+    <script>
+        $( document ).on("click", ".add-field",
+            function() {
+                var buttonRow = $(this).parents(".add-row")
+                var ourTable = $(this).parents(".extensible-table")
+                var lastRow = $(ourTable).find(".list-field:last")
+                var newRow = $(lastRow).clone()
+                lastRow.show()
+                var inputFields = lastRow.find("input")
+                for (i = 0; i < inputFields.length; i++) {
+                    $(inputFields[i]).prop("disabled", false)
+                }
+                var lastIndex = parseInt(newRow.find("td:first").text())
+                newRow.find("td:first").text(lastIndex + 1)
+                var inputFields = newRow.find("input")
+                for (i = 0; i < inputFields.length; i++) {
+                    var separator = (lastIndex-1).toString()+"-"
+                    var nArr = $(inputFields[i]).attr("name").split(separator)
+                    var newidx = lastIndex.toString()+"-"
+                    if (nArr.length === 2) {
+                        $(inputFields[i]).attr("name", nArr[0]+newidx+nArr[1])
+                    }
+                    $(inputFields[i]).attr("value", "")
+                }
+                $(newRow).appendTo(ourTable)
+                $(buttonRow).appendTo(ourTable)
+            }
+        );
+        $(function() {
+            $("#uploadFile").on("change", function()
+            {
+                var files = !!this.files ? this.files : [];
+                if (!files.length || !window.FileReader) return; // no file selected, or no FileReader support
+ 
+                if (/^image/.test( files[0].type)){ // only image file
+                    var reader = new FileReader(); // instance of the FileReader
+                    reader.readAsDataURL(files[0]); // read the local file
+ 
+                    reader.onloadend = function(e){ // set image data as background of div
+                        var contents = e.target.result;
+                        if (!contents) {
+                            window.alert('Image file is unreadable')
+                            document.getElementById('uploadFile').value = null;
+                        }
+
+                        $("#imagePreview").css("background-image", "url("+this.result+")");
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+{% block main %}
+
+    <div class = "row">
+        <div class="col-md-3 col-sm-3 col-xs-6">
+            <h2>{{ title }}</h2>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-6" role="alert">
+          {% if message %}
+            <div class="alert alert-{{message_type}}">
+                <p>{{ message }}</p>
+            </div>
+          {% endif %}
+        </div>
+    </div>
+
+    <hr>
+
+    <div id="options">
+        <form class="form-horizontal" role="form" id="{{ name }}" action="{{ action }}" method="post" enctype="multipart/form-data"">
+        {% for k, v in config.iteritems() %}
+            <div class="form-group">
+              <label class="col-sm-2" for="{{ v.name }}">{{ v.name }}:</label>
+              <div class="col-sm-10">
+              {% set value = v.get_value() -%}
+              {% if v.__class__.__name__ == 'String' and v.multiline -%}
+                <textarea class="form-control" name="{{ v.name }}" rows="10" cols="80"}">{{value}}</textarea>
+              {% elif v.__class__.__name__ in ['String', 'Template', 'Integer'] -%}
+                <input type="text" class="form-control" name="{{ v.name }}"
+                  {%- if value %}
+                    value="{{ value }}"
+                  {%- endif -%}
+                  {% if v.is_readonly() -%}
+                    disabled
+                  {%- endif -%}
+                >
+              {% elif v.__class__.__name__ == 'Image' -%}
+                <!-- FIXME: This is limited to a single instance of Image -->
+                {%- if value %}
+                <img src="{{ value }}"
+                   height="100" width="200"
+                >
+                {%- endif -%}
+                <p></p>
+                <input type="file" name="{{ v.name }}"
+                     title="{{ v.name }}"
+                     accept=".png,.jpg"
+                     id="uploadFile"
+                     style="display: none;" />
+                <input type="button" value="Select Image..." onclick="document.getElementById('uploadFile').click();" />
+                <p></p>
+                <div id="imagePreview"></div>
+              {% elif v.__class__.__name__ == 'List' -%}
+                <textarea class="form-control" name="{{ v.name }}"
+                  {% if v.is_readonly() -%}
+                    disabled
+                  {%- endif -%}
+                >
+                  {%- if value %}
+                    {{- value|join('\n') -}}
+                  {%- endif -%}
+                </textarea>
+              {% elif v.__class__.__name__ == 'Choice' -%}
+                {% set entries = v.get_allowed() -%}
+                <div class="row">
+                {% for e in entries -%}
+                  <div class="col-md-4">
+                    <input type="checkbox" name="{{ v.name }}_{{ e }}"
+                      {%- if value and e in value %}
+                        checked="true"
+                      {%- endif -%}
+                      {% if v.is_readonly() -%}
+                        disabled
+                      {%- endif -%}
+                    >&nbsp;{{ e }}
+                  </div>
+                {% endfor %}
+                </div>
+              {% elif v.__class__.__name__ == 'Pick' -%}
+                {% set entries = v.get_allowed() -%}
+                <div class="row">
+                {% for e in entries -%}
+                  <div class="col-md-4">
+                    <input type="radio" name="{{ v.name }}" value="{{ e }}"
+                      {%- if e == value %}
+                        checked="true"
+                      {%- endif -%}
+                      {% if v.is_readonly() -%}
+                        disabled
+                      {%- endif -%}
+                    >&nbsp;{{ e }}
+                  </div>
+                {% endfor %}
+                </div>
+              {% elif v.__class__.__name__ == 'Condition' -%}
+                <input type="checkbox" name="{{ v.name }}"
+                  {%- if value %}
+                    checked="true"
+                  {% endif -%}
+                  {% if v.is_readonly() -%}
+                    disabled
+                  {%- endif -%}
+                >
+              {% elif v.__class__.__name__ == 'ComplexList' -%}
+                <table class="table table-striped extensible-table">
+                <tr><th>#</th><th>Name</th><th>Delete</th></tr>
+                {% for line in value -%}
+                    {%- set basename = "%s %d-"|format(v.name, loop.index0) -%}
+                <tr class="list-field">
+                    <td>{{loop.index}}</td>
+                    <td>
+                      <input type="text" name="{{basename}}name"
+                        {%- if line.__class__.__name__ == 'list' -%}
+                          value="{{ line|join(' / ') }}"
+                        {%- else -%}
+                          value="{{ line }}"
+                        {%- endif -%}
+                        {% if v.is_readonly() -%}
+                          disabled
+                        {%- endif -%}
+                      >
+                    </td>
+                    <td>
+                      <input type="checkbox" name="{{basename}}delete">
+                      <!-- Never checked by default -->
+                    </td>
+                </tr>
+                {% endfor -%}
+                <!-- Template for new row -->
+                {%- set basename = "%s %d-"|format(v.name, value|length) -%}
+                <tr class="list-field" style="display:none">
+                    <td>{{value|length + 1}}</td>
+                    <td>
+                      <input type="text" name="{{basename}}name" value=""
+                             disabled="disabled">
+                    </td>
+                    <td>
+                      <input type="checkbox" name="{{basename}}delete"
+                             disabled="disabled">
+                    </td>
+                </tr>
+                <!-- End of Template -->
+                <tr class="add-row">
+                    <td><button class="btn add-field" type="button"> + </button></td>
+                    <td colspan=3 />
+                </tr>
+                </table>
+              {% elif v.__class__.__name__ == 'MappingList' -%}
+                <table class="table table-striped extensible-table">
+                <tr><th>#</th><th>From</th><th>To</th><th>Delete</th></tr>
+                {% for line in value -%}
+                    {%- set basename = "%s %d-"|format(v.name, loop.index0) -%}
+                <tr class="list-field">
+                    <td>{{loop.index}}</td>
+                    <td>
+                      <input type="text" name="{{basename}}from"
+                        {% if line[0].__class__.__name__ == 'list' -%}
+                          value="{{ line[0]|join(' / ') }}"
+                        {% else -%}
+                          value="{{ line[0] }}"
+                        {% endif -%}
+                      >
+                    </td>
+                    <td>
+                      <input type="text" name="{{basename}}to"
+                        {% if line[1].__class__.__name__ == 'list' -%}
+                          value="{{ line[1]|join(' / ') }}"
+                        {% else -%}
+                          value="{{ line[1] }}"
+                        {% endif -%}
+                      >
+                    </td>
+                    <td>
+                      <input type="checkbox" name="{{basename}}delete">
+                      <!-- Never checked by default -->
+                    </td>
+                </tr>
+                {% endfor -%}
+                <!-- Template for new row -->
+                {%- set basename = "%s %d-"|format(v.name, value|length) -%}
+                <tr class="list-field" style="display:none">
+                    <td>{{value|length + 1}}</td>
+                    <td>
+                      <input type="text" name="{{basename}}from" value=""
+                             disabled="disabled">
+                    </td>
+                    <td>
+                      <input type="text" name="{{basename}}to"
+                             disabled="disabled">
+                    </td>
+                    <td>
+                      <input type="checkbox" name="{{basename}}delete"
+                             disabled="disabled">
+                      <!-- Never checked by default -->
+                    </td>
+                </tr>
+                <!-- End of Template -->
+                <tr class="add-row">
+                    <td><button class="btn add-field" type="button"> + </button></td>
+                    <td colspan=3 />
+                </tr>
+                </table>
+              {% else -%}
+                {{ v.__class__.__name__ }}
+              {% endif -%}
+                <span class="help-block">{{ v.description }}</span>
+              </div>
+            </div>
+            <hr>
+        {% endfor %}
+
+          <p>
+            <button id="submit" class="btn btn-primary" name="submit" type="submit" value="Submit">
+            Save
+            </button>
+            <a href="{{ back }}" class="btn btn-default" title="Back">Back</a>
+          </p>
+        </form>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block title %}openSUSE Login{% endblock %}
+{% block toptext %}
+<div class="alert alert-info">
+  <span class="typcn typcn-key-outline"></span>
+  {%- if login_target %}
+    <strong>{{ login_target }}</strong>
+  {%- else %}
+    Application
+  {%- endif %}
+  wants to use your openSUSE Account credentials
+</div>
+{% endblock %}
+{% block after_card %}
+                <p class="my-3 text-center">
+                    Don't have an openSUSE Account? <a target="_blank" href="https://idp-portal.suse.com/univention/self-service/#page=createaccount">Sign up</a>.
+                </p>
+{% endblock %}
+{% block cardwidths %}col-md-6 col-sm-8{% endblock %}
+{% block main %}
+                {% if error %}<p>{{error}}</p>{% endif %}
+                <form method="post" action="{{ action }}" enctype="application/x-www-form-urlencoded">
+                    <div class="card-body">
+                        <input type="hidden" name="ipsilon_transaction_id" id="ipsilon_transaction_id" value="{{ ipsilon_transaction_id}}"/>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input class="form-control" id="username" name="login_name" placeholder="Username" autofocus value="{{ username | e }}" />
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input class="form-control" id="password" name="login_password" type="password" placeholder="Password" />
+                        </div>
+                        <div class="form-group mb-0">
+                            <label for="otp">One-Time-Password</label>
+                          <input type="text" class="form-control" id="otp" name="login_otp" autocomplete="off" placeholder="One-Time-Password (if you have one)" />
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between align-items-center">
+                        <a target="_blank" href="https://idp-portal.suse.com/univention/self-service/#page=passwordreset">Forgot password?</a>
+                        <input class="btn btn-primary" type="submit" id="loginbutton" value="Log in" />
+                    </div>
+                </form>
+{% endblock %}
