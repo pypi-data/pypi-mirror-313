@@ -1,0 +1,1 @@
+WHITE_GOOGLE_DRIVE_DOWNLOAD_URL = 'https://drive.google.com/file/d/1LqqqTnr0nROyjU3fz9dG26gUKXzacW6X/view?usp=sharing'
