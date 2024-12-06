@@ -1,0 +1,14 @@
+{% if not vars.draft_parent_record_state.skip %}
+{{ vars.draft_parent_record_state|imports }}
+{{ vars.draft_parent_record_state.class|generate_import }}
+{{ vars.record_metadata.class|generate_import }}
+
+
+
+class {{ vars.draft_parent_record_state|class_header }}:
+    table_name = "{{ vars.draft_parent_record_state.table }}"
+
+    __parent_record_model__ = {{ vars.draft_parent_record_metadata.class|base_name }}
+    __record_model__ = {{ published_record.record_metadata.class|base_name }}
+    __draft_model__ = {{ vars.record_metadata.class|base_name  }}
+{% endif %}

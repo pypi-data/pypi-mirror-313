@@ -1,0 +1,13 @@
+{%  if not published_service_config.skip %}
+
+def init_addons_{{ vars.module.suffix_snake }}_published_service(state):
+    """Init app."""
+    app = state.app
+    ext = app.extensions["{{ vars.ext.alias }}"]
+
+    # register service
+    sregistry = app.extensions["invenio-records-resources"].registry
+    sregistry.register(ext.{{ published_service.ext_name }},
+                       service_id=ext.{{ published_service.ext_name }}.config.service_id)
+
+{% endif  %}

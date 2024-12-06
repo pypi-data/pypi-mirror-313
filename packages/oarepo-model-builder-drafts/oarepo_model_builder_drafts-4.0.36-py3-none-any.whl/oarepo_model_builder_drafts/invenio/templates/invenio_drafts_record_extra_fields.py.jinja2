@@ -1,0 +1,14 @@
+{% if not vars.draft_parent_record.skip %}
+{{ vars.draft_parent_record_state|imports }}
+{{ vars.draft_parent_record_state.class|generate_import }}
+from oarepo_runtime.records.systemfields.record_status import RecordStatusSystemField
+
+class {{ record|class_header }}:
+    {% if not vars.draft_parent_record_state.skip %}
+    versions_model_cls = {{ vars.draft_parent_record_state.class|base_name }}
+    {% endif %}
+    {% if not vars.draft_parent_record.skip %}
+    parent_record_cls = {{ vars.draft_parent_record.class|base_name }}
+    record_status = RecordStatusSystemField()
+    {% endif %}
+{% endif %}
