@@ -1,0 +1,52 @@
+[build-system]
+requires = [
+  "hatchling",
+  "hatch-requirements-txt",
+  "hatch-fancy-pypi-readme>=22.5.0",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyannote_viewer"
+version = "1.0.0"
+description = "Gradio custom component to visualize pyannote's pipelines outputs"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Clément Pagés", email = "clement.pages@irit.fr" }]
+keywords = [
+  "gradio-custom-component",
+  "gradio-template-Audio",
+  "pyannote-audio",
+  "speech-separation",
+  "speaker-diarization",
+  "source-separation",
+  "speech",
+  "speaker",
+  "voice-activity-detection",
+  "pixit",
+  "totatonet",
+]
+# Add dependencies here
+dependencies = ["gradio>=4.0,<5.0"]
+classifiers = [
+  'Development Status :: 3 - Alpha',
+  'License :: OSI Approved :: MIT License',
+  'Operating System :: OS Independent',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3 :: Only',
+  'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: 3.11',
+  'Topic :: Scientific/Engineering',
+  'Topic :: Scientific/Engineering :: Artificial Intelligence',
+  'Topic :: Scientific/Engineering :: Visualization',
+]
+
+[project.optional-dependencies]
+dev = ["build", "twine"]
+
+[tool.hatch.build]
+artifacts = ["/backend/pyannoteviewer/templates", "*.pyi", "backend/pyannote_viewer/templates"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["/backend/pyannote_viewer"]
