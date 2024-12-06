@@ -1,0 +1,9 @@
+{
+{% for k in sorted(mp.keys()) %}
+{% if attribute_overrides.get(_append(attribute_path, k)) -%}
+    {{_spaces_for(indent+2)}}'{{k}}': {{_render_value(attribute_overrides.get(_append(attribute_path, k)), _append(attribute_path, k), indent+2, classname_map, attribute_overrides, template_dir=template_dir) }},
+{% else -%}
+    {{_spaces_for(indent+2)}}{{_render_value(k, attribute_path, indent+2, classname_map, attribute_overrides, template_dir=template_dir)}}: {{ _render_value(mp[k], _append(attribute_path, k), indent+2, classname_map, attribute_overrides, template_dir=template_dir) }},
+{% endif %}
+{% endfor %}
+{{_spaces_for(indent)}}}
