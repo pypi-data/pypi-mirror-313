@@ -1,0 +1,257 @@
+# coding: utf-8
+from __future__ import print_function, unicode_literals
+
+# awk -F\" '/add_argument\("-[^-]/{print(substr($2,2))}' copyparty/__main__.py | sort | tr '\n' ' '
+zs = "a c e2d e2ds e2dsa e2t e2ts e2tsr e2v e2vp e2vu ed emp i j lo mcr mte mth mtm mtp nb nc nid nih nth nw p q s ss sss v z zv"
+onedash = set(zs.split())
+
+
+def vf_bmap()   :
+    """argv-to-volflag: simple bools"""
+    ret = {
+        "dav_auth": "davauth",
+        "dav_rt": "davrt",
+        "ed": "dots",
+        "hardlink_only": "hardlinkonly",
+        "no_clone": "noclone",
+        "no_dirsz": "nodirsz",
+        "no_dupe": "nodupe",
+        "no_forget": "noforget",
+        "no_pipe": "nopipe",
+        "no_robots": "norobots",
+        "no_thumb": "dthumb",
+        "no_vthumb": "dvthumb",
+        "no_athumb": "dathumb",
+    }
+    for k in (
+        "dedup",
+        "dotsrch",
+        "e2d",
+        "e2ds",
+        "e2dsa",
+        "e2t",
+        "e2ts",
+        "e2tsr",
+        "e2v",
+        "e2vu",
+        "e2vp",
+        "exp",
+        "grid",
+        "gsel",
+        "hardlink",
+        "magic",
+        "no_sb_md",
+        "no_sb_lg",
+        "nsort",
+        "og",
+        "og_no_head",
+        "og_s_title",
+        "rand",
+        "rss",
+        "xdev",
+        "xlink",
+        "xvol",
+    ):
+        ret[k] = k
+    return ret
+
+
+def vf_vmap()   :
+    """argv-to-volflag: simple values"""
+    ret = {
+        "no_hash": "nohash",
+        "no_idx": "noidx",
+        "re_maxage": "scan",
+        "safe_dedup": "safededup",
+        "th_convt": "convt",
+        "th_size": "thsize",
+        "th_crop": "crop",
+        "th_x3": "th3x",
+    }
+    for k in (
+        "dbd",
+        "hsortn",
+        "html_head",
+        "lg_sbf",
+        "md_sbf",
+        "nrand",
+        "og_desc",
+        "og_site",
+        "og_th",
+        "og_title",
+        "og_title_a",
+        "og_title_v",
+        "og_title_i",
+        "og_tpl",
+        "og_ua",
+        "mv_retry",
+        "rm_retry",
+        "sort",
+        "tcolor",
+        "unlist",
+        "u2abort",
+        "u2ts",
+    ):
+        ret[k] = k
+    return ret
+
+
+def vf_cmap()   :
+    """argv-to-volflag: complex/lists"""
+    ret = {}
+    for k in (
+        "exp_lg",
+        "exp_md",
+        "mte",
+        "mth",
+        "mtp",
+        "xac",
+        "xad",
+        "xar",
+        "xau",
+        "xban",
+        "xbc",
+        "xbd",
+        "xbr",
+        "xbu",
+        "xiu",
+        "xm",
+    ):
+        ret[k] = k
+    return ret
+
+
+permdescs = {
+    "r": "read; list folder contents, download files",
+    "w": 'write; upload files; need "r" to see the uploads',
+    "m": 'move; move files and folders; need "w" at destination',
+    "d": "delete; permanently delete files and folders",
+    ".": "dots; user can ask to show dotfiles in listings",
+    "g": "get; download files, but cannot see folder contents",
+    "G": 'upget; same as "g" but can see filekeys of their own uploads',
+    "h": 'html; same as "g" but folders return their index.html',
+    "a": "admin; can see uploader IPs, config-reload",
+    "A": "all; same as 'rwmda.' (read/write/move/delete/dotfiles)",
+}
+
+
+flagcats = {
+    "uploads, general": {
+        "dedup": "enable symlink-based file deduplication",
+        "hardlink": "enable hardlink-based file deduplication,\nwith fallback on symlinks when that is impossible",
+        "hardlinkonly": "dedup with hardlink only, never symlink;\nmake a full copy if hardlink is impossible",
+        "safededup": "verify on-disk data before using it for dedup",
+        "noclone": "take dupe data from clients, even if available on HDD",
+        "nodupe": "rejects existing files (instead of linking/cloning them)",
+        "sparse": "force use of sparse files, mainly for s3-backed storage",
+        "daw": "enable full WebDAV write support (dangerous);\nPUT-operations will now \033[1;31mOVERWRITE\033[0;35m existing files",
+        "nosub": "forces all uploads into the top folder of the vfs",
+        "magic": "enables filetype detection for nameless uploads",
+        "gz": "allows server-side gzip of uploads with ?gz (also c,xz)",
+        "pk": "forces server-side compression, optional arg: xz,9",
+    },
+    "upload rules": {
+        "maxn=250,600": "max 250 uploads over 15min",
+        "maxb=1g,300": "max 1 GiB over 5min (suffixes: b, k, m, g, t)",
+        "vmaxb=1g": "total volume size max 1 GiB (suffixes: b, k, m, g, t)",
+        "vmaxn=4k": "max 4096 files in volume (suffixes: b, k, m, g, t)",
+        "medialinks": "return medialinks for non-up2k uploads (not hotlinks)",
+        "rand": "force randomized filenames, 9 chars long by default",
+        "nrand=N": "randomized filenames are N chars long",
+        "u2ts=fc": "[f]orce [c]lient-last-modified or [u]pload-time",
+        "u2abort=1": "allow aborting unfinished uploads? 0=no 1=strict 2=ip-chk 3=acct-chk",
+        "sz=1k-3m": "allow filesizes between 1 KiB and 3MiB",
+        "df=1g": "ensure 1 GiB free disk space",
+    },
+    "upload rotation\n(moves all uploads into the specified folder structure)": {
+        "rotn=100,3": "3 levels of subfolders with 100 entries in each",
+        "rotf=%Y-%m/%d-%H": "date-formatted organizing",
+        "lifetime=3600": "uploads are deleted after 1 hour",
+    },
+    "database, general": {
+        "e2d": "enable database; makes files searchable + enables upload-undo",
+        "e2ds": "scan writable folders for new files on startup; also sets -e2d",
+        "e2dsa": "scans all folders for new files on startup; also sets -e2d",
+        "e2t": "enable multimedia indexing; makes it possible to search for tags",
+        "e2ts": "scan existing files for tags on startup; also sets -e2t",
+        "e2tsa": "delete all metadata from DB (full rescan); also sets -e2ts",
+        "d2ts": "disables metadata collection for existing files",
+        "d2ds": "disables onboot indexing, overrides -e2ds*",
+        "d2t": "disables metadata collection, overrides -e2t*",
+        "d2v": "disables file verification, overrides -e2v*",
+        "d2d": "disables all database stuff, overrides -e2*",
+        "hist=/tmp/cdb": "puts thumbnails and indexes at that location",
+        "scan=60": "scan for new files every 60sec, same as --re-maxage",
+        "nohash=\\.iso$": "skips hashing file contents if path matches *.iso",
+        "noidx=\\.iso$": "fully ignores the contents at paths matching *.iso",
+        "noforget": "don't forget files when deleted from disk",
+        "fat32": "avoid excessive reindexing on android sdcardfs",
+        "dbd=[acid|swal|wal|yolo]": "database speed-durability tradeoff",
+        "xlink": "cross-volume dupe detection / linking (dangerous)",
+        "xdev": "do not descend into other filesystems",
+        "xvol": "do not follow symlinks leaving the volume root",
+        "dotsrch": "show dotfiles in search results",
+        "nodotsrch": "hide dotfiles in search results (default)",
+        "srch_excl": "exclude search results with URL matching this regex",
+    },
+    'database, audio tags\n"mte", "mth", "mtp", "mtm" all work the same as -mte, -mth, ...': {
+        "mtp=.bpm=f,audio-bpm.py": 'uses the "audio-bpm.py" program to\ngenerate ".bpm" tags from uploads (f = overwrite tags)',
+        "mtp=ahash,vhash=media-hash.py": "collects two tags at once",
+    },
+    "thumbnails": {
+        "dthumb": "disables all thumbnails",
+        "dvthumb": "disables video thumbnails",
+        "dathumb": "disables audio thumbnails (spectrograms)",
+        "dithumb": "disables image thumbnails",
+        "pngquant": "compress audio waveforms 33% better",
+        "thsize": "thumbnail res; WxH",
+        "crop": "center-cropping (y/n/fy/fn)",
+        "th3x": "3x resolution (y/n/fy/fn)",
+        "convt": "conversion timeout in seconds",
+    },
+    "handlers\n(better explained in --help-handlers)": {
+        "on404=PY": "handle 404s by executing PY file",
+        "on403=PY": "handle 403s by executing PY file",
+    },
+    "event hooks\n(better explained in --help-hooks)": {
+        "xbu=CMD": "execute CMD before a file upload starts",
+        "xau=CMD": "execute CMD after  a file upload finishes",
+        "xiu=CMD": "execute CMD after  all uploads finish and volume is idle",
+        "xbc=CMD": "execute CMD before a file copy",
+        "xac=CMD": "execute CMD after  a file copy",
+        "xbr=CMD": "execute CMD before a file rename/move",
+        "xar=CMD": "execute CMD after  a file rename/move",
+        "xbd=CMD": "execute CMD before a file delete",
+        "xad=CMD": "execute CMD after  a file delete",
+        "xm=CMD": "execute CMD on message",
+        "xban=CMD": "execute CMD if someone gets banned",
+    },
+    "client and ux": {
+        "grid": "show grid/thumbnails by default",
+        "gsel": "select files in grid by ctrl-click",
+        "sort": "default sort order",
+        "unlist": "dont list files matching REGEX",
+        "html_head=TXT": "includes TXT in the <head>, or @PATH for file at PATH",
+        "robots": "allows indexing by search engines (default)",
+        "norobots": "kindly asks search engines to leave",
+        "no_sb_md": "disable js sandbox for markdown files",
+        "no_sb_lg": "disable js sandbox for prologue/epilogue",
+        "sb_md": "enable js sandbox for markdown files (default)",
+        "sb_lg": "enable js sandbox for prologue/epilogue (default)",
+        "md_sbf": "list of markdown-sandbox safeguards to disable",
+        "lg_sbf": "list of *logue-sandbox safeguards to disable",
+        "nohtml": "return html and markdown as text/html",
+    },
+    "others": {
+        "dots": "allow all users with read-access to\nenable the option to show dotfiles in listings",
+        "fk=8": 'generates per-file accesskeys,\nwhich are then required at the "g" permission;\nkeys are invalidated if filesize or inode changes',
+        "fka=8": 'generates slightly weaker per-file accesskeys,\nwhich are then required at the "g" permission;\nnot affected by filesize or inode numbers',
+        "mv_retry": "ms-windows: timeout for renaming busy files",
+        "rm_retry": "ms-windows: timeout for deleting busy files",
+        "davauth": "ask webdav clients to login for all folders",
+        "davrt": "show lastmod time of symlink destination, not the link itself\n(note: this option is always enabled for recursive listings)",
+    },
+}
+
+
+flagdescs = {k.split("=")[0]: v for tab in flagcats.values() for k, v in tab.items()}
