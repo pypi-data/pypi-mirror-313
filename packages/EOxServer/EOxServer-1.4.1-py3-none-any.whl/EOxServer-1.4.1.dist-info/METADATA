@@ -1,0 +1,136 @@
+Metadata-Version: 2.1
+Name: EOxServer
+Version: 1.4.1
+Summary: EOxServer is a server for Earth Observation (EO) data
+Home-page: http://eoxserver.org/
+Author: EOX IT Services GmbH
+Author-email: office@eox.at
+Maintainer: EOX IT Services GmbH
+Maintainer-email: packages@eox.at
+License: EOxServer Open License (MIT-style)
+Keywords: Earth Observation,EO,OGC,WCS,WMS
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: Intended Audience :: Other Audience
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Topic :: Database
+Classifier: Topic :: Internet
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Classifier: Topic :: Multimedia :: Graphics
+Classifier: Topic :: Scientific/Engineering :: GIS
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Classifier: Topic :: Scientific/Engineering :: Visualization
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: django-model-utils (<5.0.0)
+Requires-Dist: django-prometheus
+Requires-Dist: django-utils-six (==2.0)
+Requires-Dist: django (<4)
+Requires-Dist: gdal (==3.4.1)
+Requires-Dist: gunicorn
+Requires-Dist: jsonfield
+Requires-Dist: lxml
+Requires-Dist: mapscript
+Requires-Dist: matplotlib
+Requires-Dist: numpy (<2.0.0)
+Requires-Dist: psycopg2
+Requires-Dist: pycql (==0.0.8)
+Requires-Dist: pyows (>=0.2.6)
+Requires-Dist: python-dateutil
+Requires-Dist: python-keystoneclient (<6.0.0)
+Requires-Dist: python-swiftclient (<5.0.0)
+Requires-Dist: tzdata
+Requires-Dist: zipstream
+Provides-Extra: dev
+Requires-Dist: black ; extra == 'dev'
+Requires-Dist: flake8 ; extra == 'dev'
+Requires-Dist: mypy ; extra == 'dev'
+Requires-Dist: scipy ; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: myst-parser ; extra == 'docs'
+Requires-Dist: sphinx ; extra == 'docs'
+Requires-Dist: sphinx-rtd-theme ; extra == 'docs'
+
+# EOxServer
+
+EOxServer is a Python application and library for presenting Earth
+Observation (EO) data and metadata.
+
+![build](https://github.com/EOxServer/eoxserver/actions/workflows/ci.yml/badge.svg)
+[![PyPi](https://badge.fury.io/py/EOxServer.svg)](https://pypi.org/project/EOxServer/)
+[![ReadTheDocs](https://readthedocs.org/projects/eoxserver/badge/?version=master)](http://docs.eoxserver.org/en/master)
+
+EOxServer implements the [OGC](http://www.opengeospatial.org)
+Implementation Specifications EO-WCS and EO-WMS on top of
+[MapServer's](http://mapserver.org) [WCS](http://www.opengeospatial.org/standards/wcs) and
+[WMS](http://www.opengeospatial.org/standards/wms) implementations.
+EOxServer is released under the
+[EOxServer Open License](https://docs.eoxserver.org/en/stable/copyright.html) an MIT-style
+license and written in python and entirely based on open source software including:
+
+- [MapServer](http://mapserver.org)
+- [Django/GeoDjango](https://www.djangoproject.com)
+- [GDAL](http://www.gdal.org>)
+- [SpatiaLite](http://www.gaia-gis.it/spatialite)
+- [PostGIS](http://postgis.refractions.net/>)
+- [PROJ.4](http://trac.osgeo.org/proj/>)
+
+More information is available at [https://eoxserver.org](https://eoxserver.org). Documentation
+is available at [readthedocs](https://docs.eoxserver.org/en/stable/)
+
+## Docker
+
+To run with SpatiaLite database simply run:
+
+```sh
+docker run -it --rm -p 8080:8000 eoxa/eoxserver
+```
+
+EOxServer is now accessible at [http://localhost:8080/](http://localhost:8080/).
+And you can login to the `Admin Client` using:
+
+- username: admin
+- password: admin
+
+The following environment variables control configuration:
+
+- `DB`: Specify the used database type. either `spatialite` or `postgis`
+- `DB_PW`, `DB_NAME`, `DB_HOST`, `DB_USER`: these credentials will be used to establish a
+    connection to the postgres database when DB is set to `postgis` in order to wait
+    for it to come online
+- `INSTANCE_NAME`: the name of the instance passed to `eoxserver-instance.py` - defaults
+    to `instance`
+- `INSTANCE_DIR`: the directory of the instance. Defaults to `/opt/instance`
+- `DJANGO_USER`, `DJANGO_MAIL`, `DJANGO_PASSWORD`: when set, these credentials will be
+    used to create a superuser to be used for the Django Admin. By default, no user is
+    created
+- `COLLECT_STATIC`: if set to "true" (the default), static files will be collected
+    upon initialization
+- `PREINIT_SCRIPTS`: the list of commands that will be executed before
+    the instance is initialized
+- `INIT_SCRIPTS`: the list of commands that will be executed once
+    when the instance is initialized
+- `STARTUP_SCRIPTS`: the list of commands that will be executed before
+    the command is run
+- `GUNICORN_CMD_ARGS`: gunicorn command arguments. Defaults to
+    `--config /opt/eoxserver/gunicorn.conf.py ${INSTANCE_NAME}.wsgi:application`
+
+## Development
+
+The autotest instance can be used for development and testing.
+More information in `./autotest/README.md`
+
+
