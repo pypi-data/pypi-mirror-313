@@ -1,0 +1,86 @@
+[tool.poetry]
+name = "blockbax-sdk"
+version = "1.3.1"
+description = "Blockbax Python SDK"
+authors = ["Blockbax <development@blockbax.com>"]
+maintainers = ["Blockbax <development@blockbax.com>"]
+readme = "README.md"
+homepage = "https://blockbax.com/docs/integrations/python-sdk/"
+documentation = "https://blockbax.com/docs/python-sdk/"
+keywords = [
+	"Blockbax",
+	"Data",
+	"Sensor",
+	"IoT"
+]
+license = "MIT"
+classifiers = [
+	"Programming Language :: Python :: 3",
+	"License :: OSI Approved :: MIT License",
+	"Operating System :: OS Independent",
+	"Development Status :: 4 - Beta",
+]
+
+include = [
+	"LICENSE",
+	"README.md",
+]
+exclude = [
+    "src/blockbax_sdk/console.py",
+	"noxfile.py",
+	"examples",
+	"examples.*",
+	"tests",
+	"tests.*",
+	"local_test",
+	"run_local_test.py"
+]
+
+packages = [
+    { include = "blockbax_sdk", from = "src" },
+]
+
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+addopts = [
+    "--import-mode=importlib",
+]
+
+[tool.poetry.scripts]
+bx = "blockbax_sdk.console:main"
+user-agent = "blockbax_sdk.console:user_agent"
+get_subjects = "blockbax_sdk.console:get_subjects"
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<4.0"
+httpx = ">=0.25.2"
+tenacity = ">=8.2.3"
+typing-extensions = ">=4.4.0"
+pytz = ">=2022.7.1"
+python-dateutil = ">=2.8.2"
+pydantic = "^2.5.3"
+pydantic-extra-types = "^2.1.0"
+
+[tool.poetry.dev-dependencies]
+types-pytz = ">=2022.1.2"
+types-requests = ">=2.28.8"
+types-python-dateutil = ">=2.8.19"
+tomlkit = "^0.11.3"
+coverage = {extras = ["toml"], version = "^6.4.3"}
+pytest = "^7.1.2"
+pre-commit = "^2.20.0"
+black = "^22.6.0"
+flake8 = "^6.0.0"
+flake8-bugbear = "^22.7.1"
+mypy = "^0.971"
+respx = "^0.20.1"
+requests = ">=2.26.0" # TODO remove in favor or httpx
+click = ">=8.1.3"
+
+[tool.coverage.run]
+omit = [".*", "*/site-packages/*"]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
