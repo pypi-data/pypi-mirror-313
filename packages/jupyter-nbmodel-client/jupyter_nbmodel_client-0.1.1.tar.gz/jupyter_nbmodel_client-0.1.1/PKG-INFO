@@ -1,0 +1,180 @@
+Metadata-Version: 2.3
+Name: jupyter_nbmodel_client
+Version: 0.1.1
+Project-URL: Home, https://github.com/datalayer/jupyter-nbmodel-client
+Author-email: Datalayer <info@datalayer.io>
+License: BSD 3-Clause License
+        
+        Copyright (c) 2024, Datalayer
+        All rights reserved.
+        
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are met:
+        
+        1. Redistributions of source code must retain the above copyright notice, this
+           list of conditions and the following disclaimer.
+        
+        2. Redistributions in binary form must reproduce the above copyright notice,
+           this list of conditions and the following disclaimer in the documentation
+           and/or other materials provided with the distribution.
+        
+        3. Neither the name of the copyright holder nor the names of its
+           contributors may be used to endorse or promote products derived from
+           this software without specific prior written permission.
+        
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+        AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+        DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+        FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+        DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+        SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+        CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+        OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+        OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Keywords: Jupyter
+Classifier: Framework :: Jupyter
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.9
+Requires-Dist: jupyter-ydoc<4.0.0,>=2.1.2
+Requires-Dist: nbformat~=5.0
+Requires-Dist: pycrdt<0.11.0,>=0.10.3
+Requires-Dist: requests
+Requires-Dist: websocket-client
+Provides-Extra: lint
+Requires-Dist: mdformat-gfm>=0.3.5; extra == 'lint'
+Requires-Dist: mdformat>0.7; extra == 'lint'
+Requires-Dist: ruff; extra == 'lint'
+Provides-Extra: test
+Requires-Dist: httpx-ws; extra == 'test'
+Requires-Dist: jupyter-server-ydoc~=1.0.0; extra == 'test'
+Requires-Dist: pytest-jupyter[server]>=0.6; extra == 'test'
+Requires-Dist: pytest>=7.0; extra == 'test'
+Provides-Extra: typing
+Requires-Dist: mypy>=0.990; extra == 'typing'
+Description-Content-Type: text/markdown
+
+# jupyter_nbmodel_client
+
+[![Github Actions Status](https://github.com/datalayer/jupyter-nbmodel-client/workflows/Build/badge.svg)](https://github.com/datalayer/jupyter-nbmodel-client/actions/workflows/build.yml)
+
+Client to interact with Jupyter notebook model.
+
+## Install
+
+To install the extension, execute:
+
+```bash
+pip install jupyter_nbmodel_client
+```
+
+## Usage
+
+1. Ensure you have an environment with `jupyter-server-ydoc` installed.
+
+> To reproduce the above video you will need to install `jupyterlab`, `jupyter-collaboration` and `scikit-learn` and `matplotlib` for the notebook demo.
+
+1. Start the server `jupyter server` (or JupyterLab like in the video)
+
+1. Write down the URL (usually `http://localhost:8888`) and the server token
+
+1. Open a Python terminal
+
+1. Execute the following snippet to add a cell
+
+```py
+from jupyter_nbmodel_client import NbModelClient
+
+with NbModelClient(server_url="http://localhost:8888", token="...", path="test.ipynb") as notebook:
+    notebook.add_code_cell("print('hello world')")
+```
+
+1. Another example adding a cell and executing within a kernel process
+
+```py
+from jupyter_kernel_client import KernelClient
+from jupyter_nbmodel_client import NbModelClient
+
+with KernelClient(server_url="http://localhost:8888", token="...") as kernel:
+    with NbModelClient(server_url="http://localhost:8888", token="...", path="test.ipynb") as notebook:
+        cell_index = notebook.add_code_cell("print('hello world')")
+        results = notebook.execute_cell(cell_index, kernel)
+
+        assert results["status"] == "ok"
+        assert len(results["outputs"]) > 0
+```
+
+> [!NOTE]
+> Instead of using the clients as context manager, you can call the ``start()`` and ``stop()`` methods.
+
+```py
+from jupyter_nbmodel_client import NbModelClient
+
+kernel = KernelClient(server_url="http://localhost:8888", token="...")
+kernel.start()
+try:
+    notebook = NbModelClient(server_url="http://localhost:8888", token="...", path="test.ipynb"):
+    notebook.start()
+    try:
+        cell_index = notebook.add_code_cell("print('hello world')")
+        results = notebook.execute_cell(cell_index, kernel)
+    finally:
+        notebook.stop()
+finally:
+    kernel.stop()
+```
+
+## Uninstall
+
+To remove the extension, execute:
+
+```bash
+pip uninstall jupyter_nbmodel_client
+```
+
+## Troubleshoot
+
+If you are seeing the frontend extension, but it is not working, check
+that the server extension is enabled:
+
+```bash
+jupyter server extension list
+```
+
+## Contributing
+
+### Development install
+
+```bash
+# Clone the repo to your local environment
+# Change directory to the jupyter_nbmodel_client directory
+# Install package in development mode - will automatically enable
+# The server extension.
+pip install -e ".[test,lint,typing]"
+```
+
+### Running Tests
+
+Install dependencies:
+
+```bash
+pip install -e ".[test]"
+```
+
+To run the python tests, use:
+
+```bash
+pytest
+```
+
+### Development uninstall
+
+```bash
+pip uninstall jupyter_nbmodel_client
+```
+
+### Packaging the extension
+
+See [RELEASE](RELEASE.md)
