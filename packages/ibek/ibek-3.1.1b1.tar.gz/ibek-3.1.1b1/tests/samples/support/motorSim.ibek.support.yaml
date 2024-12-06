@@ -1,0 +1,184 @@
+# yaml-language-server: $schema=../schemas/ibek.support.schema.json
+
+# slightly extended version of motorMotorSim.ibek.support.yaml from ibek-support.
+# the extra things are fictitious but are here to exercise all of the features
+# of the ibek.support schema
+module: motorSim
+
+entity_models:
+  - name: simMotorController
+    description: |-
+      Creates a simulation motion controller
+    parameters:
+      controllerName:
+        type: id
+        description: |-
+          The name of the controller and its Asyn Port Name
+
+      P:
+        type: str
+        description: |-
+          Device PV Prefix
+
+      numAxes:
+        type: int
+        description: |-
+          The number of axes to create
+
+      port:
+        type: object
+        description: |-
+          a reference to the asyn port for communication with the controller
+
+      DESC:
+        type: str
+        description: |-
+          The description of the controller
+        default: "Simulated Motion Controller testing escaping: {% raw %} {{enclosed in escaped curly braces}} {% endraw %}"
+
+    pre_init:
+      - value: |
+          # motorSimCreateController(controller_asyn_port_name, axis_count)
+          # testing escaping: {% raw %} {{enclosed in escaped curly braces}} {% endraw %}
+          motorSimCreateController({{controllerName}}, {{numAxes}})
+
+    databases:
+      - file: sim_motor.db
+        args:
+          controllerName:
+          P:
+          DESC:
+
+    pvi:
+      yaml_path: simple.pvi.device.yaml
+      ui_macros:
+        P:
+      pv: true
+      pv_prefix: $(P)
+
+  - name: simMotorAxis
+    description: |-
+      Creates a simulation motor axis
+    parameters:
+      controller:
+        type: object
+        description: |-
+          a reference to the motion controller
+
+      M:
+        type: str
+        description: |-
+          PV suffix for the motor record
+
+      ADDR:
+        type: int
+        description: |-
+          The axis number (allowed to be from 0 to controller.numAxes-1)
+
+      DESC:
+        type: str
+        description: |-
+          The description of the axis
+        default: Motor {{ADDR}}
+
+      DLLM:
+        type: int
+        description: |-
+          The low limit of the axis (in counts)
+        default: -20000
+
+      DHLM:
+        type: int
+        description: |-
+          The high limit of the axis (in counts)
+        default: 20000
+
+      home:
+        type: int
+        description: |-
+          The home position of the axis (in counts)
+        default: 0
+
+      start:
+        type: str # int or jinja string
+        description: |-
+          The starting position of the axis (in counts)
+        default: "{{home}}"
+
+      DIR:
+        type: enum
+        description: |-
+          The direction of the axis
+        default: 0
+        values:
+          Pos: 0
+          Neg: 1
+
+      VELO:
+        type: float
+        description: |-
+          The velocity of the axis (in counts/sec)
+        default: 10.0
+
+      VMAX:
+        type: str # float or jinja string
+        description: |-
+          The maximum velocity of the axis (in counts/sec)
+        default: "{{VELO}}"
+
+      is_cs:
+        type: bool
+        description: |-
+          Set to True if this axis a coordinate system axis
+        default: false
+
+      CS_NUM:
+        type: int
+        description: |-
+          The coordinate system number for this axis
+        default: 0
+
+    post_init:
+      - when: once
+        value: |
+          # motorSimCreateAxis(controller_asyn_port_name, axis, axis_description)
+
+      - value: |
+          motorSimConfigAxis({{controller}}, {{ADDR}}, {{DHLM}}, {{DLLM}}, {{home}}, {{start}})
+
+    databases:
+      - file: basic_asyn_motor.db
+        enabled: "{{not is_cs}}"
+        args:
+          P: "{{controller.P}}"
+          M:
+          DTYP: asynMotor
+          PORT: "{{controller}}"
+          ADDR:
+          DESC:
+          EGU: degrees
+          DIR:
+          VELO:
+          VMAX:
+          MRES: ".01"
+          DHLM:
+          DLLM:
+          INIT: ""
+
+      - file: basic_cs_asyn_motor.db
+        enabled: "{{is_cs}}"
+        args:
+          P: "{{controller.P}}"
+          CS_NUM:
+          DTYP: asynMotor
+          PORT: "{{controller}}"
+          ADDR:
+          DESC:
+          EGU: degrees
+          DIR:
+          VELO:
+          VMAX:
+          MRES: ".01"
+          DHLM:
+          DLLM:
+          INIT: ""

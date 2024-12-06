@@ -1,0 +1,115 @@
+{
+  "$defs": {
+    "epics_InterruptVectorVME": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "epics.InterruptVectorVME",
+          "description": "Reserve an interrupt vector for use with VME hardware.\n",
+          "enum": [
+            "epics.InterruptVectorVME"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "entity_enabled": {
+          "default": true,
+          "description": "enable or disable this entity instance",
+          "title": "Entity Enabled",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "A name for an interrupt vector variable",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "name"
+      ],
+      "title": "epics_InterruptVectorVME",
+      "type": "object"
+    },
+    "epics_InterruptVectorVME2": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "epics.InterruptVectorVME2",
+          "description": "naughty second use of same counter",
+          "enum": [
+            "epics.InterruptVectorVME2"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "entity_enabled": {
+          "default": true,
+          "description": "enable or disable this entity instance",
+          "title": "Entity Enabled",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "A name for an interrupt vector variable",
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "name"
+      ],
+      "title": "epics_InterruptVectorVME2",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "ioc_name": {
+      "description": "Name of IOC instance",
+      "title": "Ioc Name",
+      "type": "string"
+    },
+    "description": {
+      "description": "Description of what the IOC does",
+      "title": "Description",
+      "type": "string"
+    },
+    "entities": {
+      "description": "List of entities this IOC instantiates",
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "epics.InterruptVectorVME": "#/$defs/epics_InterruptVectorVME",
+            "epics.InterruptVectorVME2": "#/$defs/epics_InterruptVectorVME2"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/epics_InterruptVectorVME"
+          },
+          {
+            "$ref": "#/$defs/epics_InterruptVectorVME2"
+          }
+        ]
+      },
+      "title": "Entities",
+      "type": "array"
+    },
+    "shared": {
+      "default": [],
+      "description": "A place to create any anchors required for repeating YAML",
+      "items": {},
+      "title": "Shared",
+      "type": "array"
+    }
+  },
+  "required": [
+    "ioc_name",
+    "description",
+    "entities"
+  ],
+  "title": "NewIOC",
+  "type": "object"
+}

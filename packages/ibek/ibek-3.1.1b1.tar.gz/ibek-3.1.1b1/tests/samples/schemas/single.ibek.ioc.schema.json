@@ -1,0 +1,300 @@
+{
+  "$defs": {
+    "DIR": {
+      "enum": [
+        "Pos",
+        "Neg"
+      ],
+      "title": "DIR",
+      "type": "string"
+    },
+    "motorSim_simMotorAxis": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "motorSim.simMotorAxis",
+          "description": "Creates a simulation motor axis",
+          "enum": [
+            "motorSim.simMotorAxis"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "entity_enabled": {
+          "default": true,
+          "description": "enable or disable this entity instance",
+          "title": "Entity Enabled",
+          "type": "boolean"
+        },
+        "controller": {
+          "description": "a reference to the motion controller",
+          "title": "Controller"
+        },
+        "M": {
+          "description": "PV suffix for the motor record",
+          "title": "M",
+          "type": "string"
+        },
+        "ADDR": {
+          "anyOf": [
+            {
+              "description": "jinja that renders to <class 'int'>",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "description": "The axis number (allowed to be from 0 to controller.numAxes-1)",
+              "type": "integer"
+            }
+          ],
+          "description": "union of <class 'int'> and jinja representation of {typ}",
+          "title": "Addr"
+        },
+        "DESC": {
+          "default": "Motor {{ADDR}}",
+          "description": "The description of the axis",
+          "title": "Desc",
+          "type": "string"
+        },
+        "DLLM": {
+          "anyOf": [
+            {
+              "description": "jinja that renders to <class 'int'>",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "description": "The low limit of the axis (in counts)",
+              "type": "integer"
+            }
+          ],
+          "default": -20000,
+          "description": "union of <class 'int'> and jinja representation of {typ}",
+          "title": "Dllm"
+        },
+        "DHLM": {
+          "anyOf": [
+            {
+              "description": "jinja that renders to <class 'int'>",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "description": "The high limit of the axis (in counts)",
+              "type": "integer"
+            }
+          ],
+          "default": 20000,
+          "description": "union of <class 'int'> and jinja representation of {typ}",
+          "title": "Dhlm"
+        },
+        "home": {
+          "anyOf": [
+            {
+              "description": "jinja that renders to <class 'int'>",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "description": "The home position of the axis (in counts)",
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "union of <class 'int'> and jinja representation of {typ}",
+          "title": "Home"
+        },
+        "start": {
+          "default": "{{home}}",
+          "description": "The starting position of the axis (in counts)",
+          "title": "Start",
+          "type": "string"
+        },
+        "DIR": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/DIR"
+            }
+          ],
+          "default": 0,
+          "description": "The direction of the axis"
+        },
+        "VELO": {
+          "anyOf": [
+            {
+              "description": "jinja that renders to <class 'float'>",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "description": "The velocity of the axis (in counts/sec)",
+              "type": "number"
+            }
+          ],
+          "default": 10.0,
+          "description": "union of <class 'float'> and jinja representation of {typ}",
+          "title": "Velo"
+        },
+        "VMAX": {
+          "default": "{{VELO}}",
+          "description": "The maximum velocity of the axis (in counts/sec)",
+          "title": "Vmax",
+          "type": "string"
+        },
+        "is_cs": {
+          "anyOf": [
+            {
+              "description": "jinja that renders to <class 'bool'>",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "description": "Set to True if this axis a coordinate system axis",
+              "type": "boolean"
+            }
+          ],
+          "default": false,
+          "description": "union of <class 'bool'> and jinja representation of {typ}",
+          "title": "Is Cs"
+        },
+        "CS_NUM": {
+          "anyOf": [
+            {
+              "description": "jinja that renders to <class 'int'>",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "description": "The coordinate system number for this axis",
+              "type": "integer"
+            }
+          ],
+          "default": 0,
+          "description": "union of <class 'int'> and jinja representation of {typ}",
+          "title": "Cs Num"
+        }
+      },
+      "required": [
+        "type",
+        "controller",
+        "M",
+        "ADDR"
+      ],
+      "title": "motorSim_simMotorAxis",
+      "type": "object"
+    },
+    "motorSim_simMotorController": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "motorSim.simMotorController",
+          "description": "Creates a simulation motion controller",
+          "enum": [
+            "motorSim.simMotorController"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "entity_enabled": {
+          "default": true,
+          "description": "enable or disable this entity instance",
+          "title": "Entity Enabled",
+          "type": "boolean"
+        },
+        "controllerName": {
+          "description": "The name of the controller and its Asyn Port Name",
+          "title": "Controllername",
+          "type": "string"
+        },
+        "P": {
+          "description": "Device PV Prefix",
+          "title": "P",
+          "type": "string"
+        },
+        "numAxes": {
+          "anyOf": [
+            {
+              "description": "jinja that renders to <class 'int'>",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "description": "The number of axes to create",
+              "type": "integer"
+            }
+          ],
+          "description": "union of <class 'int'> and jinja representation of {typ}",
+          "title": "Numaxes"
+        },
+        "port": {
+          "description": "a reference to the asyn port for communication with the controller",
+          "title": "Port"
+        },
+        "DESC": {
+          "default": "Simulated Motion Controller testing escaping: {% raw %} {{enclosed in escaped curly braces}} {% endraw %}",
+          "description": "The description of the controller",
+          "title": "Desc",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "controllerName",
+        "P",
+        "numAxes",
+        "port"
+      ],
+      "title": "motorSim_simMotorController",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "ioc_name": {
+      "description": "Name of IOC instance",
+      "title": "Ioc Name",
+      "type": "string"
+    },
+    "description": {
+      "description": "Description of what the IOC does",
+      "title": "Description",
+      "type": "string"
+    },
+    "entities": {
+      "description": "List of entities this IOC instantiates",
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "motorSim.simMotorAxis": "#/$defs/motorSim_simMotorAxis",
+            "motorSim.simMotorController": "#/$defs/motorSim_simMotorController"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/motorSim_simMotorController"
+          },
+          {
+            "$ref": "#/$defs/motorSim_simMotorAxis"
+          }
+        ]
+      },
+      "title": "Entities",
+      "type": "array"
+    },
+    "shared": {
+      "default": [],
+      "description": "A place to create any anchors required for repeating YAML",
+      "items": {},
+      "title": "Shared",
+      "type": "array"
+    }
+  },
+  "required": [
+    "ioc_name",
+    "description",
+    "entities"
+  ],
+  "title": "NewIOC",
+  "type": "object"
+}

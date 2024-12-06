@@ -1,0 +1,722 @@
+{
+  "$defs": {
+    "BoolParam": {
+      "additionalProperties": false,
+      "description": "An argument with an bool value",
+      "properties": {
+        "type": {
+          "const": "bool",
+          "default": "bool",
+          "enum": [
+            "bool"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of what the argument will be used for",
+          "title": "Description",
+          "type": "string"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "description": "A Jinja2 template string",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "BoolParam",
+      "type": "object"
+    },
+    "Comment": {
+      "additionalProperties": false,
+      "description": "A script snippet that will have '# ' prepended to every line\nfor insertion into the startup script",
+      "properties": {
+        "type": {
+          "const": "comment",
+          "default": "comment",
+          "enum": [
+            "comment"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "when": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/When"
+            }
+          ],
+          "default": "every",
+          "description": "One of first / every / last"
+        },
+        "value": {
+          "default": "",
+          "description": "A comment to add into the startup script",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "title": "Comment",
+      "type": "object"
+    },
+    "Database": {
+      "additionalProperties": false,
+      "description": "A database file that should be loaded by the startup script and its args",
+      "properties": {
+        "file": {
+          "description": "Filename of the database template in <module_root>/db",
+          "title": "File",
+          "type": "string"
+        },
+        "enabled": {
+          "default": "True",
+          "description": "Set to False to disable loading this database",
+          "title": "Enabled",
+          "type": "string"
+        },
+        "args": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": "Dictionary of args and values to pass through to database. A value of None is equivalent to ARG: '{{ ARG }}'. See `UTILS.render_map` for more details.",
+          "title": "Args",
+          "type": "object"
+        }
+      },
+      "required": [
+        "file",
+        "args"
+      ],
+      "title": "Database",
+      "type": "object"
+    },
+    "Define": {
+      "additionalProperties": false,
+      "description": "A calculated value for an Entity Model",
+      "properties": {
+        "description": {
+          "description": "Description of what the value will be used for",
+          "title": "Description",
+          "type": "string"
+        },
+        "value": {
+          "description": "The contents of the value",
+          "title": "Value"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DefineType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "str",
+          "description": "The type of the value"
+        }
+      },
+      "required": [
+        "description",
+        "value"
+      ],
+      "title": "Define",
+      "type": "object"
+    },
+    "DefineType": {
+      "description": "The type of a value",
+      "enum": [
+        "str",
+        "float",
+        "int",
+        "bool",
+        "list"
+      ],
+      "title": "DefineType",
+      "type": "string"
+    },
+    "EntityModel": {
+      "additionalProperties": false,
+      "description": "A Model for a class of Entity that an IOC instance may instantiate",
+      "properties": {
+        "name": {
+          "description": "Publish EntityModel as type <module>.<name> for IOC instances",
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "description": "A description of the Support module defined here",
+          "title": "Description",
+          "type": "string"
+        },
+        "pre_defines": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Define"
+          },
+          "default": [],
+          "description": "Calculated values to use as additional arguments With Jinja evaluation before all Args",
+          "title": "Pre Defines",
+          "type": "object"
+        },
+        "parameters": {
+          "additionalProperties": {
+            "description": "union of arg types",
+            "discriminator": {
+              "mapping": {
+                "bool": "#/$defs/BoolParam",
+                "enum": "#/$defs/EnumParam",
+                "float": "#/$defs/FloatParam",
+                "id": "#/$defs/IdParam",
+                "int": "#/$defs/IntParam",
+                "object": "#/$defs/ObjectParam",
+                "str": "#/$defs/StrParam"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/FloatParam"
+              },
+              {
+                "$ref": "#/$defs/StrParam"
+              },
+              {
+                "$ref": "#/$defs/IntParam"
+              },
+              {
+                "$ref": "#/$defs/BoolParam"
+              },
+              {
+                "$ref": "#/$defs/ObjectParam"
+              },
+              {
+                "$ref": "#/$defs/IdParam"
+              },
+              {
+                "$ref": "#/$defs/EnumParam"
+              }
+            ]
+          },
+          "default": [],
+          "description": "The arguments IOC instance should supply",
+          "title": "Parameters",
+          "type": "object"
+        },
+        "post_defines": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Define"
+          },
+          "default": [],
+          "description": "Calculated values to use as additional arguments With Jinja evaluation after all Args",
+          "title": "Post Defines",
+          "type": "object"
+        },
+        "pre_init": {
+          "default": [],
+          "description": "Startup script snippets to add before iocInit()",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Comment"
+              }
+            ]
+          },
+          "title": "Pre Init",
+          "type": "array"
+        },
+        "post_init": {
+          "default": [],
+          "description": "Startup script snippets to add post iocInit(), such as dbpf",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Comment"
+              }
+            ]
+          },
+          "title": "Post Init",
+          "type": "array"
+        },
+        "databases": {
+          "default": [],
+          "description": "Databases to instantiate",
+          "items": {
+            "$ref": "#/$defs/Database"
+          },
+          "title": "Databases",
+          "type": "array"
+        },
+        "env_vars": {
+          "default": [],
+          "description": "Environment variables to set in the boot script",
+          "items": {
+            "$ref": "#/$defs/EnvironmentVariable"
+          },
+          "title": "Env Vars",
+          "type": "array"
+        },
+        "pvi": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EntityPVI"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "PVI definition for Entity"
+        },
+        "sub_entities": {
+          "default": [],
+          "description": "The sub-entity instances that this collection is to instantiate",
+          "items": {
+            "$ref": "#/$defs/SubEntity"
+          },
+          "title": "Sub Entities",
+          "type": "array"
+        },
+        "shared": {
+          "default": [],
+          "description": "A place to create any anchors required for repeating YAML",
+          "items": {},
+          "title": "Shared",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ],
+      "title": "EntityModel",
+      "type": "object"
+    },
+    "EntityPVI": {
+      "additionalProperties": false,
+      "description": "Entity PVI definition",
+      "properties": {
+        "yaml_path": {
+          "description": "Path to .pvi.device.yaml - absolute or relative to PVI_DEFS",
+          "title": "Yaml Path",
+          "type": "string"
+        },
+        "ui_index": {
+          "default": true,
+          "description": "Whether to add the UI to the IOC index.",
+          "title": "Ui Index",
+          "type": "boolean"
+        },
+        "ui_macros": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": null,
+          "description": "Macros to launch the UI on the IOC index. These must be args of the Entity this is attached to.",
+          "title": "Ui Macros",
+          "type": "object"
+        },
+        "pv": {
+          "default": false,
+          "description": "Whether to generate a PVI PV. This adds a database template with info tags that create a PVAccess PV representing the device structure.",
+          "title": "Pv",
+          "type": "boolean"
+        },
+        "pv_prefix": {
+          "default": "",
+          "description": "PV prefix for PVI PV - e.g. \"$(P)\"",
+          "title": "Pv Prefix",
+          "type": "string"
+        }
+      },
+      "required": [
+        "yaml_path"
+      ],
+      "title": "EntityPVI",
+      "type": "object"
+    },
+    "EnumParam": {
+      "additionalProperties": false,
+      "description": "An argument with an enum value",
+      "properties": {
+        "type": {
+          "const": "enum",
+          "default": "enum",
+          "enum": [
+            "enum"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of what the argument will be used for",
+          "title": "Description",
+          "type": "string"
+        },
+        "default": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        },
+        "values": {
+          "description": "provides a list of values to make this argument an Enum",
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "description",
+        "values"
+      ],
+      "title": "EnumParam",
+      "type": "object"
+    },
+    "EnvironmentVariable": {
+      "additionalProperties": false,
+      "description": "An environment variable that should be set in the startup script",
+      "properties": {
+        "name": {
+          "description": "Name of environment variable",
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "description": "Value to set",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "title": "EnvironmentVariable",
+      "type": "object"
+    },
+    "FloatParam": {
+      "additionalProperties": false,
+      "description": "An argument with a float value",
+      "properties": {
+        "type": {
+          "const": "float",
+          "default": "float",
+          "enum": [
+            "float"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of what the argument will be used for",
+          "title": "Description",
+          "type": "string"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "description": "A Jinja2 template string",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "FloatParam",
+      "type": "object"
+    },
+    "IdParam": {
+      "additionalProperties": false,
+      "description": "Explicit ID argument that an object can refer to",
+      "properties": {
+        "type": {
+          "const": "id",
+          "default": "id",
+          "enum": [
+            "id"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of what the argument will be used for",
+          "title": "Description",
+          "type": "string"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "IdParam",
+      "type": "object"
+    },
+    "IntParam": {
+      "additionalProperties": false,
+      "description": "An argument with an int value",
+      "properties": {
+        "type": {
+          "const": "int",
+          "default": "int",
+          "enum": [
+            "int"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of what the argument will be used for",
+          "title": "Description",
+          "type": "string"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "description": "A Jinja2 template string",
+              "pattern": ".*\\{\\{.*\\}\\}.*",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "IntParam",
+      "type": "object"
+    },
+    "ObjectParam": {
+      "additionalProperties": false,
+      "description": "A reference to another entity defined in this IOC",
+      "properties": {
+        "type": {
+          "const": "object",
+          "default": "object",
+          "enum": [
+            "object"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of what the argument will be used for",
+          "title": "Description",
+          "type": "string"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "ObjectParam",
+      "type": "object"
+    },
+    "StrParam": {
+      "additionalProperties": false,
+      "description": "An argument with a str value",
+      "properties": {
+        "type": {
+          "const": "str",
+          "default": "str",
+          "enum": [
+            "str"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of what the argument will be used for",
+          "title": "Description",
+          "type": "string"
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        }
+      },
+      "required": [
+        "description"
+      ],
+      "title": "StrParam",
+      "type": "object"
+    },
+    "SubEntity": {
+      "additionalProperties": true,
+      "description": "A loosely defined class to declare the Entities\nin an ibek.support.yaml file in the 'sub_entities' property of an Entity\nsection",
+      "properties": {
+        "type": {
+          "description": "The type of this entity",
+          "title": "Type",
+          "type": "string"
+        },
+        "entity_enabled": {
+          "default": true,
+          "description": "enable or disable this entity instance",
+          "title": "Entity Enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "SubEntity",
+      "type": "object"
+    },
+    "Text": {
+      "additionalProperties": false,
+      "description": "A script snippet to insert into the startup script",
+      "properties": {
+        "type": {
+          "const": "text",
+          "default": "text",
+          "enum": [
+            "text"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "when": {
+          "default": "every",
+          "description": "One of first / every / last",
+          "title": "When",
+          "type": "string"
+        },
+        "value": {
+          "default": "",
+          "description": "raw text to add to the startup script",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "title": "Text",
+      "type": "object"
+    },
+    "When": {
+      "enum": [
+        "first",
+        "every",
+        "last"
+      ],
+      "title": "When",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Lists the EntityModels for a support module, this defines what Entities it supports",
+  "properties": {
+    "shared": {
+      "default": [],
+      "description": "A place to create any anchors required for repeating YAML",
+      "items": {},
+      "title": "Shared",
+      "type": "array"
+    },
+    "module": {
+      "description": "Support module name, normally the repo name",
+      "title": "Module",
+      "type": "string"
+    },
+    "entity_models": {
+      "description": "The Entity Models an IOC can create using this module",
+      "items": {
+        "$ref": "#/$defs/EntityModel"
+      },
+      "title": "Entity Models",
+      "type": "array"
+    }
+  },
+  "required": [
+    "module",
+    "entity_models"
+  ],
+  "title": "Support",
+  "type": "object"
+}
