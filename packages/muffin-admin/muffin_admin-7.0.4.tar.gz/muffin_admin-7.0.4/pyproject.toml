@@ -1,0 +1,139 @@
+[tool.poetry]
+name = "muffin-admin"
+version = "7.0.4"
+description = "Admin interface for Muffin Framework"
+readme = "README.rst"
+license = "MIT"
+authors = ["Kirill Klenov <horneds@gmail.com>"]
+keywords = ["admin", "api", "muffin", "asgi", "asyncio", "trio"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Internet :: WWW/HTTP",
+  "Framework :: AsyncIO",
+  "Framework :: Trio",
+]
+homepage = "https://github.com/klen/muffin-admin"
+repository = "https://github.com/klen/muffin-admin"
+packages = [{ include = "muffin_admin" }]
+include = ["muffin_admin/main.js", "muffin_admin/main.js.LICENSE.txt"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+muffin = "*"
+muffin-rest = "*"
+typing-extensions = { version = "*", python = "<=3.10" }
+
+# Optional dependencies
+pyyaml = { version = "*", optional = true }
+muffin-peewee-aio = { version = "*", optional = true }
+marshmallow-peewee = { version = "*", optional = true }
+muffin-databases = { version = "*", optional = true }
+marshmallow-sqlalchemy = { version = "*", optional = true }
+sqlalchemy = { version = "*", optional = true }
+
+[tool.poetry.extras]
+yaml = ["pyyaml"]
+peewee = ["muffin-peewee-aio", "marshmallow-peewee"]
+sqlalchemy = ["muffin-databases", "marshmallow-sqlalchemy", "sqlalchemy"]
+
+[tool.poetry.group.dev.dependencies]
+aiofile = "*"
+aiosqlite = "*"
+marshmallow-peewee = "*"
+marshmallow-sqlalchemy = "*"
+muffin-databases = "*"
+muffin-peewee-aio = "*"
+pytest = "*"
+pytest-aio = { version = "*", extras = ["curio", "trio"] }
+pytest-mypy = "*"
+pyyaml = "*"
+ruff = "*"
+pre-commit = "*"
+black = "*"
+
+[tool.poetry.group.example.dependencies]
+uvicorn = "*"
+mixer = "*"
+peewee = "*"
+muffin-peewee-aio = "*"
+muffin-databases = "*"
+httptools = "*"
+
+[tool.pytest.ini_options]
+addopts = "-xsv"
+
+[tool.mypy]
+packages = ["muffin_admin"]
+ignore_missing_imports = true
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py39,py310,py311,py312,py313,pypy39
+
+[testenv]
+deps = -e .[dev]
+allowlist_externals =
+  poetry
+commands =
+  poetry install --with dev
+	poetry run pytest --mypy tests
+
+[testenv:pypy39]
+deps = -e .[dev]
+commands =
+	pytest tests
+"""
+
+[tool.ruff]
+fix = false
+line-length = 100
+target-version = "py39"
+exclude = [".venv", "docs", "examples"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "A003",
+  "ARG003",
+  "ANN",
+  "COM",
+  "D",
+  "DJ",
+  "EM",
+  "N804",
+  "PLR0912",
+  "PLR2004",
+  "RET",
+  "RSE",
+  "S101",
+  "SLF",
+  "TRY003",
+  "UP",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312", "py313"]
+preview = true
+
+[tool.poetry_bumpversion.file."frontend/package.json"]
+search = '"version": "{current_version}"'
+replace = '"version": "{new_version}"'
+
+[tool.poetry_bumpversion.file."frontend/src/index.ts"]
+search = 'export const VERSION = "{current_version}"'
+replace = 'export const VERSION = "{new_version}"'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
