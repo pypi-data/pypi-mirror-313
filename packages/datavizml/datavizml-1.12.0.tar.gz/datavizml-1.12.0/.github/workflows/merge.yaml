@@ -1,0 +1,28 @@
+name: Merge workflow
+run-name: ${{ github.actor }} is running the merge workflow
+on:
+  push:
+    branches:   
+      - main
+  workflow_dispatch:
+jobs:
+  evaluate_test_coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12.1
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements_dev.txt
+          pip install -e .
+      - name: Evaluate test coverage
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          coverage run -m pytest
+          coveralls --service=github
