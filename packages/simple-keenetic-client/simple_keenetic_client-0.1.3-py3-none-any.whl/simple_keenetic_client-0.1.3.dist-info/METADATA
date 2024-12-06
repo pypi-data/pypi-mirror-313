@@ -1,0 +1,41 @@
+Metadata-Version: 2.1
+Name: simple-keenetic-client
+Version: 0.1.3
+Summary: Client for KeeneticOS-based routers via HTTP interface
+License: MIT
+Author: Leonid Amirov
+Author-email: leonid.amirov@gmail.com
+Requires-Python: >=3.11,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: aiohttp (>=3.11.7,<4.0.0)
+Project-URL: repository, https://github.com/side2k/simple-keenetic-client
+Description-Content-Type: text/markdown
+
+# Simple Keenetic client
+
+HTTP client for KeeneticOS-based routers. Uses web interface to connect.
+Does not do more than authenticate, fetch SMS messages and mark them as read or delete them.
+
+Example usage:
+
+```python
+from simple_keenetic_client import SimpleKeeneticClient
+
+async def get_unread_sms():
+  async with SimpleKeeneticClient(
+      "http://keenetic-router.test",
+      username="testuser",
+      password="testpassword",
+  ) as client:
+      interfaces = await client.get_mobile_interfaces()
+
+      return await self.get_unread_sms(
+          interface_names=interfaces.keys()
+      )
+```
+
+"Real life" usage example: https://github.com/side2k/keensms2mqtt
+
