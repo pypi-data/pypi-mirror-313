@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "gridsource"
+version = "2.3.1"
+description = "Data mining with XLSX, cfg, json, etc."
+authors = ["Nicolas Cordier <nicolas.cordier@numeric-gmbh.ch>"]
+readme = "README.rst"
+
+[tool.poetry.dependencies]
+python = ">3.10"
+Click = "*"
+pint = ">=0.17"
+pint-pandas = ">=0.2"
+xlrd = "*"
+openpyxl = "*"
+xlsxwriter = "*"
+configobj = "*"
+simplejson = "*"
+jsonschema = "*"
+zipp = "*"
+PyYAML = "*"
+tabulate = "^0.9.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+ipython = "*"
+ipykernel = "*"
+ipywidgets ="*"
+black = "*"
+isort = "*"
+bump2version = "*"
+ipdb = "*"
+pdbpp = "*"
+pytest-cov = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+# command_name = module_for_handler : function_for_handler
+nastranio = 'gridsource.cli:main'
+
+[tool.pytest.ini_options]
+#collect_ignore = ["setup.py"]
+doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ELLIPSIS"
+addopts = "--doctest-modules --cov=gridsource  --cov-report html --cov-append"
+markers = [ ]
+
+[tool.black]
+exclude = "notebooks/.*"
+
+[tool.isort]
+profile = "black"
+
