@@ -1,0 +1,18 @@
+FROM {{ namespace }}/{{ image_prefix }}prometheus-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block prometheus_ovn_exporter_header %}{% endblock %}
+
+{% block prometheus_ovn_exporter_install %}
+
+ADD prometheus-ovn-exporter-archive /prometheus-ovn-exporter-source
+
+RUN cp /prometheus-ovn-exporter-source/* /opt/
+{% endblock %}
+
+{% block prometheus_ovn_exporter_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER prometheus

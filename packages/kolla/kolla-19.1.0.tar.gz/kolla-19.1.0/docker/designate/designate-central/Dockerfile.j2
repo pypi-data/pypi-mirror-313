@@ -1,0 +1,16 @@
+FROM {{ namespace }}/{{ image_prefix }}designate-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block designate_central_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+COPY extend_start.sh /usr/local/bin/kolla_designate_extend_start
+RUN chmod 644 /usr/local/bin/kolla_designate_extend_start
+
+{% block designate_central_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER designate

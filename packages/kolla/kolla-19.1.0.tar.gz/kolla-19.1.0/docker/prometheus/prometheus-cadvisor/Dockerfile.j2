@@ -1,0 +1,19 @@
+FROM {{ namespace }}/{{ image_prefix }}prometheus-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block prometheus_cadvisor_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% block prometheus_cadvisor_install %}
+ADD prometheus-cadvisor-archive /prometheus-cadvisor-source
+
+RUN cp /prometheus-cadvisor-source /opt/cadvisor \
+    && chmod 0755 /opt/cadvisor
+{% endblock %}
+
+
+{% block prometheus_cadvisor_footer %}{% endblock %}
+{% block footer %}{% endblock %}

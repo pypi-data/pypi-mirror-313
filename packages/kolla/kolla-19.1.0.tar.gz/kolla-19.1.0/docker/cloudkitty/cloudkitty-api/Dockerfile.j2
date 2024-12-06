@@ -1,0 +1,19 @@
+FROM {{ namespace }}/{{ image_prefix }}cloudkitty-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block cloudkitty_api_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% set cloudkitty_api_packages = [
+] %}
+
+{{ macros.install_packages(cloudkitty_api_packages | customizable("packages")) }}
+
+COPY extend_start.sh /usr/local/bin/kolla_cloudkitty_extend_start
+RUN chmod 644 /usr/local/bin/kolla_cloudkitty_extend_start
+
+{% block cloudkitty_api_footer %}{% endblock %}
+{% block footer %}{% endblock %}
