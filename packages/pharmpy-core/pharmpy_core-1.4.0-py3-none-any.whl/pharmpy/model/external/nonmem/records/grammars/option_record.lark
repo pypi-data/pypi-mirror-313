@@ -1,0 +1,15 @@
+root: option*
+
+// We handle 'KEY VALUE' outside of Lark
+option: KEY ("=" VALUE)?
+
+KEY: VALUE // Hack to circumvent LALR(1) limitations
+VALUE: VALUE_PARENTHESIZED | VALUE_ANY
+
+VALUE_PARENTHESIZED: /\([^)]*\)/
+VALUE_ANY: /[^\s=;]+/
+
+%import .definitions (WS, COMMENT, NEWLINE)
+%ignore WS
+%ignore COMMENT
+%ignore NEWLINE
