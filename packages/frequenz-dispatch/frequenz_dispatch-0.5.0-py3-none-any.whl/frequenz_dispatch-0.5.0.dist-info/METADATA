@@ -1,0 +1,149 @@
+Metadata-Version: 2.1
+Name: frequenz-dispatch
+Version: 0.5.0
+Summary: A highlevel interface for the dispatch API
+Author-email: Frequenz Energy-as-a-Service GmbH <floss@frequenz.com>
+License: MIT
+Project-URL: Documentation, https://frequenz-floss.github.io/frequenz-dispatch-python/
+Project-URL: Changelog, https://github.com/frequenz-floss/frequenz-dispatch-python/releases
+Project-URL: Issues, https://github.com/frequenz-floss/frequenz-dispatch-python/issues
+Project-URL: Repository, https://github.com/frequenz-floss/frequenz-dispatch-python
+Project-URL: Support, https://github.com/frequenz-floss/frequenz-dispatch-python/discussions/categories/support
+Keywords: frequenz,python,actor,frequenz-dispatch,dispatch,highlevel,api
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Typing :: Typed
+Requires-Python: <4,>=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: typing-extensions<5.0.0,>=4.11.0
+Requires-Dist: frequenz-sdk<1.0.0-rc1500,>=1.0.0-rc1302
+Requires-Dist: frequenz-channels<2.0.0,>=1.3.0
+Requires-Dist: frequenz-client-dispatch<0.9.0,>=0.8.2
+Provides-Extra: dev-flake8
+Requires-Dist: flake8==7.1.1; extra == "dev-flake8"
+Requires-Dist: flake8-docstrings==1.7.0; extra == "dev-flake8"
+Requires-Dist: flake8-pyproject==1.2.3; extra == "dev-flake8"
+Requires-Dist: pydoclint==0.5.9; extra == "dev-flake8"
+Requires-Dist: pydocstyle==6.3.0; extra == "dev-flake8"
+Provides-Extra: dev-formatting
+Requires-Dist: black==24.10.0; extra == "dev-formatting"
+Requires-Dist: isort==5.13.2; extra == "dev-formatting"
+Provides-Extra: dev-mkdocs
+Requires-Dist: black==24.10.0; extra == "dev-mkdocs"
+Requires-Dist: Markdown==3.7; extra == "dev-mkdocs"
+Requires-Dist: mike==2.1.3; extra == "dev-mkdocs"
+Requires-Dist: mkdocs-gen-files==0.5.0; extra == "dev-mkdocs"
+Requires-Dist: mkdocs-literate-nav==0.6.1; extra == "dev-mkdocs"
+Requires-Dist: mkdocs-macros-plugin==1.3.7; extra == "dev-mkdocs"
+Requires-Dist: mkdocs-material==9.5.47; extra == "dev-mkdocs"
+Requires-Dist: mkdocstrings[python]==0.27.0; extra == "dev-mkdocs"
+Requires-Dist: mkdocstrings-python==1.12.2; extra == "dev-mkdocs"
+Requires-Dist: frequenz-repo-config[lib]==0.11.0; extra == "dev-mkdocs"
+Provides-Extra: dev-mypy
+Requires-Dist: mypy==1.13.0; extra == "dev-mypy"
+Requires-Dist: grpc-stubs==1.53.0.5; extra == "dev-mypy"
+Requires-Dist: types-Markdown==3.7.0.20240822; extra == "dev-mypy"
+Requires-Dist: frequenz-dispatch[dev-mkdocs,dev-noxfile,dev-pytest]; extra == "dev-mypy"
+Provides-Extra: dev-noxfile
+Requires-Dist: uv==0.5.5; extra == "dev-noxfile"
+Requires-Dist: nox==2024.10.9; extra == "dev-noxfile"
+Requires-Dist: frequenz-repo-config[lib]==0.11.0; extra == "dev-noxfile"
+Provides-Extra: dev-pylint
+Requires-Dist: pylint==3.3.2; extra == "dev-pylint"
+Requires-Dist: frequenz-dispatch[dev-mkdocs,dev-noxfile,dev-pytest]; extra == "dev-pylint"
+Provides-Extra: dev-pytest
+Requires-Dist: pytest==8.3.4; extra == "dev-pytest"
+Requires-Dist: frequenz-repo-config[extra-lint-examples]==0.11.0; extra == "dev-pytest"
+Requires-Dist: pytest-mock==3.14.0; extra == "dev-pytest"
+Requires-Dist: pytest-asyncio==0.24.0; extra == "dev-pytest"
+Requires-Dist: async-solipsism==0.7; extra == "dev-pytest"
+Requires-Dist: time-machine==2.16.0; extra == "dev-pytest"
+Provides-Extra: dev
+Requires-Dist: frequenz-dispatch[dev-flake8,dev-formatting,dev-mkdocs,dev-mypy,dev-noxfile,dev-pylint,dev-pytest]; extra == "dev"
+
+# Dispatch Highlevel Interface
+
+[![Build Status](https://github.com/frequenz-floss/frequenz-dispatch-python/actions/workflows/ci.yaml/badge.svg)](https://github.com/frequenz-floss/frequenz-dispatch-python/actions/workflows/ci.yaml)
+[![PyPI Package](https://img.shields.io/pypi/v/frequenz-dispatch)](https://pypi.org/project/frequenz-dispatch/)
+[![Docs](https://img.shields.io/badge/docs-latest-informational)](https://frequenz-floss.github.io/frequenz-dispatch-python/)
+
+## Introduction
+
+A highlevel interface for the dispatch API.
+
+See [the documentation](https://frequenz-floss.github.io/frequenz-dispatch-python/v0.1/reference/frequenz/dispatch) for more information.
+
+## Usage
+
+The [`Dispatcher` class](https://frequenz-floss.github.io/frequenz-dispatch-python/v0.1/reference/frequenz/dispatch/#frequenz.dispatch.Dispatcher), the main entry point for the API, provides two channels:
+
+* [Lifecycle events](https://frequenz-floss.github.io/frequenz-dispatch-python/v0.1/reference/frequenz/dispatch/#frequenz.dispatch.Dispatcher.lifecycle_events): A channel that sends a message whenever a [Dispatch][frequenz.dispatch.Dispatch] is created, updated or deleted.
+* [Running status change](https://frequenz-floss.github.io/frequenz-dispatch-python/v0.1/reference/frequenz/dispatch/#frequenz.dispatch.Dispatcher.running_status_change): Sends a dispatch message whenever a dispatch is ready to be executed according to the schedule or the running status of the dispatch changed in a way that could potentially require the actor to start, stop or reconfigure itself.
+
+### Example using the running status change channel
+
+```python
+import os
+from frequenz.dispatch import Dispatcher
+from unittest.mock import MagicMock
+
+async def run():
+    url = os.getenv("DISPATCH_API_URL", "grpc://fz-0004.frequenz.io:50051")
+    key  = os.getenv("DISPATCH_API_KEY", "some-key")
+
+    microgrid_id = 1
+
+    dispatcher = Dispatcher(
+        microgrid_id=microgrid_id,
+        server_url=url,
+        key=key
+    )
+    await dispatcher.start()
+
+    actor = MagicMock() # replace with your actor
+
+    changed_running_status_rx = dispatcher.running_status_change.new_receiver()
+
+    async for dispatch in changed_running_status_rx:
+        if dispatch.type != "MY_TYPE":
+            continue
+
+        if dispatch.started:
+            print(f"Executing dispatch {dispatch.id}, due on {dispatch.start_time}")
+            if actor.is_running:
+                actor.reconfigure(
+                    components=dispatch.target,
+                    run_parameters=dispatch.payload, # custom actor parameters
+                    dry_run=dispatch.dry_run,
+                    until=dispatch.until,
+                )  # this will reconfigure the actor
+            else:
+                # this will start a new actor with the given components
+                # and run it for the duration of the dispatch
+                actor.start(
+                    components=dispatch.target,
+                    run_parameters=dispatch.payload, # custom actor parameters
+                    dry_run=dispatch.dry_run,
+                    until=dispatch.until,
+                )
+        else:
+            actor.stop()  # this will stop the actor
+```
+
+## Supported Platforms
+
+The following platforms are officially supported (tested):
+
+- **Python:** 3.11
+- **Operating System:** Ubuntu Linux 20.04
+- **Architectures:** amd64, arm64
+
+## Contributing
+
+If you want to know how to build this project and contribute to it, please
+check out the [Contributing Guide](CONTRIBUTING.md).
