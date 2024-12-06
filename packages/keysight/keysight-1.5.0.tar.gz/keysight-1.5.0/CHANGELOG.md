@@ -1,0 +1,106 @@
+# CHANGELOG.md
+This file contains all notable changes to the [keysight][] project.
+
+## Unreleased
+
+## v1.4.3 - 23-May-22
+- v1.4.2 wasn't released to pypi.
+- Added twine to dependencies.
+
+## v1.4.2 - 23-May-22
+- v1.4.1 wasn't released to pypi.
+- Added build to dependencies.
+- Switched to pip-chill vs pip freeze.
+
+## v1.4.1 - 23-May-22
+- Add N9038A.
+- Change from Nose to Nose2.
+
+## v1.3.0 - 23-May-22
+- Not released.
+
+## v1.2.2 - 16-Dec-21
+- Installed build and twine. Froze requirements.
+
+## v1.2.1 - 16-Dec-21
+- Change description-file to description_file in setup.cfg.
+
+## v1.2.0 - 16-Dec-21
+- Update build and PyPI distribution process.
+- Update copyright for 2022.
+- Update dependencies in requirements.txt.
+
+## v1.1.0 - 11-Jan-18
+
+### Fixed
+- Handle case where N9340 file has a marker.
+
+## v1.0.1 - 09-Jan-18
+
+### Fixed
+- Return the proper ref if it has units of dBm or dBuV.
+
+## v1.0.0 - 09-Jan-18
+
+### Changed
+- Don't auto deplay using Travis, since that's problematic.
+
+## v0.6.1 - 09-Jan-18
+
+### Changed
+- Changed Python versions to 2.7, 3.4, 3.5, and 3.6.
+
+## v0.6.0 - 09-Jan-18
+
+### Fixed
+- If the N9340 data file has units on the ref value in the CSV, then
+  return just the value and don't throw an exception.
+
+## v0.5.1 - 05-Oct-16
+
+### Fixed
+- Ability to handle 1-3 traces on E4411B
+
+## v0.5.0 - 04-Oct-16
+
+### Added
+- Ability to handle 1-3 traces instead of just 1 trace
+
+## v0.4.1 - 04-Oct-16
+
+### Added
+- Ability to run on Python 3.3+ in addition to Python 2.6+
+
+## v0.3.0 - 2015-09-01
+
+### Added
+- Ability to parse CSV files from E4411B Spectrum Analyzer
+
+## v0.2.1 - 2015-08-20
+
+### Added
+- Added coverage to `inv test` task
+
+### Changed
+- Updated pip requirements including numpy
+- Migrated from Travis legacy to container-based infrastructure
+- Remove pypi deploy from `inv release` task and use Travis instead
+
+## v0.1.2 - 2014-08-15
+
+### Bugs
+- Removed Python 3.3/3.4 from Travis-CI since those builds are currently
+  failing.
+
+## v0.1.1 - 2014-08-15
+
+### Enhancments
+- Add Travis-CI, gitignore, and Coveralls
+
+## v0.1 - 2014-08-15
+
+### Enhancements
+- Initial release passes with unit tests for a sample produced by a
+  N9340B spectrum analyzer CSV
+
+[keysight]: https://github.com/questrail/keysight
