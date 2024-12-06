@@ -1,0 +1,2 @@
+class TesseractException(Exception):
+    pass
