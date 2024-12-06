@@ -1,0 +1,150 @@
+{% extends "ausleihe/base.html" %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ medium }}</li>
+    </ol>
+  </nav>
+  <div class="row">
+    <div class="col">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>Mediatheknr.</th>
+            <td>{{ medium.id }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if perms.ausleihe.delete_medium %}
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-danger">
+        Wenn du das Medium löschen willst, dann erledige das
+        <a class="alert-link" target="_blank" href="{% url 'admin:ausleihe_medium_change' medium.id %}">über die Admin-Oberfläche</a>.
+
+        {% if medium.buecher.exists or medium.skillsets.exists  %}
+        Beachte, dass du das Medium nicht löschen kannst, wenn dem Medium noch Bücher oder Skill Sets zugeordnet sind.
+        Diese müssen erst einem anderen Medium zugeordnet werden.
+        {% endif %}
+
+        {% if not user.is_staff %}
+        Dafür musst du von einem Administrator den <em>Mitarbeiter-Status</em> erhalten.
+        Wende dich an die Admins, damit sie dir das Häkchen setzen.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if medium.buecher.exists %}
+  <div class="row">
+    <div class="col">
+      <h5>dazugehörige Bücher</h5>
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="col-4">Titel</th>
+            <th class="col-4">Autoren</th>
+            <th class="col-2">ISBN</th>
+            <th class="col-1">Verlag</th>
+            <th class="col-1">Ausgabe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for buch in medium.buecher.all %}
+          <tr>
+            <td><a href="{% url 'ausleihe:buch-detail' buch.id %}">{{ buch.titel }}</a></td>
+            <td>
+              {% include "ausleihe/buch_autoren_links.html" %}
+            </td>
+            <td>{{ buch.isbn }}</td>
+            <td>
+              {% if buch.verlag %}
+              <a href="{% url 'ausleihe:verlag-detail' buch.verlag.id %}">{{ buch.verlag }}</a>
+              {% endif %}
+            </td>
+            <td>{{ buch.ausgabe }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% if medium.skillsets.exists %}
+  <div class="row">
+    <div class="col">
+      <h5>dazugehörige Skillsets</h5>
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="col-4">Name</th>
+            <th class="col-4">Skill</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for skillset in medium.skillsets.all %}
+          <tr>
+            <td><a href="{% url 'ausleihe:skillset-detail' skillset.id %}">{{ skillset.name }}</a></td>
+            <td><a href="{% url 'ausleihe:skill-detail' skillset.skill.id %}">{{ skillset.skill.name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+  {% if perms.ausleihe.view_leihe and medium.leihe_set.exists %}
+  <div class="row">
+    <div class="col">
+      <h4>Verleihhistorie</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="text-right">Anfang</th>
+            <th class="text-right">Ende</th>
+            <th class="text-right">Δ</th>
+            <th class="col-3">Nutzer</th>
+            <th class="col-3">Verleiher:in</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for leihe in medium.leihe_set.all %}
+          <tr>
+            <td class="text-right">{{ leihe.anfang|date:"d.m.Y H:i" }} Uhr</td>
+            <td class="text-right">{{ leihe.ende|date:"d.m.Y H:i" }} Uhr</td>
+            <td class="text-right">
+              {% if leihe.zurueckgebracht %}
+              {{ leihe.dauer }}&thinsp;d
+              {% else %}
+                {% if leihe.ist_ueberfaellig %}
+                  {% with leihe.differenz_heute as d %}
+                  <span class="text-danger">{{ d }}&thinsp;d überfällig</span>
+                  {% endwith %}
+                {% else %}
+                  {% with leihe.differenz_heute as d %}
+                    noch {{ d }}&thinsp;d
+                  {% endwith %}
+                {% endif %}
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'ausleihe:verliehen-an' %}?username={{ leihe.nutzer.user }}">{{ leihe.nutzer }} ({{ leihe.nutzer.user }})</a>
+            </td>
+            <td>{{ leihe.verleiht_von.get_full_name }} ({{ leihe.verleiht_von }})</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}

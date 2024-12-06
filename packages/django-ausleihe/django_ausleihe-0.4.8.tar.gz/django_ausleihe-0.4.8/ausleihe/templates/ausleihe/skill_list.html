@@ -1,0 +1,104 @@
+{% extends "ausleihe/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page">{{ skill_list.count }} <a href="{% url 'ausleihe:skill-list' %}"><strong>Skill{% if skill_list.count > 1 %}s{% endif %}</strong></a></li>
+      {% if perms.ausleihe.change_skillset %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillset-list' %}">Skill Sets</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_skillsetitem %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillsetitem-list' %}">Skill Set Items</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_raum %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:raum-list' %}">Räume</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_gebaeude %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:gebaeude-list' %}">Gebäude</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_verfuegbarkeit %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:verfuegbarkeit-create' %}">Zeiten</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_reservierung %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:reservierung-list' %}">Reservierungen</a></li>
+      {% endif %}
+      {% if perms.ausleihe.add_skill %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-create' %}">hinzufügen</a></li>
+      {% endif %}
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col">
+      {% if skill_list %}
+      <table class="table" id="skillsets">
+        <thead>
+          <tr>
+            <th class="col-1">Nr.</th>
+            <th class="col-3">Name</th>
+            <th>Anzahl Personen</th>
+            <th>Anzahl benötigter Plätze</th>
+            <th>Anzahl verfügbarer Sets</th>
+            <th>Dauer (min)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for skill in skill_list %}
+          <tr>
+            <td>{{ skill.nummer }}</td>
+            <td><a href="{% url 'ausleihe:skill-detail' skill.id %}">{{ skill.name }}</a></td>
+            <td>
+              {% if skill.min_personen == skill.max_personen %}
+              {{ skill.min_personen }}
+              {% else %}
+              {{ skill.min_personen }} - {{ skill.max_personen }}
+              {% endif %}
+            </td>
+            <td>{{ skill.anzahl_plaetze }}</td>
+            <td>{{ skill.skillsets.count }}</td>
+            <td>{{ skill.dauer }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Bisher sind keine Skills vorhanden.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if skill_list and perms.ausleihe.change_skill %}
+  <div class="row mt-4">
+    <div class="col">
+      <h5 class="text-primary">Verfügbarkeit der Skills in den Räumen</h5>
+      <table class="table" id="verfuegbar">
+        <thead>
+          <tr>
+            <th>Raum</th>
+            <th>Plätze</th>
+            {% for skill in skill_list %}
+            <th><abbr title="{{ skill.name }}">{{ skill.nummer }} {{ skill.cap_name }}</abbr></th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for raum in raeume %}
+          <tr>
+            <td>{{ raum }}</td>
+            <td>{{ raum.anzahl_plaetze }}</td>
+            {% for skill in skill_list %}
+            <td>{% if skill in raum.skills.all %}✓{% endif %}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}

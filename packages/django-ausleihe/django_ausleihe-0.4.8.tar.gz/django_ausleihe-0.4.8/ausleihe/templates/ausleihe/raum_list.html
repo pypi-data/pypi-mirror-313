@@ -1,0 +1,63 @@
+{% extends "ausleihe/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-list' %}">Skills</a></li>
+      {% if perms.ausleihe.change_skillset %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillset-list' %}">Skill Sets</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_skillsetitem %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillsetitem-list' %}">Skill Set Items</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_raum %}
+      <li class="breadcrumb-item" aria-current="page">{{ raum_list.count }} <a href="{% url 'ausleihe:raum-list' %}"><strong>{% if raum_list.count > 1 %}Räume{% else %}Raum{% endif %}</strong></a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_gebaeude %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:gebaeude-list' %}">Gebäude</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_verfuegbarkeit %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:verfuegbarkeit-create' %}">Zeiten</a></li>
+      {% endif %}
+      {% if perms.ausleihe.add_raum %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:raum-create' %}">hinzufügen</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:raum-import' %}">aus dem LSF importieren</a></li>
+      {% endif %}
+    </ol>
+  </nav>
+  <div class="row">
+    <div class="col">
+      {% if raum_list %}
+      <table class="table" id="raeume">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Gebäude</th>
+            <th>LSF ID</th>
+            <th>Anz. Plätze</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for raum in raum_list %}
+          <tr>
+            <td>
+              {% if perms.ausleihe.change_raum %}<a href="{% url 'ausleihe:raum-edit' raum.id %}">{{ raum }}</a>{% else %}{{ raum }}{% endif %}
+            </td>
+            <td>{{ raum.gebaeude.name }}</td>
+            <td><a href="{{ raum.lsf_link }}">{{ raum.lsf_id }}</a></td>
+            <td>{{ raum.anzahl_plaetze }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Bisher sind keine Räume vorhanden.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

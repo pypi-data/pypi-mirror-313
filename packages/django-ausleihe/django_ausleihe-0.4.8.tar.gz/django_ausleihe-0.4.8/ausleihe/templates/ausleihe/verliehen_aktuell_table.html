@@ -1,0 +1,55 @@
+{% if aktuell_verliehen.exists %}
+<h4>aktuell entliehen</h4>
+<table class="table">
+  <thead>
+    <tr>
+      <th class="col-1">Mediatheknr.</th>
+      <th class="col-4">enthält</th>
+      <th class="text-right col-1">Anfang</th>
+      <th class="text-right col-2">Ende</th>
+      <th class="col-1">Δ</th>
+      {% if perms.ausleihe.view_leihe %}
+      <th>verliehen von</th>
+      {% endif %}
+      {% if perms.ausleihe.change_leihe %}
+      <th>zurücknehmen</th>
+      {% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for leihe in aktuell_verliehen %}
+    <tr>
+      <td>
+        <a href="{% url 'ausleihe:medium-detail' leihe.medium.id %}">{{ leihe.medium }}</a>
+      </td>
+      <td>
+        {% include "ausleihe/medium_enthaelt.html" with medium=leihe.medium %}
+      </td>
+      <td class="text-right">{{ leihe.anfang|date:"d.m.Y" }}</td>
+      <td class="text-right">{{ leihe.ende|date:"l" }}, {{ leihe.ende|date:"d.m.Y" }}</td>
+      <td>
+        {% if leihe.ist_ueberfaellig %}
+        {% with leihe.differenz_heute as d %}
+        <span class="text-danger">{{ d }}&thinsp;d überfällig</span>
+        {% endwith %}
+        {% else %}
+        {% with leihe.differenz_heute as d %}
+        noch {{ d }}&thinsp;d
+        {% endwith %}
+        {% endif %}
+      </td>
+      {% if perms.ausleihe.view_leihe %}
+      <td>{{ leihe.verleiht_von.get_full_name }} ({{ leihe.verleiht_von }})</td>
+      {% endif %}
+      {% if perms.ausleihe.change_leihe %}
+      <td>
+        <a class="btn btn-primary btn-sm" href="{% url 'ausleihe:zuruecknehmen' leihe.id %}{% if username %}?username={{ username }}{% endif %}">zurücknehmen</a>
+      </td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Aktuell nichts entliehen.</p>
+{% endif %}

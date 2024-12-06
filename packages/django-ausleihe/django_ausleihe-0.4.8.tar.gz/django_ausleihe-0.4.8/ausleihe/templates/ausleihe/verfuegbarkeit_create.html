@@ -1,0 +1,81 @@
+{% extends "ausleihe/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block css %}
+<style type="text/css" media="screen">
+  .asteriskField {
+    display: none;
+  }
+  .requiredField {
+    font-weight: bold;
+  }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-list' %}">Skills</a></li>
+      {% if perms.ausleihe.change_skillset %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillset-list' %}">Skill Sets</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_skillsetitem %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillsetitem-list' %}">Skill Set Items</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_raum %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:raum-list' %}">Räume</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_gebaeude %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:gebaeude-list' %}">Gebäude</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_verfuegbarkeit %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:verfuegbarkeit-create' %}"><strong>Zeiten</strong></a></li>
+      {% endif %}
+    </ol>
+  </nav>
+
+  {% crispy form %}
+
+  <div class="row mt-4">
+    <div class="col">
+      {% if zeiten %}
+      <h6 class="text-primary">Verfügbare Zeiten ab heute</h6>
+      <table class="table" id="verfuegbarkeiten">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Wochentag</th>
+            <th>Zeit</th>
+            <th>Raum</th>
+            <th>Notiz</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in zeiten %}
+          <tr>
+            <td>{{ v.datum }}</td>
+            <td>{{ v.datum|date:"l" }}</td>
+            <td>
+              {% if perms.ausleihe.change_verfuegbarkeit %}
+              <a href="{% url 'ausleihe:verfuegbarkeit-edit' v.id %}">{{ v.beginn }} – {{ v.ende }} Uhr</a>
+              {% else %}
+              {{ v.beginn }} – {{ v.ende }} Uhr
+              {% endif %}
+            </td>
+            <td>{{ v.raum }}</td>
+            <td>{{ v.notiz }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Bisher sind keine Zeiten vorhanden.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock content %}
