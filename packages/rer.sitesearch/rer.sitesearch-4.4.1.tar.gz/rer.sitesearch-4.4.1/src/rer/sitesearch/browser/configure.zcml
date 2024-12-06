@@ -1,0 +1,79 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="rer.sitesearch"
+    >
+
+  <plone:static
+      directory="static"
+      name="rer.sitesearch"
+      type="plone"
+      />
+
+  <browser:page
+      name="search"
+      for="plone.app.layout.navigation.interfaces.INavigationRoot"
+      class=".search.View"
+      template="templates/search.pt"
+      permission="zope2.View"
+      layer="rer.sitesearch.interfaces.IRERSiteSearchLayer"
+      />
+
+  <browser:page
+      name="search"
+      for="*"
+      class=".search.View"
+      template="templates/search.pt"
+      permission="zope2.View"
+      layer="rer.sitesearch.interfaces.IRERSiteSearchLayer"
+      />
+
+
+  <!-- FORCE LOCAL SEARCH ALWAYS -->
+  <browser:page
+      name="search-local"
+      for="plone.app.layout.navigation.interfaces.INavigationRoot"
+      class=".search.View"
+      template="templates/search_local.pt"
+      permission="zope2.View"
+      layer="rer.sitesearch.interfaces.IRERSiteSearchLayer"
+      />
+
+  <browser:page
+      name="search-local"
+      for="*"
+      class=".search.View"
+      template="templates/search_local.pt"
+      permission="zope2.View"
+      layer="rer.sitesearch.interfaces.IRERSiteSearchLayer"
+      />
+
+  <!-- keep default search view for debug -->
+  <configure package="Products.CMFPlone.browser">
+    <browser:page
+        name="search-debug"
+        for="plone.app.layout.navigation.interfaces.INavigationRoot"
+        class=".search.Search"
+        template="templates/search.pt"
+        permission="zope2.View"
+        />
+  </configure>
+
+  <browser:page
+      name="sitesearch-settings"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".controlpanel.RERSiteSearchSettingsControlPanel"
+      permission="rer.sitesearch.ManageSettings"
+      layer="rer.sitesearch.interfaces.IRERSiteSearchLayer"
+      />
+
+  <browser:view
+      name="plonejsi18n"
+      for="plone.app.layout.navigation.interfaces.INavigationRoot"
+      class=".i18n.View"
+      permission="zope2.View"
+      layer="rer.sitesearch.interfaces.IRERSiteSearchLayer"
+      />
+</configure>
