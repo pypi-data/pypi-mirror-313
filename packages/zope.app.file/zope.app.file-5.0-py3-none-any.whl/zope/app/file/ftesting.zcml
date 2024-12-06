@@ -1,0 +1,171 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   i18n_domain="zope"
+   package="zope.app.file"
+   >
+
+  <include package="zope.component" file="meta.zcml" />
+  <!-- view directive -->
+  <include package="zope.browserpage" file="meta.zcml" />
+  <!-- resource directive -->
+  <include package="zope.browserresource" file="meta.zcml" />
+  <!-- publisher directivie -->
+  <include package="zope.app.publication" file="meta.zcml" />
+  <!-- grant and role directives -->
+  <include package="zope.securitypolicy" file="meta.zcml" />
+  <!-- principal directives and securityPolicy directive -->
+  <include package="zope.security" file="meta.zcml" />
+  <include package="zope.principalregistry" file="meta.zcml" />
+
+  <!-- defaultView directive -->
+  <include package="zope.publisher" file="meta.zcml" />
+
+  <!-- menu/addMenuItem directive -->
+  <include package="zope.browsermenu" file="meta.zcml" />
+
+  <!-- addform/editform directive -->
+  <include package="zope.app.form.browser" file="meta.zcml" />
+  <!-- containerViews directive -->
+  <include package="zope.app.container.browser" file="meta.zcml" />
+
+  <!-- These normally come from zope.app.zcmlfiles/menus.zcml -->
+  <browser:menu
+      id="zmi_views"
+      title="Views"
+      description="Menu for displaying alternate representations of an object"
+      />
+  <browser:menu
+      id="zmi_actions"
+      title="Actions"
+      description="Menu for displaying actions to be performed"
+      />
+  <!-- zope/app/container/browser/commontasks.pt needs this -->
+  <browser:menu
+      id="zope.app.container.add"
+      title="Add"
+      description="Menu for objects to be added according to
+                   containment constraints"
+      interface="zope.app.publisher.interfaces.browser.AddMenu"
+      />
+
+  <include package="zope.app.container" />
+  <include package="zope.app.component" />
+
+
+  <include package="zope.annotation" />
+  <include package="zope.browsermenu" />
+  <include package="zope.copypastemove" />
+  <include package="zope.container" />
+  <include package="zope.component" />
+  <include package="zope.dublincore" />
+  <include package="zope.location" />
+  <include package="zope.login" />
+  <include package="zope.password" />
+  <include package="zope.principalregistry" />
+  <include package="zope.principalannotation" />
+  <include package="zope.publisher" />
+  <include package="zope.security" />
+  <include package="zope.securitypolicy" />
+  <include package="zope.site" />
+  <include package="zope.traversing" />
+  <include package="zope.traversing.browser" />
+
+
+  <include package="zope.dublincore.browser" />
+  <!-- Register the Application folder -->
+  <include package="zope.app.appsetup" />
+
+  <!-- @@standard_macros -->
+  <include package="zope.app.basicskin" />
+  <include package="zope.app.rotterdam" />
+  <include package="zope.app.publication" />
+
+  <!-- login_logout view -->
+  <include package="zope.app.security.browser" />
+  <include package="zope.app.authentication" />
+  <!-- zope namespace -->
+  <include package="zope.app.pagetemplate" />
+  <!-- the right IAdding view -->
+  <include package="zope.app.folder" />
+
+  <!-- 404, 401 views -->
+  <include package="zope.app.exception.browser" />
+
+  <include package="zope.app.form.browser" />
+  <include package="zope.app.container.browser" />
+  <include package="zope.app.component.browser" />
+  <include package="zope.formlib" />
+
+  <!-- Normally done in zope.app.principalannotation's bootstrap
+       subscriber -->
+  <utility
+      factory="zope.principalannotation.utility.PrincipalAnnotationUtility"
+      provides="zope.principalannotation.interfaces.IPrincipalAnnotationUtility"
+      />
+
+
+  <include package="zope.app.file" />
+
+  <!-- PUT view for / -->
+  <include package="zope.app.http" />
+
+  <browser:defaultView name="index.html" />
+  <browser:defaultSkin name="Rotterdam" />
+
+
+  <!-- Security setup -->
+  <securityPolicy
+    component="zope.securitypolicy.zopepolicy.ZopeSecurityPolicy" />
+
+  <role id="zope.Anonymous" title="Everybody"
+        description="All users have this role implicitly" />
+  <role id="zope.Manager" title="Site Manager" />
+
+  <!-- Replace the following directive if you don't want public access
+       -->
+  <grant permission="zope.View"
+         role="zope.Anonymous" />
+  <grant permission="zope.dublincore.view"
+		 role="zope.Anonymous" />
+  <grantAll role="zope.Manager" />
+
+  <!-- Principals -->
+
+  <unauthenticatedPrincipal
+      id="zope.anybody"
+      title="Unauthenticated User" />
+
+  <unauthenticatedGroup
+    id="zope.Anybody"
+    title="Unauthenticated Users"
+    />
+
+  <authenticatedGroup
+    id="zope.Authenticated"
+    title="Authenticated Users"
+    />
+
+  <everybodyGroup
+    id="zope.Everybody"
+    title="All Users"
+    />
+
+  <!-- Principal that tests generally run as -->
+  <principal
+      id="zope.mgr"
+      title="Manager"
+      login="mgr"
+      password="mgrpw" />
+
+  <!-- Bootstrap principal used to make local grant to the principal above -->
+  <principal
+      id="zope.globalmgr"
+      title="Manager"
+      login="globalmgr"
+      password="globalmgrpw" />
+
+  <grant role="zope.Manager" principal="zope.globalmgr" />
+  <grant role="zope.Manager" principal="zope.mgr" />
+
+</configure>
