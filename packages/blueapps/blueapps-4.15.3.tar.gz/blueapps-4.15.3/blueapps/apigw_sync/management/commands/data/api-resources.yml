@@ -1,0 +1,46 @@
+swagger: '2.0'
+basePath: /
+info:
+  version: '0.1'
+  title: API Gateway Resources
+  description: 'API Gateway Resources'
+schemes:
+- http
+paths:
+  # example,请务必根据实际情况修改
+  # 前端请求路径
+  /api/apigw/hello/:
+    # 前端请求方法
+    get:
+      # 名称
+      operationId: apigw_sync_test
+      # 描述
+      description: apigw saas sync test from blueapps
+      # 标签
+      tags:
+      - test
+      responses:
+        default:
+          description: ''
+      x-bk-apigateway-resource:
+        # 是否公开资源
+        isPublic: true
+        # 是否允许验证
+        allowApplyPermission: true
+        # 是否匹配所有子路径
+        matchSubpath: false
+        # 后端配置
+        backend:
+          type: HTTP
+          method: get
+          # 后端请求路径
+          path: /apigw/hello/
+          # 是否是追加匹配的子路径
+          matchSubpath: false
+          upstreams: {}
+          transformHeaders: {}
+        authConfig:
+          # 是否开启用户认证
+          userVerifiedRequired: true
+        disabledStages: []
+        descriptionEn:
