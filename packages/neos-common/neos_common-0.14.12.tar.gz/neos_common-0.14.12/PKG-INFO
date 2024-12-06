@@ -1,0 +1,106 @@
+Metadata-Version: 2.3
+Name: neos_common
+Version: 0.14.12
+Summary: Neos Common Code
+Requires-Python: >=3.10
+Requires-Dist: auth-aws4>=0.1.1
+Requires-Dist: httpx
+Requires-Dist: jinja2>=3
+Requires-Dist: multidict>=6.0.0
+Requires-Dist: pdoc3>=0.11.1
+Requires-Dist: pydantic>=2.0.0
+Requires-Dist: python-dotenv
+Provides-Extra: auth
+Requires-Dist: fastapi<1.0.0,>=0.0.0; extra == 'auth'
+Requires-Dist: python-keycloak<4.0,>=3.9; extra == 'auth'
+Provides-Extra: config
+Requires-Dist: pydantic-settings<3.0.0,>=2.0.0; extra == 'config'
+Provides-Extra: dev
+Requires-Dist: changelog-gen<0.13,>=0.12; extra == 'dev'
+Requires-Dist: freezegun>=1.2.1; extra == 'dev'
+Requires-Dist: pre-commit>=3.7.1; extra == 'dev'
+Requires-Dist: pytest-asyncio<0.19,>=0.18.3; extra == 'dev'
+Requires-Dist: pytest-cov>=3.0.0; extra == 'dev'
+Requires-Dist: pytest-env>=0.6.2; extra == 'dev'
+Requires-Dist: pytest-httpx; extra == 'dev'
+Requires-Dist: pytest-random-order>=1.0.4; extra == 'dev'
+Requires-Dist: pytest<8.0,>=7.1.2; extra == 'dev'
+Requires-Dist: ruff>=0.6.4; extra == 'dev'
+Provides-Extra: kafka
+Requires-Dist: confluent-kafka==2.0.2; extra == 'kafka'
+Description-Content-Type: text/markdown
+
+# NEOS Platform Common Code v0.14.12
+
+## Prerequisites
+
+The following packages are used across python repositories. A global install of them all is *highly* recommended.
+
+* [uv](https://docs.astral.sh/uv/getting-started/installation/)
+* [Invoke](https://www.pyinvoke.org/installing.html)
+
+### WSL
+
+If running on Windows, you may need to install `distutils` to install the service.
+
+```bash
+$ sudo apt-get install python3.8-distutils
+```
+
+## Initial setup
+
+```bash
+$ invoke install-dev
+```
+
+### Install on MacOS
+
+* Install kafka dependencies
+
+```bash
+$ brew install librdkafka
+```
+
+* Setup environment variables on .bashrc or .zshrc
+
+```bash
+export CFLAGS="-I/opt/homebrew/include"
+export LDFLAGS="-L/opt/homebrew/lib"
+export LIBRARY_PATH="/opt/homebrew/lib"
+```
+
+* Execute the following command to install the dependencies
+
+```bash
+$ invoke install-dev
+```
+
+## Code Quality
+
+### Tests
+
+```bash
+invoke tests
+invoke tests-coverage
+```
+
+## Linting
+
+```bash
+invoke check-style
+invoke isort
+```
+
+## Releases
+
+Release management is handled using `changelog-gen`. The below commands will
+tag a new release, and generate the matching changelog entries. Jenkins will
+then publish the release to the artifact repository.
+
+```bash
+$ invoke release
+$ invoke bump-patch
+$ invoke bump-minor
+$ invoke bump-major
+> vX.Y.Z
+```

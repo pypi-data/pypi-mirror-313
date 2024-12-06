@@ -1,0 +1,173 @@
+pipeline {
+    environment {
+        SCANNER_HOME = tool 'sonarqube'
+        VERSION = sh(returnStdout: true, script: "cat neos_common/__init__.py | sed 's/^.*__version__ = \"\\([^\"]*\\).*/\\1/'").trim()
+
+        // DD_URL="https://defectdojo.dev.neosdata.io"
+        // DD_API_KEY=credentials("DD_CICD_API_KEY")
+        DD_URL="http://defectdojov2-defectdojov2-django.defectdojov2.svc.cluster.local:80"
+        DD_API_KEY=credentials("DD_CICD_API_KEY1")
+        DD_PRODUCT_TYPE_NAME="Neos Core"
+        DD_PRODUCT_NAME="neos-platform-common"
+        DD_ENGAGEMENT_TARGET_START="${sh(script:"date -I", returnStdout: true).trim()}"
+        DD_ENGAGEMENT_TARGET_END="${DD_ENGAGEMENT_TARGET_START}"
+        DD_ENGAGEMENT_NAME="${DD_ENGAGEMENT_TARGET_START}_${GIT_BRANCH}_${BUILD_NUMBER}"
+        DD_SSL_VERIFY="False"
+        DD_BUILD_ID="${BUILD_NUMBER}"
+        DD_COMMIT_HASH="${GIT_COMMIT}"
+        DD_BRANCH_TAG="${GIT_BRANCH}"
+
+    }
+
+    agent {
+        kubernetes {
+            inheritFrom 'neos-common' // all pods will be named with this prefix
+            // idleMinutes 5  // how long the pod will live idle
+            yamlFile '.build-pod.yaml' // path to the pod definition relative to the root
+            defaultContainer 'docker' // define a default container - will default to jnlp container
+        }
+    }
+
+    stages {
+         stage('Test') {
+            steps {
+                container("python") {
+                    sh "python -m pip install --upgrade uv invoke"
+                    sh "uv sync --all-extras"
+                    sh "uv run pytest --cov --cov-report=xml"
+                    sh "uv run pre-commit run --all-files"
+                }
+            }
+        }
+
+        stage('Security Checks') {
+            parallel {
+
+                stage('Gitleaks secrets scanning'){
+                    steps{
+                        container('gitleaks'){
+                            sh '''
+                                mkdir -p reports
+                                gitleaks detect -s ./ -v -f json -r reports/gitleaks.json || true
+                            '''
+                            archiveArtifacts artifacts: 'reports/gitleaks.json', fingerprint: true
+                        }
+
+                        container('ddimport'){
+                            sh '''
+                                export DD_TEST_TYPE_NAME="Gitleaks Scan"
+                                export DD_TEST_NAME="Gitleaks"
+                                export DD_FILE_NAME="reports/gitleaks.json"
+
+                                dd-reimport-findings.sh || true
+                            '''
+                        }
+                    }
+                }
+
+                stage('KubeScore analysis') {
+                    when {
+                        anyOf {
+                            branch "main"
+                            branch "score"
+                            buildingTag()
+                        }
+                    }
+                    steps {
+                        container("kube-score") {
+                            script {
+                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                    sh "mkdir -p reports"
+                                    sh "helm template chart | kube-score score -o ci - | tee reports/kube-scan.json"
+                                    archiveArtifacts artifacts: 'reports/kube-scan.json', fingerprint: true
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('SonarQube analysis') {
+                    steps {
+                        withSonarQubeEnv('sonarqube') {
+                            container("jnlp") {
+                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                    sh '$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=NEOS-Critical_neos-platform-common_AYSllwJcMpAbRG9xVdpa -Dsonar.projectVersion=v$VERSION-$BUILD_NUMBER'
+                                }
+                            }
+                        }
+
+                        container('ddimport'){
+
+                            sh '''
+                                export DD_TEST_TYPE_NAME="SonarQube API Import"
+                                export DD_TEST_NAME="SonarQube"
+                                export DD_API_SCAN_CONFIGURATION_ID="7"
+
+                                dd-reimport-findings.sh || true
+                            '''
+                        }
+                    }
+                }
+
+                stage('Dependency analysis') {
+                    steps {
+                        container("trivy") {
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                sh 'wget -c https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl'
+                                sh 'mkdir -p reports && trivy filesystem --ignore-unfixed --vuln-type os,library --format template --template "@html.tpl" -o reports/scan.html ./'
+                                sh 'trivy filesystem --vuln-type os,library --format json -o reports/trivy.json ./'
+                                publishHTML target : [
+                                    allowMissing: true,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: true,
+                                    reportDir: 'reports',
+                                    reportFiles: 'scan.html',
+                                    reportName: 'Dependencies Scan',
+                                    reportTitles: 'Depdndencies Scan'
+                                ]
+
+                                archiveArtifacts artifacts: 'reports/trivy.json', fingerprint: true
+                            }
+                        }
+
+                        container('ddimport'){
+                            sh '''
+                                export DD_TEST_TYPE_NAME="Trivy Scan"
+                                export DD_TEST_NAME="Trivy"
+                                export DD_FILE_NAME="reports/trivy.json"
+
+                                dd-reimport-findings.sh || true
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+        stage('Publish') {
+            when {
+                buildingTag()
+            }
+            steps {
+                container("python") {
+                    withCredentials([usernamePassword(credentialsId: 'pypi_token', passwordVariable: 'pass', usernameVariable: 'user')]) {
+                        sh "uv build"
+                        sh "TWINE_USERNAME=$user TWINE_PASSWORD=$pass uvx twine upload dist/*"
+                    }
+                }
+            }
+        }
+
+        stage('Notify') {
+            when {
+                buildingTag()
+            }
+            steps {
+                container("jnlp") {
+                    script {
+                        slackSend color: "good", message: "neos-platform-common >> \nPublish successful - $TAG_NAME (<${env.BUILD_URL}|Open>)"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,190 @@
+[project]
+name = "neos_common"
+version = "0.14.12"
+description = "Neos Common Code"
+authors = []
+repository="https://github.com/NEOS-Critical/neos-platform-common"
+homepage="https://github.com/NEOS-Critical/neos-platform-common"
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "python-dotenv",
+    "httpx",
+    "pydantic >= 2.0.0",
+    "multidict >= 6.0.0",
+    "auth-aws4 >= 0.1.1",
+    "jinja2>=3",
+    "pdoc3 >= 0.11.1",
+]
+
+[project.optional-dependencies]
+auth = [
+    "fastapi >=0.0.0,<1.0.0",
+    "python-keycloak >= 3.9,<4.0",
+]
+kafka = [
+    "confluent-kafka == 2.0.2",
+]
+config = [
+    "pydantic-settings >=2.0.0,<3.0.0",
+]
+dev = [
+    # Tests
+    "freezegun >= 1.2.1",
+    "pytest >= 7.1.2,<8.0",
+    "pytest-asyncio >= 0.18.3,<0.19",
+    "pytest-cov >= 3.0.0",
+    "pytest-env >= 0.6.2",
+    "pytest-random-order >= 1.0.4",
+    "pytest-httpx",
+
+    # style
+    "ruff >= 0.6.4",
+    "pre-commit >= 3.7.1",
+
+    # Releases
+    "changelog-gen >= 0.12,<0.13",
+]
+
+[tool.changelog_gen]
+current_version = "0.14.12"
+reject_empty = true
+allowed_branches = [
+    "main",
+]
+date_format = "(released %Y-%m-%d)"
+hooks = [
+  "neos_common.changelog:generate_docs",
+]
+
+[tool.changelog_gen.custom.pdoc]
+modules = ["neos_common"]
+
+[tool.changelog_gen.github]
+strip_pr_from_description = true
+
+[[tool.changelog_gen.extractors]]
+footer = ["Refs"]
+pattern = '(?P<issue_ref>NEOS-\d+)'
+
+[[tool.changelog_gen.link_generators]]
+source = "issue_ref"
+link = "https://neom.atlassian.net/browse/{0}"
+
+[[tool.changelog_gen.link_generators]]
+source = "__change__"
+text = "{0.short_hash}"
+link = "https://github.com/NEOS-Critical/neos-platform-common/commit/{0.commit_hash}"
+
+[[tool.changelog_gen.files]]
+filename = "pyproject.toml"
+pattern = 'version = "{version}"'
+
+[[tool.changelog_gen.files]]
+filename = "README.md"
+
+[[tool.changelog_gen.files]]
+filename = "neos_common/__init__.py"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "--random-order --cov-append"
+env = [
+]
+
+[tool.coverage.report]
+sort = "cover"
+fail_under = 98
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == '__main__':",
+    "if typing.TYPE_CHECKING:",
+    "@abc.abstractmethod",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["neos_common"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.format]
+line-ending = "lf"
+quote-style = "double"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "B008",     # typer involves a lot of function calls in function definitions
+    "D203",     # No blankline before docstring
+    "D213",     # docstring starts on opening line
+    "PLR0913",  # too many arguments to a function call
+    "PLR2004",  # magic numbers in tests
+    "FIX002",   # Allow TODO's
+    "FA",
+    "E501",     # Handled by ruff format
+    "G",        # REMOVE: logging(.., extra={}) does not appear to work
+    "TD002",    # REMOVE: add authors
+    "TD003",    # REMOVE: add links
+    "ANN002",   # REMOVE: type annotation on *args
+    "ANN003",   # REMOVE: type annotation on **kwargs
+    "ANN101",   # REMOVE: annotate self
+    "ANN102",   # REMOVE: annotate cls
+]
+
+[tool.ruff.lint.per-file-ignores]
+"neos_common/*"= [
+    "D104",  # Ignore public __init__ missing docstring.
+    # TODO: Clean up below violations
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D107",  # Missing docstring in __init__
+]
+"neos_common/error.py" = [
+    "D101",  # ignore missing docstrings on exception classes
+]
+"neos_common/authorization/base.py" = [
+    "D102",  # ignore missing docstrings in protocol __call__ definitions
+]
+"neos_common/schema.py" = [
+    "ARG002",  # unused arguments abound in pydantic validators
+    "D101",  # ignore missing public class docstrings in schema
+]
+"tasks.py" = ["ANN", "E501", "INP001"]
+"tests/*" = ["ANN", "D", "SLF", "S101", "S105", "S106"]
+"tests/authorization/test_util.py" = ["N806", "S106"]
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["neos_common", "typing"]
+
+[tool.ruff.lint.pep8-naming]
+# Allow Pydantic's `@validator` decorator to trigger class method treatment.
+classmethod-decorators = [
+    "classmethod",
+    "pydantic.field_validator",
+    "pydantic.model_validator",
+]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pyright]
+include = ["neos_common"]
+exclude = [
+"tests/*",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
