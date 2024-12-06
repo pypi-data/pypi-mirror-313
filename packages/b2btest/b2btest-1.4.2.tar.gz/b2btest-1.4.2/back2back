@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+
+from yamlns import namespace as ns
+from b2btest import runBack2BackProgram
+from b2btest.b2btest import help as usage
+import sys
+
+import argparse
+
+parser = argparse.ArgumentParser(
+	formatter_class=argparse.RawDescriptionHelpFormatter,
+	description="Runs back-2-back tests defined on a yaml file",
+	epilog="""\
+The yaml file should contains two main keys: 'b2bdatapath' and 'testcases':
+
+'b2bdatapath' is the path, relative to the yaml script, that will hold b2b
+data expectations.
+
+'testcases' is a dictionary of testcases, each testcase has a 'command' key
+with the command to be executed, and an 'outputs' key with a list of outputs
+to be handled as results.
+
+All paths are relative to the yaml file path. And such path is the initial
+working dir for all command execution.
+
+Invocation examples:
+
+"""+usage.replace('./back2back', '%(prog)s cases.yaml'),
+	)
+parser.add_argument(
+	'yamlfile', metavar="TESTCASES.yaml",
+	help='a yaml file describing the testcases',
+	)
+parser.add_argument(
+	'--list',
+	action='store_const',
+	const='list',
+	default='run',
+	dest='command',
+	help='lists available test cases and exits',
+	)
+parser.add_argument(
+	'--accept',
+	action='store_const',
+	const='accept',
+	dest='command',
+	help='instead of running, accept specified testcases outputs as valid if they failed on previous execution',
+	)
+parser.add_argument(
+	'--acceptall',
+	action='store_const',
+	const='acceptall',
+	dest='command',
+	help='instead of running, accept all previously failed execution outputs (use with care)',
+	)
+parser.add_argument(
+	'testcases',
+	metavar="TESTCASE",
+	nargs='*',
+	help='testcase id to be run/accepted/discarded...',
+	)
+
+parser.add_argument(
+	'--arch',
+	action='store_true',
+	help='when accepting, accept them just for the current computer architecture',
+	)
+False and parser.add_argument(
+	'--plat',
+	action='store_true',
+	help='when accepting, accept them just for the current os platform',
+	)
+
+program = sys.argv[0]
+args, sys.argv = parser.parse_known_args()
+
+# Emulate old command line
+subargs = [program] + (
+		['--'+args.command] if args.command!='run' else []
+	) + sys.argv + (args.testcases or []) + (
+		['--arch'] if args.arch else []
+	)
+
+testcases = ns.load(args.yamlfile)
+runBack2BackProgram(testcases.datapath, subargs, [
+	( name, testcase.command, testcase.outputs)
+	for name, testcase in testcases.testcases.items()
+],
+	chosenCases=args.testcases,
+	extensions=testcases.get('extensions',{})
+)
+
+
