@@ -1,0 +1,117 @@
+Metadata-Version: 2.1
+Name: finlab
+Version: 1.2.17
+Summary: Analyzing stock has never been easier.
+Home-page: UNKNOWN
+Author: FinLab
+Author-email: finlab.company@finlab.tw
+License: UNKNOWN
+Project-URL: 文件教學, https://doc.finlab.tw/getting-start/
+Project-URL: 選股策略, https://ai.finlab.tw/strategies/
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests
+Requires-Dist: numpy (>=1.21.6)
+Requires-Dist: pandas (>=1.5.3)
+Requires-Dist: pyarrow (>=2.0.0)
+Requires-Dist: lz4
+Requires-Dist: Cython
+Requires-Dist: tqdm
+Requires-Dist: jinja2
+Provides-Extra: cli
+Requires-Dist: pywebview ; extra == 'cli'
+Requires-Dist: nbformat ; extra == 'cli'
+Requires-Dist: google-auth-oauthlib ; extra == 'cli'
+Requires-Dist: flask ; extra == 'cli'
+Requires-Dist: cryptography (>=43.0.0) ; extra == 'cli'
+Requires-Dist: rich-click (>=1.8.3) ; extra == 'cli'
+
+
+# FinLab
+
+瞬間的閃念之中，揭示過去十年2000支股票的歷史數據，這就是finlab package！不僅如此，它與pandas無縫整合，讓你在策略創建的旅程中，如同進行一場華麗的交響樂演奏。其語法之簡潔，讓你撰寫策略時有如神助。 
+
+你只需要撰寫人類懂得邏輯，而程式會自動融合各種頻率的歷史數據來選股，這不僅是程式設計上的巧思，更是對簡潔的極致追求。當你以為這已經是頂峰，它的詳細回測結果，又將你帶入更深一層的分析維度，每一筆數據都讓你的決策更加精準。 在幾秒鐘之內，2000支股票的回測，這速度，這效率，它不僅是一個 package，這是一個交易者的夢想加速器！這是finlab，一個為熱血操盤手量身打造的回測神器！
+
+## 功能
+* 📊 快速存取龐大資料集：單一指令即可取得2000支股票過去十年的歷史數據。
+* 🐼 Pandas整合：利用熟悉且功能強大的pandas函式庫，輕鬆設計交易策略。
+* 🔍 用戶友好的語法✍️：採用簡潔直觀編碼語法。
+* 🕒 多頻率數據處理：自動整合管理不同時間頻率的歷史數據。
+* 🔬 全面的回測分析：透過詳細的回測報告，獲得深入的洞察。
+* 🚀 高速計算：得益於 Cython 優化的性能，幾秒鐘內即可執行2000支股票的回測。
+* 🤖 機器學習：結合 qlib 研發機器學習策略。
+
+## 相關連結
+* [程式文檔](https://doc.finlab.tw/reference/finlab/)
+* [Jupyter Notebook 範例](https://doc.finlab.tw/tools/guide_for_beginners/)
+* [回測儀表板](https://ai.finlab.tw/strategies)
+
+## 簡易教學
+### 下載資料
+
+輸入以下程式碼，即可下載資料。可以[查詢](https://ai.finlab.tw/database)有哪些歷史資料可以下載。
+
+``` py
+from finlab import data
+
+data.get('price:收盤價')
+```
+
+| date       |   0015 |   0050 |   0051 |   0052 |   0053 |
+|:-----------|-------:|-------:|-------:|-------:|-------:|
+| 2007-04-23 |   9.54 |  57.85 |  32.83 |  38.4  |    nan |
+| 2007-04-24 |   9.54 |  58.1  |  32.99 |  38.65 |    nan |
+| 2007-04-25 |   9.52 |  57.6  |  32.8  |  38.59 |    nan |
+| 2007-04-26 |   9.59 |  57.7  |  32.8  |  38.6  |    nan |
+| 2007-04-27 |   9.55 |  57.5  |  32.72 |  38.4  |    nan |
+
+### 撰寫策略
+
+可以用非常簡單的 `Pandas` 語法來撰寫策略邏輯，以創新高的策略來說，可以用以下的寫法：
+
+``` py
+from finlab import data
+
+close = data.get('price:收盤價')
+
+# 創三百個交易日新高
+position = close >= close.rolling(300).max()
+position
+```
+
+| date                |   0015 |   0050 |   0051 |   0052 |   0053 |
+|:--------------------|-------:|-------:|-------:|-------:|-------:|
+| 2007-04-23 00:00:00 |  False |  False |  False |  False |  False |
+| 2007-04-24 00:00:00 |  False |  False |  False |  False |  False |
+| 2007-04-25 00:00:00 |  False |  False |  False |  False |  False |
+| 2007-04-26 00:00:00 |  False |  False |  False |   True |  False |
+| 2007-04-27 00:00:00 |  False |  False |  False |  False |  False |
+
+這邊的 `position` 是一個 False/True 的查詢表，當數值為 True ，代表該股票在當天有創新高，而數字 False 則代表沒有創新高。由於創新高的股票很少，上面的範例中，只有少數股票的數值會是 True。
+
+假設我們希望每個月底，搜尋上表中數值為 True 的股票並且買入持有一個月，可以用以下的語法：
+
+### 回測績效
+
+``` py
+from finlab import backtest
+
+report = backtest.sim(position, resample='M')
+report.display()
+```
+
+![image](https://i.ibb.co/7kNyvhP/Screen-Shot-2021-07-13-at-11-54-29-PM.png)
+
+
+
+
