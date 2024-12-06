@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jira-assistant"
+authors = [{ name = "Sharry Xu", email = "sharry.xu@outlook.com" }]
+maintainers = [{ name = "Sharry Xu", email = "sharry.xu@outlook.com" }]
+description = "Connect Excel with Jira"
+readme = "README.rst"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Development Status :: 6 - Mature",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Natural Language :: English",
+]
+keywords = ["jira", "excel", "sorting", "project management", "tool"]
+dependencies = [
+    "openpyxl >= 3.1.5",
+    "python-dateutil >= 2.9.0",
+    "python-dotenv >= 1.0.1",
+    "requests >= 2.32.3",
+    "jira >= 3.8.0",
+    'tomli; python_version < "3.11"',
+    'requests-mock >= 1.12.1',
+    'termcolor >= 2.4.0'
+]
+version = "1.0.0"
+
+[project.optional-dependencies]
+dev = ["pip-tools", "pytest", "pylint"]
+
+[project.urls]
+Documentation = "https://jira-assistant.readthedocs.io/en/stable"
+Repository = "https://github.com/jira-assistant/jira-assistant"
+Issues = "https://github.com/jira-assistant/jira-assistant/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"jira_assistant.assets" = ["*.json"]
+
+[project.scripts]
+process-excel-file = "jira_assistant:process_excel_file"
+# This is for users who come from the sharry-jira-tool
+sort-excel-file = "jira_assistant:process_excel_file"
+generate-template = "jira_assistant:generate_template"
+update-jira-info = "jira_assistant:update_jira_info"
+
+[tool.bandit]
+skips = ["B607"]
