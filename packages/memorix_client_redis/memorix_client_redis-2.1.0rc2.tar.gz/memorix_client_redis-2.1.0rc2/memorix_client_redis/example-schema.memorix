@@ -1,0 +1,46 @@
+Config {
+  export: {
+    engine: Redis(env(REDIS_URL))
+    files: [
+      {
+        language: python
+        path: "example_schema_generated.py"
+      }
+    ]
+  }
+}
+
+Type {
+  User: {
+    name: string
+    age: u32?
+  }
+}
+Enum {
+  Animal {
+    dog
+    cat
+    person
+  }
+}
+Cache {
+  favoriteAnimal: {
+    key: string
+    payload: Animal
+  }
+  user: {
+    key: string
+    payload: User
+  }
+}
+PubSub {
+  message: {
+    payload: string
+  }
+}
+Task {
+  runAlgo: {
+    payload: string
+  }
+}
+
