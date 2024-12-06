@@ -1,0 +1,65 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "PolUVR"
+version = "1.0.0"
+description = "Easy to use audio stem separation, using various models from UVR trained primarily by @Anjok07"
+authors = ["Politrees"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "PolUVR"}]
+include = ["PolUVR/separator/models.json"]
+homepage = "https://github.com/Bebra777228/PolUVR"
+repository = "https://github.com/Bebra777228/PolUVR"
+documentation = "https://github.com/Bebra777228/PolUVR/blob/main/README.md"
+keywords = ["audio", "sound", "karaoke"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Sound/Audio :: Mixers",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+requests = ">=2"
+numpy = ">=1.23,<2"
+librosa = ">=0.10"
+samplerate = "0.1.0"
+six = ">=1.16"
+torch = "*"
+tqdm = "*"
+pydub = ">=0.25"
+onnx = ">=1.14"
+onnx2torch = ">=1.5"
+onnxruntime = { version = ">=1.17", optional = true }
+onnxruntime-gpu = { version = ">=1.17", optional = true }
+julius = ">=0.2"
+diffq = ">=0.2"
+einops = ">=0.7"
+pyyaml = "*"
+ml_collections = "*"
+resampy = ">=0.4"
+beartype = "^0.18.5"
+rotary-embedding-torch = "^0.6.1"
+scipy = "^1.13.0"
+gradio = "*"
+
+[tool.poetry.extras]
+cpu = ["onnxruntime"]
+gpu = ["onnxruntime-gpu"]
+
+[tool.poetry.scripts]
+PolUVR = 'PolUVR.utils.cli:main'
+PolUVR-app = 'PolUVR.app:main'
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+pytest-cov = "^4.1.0"
