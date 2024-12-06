@@ -1,0 +1,25 @@
+{% extends "portfolio/layout.html" %}
+{% load static portfolio_display %}
+{% block content %}
+<div class="container mx-auto">
+    <div class="flex items-center gap-2">
+        <div id="{{ media.slug }}" class="size-72">
+            {% display media force_image=True css_class="w-72 h-full"%}
+        </div>
+        <form method="post" action="{% url 'media delete' media.slug %}" class="">
+            <h2 class="">Are you sure you want to delete "{{ media.title }}"?</h2>
+            {% csrf_token %}
+            {{ form }}
+            <div class="flex gap-2 text-white">
+                <a class="bg-blue-600 hover:bg-blue-300" href="{% url 'media detail' media.slug %}">
+                    No, keep it
+                </a>
+                <button class="bg-red-600 hover:bg-red-600" type="submit">
+                    Yes, delete it
+                </button>
+                <img id="dots" class="htmx-indicator" src="{% static "portfolio/dots.svg" %}">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
