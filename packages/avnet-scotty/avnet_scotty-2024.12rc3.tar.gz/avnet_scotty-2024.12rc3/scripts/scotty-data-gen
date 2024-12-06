@@ -1,0 +1,215 @@
+#!/usr/bin/python3
+# SPDX-FileCopyrightText: (C) 2024 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from base64 import b64decode
+from os import getenv
+
+import requests
+from requests.adapters import HTTPAdapter, Retry
+
+
+def get_args() -> argparse.Namespace:
+    '''Parse command-line arguments.'''
+    script_description = 'scotty-data-gen: create launcher data'
+    parser = argparse.ArgumentParser(prog='scotty-data-gen',
+                                     description=script_description)
+    parser.add_argument('--t', '--token', dest='token',
+                        default=getenv('GITHUB_PAT', ''), help='Github token')
+    parser.add_argument('-o', '--output', dest='output',
+                        default='data.json', help='Output file')
+    return parser.parse_args()
+
+
+def get_api_pages(first_url: str, session: requests.Session, headers: dict) -> list:
+    """
+    This function collects all the data from the provided URL and handles the pagination for you
+
+    Args:
+        first_url (str): the first URL to call
+        session (requests.Session): session object
+        headers (dict): additional headers
+
+    Returns:
+        list: the unpaginated data
+    """
+    URL_REGEX = re.compile(r'<(?P<url>https[^>]+)>; rel="(?P<type>\w+)"')
+
+    next_url = first_url
+    data = []
+
+    while next_url:
+        res = session.get(next_url, headers=headers)
+        next_page_content = res.json()
+        if isinstance(next_page_content, list):
+            data.extend(next_page_content)
+        elif isinstance(next_page_content, dict):
+            data = [next_page_content]
+        links = {
+            x["type"]: x["url"] for x in URL_REGEX.finditer(res.headers.get("Link", ""))
+        }
+        next_url = links.get("next")
+    return data
+
+
+def get_size(image_name: str) -> int:
+    image = json.loads(subprocess.check_output(
+        f"skopeo inspect --retry-times=3 --raw docker://ghcr.io/avnet-embedded/{image_name}", shell=True))
+    if 'layers' in image:
+        return sum(x.get('size', 0) for x in image.get('layers', {}))
+    return 0
+
+
+def main() -> list:
+    _args = get_args()
+
+    if not _args.token:
+        sys.stderr.write('A Github token needs to be specified\n')
+        sys.exit(1)
+
+    session = requests.Session()
+    retries = Retry(
+        total=5,
+        backoff_factor=1,
+        status_forcelist=[429, 500, 502, 503, 504],
+    )
+    session.mount("https://", HTTPAdapter(max_retries=retries))
+
+    headers = {
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Authorization": f"Bearer {_args.token}",
+        "Accept": "application/vnd.github.v3.repository+json",
+    }
+
+    elements = {}
+    all_images = get_api_pages(
+        "https://api.github.com/orgs/avnet-embedded/packages?package_type=container&per_page=100",
+        session=session,
+        headers=headers
+    )
+    images = [x for x in all_images if x['name'].startswith('simpleswitch/')]
+    for i in images:
+        image = json.loads(subprocess.check_output(
+            "skopeo inspect --retry-times=3 docker://ghcr.io/avnet-embedded/" + i['name'], shell=True))
+        if image["Labels"] is None:
+            continue
+        labels = image["Labels"]
+        created_at = i.get('created_at')
+        short_name = i['name'].split('/')[-1]
+        if "com.avnet.simpleswitch.arch" in labels:
+            if short_name in elements:
+                new_arch = json.loads(
+                    b64decode(labels["com.avnet.simpleswitch.arch"]).decode('UTF-8'))
+                elements[short_name]["arch"] += new_arch
+                _size = get_size(i['name'])
+                for arch in new_arch:
+                    elements[short_name]["size"][arch] = _size
+                continue
+
+            arch = json.loads(
+                b64decode(labels["com.avnet.simpleswitch.arch"]).decode('UTF-8'))
+
+            _size = get_size(i['name'])
+
+            if "com.avnet.simpleswitch.summary" in labels:
+                summary = b64decode(labels["com.avnet.simpleswitch.summary"]).decode(
+                    'unicode-escape').strip('"')
+            else:
+                summary = ""
+            if "com.avnet.simpleswitch.video" in labels:
+                video = b64decode(labels["com.avnet.simpleswitch.video"]).decode(
+                    'UTF-8').strip('"')
+            else:
+                video = ""
+            if "org.opencontainers.image.source" in labels:
+                source = labels["org.opencontainers.image.source"]
+            else:
+                source = ""
+            if "com.avnet.simpleswitch.picture" in labels:
+                picture = labels["com.avnet.simpleswitch.picture"]
+            else:
+                picture = ""
+            if "com.avnet.simpleswitch.dependencies.mandatory" in labels:
+                depman = json.loads(b64decode(
+                    labels["com.avnet.simpleswitch.dependencies.mandatory"]).decode('UTF-8'))
+            else:
+                depman = []
+            if "com.avnet.simpleswitch.dependencies.recommended" in labels:
+                deprec = json.loads(b64decode(
+                    labels["com.avnet.simpleswitch.dependencies.recommended"]).decode('UTF-8'))
+            else:
+                deprec = []
+            if "com.avnet.simpleswitch.description" in labels:
+                description = b64decode(labels["com.avnet.simpleswitch.description"]).decode(
+                    'unicode-escape').strip('"')
+                description = description.replace('\\n', '\n')
+            else:
+                description = ""
+            if "org.opencontainers.image.licenses" in labels:
+                license = labels["org.opencontainers.image.licenses"]
+            else:
+                license = ""
+            if "com.avnet.simpleswitch.capabilities" in labels:
+                capabilities = json.loads(
+                    b64decode(labels["com.avnet.simpleswitch.capabilities"]).decode('UTF-8'))
+            else:
+                capabilities = []
+            if "com.avnet.simpleswitch.categories" in labels:
+                categories = json.loads(
+                    b64decode(labels["com.avnet.simpleswitch.categories"]).decode('UTF-8'))
+            else:
+                categories = []
+            if "com.avnet.simpleswitch.conflicts" in labels:
+                conflicts = json.loads(
+                    b64decode(labels["com.avnet.simpleswitch.conflicts"]).decode('UTF-8'))
+            else:
+                conflicts = []
+            if "com.avnet.simpleswitch.additionalterms" in labels:
+                addterms = json.loads(
+                    b64decode(labels["com.avnet.simpleswitch.additionalterms"]).decode('UTF-8'))
+            else:
+                addterms = {}
+            tags = json.loads(subprocess.check_output("skopeo list-tags docker://ghcr.io/avnet-embedded/" + i['name'],
+                              shell=True))['Tags']
+
+            url_name = i['name'].replace('/', '%2F')
+            r = requests.get("https://api.github.com/orgs/avnet-embedded/packages/container/" + url_name,
+                             headers={
+                                 "Accept": "application/vnd.github+json",
+                                 "Authorization": f"Bearer {getenv('GITHUB_PAT')}",
+                                 "X-GitHub-Api-Version": "2022-11-28"
+                             })
+            public = r.json()['visibility'] == "public"
+
+            element = {
+                "arch": sorted(set(arch)),
+                "summary": summary,
+                "description": description,
+                "video": video,
+                "sources": source,
+                "picture": picture,
+                "dependencies.mandatory": depman,
+                "dependencies.recommended": deprec,
+                "categories": categories,
+                "license": license,
+                "additionalterms": addterms,
+                "capabilities": capabilities,
+                "conflicts": conflicts,
+                "versions": tags,
+                "public": public,
+                "created_at": created_at,
+                "size": {arch: _size for arch in arch},
+            }
+            elements[short_name] = element
+    with open(_args.output, 'w') as f:
+        json.dump(elements, f, indent=2)
+    return 0
+
+
+if __name__ == '__main__':
+    exit(main())

@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+# SPDX-FileCopyrightText: (C) 2024 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+import argparse
+import logging
+import os
+import sys
+from pathlib import Path
+from typing import List, Set, Tuple
+
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+
+
+def get_args() -> argparse.Namespace:
+    '''Parse command-line arguments.'''
+    script_description = 'layer-coverage: check used recipes from layers'
+    parser = argparse.ArgumentParser(prog='layer-coverage',
+                                     description=script_description)
+    parser.add_argument('sources_list_dir',
+                        help='Directory containing the listed sources')
+    parser.add_argument('recipe_used_dir',
+                        help='Directory to the recipe-used files')
+    parser.add_argument('output', help='Output file')
+    return parser.parse_args()
+
+
+def get_used_available(args: argparse.Namespace) -> Tuple[List[Path], List[Path], List[Path]]:
+    '''Return list of used files relative to the layer root'''
+    _from_manifest = set()
+    for root, _, files in os.walk(args.recipe_used_dir):
+        for file in files:
+            if not file.endswith('.recipe-used'):
+                continue
+            with open(os.path.join(root, file)) as i:
+                logging.info(f'Reading recipe used from {i.name}')
+                _from_manifest.update([x.strip('\n') for x in i.readlines()])
+
+    _available: Set[Path] = set()
+    for root, _, files in os.walk(args.sources_list_dir):
+        for file in files:
+            if not file.endswith('.sources.txt'):
+                continue
+            with open(os.path.join(root, file)) as i:
+                logging.info(f'Reading layer sources from {i.name}')
+                lines = [x for x in i.readlines() if x.strip(
+                    '\n').endswith('.bb') and '-native' not in x]
+                _available.update([
+                    Path(x.strip('\n')) for x in lines
+                ])
+
+    _used = set(x for x in _available if any(x.stem.startswith(y)
+                for y in _from_manifest))
+    _unused = set(x for x in _available if not any(
+        x.stem.startswith(y) for y in _from_manifest))
+
+    return (_available, _used, _unused)
+
+
+def main():
+    '''Check layer coverage.'''
+    args = get_args()
+
+    _, _used, _not_covered = get_used_available(args)
+
+    logging.info(f'Used recipes: {len(_used)}')
+    logging.info(f'Unused recipes: {len(_not_covered)}')
+    logging.info('Not covered recipe:\n\t' +
+                 '\n\t'.join(sorted([x.as_posix() for x in _not_covered])))
+
+    with open(args.output, 'w') as o:
+        o.write('```mermaid\n')
+        o.write('pie title recipe coverage\n')
+        o.write(f'    "covered" : {len(_used)}\n')
+        o.write(f'    "not covered" : {len(_not_covered)}\n')
+        o.write('```\n\n\n')
+        o.write('## not covered recipes\n')
+        for item in sorted(_not_covered):
+            o.write(f'- {item}\n')
+
+
+if __name__ == '__main__':
+    main()
