@@ -1,0 +1,13 @@
+#BASE_URL = 'http://141.227.140.197/'
+BASE_URL = 'https://tilegeo.azurewebsites.net/'
+
+PREFIX = 'dts/'
+
+GENERAL_ENDPOINT = BASE_URL + PREFIX
+
+VECTOR_ENDPOINT     = GENERAL_ENDPOINT + 'vector/'
+RASTER_ENDPOINT     = GENERAL_ENDPOINT + 'raster/'
+REDIS_ENDPOINT      = GENERAL_ENDPOINT + 'redis/'
+TILE_ENDPOINT       = GENERAL_ENDPOINT + 'tile/'
+TILE_CACHE_ENDPOINT = GENERAL_ENDPOINT + 'tile/cache/'
+VRT_ENDPOINT        = GENERAL_ENDPOINT + 'vrt/'
