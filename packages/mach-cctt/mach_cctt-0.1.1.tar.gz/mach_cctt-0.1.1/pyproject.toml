@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mach_cctt"
+version = "0.1.1"
+authors = [
+    { name = "Richard Dong", email = "richard@tristero.xyz" },
+    { name = "Marwan Hassanien" },
+]
+description = "Test automated trades on the Mach exchange."
+readme = "README.md"
+requires-python = ">=3.13.0"
+classifiers = [
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Testing",
+]
+keywords = [
+    "crypto",
+    "cryptocurrency",
+    "cryptocurrencies",
+    "defi",
+    "exchange",
+    "liquidity",
+    "mach",
+    "pool",
+    "swap",
+    "tristero",
+]
+dependencies = [
+    "asyncache",
+    "cachetools",
+    "eth_account",
+    "hexbytes",
+    "mach-client",
+    "pyyaml",
+    "web3",
+]
+
+[project.optional-dependencies]
+dev = ["build", "twine"]
+
+[project.scripts]
+cctt = "mach_cctt.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/tristeroresearch/cross-chain-trade-test"
+Issues = "https://github.com/tristeroresearch/cross-chain-trade-test/issues"
+
+[tool.hatch.build]
+include = ["abi/**/*.json", "src/mach_cctt/**/*.py"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mach_cctt"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"abi/" = "/abi"
+
+[tool.hatch.envs.default]
+installer = "uv"
