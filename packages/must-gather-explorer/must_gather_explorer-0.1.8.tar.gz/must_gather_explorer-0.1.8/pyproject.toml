@@ -1,0 +1,59 @@
+[tool.ruff]
+preview = true
+line-length = 120
+fix = true
+output-format = "grouped"
+
+  [tool.ruff.format]
+  exclude = [ ".git", ".venv", ".mypy_cache", ".tox", "__pycache__" ]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = false
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+show_error_codes = true
+warn_unused_ignores = true
+
+[tool.hatch.build.targets.wheel]
+packages = [ "must_gather_explorer" ]
+
+[tool.uv]
+dev-dependencies = [ "ipdb>=0.13.13", "ipython>=8.18.1" ]
+
+[project]
+name = "must-gather-explorer"
+version = "0.1.8"
+description = "Tool to explore must-gather data"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "click>=8.1.7",
+  "cmd2>=2.5.7",
+  "gnureadline>=8.2.13",
+  "pyhelper-utils>=0.0.42",
+  "python-simple-logger>=1.0.40",
+  "pyyaml>=6.0.2",
+  "rich>=13.9.2",
+  "tqdm>=4.67.0"
+]
+
+  [[project.authors]]
+  name = "Jenia Peimer"
+  email = "jpeimer@redhat.com"
+
+  [[project.authors]]
+  name = "Meni Yakove"
+  email = "myakove@gmail.com"
+
+  [project.license]
+  text = "Apache-2.0 license"
+
+  [project.scripts]
+  must-gather-explorer = "must_gather_explorer.main:main"
+  must-gather-explorer-update-aliases = "must_gather_explorer.resource_aliases:fill_api_resources_aliases"
+
+[build-system]
+requires = [ "hatchling" ]
+build-backend = "hatchling.build"
