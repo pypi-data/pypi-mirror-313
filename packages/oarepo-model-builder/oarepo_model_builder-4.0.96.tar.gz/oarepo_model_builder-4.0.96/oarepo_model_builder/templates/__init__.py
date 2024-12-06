@@ -1,0 +1,36 @@
+from pathlib import Path
+
+from importlib_metadata import entry_points
+
+
+class TemplateRegistry:
+    def __init__(self):
+        self.mapping = {}
+        eps = entry_points()
+        for ep in reversed(
+            sorted(
+                eps.select(group="oarepo_model_builder.templates"),
+                key=lambda ep: ep.name,
+            )
+        ):
+            loaded_package = ep.load()
+            base_path = Path(loaded_package.__file__).parent.absolute()
+            for k, v in loaded_package.TEMPLATES.items():
+                self.mapping[k] = base_path.joinpath(v)
+
+    def get_template(self, template_key, settings):  # NOSONAR
+        # try to get the template key from settings
+        path = self.mapping.get(template_key, None)
+        if not path:
+            raise AttributeError(f"Template with key {template_key} has not been found")
+        if isinstance(path, str):
+            path = Path(path).absolute()
+        if path.exists():
+            with path.open() as f:
+                return f.read()
+        raise AttributeError(
+            f"Template with key {template_key} has not been found, file at path {path} does not exist"
+        )
+
+
+templates = TemplateRegistry()

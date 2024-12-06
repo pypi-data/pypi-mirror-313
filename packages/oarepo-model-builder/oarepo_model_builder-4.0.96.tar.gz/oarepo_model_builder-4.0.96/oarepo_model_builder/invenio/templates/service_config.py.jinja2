@@ -1,0 +1,58 @@
+{{ vars.service_config|imports }}
+{{ link_imports|imports }}
+{{ vars.record.class|imports }}
+{{ vars.permissions.class|imports }}
+{{ vars.marshmallow.class|imports }}
+{{ vars.search_options.class|imports }}
+{{ vars.record_item.class|imports }}
+{{ vars.record_list.class|imports }}
+{{ vars.service_config.search_item_links_template_cls|imports }}
+{% for c in vars.service_config.components %}
+{{ c|code_imports }}
+{% endfor %}
+
+class {{ vars.service_config|class_header }}:
+    """{{ vars.record.class|base_name }} service config."""
+    {% if not vars.record_item.skip %}
+    result_item_cls = {{ vars.record_item.class|base_name }}
+    {% endif %}
+    {% if not vars.record_list.skip %}
+    result_list_cls = {{ vars.record_list.class|base_name }}
+    {% endif %}
+    PERMISSIONS_PRESETS = [{% for p in vars.permissions.presets %}"{{ p }}"{{ ", " if not loop.last else "" }} {% endfor %}]
+
+    url_prefix = "{{ vars.resource_config.base_url }}"
+    {% if not vars.permissions.skip %}
+    base_permission_policy_cls = {{ vars.permissions.class|base_name }}
+    {% endif %}
+    {% if not vars.marshmallow.skip %}
+    schema = {{ vars.marshmallow.class|base_name }}
+    {% endif %}
+    {% if not vars.search_options.skip %}
+    search = {{ vars.search_options.class|base_name }}
+    {% endif %}
+    {% if not vars.record.skip %}
+    record_cls = {{ vars.record.class|base_name }}
+    {% endif %}
+    {% if not vars.service_config.skip %}
+    service_id = "{{ vars.service_config.service_id }}"
+    {% endif %}
+    {% if not vars.service_config.skip %}
+    search_item_links_template = {{ vars.service_config.search_item_links_template_cls|base_name }}
+    {% endif %}
+
+    components = [ {% for b in vars.service_config.base_classes %}*{{ b|base_name }}.components{% if not loop.last %}, {% endif %}{% endfor %}{% for c in vars.service_config.components %}, {{ c|extra_code }} {% endfor %}]
+
+    model = "{{ vars.module.qualified }}"
+
+    {% for links_name, links_def in links.items() %}
+    @property
+    def {{ links_name }}(self):
+        return {
+            {% for link in links_def %}
+            {% if link.name -%} "{{link.name}}": {%- else -%}**{%-endif-%}{{link.link_class}}({{link.link_args_str}}),
+            {% endfor %}
+        }
+    {% endfor %}
+
+{{ vars.service_config|extra_code }}

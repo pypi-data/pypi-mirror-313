@@ -1,0 +1,19 @@
+from flask import current_app
+from werkzeug.local import LocalProxy
+{{ vars.proxy|imports }}
+
+def _ext_proxy(attr):
+    return LocalProxy(
+        lambda: getattr(current_app.extensions["{{ vars.ext.alias }}"], attr))
+
+{% if not vars.service.skip %}
+{{ vars.service.proxy }} = _ext_proxy('{{ ext.ext_service_name }}')
+"""Proxy to the instantiated service."""
+{% endif %}
+
+{% if not vars.resource.skip %}
+{{ vars.resource.proxy }} = _ext_proxy('{{ ext.ext_resource_name }}')
+"""Proxy to the instantiated resource."""
+{% endif %}
+
+{{ vars.proxy|extra_code }}
