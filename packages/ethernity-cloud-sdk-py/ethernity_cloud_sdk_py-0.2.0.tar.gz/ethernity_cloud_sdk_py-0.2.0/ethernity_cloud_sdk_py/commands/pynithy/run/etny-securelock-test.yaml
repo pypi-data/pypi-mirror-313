@@ -1,0 +1,44 @@
+name: ec_sdk_py_win_06_SECURELOCK_V3_testnet_v1
+version: "0.3"
+predecessor: 01696ad40135d6e9b3436937e3450adffafdfaf7913ac37e13f0f618c9ab70f9
+
+security:
+  attestation:
+    tolerate: [debug-mode, hyperthreading, outdated-tcb, software-hardening-needed, debug-mode]
+    ignore_advisories: "*"
+
+services:
+   - name: application
+     image_name: application_image
+     mrenclaves: [ "5d986bb9e7cc9d0bca1e183f3ad752c2eec8ad9451cf48e2e8c70c03e9e13f5b" ]
+     command: /usr/local/bin/python /etny-securelock/securelock.py
+     pwd: /
+
+images:
+   - name: application_image
+     injection_files:
+       - path: /app/ec_sdk_py_win_06_SECURELOCK_V3_testnet_v1/ca.pem
+         content: $$SCONE::CA_CERT:crt$$
+       - path: /app/ec_sdk_py_win_06_SECURELOCK_V3_testnet_v1/cert.pem
+         content: $$SCONE::SERVER_CERT:crt$$
+       - path: /private/ec_sdk_py_win_06_SECURELOCK_V3_testnet_v1/key.pem
+         content: $$SCONE::SERVER_CERT:privatekey$$
+
+secrets:
+   - name: CA_KEY
+     kind: private-key
+     key_type: P-384
+     migrate: true
+   - name: CA_CERT
+     kind: x509-ca
+     private_key: CA_KEY
+     valid_for: 3560d
+   - name: SERVER_KEY
+     kind: private-key
+     key_type: P-384
+     migrate: false
+   - name: SERVER_CERT
+     issuer: CA_CERT
+     kind: x509
+     endpoint: server
+     private_key: SERVER_KEY
