@@ -1,0 +1,103 @@
+Metadata-Version: 2.1
+Name: mkdocs-confluence-publisher
+Version: 0.1.2
+Summary: A MkDocs plugin to publish documentation to Confluence
+Home-page: https://github.com/johnny/mkdocs-confluence-publisher
+Author: Jonas von Andrian
+Author-email: j.andrianmueller@outlook.com
+License: Apache License 2.0
+Project-URL: Bug Tracker, https://github.com/johnny/mkdocs-confluence-publisher/issues
+Keywords: mkdocs confluence documentation
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Documentation
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: mkdocs>=1.0
+Requires-Dist: atlassian-python-api>=3.14.0
+Requires-Dist: mistune
+Requires-Dist: md2cf
+Requires-Dist: python-dotenv
+
+# MkDocs Confluence Publisher Plugin
+
+This MkDocs plugin automatically publishes your documentation to Confluence. It creates a hierarchical structure in Confluence that mirrors your MkDocs site structure, updates page content, and handles attachments.
+
+## Features
+
+- Automatically creates and updates pages in Confluence
+- Maintains the hierarchy of your MkDocs site in Confluence
+- Handles attachments referenced in your markdown files
+- Configurable page prefix for easy identification in Confluence
+
+## Installation
+
+Install the plugin using pip:
+
+```bash
+pip install mkdocs-confluence-publisher
+```
+
+## Configuration
+
+Add the following to your `mkdocs.yml`:
+
+```yaml
+plugins:
+  - confluence-publisher:
+      confluence_prefix: "MkDocs - "  # Optional: Prefix for page titles in Confluence
+      space_key: "YOUR_SPACE_KEY"     # Required: Confluence space key
+      parent_page_id: 123456          # Required: ID of the parent page in Confluence
+```
+
+## Environment Variables
+
+The plugin requires the following environment variables to be set:
+
+- `CONFLUENCE_URL`: The base URL of your Confluence instance
+- `CONFLUENCE_USERNAME`: Your Confluence username
+- `CONFLUENCE_API_TOKEN`: Your Confluence API token
+
+You can set these in your environment or use a `.env` file.
+
+## Usage
+
+Once configured, the plugin will automatically publish your documentation to Confluence when you build your MkDocs site:
+
+```bash
+mkdocs build
+```
+
+## How It Works
+
+1. **Initialization**: The plugin connects to Confluence using the provided credentials.
+2. **Page Creation**: It creates a structure in Confluence mirroring your MkDocs navigation.
+3. **Content Update**: As it processes each page, it updates the content in Confluence.
+4. **Attachment Handling**: Any attachments referenced in your markdown are uploaded to the corresponding Confluence page.
+
+## Logging
+
+The plugin uses Python's logging module. You can configure logging in your `mkdocs.yml`:
+
+```yaml
+logging:
+  level: INFO
+```
+
+Set to `DEBUG` for more detailed logging information.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the Apache-2.0 license.
