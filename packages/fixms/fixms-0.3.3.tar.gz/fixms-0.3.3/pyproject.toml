@@ -1,0 +1,62 @@
+[tool.poetry]
+name = "fixms"
+version = "0.3.3" # a placeholder
+description = ""
+authors = ["Alec Thomson (S&A, Kensington WA) <alec.thomson@csiro.au>"]
+readme = "README.md"
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+numpy = "<2"
+astropy = ">=5"
+python-casacore = "*"
+tqdm = "*"
+importlib-resources = {version="*", python = "<3.9"}
+
+[tool.poetry-dynamic-versioning]
+enable = false
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "*"
+sphinx = "*"
+numpydoc = "*"
+myst_parser = "*"
+autoapi = "*"
+sphinx-autoapi = "*"
+pytest = "*"
+pre-commit = "*"
+
+[tool.poetry.group.docs.dependencies]
+autoapi = "*"
+myst_parser = "*"
+numpydoc = "*"
+pydata-sphinx-theme = "*"
+sphinx = ">=6"
+sphinx-autoapi = "*"
+
+
+[tool.poetry.extras]
+dev = [
+    "ruff",
+    "pytest",
+    "pre-commit",
+]
+docs =[
+    "autoapi",
+    "myst_parser",
+    "numpydoc",
+    "pydata-sphinx-theme",
+    "sphinx",
+    "sphinx-autoapi",
+]
+
+
+[tool.poetry.scripts]
+fix_ms_corrs = "fixms.fix_ms_corrs:cli"
+fix_ms_dir = "fixms.fix_ms_dir:cli"
+fix_ms = "fixms.fix_ms:cli"
