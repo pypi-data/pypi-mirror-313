@@ -1,0 +1,433 @@
+import sys
+import warnings
+from collections.abc import Iterable
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import cast
+
+import pandas as pd
+from pandas import Index
+from rdflib import Dataset, Namespace, URIRef
+from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
+
+from cognite.neat._constants import DEFAULT_NAMESPACE
+from cognite.neat._graph._shared import rdflib_to_oxi_type
+from cognite.neat._graph.extractors import RdfFileExtractor, TripleExtractors
+from cognite.neat._graph.queries import Queries
+from cognite.neat._graph.transformers import Transformers
+from cognite.neat._rules.analysis import InformationAnalysis
+from cognite.neat._rules.models import InformationRules
+from cognite.neat._rules.models.entities import ClassEntity
+from cognite.neat._shared import InstanceType, Triple
+from cognite.neat._utils.auxiliary import local_import
+from cognite.neat._utils.rdf_ import add_triples_in_batch
+
+from ._provenance import Change, Provenance
+
+if sys.version_info < (3, 11):
+    from typing_extensions import Self
+else:
+    from typing import Self
+
+
+class NeatGraphStore:
+    """NeatGraphStore is a class that stores the graph and provides methods to read/write data it contains
+
+
+    Args:
+        graph : Instance of rdflib.Graph class for graph storage
+        rules:
+    """
+
+    rdf_store_type: str
+
+    def __init__(
+        self,
+        graph: Dataset,
+        rules: InformationRules | None = None,
+    ):
+        self.rules: InformationRules | None = None
+
+        _start = datetime.now(timezone.utc)
+        self.graph = graph
+        self.provenance = Provenance(
+            [
+                Change.record(
+                    activity=f"{type(self).__name__}.__init__",
+                    start=_start,
+                    end=datetime.now(timezone.utc),
+                    description=f"Initialize graph store as {type(self.graph.store).__name__}",
+                )
+            ]
+        )
+
+        if rules:
+            self.add_rules(rules)
+        else:
+            self.base_namespace = DEFAULT_NAMESPACE
+
+        self.queries = Queries(self.graph, self.rules)
+
+    @property
+    def type_(self) -> str:
+        "Return type of the graph store"
+        return type(self.graph.store).__name__
+
+    def add_rules(self, rules: InformationRules) -> None:
+        """This method is used to add rules to the graph store and it is the only correct
+        way to add rules to the graph store, after the graph store has been initialized.
+        """
+
+        self.rules = rules
+        self.base_namespace = self.rules.metadata.namespace
+        self.queries = Queries(self.graph, self.rules)
+        self.provenance.append(
+            Change.record(
+                activity=f"{type(self)}.rules",
+                start=datetime.now(timezone.utc),
+                end=datetime.now(timezone.utc),
+                description=f"Added rules to graph store as {type(self.rules).__name__}",
+            )
+        )
+
+        if self.rules.prefixes:
+            self._upsert_prefixes(self.rules.prefixes)
+
+    def _upsert_prefixes(self, prefixes: dict[str, Namespace]) -> None:
+        """Adds prefixes to the graph store."""
+        _start = datetime.now(timezone.utc)
+        for prefix, namespace in prefixes.items():
+            self.graph.bind(prefix, namespace)
+
+        self.provenance.append(
+            Change.record(
+                activity=f"{type(self).__name__}._upsert_prefixes",
+                start=_start,
+                end=datetime.now(timezone.utc),
+                description="Upsert prefixes to graph store",
+            )
+        )
+
+    @classmethod
+    def from_memory_store(cls, rules: InformationRules | None = None) -> "Self":
+        return cls(Dataset(), rules)
+
+    @classmethod
+    def from_sparql_store(
+        cls,
+        query_endpoint: str | None = None,
+        update_endpoint: str | None = None,
+        returnFormat: str = "csv",
+        rules: InformationRules | None = None,
+    ) -> "Self":
+        store = SPARQLUpdateStore(
+            query_endpoint=query_endpoint,
+            update_endpoint=update_endpoint,
+            returnFormat=returnFormat,
+            context_aware=False,
+            postAsEncoded=False,
+            autocommit=False,
+        )
+        graph = Dataset(store=store)
+        return cls(graph, rules)
+
+    @classmethod
+    def from_oxi_store(cls, storage_dir: Path | None = None, rules: InformationRules | None = None) -> "Self":
+        """Creates a NeatGraphStore from an Oxigraph store."""
+        local_import("pyoxigraph", "oxi")
+        local_import("oxrdflib", "oxi")
+        import oxrdflib
+        import pyoxigraph
+
+        # Adding support for both oxigraph in-memory and file-based storage
+        for i in range(4):
+            try:
+                oxi_store = pyoxigraph.Store(path=str(storage_dir) if storage_dir else None)
+                break
+            except OSError as e:
+                if "lock" in str(e) and i < 3:
+                    continue
+                raise e
+        else:
+            raise Exception("Error initializing Oxigraph store")
+
+        graph = Dataset(
+            store=oxrdflib.OxigraphStore(store=oxi_store),
+        )
+
+        return cls(graph, rules)
+
+    def write(self, extractor: TripleExtractors) -> None:
+        _start = datetime.now(timezone.utc)
+        success = True
+
+        if isinstance(extractor, RdfFileExtractor) and not extractor.issue_list.has_errors:
+            self._parse_file(extractor.filepath, cast(str, extractor.format), extractor.base_uri)
+        elif isinstance(extractor, RdfFileExtractor):
+            success = False
+            issue_text = "\n".join([issue.as_message() for issue in extractor.issue_list])
+            warnings.warn(
+                f"Cannot write to graph store with {type(extractor).__name__}, errors found in file:\n{issue_text}",
+                stacklevel=2,
+            )
+        else:
+            self._add_triples(extractor.extract())
+
+        if success:
+            _end = datetime.now(timezone.utc)
+            # Need to do the hasattr in case the extractor comes from NeatEngine.
+            activities = (
+                extractor._get_activity_names()
+                if hasattr(extractor, "_get_activity_names")
+                else [type(extractor).__name__]
+            )
+            for activity in activities:
+                self.provenance.append(
+                    Change.record(
+                        activity=activity,
+                        start=_start,
+                        end=_end,
+                        description=f"Extracted triples to graph store using {type(extractor).__name__}",
+                    )
+                )
+
+    def _read_via_rules_linkage(
+        self, class_neat_id: URIRef, property_link_pairs: dict[str, URIRef] | None
+    ) -> Iterable[tuple[str, dict[str | InstanceType, list[str]]]]:
+        if self.rules is None:
+            warnings.warn("Rules not found in graph store!", stacklevel=2)
+            return
+
+        if cls := InformationAnalysis(self.rules).classes_by_neat_id.get(class_neat_id):
+            if property_link_pairs:
+                property_renaming_config = {
+                    prop_uri: prop_name
+                    for prop_name, prop_neat_id in property_link_pairs.items()
+                    if (
+                        prop_uri := InformationAnalysis(self.rules).neat_id_to_transformation_property_uri(prop_neat_id)
+                    )
+                }
+
+                yield from self._read_via_class_entity(cls.class_, property_renaming_config)
+                return
+            else:
+                warnings.warn("Rules not linked", stacklevel=2)
+                return
+        else:
+            warnings.warn("Class with neat id {class_neat_id} found in rules", stacklevel=2)
+            return
+
+    def _read_via_class_entity(
+        self,
+        class_entity: ClassEntity,
+        property_renaming_config: dict[URIRef, str] | None = None,
+    ) -> Iterable[tuple[str, dict[str | InstanceType, list[str]]]]:
+        if self.rules is None:
+            warnings.warn("Rules not found in graph store!", stacklevel=2)
+            return
+
+        if class_entity not in [definition.class_ for definition in self.rules.classes]:
+            warnings.warn("Desired type not found in graph!", stacklevel=2)
+            return
+
+        if not (class_uri := InformationAnalysis(self.rules).class_uri(class_entity)):
+            warnings.warn(
+                f"Class {class_entity.suffix} does not have namespace defined for prefix {class_entity.prefix} Rules!",
+                stacklevel=2,
+            )
+            return
+
+        has_hop_transformations = InformationAnalysis(self.rules).has_hop_transformations()
+        has_self_reference_transformations = InformationAnalysis(
+            self.rules
+        ).has_self_reference_property_transformations()
+        if has_hop_transformations or has_self_reference_transformations:
+            msg = (
+                f"Rules contain [{'Hop' if has_hop_transformations else '' }"
+                f", {'SelfReferenceProperty' if has_self_reference_transformations else '' }]"
+                " rdfpath."
+                f" Run [{'ReduceHopTraversal' if has_hop_transformations else '' }"
+                f", {'AddSelfReferenceProperty' if has_self_reference_transformations else '' }]"
+                " transformer(s) first!"
+            )
+
+            warnings.warn(
+                msg,
+                stacklevel=2,
+            )
+            return
+
+        # get all the instances for give class_uri
+        instance_ids = self.queries.list_instances_ids_of_class(class_uri)
+
+        # get potential property renaming config
+        property_renaming_config = property_renaming_config or InformationAnalysis(
+            self.rules
+        ).define_property_renaming_config(class_entity)
+
+        # get property types to guide process of removing or not namespaces from results
+        property_types = InformationAnalysis(self.rules).property_types(class_entity)
+
+        for instance_id in instance_ids:
+            if res := self.queries.describe(
+                instance_id=instance_id,
+                instance_type=class_entity.suffix,
+                property_renaming_config=property_renaming_config,
+                property_types=property_types,
+            ):
+                yield res
+
+    def read(
+        self,
+        class_: str,
+    ) -> Iterable[tuple[str, dict[str | InstanceType, list[str]]]]:
+        """Read instances for given class from the graph store.
+
+        !!! note "Assumption"
+            This method assumes that the class_ belongs to the same (name)space as
+            the rules which are attached to the graph store.
+
+        """
+
+        if not self.rules:
+            warnings.warn("Rules not found in graph store!", stacklevel=2)
+            return
+
+        class_entity = ClassEntity(prefix=self.rules.metadata.prefix, suffix=class_)
+
+        if class_entity not in [definition.class_ for definition in self.rules.classes]:
+            warnings.warn("Desired type not found in graph!", stacklevel=2)
+            return
+
+        yield from self._read_via_class_entity(class_entity)
+
+    def _parse_file(
+        self,
+        filepath: Path,
+        format: str = "turtle",
+        base_uri: URIRef | None = None,
+    ) -> None:
+        """Imports graph data from file.
+
+        Args:
+            filepath : File path to file containing graph data, by default None
+            format : rdflib format file containing RDF graph, by default "turtle"
+            base_uri : base URI to add to graph in case of relative URIs, by default None
+
+        !!! note "Oxigraph store"
+            By default we are using non-transactional mode for parsing RDF files.
+            This gives us a significant performance boost when importing large RDF files.
+            Underhood of rdflib we are triggering oxrdflib plugin which in respect
+            calls `bulk_load` method from oxigraph store. See more at:
+            https://pyoxigraph.readthedocs.io/en/stable/store.html#pyoxigraph.Store.bulk_load
+        """
+
+        # Oxigraph store, do not want to type hint this as it is an optional dependency
+        if type(self.graph.store).__name__ == "OxigraphStore":
+            local_import("pyoxigraph", "oxi")
+
+            # this is necessary to trigger rdflib oxigraph plugin
+            self.graph.parse(
+                filepath,
+                format=rdflib_to_oxi_type(format),
+                transactional=False,
+                publicID=base_uri,
+            )
+            self.graph.store._store.optimize()  # type: ignore[attr-defined]
+
+        # All other stores
+        else:
+            if filepath.is_file():
+                self.graph.parse(filepath, publicID=base_uri)
+            else:
+                for filename in filepath.iterdir():
+                    if filename.is_file():
+                        self.graph.parse(filename, publicID=base_uri)
+
+    def _add_triples(self, triples: Iterable[Triple], batch_size: int = 10_000):
+        """Adds triples to the graph store in batches.
+
+        Args:
+            triples: list of triples to be added to the graph store
+            batch_size: Batch size of triples per commit, by default 10_000
+            verbose: Verbose mode, by default False
+        """
+        add_triples_in_batch(self.graph, triples, batch_size)
+
+    def transform(self, transformer: Transformers) -> None:
+        """Transforms the graph store using a transformer."""
+
+        missing_changes = [
+            change for change in transformer._need_changes if not self.provenance.activity_took_place(change)
+        ]
+        if self.provenance.activity_took_place(type(transformer).__name__) and transformer._use_only_once:
+            warnings.warn(
+                f"Cannot transform graph store with {type(transformer).__name__}, already applied",
+                stacklevel=2,
+            )
+        elif missing_changes:
+            warnings.warn(
+                (
+                    f"Cannot transform graph store with {type(transformer).__name__}, "
+                    f"missing one or more required changes [{', '.join(missing_changes)}]"
+                ),
+                stacklevel=2,
+            )
+
+        else:
+            _start = datetime.now(timezone.utc)
+            transformer.transform(self.graph)
+            self.provenance.append(
+                Change.record(
+                    activity=f"{type(transformer).__name__}",
+                    start=_start,
+                    end=datetime.now(timezone.utc),
+                    description=transformer.description,
+                )
+            )
+
+    @property
+    def summary(self) -> pd.DataFrame:
+        return pd.DataFrame(self.queries.summarize_instances(), columns=["Type", "Occurrence"])
+
+    def _repr_html_(self) -> str:
+        provenance = self.provenance._repr_html_()
+        summary: pd.DataFrame = self.summary
+
+        if summary.empty:
+            summary_text = "<br /><strong>Graph is empty</strong><br />"
+        else:
+            summary_text = (
+                "<br /><strong>Overview</strong>:"  # type: ignore
+                f"<ul><li>{len(summary)} types</strong></li>"
+                f"<li>{sum(summary['Occurrence'])} instances</strong></li></ul>"
+                f"{cast(pd.DataFrame, self._shorten_summary(summary))._repr_html_()}"  # type: ignore[operator]
+            )
+
+        return f"{summary_text}" f"{provenance}"
+
+    def _shorten_summary(self, summary: pd.DataFrame) -> pd.DataFrame:
+        """Shorten summary to top 5 types by occurrence."""
+        top_5_rows = summary.head(5)
+
+        indexes = [
+            *top_5_rows.index.tolist(),
+        ]
+        data = [
+            top_5_rows,
+        ]
+        if len(summary) > 6:
+            last_row = summary.tail(1)
+            indexes += [
+                "...",
+                *last_row.index.tolist(),
+            ]
+            data.extend([pd.DataFrame([["..."] * summary.shape[1]], columns=summary.columns), last_row])
+
+        shorter_summary = pd.concat(
+            data,
+            ignore_index=True,
+        )
+        shorter_summary.index = cast(Index, indexes)
+
+        return shorter_summary
