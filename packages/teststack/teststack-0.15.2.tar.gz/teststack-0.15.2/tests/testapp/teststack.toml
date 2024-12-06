@@ -1,0 +1,59 @@
+[tests]
+copy = [
+    "pytest.xml",
+]
+
+[tests.ports]
+"5000/tcp" = ""
+
+[tests.import]
+command = "poetry run flask run -h 0.0.0.0"
+
+[tests.steps]
+install = "poetry install --no-ansi"
+test = "poetry run coverage run -m pytest -v {posargs} --junit-xml=pytest.xml"
+report = [
+    "poetry run coverage report",
+    "poetry run coverage xml",
+    "poetry run coverage html"
+]
+
+[tests.buildargs]
+PYTHON_VERSION = "3.10"
+REGISTRY = "docker.io"
+
+[tests.environment]
+AWS_ACCESS_KEY_ID = "keyid"
+AWS_SECRET_ACCESS_KEY = "secret"
+
+[tests.export]
+TESTAPP_URL = "http://{HOST}:{PORT;5000/tcp}/"
+
+[services.database]
+image = "docker.io/postgres:12"
+
+[services.database.ports]
+"5432/tcp" = ""
+
+[services.database.environment]
+POSTGRES_USER = "bebop"
+POSTGRES_PASSWORD = "secret"
+POSTGRES_DB = "bebop"
+
+[services.database.export]
+POSTGRES_MAIN_USER = "{POSTGRES_USER}"
+POSTGRES_MAIN_PASSWORD = "{POSTGRES_PASSWORD}"
+POSTGRES_MAIN_HOST = "{HOST}"
+POSTGRES_MAIN_RDS_HOST = "{HOST}"
+POSTGRES_MAIN_PORT = "{PORT;5432/tcp}"
+POSTGRES_MAIN_DBNAME = "{POSTGRES_DB}"
+
+[services.cache]
+image = "docker.io/redis:latest"
+
+[services.cache.ports]
+"6379/tcp" = ""
+
+[services.cache.export]
+REDIS_MAIN_HOST = "{HOST}"
+REDIS_MAIN_PORT = "{PORT;6379/tcp}"
