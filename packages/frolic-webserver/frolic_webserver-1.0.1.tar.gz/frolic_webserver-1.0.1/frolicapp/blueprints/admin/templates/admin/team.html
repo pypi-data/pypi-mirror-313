@@ -1,0 +1,50 @@
+{% extends 'admin/__base__.html' %}
+
+{% block title %}
+    {{ team.name | title }}
+{% endblock %}
+
+{% block sidebar %}
+{% from 'admin/macros.html' import generate_sidebar %}
+{{ generate_sidebar('Team') }}
+{% endblock %}
+
+{% block main %}
+    <h1 class="fw-bold">Team {{ team.name | title }}</h1>
+    <hr>
+
+    <p>
+        This team is registered for the event <a href="{{ url_for('Admin.get_event', id=team.event.event_id) }}">{{ team.event.name }}</a>. Led by <a href="{{ url_for('Admin.get_user', id=team.leader.user_id) }}">{{ team.leader.fullname }}</a>
+    {% if team.participants %}
+        , the team includes the following members:
+    </p>
+    <ul> 
+        {% for member in team.participants %}
+        <li><a href="{{ url_for('Admin.get_user', id=member.participant.user_id) }}">{{ member.participant.fullname }}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        . There are no other members in this team. <br>
+    {% endif %}
+
+    <button type="button" class="btn btn-danger mt-2" data-bs-toggle="modal" data-bs-target="#deleteTeamModal">
+        <i class="bi bi-trash text-white"></i>
+    </button>
+    
+    <div class="modal fade" id="deleteTeamModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="DeleteTeam" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 fw-bold">Delete this team</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to eliminate this team from event?
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-danger" href="{{ url_for('Admin.delete_team', id=team.team_id) }}">Yes, Eliminate!</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

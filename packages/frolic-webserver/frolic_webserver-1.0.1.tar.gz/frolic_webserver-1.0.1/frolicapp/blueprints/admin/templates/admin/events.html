@@ -1,0 +1,62 @@
+{% extends 'admin/__base__.html' %}
+
+
+{% block title %}
+  Events
+{% endblock %}
+
+
+{% block sidebar %}
+{% from 'admin/macros.html' import generate_sidebar %}
+{{ generate_sidebar('Event') }}
+{% endblock %}
+
+
+{% block main %}
+<form action="{{ url_for('Admin.home') }}" method="post">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          {{ form.csrf_token }}
+          {{ form.search(class='form-control', type='search', aria_label='Search') }}
+          <button type="submit" class="btn btn-primary fw-bold">Search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% if events|length != 0 %}
+{% for event in events %}
+<a href="{{ url_for('Admin.get_event', id=event.event_id) }}">
+  <div class="card-container my-4">
+    <div class="card d-flex flex-sm-row flex-column w-100">
+      <div class="ratio ratio-16x9">
+        <img src="{{ url_for('instance_asset', filename=event.thumbnail.path) }}" alt="Thumbnail">
+      </div>
+
+      <div class="d-flex flex-column justify-content-between px-3 py-2 w-100">
+        <span class="card-title fs-4 p-0">{{ event.name | title }}</span>
+        <div class="d-flex align-items-start h-100 pt-2">
+          <div class="overflow-y-scroll" style="max-height: 140px;">
+            <p class="card-text" style="font-size: 1.15em;">
+              {{ event.description }}
+            </p>
+          </div>
+        </div>
+        <div class="text-muted py-2 d-flex justify-content-between">
+          <div>Created by: {{ event.created_by.fullname | title }} on <time>{{ event.created_at.date().strftime('%d/%m/%Y') }}</time></div>
+          <div><span class="badge text-wrap text-end" style="background-color: #d61b3c;">{{ event.branch | upper }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</a>
+{% endfor %}
+{% else %}
+<div class="container-fluid text-center pt-5">
+  <h1 class="fw-bold">No Events Found</h1>
+</div>
+{% endif %}
+{% endblock %}

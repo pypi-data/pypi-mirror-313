@@ -1,0 +1,129 @@
+{% extends 'admin/__base__.html' %}
+
+{% block title %}
+{% if profile is defined %}
+Profile 
+{% else %}
+{{ target.fullname | title }}
+{% endif %}
+{% endblock %}
+
+{% block sidebar %}
+{% from 'admin/macros.html' import generate_sidebar %}
+{% if profile is defined %}
+{{ generate_sidebar('Profile') }}
+{% else %}
+{{ generate_sidebar('User') }}
+{% endif %}
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row g-5">
+        <div class="col-md-auto col-12">
+            <div class="ratio ratio-1x1" style="height: 128px; width: 128px;">
+                <img src="{{ url_for('instance_asset', filename=target.profile_picture.path) }}" alt="Profile Picture" style="height: 100%; width: 100%;object-fit: cover;">
+            </div>
+        </div>
+        <div class="col-md-auto col-12">
+            <div class="table-responsive">
+                <table class="table">
+                    <tr>
+                        <td class="fw-bold">First Name:</td>
+                        <td>{{ target.fname | title }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="fw-bold">Last Name:</td>
+                        <td>{{ target.lname | title }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="fw-bold">Email:</td>
+                        <td>{{ target.email | lower }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if profile is not defined %}
+    <button type="button" class="btn btn-danger mt-1 mb-4" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+        <i class="bi bi-trash text-white"></i>
+    </button>
+
+    <div class="modal fade" id="deleteUserModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="DeleteUser" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5 fw-bold">Delete this user</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this user?
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-danger" href="{{ url_for('Admin.delete_user', id=target.user_id) }}">Yes, delete!</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    
+    
+    {% if role_info %}
+        {% if target.role != role.ADMIN %}
+            <h2 class="fw-bold">{{ target.role | title }} Details:</h2>
+            <hr>
+        {% else %}
+            <p style="color: #d61b3c;" class="mt-3">You are the <strong>"Superuser"</strong> of this web application.</p>
+        {% endif %}
+
+
+        {% if target.role == role.PARTICIPANT %}
+            {% if role_info.leaderships %}
+                <p>Leading for following teams:</p>
+                <ul>
+                    {% for team in role_info.leaderships %}
+                        <li><a href="{{ url_for('Admin.get_team', id=team.team_id) }}">{{ team.name }}</a></li>
+                    {% endfor %}
+                </ul>    
+            {% endif %}
+
+            {% if role_info.teams %}
+                <p>Joined for following teams:</p>
+                <ul>
+                    {% for team in role_info.teams %}
+                        <li><a href="{{ url_for('Admin.get_team', id=team.team.team_id) }}">{{ team.team.name }}</a></li> 
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if not (role_info.leaderships or role_info.teams) %}
+                <p>This user has not participated in any events.</p>
+            {% endif %}
+        {% elif target.role == role.COORDINATOR %}
+            <p>This user is Co-ordinating the event <a href="{{ url_for('Admin.get_event', id=role_info.event.event_id) }}">{{ role_info.event.name }}</a>.</p>
+        {% endif %}
+        
+
+        {% if target.role == role.ORGANIZER %}
+            <p>This user has organized the event <a href="{{ url_for('Admin.get_event', id=role_info.event.event_id) }}">{{ role_info.event.name}}</a>.</p>
+        {% endif %}
+
+        {% if target.role == role.BRANCHADMIN %}
+            <p>This user is branchadmin for the branch {{ role_info[0].branch | upper }}.</p>
+            {% if role_info[1] %}
+                <p>Following events can be managed by this user:</p>
+                <ul>
+                    {% for event in role_info[1] %}
+                        <li><a href="{{ url_for('Admin.get_event', id=event.event_id) }}">{{ event.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endif %}
+
+    {% endif %}
+</div>
+{% endblock %}
