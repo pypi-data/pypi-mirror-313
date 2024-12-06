@@ -1,0 +1,96 @@
+Metadata-Version: 2.1
+Name: cybereason
+Version: 0.6.1
+Summary: Async Cybereason API client
+Home-page: https://github.com/forensic-security/cybereason#readme
+Author: Nuno André
+Author-email: mail@nunoand.re
+License: BSD-3-Clause
+Project-URL: Source, https://github.com/forensic-security/cybereason
+Project-URL: Bug Tracker, https://github.com/forensic-security/cybereason/issues
+Keywords: cybereason,cybersecurity,security,edr
+Platform: any
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Framework :: AsyncIO
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Security
+Classifier: Typing :: Typed
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Provides-Extra: dev
+Provides-Extra: docs
+Provides-Extra: socks
+Provides-Extra: zip
+License-File: LICENSE
+
+# Cybereason
+
+> Async Cybereason API client  
+>
+> [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/cybereason)](https://pypi.org/project/cybereason/)
+
+
+
+## Installation
+
+<a href="https://pypi.org/project/cybereason/"><pre>
+pip install cybereason
+</pre></a>
+
+Install _cybereason_ using:
+- `pip install cybereason[zip]` to enable on-the-fly extraction of files
+downloaded from sensors,
+- `pip install cybereason[socks]` to enable SOCKS proxy support, or
+- `pip install cybereason[zip,socks]` to enable both features.
+
+## Examples
+
+### Save metadata and config for every policy
+```python
+from cybereason import Cybereason
+import asyncio
+import json
+
+async def dump_policies_config():
+    '''Save metadata and config for every policy.
+    '''
+    async with Cybereason(<tenant>, <username>, <password>) as client:
+        async for policy in client.get_policies(show_config=True):
+            filename = f'{policy["metadata"]["name"]}.json'
+            with open(filename, 'w') as f:
+                json.dump(policy, f, indent=4)
+
+asyncio.run(dump_policies_config())
+```
+
+### Download and parse into JSON all user audit logs (action log)
+```python
+from cybereason import Cybereason
+import asyncio
+import json
+
+async def user_audit():
+    async with Cybereason(<tenant>, <username>, <password>) as client:
+        # rotated=False to get only the latest logs
+        logs = [log async for log in client.get_user_audit_logs(rotated=True)]
+        with open('user_audit.json', 'w') as f:
+            json.dump(logs, f, indent=4)
+
+asyncio.run(user_audit())
+```
+
+---
+
+Copyright &copy; 2021-2024 [Forensic & Security](https://forensic-security.com/)
+
+
