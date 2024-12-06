@@ -1,0 +1,261 @@
+Metadata-Version: 2.1
+Name: gai-tool
+Version: 0.2.5
+Summary: AI-powered automation tool for git
+Author-email: Daniel Ratmiroff <danielratmiroff@pm.me>
+License: MIT License
+        
+        Copyright (c) 2024 Daniel Ratmiroff
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/Danielratmiroff/gai
+Project-URL: Source, https://github.com/Danielratmiroff/gai
+Project-URL: Bug Tracker, https://github.com/Danielratmiroff/gai/issues
+Project-URL: Documentation, https://github.com/Danielratmiroff/gai#readme
+Keywords: git,ai,automation,commit,merge-request
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: annotated-types>=0.7.0
+Requires-Dist: anyio>=4.6.2
+Requires-Dist: appdirs>=1.4.4
+Requires-Dist: build>=1.2.2
+Requires-Dist: certifi>=2024.8.30
+Requires-Dist: cffi>=1.17.1
+Requires-Dist: charset-normalizer>=3.4.0
+Requires-Dist: colorama>=0.4.6
+Requires-Dist: coverage>=7.6.4
+Requires-Dist: cryptography>=43.0.3
+Requires-Dist: distro>=1.9.0
+Requires-Dist: docutils>=0.21.2
+Requires-Dist: filelock>=3.16.1
+Requires-Dist: fsspec>=2024.10.0
+Requires-Dist: groq>=0.11.0
+Requires-Dist: h11>=0.14.0
+Requires-Dist: httpcore>=1.0.6
+Requires-Dist: httpx>=0.27.2
+Requires-Dist: huggingface-hub>=0.26.1
+Requires-Dist: idna>=3.10
+Requires-Dist: importlib_metadata>=8.5.0
+Requires-Dist: iniconfig>=2.0.0
+Requires-Dist: jaraco.classes>=3.4.0
+Requires-Dist: jaraco.context>=6.0.1
+Requires-Dist: jaraco.functools>=4.1.0
+Requires-Dist: jeepney>=0.8.0
+Requires-Dist: keyring>=25.4.1
+Requires-Dist: markdown-it-py>=3.0.0
+Requires-Dist: mdurl>=0.1.2
+Requires-Dist: more-itertools>=10.5.0
+Requires-Dist: nh3>=0.2.18
+Requires-Dist: numpy>=2.1.2
+Requires-Dist: packaging>=24.1
+Requires-Dist: pick>=2.4.0
+Requires-Dist: pkginfo>=1.10.0
+Requires-Dist: pluggy>=1.5.0
+Requires-Dist: pycparser>=2.22
+Requires-Dist: pydantic>=2.9.2
+Requires-Dist: pydantic_core>=2.23.4
+Requires-Dist: Pygments>=2.18.0
+Requires-Dist: pyproject_hooks>=1.2.0
+Requires-Dist: PyYAML>=6.0.2
+Requires-Dist: readme_renderer>=44.0
+Requires-Dist: regex>=2024.9.11
+Requires-Dist: requests>=2.32.3
+Requires-Dist: requests-toolbelt>=1.0.0
+Requires-Dist: rfc3986>=2.0.0
+Requires-Dist: rich>=13.9.2
+Requires-Dist: safetensors>=0.4.5
+Requires-Dist: SecretStorage>=3.3.3
+Requires-Dist: sentencepiece>=0.2.0
+Requires-Dist: setuptools>=75.2.0
+Requires-Dist: sniffio>=1.3.1
+Requires-Dist: tiktoken>=0.8.0
+Requires-Dist: tokenizers>=0.20.1
+Requires-Dist: tqdm>=4.66.5
+Requires-Dist: transformers>=4.46.0
+Requires-Dist: typing_extensions>=4.12.2
+Requires-Dist: urllib3>=2.2.3
+Requires-Dist: zipp>=3.20.2
+
+![codecov](https://codecov.io/gh/Danielratmiroff/gai/branch/master/graph/badge.svg)
+[![PyPI version](https://badge.fury.io/py/gai-tool.svg)](https://badge.fury.io/py/gai-tool)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+# Gai is an AI-Powered Automation Tool for Git 🚀
+
+command-line application that automates git commit messages and merge requests using AI. 
+
+![Demo](resources/video_demo.gif)
+
+## ✨ Features
+
+-  Generate commit messages based on code diffs.
+-  Create merge requests with AI-generated titles and descriptions.
+-  Works with both GitHub and GitLab.
+-  Supports Groq and Hugging Face AI interfaces.
+
+## 📦 Installation
+
+Install gai-tool via pip:
+
+```bash
+pip install gai-tool
+```
+
+## 🚀 Getting Started
+
+1. **Navigate to your git repository**:
+
+   ```bash
+   cd /path/to/your/git/repo
+   ```
+
+2. **Set API Tokens as Environment Variables**:
+
+   ```bash
+   # Ensure you have your AI interface and GitHub/GitLab API tokens set:
+   export GROQ_API_KEY='your_groq_api_key'             # If you want to use Groq's API
+   export HUGGINGFACE_API_TOKEN='your_hf_api_token'    # If you want to use Hugging Face's API
+   export GITHUB_TOKEN='your_github_token'             # If using GitHub
+   export GITLAB_TOKEN='your_gitlab_token'             # If using GitLab
+   ```
+3. **Start Using gai-tool**:
+
+   ```bash
+   # Generate an AI-powered commit message:
+   gai commit -a
+   ```
+
+## ⚙️ Configuration
+
+Configuration file is located at `~/.config/gai/config.yaml`. Customize settings like the AI interface, temperature, and target branch.
+
+Example configuration:
+
+```yaml
+interface: huggingface
+temperature: 0.7
+target_branch: master
+```
+
+## 📖 Usage
+
+gai-tool provides two main commands: `commit` and `merge`.
+
+### 📝 Commit Messages
+
+Generate an commit message:
+
+```bash
+gai commit
+```
+
+Options:
+
+- `-a`, `--all`: Stage all changes before committing.
+- `-t`, `--temperature`: Override the temperature specified in the config.
+- `-i`, `--interface`: Specify and override the AI client API to use (`groq` or `huggingface`).
+
+**Example**:
+```bash
+# Simply
+gai commit -a
+# Or
+gai commit -a -t 0.5 -i huggingface
+```
+
+### 🔀 Merge Requests
+
+Create a merge request:
+
+```bash
+gai merge
+```
+
+Options:
+
+- `[remote]`: Specify the remote git repository (default is `origin`).
+- `--push`, `-p`: Push changes to remote before creating a merge request.
+- `--target-branch`, `-tb`: Specify the target branch for the merge request (default is `master`).
+- `-t`, `--temperature`: Override the temperature specified in the config.
+- `-i`, `--interface`: Specify and override the AI client API to use (`groq` or `huggingface`).
+
+**Example**:
+```bash
+# Simply
+gai merge -p
+# Or
+gai merge origin -p -tb develop -t 0.8 -i groq
+```
+
+## 🛠 Build Instructions
+
+Build gai-tool from source:
+
+1. **Clone the Repository**:
+
+   ```bash
+   git clone https://github.com/Danielratmiroff/gai.git
+   ```
+
+2. **Navigate to the Project Directory**:
+
+   ```bash
+   cd gai
+   ```
+
+3. **Create a Virtual Environment (Optional but Recommended)**:
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use venv\Scripts\activate
+   ```
+
+4. **Install Build Tools and Dependencies**:
+
+   ```bash
+   pip install build
+   pip install -r requirements.txt
+   ```
+
+5. **Build the Package**:
+
+   ```bash
+   python -m build
+   ```
+
+   This will generate distribution files in the `dist/` directory.
+
+6. **Install the Built Package**:
+
+   ```bash
+   pip install dist/gai_tool-0.1.0-py3-none-any.whl
+   ```
+
+## 🤝 Contributing
+
+Contributions are welcome! 
+
+
+## 📄 License
+
+MIT License - [LICENSE](LICENSE).
