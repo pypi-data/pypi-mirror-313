@@ -1,0 +1,214 @@
+[project]
+name = "numpydantic"
+version = "1.6.5"
+description = "Type and shape validation and serialization for arbitrary array types in pydantic models"
+authors = [
+    { name = "sneakers-the-rat", email = "sneakers-the-rat@protonmail.com" },
+]
+dependencies = [
+    "pydantic>=2.7.0",
+    "numpy>=1.24.0",
+    "typing-extensions>=4.11.0;python_version<'3.11'",
+]
+requires-python = "<4.0,>=3.9"
+readme = "README.md"
+repository = "https://github.com/p2p-ld/numpydantic"
+keywords = [
+    "arrays",
+    "validation",
+    "serialization",
+    "numpy",
+    "pydantic",
+]
+classifiers = [
+    "Framework :: Pydantic",
+    "Framework :: Pydantic :: 2",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: File Formats :: JSON :: JSON Schema",
+    "Topic :: Utilities",
+]
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+homepage = "https://numpydantic.readthedocs.io"
+documentation = "https://numpydantic.readthedocs.io"
+repository = "https://github.com/p2p-ld/numpydantic"
+changelog = "https://numpydantic.readthedocs.io/en/latest/changelog.html"
+
+[project.optional-dependencies]
+dask = [
+    "dask>=2024.4.0",
+]
+hdf5 = [
+    "h5py>=3.10.0",
+]
+video = [
+    "opencv-python>=4.9.0.80",
+]
+zarr = [
+    "zarr>=2.17.2",
+]
+arrays = [
+    "numpydantic[dask,hdf5,zarr,video]",
+]
+tests = [
+    "numpydantic[arrays]",
+    "pytest>=7.4.0",
+    "pytest-depends<2.0.0,>=1.0.1",
+    "coverage>=6.1.1",
+    "pytest-cov<5.0.0,>=4.1.0",
+    "coveralls<4.0.0,>=3.3.1",
+]
+docs = [
+    "numpydantic[arrays]",
+    "sphinx<8.0.0,>=7.2.6",
+    "furo>=2024.1.29",
+    "myst-parser<3.0.0,>=2.0.0",
+    "autodoc-pydantic<3.0.0,>=2.0.1",
+    "sphinx-design<1.0.0,>=0.5.0",
+    "sphinxcontrib-mermaid>=0.9.2",
+    "myst-nb>=1.1.1",
+    "rich>=13.8.1",
+]
+dev = [
+    "numpydantic[tests,docs]",
+    "sphinx-autobuild>=2021.3.14",
+    "black<25.0.0,>=24.1.1",
+    "ruff<1.0.0,>=0.2.0",
+]
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.build]
+includes = []
+
+[tool.pdm.scripts]
+lint = "ruff check"
+test = "pytest"
+
+[tool.pdm.scripts.format]
+shell = "ruff check --fix ; black ."
+
+[tool.pytest.ini_options]
+addopts = [
+    "--cov=numpydantic",
+    "--cov-append",
+]
+testpaths = [
+    "tests",
+]
+filterwarnings = [
+    "ignore:.*deprecated alias.*Deprecated NumPy 1\\.24.*",
+]
+markers = [
+    "dtype: mark test related to dtype validation",
+    "shape: mark test related to shape validation",
+    "json_schema: mark test related to json schema generation",
+    "serialization: mark test related to serialization",
+    "proxy: test for proxy class in any interface",
+    "dask: dask interface",
+    "hdf5: hdf5 interface",
+    "numpy: numpy interface",
+    "video: video interface",
+    "zarr: zarr interface",
+]
+
+[tool.black]
+target-version = [
+    "py39",
+    "py310",
+    "py311",
+    "py312",
+]
+
+[tool.ruff]
+target-version = "py39"
+include = [
+    "src/numpydantic/**/*.py",
+    "tests/**/*.py",
+    "pyproject.toml",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "UP",
+    "B",
+    "SIM",
+    "I",
+    "ANN",
+    "PERF",
+    "NPY",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D106",
+    "D107",
+    "D207",
+    "D208",
+    "D210",
+    "D211",
+    "D419",
+    "T100",
+]
+ignore = [
+    "ANN101",
+    "ANN102",
+    "ANN401",
+    "ANN204",
+    "B905",
+    "UP006",
+    "UP035",
+    "UP007",
+    "UP038",
+    "D107",
+]
+fixable = [
+    "ALL",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/numpydantic/testing/*" = [
+    "D",
+    "F722",
+]
+"tests/*" = [
+    "D",
+    "F403",
+    "F722",
+    "ANN",
+]
+
+[tool.mypy]
+plugins = [
+    "pydantic.mypy",
+]
+
+[tool.coverage.run]
+omit = [
+    "src/numpydantic/vendor/*",
+]
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
