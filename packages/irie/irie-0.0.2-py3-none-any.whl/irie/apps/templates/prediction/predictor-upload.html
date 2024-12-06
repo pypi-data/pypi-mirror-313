@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+{# load predictor #}
+{% block title %} {{ asset.calid }} | Upload {% endblock %} 
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="print">
+    <h1 class="fs-2 lh-2 me-3">Uploads</h1>
+    <span id="predictorProfile" class="fs-2 lh-2 me-3">{{ title }}</span>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p}}
+      <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+{% endblock content %}
+
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+</script>
+{% block javascripts %}
+
+<script type="text/javascript">
+  function printTables() {
+    var myWindow = window.open('','','width=200,height=100')
+    myWindow.document.write("This is 'myWindow'")
+    myWindow.print();
+  }
+</script>
+
+{% endblock javascripts %}
