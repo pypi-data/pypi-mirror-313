@@ -1,0 +1,31 @@
+{
+    "packages": {
+      ".": {
+        "package-name": "cli",
+        "release-type": "python",
+        "changelog-path": "CHANGELOG.md",
+        "exclude-paths": [
+            "tests/",
+            "charts/gitops",
+            "gitops_server/"
+        ]
+      },
+      "gitops_server": {
+        "package-name": "server",
+        "release-type": "python",
+        "changelog-path": "gitops_server/CHANGELOG.md",
+        "extra-files": [
+            {
+              "type": "yaml",
+              "path": "charts/gitops/Chart.yaml",
+              "jsonpath": "$.appVersion"
+            }
+        ]
+      },
+      "charts/gitops": {
+        "package-name": "helm",
+        "release-type": "helm",
+        "changelog-path": "charts/gitops/CHANGELOG.md"
+      }
+    }
+}

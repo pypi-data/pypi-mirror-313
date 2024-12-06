@@ -1,0 +1,62 @@
+name: Release
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+
+permissions:
+  actions: read # Read the metrics
+  contents: write # to be able to publish a GitHub release
+  issues: write # to be able to comment on released issues
+  pull-requests: write # to be able to comment on released pull requests
+  id-token: write # to enable use of OIDC for npm provenance / AWS
+
+env:
+  MISE_PYTHON_COMPILE: false
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: Build and Push Docker Image
+    uses: uptick/actions/.github/workflows/ci.yaml@main
+    secrets:
+      SECRET_ENV: "${{ secrets.CLUSTER_KEY }}"
+    #https://github.com/uptick/actions/blob/main/.github/workflows/ci.yaml
+    with:
+      aws-iam-role-arn: "arn:aws:iam::305686791668:role/default-github-actions-ci-role"
+      docker-enabled: true
+      docker-context: "."
+      docker-tag: ${{github.event.release.tag_name}}
+      docker-tag-latest: true
+      docker-image-platforms: linux/amd64
+      docker-repository: "305686791668.dkr.ecr.ap-southeast-2.amazonaws.com/gitops"
+      command: echo $SECRET_ENV | base64 -d > cluster.key
+
+  publish_helm_chart:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Publish Helm charts
+      uses: stefanprodan/helm-gh-pages@master
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_to_pypi:
+    name: Publishes tag to pypi
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: jdx/mise-action@v2
+      with:
+        install: true
+        cache: true
+        experimental: true
+
+    - run: |
+        mise run build
+      shell: bash
+
+    - name: Publish Pypi Package
+      uses: pypa/gh-action-pypi-publish@release/v1
