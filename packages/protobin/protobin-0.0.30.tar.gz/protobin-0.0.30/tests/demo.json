@@ -1,0 +1,69 @@
+{
+    "formats": {
+        "login": {
+            "header": "T",
+            "client": {
+                "serial": {"type": "string"}
+            },
+            "server": {
+                "id": {"bytes": 2, "type": "id"},
+                "bus_number": {"bytes": 2, "type": "id"},
+                "route": {"bytes": 1, "type": "id"},
+                "direction": {"bytes": 1, "type": "bool"},
+                "geofence": {"bytes": 2, "type": "id"},
+                "state": {"bytes": 1, "type": "char"},
+                "trip": {"bytes": 4, "type": "id"},
+                "driver": {"bytes": 4, "type": "id"},
+                "order": {"bytes": 1, "type": "unsigned"},
+                "logged": {"type": "bool"},
+                "data": {"type": "datetime"},
+                "schedule": {"type": "time"}
+            }
+        },
+        "report": {
+            "header": "PV",
+            "client": {
+                "positions": {"type": "array", "array": {
+                    "time": {"type": "datetime"},
+                    "lng": {"bytes": 4,"type": "float", "decimals": 6},
+                    "lat": {"bytes": 4, "type": "float", "decimals": 6},
+                    "speed": {"bytes": 1, "type": "unsigned"},
+                    "mark": {"bytes": 2, "type": "id"},
+                    "busstop": {"bytes": 2, "type": "id"}
+                    }
+                },
+                "trip": {"bytes": 4, "type": "id"},
+                "route": {"bytes": 1, "type": "id"},
+                "direction": {"type": "bool"},
+                "state": {"type": "char"},
+                "sales": {"bytes": 3, "type": "unsigned"},
+                "events": {"type": "array", "array": {
+                    "id": {"bytes": 2, "type": "unsigned"},
+                    "value": {"bytes": 1, "type": "unsigned"}
+                }}
+            },
+            "server": {
+                "positions": {"bytes": 1, "type": "unsigned"}
+            }
+        },
+        "comando": {
+            "header": "$",
+            "client": {
+                "comando": {
+                    "type": "char"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            },
+            "server": {
+                "comando": {"type": "char"},
+                "id": {"type": "string"},
+                "value": {"type": "string"}
+            }
+        }
+    }
+}
