@@ -1,0 +1,174 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "torchio"
+version = "0.20.3"
+description = "Tools for medical image processing with PyTorch"
+readme = {file = "README.md", content-type = "text/markdown"}
+authors = [
+    {name = "TorchIO contributors"}
+]
+maintainers = [
+    {name = "Fernando Perez-Garcia", email = "fepegar@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Typing :: Typed"
+]
+keywords = ["medical", "image processing", "pytorch", "augmentation", "mri"]
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "deprecated>=1.2",
+    "humanize>=0.1",
+    "nibabel>=3",
+    "numpy>=1.20",
+    "packaging>=20",
+    "rich>=10",
+    "scipy>=1.7",
+    "simpleitk >=1.3, !=2.0.*, !=2.1.1.1",
+    "torch>=1.9",
+    "tqdm>=4.40",
+    "typer>=0.1",
+]
+
+[project.optional-dependencies]
+csv = [
+    "pandas>=1",
+]
+plot = [
+    "matplotlib>=3.4",
+]
+
+[project.scripts]
+tiohd = "torchio.cli.print_info:app"
+tiotr = "torchio.cli.apply_transform:app"
+torchio-transform = "torchio.cli.apply_transform:app"
+
+[project.urls]
+Homepage = "http://torchio.rtfd.io"
+Source = "https://github.com/fepegar/torchio"
+"Issue tracker" = "https://github.com/fepegar/torchio/issues"
+Documentation = "http://torchio.rtfd.io"
+"Release notes" = "https://github.com/fepegar/torchio/releases"
+
+[dependency-groups]
+dev = [
+    { include-group = "doc" },
+    { include-group = "maintain" },
+    { include-group = "test" },
+    "ipykernel",
+    "ruff>0.0.40",
+    "ipywidgets",
+]
+doc = [
+    "einops",
+    "furo",
+    "matplotlib",
+    "sphinx",
+    "sphinx-autobuild",
+    "sphinx-copybutton",
+    "sphinx-gallery",
+    "sphinxext-opengraph",
+]
+maintain = [
+    "bump-my-version",
+    "pre-commit-uv",
+]
+test = [
+    "coverage>=5",
+    "mypy>=0.800",
+    "parameterized>=0.7",
+    "pillow>=8",
+    "pytest>=5",
+    "pytest-cov",
+    "pytest-sugar>=0.10",
+    "tox-uv",
+    "types-deprecated",
+]
+
+[tool.bumpversion]
+current_version = "0.20.3"
+commit = true
+tag = true
+
+[[tool.bumpversion.files]]
+filename = "src/torchio/__init__.py"
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[tool.mypy]
+pretty = true
+
+[[tool.mypy.overrides]]
+module = "duecredit.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "matplotlib.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "nibabel.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "scipy.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+markers = [
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "serial",
+]
+filterwarnings = [
+    # Ignore SimpleITK Swig warnings
+    "ignore:builtin type .* has no __module__ attribute",
+    "ignore:Casting complex values to real discards the imaginary part",
+    # Raised by SimpleITK on CI
+    "ignore:invalid escape sequence",
+]
+
+[tool.ruff.format]
+quote-style = 'single'
+
+[tool.ruff.lint]
+preview = true
+select = [
+    "B",
+    "E",
+    "F",
+    "I",
+    "W",
+]
+ignore = [
+    "E203",
+    "E501",
+    "N813",
+]
+
+[tool.ruff.lint.isort]
+force-single-line = true
