@@ -1,0 +1,6 @@
+__version__ = "0.20.6rc4"
+__package_name__ = "anylearn"
+__license__ = "Proprietary"
+__description__ = "Anylearn Python SDK"
+__author__ = "Dmagine"
+__author_email__ = "anylearn@nelbds.org.cn"
