@@ -1,0 +1,32 @@
+.. code-block:: python
+
+    from asyncua.sync import Client
+    from asyncua.ua import NodeId
+    from asyncua import ua
+
+    
+    def {{function_name}}(client: Client{% for argument in input_args %}, {{argument.name_snake_case}}: {{argument.py_type}}{% endfor %}) -> {% if output_args | length == 0 %} None{% elif output_args | length == 1%}{{output_args[0].py_type}}{% else %}tuple[{{ output_args | join(', ', attribute= 'py_type')}}]{% endif %}:
+        node_id = NodeId({{parent_identifier}}{% if namespace != None %}, {{namespace}}{% endif %})
+        node_id_method = NodeId({{method_id}}{% if namespace != None %}, {{namespace}}{% endif %})
+        node = client.get_node(node_id)
+        {% if output_args != [] %}
+        {{output_args | join(', ', attribute= 'name_snake_case')}} = node.call_method(
+        {% else %}
+        node.call_method( 
+        {% endif %}
+            node_id_method,
+            {% for argument in arguments%}
+            ua.Variant({{argument.name_snake_case}}, ua.VariantType.{{ argument.ua_type }}),
+            {% endfor %}
+        )
+        {% if output_args != [] %}
+        return {{output_args | join(', ', attribute= 'name_snake_case')}}
+        {% endif%}
+
+    with Client("opc.tcp://localhost:4840/") as client:
+        {{function_name}}(
+            client,
+            {% for argument in input_args %}
+            {{argument.name_snake_case | upper }},
+            {% endfor %}
+        )

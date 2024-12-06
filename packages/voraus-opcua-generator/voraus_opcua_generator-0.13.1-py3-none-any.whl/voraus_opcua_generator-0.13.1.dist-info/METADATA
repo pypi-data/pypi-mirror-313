@@ -1,0 +1,181 @@
+Metadata-Version: 2.1
+Name: voraus-opcua-generator
+Version: 0.13.1
+Summary: A library for robots that helps with a lot of things.
+Home-page: https://github.com/vorausrobotik/voraus-opcua-generator
+Author: Jan-Niklas Burfeind
+Author-email: jan-niklas.burfeind@vorausrobotik.com
+License: commercial
+Requires-Python: >=3.11
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+Requires-Dist: importlib-metadata
+Requires-Dist: voraus-logging-lib
+Requires-Dist: asyncua
+Requires-Dist: Jinja2
+Requires-Dist: typer
+Provides-Extra: build
+Requires-Dist: build[virtualenv]==1.2.1; extra == "build"
+Provides-Extra: build-template
+Requires-Dist: build[virtualenv]==1.2.1; extra == "build-template"
+Provides-Extra: dev
+Requires-Dist: tox==4.15.1; extra == "dev"
+Requires-Dist: isort==5.13.2; extra == "dev"
+Requires-Dist: black==24.4.2; extra == "dev"
+Requires-Dist: mypy==1.10.1; extra == "dev"
+Requires-Dist: pylint==3.2.5; extra == "dev"
+Requires-Dist: pytest==8.2.2; extra == "dev"
+Requires-Dist: types-docutils; extra == "dev"
+Requires-Dist: types-setuptools; extra == "dev"
+Requires-Dist: jinja2==3.1.4; extra == "dev"
+Requires-Dist: ruff==0.5.0; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: isort; extra == "dev"
+Requires-Dist: voraus-opc-ua-spec-robot-control~=6.1.1; extra == "dev"
+Requires-Dist: pytest-randomly==3.15.0; extra == "dev"
+Requires-Dist: pytest-cov==5.0.0; extra == "dev"
+Requires-Dist: coverage[toml]==7.5.4; extra == "dev"
+Requires-Dist: pytest-mock; extra == "dev"
+Requires-Dist: sphinx==7.3.7; extra == "dev"
+Requires-Dist: sphinxawesome-theme==5.2.0; extra == "dev"
+Requires-Dist: sphinx-selective-exclude==1.0.3; extra == "dev"
+Requires-Dist: sphinx-autodoc-typehints==2.2.2; extra == "dev"
+Requires-Dist: pip-licenses==4.4.0; extra == "dev"
+Requires-Dist: build[virtualenv]==1.2.1; extra == "dev"
+Provides-Extra: doc
+Requires-Dist: sphinx==7.3.7; extra == "doc"
+Requires-Dist: sphinxawesome-theme==5.2.0; extra == "doc"
+Requires-Dist: sphinx-selective-exclude==1.0.3; extra == "doc"
+Requires-Dist: sphinx-autodoc-typehints==2.2.2; extra == "doc"
+Requires-Dist: pip-licenses==4.4.0; extra == "doc"
+Requires-Dist: jinja2==3.1.4; extra == "doc"
+Provides-Extra: doc-template
+Requires-Dist: sphinx==7.3.7; extra == "doc-template"
+Requires-Dist: sphinxawesome-theme==5.2.0; extra == "doc-template"
+Requires-Dist: sphinx-selective-exclude==1.0.3; extra == "doc-template"
+Requires-Dist: sphinx-autodoc-typehints==2.2.2; extra == "doc-template"
+Requires-Dist: pip-licenses==4.4.0; extra == "doc-template"
+Requires-Dist: jinja2==3.1.4; extra == "doc-template"
+Provides-Extra: lint
+Requires-Dist: isort==5.13.2; extra == "lint"
+Requires-Dist: black==24.4.2; extra == "lint"
+Requires-Dist: mypy==1.10.1; extra == "lint"
+Requires-Dist: pylint==3.2.5; extra == "lint"
+Requires-Dist: pytest==8.2.2; extra == "lint"
+Requires-Dist: types-docutils; extra == "lint"
+Requires-Dist: types-setuptools; extra == "lint"
+Requires-Dist: jinja2==3.1.4; extra == "lint"
+Requires-Dist: ruff==0.5.0; extra == "lint"
+Requires-Dist: black; extra == "lint"
+Requires-Dist: isort; extra == "lint"
+Requires-Dist: voraus-opc-ua-spec-robot-control~=6.1.1; extra == "lint"
+Provides-Extra: lint-template
+Requires-Dist: isort==5.13.2; extra == "lint-template"
+Requires-Dist: black==24.4.2; extra == "lint-template"
+Requires-Dist: mypy==1.10.1; extra == "lint-template"
+Requires-Dist: pylint==3.2.5; extra == "lint-template"
+Requires-Dist: pytest==8.2.2; extra == "lint-template"
+Requires-Dist: types-docutils; extra == "lint-template"
+Requires-Dist: types-setuptools; extra == "lint-template"
+Requires-Dist: jinja2==3.1.4; extra == "lint-template"
+Requires-Dist: ruff==0.5.0; extra == "lint-template"
+Provides-Extra: test
+Requires-Dist: pytest==8.2.2; extra == "test"
+Requires-Dist: pytest-randomly==3.15.0; extra == "test"
+Requires-Dist: pytest-cov==5.0.0; extra == "test"
+Requires-Dist: coverage[toml]==7.5.4; extra == "test"
+Requires-Dist: black; extra == "test"
+Requires-Dist: isort; extra == "test"
+Requires-Dist: pytest-mock; extra == "test"
+Requires-Dist: voraus-opc-ua-spec-robot-control~=6.1.1; extra == "test"
+Provides-Extra: test-template
+Requires-Dist: pytest==8.2.2; extra == "test-template"
+Requires-Dist: pytest-randomly==3.15.0; extra == "test-template"
+Requires-Dist: pytest-cov==5.0.0; extra == "test-template"
+Requires-Dist: coverage[toml]==7.5.4; extra == "test-template"
+Provides-Extra: tox
+Requires-Dist: tox==4.15.1; extra == "tox"
+
+=======================
+voraus OPC UA Generator
+=======================
+
+A library to generate OPC UA artifacts based on an xml nodeset (or a server) and target nodes, as well as an automated OPC UA server documentation builder.
+
+Install the module in editable mode for development:
+
+
+.. code-block::
+
+    pip install -e .[dev]
+
+
+OPC UA Client Generator (Python)
+################################
+
+This generates a typed client for a voraus OPC UA specification in form of a nodeset.
+
+.. code-block::
+
+    voraus-opcua-generator build-client-package motion_nodes.xml /tmp/my_robot_control_package/
+
+
+OPC UA Server XML Builder
+#########################
+
+The XML builder creates a OPC UA specification of a running OPC UA Server. 
+
+.. code-block::
+
+   voraus-opcua-generator build-xml motion_nodes.xml
+
+
+OPC UA Server Documentation Builder
+###################################
+
+The documentation builder for OPC UA server XML files creates RST files for all nodes including methods and variables. 
+Code examples for each node are also generated. Note that the documentation builder will create a subdirectory including the documentation folder,
+which **must not** be committed. You also have to include the base rst file to the doctree of your `index.rst` file.
+
+.. code-block::
+
+   voraus-opcua-generator build-docs motion_nodes.xml docs/
+
+
+How to use
+##########
+
+Use the tools to configure own generator, 
+all classes can be generated to a single file
+or multiple schemas can be generated to multiple files
+
+.. code-block::
+
+    # setup parser
+    schema_parser = NodesetParser("nodeset.xml") # or ClientParser("opc.tcp://<ip>:<port>")
+
+    # select target nodes
+    target_nodes: List[ua.NodeId] = [
+        ua.NodeId(8100104, 1),  # classify camera image
+        ua.NodeId(8200101, 1),  # detect objects
+        ua.NodeId(8310101, 1),  # find qr codes
+        ua.NodeId(4200102, 1),  # apply camera setting
+    ]
+
+    # parse schema
+    schema = schema_parser.parse(target_nodes)
+
+    # set override options
+    override_options: List[OverrideOptions] = [
+        OverrideOptions(
+            node_id=ua.NodeId.from_string("ns=1;i=100210"),
+            name="Motion",
+        ),
+    ]
+
+    # generate code
+    code = generate_code(schema, override_options)
+
+    # write to file
+    with open(<filename>, "w") as file:
+        file.write(code)

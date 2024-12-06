@@ -1,0 +1,78 @@
+{% macro property(child_node) -%}
+@property
+def {{ child_node.displayname_snake_case }}(self) -> {{ child_node.data.valuetype | py_type }}:
+    """{{ child_node.data.desc | escape_rst_special_chars }}
+
+    Returns:
+        The value of {% if child_node.namespace != None %}ns={{ child_node.namespace }};{% endif %}i={{ child_node.identifier }}.
+    """
+    attribute_node_id = NodeId(Int32({{ child_node.identifier }}), Int16({{ child_node.namespace }}))
+    return self.established_connection.get_node(attribute_node_id).get_value()
+{%- endmacro %}
+
+{% macro method_return_value_class(method_node) %}
+class {{ method_node.data.displayname | pascal_case }}ReturnValue(BaseModel):
+    """A model to provide named access to return values of {{ method_node.data.displayname | pascal_case }}."""
+    {% for argument in method_node.get_output_arguments() %}
+    {{ argument.name_snake_case }}: {{ argument.py_type }}
+    {% endfor %}
+{%- endmacro %}
+
+{% macro method(method_node) %}
+def {{ method_node.displayname_snake_case | escape_keywords }}(self{{ method_node.get_input_arguments() | input_typehint(optional=False) }}) -> {{ "None" if method_node.get_output_arguments() | length == 0 else "{}ReturnValue".format(method_node.data.displayname | pascal_case) }}:
+    {{ method_docstring(method_node) | indent(4) }}
+    {{ method_body_without_output(method_node) | indent(4) if method_node.get_output_arguments() | length == 0 else method_body_with_output(method_node) | indent(4) }}
+{%- endmacro %}
+
+{% macro method_docstring(method_node) %}
+"""{{ method_node.data.desc | escape_rst_special_chars }}{{ '"""' if method_node.get_input_arguments() | length == 0 and method_node.get_output_arguments() | length == 0 -}}
+{% if method_node.get_input_arguments() | length > 0 %}
+
+
+Args:
+{% endif %}
+{% for input_argument in method_node.get_input_arguments() %}
+    {{ input_argument.name_snake_case | escape_keywords }}: {{ input_argument.ua_text }}
+{% endfor %}
+{% if method_node.get_output_arguments() | length > 0 %}
+
+
+Returns:
+    A collection of return values as a pydantic model.
+{% endif %}
+{{ '"""' if method_node.get_input_arguments() | length > 0 or method_node.get_output_arguments() | length > 0 }}
+{%- endmacro %}
+
+{% macro method_body_without_output(method_node) %}
+method_node_id = NodeId(Int32({{ method_node.identifier }}), Int16({{ method_node.namespace }}))
+node = self.established_connection.get_node(self._node_id)
+node.call_method(
+    method_node_id,
+{% for argument in method_node.get_input_arguments() %}
+    Variant({{ argument.name_snake_case | escape_keywords }}, VariantType.{{ argument.ua_type }}),
+{% endfor %}
+)
+{%- endmacro %}
+
+{% macro method_body_with_output(method_node) %}
+method_node_id = NodeId(Int32({{ method_node.identifier }}), Int16({{ method_node.namespace }}))
+node = self.established_connection.get_node(self._node_id)
+{% if method_node.get_output_arguments()|length == 1 %}
+res = node.call_method(method_node_id)
+key = list(self.{{ method_node.data.displayname | pascal_case }}ReturnValue.model_fields.keys())[0]
+return self.{{ method_node.data.displayname | pascal_case }}ReturnValue(**{key: res})
+{% endif %}
+{% if method_node.get_output_arguments()|length > 1 %}
+res: tuple = tuple(
+    node.call_method(
+        method_node_id,
+{% for argument in method_node.get_input_arguments() %}
+        Variant({{ argument.name_snake_case | escape_keywords }}, VariantType.{{ argument.ua_type }}),
+{% endfor %}
+    )
+)
+return self.{{ method_node.data.displayname | pascal_case }}ReturnValue(
+    **{key: res[i] for i, key in enumerate(self.{{ method_node.data.displayname | pascal_case }}ReturnValue.model_fields.keys())}
+)
+{% endif %}
+{%- endmacro %}

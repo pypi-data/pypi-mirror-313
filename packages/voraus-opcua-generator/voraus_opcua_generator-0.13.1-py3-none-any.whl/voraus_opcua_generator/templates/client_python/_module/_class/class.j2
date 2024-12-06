@@ -1,0 +1,26 @@
+{% from 'client_python/_module/_class/helpers.j2' import property, method_return_value_class, method %}
+class {{ node.data.displayname | pascal_case}}(ChildOrConnectable):
+    """{{ node.data.desc | escape_rst_special_chars }}"""
+    _node_id=NodeId(Int32({{node.identifier}}){% if node.namespace != None %}, Int16({{node.namespace}}){% endif %})
+
+    {% if node.objects | length > 0 %}
+    def __init__(self,  uri: str | None = None, parent:ChildOrConnectable|None=None):
+        super().__init__(uri, parent)
+        {% for child in node.objects %}
+        self.{{ child.data.displayname | snake_case }}:{{ child.data.displayname | pascal_case }} = {{ child.data.displayname | pascal_case }}(parent=self)
+        {% endfor %}
+    {% endif %}
+
+    {% for child_node in node.variables %}
+    {{ property(child_node) | indent(4) }}
+    {% endfor %}
+
+    {% for method_node in node.methods %}
+
+    {% if method_node.get_output_arguments() | length > 0 %}
+    {{ method_return_value_class(method_node) | indent(4) }}
+    {% endif %}
+
+    {{ method(method_node) | indent(4) }}
+
+    {% endfor %}

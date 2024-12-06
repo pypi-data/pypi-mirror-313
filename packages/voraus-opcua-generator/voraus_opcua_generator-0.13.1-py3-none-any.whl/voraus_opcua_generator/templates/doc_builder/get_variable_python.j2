@@ -1,0 +1,17 @@
+.. code-block:: python
+
+    from asyncua.sync import Client
+    from asyncua import ua
+
+    # connect to the opcua server
+    with Client("opc.tcp://localhost:4840/") as client:
+        # Get the node
+        nodeid = ua.NodeId({{inumber}}{% if namespace != None %}, {{namespace}}{% endif %})
+        node = client.get_node(nodeid)
+
+        # Get the node value
+        value = node.get_value()
+    {% if access_level in ('CurrentWrite', 'HistoryWrite') %}
+        # Set the node value
+        node.set_value({{value}})
+    {% endif %}

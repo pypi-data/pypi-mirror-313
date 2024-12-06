@@ -1,0 +1,17 @@
+{% if node.methods | length > 0 or node %}
+from __future__ import annotations
+
+{% endif %}
+{% if node.any_method_has_input_arguments() %}
+from asyncua.ua import NodeId, Variant, VariantType
+{% else %}
+from asyncua.ua import NodeId
+{% endif %}
+from asyncua.ua.uatypes import Int32{{", Int16" if node.namespace != None}}
+{% if node.any_method_has_output_arguments() %}
+from pydantic import BaseModel
+{% endif %}
+{% for child in node.objects %}
+from voraus_robot_control_client.{{ node.path | to_module }}.{{ child.data.displayname | snake_case }} import {{ child.data.displayname | pascal_case }}
+{% endfor %}
+from voraus_robot_control_client.util import ChildOrConnectable
