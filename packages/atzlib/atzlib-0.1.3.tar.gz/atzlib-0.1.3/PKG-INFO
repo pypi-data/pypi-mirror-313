@@ -1,0 +1,140 @@
+Metadata-Version: 2.1
+Name: atzlib
+Version: 0.1.3
+Summary: My python codes.
+License: MIT
+Author: jhlee29
+Author-email: leejinha829@gmail.com
+Requires-Python: >=3.9,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: pandas (>=2.2.3,<3.0.0)
+Requires-Dist: psycopg2 (>=2.9.10,<3.0.0)
+Requires-Dist: python-dotenv (>=1.0.1,<2.0.0)
+Requires-Dist: sqlalchemy (>=1.4,<2.0.36)
+Description-Content-Type: text/markdown
+
+# atzlib  
+
+Bunch of python codes.
+Test project to learn how to manage pypi library.
+
+LINK: <https://pypi.org/manage/project/atzlib/releases/>
+
+```bash
+poetry config pypi-token.pypi your-pypi-token
+```
+
+### TODO: 코드 작동 확인 및 서브패키지 분리하기
+
+## 기능목록
+
+### ezpsql.py
+
+```python
+def upload_csv(file_path, table_name, primary_keys, foreign_keys=None, reset=False):
+    """
+    CSV 파일에서 데이터를 로드하여 데이터베이스에 업로드합니다.
+
+    Args:
+        file_path (str): CSV 파일의 경로.
+        table_name (str): 생성하거나 업서트할 테이블 이름.
+        primary_keys (list of str): 기본 키 컬럼들.
+        foreign_keys (dict, optional): 컬럼 이름과 외래 키 참조를 매핑하는 딕셔너리.
+        reset (bool, optional): 업서트 전에 테이블을 초기화할지 여부. 기본값은 False.
+    """
+```
+
+## 사용방법
+
+### 1. config.yaml 파일을 수정해서 연결정보 저장
+
+```yaml
+# config.yaml template
+database:
+  user: YOUR_NAME
+  password: YOUR_PASSWORD
+  host: YOUR_HOSTID
+  port: 5432
+  dbname: YOUR_DBNAME
+```
+
+### 2. ezpsql.py를 임포트하여 데이터 업로드
+
+```python
+from ezpsql import upload_csv
+upload_csv('test.csv', 'test', primary_keys=['SEQ_NO'])
+```
+
+### 3. 연결 및 데이터 쿼리 방법
+
+```python
+from ezpsql import connect_db
+from sqlalchemy import text
+import pandas as pd
+
+engine = connect_db()
+query = text('SELECT * FROM public.tms_elite_temp WHERE "TR_ID" LIKE :tr_id')
+reg_map = pd.read_sql_query(query, engine, params={'tr_id': '%수원%'})
+reg_map
+```
+
+## 일일 스케쥴러 작성방법
+
+### 1. 노트북 -> .py
+
+```python
+if __name__ == "__main__":
+```
+
+구문을 사용하여 구동되는 .py로 변경
+
+#### 예시
+
+```python
+#!/usr/bin/env python
+# coding: utf-8
+
+from ezpsql import upload_csv
+from ezpsql import connect_db
+
+from sqlalchemy import text
+import pandas as pd
+
+
+if __name__ == "__main__":
+    upload_csv('test.csv', 'test', primary_keys=['DEV_ID'], option=['reset'])
+    engine = connect_db()
+    query = text('SELECT * FROM public.test')
+    reg_map = pd.read_sql_query(query, engine)
+```
+
+### 2. 실행파일 동작확인
+
+```bash
+python main.py
+```
+
+### 3. bash 스케쥴러 작성
+
+``` bash
+#!/bin/bash
+while true
+do
+    echo "Running Python script at $(date)"
+    python /path/to/your/main.py
+    sleep 86400  # 86400초 = 24시간
+done
+```
+
+### 4. .sh 권한부여 및 실행
+
+```terminal
+chmod +x run_daily.sh
+./run_daily.sh
+```
+
