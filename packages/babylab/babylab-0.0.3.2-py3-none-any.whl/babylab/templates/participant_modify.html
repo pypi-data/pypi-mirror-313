@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block content %}
+<header>
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-4">Participants ({{ ppt_id }})</h1>
+            <p class="lead">Modify the corresponding values and hit the submit button.</p>
+        </div>
+    </div>
+    <hr class="my-4">
+</header>
+
+<body>
+    <form class="form needs-validation" method="POST" novalidate>
+        <div class="row"></div>
+        <div class="col">
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="submit" class="btn btn-warning" style="float: left; margin: 0.5em;"><i
+                        class="fa fa-pen"></i>&nbsp&nbspSubmit</button>
+            </div>
+        </div>
+        </div>
+        <div class="card" style="width: 30%; float: left; margin-right: 2em;">
+            <h5 class="card-header">Participant information</h5>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <label for="inputName" class="form-label">Participant first name</label>
+                        <input type="text" name="inputName" class="form-control" placeholder="{{ data['name'] }}"
+                            value="{{ data['name'] }}">
+                    </div>
+                    <div class="col">
+                        <label for="inputSex" class="form-label">Sex&nbsp&nbsp <i class="fa  fa-venus-mars"></i></label>
+                        <select class="form-select" name="inputSex" required>
+                            {% for k, v in data_dict["participant_sex"].items() %}
+                            <option value="{{ k }}" {% if data["sex"]==k %} selected {% endif %}>{{ v }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label for="inputParent1Name" class="form-label">Parent 1 name</label>
+                        <input type="text" name="inputParent1Name" class="form-control"
+                            placeholder="{{ data['parent1_name'] }}" value="{{ data['parent1_name'] }}">
+                    </div>
+                    <div class="col">
+                        <label for="inputParent1Surname" class="form-label">Parent 1 surname</label>
+                        <input type="text" name="inputParent1Surname" class="form-control"
+                            placeholder="{{ data['parent1_surname'] }}" value="{{ data['parent1_surname'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label for="inputParent2Name" class="form-label">Parent 2 name</label>
+                        <input type="text" name="inputParent2Name" class="form-control"
+                            placeholder="{{ data['parent2_name'] }}" value="{{ data['parent2_name'] }}">
+                    </div>
+                    <div class="col">
+                        <label for="inputParent2Surname" class="form-label">Parent 2 surname</label>
+                        <input type="text" name="inputParent2Surname" class="form-control"
+                            placeholder="{{ data['parent2_surname'] }}" value="{{ data['parent2_surname'] }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="inputAgeMonths" placeholder="{{ data['age_now_months'] }}"
+                            value="{{ data['age_now_months'] }}">Age
+                            (months)</label>
+                        <input type="number" name="inputAgeMonths" class="form-control" min="0"
+                            placeholder="{{ data['age_now_months'] }}" value="{{ data['age_now_months'] }}" required>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="inputAgeDays">Age (days)</label>
+                        <input type=" number" name="inputAgeDays" class="form-control" min="1" max="31"
+                            placeholder="{{ data['age_now_days'] }}" value="{{ data['age_now_days'] }}" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <label class="form-label" for="inputNormalHearing">Hearing test</label>
+                    <select class="form-select" name="inputNormalHearing">
+                        {% for k, v in data_dict["participant_hearing"].items() %}
+                        <option value="{{ k }}" {% if v=="Not available" %} selected {% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <label for="inputTwinID" class="form-label">Twin ID</label>
+                <textarea class="form-control" name="inputTwinID" rows="1" placeholder="{{ data['twin'] }}"
+                    value="{{ data['twin'] }}"></textarea>
+                <label for="inputComments" class="form-label">Comments</label>
+                <textarea class="form-control" name="inputComments" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="card" style="width: 25%; float: left; margin-right: 2em;">
+            <h5 class="card-header">Contact information</h5>
+            <div class="card-body">
+                <label for="inputEmail1" class="form-label">E-mail 1&nbsp&nbsp<i class="fa  fa-envelope"></i></label>
+                <input type="email" class="form-control" name="inputEmail1" placeholder="Enter email"
+                    placeholder="{{ data['email1'] }}" value="{{ data['email1'] }}"
+                    pattern="/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$" required>
+                <label for="inputPhone1" class="form-label">Phone 1&nbsp&nbsp<i
+                        class="fa  fa-phone fa-rotate-180"></i></label>
+                <input type="tel" class="form-control" name="inputPhone1" placeholder="{{ data['phone1'] }}"
+                    value="{{ data['phone1'] }}" required>
+                <label for="inputEmail2" class="form-label">E-mail 2&nbsp&nbsp<i class="fa  fa-envelope"></i></label>
+                <input type="email" class="form-control" name="inputEmail2" placeholder="{{ data['email2'] }}"
+                    value="{{ data['email2'] }}" pattern="/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$">
+                <label for="inputPhone1" class="form-label">Phone 2&nbsp&nbsp<i
+                        class="fa fa-phone fa-rotate-180"></i></label>
+                <input type="tel" class="form-control" name="inputPhone2" placeholder="{{ data['phone2'] }}"
+                    value="{{ data['phone2'] }}">
+                <div class="form-group">
+                    <label for="inputAddress" class="form-label">Home address&nbsp&nbsp<i
+                            class="fa fa-house"></i></label>
+                    <textarea class="form-control" name="inputAddress" rows="1" placeholder="e.g., Tristan 1089, 1D"
+                        placeholder="{{ data['address'] }}" value="{{ data['address'] }}"></textarea>
+                    <label for="inputCity" class="form-label">City/place of residence</label>
+                    <textarea class="form-control" name="inputCity" rows="1" placeholder="{{ data['city'] }}"
+                        value="{{ data['city'] }}"></textarea>
+                    <label for="inputPostcode" class="form-label">Postcode</label>
+                    <input type=text class="form-control" name="inputPostcode" rows="1"
+                        placeholder="{{ data['postcode'] }}" value="{{ data['postcode'] }}" pattern="[0-9]{5}">
+                </div>
+            </div>
+        </div>
+        <div class="card" style="width: 25%; float: left; margin-right: 2em;">
+            <h5 class="card-header">Birth information</h5>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="inputBirthWeight">Birth weight (g)</label>
+                        <input type="number" name="inputBirthWeight" class="form-control" min="0"
+                            placeholder="{{ data['birth_weight'] }}" value="{{ data['birth_weight'] }}">
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="inputGestationalWeeks">Gestational weeks</label>
+                        <input type="number" name="inputGestationalWeeks" class="form-control" min="20" max="50"
+                            placeholder="{{ data['gest_weeks'] }}" value="{{ data['gest_weeks'] }}">
+                    </div>
+                </div>
+                <label for="inputDeliveryType" class="form-label">Delivery type</label>
+                <select class="form-select" name="inputDeliveryType">
+                    {% for k, v in data_dict["participant_birth_type"].items() %}
+                    <option value="{{ k }}" {% if data["birth_type"]=="v" %} selected {% endif %}>{{ v }}</option>
+                    {% endfor %}
+                </select>
+                <div class="col">
+                    <label class="form-label" for="inputBirthCircumference">Head circunference (cm)</label>
+                    <input type="number" name="inputHeadCircumference" class="form-control" min="0" max="60"
+                        placeholder="{{ data['head_circumference'] }}" value="{{ data['head_circumference'] }}">
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label" for="inputApgar1">Apgar 1</label>
+                        <input type="number" name="inputApgar1" class="form-control" min="0" max="10"
+                            placeholder="{{ data['apgar1'] }}" value="{{ data['apgar1'] }}">
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="inputApgar2">Apgar 2</label>
+                        <input type="number" name="inputApgar2" class="form-control" min="0" max="10"
+                            placeholder="{{ data['apgar2'] }}" value="{{ data['apgar2'] }}">
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="inputApgar3">Apgar 3</label>
+                        <input type="number" name="inputApgar3" class="form-control" min="0" max="10"
+                            placeholder="{{ data['apgar3'] }}" value="{{ data['apgar3'] }}">
+                    </div>
+                </div>
+                <label for="inputDiagnoses" class="form-label">Diagnoses</label>
+                <textarea class="form-control" name="inputDiagnoses" rows="3" placeholder="{{ data['diagnoses'] }}"
+                    value="{{ data['diagnoses'] }}"></textarea>
+            </div>
+        </div>
+    </form>
+    <script>
+        // Example starter JavaScript for disabling form submissions if there are invalid fields
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('needs-validation');
+                // Loop over them and prevent submission
+                var validation = Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+</body>
+{% endblock %}
