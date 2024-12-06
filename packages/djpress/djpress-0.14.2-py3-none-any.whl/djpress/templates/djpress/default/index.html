@@ -1,0 +1,82 @@
+{% load static %}
+{% load djpress_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% blog_page_title post_text="| " %}{% blog_title %}</title>
+    <link rel="stylesheet" href="{% static 'default/css/style.css' %}">
+    {% rss_link %}
+  </head>
+  <body>
+    <header>
+      <h1>{% blog_title_link %}</h1>
+      {% blog_pages %}
+    </header>
+
+    <main>
+
+      {% category_title "h1" pre_text="View Posts in the " post_text=" Category" %}
+      {% author_name "h1" pre_text="View Posts by " %}
+
+      {% if post %}
+
+        {% post_wrap %}
+
+          <header>
+            {% post_title outer_tag="h1" %}
+            <p>By {% post_author %}. {% post_date %}</p>
+          </header>
+
+          {% post_content outer_tag="section" %}
+
+          <footer>
+            <p>Categories: {% post_categories "span" "badge" %}</p>
+          </footer>
+
+        {% end_post_wrap %}
+
+      {% else %}
+
+        <h1>Latest Posts</h1>
+
+        {% for post in posts %}
+
+          {% post_wrap %}
+
+            <header>
+              {% post_title outer_tag="h2" %}
+              <p>By {% post_author %}. {% post_date %}</p>
+            </header>
+
+            {% post_content outer_tag="section" %}
+
+            <footer>
+              <p>Categories: {% post_categories "span" "badge" %}</p>
+            </footer>
+
+          {% end_post_wrap %}
+
+        {% empty %}
+
+          <p>No posts available.</p>
+
+        {% endfor %}
+
+      {% endif %}
+
+      {% pagination_links %}
+
+    </main>
+
+    <footer>
+      <p>Powered by
+        <a href="https://www.djangoproject.com/" title="The web framework for perfectionists with deadlines">Django</a>
+        and
+        <a href="#">DJPress</a>
+      </p>
+    </footer>
+  </body>
+</html>
