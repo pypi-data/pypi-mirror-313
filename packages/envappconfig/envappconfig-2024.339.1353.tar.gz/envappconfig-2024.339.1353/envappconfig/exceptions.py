@@ -1,0 +1,2 @@
+class EnvAppConfigException(Exception):
+    pass
