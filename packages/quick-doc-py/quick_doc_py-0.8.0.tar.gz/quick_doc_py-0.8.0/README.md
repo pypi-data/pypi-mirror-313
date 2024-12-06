@@ -1,0 +1,322 @@
+# Quick-Doc-Py Documentation
+
+## Overview
+
+**Quick-Doc-Py** is a Python utility designed to automatically generate documentation for Python projects. It uses AI to interpret the code structure and content, then writes documentation in Markdown format following Google Style. The tool supports multiple languages for documentation generation, making it versatile for international development teams.
+
+## Features
+
+- **Multi-Language Support**: Generate documentation in English, Russian, Ukrainian, Chinese (Simplified), Spanish, and Polish.
+- **AI-Driven Documentation**: Utilizes AI to analyze Python code and generate descriptive documentation.
+- **Customizable**: Users can specify which files to ignore during documentation generation and set the project name.
+- **Command Line Interface**: Facilitates easy integration into development workflows or CI/CD pipelines.
+- **File Structure Analysis**: Recursively processes directories to document all relevant Python files.
+
+## Structure
+
+- **`./config.py`**: Contains configuration settings like supported languages and their mappings.
+  - `language_type`: A dictionary mapping language codes to integer values.
+- **`./main.py`**: The core logic for documentation generation.
+  - `ReqHendler`: Handles requests for file discovery and code reading.
+  - `GptHandler`: Manages interactions with the AI provider for document generation.
+  - `AnswerHandler`: Processes and saves the generated documentation.
+  - `AutoDock`: Orchestrates the entire documentation process from start to finish.
+- **`./providers_test.py`**: Utility to test various AI providers for compatibility and performance.
+- **`./utilities.py`**: Helper functions for progress tracking, text styling, and time management.
+
+## Usage
+
+### Command Line Arguments
+
+- `--name_project`: The name of the project for which documentation is being generated.
+- `--root_dir`: The root directory where the Python project resides.
+- `--ignore`: A list of files or directories to ignore during documentation generation (passed as a string that will be evaluated).
+- `--languages`: List of languages in which documentation should be generated (passed as a string that will be evaluated).
+
+### Example Usage
+
+```sh
+python main.py --name_project "My Awesome Project" --root_dir "/path/to/project" --ignore "['__init__.py', 'tests/']" --languages "['en', 'ru']"
+```
+
+This command would initiate the documentation process for "My Awesome Project" located in `/path/to/project`, ignoring `__init__.py` and the `tests` directory, generating documentation in both English and Russian.
+
+### Notes
+
+- Ensure you have the necessary dependencies installed, like `g4f` for AI model interactions.
+- Adjust the `provider` in `GptHandler` if you're using a different AI service provider.
+- The script outputs documentation files named with the language code (e.g., `README.en.md` for English).# Usage
+
+The `config.py` file contains utilities for generating prompts for different languages. Here's how each component should be used:
+
+## `language_type` Dictionary
+
+- **Usage**: This dictionary maps language codes to their respective integer indices. It is used to enumerate and reference languages by their codes in a consistent manner.
+
+  ```python
+  language_type = {
+      "en": 0,
+      "ru": 1,
+      "ua": 2,
+      "chs": 3, # китайский
+      "es": 4, # испанский
+      "pl": 5  # польский
+  }
+  ```
+
+  **Example**: 
+  ```python
+  print(language_type["ru"])  # Output: 1
+  ```
+
+## `GenerateLanguagePrompt` Class
+
+### `__init__(self, languages: dict[str, int]) -> None`
+
+- **Usage**: Initializes the `GenerateLanguagePrompt` instance with a dictionary of languages.
+  - **Parameters**: 
+    - `languages` (dict): A dictionary where keys are language codes and values are their respective indices.
+
+  **Example**:
+  ```python
+  GLP = GenerateLanguagePrompt(language_type)
+  ```
+
+### `generate(self) -> dict`
+
+- **Usage**: Generates a dictionary where keys are indices and values are lists of prompts for documentation generation in different languages.
+  - **Returns**: A dictionary where each key is an integer (language index), and the value is a list of strings representing prompts for generating documentation in that language.
+
+  **Example**: 
+  ```python
+  language_prompt = GLP.generate()
+  print(language_prompt[0])  # Output: List of prompts for English
+  ```
+
+### `gen_prompt(self, language: str) -> list[str]`
+
+- **Usage**: Generates a base prompt for documentation in a specified language.
+  - **Parameters**: 
+    - `language` (str): The language code for which to generate the prompt.
+  - **Returns**: A list of strings where each string is part of the prompt for generating documentation in the specified language.
+
+  **Example**:
+  ```python
+  prompt = GLP.gen_prompt("en")
+  print(prompt)  # Output: List of prompts for English documentation
+  ```
+
+These components are used together to dynamically generate documentation prompts for multiple languages based on the `language_type` dictionary. The `GenerateLanguagePrompt` class provides an interface to create these prompts, which can be used in automated documentation generation tools or scripts.# AutoDock Documentation
+
+## Usage
+
+The `AutoDock` module is designed to automatically generate documentation for Python projects by interfating with a GPT-like AI model. Here's how to use each component of the system:
+
+### `ReqHendler`
+
+**Class: `ReqHendler`**
+
+- **Constructor:**
+  ```python
+  def __init__(self, root_dir: str, language: str = "en", ignore_file: list[str] = None, project_name: str = "Python Project") -> None
+  ```
+  - `root_dir`: The root directory of the project to scan for files.
+  - `language`: The language for which documentation should be generated (default is English).
+  - `ignore_file`: A list of file paths or patterns to ignore during the scan.
+  - `project_name`: The name of the project.
+
+- **Methods:**
+  - `get_files_from_directory(self, current_path: str = "") -> None`
+    - Recursively scans the `root_dir` and collects all file paths, excluding those specified in `ignore_file`.
+
+  - `is_ignored(self, path: str) -> bool`
+    - Checks if the given file path should be ignored based on the `ignore_file` list.
+
+  - `get_code_from_file(self) -> None`
+    - Reads the content of all collected files and stores them in a dictionary `self.codes`.
+
+  - `make_prompt(self) -> str`
+    - Constructs a prompt string that includes the project name, start prompt, and all file contents for AI processing.
+
+### `GptHandler`
+
+**Class: `GptHandler`**
+
+- **Constructor:**
+  ```python
+  def __init__(self, provider: str = "DarkAI") -> None
+  ```
+  - `provider`: The AI model provider to use for generating documentation.
+
+- **Methods:**
+  - `get_answer(self, prompt: str) -> str`
+    - Sends the prompt to the AI provider and returns the generated documentation.
+
+### `AnswerHandler`
+
+**Class: `AnswerHandler`**
+
+- **Constructor:**
+  ```python
+  def __init__(self, answer: str) -> None
+  ```
+  - `answer`: Initial documentation string to start with.
+
+- **Methods:**
+  - `save_documentation(self, name: str = "README.md") -> None`
+    - Saves the documentation to a file with the given name.
+
+  - `combine_response(self, new_response: str) -> None`
+    - Appends a new response to the existing documentation.
+
+  - `make_start_req_form(cls, prompt: str) -> list`
+    - Creates a message structure for the AI model with the role and content.
+
+### `AutoDock`
+
+**Class: `AutoDock`**
+
+- **Constructor:**
+  ```python
+  def __init__(self, root_dir: str, language: str = "en", ignore_file: list[str] = None, project_name: str = "Python Project") -> None
+  ```
+  - Similar parameters as `ReqHendler`.
+
+- **Methods:**
+  - `get_response(self, codes: dict) -> AnswerHandler`
+    - Generates documentation by creating prompts for each file and collecting AI responses.
+
+  - `get_part_of_response(self, prompt: str, answer_handler: AnswerHandler = None) -> AnswerHandler`
+    - Handles the interaction with the AI model, including retries if there are issues.
+
+  - `save_dock(self, answer_handler: AnswerHandler, name: str = "README") -> None`
+    - Saves the generated documentation in a language-specific file.
+
+### Main Function
+
+**Function: `main()`**
+
+- Parses command line arguments for project details and language specifications.
+- Initializes `AutoDock` for each specified language, generates documentation, and saves it. 
+
+This script is designed to be run from the command line with arguments specifying the project name, root directory, files or directories to ignore, and the target languages for documentation.# Provider Testing Documentation
+
+This module provides functionality to test various providers for a given model name, ensuring they can respond to a simple query within a specified timeout. Below is a detailed description of each method used in the `ProviderTest` class:
+
+## Usage
+
+1. **Run the script:**
+   ```sh
+   python ./providers_test.py --name_model <model_name>
+   ```
+   Replace `<model_name>` with the desired model name like `gpt-3.5-turbo` or `gpt-4`.
+
+2. **Output:** The script will output a progress bar as it tests each provider, followed by a dictionary of providers that successfully responded, along with their responses.
+
+## Methods
+
+### `ProviderTest.__init__(model_name: str) -> None`
+- **Parameters:**
+  - `model_name` (str): The name of the model to test with.
+- **Description:** Initializes the `ProviderTest` with the model name which will be used in testing.
+
+### `ProviderTest.get_providers() -> None`
+- **Description:** Retrieves all available provider names from the `g4f.Provider` module, excluding any names starting with "__". It also initializes a `ProgressBar` for visual feedback during testing.
+
+### `ProviderTest.test_provioder(provider_name: str) -> tuple[bool, str]`
+- **Parameters:**
+  - `provider_name` (str): The name of the provider to test.
+- **Returns:** A tuple where the first element is a boolean indicating if the provider worked (`True` if it did, `False` otherwise), and the second element is either the response string or `None` if there was an error.
+- **Description:** Attempts to use the provider with the given name to get a response from the model. Uses `test_provider_timeout` for the actual test with a timeout.
+
+### `ProviderTest.test_provider_timeout(provider) -> str`
+- **Parameters:**
+  - `provider`: The provider object to test.
+- **Returns:** The response string if successful, `None` if an error occurred or if timed out.
+- **Description:** Tries to create a chat completion with the provider. This method is wrapped with `timeout_control` decorator to ensure it doesn't hang indefinitely.
+
+### `ProviderTest.test_providers() -> dict`
+- **Returns:** A dictionary where keys are provider names that worked, and values are their respective responses.
+- **Description:** Iterates through all providers, testing each one, and returns a dictionary of those that successfully responded within the timeout period.
+
+### Decorator: `timeout_control(timeout: int)`
+- **Parameters:**
+  - `timeout` (int): The number of seconds before the operation times out.
+- **Description:** A decorator function that wraps another function to enforce a timeout. If the wrapped function does not complete within the specified timeout, it will return `None`.
+
+### Helper Classes:
+- **TextStyle:** Provides methods to colorize text output for better readability.
+- **ProgressBar:** Manages a visual progress bar to show the testing progress of providers. 
+
+This documentation covers the usage of the script for testing providers along with a brief description of each method's role in the process. Remember, this is not an exhaustive documentation; for more in-depth information, refer to the full source code or additional documentation.## `utilities.py` Usage Guide
+
+### TextStyle Class
+
+This class is designed to format text with different colors using the `colorama` library.
+
+- **Constructor:**
+  ```python
+  def __init__(self) -> None
+  ```
+  Initializes the `colorama` library.
+
+- **Method:**
+  ```python
+  def get_text(self, text: str, color: any = "", back: any = "") -> str
+  ```
+  - **Parameters:**
+    - `text` (str): The text to be styled.
+    - `color` (any): The foreground color for the text. Default is an empty string which means no color change.
+    - `back` (any): The background color for the text. Default is an empty string which means no background color change.
+  - **Returns:** 
+    A string with applied color styles. The text is returned with the specified foreground and background colors, followed by a reset of all styles.
+
+### ProgressBar Class
+
+A utility for displaying progress bars in the console.
+
+- **Constructor:**
+  ```python
+  def __init__(self, part) -> None
+  ```
+  - **Parameters:**
+    - `part` (int): Affects the total number of steps for the progress bar.
+
+- **Method:**
+  ```python
+  def progress(self, name)
+  ```
+  Updates and prints the progress bar.
+  - **Parameters:**
+    - `name` (str): The name or description to display with the progress bar.
+
+### Global Variables
+
+- `bar: ProgressBar`: A global instance of `ProgressBar` used for tracking progress across functions.
+
+### Functions
+
+- **Function:**
+  ```python
+  def start(part)
+  ```
+  Initializes the global progress bar.
+  - **Parameters:**
+    - `part` (int): The number used to determine the total steps of the progress bar.
+
+- **Decorator:**
+  ```python
+  def time_manager(func)
+  ```
+  A decorator to wrap functions, timing their execution and updating the progress bar.
+  - **Parameters:**
+    - `func` (callable): The function to be timed.
+  - **Usage:** 
+    ```python
+    @time_manager
+    def some_function():
+        # Function body
+    ```
+    - The decorator will print the start and end of the function execution along with the time taken. It updates the progress bar with this information.
+
+
