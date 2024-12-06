@@ -1,0 +1,45 @@
+name: Python Lint
+
+on: [push]
+
+jobs:
+  Flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - uses: py-actions/flake8@v2
+        with:
+          max-line-length: "120"
+          path: "strideutils/ tests strideutils-stubs"
+  Black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: psf/black@stable
+        with:
+          options: "--check --verbose --skip-string-normalization --line-length=120"
+          src: "strideutils tests strideutils-stubs"
+  Isort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install isort
+        run: python3 -m pip install isort
+
+      - name: Run isort on each project
+        run: isort --check-only --diff --profile=black strideutils tests strideutils-stubs
+  Typing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -e .[dev]
+      - name: Run type check
+        run: mypy strideutils tests --exclude strideutils-stubs

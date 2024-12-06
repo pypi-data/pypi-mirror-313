@@ -1,0 +1,23 @@
+from enum import Enum
+
+
+class DepositRecordStatus(str, Enum):
+    TRANSFER_QUEUE = "TRANSFER_QUEUE"
+    TRANSFER_IN_PROGRESS = "TRANSFER_IN_PROGRESS"
+    DELEGATION_QUEUE = "DELEGATION_QUEUE"
+    DELEGATION_IN_PROGRESS = "DELEGATION_IN_PROGRESS"
+
+
+class CallbackId(str, Enum):
+    TRANSFER = "transfer"
+    DELEGATE = "delegate"
+    UNDELEGATE = "undelegate"
+    REDEMPTION = "redemption"
+
+
+class UnbondingRecordStatus(str, Enum):
+    UNBONDING_QUEUE = "UNBONDING_QUEUE"
+    UNBONDING_IN_PROGRESS = "UNBONDING_IN_PROGRESS"
+    EXIT_TRANSFER_QUEUE = "EXIT_TRANSFER_QUEUE"
+    EXIT_TRANSFER_IN_PROGRESS = "EXIT_TRANSFER_IN_PROGRESS"
+    CLAIMABLE = "CLAIMABLE"
