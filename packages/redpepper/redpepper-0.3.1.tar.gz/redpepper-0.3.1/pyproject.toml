@@ -1,0 +1,126 @@
+[project]
+name = "redpepper"
+description = "A state-based server management system (meta-package)"
+readme = "README.md"
+license = { text = "MIT License" }
+requires-python = ">=3.12"
+dynamic = ['version']
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: System :: Installation/Setup",
+    "Topic :: System :: Systems Administration",
+]
+
+[project.urls]
+Homepage = "https://github.com/merlinz01/redpepper"
+Documentation = "https://merlinz01.github.com/redpepper"
+Repository = "https://github.com/merlinz01/redpepper"
+"Bug Tracker" = "https://github.com/merlinz01/redpepper/issues"
+Changelog = "https://github.com/merlinz01/redpepper/blob/master/CHANGELOG.md"
+
+
+[project.optional-dependencies]
+agent = ["redpepper-agent"]
+manager = ["redpepper-manager"]
+operations = ["redpepper-operations"]
+requests = ["redpepper-requests"]
+tools = ["redpepper-tools"]
+
+[tool.uv]
+dev-dependencies = [
+    "msgpack-types>=0.5.0",
+    "poethepoet>=0.29.0",
+    "pytest-cov>=5.0.0",
+    "pytest-trio>=0.8.0",
+    "pytest>=8.3.3",
+    "ruff>=0.6.9",
+]
+
+[tool.uv.sources]
+redpepper = { workspace = true }
+redpepper-agent = { workspace = true }
+redpepper-common = { workspace = true }
+redpepper-manager = { workspace = true }
+redpepper-operations = { workspace = true }
+redpepper-requests = { workspace = true }
+redpepper-tools = { workspace = true }
+
+[tool.uv.workspace]
+members = [
+    "src/agent",
+    "src/common",
+    "src/manager",
+    "src/operations",
+    "src/requests",
+    "src/tools",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = 'src/redpepper/version.py'
+
+[tool.hatch.build]
+include = ["src/redpepper"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/redpepper"]
+
+[tool.ruff]
+extend-exclude = ["console"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+trio_mode = true
+markers = ["fixture_params"]
+
+# Tasks
+
+[tool.poe.tasks.sync]
+cmd = "uv sync --all-extras --dev"
+
+[tool.poe.tasks.clean]
+cmd = 'rm -f dist/*.whl dist/*.tar.gz'
+
+[tool.poe.tasks.build]
+deps = ['clean', 'sync']
+sequence = [{ cmd = 'uv build --all' }]
+
+[tool.poe.tasks.buildconsole]
+sequence = [
+    { cmd = "npm run build" },
+    { cmd = "tar -czf ../dist/console.tar.gz dist" },
+]
+cwd = 'console'
+
+[tool.poe.tasks.console]
+cmd = "npm run dev"
+cwd = 'console'
+
+[tool.poe.tasks.publishpypi]
+cmd = "uvx twine upload dist/redpepper*"
+
+[tool.poe.tasks.release]
+cmd = 'uv run scripts/release.py'
+
+[tool.poe.tasks.test]
+cmd = "pytest"
+
+[tool.poe.tasks.coverage]
+cmd = "pytest  --cov --cov-report=xml"
+
+[tool.poe.tasks.htmlcov]
+cmd = "pytest --cov --cov-report=html"
+
+[tool.poe.tasks.act]
+cmd = "act -j test"
