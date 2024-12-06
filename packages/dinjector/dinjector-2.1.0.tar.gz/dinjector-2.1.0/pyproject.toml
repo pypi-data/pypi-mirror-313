@@ -1,0 +1,56 @@
+[tool.poetry]
+name = "dinjector"
+version = "2.1.0"
+description = "Very simple dependency injector using a yaml file"
+authors = ["Salvador Ruiz <sruiz@indoorclima.com>"]
+license = "LGPL"
+readme = "README.md"
+packages = [
+    {include = "di"}
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pyyaml = "^6.0"
+cfg-service = "^0.1.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+pytest = "^7.3.1"
+isort = "^5.12.0"
+uvicorn = "^0.22.0"
+flake8 = "^6.0.0"
+pyright = "^1.1.309"
+pre-commit = "^3.3.2"
+pytest-cov = "^4.1.0"
+commitizen = "^3.6.0"
+
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "pep440"
+version_provider = "poetry"
+update_changelog_on_bump = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests"
+]
+python_files = "test_* feat_*"
+python_classes = "A_* An_* UseCase_* Test*"
+python_functions = "should_* scenario_* test_*"
+markers = [
+    "integration: tests comunication to simulated external systems(devel mode)",
+    "acceptance: test application layer as external user"
+]
+
+[tool.coverage.run]
+concurrency = ["thread", "greenlet"]
