@@ -1,0 +1,94 @@
+Metadata-Version: 2.1
+Name: chide
+Version: 3.0.1
+Summary: Quickly create sample objects from data.
+Home-page: https://github.com/cjw296/chide
+Author: Chris Withers
+Author-email: chris@withers.org
+License: MIT
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.11
+License-File: LICENSE.txt
+Provides-Extra: test
+Requires-Dist: mypy; extra == "test"
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-cov; extra == "test"
+Requires-Dist: sybil; extra == "test"
+Requires-Dist: testfixtures; extra == "test"
+Requires-Dist: sqlalchemy; extra == "test"
+Provides-Extra: docs
+Requires-Dist: furo; extra == "docs"
+Requires-Dist: sphinx; extra == "docs"
+Requires-Dist: sqlalchemy; extra == "docs"
+Provides-Extra: build
+Requires-Dist: setuptools-git; extra == "build"
+Requires-Dist: twine; extra == "build"
+Requires-Dist: wheel; extra == "build"
+
+Chide
+=====
+
+|CircleCI|_ |Docs|_
+
+.. |CircleCI| image:: https://circleci.com/gh/cjw296/chide/tree/master.svg?style=shield
+.. _CircleCI: https://circleci.com/gh/cjw296/tree/chide
+
+.. |Docs| image:: https://readthedocs.org/projects/chide/badge/?version=latest
+.. _Docs: http://chide.readthedocs.org/en/latest/
+
+Quickly create and compare sample objects.
+
+Chide's philosophy is to give you a simple registry of parameters
+needed to instantiate objects for your tests.
+There's also support for simplifying objects down to mappings of their attributes
+for easier comparison and rendering, along with parsing and rendering of formats
+for inserting or asserting about multiple objects that are naturally tabular.
+
+Quickstart
+~~~~~~~~~~
+
+Say we have two classes that each require two parameters in order to
+be instantiated:
+
+.. code-block:: python
+
+  from dataclasses import dataclass
+
+  @dataclass
+  class ClassOne:
+    x: int
+    y: int
+
+  @dataclass
+  class ClassTwo:
+    a: int
+    b: ClassOne
+
+We can set up a registry of sample values as follows:
+
+.. code-block:: python
+
+  from chide import Collection
+
+  samples = Collection({
+      ClassOne: {'x': 1, 'y': 2},
+      ClassTwo: {'a': 1, 'b': ClassOne},
+  })
+
+Now we can quickly make sample objects:
+
+>>> samples.make(ClassOne)
+ClassOne(x=1, y=2)
+
+We can provide our own overrides if we want:
+
+>>> samples.make(ClassOne, y=3)
+ClassOne(x=1, y=3)
+
+We can also create nested trees of objects:
+
+>>> samples.make(ClassTwo)
+ClassTwo(a=1, b=ClassOne(x=1, y=2))
