@@ -1,0 +1,3 @@
+__EMAPS__ is a collection of python base modules for electron diffraction simulations and crystallographic caculations. It is free for using with pyEMAPS. Check out the full [pyemaps documentation](https:/emlab-solutions.github.io/pyemaps) for its latest list of features exposed by pyEMAPS.
+
+An extended version of emaps with 4D-STEM or 4DSTEM features, such as experimental diffraction pattern indexing and annular dark fields, for commercial use is also availavle. [Contact our support](mailto:support@emlabsoftware.com) for pricing and activation.
