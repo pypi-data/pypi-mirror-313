@@ -1,0 +1,230 @@
+Metadata-Version: 2.1
+Name: shodankey
+Version: 1.0.0
+Summary: A package to validate and retrieve information from the Shodan API
+Home-page: https://github.com/ByteBreach/shodankey
+Author: Fidal
+Author-email: mrfidal@proton.me
+Keywords: shodan,MrFidal,api,security,network-scanning,information-gathering,api-key-validation
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: Topic :: Security
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+
+# ShodanKey - API Key Validator
+
+ShodanKey is a Python package that helps validate Shodan API keys and retrieve important details about them, including usage limits, credits, and plan information.
+
+## Features
+
+- Validate Shodan API keys.
+- Retrieve details like `scan_credits`, `query_credits`, `monitored_ips`, `usage_limits`, `plan`, and more.
+- Handle both valid and invalid API keys.
+- Provides detailed response for each API key validation.
+
+## Installation
+
+To install the package, simply run the following command:
+
+```bash
+pip install shodankey
+```
+
+## Usage Examples
+
+### Example 1: Basic Usage
+
+To validate a single Shodan API key and retrieve its associated information:
+
+```python
+from shodankey import token
+
+# Replace with your actual Shodan API key
+api_key = "your_shodan_api_key"
+
+# Validate the API key
+result = token(api_key)
+
+# Check if the key is valid and print the information
+if result["valid"]:
+    print(f"Plan: {result['plan']}")
+    print(f"Scan Credits: {result['scan_credits']}")
+    print(f"Query Credits: {result['query_credits']}")
+    print(f"Monitored IPs: {result['monitored_ips']}")
+    print(f"Unlocked Left: {result['unlocked_left']}")
+    print(f"Telnet Access: {result['telnet']}")
+    print(f"HTTPS Supported: {result['https']}")
+    print(f"Usage Limits: {result['usage_limits']}")
+    print(f"Timestamp: {result['timestamp']}")
+else:
+    print(f"Invalid API Key: {result['error']}")
+```
+
+### Example 2: Loop Through Multiple API Keys
+
+If you have multiple Shodan API keys and you want to validate each one in a loop, use the following code:
+
+```python
+from shodankey import token
+
+# List of Shodan API keys to validate
+api_keys = [
+    "your_shodan_api_key_1",
+    "your_shodan_api_key_2",
+    "your_shodan_api_key_3"
+]
+
+# Loop through the keys and check their validity
+for api_key in api_keys:
+    print(f"Checking API Key: {api_key}")
+    result = token(api_key)
+    
+    if result["valid"]:
+        print(f"Plan: {result['plan']}")
+        print(f"Scan Credits: {result['scan_credits']}")
+        print(f"Query Credits: {result['query_credits']}")
+        print(f"Monitored IPs: {result['monitored_ips']}")
+        print(f"Unlocked Left: {result['unlocked_left']}")
+        print(f"Telnet Access: {result['telnet']}")
+        print(f"HTTPS Supported: {result['https']}")
+        print(f"Usage Limits: {result['usage_limits']}")
+        print(f"Timestamp: {result['timestamp']}")
+    else:
+        print(f"Invalid API Key: {api_key}, Error: {result['error']}")
+    
+    # Print a separator between results
+    print("-" * 40)
+```
+
+### Example 3: Detailed Information for Each Key
+
+If you want to retrieve all available details for a given API key, including its plan, credits, and usage limits:
+
+```python
+from shodankey import token
+
+# Replace with your actual Shodan API key
+api_key = "your_shodan_api_key"
+
+# Get the API key validation result
+result = token(api_key)
+
+# Check if the key is valid and print all detailed information
+if result["valid"]:
+    print(f"API Key is valid!\n")
+    print(f"Plan: {result['plan']}")
+    print(f"Credits: {result['credits']}")
+    print(f"Scan Credits: {result['scan_credits']}")
+    print(f"Query Credits: {result['query_credits']}")
+    print(f"Monitored IPs: {result['monitored_ips']}")
+    print(f"Unlocked Left: {result['unlocked_left']}")
+    print(f"Telnet Access: {result['telnet']}")
+    print(f"HTTPS Supported: {result['https']}")
+    print(f"Usage Limits: {result['usage_limits']}")
+    print(f"Timestamp: {result['timestamp']}")
+else:
+    print(f"Invalid API Key: {result['error']}")
+```
+
+### Example 4: Full API Response Details
+
+To get the full response, including usage limits, plan, and credits, hereâ€™s an example of how you can extract everything:
+
+```python
+from shodankey import token
+
+# Replace with your actual Shodan API key
+api_key = "your_shodan_api_key"
+
+# Get detailed information
+result = token(api_key)
+
+# Check for valid API key and print all available details
+if result["valid"]:
+    print(f"API Key is valid!\n")
+    print(f"Plan: {result['plan']}")
+    print(f"Credits: {result['credits']}")
+    print(f"Scan Credits: {result['scan_credits']}")
+    print(f"Query Credits: {result['query_credits']}")
+    print(f"Monitored IPs: {result['monitored_ips']}")
+    print(f"Unlocked Left: {result['unlocked_left']}")
+    print(f"Telnet Access: {result['telnet']}")
+    print(f"HTTPS Supported: {result['https']}")
+    print(f"Usage Limits: {result['usage_limits']}")
+    print(f"Timestamp: {result['timestamp']}")
+else:
+    print(f"Invalid API Key: {result['error']}")
+```
+
+### Example 5: Check for Token File
+
+Before validating the API key, you can check whether a token file exists. If it doesn't exist, you can create one to store your API keys:
+
+```python
+import os
+from shodankey import token
+
+# File where the API keys are stored
+token_file = "shodan_tokens.txt"
+
+# Check if the file exists
+if os.path.exists(token_file):
+    with open(token_file, "r") as file:
+        api_keys = file.readlines()
+
+    # Loop through the keys and check their validity
+    for api_key in api_keys:
+        api_key = api_key.strip()  # Remove extra spaces/newlines
+        print(f"Checking API Key: {api_key}")
+        result = token(api_key)
+        
+        if result["valid"]:
+            print(f"Plan: {result['plan']}")
+            print(f"Scan Credits: {result['scan_credits']}")
+            print(f"Query Credits: {result['query_credits']}")
+            print(f"Monitored IPs: {result['monitored_ips']}")
+            print(f"Unlocked Left: {result['unlocked_left']}")
+            print(f"Telnet Access: {result['telnet']}")
+            print(f"HTTPS Supported: {result['https']}")
+            print(f"Usage Limits: {result['usage_limits']}")
+            print(f"Timestamp: {result['timestamp']}")
+        else:
+            print(f"Invalid API Key: {api_key}, Error: {result['error']}")
+        
+        # Print a separator between results
+        print("-" * 40)
+else:
+    print(f"{token_file} does not exist. Please create the file and add your Shodan API keys.")
+```
+
+## Handling Invalid API Keys
+
+If the API key is invalid, you will receive a message with the error description, like so:
+
+```json
+{
+    "valid": false,
+    "error": "Unauthorized - Invalid API Key"
+}
+```
+
+This error message helps you identify whether the issue is related to the API key or something else.
+
+## Thank You
+
+Thank you for using **ShodanKey**! If you have any questions or need further assistance, please feel free to open an issue or contribute to the project. Your support means a lot to us!
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for more information.
+
+---
