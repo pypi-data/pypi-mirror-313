@@ -1,0 +1,94 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vba_edit"                     
+version = "0.1.1"                     
+description = "Enable seamless MS Office VBA code editing in preferred editor or IDE (facilitating the use of coding assistants and version control workflows)"
+authors = [
+    {name = "Markus Killer", email = "m.killer@langui.ch"}
+]
+readme = "README.rst"                  
+requires-python = ">=3.9"             # Minimum Python version
+license = {file = "LICENSE"}          
+keywords = ["VBA", "Word", "PyPI"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Office/Business :: Office Suites",
+]
+dependencies = ["xlwings", "watchgod"]               # Required dependencies
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "bumpver",
+    "ruff",
+    "pytest",
+    "pytest-cov",
+    "twine",
+    "wheel",
+]
+all = [
+    
+]
+
+[package]
+include = ["vba_edit", "src", "vba_edit.*"]
+
+[project.scripts]
+word-vba =  "vba_edit.word_vba:main"
+excel-vba = "vba_edit.excel_vba:main"
+#access-vba = "vba_edit.access_vba:main"
+#powerpoint-vba = "vba_edit.powerpoint_vba:main"
+
+
+[project.urls]
+Homepage = "https://langui.ch/current-projects/vba-edit/"
+Documentation = "https://github.com/markuskiller/vba-edit/blob/dev/README.md"
+Source = "https://github.com/markuskiller/vba-edit"
+Changelog = "https://github.com/markuskiller/vba-edit/blob/dev/CHANGELOG.md"
+
+[tool.black]
+line-length = 120
+target-version = ['py312']  # Target Python version
+
+[tool.ruff]
+line-length = 120
+target-version = 'py312'
+fix = true
+show-fixes = true
+respect-gitignore = true
+src = ["src", "vba_edit", "tests"]
+
+[tool.isort]
+profile = "black"
+line_length = 120
+src_paths = ["src", "vba_edit", "tests"]
+
+[tool.bumpver]
+current_version = "0.1.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message  = "bump version {old_version} -> {new_version}"
+commit          = true
+tag             = false
+push            = false
+
+[tool.bumpver.file_patterns]
+    "pyproject.toml" = [
+        'current_version = "{version}"',
+        'version = "{version}"',
+    ]
+    "src/vba_edit/__init__.py" = ["{version}"]
+    "setup.cfg" = ['version = {version}']
+    
