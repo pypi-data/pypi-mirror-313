@@ -1,0 +1,72 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      lang="en"
+      metal:use-macro="context/main_template/macros/master"
+      i18n:domain="plone">
+
+<head>
+
+</head>
+
+  <tal:block metal:fill-slot="javascript_head_slot">
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $(".chosen-select").chosen({width: "100%"});
+      });
+    </script>
+  </tal:block>
+
+<body>
+<metal:main fill-slot="main"
+     tal:define="context_state context/@@plone_context_state">
+
+    <h1 class="documentFirstHeading">
+        Request for comments
+    </h1>
+
+    <div class="documentDescription">
+        You can select which users will comment on this conclusions
+    </div>
+
+    <div tal:replace="structure provider:plone.abovecontentbody" tal:condition="not:ajax_load" />
+
+    <div id="content-core">
+
+        <tal:block condition="not:view/get_counterpart_users">
+          Sorry: there are no experts for this country.
+          Please, contact the EEA Secretariat for further assistance.
+
+        </tal:block>
+
+
+        <tal:block condition="view/get_counterpart_users">
+          <form method="post"
+                tal:attributes="action string:${context/absolute_url}/${view/__name__}">
+
+              <input type="hidden" name="form.submitted:boolean" value="True" />
+            <div id="user-group-sharing-container">
+
+
+              <select multiple="multiple" name="counterparts:list" class="chosen-select"
+                data-placeholder="Click here or type the name to select counterparts">
+                <option
+                  tal:repeat="member view/get_counterpart_users"
+                  tal:content="python:member[1]"
+                  tal:attributes="value python:member[0];
+                                  selected python:member[2] and 'selected' or None;">
+                </option>
+              </select>
+
+
+            </div>
+
+            <input class="standalone standardButton" type="submit" name="send" value="Send"/>
+
+            <input tal:replace="structure context/@@authenticator/authenticator" />
+
+          </form>
+
+        </tal:block>
+      </div>
+</metal:main>
+</body>
+</html>

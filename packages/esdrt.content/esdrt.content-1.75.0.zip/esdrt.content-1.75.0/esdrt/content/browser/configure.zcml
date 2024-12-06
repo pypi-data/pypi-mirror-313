@@ -1,0 +1,221 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:grok="http://namespaces.zope.org/grok"
+    i18n_domain="esdrt.content">
+
+  <!-- -*- extra stuff goes here -*- -->
+
+  <browser:page
+    name="tableau_dashboard"
+    for="..reviewfolder.IReviewFolder"
+    class=".tableau.DashboardView"
+    permission="zope2.View"
+  />
+
+  <browser:page
+      name="view"
+      for="..reviewfolder.IReviewFolder"
+      class="..reviewfolder.ReviewFolderView"
+      permission="zope2.View"
+      template="templates/reviewfolderview.pt"
+  />
+
+
+  <browser:page
+      name="get_table"
+      for="..reviewfolder.IReviewFolder"
+      class="..reviewfolder.ReviewFolderBrowserView"
+      permission="zope2.View"
+      attribute="render"
+  />
+
+  <browser:page
+      name="export_as_xls"
+      for="..reviewfolder.IReviewFolder"
+      class="..reviewfolder.ExportReviewFolderFormView"
+      permission="esdrt.content.ExportObservations"
+  />
+
+  <browser:page
+      name="inboxview"
+      for="..reviewfolder.IReviewFolder"
+      class="..reviewfolder.InboxReviewFolderView"
+      permission="zope2.View"
+      template="templates/inboxreviewfolderview.pt"
+  />
+
+  <browser:page
+      name="finalisedfolderview"
+      for="..reviewfolder.IReviewFolder"
+      class="..reviewfolder.FinalisedFolderView"
+      permission="zope2.View"
+      template="templates/finalisedfolderview.pt"
+  />
+
+  <browser:page
+        name="assign_counterpart_form"
+        for="..question.IQuestion"
+        class=".statechange.AssignCounterPartForm"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        name="reassign_counterpart_form"
+        for="..question.IQuestion"
+        class=".statechange.ReAssignCounterPartForm"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        name="assign_answerer_form"
+        for="..question.IQuestion"
+        class=".statechange.AssignAnswererForm"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        name="select-new-mse"
+        for="..question.IQuestion"
+        class=".statechange.ReAssignMSExpertsForm"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        name="request-redraft"
+        for="..question.IQuestion"
+        class=".statechange.RequestRedraftReasonForm"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        name="assign_conclusion_reviewer_form"
+        for="..observation.IObservation"
+        class=".statechange.AssignConclusionReviewerForm"
+        permission="zope2.View"
+        />
+
+
+    <browser:page
+        name="request-finish-observation"
+        for="..observation.IObservation"
+        class=".statechange.FinishObservationReasonForm"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        name="deny-finish-observation"
+        for="..observation.IObservation"
+        class=".statechange.DenyFinishObservationReasonForm"
+        permission="zope2.View"
+        />
+
+    <browser:viewletManager
+        name="esdrt.content.commentmanager"
+        provides=".interfaces.ICommentDiscussion"
+        permission="zope2.View"
+        class="plone.app.viewletmanager.manager.BaseOrderedViewletManager"
+        />
+
+
+     <browser:viewlet
+        name="plone.comments"
+        for="..comment.IComment"
+        layer="plone.app.discussion.interfaces.IDiscussionLayer"
+        manager=".interfaces.ICommentDiscussion"
+        view="plone.app.layout.globals.interfaces.IViewView"
+        class=".comments.CommentsViewlet"
+        permission="esdrt.content.ViewCommentDiscussion"
+        />
+
+     <browser:viewlet
+        name="plone.comments"
+        for="..commentanswer.ICommentAnswer"
+        layer="plone.app.discussion.interfaces.IDiscussionLayer"
+        manager=".interfaces.ICommentDiscussion"
+        view="plone.app.layout.globals.interfaces.IViewView"
+        class=".comments.CommentsViewlet"
+        permission="esdrt.content.ViewAnswerDiscussion"
+        />
+
+     <browser:viewlet
+        name="plone.comments"
+        for="..conclusion.IConclusion"
+        layer="plone.app.discussion.interfaces.IDiscussionLayer"
+        manager=".interfaces.ICommentDiscussion"
+        view="plone.app.layout.globals.interfaces.IViewView"
+        class=".comments.CommentsViewlet"
+        permission="esdrt.content.ViewConclusionDiscussion"
+        />
+
+     <browser:viewlet
+        name="plone.comments"
+        for="..conclusionsphase2.IConclusionsPhase2"
+        layer="plone.app.discussion.interfaces.IDiscussionLayer"
+        manager=".interfaces.ICommentDiscussion"
+        view="plone.app.layout.globals.interfaces.IViewView"
+        class=".comments.CommentsViewlet"
+        permission="esdrt.content.ViewConclusionDiscussion"
+        />
+
+    <browser:page
+        name="download"
+        for="plone.app.discussion.interfaces.IComment"
+        class=".attachmentdownload.Download"
+        permission="zope2.View"
+        />
+
+    <browser:page
+        name="manage_forcing_workflow_state"
+        for="*"
+        class=".statechange.UpdateWorkflow"
+        permission="cmf.ManagePortal"
+        />
+
+    <browser:page
+        name="observation_import_form"
+        for="esdrt.content.reviewfolder.IReviewFolder"
+        template="templates/import_observation.pt"
+        permission="cmf.ManagePortal"
+        />
+
+    <browser:page
+        name="observation_import"
+        for="esdrt.content.reviewfolder.IReviewFolder"
+        class=".observation_import.ObservationXLSImport"
+        attribute="do_import"
+        permission="cmf.ManagePortal"
+        />
+
+    <browser:page
+        name="get_sample_xls"
+        for="esdrt.content.reviewfolder.IReviewFolder"
+        class=".get_sample_xls.GetSampleXLS"
+        permission="cmf.ManagePortal"
+        />
+
+    <browser:page
+        name="macros"
+        for="..reviewfolder.IReviewFolder"
+        template="templates/macros.pt"
+        class=".macros.MacrosView"
+        permission="zope2.View"
+        />
+
+    <browser:page
+      name="carryover-form"
+      for="esdrt.content.reviewfolder.IReviewFolder"
+      class=".carryover.CarryOverView"
+      permission="cmf.ManagePortal"
+      />
+
+    <browser:page
+      name="carryover"
+      for="esdrt.content.reviewfolder.IReviewFolder"
+      class=".carryover.CarryOverView"
+      permission="cmf.ManagePortal"
+      attribute="start"
+      />
+
+</configure>
