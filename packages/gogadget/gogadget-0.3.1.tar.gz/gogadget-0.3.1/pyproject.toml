@@ -1,0 +1,116 @@
+# Copyright: © 2024 Jonathan Fox
+# License: GNU AGPL, version 3 or later; http://www.gnu.org/licenses/agpl.html
+# Full source code: https://github.com/jonathanfox5/gogadget
+
+[project]
+name = "gogadget"
+version = "0.3.1"
+description = "gogadget is a toolkit for producing immersion and priming materials for language learning. It is capable of downloading audio and video files, automatically transcribing subtitles from videos and podcasts, and automatically producing filtered Anki decks with sentence audio / translations / screenshots / definitions."
+authors = [
+    {name = "Jonathan Fox"},
+]
+readme = "README.md"
+requires-python = "<3.13,>=3.10"
+dependencies = [
+    # Direct dependencies. Make sure that we always stay on the current major version
+    "typer<1.0.0,>=0.13.1",
+    "lemon-tizer<1.0.0,>=0.0.7",
+    "genanki<1.0.0,>=0.13.1",
+    "ffmpeg-python<1.0.0,>=0.2.0",
+    "pandas<3.0.0,>=2.2.3",
+    "openpyxl<4.0.0,>=3.1.5",
+    "pysubs2<2.0.0,>=1.7.3",
+    "rtoml<1.0.0,>=0.11.0",
+    "tomlkit<1.0.0,>=0.13.2",
+
+    # Direct dependencies that we always want the latest version of, regardless of major version
+    # yt-dlp - We always want latest due to yt api periodically changing, therefore no upper limit
+    "yt-dlp>=2024.11.18", 
+
+    # Packages missing as requirements from other packages
+    "pip",  # argos assumes that this is available when managing models, doesn't automatically get added with uv
+
+    # These are effectively pins, they are my own builds made for compatibility reasons
+    "argos-spacy-compatibility<1.0.0,>=0.1.0",
+    "whisperx-numpy2-compatibility<1.0.0,>=0.1.1",
+
+    # The following have all been added due to compatibility issues in some configurations
+    "torch==2.5.1", # cpu version, the installers deal with adding CUDA
+    "torchaudio==2.5.1", # cpu version, the installers deal with adding CUDA
+    "spacy==3.7.5", # 3.8 has a Windows memory bug
+    "faster-whisper==1.0.3", # breaking changes in 1.1.0
+    "transformers==4.46.3", # fixes transcriber models not initialising
+    "ctranslate2==4.5.0", # pinning due to being very finicky depending on version
+    "pyannote-core==5.0.0", # Many version incompatibilities
+    "pyannote-audio==3.3.2", # Many version incompatibilities
+    "llvmlite==0.43.0", # Many, many, many version incompatibilities
+    "numba==0.60.0", # Many, many, many version incompatibilities
+    "numpy<2", # Numpy 2 breaks spacy 3.7, not listed in their dependencies
+
+    # The following are key packagers in the ml pipeline
+    # No specific errors observed but locking down due to the very high volume
+    # of version issues observed in the rest of the pipeline
+    "tokenizers==0.20.3",
+    "onnxruntime==1.20.1",
+    "safetensors==0.4.5",
+    "speechbrain==1.0.2"
+]
+classifiers = [
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+    "Topic :: Text Processing :: Linguistic",
+]
+keywords = [
+    "language learning",
+    "yt-dlp",
+    "whisper",
+    "anki",
+    "frequency analysis",
+    "priming",
+]
+
+[dependency-groups]
+dev = [
+    "mkdocs-glightbox>=0.4.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-material[imaging]>=9.5.46",
+    "mdx-truly-sane-lists>=1.3",
+    "mkdocs-minify-plugin>=0.8.0",
+    "pip-licenses"
+]
+
+[project.urls]
+homepage = "https://gogadget.jfox.io/"
+repository = "https://github.com/jonathanfox5/gogadget"
+documentation = "https://jonathanfox5.github.io/gogadget"
+download = "https://github.com/jonathanfox5/gogadget/releases"
+
+[project.scripts]
+gogadget = "gogadget.main:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.mypy]
+disable_error_code = "import-untyped"
+
+[tool.ruff]
+line-length = 100
+indent-width = 4
+target-version = "py310"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+extend-select = ["I"]
