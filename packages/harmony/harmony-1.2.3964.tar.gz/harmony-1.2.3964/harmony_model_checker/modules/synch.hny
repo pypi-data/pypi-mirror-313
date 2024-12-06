@@ -1,0 +1,82 @@
+import lists
+import bags
+
+def atomic_load(p) returns current:
+    atomically current = !p
+
+def atomic_store(p, v):
+    atomically !p = v
+
+def tas(lk) returns oldvalue:
+    atomically:
+        oldvalue = !lk
+        !lk = True
+
+def cas(p, old, new) returns success:
+    atomically:
+        success = !p == old
+        if success:
+            !p = new
+
+def BinSema(initial) returns sema:
+    assert initial in { False, True }
+    sema = initial
+
+def Lock() returns result:
+    result = BinSema(False)
+
+def acquired(binsema) returns result:
+    result = !binsema
+    
+def held(binsema) returns result:
+    result = !binsema
+
+def acquire(binsema):
+    atomically when not !binsema:
+        !binsema = True
+
+def release(binsema):
+    atomically:
+        assert !binsema, "release(): lock not owned"
+        !binsema = False
+
+def Condition() returns result:
+    result = bags.empty()
+
+def wait(c, lk):
+    var cnt = 0
+    let (), ctx = save():
+        atomically:
+            cnt = bags.multiplicity(!c, ctx)
+            !c = bags.add(!c, ctx)
+            !lk = False
+        atomically when (not !lk) and bags.multiplicity(!c, ctx) <= cnt:
+            !lk = True
+
+def notify(c):
+    atomically if !c != bags.empty():
+        !c = bags.remove(!c, bags.bchoose(!c))
+
+def notifyAll(c):
+    atomically !c = bags.empty()
+
+def Semaphore(cnt) returns result:
+    result = cnt
+
+def P(sema):
+    atomically when !sema > 0:
+        !sema -= 1
+
+def V(sema):
+    atomically !sema += 1
+    
+def Queue() returns result:
+    result = []
+
+def get(q) returns result:
+    atomically when !q != []:
+        result = lists.head(!q)
+        !q = lists.tail(!q)
+
+def put(q, item):
+    atomically !q = lists.append(!q, item)
