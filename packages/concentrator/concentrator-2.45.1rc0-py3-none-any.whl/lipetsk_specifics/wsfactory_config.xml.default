@@ -1,0 +1,141 @@
+<WSConfig xmlns="http://bars-open.ru/schema/wsfactory" ApplicationClass="spyne_smev.application.Application"
+          WsgiClass="kinder.webservice.spyne_ws.helpers.LoggingSmevDjangoApplication"
+          ServiceClass="kinder.webservice.spyne_ws.helpers.LoggingService" ApiHandler="wsfactory.views.api_handler">
+    <Protocols>
+        <!-- Протоколы -->
+        <Protocol code="soap11" direction="BOTH" module="spyne.protocol.soap.soap11.Soap11" name="SOAP 1.1"/>
+        <Protocol code="json" direction="BOTH" module="spyne.protocol.json.JsonDocument" name="JSON Protocol"/>
+        <Protocol code="http-rpc" direction="IN" module="spyne.protocol.http.HttpRpc" name="HTTP RPC"/>
+
+        <!-- установите модуль spyne-smev и раскомментируйте следующие строки, чтобы добавить поддежку протоколв СМЭВ -->
+        <Protocol code="soap11wsse" direction="BOTH" module="spyne_smev.wsse.Soap11WSSE" name="SOAP 1.1 WSSE"/>
+        <Protocol code="smev256" direction="BOTH" module="concentrator.webservice.service.Protocol" name="СМЭВ 2.5.6"/>
+        <Protocol code="unwrapsmev" direction="OUT" module="kinder.webservice.spyne_ws.declaration_info.protocol.UnwrapResponseSmevProtocol" name="Не оборачивающий СМЭВ"/>
+    </Protocols>
+    <ApiRegistry>
+        <!-- API-методы -->
+        <Api code="NewApplicationRequest" module="lipetsk_specifics.webservice.service.NewApplicationRequest"
+             name="Передача Заявления в региональную систему предоставления услуг"
+             id="NewApplicationRequest"/>
+        <Api code="GetApplicationRequest" module="lipetsk_specifics.webservice.service.GetApplicationRequest"
+             name="Получение данных Заявления для изменения"
+             id="GetApplicationRequest"/>
+        <Api code="UpdateApplicationRequest" module="lipetsk_specifics.webservice.service.UpdateApplicationRequest"
+             name="Изменение данных заявления"
+             id="UpdateApplicationRequest"/>
+        <Api code="NewApplicationRequest" module="concentrator.webservice.service.NewApplicationRequest"
+             name="Передача Заявления в региональную систему предоставления услуг"
+             id="NewApplicationRequestCommon"/>
+        <Api code="GetApplicationRequest" module="concentrator.webservice.service.GetApplicationRequest"
+             name="Получение данных Заявления для изменения"
+             id="GetApplicationRequestCommon"/>
+        <Api code="UpdateApplicationRequest" module="concentrator.webservice.service.UpdateApplicationRequest"
+             name="Изменение данных заявления"
+             id="UpdateApplicationRequestCommon"/>
+        <Api code="FindApplicationsByApplicantRequest" module="concentrator.webservice.service.FindApplicationsByApplicantRequest"
+             name="Поиск Заявлений по совпадению персональных данных заявителя"
+             id="FindApplicationsByApplicantRequest"/>
+        <Api code="FindApplicationsByDeclaredPersonRequest" module="concentrator.webservice.service.FindApplicationsByDeclaredPersonRequest"
+             name="Поиск Заявлений по совпадению персональных данных ребенка"
+             id="FindApplicationsByDeclaredPersonRequest"/>
+        <Api code="GetApplicationQueueRequest" module="concentrator.webservice.service.GetApplicationQueueRequest"
+             name="Запрос текущей очереди заявления"
+             id="GetApplicationQueueRequest"/>
+        <Api code="GetApplicationStateRequest" module="concentrator.webservice.service.GetApplicationStateRequest"
+             name="Запрос текущего статуса заявления"
+             id="GetApplicationStateRequest"/>
+        <Api code="GetDistrictList" name="Получение списка МО" module="kinder.webservice.spyne_ws.service.GetDistrictList"
+             id="GetDistrictList"/>
+        <Api code="GetFilteredUnits" name="Фильтрация учреждений" module="kinder.webservice.spyne_ws.service.GetFilteredUnits"
+             id="GetFilteredUnits"/>
+        <Api code="ListPrivilege" name="Список льгот по ОКАТО" module="kinder.webservice.spyne_ws.dict_info.service.ListPrivilege"
+             id="ListPrivilege"/>
+        <Api code="DictionaryInfo" name="Отдача данных из справочников" module="kinder.webservice.spyne_ws.dict_info.service.DictionaryInfo"
+             id="DictionaryInfo"/>
+        <Api code="GetDOUQueueInfo" name="Информация об очереди в разрезе ДОО" module="kinder.webservice.spyne_ws.service.GetDOUQueueInfo"
+             id="GetDOUQueueInfo"/>
+        <Api code="CheckDeclarationDOU" name="Вывод информации по учреждениям заявок ребенка" module="kinder.webservice.spyne_ws.declaration_info.service.CheckDeclarationDOU"
+             id="CheckDeclarationDOU"/>
+        <Api code="LipetskCheckDeclarationDOU" name="Вывод информации по учреждениям заявок ребенка (Липецк)" module="lipetsk_specifics.webservice.service.CheckDeclarationDOU"
+             id="LipetskCheckDeclarationDOU"/>
+    </ApiRegistry>
+    <Services>
+        <!-- Сервисы, они же услуги - наборы методов-API -->
+        <Service code="PupilService" name="PupilService">
+            <Api id="NewApplicationRequest"/>
+            <Api id="GetDistrictList"/>
+            <Api id="GetFilteredUnits"/>
+            <Api id="DictionaryInfo"/>
+            <Api id="ListPrivilege"/>
+            <Api id="CheckDeclarationDOU"/>
+        </Service>
+        <Service code="ConcentratorService" name="ConcentratorService">
+            <Api id="FindApplicationsByApplicantRequest"/>
+            <Api id="FindApplicationsByDeclaredPersonRequest"/>
+            <Api id="GetApplicationQueueRequest"/>
+            <Api id="GetApplicationRequestCommon"/>
+            <Api id="GetApplicationStateRequest"/>
+            <Api id="NewApplicationRequestCommon"/>
+            <Api id="UpdateApplicationRequestCommon"/>
+        </Service>
+        <Service code="GetDOUQueueInfoApplication" name="GetDOUQueueInfoApplication">
+            <Api id="GetDistrictList"/>
+            <Api id="GetFilteredUnits"/>
+            <Api id="DictionaryInfo"/>
+            <Api id="GetDOUQueueInfo"/>
+        </Service>
+        <Service code="CheckDeclaration" name="CheckDeclaration">
+            <Api id="CheckDeclarationDOU"/>
+        </Service>
+        <Service code="LipetskCheckDeclarationDOU" name="LipetskCheckDeclarationDOU">
+            <Api id="LipetskCheckDeclarationDOU"/>
+        </Service>
+        <Service code="ChangeRegServiceDelivery" name="ChangeRegServiceDelivery">
+            <Api id="GetApplicationRequest"/>
+            <Api id="UpdateApplicationRequest"/>
+            <Api id="GetFilteredUnits"/>
+            <Api id="ListPrivilege"/>
+        </Service>
+    </Services>
+    <SecurityProfile>
+        <!-- Профили безопасности WS-Security. Требует установки модуля spyne-smev -->
+        <Modules>
+            <!-- Описание модулей -->
+            <Module code="x509token" path="spyne_smev.wsse.protocols.X509TokenProfile" name="X509 Token Profile"/>
+        </Modules>
+        <Security module="x509token" code="security" name="Default security profile">
+            <!-- Декларация объектов профилей безопасности -->
+            <Param key="certificate_path" valueType="string">путь_до_сертификата</Param>
+            <Param key="private_key_path" valueType="string">путь_до_ключа</Param>
+            <Param key="private_key_pass" valueType="string">пароль_к_файлу_ключа</Param>
+            <Param key="digest_method" valueType="string">md_gost94</Param>
+        </Security>
+    </SecurityProfile>
+    <Applications>
+        <!-- Реестр веб-сервисов (Соответствия протоколов-сервисов) -->
+        <Application name="RegServiceDelivery" service="PupilService" tns='http://concentrator.gosuslugi.ru/regservicedelivery/smev'>
+            <InProtocol code="smev256"/>
+            <OutProtocol code="smev256" security="security"/>
+        </Application>
+        <Application name="RegServiceDeliveryConcentrator" service="ConcentratorService" tns='http://concentrator.gosuslugi.ru/regservicedelivery/smev' url="^RegServiceDelivery/$">
+            <InProtocol code="smev256"/>
+            <OutProtocol code="smev256" security="security"/>
+        </Application>
+        <Application service="GetDOUQueueInfoApplication" name="GetDOUQueueInfoApplication" tns='http://concentrator.gosuslugi.ru/regservicedelivery/smev'>
+            <InProtocol code="smev256"/>
+            <OutProtocol code="smev256" security="security"/>
+        </Application>
+        <Application service="CheckDeclaration" name="CheckDeclaration" tns='http://smev.gosuslugi.ru/inf/' url="^ws/smev/decl_check$">
+            <InProtocol code="smev256"/>
+            <OutProtocol code="unwrapsmev" security="security"/>
+        </Application>
+        <Application service="ChangeRegServiceDelivery" name="ChangeRegServiceDelivery" tns='http://concentrator.gosuslugi.ru/regservicedelivery/smev'>
+            <InProtocol code="smev256"/>
+            <OutProtocol code="smev256" security="security"/>
+        </Application>
+        <!-- <Application service="LipetskCheckDeclarationDOU" name="LipetskCheckDeclarationDOU" tns='http://concentrator.gosuslugi.ru/regservicedelivery/smev' url="^ws/smev/decl_check$">
+            <InProtocol code="smev256"/>
+            <OutProtocol code="smev256" security="security"/>
+        </Application> -->
+    </Applications>
+</WSConfig>

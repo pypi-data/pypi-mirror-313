@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://epgu.gosuslugi.ru/concentrator/kindergarten/3.2.1" targetNamespace="http://epgu.gosuslugi.ru/concentrator/kindergarten/3.2.1" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:simpleType name="stringNN-11">
+		<xsd:restriction base="xsd:normalizedString">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="11"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="stringNN-20">
+		<xsd:restriction base="xsd:normalizedString">
+			<xsd:minLength value="1"/>
+			<xsd:maxLength value="20"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-6">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="6"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-10">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="10"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-20">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="20"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-21">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="21"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-14">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="14"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-50">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="50"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-256">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="256"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-1024">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="1024"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="string-2048">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="2048"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="DataElementType">
+		<xsd:simpleContent>
+			<xsd:extension base="tns:string-256">
+				<xsd:attribute name="code" type="tns:string-50" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="AddressType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Адрес
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="FullAddress" type="tns:string-1024"/>
+			<xsd:element name="Index" type="tns:string-6"/>
+			<xsd:element name="Region" type="tns:DataElementType"/>
+			<xsd:element name="Area" type="tns:DataElementType"/>
+			<xsd:element name="City" type="tns:DataElementType"/>
+			<xsd:element name="CityArea" type="tns:DataElementType"/>
+			<xsd:element name="Place" type="tns:DataElementType"/>
+			<xsd:element name="Street" type="tns:DataElementType"/>
+			<xsd:element name="AdditionalArea" type="tns:DataElementType"/>
+			<xsd:element name="AdditionalStreet" type="tns:DataElementType"/>
+			<xsd:element name="House" type="tns:DataElementType"/>
+			<xsd:element name="Building1" type="tns:string-50"/>
+			<xsd:element name="Building2" type="tns:string-50"/>
+			<xsd:element name="Apartment" type="tns:string-50"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AppliedDocumentType">
+		<xsd:annotation>
+			<xsd:documentation>Описание прилагаемого документа</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="CodeDocument" type="tns:string-50">
+				<xsd:annotation>
+					<xsd:documentation>Код документа, генерируемый ЕПГУ</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="NameDocument" type="tns:string-50">
+				<xsd:annotation>
+					<xsd:documentation>Имя файла загруженного документа</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="TypeDocument" type="tns:string-50">
+				<xsd:annotation>
+					<xsd:documentation>mime type контента (например: image/jpeg/pdf)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="DocInfoType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Описание документа 
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="DocIssueDate" type="xsd:date"/>
+			<xsd:element name="DocIssued" type="tns:string-256"/>
+			<xsd:element name="DocExpirationDate" type="xsd:date" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PersonInfoType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Сведения о заявителе
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="PersonSurname" type="tns:string-256"/>
+			<xsd:element name="PersonName" type="tns:string-256"/>
+			<xsd:element name="PersonMiddleName" type="tns:string-256" minOccurs="0"/>
+			<xsd:element name="PersonPhone" type="tns:string-14"/>
+			<xsd:element name="PersonEmail" type="tns:string-256"/>
+			<xsd:element name="Parents" type="xsd:boolean"/>
+			<xsd:element name="OtherRepresentative" type="tns:OtherRepresentativeType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="OtherRepresentativeType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Сведения о документе, подтверждающем полномочия заявителя
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="OtherRepresentativeDocName" type="tns:string-256"/>
+			<xsd:element name="OtherRepresentativeDocSeries" type="tns:string-10" minOccurs="0"/>
+			<xsd:element name="OtherRepresentativeDocNumber" type="tns:string-10"/>
+			<xsd:element name="OtherRepresentativeDocDate" type="xsd:date"/>
+			<xsd:element name="OtherRepresentativeDocIssued" type="tns:string-256"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="PersonIdentityDocInfoType">
+		<xsd:annotation>
+			<xsd:documentation>		
+				Паспортные данные заявителя
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="IdentityDocName" type="tns:DataElementType"/>
+			<xsd:element name="IdentityDocSeries" type="tns:string-10" minOccurs="0"/>
+			<xsd:element name="IdentityDocNumber" type="tns:string-10"/>
+			<xsd:element name="IdentityDocIssueDate" type="xsd:date"/>
+			<xsd:element name="IdentityDocIssueCode" type="tns:string-6" minOccurs="0"/>
+			<xsd:element name="IdentityDocIssued" type="tns:string-256"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ChildInfoType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Сведения о ребёнке
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ChildSurname" type="tns:string-256"/>
+			<xsd:element name="ChildName" type="tns:string-256"/>
+			<xsd:element name="ChildMiddleName" type="tns:string-256" minOccurs="0"/>
+			<xsd:element name="ChildBirthDate" type="xsd:date"/>
+			<xsd:choice>
+				<xsd:element name="ChildBirthDocRF" type="tns:ChildBirthDocRFType"/>
+				<xsd:element name="ChildBirthDocForeign" type="tns:ChildBirthDocForeignType"/>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ChildBirthDocRFType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Свидетельство о рождении РФ
+	        </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ChildBirthDocSeries" type="tns:string-10"/>
+			<xsd:element name="ChildBirthDocNumber" type="tns:string-10"/>
+			<xsd:element name="ChildBirthDocIssueDate" type="xsd:date"/>
+			<xsd:element name="ChildBirthDocActNumber" type="tns:string-21"/>
+			<xsd:element name="ChildBirthDocActDate" type="xsd:date"/>
+			<xsd:element name="ChildBirthDocIssued" type="tns:string-256"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ChildBirthDocForeignType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Другой документ
+	        </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ChildBirthDocName" type="tns:string-256"/>
+			<xsd:element name="ChildBirthDocSeries" type="tns:string-10" minOccurs="0"/>
+			<xsd:element name="ChildBirthDocNumber" type="tns:string-50"/>
+			<xsd:element name="ChildBirthDocIssueDate" type="xsd:date"/>
+			<xsd:element name="ChildBirthDocIssued" type="tns:string-256"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="EntryParamsType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Желаемые параметры зачисления
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="EntryDate" type="xsd:date"/>
+			<xsd:element name="Language" type="tns:DataElementType"/>
+			<xsd:element name="Schedule" type="tns:DataElementType"/>
+			<xsd:element name="AgreementOnFullDayGroup" type="xsd:boolean" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="AdaptationProgramType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Направленность группы
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="AdaptationGroup" type="tns:DataElementType"/>
+			<xsd:element name="AdaptationGroupType" type="tns:DataElementType" minOccurs="0"/>
+			<xsd:element name="AgreementOnGeneralGroup" type="xsd:boolean" minOccurs="0"/>
+			<xsd:element name="AgreementOnCareGroup" type="xsd:boolean" minOccurs="0"/>
+			<xsd:element name="NeedSpecialCareConditions" type="xsd:boolean" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="MedicalReportType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Реквизиты документа, подтверждающего группу коменсирующей направленности
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="DocName" type="tns:DataElementType"/>
+			<xsd:element name="DocSeries" type="tns:string-20" minOccurs="0"/>
+			<xsd:element name="DocNumber" type="tns:string-20"/>
+			<xsd:element name="DocIssueDate" type="xsd:date"/>
+			<xsd:element name="DocIssued" type="tns:string-256"/>
+			<xsd:element name="DocExpirationDate" type="xsd:date" minOccurs="0"/>
+			<xsd:element name="DocFile" type="tns:AppliedDocumentType" minOccurs="0" maxOccurs="2"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="MedicalReportWithoutFilesType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Реквизиты документа, подтверждающего группу коменсирующей направленности
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="DocName" type="tns:DataElementType"/>
+			<xsd:element name="DocSeries" type="tns:string-20" minOccurs="0"/>
+			<xsd:element name="DocNumber" type="tns:string-20"/>
+			<xsd:element name="DocIssueDate" type="xsd:date"/>
+			<xsd:element name="DocIssued" type="tns:string-256"/>
+			<xsd:element name="DocExpirationDate" type="xsd:date" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="EduOrganizationType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Выбранный детский сад
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:simpleContent>
+			<xsd:extension base="tns:string-256">
+				<xsd:attribute name="code" type="tns:string-50" use="required"/>
+				<xsd:attribute name="PriorityNumber" type="xsd:byte" use="required"/>
+			</xsd:extension>
+		</xsd:simpleContent>
+	</xsd:complexType>
+	<xsd:complexType name="EduOrganizationsType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Выбранные детские сады
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="EduOrganization" type="tns:EduOrganizationType" minOccurs="1" maxOccurs="50"/>
+			<xsd:element name="AllowOfferOther" type="xsd:boolean"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="BrotherSisterInfoType">
+		<xsd:annotation>
+			<xsd:documentation>		
+				Сведения об обучении братьев или сестер ребенка в выбранных организациях
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ChildSurname" type="tns:string-256"/>
+			<xsd:element name="ChildName" type="tns:string-256"/>
+			<xsd:element name="ChildMiddleName" type="tns:string-256" minOccurs="0"/>
+			<xsd:element name="EduOrganization" type="tns:DataElementType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="BenefitInfoType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Сведения о документе, подтверждающем право на получение мер специальной поддержки
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="BenefitCategory" type="tns:DataElementType"/>
+			<xsd:element name="BenefitDocInfo" type="tns:DocInfoType"/>
+			<xsd:element name="BenefitFile" type="tns:AppliedDocumentType" minOccurs="0" maxOccurs="2"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="BenefitInfoWithoutFilesType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Сведения о документе, подтверждающем право на получение мер специальной поддержки
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="BenefitCategory" type="tns:DataElementType"/>
+			<xsd:element name="BenefitDocInfo" type="tns:DocInfoType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ApplicationType">
+		<xsd:annotation>
+			<xsd:documentation>		
+				Подача заявления для направления в дошкольную организацию.
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="ServicesType" type="tns:stringNN-20"/>
+			<xsd:element name="FilingDate" type="xsd:dateTime" minOccurs="0">
+				<xsd:annotation>
+					<xsd:documentation>		
+						Дата и время подачи. Передаётся только при первичной подаче заявления
+					</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="PersonInfo" type="tns:PersonInfoType"/>
+			<xsd:element name="PersonIdentityDocInfo" type="tns:PersonIdentityDocInfoType"/>
+			<xsd:element name="ChildInfo" type="tns:ChildInfoType"/>
+			<xsd:element name="Address" type="tns:AddressType"/>
+			<xsd:element name="EntryParams" type="tns:EntryParamsType"/>
+			<xsd:element name="AdaptationProgram" type="tns:AdaptationProgramType"/>
+			<xsd:element name="MedicalReport" type="tns:MedicalReportType" minOccurs="0"/>
+			<xsd:element name="EduOrganizations" type="tns:EduOrganizationsType"/>
+			<xsd:element name="BrotherSisterInfo" type="tns:BrotherSisterInfoType" minOccurs="0" maxOccurs="10"/>
+			<xsd:element name="BenefitInfo" type="tns:BenefitInfoType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ApplicationOrderInfoRequestType">
+		<xsd:annotation>
+			<xsd:documentation>		
+				Подача заявления на получение информации об этапах и результатах оказания услуги зачисления в дошкольную организацию
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="ServicesType" type="tns:stringNN-20"/>
+			<xsd:element name="PersonInfo" type="tns:PersonInfoType"/>
+			<xsd:element name="PersonIdentityDocInfo" type="tns:PersonIdentityDocInfoType"/>
+			<xsd:element name="ChildInfo" type="tns:ChildInfoType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="Person2InfoType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Сведения о 2-м родителе
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="Person2Surname" type="tns:string-256"/>
+			<xsd:element name="Person2Name" type="tns:string-256"/>
+			<xsd:element name="Person2MiddleName" type="tns:string-256" minOccurs="0"/>
+			<xsd:element name="Person2Phone" type="tns:string-14" minOccurs="0"/>
+			<xsd:element name="Person2Email" type="tns:string-256" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ApplicationAdmissionRequestType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Подача заявления о приёме в дошкольную организацию
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="ServicesType" type="tns:stringNN-20"/>
+			<xsd:element name="PersonInfo" type="tns:PersonInfoType"/>
+			<xsd:element name="PersonIdentityDocInfo" type="tns:PersonIdentityDocInfoType"/>
+			<xsd:element name="Person2Info" type="tns:Person2InfoType" minOccurs="0"/>
+			<xsd:element name="ChildInfo" type="tns:ChildInfoType"/>
+			<xsd:element name="Address" type="tns:AddressType"/>
+			<xsd:element name="EntryParams" type="tns:EntryParamsType"/>
+			<xsd:element name="AdaptationProgram" type="tns:AdaptationProgramType"/>
+			<xsd:element name="MedicalReport" type="tns:MedicalReportType" minOccurs="0"/>
+			<xsd:element name="EduOrganizationCode" type="tns:string-50"/>
+			<xsd:element name="DocListReview" type="xsd:boolean"/>
+			<xsd:element name="LicenseCharter" type="xsd:boolean"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="GetApplicationQueueRequestType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Получение данных о последовательности предоставления мест
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="GetApplicationQueueReasonRequestType">
+		<xsd:annotation>
+			<xsd:documentation>	
+				Получение информации об основаниях изменений последовательности
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="PeriodStart" type="xsd:date"/>
+			<xsd:element name="PeriodEnd" type="xsd:date"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="GetApplicationRequestType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Запрос для получения данных заявления
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="GetApplicationAdmissionRequestType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Запрос для получения данных для подачи заявления на приём
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ApplicationRejectionRequestType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Отказ от предложенной  дошкольной организации
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="comment" type="tns:string-2048" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="cancelRequestType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Запрос на отмену заявления для направления
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="reason" type="tns:string-2048" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="orderIdType">
+		<xsd:sequence>
+			<xsd:annotation>
+				<xsd:documentation>
+					Номер заявки в ЛК ЕПГУ
+                </xsd:documentation>
+			</xsd:annotation>
+			<xsd:element name="pguId" type="xsd:long"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="statusCodeType">
+		<xsd:annotation>
+			<xsd:documentation>Статус заявления</xsd:documentation>
+		</xsd:annotation>
+		<xsd:choice>
+			<xsd:element name="orgCode" type="tns:string-50">
+				<xsd:annotation>
+					<xsd:documentation>Код статуса в ведомстве</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="techCode" type="xsd:byte">
+				<xsd:annotation>
+					<xsd:documentation>Код статуса на ЕПГУ</xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:complexType name="changeOrderInfoType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Информация для изменения статуса заявления для направления в ЛК ЕПГУ				
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="tns:orderIdType"/>
+			<xsd:element name="statusCode" type="tns:statusCodeType"/>
+			<xsd:element name="comment" type="tns:string-2048" minOccurs="0"/>
+			<xsd:element name="cancelAllowed" type="xsd:boolean" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ApplicationQueueResponseType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Данные о позиции при распределении 
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="Position" type="xsd:integer"/>
+			<xsd:element name="Total" type="xsd:integer"/>
+			<xsd:element name="WithoutQueue" type="xsd:short"/>
+			<xsd:element name="FirstQueue" type="xsd:short"/>
+			<xsd:element name="AdvantageQueue" type="xsd:short"/>
+			<xsd:element name="RelevantDT" type="xsd:dateTime"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="GetApplicationQueueReasonResponseType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Информация об основаниях изменений последовательности
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="IncreaseQueue" type="xsd:integer"/>
+			<xsd:element name="GotAPlace" type="xsd:integer"/>
+			<xsd:element name="IncreaseBenefits" type="xsd:integer"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="GetApplicationResponseType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Ответ с данными заявления
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="PersonInfo" type="tns:PersonInfoType"/>
+			<xsd:element name="PersonIdentityDocInfo" type="tns:PersonIdentityDocInfoType"/>
+			<xsd:element name="ChildInfo" type="tns:ChildInfoType"/>
+			<xsd:element name="Address" type="tns:AddressType"/>
+			<xsd:element name="EntryParams" type="tns:EntryParamsType"/>
+			<xsd:element name="AdaptationProgram" type="tns:AdaptationProgramType"/>
+			<xsd:element name="MedicalReport" type="tns:MedicalReportWithoutFilesType" minOccurs="0"/>
+			<xsd:element name="EduOrganizations" type="tns:EduOrganizationsType"/>
+			<xsd:element name="BrotherSisterInfo" type="tns:BrotherSisterInfoType" minOccurs="0" maxOccurs="10"/>
+			<xsd:element name="BenefitInfo" type="tns:BenefitInfoWithoutFilesType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="GetApplicationAdmissionResponseType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Ответ с данными для подачи заявления на приём
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="PersonInfo" type="tns:PersonInfoType"/>
+			<xsd:element name="PersonIdentityDocInfo" type="tns:PersonIdentityDocInfoType"/>
+			<xsd:element name="ChildInfo" type="tns:ChildInfoType"/>
+			<xsd:element name="Address" type="tns:AddressType"/>
+			<xsd:element name="EntryParams" type="tns:EntryParamsType"/>
+			<xsd:element name="AdaptationProgram" type="tns:AdaptationProgramType"/>
+			<xsd:element name="MedicalReport" type="tns:MedicalReportWithoutFilesType" minOccurs="0"/>
+			<xsd:element name="EduOrganizationCode" type="tns:string-50"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:simpleType name="CancelResultType">
+		<xsd:annotation>
+			<xsd:documentation>Результат передачи запроса на отмену заявления</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="CANCELLED"/>
+			<xsd:enumeration value="IN_PROGRESS"/>
+			<xsd:enumeration value="REJECTED"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="cancelResponseType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Ответ на запрос отмены заявления для направления
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="orderId" type="xsd:long"/>
+			<xsd:element name="result" type="tns:CancelResultType"/>
+			<xsd:element name="comment" type="tns:string-2048" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="FormDataType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Заявление для направления в дошкольную организацию
+				или заявление на получение информации об этапах и результатах оказания услуги зачисления в дошкольную организацию
+				или заявление на приём в дошкольную организацию
+				или запрос получения информации о последовательности предоставления мест
+				или запрос получения информации об основаниях изменения последовательности предоставления мест
+				или запрос получения данных заявления для редактирования
+				или запрос получения данных для подачи заявления на приём
+				или отказ от предложенной дошкольной организации
+				или запрос на отмену заявления для направления в дошкольную организацию
+            </xsd:documentation>
+		</xsd:annotation>
+		<xsd:choice>
+			<xsd:element name="ApplicationRequest" type="tns:ApplicationType"/>
+			<xsd:element name="ApplicationOrderInfoRequest" type="tns:ApplicationOrderInfoRequestType"/>
+			<xsd:element name="ApplicationAdmissionRequest" type="tns:ApplicationAdmissionRequestType"/>
+			<xsd:element name="GetApplicationQueueRequest" type="tns:GetApplicationQueueRequestType"/>
+			<xsd:element name="GetApplicationQueueReasonRequest" type="tns:GetApplicationQueueReasonRequestType"/>
+			<xsd:element name="GetApplicationRequest" type="tns:GetApplicationRequestType"/>
+			<xsd:element name="GetApplicationAdmissionRequest" type="tns:GetApplicationAdmissionRequestType"/>
+			<xsd:element name="ApplicationRejectionRequest" type="tns:ApplicationRejectionRequestType"/>
+			<xsd:element name="cancelRequest" type="tns:cancelRequestType"/>
+		</xsd:choice>
+		<xsd:attribute name="oktmo" type="tns:stringNN-11" use="required"/>
+	</xsd:complexType>
+	<xsd:complexType name="FormDataResponseType">
+		<xsd:annotation>
+			<xsd:documentation>
+				Ответ с изменением статуса заявления
+				или информация о последовательности предоставления мест
+				или информация об основаниях изменения последовательности предоставления мест
+				или ответ с данными заявления для редактирования
+				или ответ с данными для подачи заявления на приём
+				или ответ на запрос отмены заявления
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:choice>
+			<xsd:element name="changeOrderInfo" type="tns:changeOrderInfoType"/>
+			<xsd:element name="GetApplicationQueueResponse" type="tns:ApplicationQueueResponseType"/>
+			<xsd:element name="GetApplicationQueueReasonResponse" type="tns:GetApplicationQueueReasonResponseType"/>
+			<xsd:element name="GetApplicationResponse" type="tns:GetApplicationResponseType"/>
+			<xsd:element name="GetApplicationAdmissionResponse" type="tns:GetApplicationAdmissionResponseType"/>
+			<xsd:element name="cancelResponse" type="tns:cancelResponseType"/>
+		</xsd:choice>
+	</xsd:complexType>
+	<xsd:element name="FormData" type="tns:FormDataType"/>
+	<xsd:element name="FormDataResponse" type="tns:FormDataResponseType"/>
+</xsd:schema>
