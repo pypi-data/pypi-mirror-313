@@ -1,0 +1,64 @@
+[build-system]
+
+requires = [
+  "setuptools"
+]  
+
+build-backend = "setuptools.build_meta" 
+
+
+[project]
+name = "contcfg"  # REQUIRED, is the only field that cannot be marked as dynamic.
+dynamic = ["version"]
+description = "A simple tools for container network configuration using tc command."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE.txt"}
+
+authors = [
+  {name = "DeEMO", email = "yzzxrx@gmail.com" }
+]
+maintainers = [
+  {name = "DeEMO", email = "yzzxrx@gmail.com" }
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3 :: Only",
+]
+
+dependencies = [
+
+]
+
+[project.scripts]
+contcfg = "contcfg.main:main"
+
+[project.optional-dependencies]
+dev = ["check-manifest"]
+test = ["coverage"]
+
+[tool.setuptools]
+package-data = {"contcfg" = ["utils/scripts/*.sh"]}
+
+[tool.setuptools.dynamic]
+version = {attr = "contcfg.__version__"}
+
+[tool.ruff]
+line-length = 80 
+lint.select = [         
+    "F",
+    "E",
+    "W",
+    "UP",
+]
+lint.ignore = ["F401"] 
