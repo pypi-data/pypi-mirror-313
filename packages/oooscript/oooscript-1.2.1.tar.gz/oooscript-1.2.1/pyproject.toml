@@ -1,0 +1,66 @@
+[project]
+name = "oooscript"
+dynamic = ["version"]
+description = "Compiles several python scripts into a single script that can be easily used by LibreOffice as a macro."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+keywords = ["ooouno", "libreoffice", "scriptmerge", "uno", "pyuno", "macro"]
+dependencies = [
+    "pydantic>=1.10.2,<2.0.0",
+    "python-dotenv>=1.0.1",
+    "scriptmerge>=1.1.0,<2.0.0",
+]
+authors = [
+    {name = ":Barry-Thomas-Paul: Moss", email = "bigbytetech@gmail.com"}]
+packages = [
+    { include = "oooscript" }
+]
+classifiers=[
+    "License :: OSI Approved :: Apache Software License",
+    "Environment :: Other Environment",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Office/Business",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10"
+]
+
+[project.scripts]
+oooscript = 'oooscript.cli.main:main'
+
+[project.urls]
+Homepage = "https://github.com/Amourspirit/python_libreoffice_oooscript"
+Documentation = "https://oooscript.readthedocs.io/en/latest/"
+Repository = "https://github.com/Amourspirit/python_libreoffice_oooscript"
+Issues = "https://github.com/Amourspirit/python_libreoffice_oooscript/issues"
+
+[build-system]
+# requires = ["hatchling", "setuptools_scm"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+    "oooscript/**/*",
+]
+
+[tool.hatch.version]
+path = "oooscript/__init__.py"
+
+[dependency-groups]
+dev = [
+    "ooo-dev-tools>=0.50.0",
+    "ruff>=0.8.1",
+    "typing-extensions>=4.12.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests"
+]
