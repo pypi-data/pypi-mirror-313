@@ -1,0 +1,28 @@
+{# loop over all errors and create types for each #}
+{%- for error_info in errors -%}
+class {{contract_name}}{{error_info.name}}ContractError(PypechainBaseError):
+    """ContractError for {{error_info.name}}."""
+    # Error name
+    name: str = "{{error_info.name}}"
+    # 4 byte error selector
+    selector: str = "{{error_info.selector}}"
+    # error signature, i.e. CustomError(uint256,bool)
+    signature: str = "{{error_info.signature}}"
+    # Error input types
+    abi: ABI = {{contract_name | lower}}_abi
+{% endfor %}
+
+class {{contract_name}}ContractErrors(PypechainBaseContractErrors):
+    """ContractErrors for the {{contract_name}} contract."""
+{% for error_info in errors %}
+    {{error_info.name}}: {{contract_name}}{{error_info.name}}ContractError
+{% endfor %}
+
+    def __init__(
+        self,
+    ) -> None:
+        {% for error_info in errors -%}
+        self.{{error_info.name}} = {{contract_name}}{{error_info.name}}ContractError()
+        {% endfor %}
+        self._all = [{% for error_info in errors -%}self.{{error_info.name}},{%- endfor %}]
+
