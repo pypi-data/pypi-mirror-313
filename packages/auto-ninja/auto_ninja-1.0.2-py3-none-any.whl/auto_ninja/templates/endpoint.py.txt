@@ -1,0 +1,43 @@
+from {{ app.name }} import models
+from  {{ app.name }}.api import schemas
+from {{ settings }}.api import services
+from {{ settings }}.api.utils import AliasRouter
+from ninja import Query
+
+router = AliasRouter(tags=["{{ model }}"])
+
+
+@router.get("/count", response=int)
+def count(request):
+    """Count all entries."""
+    return models.{{ model }}.objects.count()
+
+
+@router.get("", response=list[schemas.{{ model }}Out])
+def list_all(request, filters: schemas.{{ model }}Filter = Query(...)):
+    """List all entries."""
+    return services.list_all(models.{{ model }}.objects.all(), filters)
+
+
+@router.get("/{pk}", response=schemas.{{ model }}Out)
+def get(request, pk: int):
+    """Get an entry."""
+    return services.get(models.{{ model }}, pk)
+
+
+@router.post("", response=schemas.{{ model }}Out)
+def create(request, payload: schemas.{{ model }}In):
+    """Create a new entry."""
+    return services.create(models.{{ model }}, payload)
+
+
+@router.put("/{pk}", response=schemas.{{ model }}Out)
+def update(request, pk: int, payload: schemas.{{ model }}In):
+    """Edit an entry."""
+    return services.update(models.{{ model }}, pk, payload)
+
+
+@router.delete("/{pk}", response={204: None})
+def delete(request, pk: int):
+    """Delete an entry."""
+    return services.delete(models.{{ model }}, pk)

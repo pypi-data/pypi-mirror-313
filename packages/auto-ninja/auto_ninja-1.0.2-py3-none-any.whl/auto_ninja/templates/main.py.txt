@@ -1,0 +1,25 @@
+"""
+API setup.
+"""
+from django.contrib.auth.decorators import user_passes_test
+from ninja import NinjaAPI
+
+from .services import register_error_handlers
+from ninja.security import SessionAuth
+{% for _, app in apps %}
+from {{ app.name }}.api.endpoints import router as {{ app.name }}_router
+{% endfor %}
+
+api = NinjaAPI(
+    title="{{ title }}",
+    description="{{ description }}",
+    auth=SessionAuth(),
+    docs_url="/",
+    docs_decorator=user_passes_test(lambda user: user.is_staff),
+    urls_namespace="api",
+)
+register_error_handlers(api)
+
+{% for _, app in apps %}
+api.add_router("", {{ app.name }}_router)
+{% endfor %}
