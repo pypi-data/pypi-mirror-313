@@ -1,0 +1,100 @@
+swagger: '2.0'
+info:
+  title: SharedData API
+  version: '1.0'
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: token
+    in: query
+security:
+  - api_key: []
+paths:
+  /api/table/{database}/{period}/{source}/{tablename}:
+    get:      
+      summary: Get table data
+      parameters:
+      - name: database
+        in: path
+        type: string
+        required: true
+        description: >
+          The name of the database. Can be one of the following:
+          'MarketData': ['date', 'symbol'],
+          'Relationships': ['date', 'symbol', 'symbol1'],
+          'Portfolios': ['date', 'portfolio'],
+          'Signals': ['date', 'portfolio', 'symbol'],
+          'Risk': ['date', 'portfolio', 'symbol'],
+          'Positions': ['date', 'portfolio', 'symbol'],
+          'Orders': ['date', 'portfolio', 'symbol', 'clordid'],
+          'Trades': ['date', 'portfolio', 'symbol', 'tradeid']
+      - name: period
+        in: path
+        type: string
+        required: true
+        description: The period can be D1,M15,M1,RT
+      - name: source
+        in: path
+        type: string
+        required: true
+        description: The source
+      - name: tablename
+        in: path
+        type: string
+        required: true
+        description: The table name      
+      - name: tablesubfolder
+        in: query
+        type: string
+        required: false
+        description: The table subfolder when table has a '/' in the name
+      - name: token
+        in: query
+        required: true
+        type: string
+      - name: startdate
+        in: query
+        type: string
+        required: false
+        description: The start date (optional)
+      - name: enddate
+        in: query
+        type: string
+        required: false
+        description: The end date (optional)
+      - name: symbols
+        in: query
+        type: string
+        required: false
+        description: The symbols separated by comma (optional)
+      - name: portfolios
+        in: query
+        type: string
+        required: false
+        description: The portfolios separated by comma (optional)
+      - name: page
+        in: query
+        type: integer
+        required: false
+        description: The page number (optional, default is 1)
+      - name: per_page
+        in: query
+        type: integer
+        required: false
+        description: The number of items per page (optional, default is 1000000, max is 1000000)
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                # Define the properties of the returned items here
+        500:
+          description: Error
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
