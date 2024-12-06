@@ -1,0 +1,72 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "vite-transporter"
+description = 'Transport Vite apps.'
+authors = [{ name = "David Carmichael", email = "david@uilix.com" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+classifiers = [
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+    'Natural Language :: English',
+]
+requires-python = ">=3.8"
+dynamic = ["version"]
+
+[project.optional-dependencies]
+flask = ["flask"]
+quart = ["quart"]
+
+[project.scripts]
+vt = "vite_transporter:cli"
+
+[tool.pyqwe]
+vite = "*(app_vite_demo):npx vite --host 127.0.0.1 --port 5003"
+flask = "*:flask --app app_flask run --host 127.0.0.1 --port 5001 --debug"
+quart = "*:quart --app app_quart run --host 127.0.0.1 --port 5002"
+install = "*:flit install --symlink"
+build = "*:flit build"
+publish = "*shell:export FLIT_USERNAME=__token__ && flit publish"
+
+[tool.vite_transporter]
+npm_exec = "npm"
+npx_exec = "npx"
+serve_app = "app_flask"
+vite_apps = ["frontend"]
+
+
+[tool.flit.sdist]
+exclude = [
+    ".github",
+    "app_flask",
+    "app_quart",
+    "frontend",
+    "dist",
+    ".gitignore",
+    ".env"
+]
+
+[tool.mypy]
+python_version = "3.9"
+files = ["src/vite_transporter"]
+show_error_codes = true
+pretty = true
+strict = true
+
+[tool.pyright]
+pythonVersion = "3.9"
+include = ["src/vite_transporter"]
+typeCheckingMode = "basic"
+
+[tool.ruff]
+src = ["src"]
+fix = true
+show-fixes = true
+output-format = "full"
