@@ -1,0 +1,32 @@
+###Testing of CommandLineBase
+```python3
+>>> from cgecore.alignment.read_alignment import KMAAlignment, BlastNAlignment
+>>> import os
+>>> loc = os.getcwd()
+>>> loc_aln = "%s/../../../data/tests/alignment_files/" % loc
+>>> m = KMAAlignment(output_path=loc_aln, filenames=["aminoglycoside", "beta-lactam", "fosfomycin"], result_file=["Result", "Alignment"])
+>>> a = m.parse_hits()
+>>> print(next(a))
+>>> print(next(a))
+>>> print(next(a))
+>>> print(next(a))
+>>> print(next(a))
+>>> print(next(a))
+>>> print(next(a))
+>>> print(m.init_result)
+>>> m.get_alignment_results()
+>>> print(m.init_result)
+>>> m.save_alignment("./sup.json")
+>>> b = BlastNAlignment(output_path=loc_aln, filenames=["blasttest2amino5.xml", "blasttest2betalactam5.xml", "blasttest2colistin5.xml", "blasttest2fosfomycin5.xml"], result_file="XML")
+>>> c = b.parse_hits()
+>>> print(next(c))
+>>> print(next(c))
+>>> print(next(c))
+>>> print(next(c))
+>>> print(next(c))
+>>> print(next(c))
+>>> print(next(c))
+>>> print(b.init_result)
+>>> b.get_alignment_results()
+>>> print(b.init_result)
+>>> b.save_alignment("./supblast.json")
