@@ -1,0 +1,86 @@
+[project]
+name = "pyobjson"
+dynamic = ["version"]
+authors = [
+    { name="Wren J. Rudolph for Wrencode, LLC", email="dev@wrencode.com" },
+]
+license = { text = "MIT" }
+description = "Utility library for serializing/deserializing custom Python objects to/from JSON."
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/wrencode/pyobjson"
+Issues = "https://github.com/wrencode/pyobjson/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "bandit[toml]>=1.8.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-autorefs>=1.2.0",
+    "mkdocstrings-python>=1.12.2",
+    "pygments>=2.18.0",
+    "pymdown-extensions>=10.12",
+    "pytest>=8.3.4",
+    "python-dotenv>=1.0.1",
+    "ruff>=0.8.1",
+    "twine>=6.0.1",
+]
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".github",
+    ".idea",
+    ".pytest_cache",
+    ".python-venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "scripts"
+]
+extend-exclude = [
+    "src/pyobjson/__init__.py"
+]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint]
+extend-select = [
+    "E501"
+]
+
+[tool.bandit]
+exclude_dirs = [
+    "./.github",
+    "./.venv*",
+    "./scripts",
+    "./tests"
+]
+
+[tool.hatch.version]
+path = "VERSION.py"
+
+[tool.custom]
+environment = ".venv-python_3.13.0"
