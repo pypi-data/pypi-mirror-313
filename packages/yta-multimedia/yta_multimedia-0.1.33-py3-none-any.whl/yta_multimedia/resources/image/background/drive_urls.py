@@ -1,0 +1,1 @@
+BRICKS_GOOGLE_DRIVE_DOWNLOAD_URL = 'https://drive.google.com/file/d/1JlStN-4b0_I_t28-8fJmxTfu4ZjnPuMK/view?usp=sharing'
