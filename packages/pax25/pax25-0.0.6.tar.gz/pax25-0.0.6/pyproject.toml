@@ -1,0 +1,93 @@
+# pyproject.toml file, now the standard for Python packaging.
+# For a tutorial on the basics of this file, see https://packaging.python.org/en/latest/tutorials/packaging-projects/
+#
+# This configuration allows not only for local installation but also inclusion of the
+# package in repositories-- chiefly, PyPi: https://pypi.org/
+# As of writing, the package is not yet submitted, but it will be.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pax25"
+version = "0.0.6"
+authors = [
+    { name="Lion Templin", email="lion@lion.fm" },
+    { name="Fox Piacenti", email="fox@artconomy.com" },
+]
+description = "A complete AX.25 stack library"
+readme = "README.md"
+requires-python = ">=3.13"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pyserial~=3.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest~=8.3.3",
+    "pytest-asyncio~=0.24.0",
+    "pytest-cov~=5.0.0",
+    "pytest-xdist~=3.6.1",
+    "black~=24.10.0",
+    "pylint~=3.3.1",
+    "isort~=5.13.1",
+    "mypy~=1.12.1",
+]
+
+docs = [
+    "mkdocs~=1.6.1",
+    "mkdocs-material~=9.5.42",
+    "mkdocstrings[python]~=0.26.2",
+    "mkapi~=3.0.22",
+]
+dist = [
+    "build~=1.2.2",
+    "twine~=5.1.1",
+]
+
+[project.urls]
+# We'll probably move this somewhere else, but putting these placeholders in for now.
+"Homepage" = "https://gitlab.com/FoxyFoxie/pax25"
+"Bug Tracker" = "https://gitlab.com/FoxyFoxie/pax25/-/issues"
+
+# Source distribution. We don't have compiled source files, so this is the only
+# build we provide.
+[tool.hatch.build.targets.sdist]
+packages = ["pax25"]
+include = [
+    "pax25/**/*.py",
+]
+exclude = [
+    "pax25/**/tests/**",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.pylint]
+fail-under = 10.0
+suggestion-mode = true
+# We can expect to have a lot of flags on our classes.
+max-attributes = 20
+
+
+[tool.pylint.format]
+max-line-length = "88"
+
+
+[tool.isort]
+profile = 'black'
+
+[tool.pytest.ini_options]
+# Bump this number as we make progress so that we can ratchet up this standard.
+addopts = '-n auto --cov=pax25 --cov-report html --cov-report term --cov-fail-under=90'
+
+# TODO: Remove this line once pytest-asyncio marks the scope of this fixture upstream. See:
+# https://github.com/pytest-dev/pytest-asyncio/issues/924
+asyncio_default_fixture_loop_scope = "function"
