@@ -1,0 +1,187 @@
+# BONSAI classifications
+
+The BONSAI classifications Python package is a part of the [Getting The Data Right](https://bonsamurais.gitlab.io/bonsai/documentation) project.
+
+Here, all the classifications, which are used in the Bonsai database, are created and stored as csv files.
+The csv files can be found under [/src/classifications/data](https://gitlab.com/bonsamurais/bonsai/clean/classifications/-/tree/main/src/classifications?ref_type=heads). The structure of organising these files follows the [Bonsai ontology](https://github.com/BONSAMURAIS/ontology) and thus has the following folders:
+- activitytype (includes: `industry_activity`, `government_activity`, `treatment_activity`, `non_profit_institution_serving_household`, `household_production`, `household_consumption`, `market_activity`, `natural_activity`, `auxiliary_production_activity`, `change_in_stock_activity`, `other_activity`)
+- flowobject (includes `industry_product`, `material_for_treatment`, `market_product`, `government_product`, `household_product`, `needs_satisfaction`, `emission`, `direct_physical_change`, `natural_resource`, `economic_flow`, `social_flow`)
+- location
+- unit
+- time
+
+Since the Bonsai ontology does not cover all required topics, additional folders are added:
+- dataquality
+- uncertainty
+
+A comprehensive documentation of the classification package is availbale [here](https://bonsamurais.gitlab.io/bonsai/util/classifications/index.html)
+
+## Format
+The csv files (tables) of each folder (datapackage) are organised in tabular format. Each of the mentioned folders represents a valid dataio.datapackage created with the Python package [dataio](https://bonsamurais.gitlab.io/bonsai/util/dataio/index.html). The following types of tables with its prefixes are used:
+- tree table `tree_`
+- concordance table `conc_`
+- dimension table `dim_`
+- pairwise cocncordance table `concpair_`
+
+### tree table
+Tree tables are used for classifications which have a tree structure, meaning that the classification is structured hierarchically with multiple levels. The classification starts with broad categories at the top level and then branches out into more specific subcategories as you move down the hierarchy.
+
+The following column names are used:
+- `code`: code of the item
+- `parent_code`: code of the items parent
+- `name`: name of the item
+- `level`: the items level in the tree structure (from 0 to n)
+- `prefixed_id`: unique id (uuid4)
+
+### concordance table
+A concordance table is used to establish equivalences or relationships between different classification systems. It provides mappings between codes of a classification system and codes from another classification system. A relationship between codes can have four different types:
+
+- **one-to-one (1:1) correspondence**: In a one-to-one correspondence, each category or code in one classification system is mapped to exactly one category or code in another classification system, and vice versa. This type of mapping implies a direct and unambiguous correspondence between the two systems. The skos uri is http://www.w3.org/2004/02/skos/core#exactMatch
+
+- **one-to-many (1:M) correspondence**: In a one-to-many correspondence, each category or code in one classification system is mapped to multiple categories or codes in another classification system. However, each category or code in the second system is only mapped to one category or code in the first system. This type of mapping implies that one category or code in the first system may encompass multiple categories or codes in the second system. The skos uri is http://www.w3.org/2004/02/skos/core#narrowMatch . Indicating `<A> skos:narrowMatch <B>` means "B is narrower than A"
+
+- **many-to-one (M:1) correspondence**: In a many-to-one correspondence, multiple categories or codes in one classification system are mapped to a single category or code in another classification system. However, each category or code in the second system is only mapped to one category or code in the first system. This type of mapping implies that multiple categories or codes in the first system are aggregated or collapsed into a single category or code in the second system. The skos uri is http://www.w3.org/2004/02/skos/core#broadMatch . Indicating `<A> skos:broadwMatch <B>` means "B is broader than A"
+
+- **many-to-many (M:M) correspondence**: In a many-to-many correspondence, multiple categories or codes in one classification system are mapped to multiple categories or codes in another classification system. This type of mapping indicates complex relationships where neither a straightforward one-to-one correspondence exists, nor a parent-child relationship. The skos uri is http://www.w3.org/2004/02/skos/core#relatedMatch
+
+
+The following column names are used:
+- `<tree_classification_A>`: code of classification A
+- `<tree_classification_A>`: code of classification B which is mapped to the code of classification A
+- `comment`: comment on the type of concordance
+- `prefixed_id`: unique id (uuid4)
+- `skos_uri`: skos uri
+
+The requirements for these table types are specified [here](https://dataio-bonsamurais-bonsai-util-a55d63cbbbcf635b952059f8b8a12a71.gitlab.io/syntax.html#field).
+
+### dimension table
+A dimension table is used for classifications which do not have a tree structure.
+
+The following column names are used:
+- `code`: code of the item
+- `name`: name of the item
+- `description`: description of the item
+- `prefixed_id`: unique id (uuid4)
+
+
+### pairwise concordance table (for Bonsai)
+This type of concordance table is used to map pairwise codes. For instance, some data providers such as `UNdata` and `IEA` are using combined codes for an activity (e.g. for "production of", "electricity production by") and `flowobject` (e.g. "coal") to express a `bonsai_activitytype` ("A_COAL", "A_PowC"). In some cases, when the `conc_` tables for  `activitytype` and `flowobject`, which map single relations, are not sufficient to create these pairwise concordances, it is reasonable to make it explicit. The mapping relationships between the pairwise codes can be the same as in the `conc_` tables.
+
+
+The following column names are used:
+activitytype_from,flowobject_from,activitytype_other,flowobject_other,classification_from,classification_other
+
+- `activitytype_from`: code for activitytype of `<from>` classification
+- `flowobject_from`: code for flowobject of `<from>` classification
+- `activitytype_other`: code for the activitytype of `<other>` classification
+- `flowobject_other`: code for the flowobject of `<other>` classification
+- `classification_from`: name of the `<from>` classification schema
+- `classification_other`: name of the `<other>` classification schema
+- `skos_uri`: skos uri
+- `comment`: comment on the type of concordance
+- `prefixed_id`: unique id (created by `uuid4`)
+
+## Usage
+To use the classification, you can install the package via pip. Replace `<version>` by a specific tag or branch name.
+
+```
+pip install git+ssh://git@gitlab.com/bonsamurais/bonsai/util/classifications@<version>
+```
+
+From pypi, do:
+```
+pip install bonsai_classifications
+```
+
+
+All classifications are provided as `dataio.datapackage` which include the tables as `pandas.DataFrame`. E.g., you can do the following get the classification `tree` for industry activities of Bonsai:
+```python
+import classifications
+
+classifications.activitytype.datapackage.tree_bonsai
+```
+:::{note} The datapackage object includes also the tables of other classifications.
+:::
+
+You can also get the concordance tables and external classifications in the similar way, using the `datapackage` object.
+
+The activities and flowobjects of Bonsai can be also used directly as objects. By doing the following, you would get the `name` of the `A_Chick` activity.
+```python
+import classifications
+
+classifications.activitytype.bonsai.A_Chick.name
+```
+
+### Special methods
+- `lookup()` for searching strings in code names
+- `get_children()` to get all codes those have the same parent code
+- `create_conc()` to create a concordance table
+- `disaggregate_bonsai()` for adding new codes, which disaggregate an existing code
+
+To search for certain key words in a table, you can use the line of code below. This returns a pandas DataFrame with rows that have "coal" in the `name` column.
+```python
+classifications.flowobject.datapackage.tree_bonsai.lookup("coal")
+```
+
+To get all children of a certain code (here for treatment activities in Bonsai), you can do:
+```python
+classifications.activitytype.datapackage.tree_bonsai.get_children(parent_code="at")
+```
+
+The package also helps to create new concordance tables. When having two concordance tables, one for mapping codes of classification `a` to `b`, and the other for mapping `b` to `c`, you can use the following:
+
+df_1:
+| a | b |
+| - | - |
+| 01.01 | x |
+| ... | ... |
+
+df_2:
+| b | c |
+| - | - |
+| x | YXDA |
+| ... | ... |
+
+```python
+df_3 = classifications.create_conc(df_1, df_2, source="a", target="c", intermediate="c")
+
+```
+df_3:
+| a | c |
+| - | - |
+| 01.01 | YXDA |
+| ... | ... |
+
+To disaggregate existing codes of the Bonsai classification, you can use the `disaggregate_bonsai()` method. Depending on the category, e.g. `activitytype` or `flowobject`, you can call that method.
+To indicate the which code you want to disaggregate, you need to provide a dictionary, with the old code of Bonsai as keys. The value corresponding to that key is a list of tuples. Each tuple represents a new code. The first entry of that tuple is the code, the second entry is the name, and the third is a mapping dictionary. This mapping dictionary includes the name of another classification scheme (other than Bonsai) as key, and a list of strings, which are the codes of the other classification now represented by the new code.
+```python
+codes = {"disaggregations":
+          [
+            {"old_code" : "A_Paper",
+             "new_codes":
+               [
+                {"code": "New_Paper1",
+                 "description": "new paper production 1",
+                 "mappings": {"nace_rev2": ["10.02","01.13"]}
+                },
+                {"code": "New_Paper2",
+                 "description": "new paper production 2",
+                 "mappings": {}
+                }
+                ]
+            }
+          ]
+}
+
+d = classifications.activitytype.datapackage.disaggregate_bonsai(codes)
+```
+
+Get the pandas DataFrames that are modified.
+```python
+d["tree_bonsai"]
+d["conc_bonsai_nace_rev2"]
+```
+
+To use that function via terminal, execute `python disaggregate_bonsai.py <bonsai_categorty> <path/to/disaggregaion.yaml> <directory/for/updated/files>`. `<bonsai_category>` can be for instance `activitytype` or `flowobject`.
+
+:::{note} To disaggregate an existing code, you need to provide at least 2 new codes. It is assumed that all entities covered by the new codes are equal to the entities of the existing code.
