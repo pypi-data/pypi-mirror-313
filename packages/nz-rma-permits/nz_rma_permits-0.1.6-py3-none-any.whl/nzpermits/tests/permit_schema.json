@@ -1,0 +1,331 @@
+{
+  "title": "Permit",
+  "description": "    ",
+  "type": "object",
+  "properties": {
+    "permit_id": {
+      "title": "Permit Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/definitions/Status"
+    },
+    "status_changed_date": {
+      "title": "Status Changed Date",
+      "type": "string",
+      "format": "date"
+    },
+    "commencement_date": {
+      "title": "Commencement Date",
+      "type": "string",
+      "format": "date"
+    },
+    "expiry_date": {
+      "title": "Expiry Date",
+      "type": "string",
+      "format": "date"
+    },
+    "effective_end_date": {
+      "title": "Effective End Date",
+      "type": "string",
+      "format": "date"
+    },
+    "exercised": {
+      "title": "Exercised",
+      "type": "boolean"
+    },
+    "permitting_authority": {
+      "title": "Permitting Authority",
+      "type": "string"
+    },
+    "permit_type": {
+      "$ref": "#/definitions/PermitType"
+    },
+    "activity": {
+      "$ref": "#/definitions/Activity"
+    },
+    "modified_date": {
+      "title": "Modified Date",
+      "description": "The modification date of the last edit.",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "permit_id",
+    "status",
+    "commencement_date",
+    "expiry_date",
+    "exercised",
+    "permitting_authority",
+    "permit_type",
+    "activity",
+    "modified_date"
+  ],
+  "definitions": {
+    "Status": {
+      "title": "Status",
+      "description": "An enumeration.",
+      "enum": [
+        "Expired",
+        "Surrendered",
+        "Active",
+        "Archived",
+        "Lapsed",
+        "Superseded",
+        "Cancelled",
+        "Expired - S.124 Protection"
+      ],
+      "type": "string"
+    },
+    "PermitType": {
+      "title": "PermitType",
+      "description": "An enumeration.",
+      "enum": [
+        "water permit"
+      ],
+      "type": "string"
+    },
+    "ActivityType": {
+      "title": "ActivityType",
+      "description": "An enumeration.",
+      "enum": [
+        "consumptive take water",
+        "non-consumptive take water",
+        "divert water",
+        "dam water",
+        "use water",
+        "discharge water"
+      ],
+      "type": "string"
+    },
+    "HydroFeature": {
+      "title": "HydroFeature",
+      "description": "An enumeration.",
+      "enum": [
+        "surface water",
+        "groundwater"
+      ],
+      "type": "string"
+    },
+    "GeometryType": {
+      "title": "GeometryType",
+      "description": "An enumeration.",
+      "enum": [
+        "Point",
+        "Line",
+        "Polygon"
+      ],
+      "type": "string"
+    },
+    "Geometry": {
+      "title": "Geometry",
+      "description": "Geojson-like geometry model.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/GeometryType"
+        },
+        "coordinates": {
+          "title": "Coordinates",
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "coordinates"
+      ]
+    },
+    "Station": {
+      "title": "Station",
+      "description": "Contains the station data of a dataset.",
+      "type": "object",
+      "properties": {
+        "station_id": {
+          "title": "Station Id",
+          "description": "station uuid based on the geometry",
+          "type": "string"
+        },
+        "ref": {
+          "title": "Ref",
+          "description": "station reference ID given by owner",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "osm_id": {
+          "title": "Osm Id",
+          "type": "integer"
+        },
+        "geometry": {
+          "$ref": "#/definitions/Geometry"
+        },
+        "altitude": {
+          "title": "Altitude",
+          "type": "number"
+        },
+        "stream_depletion_ratio": {
+          "title": "Stream Depletion Ratio",
+          "type": "number"
+        }
+      },
+      "required": [
+        "station_id",
+        "ref",
+        "geometry"
+      ]
+    },
+    "ConditionType": {
+      "title": "ConditionType",
+      "description": "An enumeration.",
+      "enum": [
+        "abstraction limit"
+      ],
+      "type": "string"
+    },
+    "Period": {
+      "title": "Period",
+      "description": "An enumeration.",
+      "enum": [
+        "S",
+        "H",
+        "D",
+        "W",
+        "M",
+        "Y"
+      ],
+      "type": "string"
+    },
+    "Units": {
+      "title": "Units",
+      "description": "An enumeration.",
+      "enum": [
+        "l",
+        "m3"
+      ],
+      "type": "string"
+    },
+    "LimitBoundary": {
+      "title": "LimitBoundary",
+      "description": "An enumeration.",
+      "enum": [
+        "min",
+        "max"
+      ],
+      "type": "string"
+    },
+    "AggregationStat": {
+      "title": "AggregationStat",
+      "description": "An enumeration.",
+      "enum": [
+        "min",
+        "max",
+        "median",
+        "mean"
+      ],
+      "type": "string"
+    },
+    "Limit": {
+      "title": "Limit",
+      "description": "    ",
+      "type": "object",
+      "properties": {
+        "value": {
+          "title": "Value",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "period": {
+          "$ref": "#/definitions/Period"
+        },
+        "units": {
+          "$ref": "#/definitions/Units"
+        },
+        "limit_boundary": {
+          "$ref": "#/definitions/LimitBoundary"
+        },
+        "aggregation_stat": {
+          "$ref": "#/definitions/AggregationStat"
+        }
+      },
+      "required": [
+        "value",
+        "period",
+        "units",
+        "limit_boundary"
+      ]
+    },
+    "Condition": {
+      "title": "Condition",
+      "description": "    ",
+      "type": "object",
+      "properties": {
+        "condition_type": {
+          "$ref": "#/definitions/ConditionType"
+        },
+        "limit": {
+          "title": "Limit",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Limit"
+          }
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "condition_type"
+      ]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "    ",
+      "type": "object",
+      "properties": {
+        "activity_type": {
+          "$ref": "#/definitions/ActivityType"
+        },
+        "hydro_feature": {
+          "$ref": "#/definitions/HydroFeature"
+        },
+        "primary_purpose": {
+          "title": "Primary Purpose",
+          "type": "string"
+        },
+        "station": {
+          "title": "Station",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Station"
+          }
+        },
+        "condition": {
+          "title": "Condition",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Condition"
+          }
+        }
+      },
+      "required": [
+        "activity_type",
+        "hydro_feature",
+        "station",
+        "condition"
+      ]
+    }
+  }
+}
