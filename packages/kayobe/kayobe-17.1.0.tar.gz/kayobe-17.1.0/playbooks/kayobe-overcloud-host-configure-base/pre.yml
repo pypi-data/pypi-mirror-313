@@ -1,0 +1,54 @@
+---
+- hosts: primary
+  vars:
+    testinfra_venv: ~/testinfra-venv
+  tasks:
+    - name: Ensure python3 is installed
+      package:
+        name: python3
+      become: true
+
+    - name: Install Python3.12 on RHEL derivatives
+      dnf:
+        name:
+          - python3.12
+          - python3.12-devel
+        state: latest
+      when: ansible_facts.os_family == 'RedHat'
+      become: true
+
+    - name: Ensure testinfra is installed
+      vars:
+        cmd: "{{ 'python3.12' if ansible_facts.os_family == 'RedHat' else 'python3' }} -m venv"
+      pip:
+        name:
+          - distro
+          - pytest-testinfra
+          - pytest-html
+        virtualenv: "{{ testinfra_venv }}"
+        virtualenv_command: "{{ cmd }}"
+
+    # NOTE(mgoddard): Use the name zzz-overrides.yml to ensure this takes
+    # precedence over the standard config files and zz-overrides.yml from
+    # kayobe-overcloud-base.
+    - name: Ensure kayobe-config override config file exists
+      template:
+        src: overrides.yml.j2
+        dest: "{{ kayobe_config_src_dir }}/etc/kayobe/zzz-overrides.yml"
+
+    # NOTE(mgoddard): Create two loopback devices backed by files. These will
+    # be added to a software RAID volume, then added to an LVM volume group.
+    - name: Ensure a docker storage backing file exists
+      command: truncate -s 2G /tmp/docker-storage{{ item }}
+      loop: [0, 1]
+
+    - name: Ensure the docker storage loopback device is created
+      command: losetup /dev/loop{{ item }} /tmp/docker-storage{{ item }}
+      become: true
+      loop: [0, 1]
+
+    - name: Ensure dummy network interfaces exist
+      command: ip link add dummy{{ item }} type dummy
+      become: true
+      loop: "{{ range(2, 8) | list }}"
+      when: ansible_facts.os_family == 'Debian'
