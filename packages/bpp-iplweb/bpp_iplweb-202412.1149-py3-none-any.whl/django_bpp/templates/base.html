@@ -1,0 +1,165 @@
+{% extends "bare.html" %}
+{% load static static cache just_single_quotes bpp_version crispy_forms_tags %}
+
+{% block extrahead %}
+    {{ block.super }}
+
+    {% load session_security_tags %}
+    {% load l10n %}
+
+    {% if request.user.is_authenticated %}
+        {% include 'session_security/dialog.html' %}
+        <script type="text/javascript">
+            var sessionSecurity = new yourlabs.SessionSecurity({
+                pingUrl: '{% url 'session_security_ping' %}',
+                warnAfter: {{ request|warn_after|unlocalize }},
+                expireAfter: {{ request|expire_after|unlocalize }},
+                confirmFormDiscard: false
+            });
+
+            var messageAlertSound = null;
+        </script>
+    {% endif %}
+
+{% endblock %}
+
+{% block body %}
+        {% load notifications %}
+        <div id="messageTemplate" style="display: none;">
+        {% verbatim messageTemplate %}
+        <div data-closable
+             data-url="{{ closeURL }}"
+             class="ajax-on-close callout primary {{ cssClass }}{{^cssClass}}info{{/cssClass}}">
+        {{#clickURL}}
+        <a href="{{ clickURL }}">
+        {{/clickURL}}
+        {{{ text }}}
+        {{#clickURL}}</a>{{/clickURL}}
+            <button
+                type="button"
+                class="close-button"
+                aria-label="Zamknij powiadomienie"
+                data-close>
+             <span aria-hidden="true">&times;</span>
+             </button>
+
+        </div>
+        {% endverbatim messageTemplate %}
+        </div>
+        {# fix pycharm highlighting #}
+
+    {% if request.user.is_authenticated %}
+        {{ extraChannels|json_script:"extra-channels" }}
+        <script type="text/javascript">
+            $(document).ready(function () {
+                bppNotifications.init("{% static "bpp/wav/alert.wav" %}",
+                    document.getElementById('extra-channels').textContent);
+
+                $(document).on('closed.zf', function (event) {
+                    if ($(event.target).hasClass("ajax-on-close")) {
+                        var url = $(event.target).data("url");
+                        if (url) {
+                            $.get(url);
+                        }
+                    }
+                });
+
+                {% if messages %}
+                    {% for message in messages %}
+                        bppNotifications.addMessage({
+                            cssClass: '{{ message.level|message_level_to_css_class }}',
+                            clickURL: '{{ message.url }}',
+                            {% if message.pk %}
+                                closeURL: '{% url "messages_extends:message_mark_read" message.pk %}',
+                            {% endif %}
+                            pk: '{{ message.pk }}',
+                            text: '{{ message.message|just_single_quotes|safe }}',
+                            sound: false
+                        });
+                    {% endfor %}
+                {% endif %}
+
+            });
+
+        </script>
+    {% else %}
+{#        Użytkownik NIE jest autoryzowany -- wyrzuć mu za pomoca JScript (zeby wygladalo identycznie) #}
+{#        listę statycznych komunikatów -- flash messages (tych co to pomiędzy requestami)... #}
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                bppNotifications.init("{% static "bpp/wav/alert.wav" %}");
+
+                {% if messages %}
+                    {% for message in messages %}
+                        bppNotifications.addMessage({
+                            cssClass: '{{ message.level|message_level_to_css_class }}',
+                            clickURL: '{{ message.url }}',
+                            {% if message.pk %}
+                                closeURL: '{% url "messages_extends:message_mark_read" message.pk %}',
+                            {% endif %}
+                            pk: '{{ message.pk }}',
+                            text: '{{ message.message|just_single_quotes|safe }}',
+                            sound: false
+                        });
+                    {% endfor %}
+                {% endif %}
+            });
+        </script>
+
+    {% endif %}
+
+    {% include "top_bar.html" %}
+    <div class="grid-container-fluid" data-sticky-container>
+        <div class="grid-container">
+            {% block before-breadcrumbs %}{% endblock %}
+            <div class="grid-x hide-for-small-only">
+                <ul class="breadcrumbs hide-for-print" style="margin-top: 10px;">
+                    {% block breadcrumbs %}
+                        <li><a href="/">Strona główna</a></li>
+                    {% endblock %}
+                </ul>
+            </div>
+
+            <div class="grid-x">
+                <div class="cell">
+                    <div id="messagesPlaceholder"></div>
+                    <div id="content">
+
+                        {% include "test_server_detection.html" %}
+
+                        {% if password_change_required %}
+                            <div class="grid-x align-center">
+                                <div class="large-6 medium-8 small-12 cell">
+
+                                    <div class='callout primary'>Twoje hasło uległo przeterminowaniu.
+                                        Proszę, zmień je używając poniższego formularza.
+                                    </div>
+                                    <form action="." method="post">{% csrf_token %}
+                                        {% crispy form %}{% if next %}
+                                            <input type="hidden" name="next" value="{{ next }}"/>{% endif %}
+                                    </form>
+                                </div>
+                            </div>
+                        {% else %}
+                            {% block content %}
+                            {% endblock %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% include "base_footer.html" %}
+            </div>
+            {% load cookielaw_tags %}
+            {% if cookielaw.notset %}{% rejectable_cookielaw_banner %}{% endif %}
+        </div>
+    </div>
+
+    {% if cookielaw.accepted %}
+        {% cache 3600 google %}
+            {% if GOOGLE_ANALYTICS_PROPERTY_ID %}
+                {% include "google_analytics.html" %}
+            {% endif %}
+        {% endcache %}
+    {% endif %}
+
+{% endblock %}

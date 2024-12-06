@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load render_table from django_tables2 %}
+
+{% block extratitle %}
+    {{ table_title }} - {{  table_subtitle }}
+{% endblock %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css"/>
+    {{ block.super }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li><a href="{% url "bpp:ranking_autorow_formularz" %}">Ranking autorów</a></li>
+    <li class="current">{{ table_title }}</li>
+{% endblock %}
+
+{% block content %}
+    <h1>{{ table_title }}</h1>
+    <h2>{{ table_subtitle }}</h2>
+    {% render_table table %}
+{% endblock %}

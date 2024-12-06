@@ -1,0 +1,515 @@
+{% load prace user_in_group %}
+<table width="{{ width|default:"100%" }}"
+       class="szczegolyRekordu {{ htmlclass|default:"naglowki_z_lewej" }}">
+    <tr>
+        <th width="20%">Tytuł:</th>
+        <td>
+            {% if praca.tytul %}
+                <b>{{ praca.tytul_oryginalny|safe }} ({{ praca.tytul|safe }}).</b>
+            {% else %}
+                <b>{{ praca.tytul_oryginalny|znak_na_koncu:"."|safe }}</b>
+            {% endif %}
+            {% if praca.charakter_formalny.charakter_ogolny != 'roz' %}
+                {{ praca.oznaczenie_wydania|default:""|znak_na_koncu:"." }}
+            {% endif %}
+        </td>
+    </tr>
+    <tr>
+        <th>
+            Autorzy:
+        </th>
+        <td>
+            {{ praca.tekst_przed_pierwszym_autorem|default:"" }}
+            {% for autor in praca.autorzy_dla_opisu %}{% ifchanged autor.typ_odpowiedzialnosci %}
+                [{{ autor.typ_odpowiedzialnosci.skrot|upper }}] {% endifchanged %}{% if links == "admin" %}
+                <a href="{% url "admin:bpp_autor_change" autor.autor.pk %}">
+                {% else %}{% if links == "normal" %}<a href="{% url "bpp:browse_autor" autor.autor.slug %}">{% else %}
+                {% endif %}{% endif %}{% if links %}{{ autor.zapisany_jako }}{% else %}
+                {{ autor.zapisany_jako|upper }}{% endif %}{% if links == "admin" or links == "normal" %}</a>{% endif %}
+                {% if not forloop.last %}, {% else %}{{ praca.tekst_po_ostatnim_autorze|default:"" }}.
+                {% endif %}{% endfor %}
+        </td>
+    </tr>
+    {% if praca.zrodlo or praca.wydawnictwo_nadrzedne or praca.informacje or praca.szczegoly %}
+        <tr>
+            <th>
+                Szczegóły:
+            </th>
+            <td>
+                {% if praca.zrodlo %}
+                    {% if links == "admin" %}
+                        <a href="{% url "admin:bpp_zrodlo_change" praca.zrodlo.pk %}">{{ praca.zrodlo }}</a>
+                    {% else %}
+                        <a href="{% url "bpp:browse_zrodlo" praca.zrodlo.slug %}">{{ praca.zrodlo }}</a>
+                    {% endif %}
+                {% endif %}
+                {% if praca.wydawnictwo_nadrzedne %}
+                    <a href="{% url "bpp:browse_praca" "wydawnictwo_zwarte" praca.wydawnictwo_nadrzedne.pk %}">
+                {% endif %}
+                {% if not praca.informacje and not praca.szczegoly %}
+                    {% if praca.wydawnictwo_nadrzedne.opis_bibliograficzny %}
+                        W: {{ praca.wydawnictwo_nadrzedne.opis_bibliograficzny|safe }}
+                    {% endif %}
+                {% endif %}
+                {{ praca.informacje|default:""|znak_na_koncu:", "|safe }}
+                {{ praca.szczegoly|default:""|safe }}
+                {% if praca.wydawnictwo_nadrzedne %}
+                    </a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endif %}
+
+    {% if praca.wydawca or praca.wydawca_opis %}
+        <tr>
+            <th>Wydawca:</th>
+            <td>{{ praca.wydawca|default:"" }} {{ praca.wydawca_opis|default:"" }}</td>
+        </tr>
+    {% endif %}
+
+    {% if praca.streszczenia.exists %}
+        <tr>
+            <th>Streszczenie:</th>
+            <td>{% for streszczenie in praca.streszczenia.all %}
+                <!-- <strong>{{streszczenie.jezyk_streszczenia.nazwa}}</strong> -->
+                <p>{{ streszczenie.streszczenie|safe }}</p>
+            {% endfor %}
+            </td>
+        </tr>
+    {% endif %}
+
+    {% if praca.isbn %}
+        <tr>
+            <th>ISBN:</th>
+            <td>{{ praca.isbn }}</td>
+        </tr>
+    {% endif %}
+    {% if praca.e_isbn %}
+        <tr>
+            <th>e-ISBN:</th>
+            <td>{{ praca.e_isbn }}</td>
+        </tr>
+    {% endif %}
+
+    {% if praca.issn %}
+        <tr>
+            <th>ISSN:</th>
+            <td>{{ praca.issn }}</td>
+        </tr>
+    {% endif %}
+    {% if praca.e_issn %}
+        <tr>
+            <th>e-ISSN:</th>
+            <td>{{ praca.e_issn }}</td>
+        </tr>
+    {% endif %}
+
+    {% if praca.charakter_formalny.skrot == "PAT" %}
+        <tr>
+            <th>Patent:</th>
+            <td>
+                <b>- numer zgłoszenia:</b> {{ praca.numer_zgloszenia|default:"brak" }}. <br/>
+                <b>- wydział:</b> {{ praca.wydzial|default:"brak" }}<br/>
+                <b>- rodzaj prawa:</b> {{ praca.rodzaj_prawa|default:"brak" }}<br/>
+                <b>- data zgłoszenia:</b> {{ praca.data_zgloszenia|default:"brak" }}<br/>
+                <b>- numer zgłoszenia:</b> {{ praca.numer_zgloszenia|default:"brak" }}<br/>
+                <b>- data decyzji:</b> {{ praca.data_decyzji|default:"brak" }}<br/>
+                <b>- numer prawa wyłącznego:</b> {{ praca.numer_prawa_wylacznego|default:"brak" }}<br/>
+                <b>- wdrożenie:</b> {% if praca.wdrozenie %}tak{% else %}nie{% endif %}
+            </td>
+        </tr>
+    {% endif %}
+    {% if praca.public_www or praca.www %}
+        <tr>
+            <th>
+                Strona WWW:
+            </th>
+            <td>
+                {% if praca.public_www %}
+                    <a href="{{ praca.public_www }}">
+                        {{ praca.public_www|truncatechars:120 }}</a>
+                {% elif praca.www %}
+                    <a href="{{ praca.www }}">{{ praca.www|truncatechars:120 }}</a>
+                {% else %}
+                    Brak danych
+                {% endif %}
+            </td>
+        </tr>
+    {% endif %}
+    {% if praca.doi %}
+        <tr>
+            <th>DOI</th>
+            <td><a target="_blank" href="http://doi.org/{{ praca.doi }}">{{ praca.doi }}</a></td>
+        </tr>
+    {% endif %}
+
+    {% if praca.pubmed_id %}
+        <tr>
+            <th>PubMed ID:</th>
+            <td><a target="_blank"
+                   href="https://www.ncbi.nlm.nih.gov/pubmed/{{ praca.pubmed_id }}">{{ praca.pubmed_id }}</a></td>
+        </tr>
+    {% endif %}
+
+    {% if praca.pmc_id %}
+        <tr>
+            <th>PMC ID:</th>
+            <td><a href="https://www.ncbi.nlm.nih.gov/pmc/{{ praca.pmc_id }}">{{ praca.pmc_id }}</a></td>
+        </tr>
+    {% endif %}
+
+    <tr>
+        <th>
+            BPP ID:
+        </th>
+        <td>
+            {{ rekord.pk }} <small>czyli {{ rekord.describe_content_type }} o ID = {{ praca.pk }}</small>
+        </td>
+    </tr>
+    {% if praca.pbn_uid_id %}
+        <tr>
+            <th>PBN UID:</th>
+            <td><a target="_blank" href="{{ praca.link_do_pbn }}">{{ praca.pbn_uid_id }}</a></td>
+        </tr>
+    {% endif %}
+    {% if praca.pbn_id %}
+        <tr>
+            <th>
+                PBN ID (historyczne):
+            </th>
+            <td>
+                {{ praca.pbn_id }}
+            </td>
+        </tr>
+    {% endif %}
+
+    <tr>
+        <th>
+            Rok:
+        </th>
+        <td>
+            {{ praca.rok }}
+        </td>
+    </tr>
+    <tr>
+        <th>
+            Charakter formalny:
+        </th>
+        <td>
+            {{ praca.charakter_formalny }}
+        </td>
+    </tr>
+
+    <tr>
+        <th>
+            Język:
+        </th>
+        <td>
+            {{ praca.jezyk }}
+        </td>
+    </tr>
+    {% if praca.typ_kbn %}
+        <tr>
+            <th>
+                Typ MNiSW/MEiN:
+            </th>
+            <td>
+                {{ praca.typ_kbn }}
+            </td>
+        </tr>
+    {% endif %}
+    {% if praca.openaccess_tryb_dostepu or praca.openaccess_wersja_tekstu or praca.openaccess_licencja or praca.openaccess_czas_publikacji or praca.openaccess_ilosc_miesiecy %}
+        <tr>
+            <th style="vertical-align: top;">OpenAccess:</th>
+            <td>
+                {% if praca.openaccess_tryb_dostepu %}
+                    <b>- tryb dostępu: </b>
+                    {{ praca.openaccess_tryb_dostepu|lower }}
+                    <br/>
+                {% endif %}
+
+                {% if praca.openaccess_wersja_tekstu %}
+
+                    <b> - wersja tekstu: </b>
+                    {{ praca.openaccess_wersja_tekstu|lower }}<br/>
+
+                {% endif %}
+                {% if praca.openaccess_licencja %}
+
+                    <b> - licencja: </b>
+                    {% if praca.openaccess_licencja.webname %}
+                        <a target="_blank"
+                           href="https://creativecommons.org/licenses/{{ praca.openaccess_licencja.webname }}/3.0/pl/#content">
+                    {% endif %}
+                {{ praca.openaccess_licencja }}
+                {% if praca.openaccess_licencja.webname %}
+                    </a>
+                {% endif %}
+                    <br/>
+
+                {% endif %}
+                {% if praca.openaccess_czas_publikacji %}
+
+                    <b> - czas udostępnienia: </b>
+                    {{ praca.openaccess_czas_publikacji|lower }}<br/>
+
+                {% endif %}
+                {% if praca.openaccess_ilosc_miesiecy %}
+
+                    <b> - ilość miesięcy: </b>
+                    {{ praca.openaccess_ilosc_miesiecy }}
+                    <small>ilość miesięcy które upłynęły od momentu opublikowania do momentu udostępnienia
+                    </small>
+                    <br/>
+
+                {% endif %}
+            </td>
+            </td>
+        </tr>
+    {% endif %}
+    <tr>
+        <th>
+            Punkty MNiSW/MEiN:
+        </th>
+        <td>
+            {{ praca.punkty_kbn }}
+        </td>
+    </tr>
+
+    <tr>
+        <th>
+            Impact factor:
+        </th>
+        <td>
+            {{ praca.impact_factor }}
+        </td>
+    </tr>
+    {% if praca.kwartyl_w_scopus %}
+        <tr>
+            <th>
+                Kwartyl w SCOPUS:
+            </th>
+            <td>
+                Q{{ praca.kwartyl_w_scopus }}
+            </td>
+        </tr>
+    {% endif %}
+    {% if praca.kwartyl_w_wos %}
+        <tr>
+            <th>
+                Kwartyl w WoS:
+            </th>
+            <td>
+                Q{{ praca.kwartyl_w_wos }}
+            </td>
+        </tr>
+    {% endif %}
+    {% if praca.liczba_cytowan %}
+        <tr>
+            <th>Liczba cytowań:</th>
+            <td>{{ praca.liczba_cytowan }}</td>
+        </tr>
+    {% endif %}
+    {% if praca.liczba_znakow_wydawniczych %}
+        <tr>
+            <th>Liczba arkuszy wydawniczych:</th>
+            <td>{{ praca.wymiar_wydawniczy_w_arkuszach }}</td>
+        </tr>
+    {% endif %}
+    {% if uczelnia.pokazuj_punktacja_snip %}
+        <tr>
+            <th>Punktacja SNIP:</th>
+            <td>{{ praca.punktacja_snip }}</td>
+        </tr>
+    {% endif %}
+    {% if uczelnia.pokazuj_index_copernicus %}
+        <tr>
+            <th>
+                Index Copernicus:
+            </th>
+            <td>
+                {{ praca.index_copernicus }}
+            </td>
+        </tr>
+    {% endif %}
+
+    {% if uczelnia.pokazuj_punktacje_wewnetrzna %}
+        <tr>
+            <th>
+                Punktacja wewnętrzna:
+            </th>
+            <td>
+                {{ praca.punktacja_wewnetrzna }}
+            </td>
+        </tr>
+    {% endif %}
+    {% if uczelnia.pokazuj_status_korekty == "always" or uczelnia.pokazuj_status_korekty == "logged-in" and not request.user.is_anonymous %}
+        <tr>
+            <th>
+                Status:
+            </th>
+            <td>
+                {{ praca.status_korekty }}
+            </td>
+        </tr>
+    {% endif %}
+    {% if praca.wydawnictwa_powiazane_set.exists %}
+        <tr>
+            <th>Rekordy powiązane</th>
+            <td>
+                <ol>
+                    {% for elem in praca.wydawnictwa_powiazane_posortowane.all %}
+                        <li>
+                            <a href="{% url "bpp:browse_praca" "wydawnictwo_zwarte" elem.pk %}">{{ elem.opis_bibliograficzny_cache|safe }}</a>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </td>
+        </tr>
+    {% endif %}
+    {% if uczelnia.pokazuj_praca_recenzowana == "always" or uczelnia.pokazuj_praca_recenzowana == "logged-in" and not request.user.is_anonymous %}
+        <tr>
+            <th>
+                Praca recenzowana:
+            </th>
+            <td>
+                {{ praca.recenzowana|yesno }}
+            </td>
+        </tr>
+    {% endif %}
+    {% if praca.ma_procenty %}
+        <tr>
+            <th>Odpowiedzialność za powstanie pracy</th>
+            <td>
+                {% for autor in praca.autorzy_set.all %}
+                    {% if autor.procent %}
+                        {{ autor.procent }}% {{ autor.zapisany_jako }}<br/>
+                    {% endif %}
+                {% endfor %}
+
+            </td>
+        </tr>
+    {% endif %}
+
+    <tr>
+        <th>
+            Rekord utworzony:
+        </th>
+        <td>
+            {{ praca.utworzono }}
+        </td>
+    </tr>
+
+    <tr>
+        <th>
+            Rekord zaktualizowany:
+        </th>
+        <td>
+            {{ praca.ostatnio_zmieniony }}
+        </td>
+    </tr>
+    {% if praca.zewnetrzna_baza_danych.exists %}
+        <tr>
+            <th>Zewnętrzna<br/>baza danych:</th>
+            <td>
+                <ul>{% for db in praca.zewnetrzna_baza_danych.all %}
+                    <li>{{ db.baza.nazwa }}</li>
+                {% endfor %}
+                </ul>
+            </td>
+        </tr>
+    {% endif %}
+</table>
+
+{% if rekord.ma_punktacje_sloty %}
+    {% if uczelnia.pokazuj_tabele_slotow_na_stronie_rekordu == "always" or uczelnia.pokazuj_tabele_slotow_na_stronie_rekordu == "logged-in" and not request.user.is_anonymous %}
+        <h4>Punkty i sloty autorów
+            {% if uczelnia.drukuj_oswiadczenia %}
+                {% if request.user.is_superuser or request.user|has_group:"wprowadzanie danych" %}
+                    <a target="_blank" href="{% url "oswiadczenia:wiele-oswiadczen" rekord.id.0 rekord.id.1 %}">
+                        <span class="fi-print"></span>
+                    </a>
+                {% endif %}
+            {% endif %}
+
+        </h4>
+        <table>
+            <tr>
+                <th>Autor</th>
+                <th>Dyscyplina</th>
+                <th>PkD / PkDAut</th>
+                <th>Slot</th>
+                {% if uczelnia.drukuj_oswiadczenia %}
+                    {% if request.user.is_superuser or request.user|has_group:"wprowadzanie danych" %}
+                        <th>Oświadczenia</th>
+                    {% endif %}
+                {% endif %}
+            </tr>
+
+            {% for pa in rekord.punktacja_autora.select_related %}
+                <tr>
+                    <td>{{ pa.autor }}</td>
+                    <td>{{ pa.dyscyplina.nazwa }}</td>
+                    <td>{{ pa.pkdaut }}</td>
+                    <td>{{ pa.slot }}</td>
+                    {% if uczelnia.drukuj_oswiadczenia %}
+                        {% if request.user.is_superuser or request.user|has_group:"wprowadzanie danych" %}
+                            <td>
+                                <!-- wydruk oswiadczenia -->
+                                <a target="_blank"
+                                   title="Wydruk dyscypliny zgłoszonej dla publikacji"
+                                   href="{% url "oswiadczenia:jedno-oswiadczenie" rekord.id.0 rekord.id.1 pa.autor.id pa.dyscyplina.id %}">
+                                    <span class="fi-print"></span>
+                                </a>
+                                <!-- wydruk drugiego oswiadczenia jezeli ma subdyscypline -->
+                                {% if pa.czy_autor_ma_alternatywna_dyscypline and uczelnia.drukuj_alternatywne_oswiadczenia %}
+                                    &nbsp;
+                                    <a target="_blank"
+                                       title="Wydruk alternatywnej dyscypliny autora (innej, niż zgłoszona dla publikacji)"
+                                       href="{% url "oswiadczenia:jedno-oswiadczenie-druga-dyscyplina" rekord.id.0 rekord.id.1 pa.autor.id pa.dyscyplina.id %}">
+                                        <span class="fi-print" style="color: palevioletred;"></span>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+        <h4>Punkty i sloty dyscyplin</h4>
+        <table>
+            <tr>
+                <th>Dyscyplina</th>
+                <th>PkD / PkDAut</th>
+                <th>Slot</th>
+            </tr>
+            {% for pd in rekord.punktacja_dyscypliny.select_related %}
+                <tr>
+                    <td>{{ pd.dyscyplina.nazwa }}</td>
+                    <td>{{ pd.pkd }}</td>
+                    <td>{{ pd.slot }}</td>
+                    {% load user_in_group %}
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% endif %}
+{% endif %}
+
+{% if rekord.ma_odpiete_dyscypliny %}
+    {% if uczelnia.pokazuj_tabele_slotow_na_stronie_rekordu == "always" or uczelnia.pokazuj_tabele_slotow_na_stronie_rekordu == "logged-in" and not request.user.is_anonymous %}
+        <h4>"Odpięte" dyscypliny:</h4>
+        <table>
+            <tr>
+                <th>Autor</th>
+                <th>Dyscyplina</th>
+            </tr>
+            {% for pa in praca.odpiete_dyscypliny.select_related %}
+                <tr>
+                    <td>{{ pa.autor }}</td>
+                    <td>{{ pa.dyscyplina_naukowa.nazwa }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endif %}
