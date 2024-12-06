@@ -1,0 +1,167 @@
+<script>
+    // jquery hacks to improve layout during dev
+    $('.left-sidebar').remove()
+    $('#main-wrapper').attr('data-layout', '')
+</script>
+
+<style>
+/*        .container-fluid { display : flex  ;
+                           } */
+    .chatbot         { flex    : 1      }
+
+    .ask-llm {
+        margin: 20px;
+        padding: 20px;
+        border: 2px solid ;
+        background-color:black;
+        color: white;
+
+
+    .ask-llm h4 {
+        font-size: 24px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .ask-llm button {
+        width: 100%;
+        height: 100%;
+        font-size: 34px;
+    }
+
+    .ask-llm .textarea-container {
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+
+    .ask-llm textarea {
+        width: 100%;
+        height: auto;
+    }
+</style>
+
+<script type="module" src="/web_components/js/utils/WebC__Events_Utils.mjs"></script>
+
+<div class="container-fluid">
+    <div class="row ask-llm">
+        <div class="col-3 d-flex justify-content-center align-items-center">
+                <h2>ask same question to 3 LLMS</h2>
+            </div>
+            <div class="col-6 textarea-container">
+                <textarea id="promptToAllModels" class="form-control" rows="4" placeholder="Enter your prompt here..."></textarea>
+            </div>
+            <div class="col-3 d-flex justify-content-center align-items-center">
+                <button id="submit4thModel" class="btn btn-primary large" onclick="submit_to_models()">Submit to 3 models</button>
+            </div>
+        </div>
+    </div>
+    <div class="row ">
+        <div class="col-4">
+            <chatbot-openai url                = "{{ url_athena }}"
+                            name               = "Meta (Llama3)"
+                            platform           = "Groq (Free)"
+                            provider           = "1. Meta"
+                            model              = "llama3-70b-8192"
+                            show_sent_messages = "false"
+                            edit_mode          = "false"
+                            channel            = "chatbot-1" >
+            </chatbot-openai>
+        </div>
+        <div class="col-4">
+            <chatbot-openai url                = "{{ url_athena }}"
+                            name               = "Google (Gemma)"
+                            platform           = "Groq (Free)"
+                            provider           = "Google"
+                            model              = "gemma-7b-it"
+                            show_sent_messages = "false"
+                            edit_mode          = "false"
+                            channel            = "chatbot-2" >
+            </chatbot-openai>
+        </div>
+        <div class="col-4">
+            <chatbot-openai url                = "{{ url_athena }}"
+                            name               = "Mistral (Mixtral 8x7b)"
+                            platform           = "Groq (Free)"
+                            provider           = "Mistral"
+                            model              = "mixtral-8x7b-32768"
+                            show_sent_messages = "false"
+                            edit_mode          = "false"
+                            channel          = "chatbot-3" >
+            </chatbot-openai>
+        </div>
+    </div>
+    <div class="row ask-llm">
+        <div class="col-3 d-flex justify-content-center align-items-center">
+                <h2>ask 4th LLM to review</h2>
+            </div>
+            <div class="col-6 textarea-container">
+                <textarea id="promptTo4thModel" class="form-control" rows="4" placeholder="Enter your prompt here..."></textarea>
+            </div>
+            <div class="col-3 d-flex justify-content-center align-items-center">
+                <button id="submit4thModel" class="btn btn-primary large" onclick="ask_llm_to_review()">Aggregate and Submit</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <chatbot-openai url              = "{{ url_athena }}"
+                            name             = "{{ title      }}"
+                            platform           = "Groq (Free)"
+                            provider           = "1. Meta"
+                            model              = "llama3-70b-8192"
+                            channel          = "chatbot-4"
+                            edit_mode          = "false">
+            </chatbot-openai>
+        </div>
+    </div>
+</div>
+
+<webc-events-utils></webc-events-utils>
+
+<script>
+    user_prompt = "What is OWASP ; reply in 10 words"
+    review_prompt = "Act like a content reviewer with super focus on details, " +
+                     "can you review the 3 results for 3 different LLMs and review them for accuracy, " +
+                     "completeness and correctness. Can you also look for any inconsistencies between the answers"
+
+    $(document).ready(function (){
+        $('#promptTo4thModel' ).val(review_prompt)
+        $('#promptToAllModels').val(user_prompt)
+    })
+
+    function submit_to_models() {
+        $($("chatbot-openai")[0].messages.childNodes).remove()
+        $($("chatbot-openai")[1].messages.childNodes).remove()
+        $($("chatbot-openai")[2].messages.childNodes).remove()
+        $($("chatbot-openai")[3].messages.childNodes).remove()
+        user_prompt = $('#promptToAllModels').val()
+        events_utils.send_to_channel("new_input_message", 'chatbot-1', {'user_prompt':user_prompt})
+        events_utils.send_to_channel("new_input_message", 'chatbot-2', {'user_prompt':user_prompt})
+        events_utils.send_to_channel("new_input_message", 'chatbot-3', {'user_prompt':user_prompt})
+    }
+
+    function get_answers_from_chatbots() {
+        var chatbots = document.querySelectorAll("chatbot-openai");
+        var messages = [];
+        chatbots.forEach(function(chatbot, index) {
+            if (index < 3) {
+                var chatbotMessages = [];
+                chatbot.messages.childNodes.forEach(function(childNode) {
+                    var messageRaw = childNode.message_raw;
+                    chatbotMessages.push(messageRaw);
+                });
+                var chatbotMessageString = `### Here is the answer from Chatbot ${index + 1}\n------------------------\n` + chatbotMessages.join(" ");
+                messages.push(chatbotMessageString);
+            }
+        });
+        var allMessages = messages.join("\n\n");
+        return allMessages
+    }
+
+    function ask_llm_to_review() {
+        let review_prompt = $('#promptTo4thModel').val() + "\n\n"  + get_answers_from_chatbots()
+        events_utils.send_to_channel("new_input_message", 'chatbot-4', {'user_prompt':review_prompt})
+    }
+</script>
+

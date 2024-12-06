@@ -1,0 +1,56 @@
+<script>
+    // jquery hacks to improve layout during dev
+    $('.left-sidebar').remove()
+    $('#main-wrapper').attr('data-layout', '')
+</script>
+
+
+<style>
+/*        .container-fluid { display : flex  ;
+                           } */
+        .chatbot         { flex    : 1      }
+</style>
+
+
+<div class="container-fluid">
+    <div class="row ">
+        <div class="col-12">
+            <chatbot-openai url              = "{{ url_athena }}"
+                            name             = "{{ title      }}"
+                            model            = "{{ model      }}"
+                            platform         = "{{ platform   }}"
+                            provider         = "{{ provider   }}"
+                            channel          = "chatbot-main"
+                            system_prompt    = "only speak in emojis">
+            </chatbot-openai>
+        </div>
+{#        <div class="col-4">#}
+{#            <webc-events-utils></webc-events-utils>#}
+{#            <webc-events-viewer></webc-events-viewer>#}
+{#        </div>#}
+    </div>
+</div>
+<webc-events-utils></webc-events-utils>
+
+
+<script>
+    // todo: create CBR_Browser api to help with a lot of these methods and helper functions
+    // send test message as soon as the page opens (to Ollama running locally)
+    $(document).ready(function (){
+      //  user_prompt = "In two words, what is your name, and who created you?"
+      //  images = []
+      //  event_detail = {"user_prompt": user_prompt, 'images': images, channel:'chatbot-main'}
+      //  event_name = 'new_input_message'
+      //  event_data = {
+      //      bubbles: true,
+      //      composed: true,
+      //      detail: event_detail
+      //  }
+      //  this.dispatchEvent(new CustomEvent(event_name, event_data))
+      //  events_utils.send_message_to_channel('chatbot-main', 'hello channel')
+
+        events_utils.send_to_channel("new_input_message", 'chatbot-main', {'user_prompt':"to main: what is 2+2"})
+        events_utils.send_to_channel("new_input_message", 'chatbot-other', {'user_prompt':"to other: what is 4+4"})
+    })
+</script>
+
