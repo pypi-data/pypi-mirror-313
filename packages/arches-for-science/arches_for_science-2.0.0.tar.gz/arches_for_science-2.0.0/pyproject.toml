@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arches-for-science"
+readme = "README.md"
+authors = [
+    {name = "Farallon Geographics, Inc", email = "dev@fargeo.com"}
+]
+license = {text = "GNU AGPL3"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+requires-python = ">=3.10"
+dependencies = [
+  "arches>=7.6.3,<8",
+  "supervisor==4.2.1",
+  "django-pgtrigger==4.9.0",
+  "django-storages==1.13.2",
+  "boto3==1.25.3",
+  "arches-templating>=0.1.2",
+]
+version = "2.0.0"
+
+[project.optional-dependencies]
+dev = [
+    "livereload",
+    "sst",
+    "coverage",
+    "django-silk==5.1.0",
+    "pre-commit",
+    "black==24.4.2",
+]
+
+[tool.setuptools]
+packages = ["arches_for_science"]
+
+[tool.black]
+line-length = 140
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.pylint."messages control"]
+disable = [
+  "no-member",  # Django false positives
+  "no-self-argument",  # Django false positives
+]
