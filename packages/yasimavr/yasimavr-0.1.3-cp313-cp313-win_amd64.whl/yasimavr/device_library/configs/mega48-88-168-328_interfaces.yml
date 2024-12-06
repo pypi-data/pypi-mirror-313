@@ -1,0 +1,319 @@
+# YAML configuration file for atmega48-88-168-328 variants
+#
+# Copyright 2021 Clement Savergne <csavergne@yahoo.com>
+#
+# This file is part of yasim-avr.
+#
+# yasim-avr is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# yasim-avr is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with yasim-avr.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+#========================================================================================
+PORT:
+    registers:
+        - name: PUD
+          address: 0x35
+          fields:
+            PUD: { kind: BIT, pos: 4 }
+
+        - name: PORT
+          offset: 0x02
+
+        - name: DDR
+          offset: 0x01
+
+        - name: PIN
+          offset: 0x00
+
+#========================================================================================
+EXTINT:
+    registers:
+        - name: EICRA
+          address: 0x49
+          fields:
+            ISC0:
+                kind: ENUM
+                LSB: 0
+                MSB: 1
+                values: [ LOW, TOGGLE, FALLING, RISING ]
+            ISC1:
+                kind: ENUM
+                LSB: 2
+                MSB: 3
+                values: [ LOW, TOGGLE, FALLING, RISING ]
+
+        - name: EIMSK
+          address: 0x1D
+          fields:
+            INT0: { kind: BIT, pos: 0, one: enabled, zero: disabled }
+            INT1: { kind: BIT, pos: 1, one: enabled, zero: disabled }
+
+        - name: EIFR
+          address: 0x1C
+          fields:
+            INTF0: { kind: BIT, pos: 0 }
+            INTF1: { kind: BIT, pos: 1 }
+
+        - name: PCICR
+          address: 0x48
+          fields:
+            PCIE0: { kind: BIT, pos: 0, one: enabled, zero: disabled }
+            PCIE1: { kind: BIT, pos: 1, one: enabled, zero: disabled }
+            PCIE2: { kind: BIT, pos: 2, one: enabled, zero: disabled }
+
+        - name: PCIFR
+          address: 0x1B
+          fields:
+            PCIF0: { kind: BIT, pos: 0, one: enabled, zero: disabled }
+            PCIF1: { kind: BIT, pos: 1, one: enabled, zero: disabled }
+            PCIF2: { kind: BIT, pos: 2, one: enabled, zero: disabled }
+
+        - name: PCMSK0
+          address: 0x4B
+          fields:
+            PCINT0: { kind: BIT, pos: 0, one: enabled, zero: disabled }
+            PCINT1: { kind: BIT, pos: 1, one: enabled, zero: disabled }
+            PCINT2: { kind: BIT, pos: 2, one: enabled, zero: disabled }
+            PCINT3: { kind: BIT, pos: 3, one: enabled, zero: disabled }
+            PCINT4: { kind: BIT, pos: 4, one: enabled, zero: disabled }
+            PCINT5: { kind: BIT, pos: 5, one: enabled, zero: disabled }
+            PCINT6: { kind: BIT, pos: 6, one: enabled, zero: disabled }
+            PCINT7: { kind: BIT, pos: 7, one: enabled, zero: disabled }
+
+        - name: PCMSK1
+          address: 0x4C
+          fields:
+            PCINT8: { kind: BIT, pos: 0, one: enabled, zero: disabled }
+            PCINT9: { kind: BIT, pos: 1, one: enabled, zero: disabled }
+            PCINT10: { kind: BIT, pos: 2, one: enabled, zero: disabled }
+            PCINT11: { kind: BIT, pos: 3, one: enabled, zero: disabled }
+            PCINT12: { kind: BIT, pos: 4, one: enabled, zero: disabled }
+            PCINT13: { kind: BIT, pos: 5, one: enabled, zero: disabled }
+            PCINT14: { kind: BIT, pos: 6, one: enabled, zero: disabled }
+
+        - name: PCMSK2
+          address: 0x4D
+          fields:
+            PCINT16: { kind: BIT, pos: 0, one: enabled, zero: disabled }
+            PCINT17: { kind: BIT, pos: 1, one: enabled, zero: disabled }
+            PCINT18: { kind: BIT, pos: 2, one: enabled, zero: disabled }
+            PCINT19: { kind: BIT, pos: 3, one: enabled, zero: disabled }
+            PCINT20: { kind: BIT, pos: 4, one: enabled, zero: disabled }
+            PCINT21: { kind: BIT, pos: 5, one: enabled, zero: disabled }
+            PCINT22: { kind: BIT, pos: 6, one: enabled, zero: disabled }
+            PCINT23: { kind: BIT, pos: 7, one: enabled, zero: disabled }
+
+    config:
+        extint_pins: [ PD2, PD3 ]
+        pcint_pins: [ PB0, PB1, PB2, PB3, PB4, PB5, PB6, PB7,
+                      PC0, PC1, PC2, PC3, PC4, PC5, PC6, "",
+                      PD0, PD1, PD2, PD3, PD4, PD5, PD6, PD7 ]
+        rb_extint_ctrl : EICRA/ISC0|ISC1
+        rb_extint_mask : EIMSK/INT0|INT1
+        rb_extint_flag : EIFR/INTF0|INTF1
+        rb_pcint_ctrl : PCICR
+        rb_pcint_flag : PCIFR
+        reg_pcint_mask : [ PCMSK0, PCMSK1, PCMSK2 ]
+        extint_vector : [ INT0, INT1 ]
+        pcint_vector : [ PCINT0, PCINT1, PCINT2 ]
+
+#========================================================================================
+USART:
+    registers:
+        - name: UDR
+          address: 0xA6
+
+        - name: UCSRA
+          address: 0xA0
+          fields:
+            MPCM: { kind: BIT, pos: 0 }
+            U2X: { kind: BIT, pos: 1 }
+            UPE: { kind: BIT, pos: 2 }
+            DOR: { kind: BIT, pos: 3, readonly: yes }
+            FE: { kind: BIT, pos: 4, readonly: yes }
+            UDRE: { kind: BIT, pos: 5, readonly: yes }
+            TXC: { kind: BIT, pos: 6 }
+            RXC: { kind: BIT, pos: 7, readonly: yes }
+
+        - name: UCSRB
+          address: 0xA1
+          fields:
+            TXB8: { kind: BIT, pos: 0 }
+            RXB8: { kind: BIT, pos: 1, readonly: yes }
+            UCSZ2: { kind: BIT, pos: 2 }
+            TXEN: { kind: BIT, pos: 3 }
+            RXEN: { kind: BIT, pos: 4 }
+            UDRIE: { kind: BIT, pos: 5 }
+            TXCIE: { kind: BIT, pos: 6 }
+            RXCIE: { kind: BIT, pos: 7 }
+
+        - name: UCSRC
+          address: 0xA2
+          fields:
+            UCPOL: { kind: BIT, pos: 0 }
+            UCSZ:
+                kind:  ENUM
+                LSB: 1
+                MSB: 2
+
+            USBS: { kind: BIT, pos: 3, one: "1-bit", zero: "2-bits" }
+
+            UPM:
+                kind:  ENUM
+                LSB: 4
+                MSB: 5
+                values: [ Disabled, "", Even, Odd ]
+
+            UMSEL:
+                kind:  ENUM
+                LSB: 6
+                MSB: 7
+                values: [ Async, Sync, "", Master SPI ]
+
+        - name: UBRR
+          address: 0xA4
+          size: 2
+          fields:
+            BAUD:
+                kind: INT
+                LSB: 0
+                MSB: 11
+
+    config:
+        reg_data : UDR
+        rb_rx_enable: UCSRB/RXEN
+        rb_tx_enable: UCSRB/TXEN
+        rb_rxc_inten: UCSRB/RXCIE
+        rb_rxc_flag: UCSRA/RXC
+        rb_txc_inten: UCSRB/TXCIE
+        rb_txc_flag: UCSRA/TXC
+        rb_txe_inten: UCSRB/UDRIE
+        rb_txe_flag: UCSRA/UDRE
+        rb_baud_2x: UCSRA/U2X
+        reg_baud: UBRR
+        baud_bitsize: 12
+        rxc_vector: USART_RX
+        txc_vector: USART_TX
+        txe_vector: USART_UDRE
+
+#========================================================================================
+SPI:
+    registers:
+        - name: SPCR
+          address: 0x2C
+          fields:
+            SPR:
+                kind: ENUM
+                LSB: 0
+                MSB: 1
+                values: [ DIV4, DIV16, DIV64, DIV128 ]
+            CPHA: { kind: BIT, pos: 2 }
+            CPOL: { kind: BIT, pos: 3 }
+            MSTR: { kind: BIT, pos: 4, one: master, zero: slave }
+            DORD: { kind: BIT, pos: 5, one: "LSB first", zero: "MSB first" }
+            SPE: { kind: BIT, pos: 6, one: enable, zero: disable }
+            SPIE: { kind: BIT, pos: 6, one: enable, zero: disable }
+
+        - name: SPSR
+          address: 0x2D
+          fields:
+            SPI2X: { kind: BIT, pos: 0, one: 2X, zero: 1X }
+            WCOL: { kind: BIT, pos: 6 }
+            SPIF: { kind: BIT, pos: 7 }
+
+        - name: SPDR
+          address: 0x2E
+
+    config:
+        reg_data: SPDR
+        rb_enable: SPCR/SPE
+        rb_int_enable: SPCR/SPIE
+        rb_int_flag: SPSR/SPIF
+        rb_mode: SPCR/MSTR
+        rb_clock: SPCR/SPR
+        rb_clock2x: SPSR/SPI2X
+        iv_spi: SPI_STC
+
+#========================================================================================
+TWI:
+    registers:
+        - name: TWBR
+          address: 0xB8
+          fields:
+            TWBR:
+                kind: INT
+
+        - name: TWCR
+          address: 0xBC
+          fields:
+            TWIE: { kind: BIT, pos: 0 , one: enabled, zero: disabled }
+            TWEN: { kind: BIT, pos: 2, one: enabled, zero: disabled }
+            TWWC: { kind: BIT, pos: 3 }
+            TWSTO: { kind: BIT, pos: 4 }
+            TWSTA: { kind: BIT, pos: 5 }
+            TWEA: { kind: BIT, pos: 6 }
+            TWINT: { kind: BIT, pos: 7 }
+
+        - name: TWSR
+          address: 0xB9
+          fields:
+            TWPS:
+                kind: ENUM
+                LSB: 0
+                MSB: 1
+                values: [ DIV1, DIV4, DIV16, DIV64 ]
+            TWS:
+                kind: RAW
+                LSB: 3
+                MSB: 7
+
+        - name: TWDR
+          address: 0xBB
+          fields:
+            TWDR:
+                kind: RAW
+
+        - name: TWAR
+          address: 0xBA
+          fields:
+            TWA:
+                kind: RAW
+                LSB: 1
+            TWGCE: { kind: BIT, pos: 0 }
+
+        - name: TWAMR
+          address: 0xBD
+          fields:
+            TWAM:
+                kind: RAW
+                LSB: 1
+
+    config:
+        ps_factors: [ 1, 4, 16, 64 ]
+        reg_ctrl: TWCR
+        bm_enable: TWCR/TWEN
+        bm_start: TWCR/TWSTA
+        bm_stop: TWCR/TWSTO
+        bm_int_enable: TWCR/TWIE
+        bm_int_flag: TWCR/TWINT
+        bm_ack_enable: TWCR/TWEA
+        reg_bitrate: TWBR
+        rb_status: TWSR/TWS
+        rb_prescaler: TWSR/TWPS
+        reg_data: TWDR
+        rb_addr: TWAR/TWA
+        rb_gencall_enable: TWAR/TWGCE
+        rb_addr_mask: TWAMR/TWAM
+        iv_twi: TWI
+
+#========================================================================================
