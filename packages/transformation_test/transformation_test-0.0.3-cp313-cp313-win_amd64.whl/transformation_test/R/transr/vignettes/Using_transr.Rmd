@@ -1,0 +1,296 @@
+---
+title: "Introduction to the transr R package"
+author: "David Robertson"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to the transr R package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  error = FALSE,
+  tidy = FALSE,
+  out.extra='style="display:block; margin: auto"', 
+  fig.align="center", 
+  fig.width=6, 
+  fig.height=4, 
+  dev='png'
+)
+```
+
+## Background
+
+Data transformations are used to normalised data and stabilize their variance. The transr package contains 3 data transformations: 2 of which (LogSinh and BoxCox) that are appropriate for zero bounded data, such as streamflow and rainfall, and one that is for non-bounded data (YeoJohnson). Here we demonstrate the use of the transr package on zero  bounded data.
+
+First we need to load the transformations library and a few others to help us along the way
+
+```{r}
+library(transr)
+library(ggplot2)
+```
+
+We will be using some random numbers, so set the random number seed so results are reproducible
+
+```{r}
+set.seed(5)
+```
+
+It is useful to print out the class signature to understand what functions can be called:
+
+```{r}
+transr::RLogSinh
+```
+
+Detailed explanation of the methods can be obtained by looking up the help file
+
+?RLogSinh
+
+# Generate sample data
+
+First generate some data that follow a skewed distribution
+There are lots of very small values so we will use a small non-zero censor threshold of 0.01
+```{r}
+x <- rgamma(n=100, shape=0.1,scale=1)
+lcens <- 0.01
+x[x<=lcens] <- lcens
+```
+Plot the data to have a look at its distribution.
+We use a standard normal variate for the horizontal axis. If the data follow a normal distribution then they will plot along a straight line
+```{r}
+pltx <- qnorm(rank(x,ties.method = "random")/(length(x)+1))
+
+pltdata <- as.data.frame(cbind(pltx, x))
+#plot(pltx,x, xlab = "Standard normal variate", ylab="Data")
+g <- ggplot(data=pltdata, aes(x=pltx, y=x))
+g <- g + geom_point()
+g <- g + xlab("Standard normal variate")
+g <- g + ylab("Data")
+g <- g + theme_bw()
+print(g)
+```
+The transformation can scale the data, so that common parameter bounds can be used across diverse data ranges. We tend to rescale the data so that the maximum value is equal to 5.
+```{r}
+scale_x <- 5.0/max(x)
+```
+
+## Fitting the LogSinh transformation
+
+Step 1: Construct the transformation object
+
+```{r}
+transform <- transr::RLogSinh$new(1.0, 1.0, scale_x)
+
+```
+Step 2: Infer transformation parameters
+
+```{r}
+opt_params <- transform$optim_params_sce(x, lcens, TRUE, TRUE)
+```
+
+
+Step 3: Transformation can then be used to transform data
+
+```{r}
+trans_data <- transform$transform_many(transform$rescale_many(x))
+```
+
+Transformed data can be plotted against a standard normal variate to check whether the non-censored values approximately follow a straight line, with an intercept equal to the distribution mean, and the slope equal to the distribution standard deviation.
+
+```{r}
+
+pltx <- qnorm(rank(x, ties.method = "random")/(length(x)+1))
+
+pltdata <- as.data.frame(cbind(pltx, trans_data, x))
+#plot(pltx,x, xlab = "Standard normal variate", ylab="Data")
+g <- ggplot(data=pltdata, aes(x=pltx, y=trans_data))
+g <- g + geom_point()
+g <- g + xlab("Standard normal variate")
+g <- g + ylab("Transformed data")
+g <- g + geom_abline(slope = exp(opt_params[4]), intercept = opt_params[3]*exp(opt_params[4]))
+g <- g + theme_bw()
+print(g)
+
+```
+
+We can also plot the transformation
+```{r}
+g <- ggplot(data=pltdata, aes(x=x, y=trans_data))
+g <- g + geom_point()
+g <- g + xlab("Raw data")
+g <- g + ylab("Transformed data")
+g <- g + theme_bw()
+print(g)
+```
+
+Lets do a better check of the fit of the distribution to show that all data points lie within the (0.05, 0.95) quantile fit of the transformation.
+
+```{r}
+
+stdev <- exp(opt_params[4])
+mean <- opt_params[3]*stdev
+
+rand_norm_samples <- rnorm(n=(1000 * length(x)),mean,stdev)
+back_trans_samples <- transform$inv_transform_many(rand_norm_samples)
+back_rescaled_samples <- transform$inv_rescale_many(back_trans_samples)
+back_rescaled_samples[back_rescaled_samples<lcens] <- lcens
+plotting_samples <- array(back_rescaled_samples,dim = c(length(x),1000))
+
+plotting_samples <- apply(plotting_samples, FUN=sort, MARGIN = 2)
+plot_quantiles <- c(0.95,0.5,0.05)
+plotting_quantiles <- apply(plotting_samples,FUN=quantile, MARGIN = 1, probs=plot_quantiles)
+
+pltx <- qnorm((1:length(x))/(length(x)+1))
+
+lims <- c(min(plotting_quantiles), max(plotting_quantiles))
+
+pltdata <- as.data.frame(cbind(pltx,t(plotting_quantiles),sort(x)))
+g <- ggplot(data=pltdata, aes(x=pltx, y=`V5`))
+g <- g + geom_point(aes(shape="1"))
+g <- g + geom_line(aes(x=pltx, y=`95%`, color = "1"))
+g <- g + geom_line(aes(x=pltx, y=`50%`, color = "2"))
+g <- g + geom_line(aes(x=pltx, y=`5%`, color = "3"))
+g <- g + scale_colour_manual(name = "Transformation fit",values = c("red","black","blue"), labels = c("95th %ile", "Median", "5th %ile") )
+g <- g + scale_shape_manual(name = "", values = c(19), labels = c("Raw data"))
+g <- g + xlab("Standard Normal Variate")
+g <- g + ylab("Data (log scale)")
+g <- g + scale_y_log10()
+g <- g + theme_bw()
+print(g)
+
+g <- ggplot(data=pltdata, aes(x=pltx, y=`V5`))
+g <- g + geom_point(aes(shape="1"))
+g <- g + geom_line(aes(x=pltx, y=`95%`, color = "1"))
+g <- g + geom_line(aes(x=pltx, y=`50%`, color = "2"))
+g <- g + geom_line(aes(x=pltx, y=`5%`, color = "3"))
+g <- g + scale_colour_manual(name = "Transformation fit",values = c("red","black","blue"), labels = c("95th %ile", "Median", "5th %ile") )
+g <- g + scale_shape_manual(name = "", values = c(19), labels = c("Raw data"))
+g <- g + xlab("Standard Normal Variate")
+g <- g + ylab("Data")
+g <- g + theme_bw()
+print(g)
+```
+
+
+
+## Fiting the Box-Cox transformation
+
+Fitting the LogSinh transformation
+
+Step 1: Construct the transformation object
+
+```{r}
+transform_boxcox <- transr::RBoxCox$new(1.0, 1.0, scale_x)
+
+```
+Step 2: Infer transformation parameters
+
+```{r}
+opt_params_boxcox <- transform_boxcox$optim_params_sce(x, lcens, TRUE, TRUE)
+```
+
+
+Step 3: Transformation can then be used to transform data
+
+```{r}
+trans_data_boxcox <- transform_boxcox$transform_many(transform_boxcox$rescale_many(x))
+```
+
+Transformed data can be plotted against a standard normal variate to check whether the non-censored values approximately follow a straight line, with an intercept equal to the distribution mean, and the slope equal to the distribution standard deviation.
+
+```{r}
+
+pltx <- qnorm(rank(x, ties.method = "random")/(length(x)+1))
+
+pltdata <- as.data.frame(cbind(pltx, trans_data_boxcox, x))
+#plot(pltx,x, xlab = "Standard normal variate", ylab="Data")
+g <- ggplot(data=pltdata, aes(x=pltx, y=trans_data_boxcox))
+g <- g + geom_point()
+g <- g + xlab("Standard normal variate")
+g <- g + ylab("Transformed data")
+g <- g + geom_abline(slope = exp(opt_params_boxcox[4]), intercept = opt_params_boxcox[3]*exp(opt_params_boxcox[4]))
+g <- g + theme_bw()
+print(g)
+
+```
+
+We can also plot the transformation
+```{r}
+g <- ggplot(data=pltdata, aes(x=x, y=trans_data_boxcox))
+g <- g + geom_point()
+g <- g + xlab("Raw data")
+g <- g + ylab("Transformed data")
+g <- g + theme_bw()
+print(g)
+```
+
+
+Compare the fit of the LogSinh and BoxCox transformations.
+For both transformations all data points lie within the (0.05, 0.95) quantile fit of the transformation.
+The median BoxCox transformation fits the raw data slightly better, however the uncertainty estimates of the BoxCox transformation tend to be larger for extreme values.
+
+```{r}
+
+stdev_boxcox <- exp(opt_params_boxcox[4])
+mean_boxcox <- opt_params_boxcox[3]*stdev_boxcox
+
+rand_norm_samples_boxcox <- rnorm(n=(1000 * length(x)),mean_boxcox,stdev_boxcox)
+back_trans_samples_boxcox <- transform_boxcox$inv_transform_many(rand_norm_samples_boxcox)
+back_rescaled_samples_boxcox <- transform_boxcox$inv_rescale_many(back_trans_samples_boxcox)
+
+back_rescaled_samples_boxcox[back_rescaled_samples_boxcox<lcens] <- lcens
+plotting_samples_boxcox <- array(back_rescaled_samples_boxcox,dim = c(length(x),1000))
+
+plotting_samples_boxcox <- apply(plotting_samples_boxcox, FUN=sort, MARGIN = 2)
+
+plot_quantiles <- c(0.95,0.5,0.05)
+plotting_quantiles_boxcox <- apply(plotting_samples_boxcox,FUN=quantile, MARGIN = 1, probs=plot_quantiles)
+
+pltx <- qnorm((1:length(x))/(length(x)+1))
+
+lims <- c(min(plotting_quantiles_boxcox), max(plotting_quantiles_boxcox))
+
+
+
+pltdata <- as.data.frame(cbind(pltx,t(plotting_quantiles), t(plotting_quantiles_boxcox),sort(x), deparse.level = 2))
+colnames(pltdata) <- c("pltx",paste0("ls_",plot_quantiles),paste0("bc_",plot_quantiles), "sort(x)")
+
+g <- ggplot(data=pltdata, aes(x=pltx, y=`sort(x)`))
+g <- g + geom_point(aes(shape="1"))
+g <- g + geom_line(aes(x=pltx, y=`ls_0.95`, color = "1", linetype="1"))
+g <- g + geom_line(aes(x=pltx, y=`ls_0.5`, color = "2", linetype="1"))
+g <- g + geom_line(aes(x=pltx, y=`ls_0.05`, color = "3", linetype="1"))
+g <- g + geom_line(aes(x=pltx, y=`bc_0.95`, color = "1", linetype="2"))
+g <- g + geom_line(aes(x=pltx, y=`bc_0.5`, color = "2", linetype="2"))
+g <- g + geom_line(aes(x=pltx, y=`bc_0.05`, color = "3", linetype="2"))
+g <- g + scale_colour_manual(name = "Transformation fit",values = c("red","black","blue"), labels = c("95th %ile", "Median", "5th %ile") )
+g <- g + scale_shape_manual(name = "", values = c(19), labels = c("Raw data"))
+g <- g + scale_linetype_manual("Transformation", values = c(2,1),labels = c("LogSinh", "BoxCox"))
+g <- g + xlab("Standard Normal Variate")
+g <- g + ylab("Data (log scale)")
+g <- g + scale_y_log10()
+g <- g + theme_bw()
+print(g)
+
+g <- ggplot(data=pltdata, aes(x=pltx, y=`sort(x)`))
+g <- g + geom_point(aes(shape="1"))
+g <- g + geom_line(aes(x=pltx, y=`ls_0.95`, color = "1", linetype="1"))
+g <- g + geom_line(aes(x=pltx, y=`ls_0.5`, color = "2", linetype="1"))
+g <- g + geom_line(aes(x=pltx, y=`ls_0.05`, color = "3", linetype="1"))
+g <- g + geom_line(aes(x=pltx, y=`bc_0.95`, color = "1", linetype="2"))
+g <- g + geom_line(aes(x=pltx, y=`bc_0.5`, color = "2", linetype="2"))
+g <- g + geom_line(aes(x=pltx, y=`bc_0.05`, color = "3", linetype="2"))
+g <- g + scale_colour_manual(name = "Transformation fit",values = c("red","black","blue"), labels = c("95th %ile", "Median", "5th %ile") )
+g <- g + scale_shape_manual(name = "", values = c(19), labels = c("Raw data"))
+g <- g + scale_linetype_manual("Transformation", values = c(2,1),labels = c("LogSinh", "BoxCox"))
+g <- g + xlab("Standard Normal Variate")
+g <- g + ylab("Data")
+g <- g + theme_bw()
+print(g)
+
+```
+
+

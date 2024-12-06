@@ -1,0 +1,107 @@
+---
+title: "Introduction to the efts R package"
+author: "Jean-Michel Perraud"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to the efts R package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  error = FALSE,
+  tidy = FALSE,
+  out.extra='style="display:block; margin: auto"', 
+  fig.align="center", 
+  fig.width=8, 
+  fig.height=4, 
+  dev='png'
+)
+```
+
+# Testing transr
+
+This is a (tentative) port of the file transformation\test_pytrans.py
+
+```{r}
+library(transr)
+
+set.seed(5)
+x <- rgamma(n=1000, shape=3,scale=1)
+lcens <- 0.0
+
+x[x<=lcens] <- lcens
+# Note: scale is a base function in R...
+scale_x <- 5.0/max(x)
+```
+
+It is useful to print out the class signature:
+
+```{r}
+transr::RLogSinh
+```
+
+```{r}
+transform <- transr::RLogSinh$new(1.0, 1.0, scale_x)
+rescaled_data <- transform$rescale_many(x)
+# rescaled_lcens <- transform$rescale_one(lcens)
+# opt_params <- transform$optim_params(rescaled_data, rescaled_lcens, FALSE, TRUE)
+# trans_data <- transform$transform_many(rescaled_data)
+#
+opt_params <- transform$optim_params(x, lcens, TRUE, FALSE)
+trans_data <- transform$transform_many(transform$rescale_many(x))
+back_trans_data <- transform$inv_rescale_many(transform$inv_transform_many(trans_data))
+```
+
+```{r}
+stdev <- exp(opt_params[3])
+mean <- opt_params[2]*stdev
+
+rand_norm_samples <- rnorm(n=50000,mean,stdev)
+back_trans_samples <- transform$inv_transform_many(rand_norm_samples)
+back_rescaled_samples <- transform$inv_rescale_many(back_trans_samples)
+```
+
+I am not sure the histograms below reflect what was intended in the python script:
+
+```{r}
+# http://ggplot2.tidyverse.org/reference/geom_histogram.html
+library(ggplot2)
+y <- data.frame(trans_data=trans_data, x=x, rescaled_data=rescaled_data)
+ggplot(y, aes(trans_data)) + geom_histogram(bins=50)
+ggplot(y, aes(x)) + geom_histogram(bins=50)
+ggplot(y, aes(rescaled_data)) + geom_histogram(bins=50)
+
+y_b <- data.frame(back_trans_samples=back_trans_samples, back_rescaled_samples=back_rescaled_samples)
+ggplot(y_b, aes(back_trans_samples)) + geom_histogram(bins=200)
+ggplot(y_b, aes(back_rescaled_samples)) + geom_histogram(bins=200)
+```
+
+```{r}
+shift <- 0.0
+x <- 4.0
+x_rs <- scale_x*(x+shift)
+lcens_rs <- scale_x*(lcens+shift)
+
+print(opt_params)
+log_dens <- transform$log_density(opt_params, x, lcens, TRUE)
+x_rs
+log_dens
+exp(log_dens)
+
+log_dens <- transform$log_density(opt_params, x_rs, lcens_rs, FALSE)
+x_rs
+log_dens
+exp(log_dens)
+
+# plt.axvline(x_rs)
+# plt.legend(loc='best')
+
+# plt.show()
+```
+
+
+

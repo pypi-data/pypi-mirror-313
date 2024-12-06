@@ -1,0 +1,16 @@
+
+INSTDIR=../inst
+
+CPP_LANG_FLAGS = --std=c++0x 
+# an intel compiler still requires 'future' flag for 5yrs old stuff.
+ifeq "$(CXX)" "icpc"
+CPP_LANG_FLAGS = -std=c++0x 
+endif
+
+# This is a cheap way to indicate the location of the Boost included files on a particular machine
+# For future reference, this LOCAL_INCLUDES_ARGS is a partial copy from an otherwise generated Makevars.win file
+# e.g. uchronia\src\Makevars.win
+LOCAL_INCLUDES_ARGS= -IC:/local/include
+
+PKG_CPPFLAGS = $(CPP_LANG_FLAGS) -I$(INSTDIR)/include $(LOCAL_INCLUDES_ARGS) $(PKG_CPPFLAGS_SITE)
+PKG_LIBS = 
