@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "botc_tokens"
+description = "A collection of command line utilities for creating, updating, and grouping tokens for Blood on the Clocktower."
+readme = "README.md"
+requires-python = ">=3.8"
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+]
+dependencies = [
+    "beautifulsoup4 ~= 4.12.0",
+    "html5lib ~= 1.1.0",
+    "jsonschema ~= 4.21.1",
+    "rich ~= 12.6.0",
+    "wand ~= 0.6.13"
+]
+
+[project.optional-dependencies]
+test = [
+    "flake8",
+    "flake8-bugbear",
+    "flake8-docstrings",
+    "flake8-import-order",
+    "flake8-colors",
+    "pep8-naming",
+    "pytest",
+    "pytest-cov",
+    "pypdf"
+    ]
+
+[project.scripts]
+botc_tokens = "botc_tokens:__main__.main"
+
+[tool.setuptools_scm]
+write_to = "src/botc_tokens/__version__.py"
+
+[tool.setuptools.dynamic]
+version = {attr = "botc_tokens.__version__.__version__"}
+
+[tool.pytest.ini_options]
+# addopts = "--cov --cov-branch --cov-report html --cov-report term-missing --cov-fail-under 100"
+pythonpath = ["src"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = ["src/botc_tokens/__version__.py"]
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+    ]
+
+[tool.yapf]
+column_limit = 120
+
+[tool.isort]
+py_version = "auto"
