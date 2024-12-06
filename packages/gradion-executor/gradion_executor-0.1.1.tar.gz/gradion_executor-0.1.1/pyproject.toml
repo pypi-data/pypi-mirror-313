@@ -1,0 +1,54 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "gradion-executor"
+version = "0.1.1"
+description = "Gradion AI Code Execution Container"
+homepage = "https://github.com/gradion-ai/executor"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    "Martin Krasser <martin@gradion.ai>",
+    "Christoph Stumpf <chris@gradion.ai>",
+]
+packages = [
+    { include = "gradion" },
+]
+
+[tool.poetry.dependencies]
+aiodocker = "^0.23.0"
+aiofiles = "^24.1"
+aiohttp = "^3.10"
+pillow = "^11.0"
+python = "^3.10,<3.13"
+tornado = "^6.4"
+typer = "^0.12.5"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.0"
+invoke = "^2.2"
+pytest = "^8.3"
+pytest-asyncio = "^0.24.0"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = 3.11
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "aiofiles",
+    "aiofiles.os",
+]
+ignore_missing_imports = true
