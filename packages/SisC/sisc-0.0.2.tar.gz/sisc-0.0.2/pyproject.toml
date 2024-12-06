@@ -1,0 +1,40 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SisC"
+version = "0.0.2"
+authors = [
+    { name = "Frederik Arnold", email = "frederik.arnold@hu-berlin.de"}
+]
+description = "SisC is a tool to automatically separate  annotations from the underlying text. SisC uses a fingerprint, that is, a masked version  of the text to merge stand-off annotations with another version of the original text, for example, extracted from a PDF file. The fingerprint cannot be used on its own to recreate (meaningful parts of) the original text and can therefore be shared."
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.11"
+keywords = ["sharing", "annotation", "openaccess"]
+dependencies = [
+    "biopython>=1.84",
+    "pdf2image>=1.17.0",
+    "kpcommons>=0.1.2",
+    "rapidfuzz>=3.10.0"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sisc*"]
+
+[project.scripts]
+sisc = "sisc.cli.SisCCLI:main"
+
+[project.urls]
+"Homepage" = "https://hu.berlin/sisc"

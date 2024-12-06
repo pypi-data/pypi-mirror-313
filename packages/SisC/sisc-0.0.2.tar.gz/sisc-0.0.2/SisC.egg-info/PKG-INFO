@@ -1,0 +1,499 @@
+Metadata-Version: 2.1
+Name: SisC
+Version: 0.0.2
+Summary: SisC is a tool to automatically separate  annotations from the underlying text. SisC uses a fingerprint, that is, a masked version  of the text to merge stand-off annotations with another version of the original text, for example, extracted from a PDF file. The fingerprint cannot be used on its own to recreate (meaningful parts of) the original text and can therefore be shared.
+Author-email: Frederik Arnold <frederik.arnold@hu-berlin.de>
+License:                                  Apache License
+                                   Version 2.0, January 2004
+                                http://www.apache.org/licenses/
+        
+           TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+        
+           1. Definitions.
+        
+              "License" shall mean the terms and conditions for use, reproduction,
+              and distribution as defined by Sections 1 through 9 of this document.
+        
+              "Licensor" shall mean the copyright owner or entity authorized by
+              the copyright owner that is granting the License.
+        
+              "Legal Entity" shall mean the union of the acting entity and all
+              other entities that control, are controlled by, or are under common
+              control with that entity. For the purposes of this definition,
+              "control" means (i) the power, direct or indirect, to cause the
+              direction or management of such entity, whether by contract or
+              otherwise, or (ii) ownership of fifty percent (50%) or more of the
+              outstanding shares, or (iii) beneficial ownership of such entity.
+        
+              "You" (or "Your") shall mean an individual or Legal Entity
+              exercising permissions granted by this License.
+        
+              "Source" form shall mean the preferred form for making modifications,
+              including but not limited to software source code, documentation
+              source, and configuration files.
+        
+              "Object" form shall mean any form resulting from mechanical
+              transformation or translation of a Source form, including but
+              not limited to compiled object code, generated documentation,
+              and conversions to other media types.
+        
+              "Work" shall mean the work of authorship, whether in Source or
+              Object form, made available under the License, as indicated by a
+              copyright notice that is included in or attached to the work
+              (an example is provided in the Appendix below).
+        
+              "Derivative Works" shall mean any work, whether in Source or Object
+              form, that is based on (or derived from) the Work and for which the
+              editorial revisions, annotations, elaborations, or other modifications
+              represent, as a whole, an original work of authorship. For the purposes
+              of this License, Derivative Works shall not include works that remain
+              separable from, or merely link (or bind by name) to the interfaces of,
+              the Work and Derivative Works thereof.
+        
+              "Contribution" shall mean any work of authorship, including
+              the original version of the Work and any modifications or additions
+              to that Work or Derivative Works thereof, that is intentionally
+              submitted to Licensor for inclusion in the Work by the copyright owner
+              or by an individual or Legal Entity authorized to submit on behalf of
+              the copyright owner. For the purposes of this definition, "submitted"
+              means any form of electronic, verbal, or written communication sent
+              to the Licensor or its representatives, including but not limited to
+              communication on electronic mailing lists, source code control systems,
+              and issue tracking systems that are managed by, or on behalf of, the
+              Licensor for the purpose of discussing and improving the Work, but
+              excluding communication that is conspicuously marked or otherwise
+              designated in writing by the copyright owner as "Not a Contribution."
+        
+              "Contributor" shall mean Licensor and any individual or Legal Entity
+              on behalf of whom a Contribution has been received by Licensor and
+              subsequently incorporated within the Work.
+        
+           2. Grant of Copyright License. Subject to the terms and conditions of
+              this License, each Contributor hereby grants to You a perpetual,
+              worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+              copyright license to reproduce, prepare Derivative Works of,
+              publicly display, publicly perform, sublicense, and distribute the
+              Work and such Derivative Works in Source or Object form.
+        
+           3. Grant of Patent License. Subject to the terms and conditions of
+              this License, each Contributor hereby grants to You a perpetual,
+              worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+              (except as stated in this section) patent license to make, have made,
+              use, offer to sell, sell, import, and otherwise transfer the Work,
+              where such license applies only to those patent claims licensable
+              by such Contributor that are necessarily infringed by their
+              Contribution(s) alone or by combination of their Contribution(s)
+              with the Work to which such Contribution(s) was submitted. If You
+              institute patent litigation against any entity (including a
+              cross-claim or counterclaim in a lawsuit) alleging that the Work
+              or a Contribution incorporated within the Work constitutes direct
+              or contributory patent infringement, then any patent licenses
+              granted to You under this License for that Work shall terminate
+              as of the date such litigation is filed.
+        
+           4. Redistribution. You may reproduce and distribute copies of the
+              Work or Derivative Works thereof in any medium, with or without
+              modifications, and in Source or Object form, provided that You
+              meet the following conditions:
+        
+              (a) You must give any other recipients of the Work or
+                  Derivative Works a copy of this License; and
+        
+              (b) You must cause any modified files to carry prominent notices
+                  stating that You changed the files; and
+        
+              (c) You must retain, in the Source form of any Derivative Works
+                  that You distribute, all copyright, patent, trademark, and
+                  attribution notices from the Source form of the Work,
+                  excluding those notices that do not pertain to any part of
+                  the Derivative Works; and
+        
+              (d) If the Work includes a "NOTICE" text file as part of its
+                  distribution, then any Derivative Works that You distribute must
+                  include a readable copy of the attribution notices contained
+                  within such NOTICE file, excluding those notices that do not
+                  pertain to any part of the Derivative Works, in at least one
+                  of the following places: within a NOTICE text file distributed
+                  as part of the Derivative Works; within the Source form or
+                  documentation, if provided along with the Derivative Works; or,
+                  within a display generated by the Derivative Works, if and
+                  wherever such third-party notices normally appear. The contents
+                  of the NOTICE file are for informational purposes only and
+                  do not modify the License. You may add Your own attribution
+                  notices within Derivative Works that You distribute, alongside
+                  or as an addendum to the NOTICE text from the Work, provided
+                  that such additional attribution notices cannot be construed
+                  as modifying the License.
+        
+              You may add Your own copyright statement to Your modifications and
+              may provide additional or different license terms and conditions
+              for use, reproduction, or distribution of Your modifications, or
+              for any such Derivative Works as a whole, provided Your use,
+              reproduction, and distribution of the Work otherwise complies with
+              the conditions stated in this License.
+        
+           5. Submission of Contributions. Unless You explicitly state otherwise,
+              any Contribution intentionally submitted for inclusion in the Work
+              by You to the Licensor shall be under the terms and conditions of
+              this License, without any additional terms or conditions.
+              Notwithstanding the above, nothing herein shall supersede or modify
+              the terms of any separate license agreement you may have executed
+              with Licensor regarding such Contributions.
+        
+           6. Trademarks. This License does not grant permission to use the trade
+              names, trademarks, service marks, or product names of the Licensor,
+              except as required for reasonable and customary use in describing the
+              origin of the Work and reproducing the content of the NOTICE file.
+        
+           7. Disclaimer of Warranty. Unless required by applicable law or
+              agreed to in writing, Licensor provides the Work (and each
+              Contributor provides its Contributions) on an "AS IS" BASIS,
+              WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+              implied, including, without limitation, any warranties or conditions
+              of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+              PARTICULAR PURPOSE. You are solely responsible for determining the
+              appropriateness of using or redistributing the Work and assume any
+              risks associated with Your exercise of permissions under this License.
+        
+           8. Limitation of Liability. In no event and under no legal theory,
+              whether in tort (including negligence), contract, or otherwise,
+              unless required by applicable law (such as deliberate and grossly
+              negligent acts) or agreed to in writing, shall any Contributor be
+              liable to You for damages, including any direct, indirect, special,
+              incidental, or consequential damages of any character arising as a
+              result of this License or out of the use or inability to use the
+              Work (including but not limited to damages for loss of goodwill,
+              work stoppage, computer failure or malfunction, or any and all
+              other commercial damages or losses), even if such Contributor
+              has been advised of the possibility of such damages.
+        
+           9. Accepting Warranty or Additional Liability. While redistributing
+              the Work or Derivative Works thereof, You may choose to offer,
+              and charge a fee for, acceptance of support, warranty, indemnity,
+              or other liability obligations and/or rights consistent with this
+              License. However, in accepting such obligations, You may act only
+              on Your own behalf and on Your sole responsibility, not on behalf
+              of any other Contributor, and only if You agree to indemnify,
+              defend, and hold each Contributor harmless for any liability
+              incurred by, or claims asserted against, such Contributor by reason
+              of your accepting any such warranty or additional liability.
+        
+           END OF TERMS AND CONDITIONS
+        
+           APPENDIX: How to apply the Apache License to your work.
+        
+              To apply the Apache License to your work, attach the following
+              boilerplate notice, with the fields enclosed by brackets "[]"
+              replaced with your own identifying information. (Don't include
+              the brackets!)  The text should be enclosed in the appropriate
+              comment syntax for the file format. We also recommend that a
+              file or class name and description of purpose be included on the
+              same "printed page" as the copyright notice for easier
+              identification within third-party archives.
+        
+           Copyright 2021 Schlüsselstellen
+        
+           Licensed under the Apache License, Version 2.0 (the "License");
+           you may not use this file except in compliance with the License.
+           You may obtain a copy of the License at
+        
+               http://www.apache.org/licenses/LICENSE-2.0
+        
+           Unless required by applicable law or agreed to in writing, software
+           distributed under the License is distributed on an "AS IS" BASIS,
+           WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+           See the License for the specific language governing permissions and
+           limitations under the License.
+        
+Project-URL: Homepage, https://hu.berlin/sisc
+Keywords: sharing,annotation,openaccess
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: biopython>=1.84
+Requires-Dist: pdf2image>=1.17.0
+Requires-Dist: kpcommons>=0.1.2
+Requires-Dist: rapidfuzz>=3.10.0
+
+# Readme
+
+SisC is a tool to automatically separate  annotations from the underlying text. SisC uses a fingerprint, that is,
+a masked version  of the text to merge stand-off annotations with another version of the original text, for example,
+extracted from a PDF file. The fingerprint cannot be used on its own to recreate (meaningful parts of) the original
+text and can therefore be shared.
+
+## Installation
+
+~~~
+pip install sisc
+~~~
+
+## Dependencies
+
+For PDF processing, SisC uses [pdf2image](https://github.com/Belval/pdf2image) and [Tesseract](https://github.com/tesseract-ocr/tesseract).
+Both need to be manually installed.
+
+## Usage
+
+SisC provides a command line interface for easy usage.
+
+Sisc currently best supports TEI XML as the input format. [Other formats](#supported-formats) are partially supported
+and [more formats can easily be added](#adding-new-formats).
+
+### Creating a Fingerprint
+
+For XML files, two types of [masking](#masking) are available, `uniform` and `context`. A fingerprint with uniform
+masking is created with:
+
+~~~
+sisc fingerprint uniform input_path output_path
+~~~
+
+If `input_path` is a folder, all files in that folder which are of the type specified with `--file-type` will be processed.
+By default, `--file-type` is set to xml.
+
+For TEI XML files, SisC supports moving footnotes to the end of the page if the TEI XML files contains annotations for
+footnotes and page breaks. This can be useful when the footnotes are moved to their anchor position during annotation.
+To turn on moving of footnotes, set `--move-notes`.
+
+<details>
+<summary>All command line options for uniform fingerprinting</summary>
+
+~~~
+usage: sisc fingerprint uniform [-h] [--file-type {txt,xml}]
+                                [--move-notes | --no-move-notes]
+                                [--add-quotation-marks | --no-add-quotation-marks]
+                                [-s SYMBOL] [-k KEEP_COUNT] [-d DISTANCE]
+                                input-path output-path
+
+Command to use uniform masking for the fingerprint.
+
+positional arguments:
+  input-path            Path to txt or xml file to create fingerprint from.
+                        Can be a folder in which case all files will be
+                        processed.
+  output-path           Output folder path.
+
+options:
+  -h, --help            show this help message and exit
+  --file-type {txt,xml}
+                        The input file type to process. Only used when
+                        input_path is a folder (default: xml).
+  --move-notes, --no-move-notes
+                        This will move footnotes and endnotes to the end of
+                        their page/the whole text. Only works withXML file
+                        which are annotated with footnotes/endnotes and
+                        pagebreaks. (default: False)
+  --add-quotation-marks, --no-add-quotation-marks
+                        Add quotation marks in the fingerprint. Useful when
+                        quotations marks are not present in the annotated XML
+                        file. (default: False)
+  -s SYMBOL, --symbol SYMBOL
+                        The character to use for masking (default: _).
+  -k KEEP_COUNT, --keep-count KEEP_COUNT
+                        Number of characters which not to mask.
+  -d DISTANCE, --distance DISTANCE
+                        The number of characters to mask between not masked
+                        characters (default: 10)
+~~~
+
+</details>
+
+#### Example
+
+~~~
+<TEI>
+  <text>
+    <body>
+      <p>Some text with <q>an annotated quote</q>.</p>
+    </body>
+  </text>
+</TEI>
+~~~
+
+The given simple TEI XML file would result in the following file with fingerprint with uniform masking:
+
+~~~
+<TEI>
+  <text>
+    <body sisc_start="0" sisc_end="36"><p sisc_start="1" sisc_end="35"><q sisc_start="16" sisc_end="34" /></p></body>
+  </text>
+  <standoff>
+  S___ _ex_ ___h __ __no_____ q____.
+  </standoff>
+</TEI>
+~~~
+
+#### Masking
+
+We currently support two types of masking: `Uniform` masking and `context` masking.  Uniform masking keeps a certain
+number of characters, for example two, then masks a certain number of characters,  for example five, then keeps two
+characters and so on. The result can be seen in the [example above](#example).
+
+The number of characters to keep can be set with the `--keep-count` argument and the number of characters to mask with
+`--distance`.
+
+Context masking keeps the text around a specified tag unmasked and masked the rest of the text. The previous
+[example](#example) with context masking would result in the following fingerprint:
+
+~~~
+____ text with __ _________ _____.
+~~~
+
+To specify the tag, use `--tag`. `--context-size` specify the context size on either side.
+By default, the text of the tag itself is masked, to can be changed with `--keep-text`.
+
+### Aligning Texts
+
+To align PDF files with TEI XML fingerprints, run:
+
+~~~
+sisc align content_path fingerprint_path output_path
+~~~
+
+If `content_path` is a folder, all PDF and Txt files in that path will be processed. If `content_path` points to a file,
+then `fingerprint_path` also needs to be a file. Otherwise, `fingerprint_path` needs to be a folder. In that case,
+by default, SisC will look for XML files in `fingerprint_path`.
+
+For annotations in external files, for example, json, `--annotation-type` can be set to `json` and `--annotation-path`
+to the path with the annotation files.
+
+<details>
+<summary>All command line options for aligning texts</summary>
+
+~~~
+usage: sisc align [-h] [--annotation-path ANNOTATION_PATH]
+                  [--annotation-type {txt,json}] [-f FIRST_PAGE]
+                  [-l LAST_PAGE] [-k KEYS_TO_UPDATE [KEYS_TO_UPDATE ...]]
+                  [--max-num-processes MAX_NUM_PROCESSES]
+                  [--max-text-length MAX_TEXT_LENGTH]
+                  content-path fingerprint-path output-path
+
+Command to align fingerprint and PDF or text.
+
+positional arguments:
+  content-path          Path to the file (or folder) with the content for
+                        alignment (txt or pdf).
+  fingerprint-path      Path to the file (or folder) with the fingerprint
+                        file(s) (txt or xml).
+  output-path           Output folder path.
+
+options:
+  -h, --help            show this help message and exit
+  --annotation-path ANNOTATION_PATH
+                        Can be used to specify the path to the annotations.
+                        Only needed when the annotations are not part of the
+                        files specified in fingerprint_path.
+  --annotation-type {txt,json}
+                        The type of the annotations to process. Only used when
+                        content_path isa folder. (default: xml).
+  -f FIRST_PAGE, --first-page FIRST_PAGE
+                        Can be used to specify the first page to process. Only
+                        used for PDF files and when processing a single PDF
+                        file (default: 1).
+  -l LAST_PAGE, --last-page LAST_PAGE
+                        Can be used to specify the last page to process. Only
+                        used for PDF files and when processing a single PDF
+                        file (default: -1).
+  -k KEYS_TO_UPDATE [KEYS_TO_UPDATE ...], --keys KEYS_TO_UPDATE [KEYS_TO_UPDATE ...]
+                        Only used for json standoff annotations. Used to
+                        specify json keys which represent a position and need
+                        to be updated.
+  --max-num-processes MAX_NUM_PROCESSES
+                        Maximum number of processes to use for parallel
+                        processing (default: 1).
+  --max-text-length MAX_TEXT_LENGTH
+                        The maximum length (in characters) of a text to align
+                        (default: 200000).
+~~~
+
+</details>
+
+## Supported Formats
+
+TEI XML is the best supported format. Other formats, which have limited support, are txt and json.
+
+To align a PDF file with a fingerprint stored in a Txt file and annotations in a json file, the following command can
+be used:
+
+~~~
+sisc align path_to_file.pdf path_to_fingerprint.txt output_path --annotation-path path_to_file.json --annotation-type json --keys start end
+~~~
+
+For an annotation file, that looks something like the following example, this would update the start and end positions.
+
+~~~
+[
+    {
+        "text": "quote",
+        "start": 5,
+        "end": 10
+    },
+    {
+        "text": "quote 2",
+        "start": 25,
+        "end": 32
+    }
+]
+~~~
+
+More fine-grained matching of keys is also possible, for example `key.start` will only match for `start` that appears
+as a child of `key`.
+
+## Custom Masking
+
+To use custom masking, SisC needs to be run from code, for example:
+
+~~~
+from sisc.obfuscate.BaseObfuscater import BaseObfuscater
+from sisc.fingerprint.TeiXmlFingerprinter import TeiXmlFingerprinter
+
+class CustomObfuscater(BaseObfuscater):
+    
+    # overriding abstract method
+    def obfuscate(self, text: str, positions: List[Tuple[int,int]]) -> str:
+        ...
+
+obfuscater = CustomObfuscater()
+fingerprinter = TeiXmlFingerprinter(obfuscater)
+result = fingerprinter.fingerprint(...)    
+~~~
+
+## Adding New Formats
+
+To add support for a new file format, a custom fingerprinter and aligner can be implemented. For example:
+
+~~~
+from typing import Any, List
+from sisc.fingerprint.BaseFingerprinter import BaseFingerprinter
+from sisc.obfuscate.BaseObfuscater import BaseObfuscater
+from sisc.alignment.BaseFileAligner import BaseFileAligner
+
+class CustomFingerprinter(BaseFingerprinter[str, Any]):
+
+    def __init__(self, obfuscater: BaseObfuscater):
+        self.obfuscater = obfuscater
+
+    # overriding abstract method
+    def fingerprint(self, text: str, annotations: Any) -> str:
+        return self.obfuscater.obfuscate(text, [])
+
+class CustomAligner(BaseFileAligner[str]):
+
+    # overriding abstract method
+    def align(self, input_content: str, aligned_text: str, aligned_fingerprint: str, text_gap_positions: List[int],
+              fingerprint_gap_positions: List[int]) -> str:
+        ...
+
+~~~
+
+<!-- 
+
+## Citation
+
+Coming soon!
+
+--->
