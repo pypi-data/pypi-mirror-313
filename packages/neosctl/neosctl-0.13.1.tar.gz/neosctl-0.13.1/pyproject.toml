@@ -1,0 +1,184 @@
+[project]
+name = "neosctl"
+version = "0.13.1"
+description = "NEOS Core CLI"
+authors = []
+repository="https://github.com/NEOS-Critical/neos-platform-cli"
+homepage="https://github.com/NEOS-Critical/neos-platform-cli"
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "httpx >= 0.27",
+    "minio >= 7.1.14",
+    "multidict >= 6.0.5",
+    "orjson >= 3.10.1",
+    "pydantic >= 2.0.0",
+    "rich >= 13.7.1",
+    "rtoml >= 0.10.0",
+    "ryaml >= 0.4.0",
+    "tabulate >= 0.9.0",
+    "typer >= 0.12",
+    "typing_extensions >= 4.7.0; python_version <= '3.10'",
+    "auth-aws4 >= 0.1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "freezegun >= 1.2.1",
+    "pytest >=7.1.2,<7.2",
+    "pytest-cov >= 3.0.0",
+    "pytest-random-order >= 1.0.4",
+    "pytest-httpx >= 0.30",
+
+    # style
+    "ruff >= 0.6.4",
+    "pre-commit >= 3.7.1",
+    "pyright >= 1.1.293",
+
+    # Releases
+    "changelog-gen >= 0.13.1,<0.14",
+
+    # Docs
+    "pdoc >= 14.1.0"
+]
+
+[project.scripts]
+neosctl = "neosctl.cli:app"
+
+[tool.changelog_gen]
+current_version = "0.13.1"
+reject_empty = true
+allowed_branches = [
+    "main",
+]
+date_format = "(released %Y-%m-%d)"
+
+[tool.changelog_gen.github]
+strip_pr_from_description = true
+
+[[tool.changelog_gen.extractors]]
+footer = ["Refs"]
+pattern = '(?P<issue_ref>NEOS-\d+)'
+
+[[tool.changelog_gen.link_generators]]
+source = "issue_ref"
+link = "https://neom.atlassian.net/browse/{0}"
+
+[[tool.changelog_gen.link_generators]]
+source = "__change__"
+text = "{0.short_hash}"
+link = "https://github.com/NEOS-Critical/neos-platform-cli/commit/{0.commit_hash}"
+
+[[tool.changelog_gen.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.changelog_gen.files]]
+filename = "README.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--random-order"
+markers = [
+    "nodotfile_patch: don't auto patch a dotfile into existence",
+    "nocredential_patch: don't auto patch a credential file into existence",
+]
+filterwarnings = [
+    # typer
+    "ignore:ast.Str is deprecated and will be removed in Python 3.14; use ast.Constant instead",
+    "ignore:ast.NameConstant is deprecated and will be removed in Python 3.14; use ast.Constant instead",
+]
+
+
+[tool.coverage.report]
+sort = "cover"
+fail_under = 98
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == '__main__':",
+    "@abc.abstractmethod"
+]
+
+[tool.coverage.run]
+branch = true
+source = ["neosctl"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "B008",     # typer involves a lot of function calls in function definitions
+    "PLR0913",  # too many arguments to a function call
+    "TCH",      # typechecking blocks break tests
+    "FA",
+    "FBT003",   # typer default + args, breaks FBT003
+    "FIX",      # allow TODOs
+    "TD002",    # REMOVE: support author/links
+    "TD003",    # REMOVE: support author/links
+    "ANN101",   # REMOVE: type annotation on self
+    "D107",     # Allow __init__ without docstring
+]
+
+[tool.ruff.format]
+line-ending = "lf"
+quote-style = "double"
+
+[tool.ruff.lint.per-file-ignores]
+"neosctl/*"= [
+    "D104",  # Ignore public __init__ missing docstring.
+]
+"neosctl/schema.py" = [
+    "D101",  # ignore docstrings on pydantic models
+]
+"neosctl/services/gateway/schema.py" = [
+    "D101",  # ignore docstrings on pydantic models
+]
+"neosctl/services/iam/schema.py" = [
+    "D101",  # ignore docstrings on pydantic models
+]
+"neosctl/services/registry/schema.py" = [
+    "D101",  # ignore docstrings on pydantic models
+]
+"tasks.py" = ["ANN", "INP001", "E501", "S"]
+"tests/*" = [
+    "ANN",  # skip annotation in tests
+    "D",  # skip docstrings in tests
+    "S101",  # allow assert statements
+    "S105",
+    "S106",
+    "SLF001",  # access private members in tests
+]
+"tests/cli/test_profile.py" = ["W291"]
+"tests/cli/test_auth.py" = ["W291"]
+"tests/test_util.py" = ["W291"]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pep8-naming]
+# Allow Pydantic's `@validator` decorator to trigger class method treatment.
+classmethod-decorators = [
+    "classmethod",
+    "pydantic.field_validator",
+    "pydantic.model_validator",
+]
+
+[tool.pyright]
+include = ["neosctl"]
+exclude = [
+    "tests/*",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

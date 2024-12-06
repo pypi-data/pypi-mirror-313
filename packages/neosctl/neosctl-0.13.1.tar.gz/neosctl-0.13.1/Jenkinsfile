@@ -1,0 +1,123 @@
+pipeline {
+    environment {
+        SCANNER_HOME = tool 'sonarqube'
+        /* jdk = tool name: 'jdk' */
+        /* JAVA_HOME = "${jdk}/jdk-11.0.1/" */
+        VERSION = sh(returnStdout: true, script: "cat pyproject.toml | sed -En 's/^.*current_version = \"(.*)\".*/\\1/p'").trim()
+    }
+
+    agent {
+        kubernetes {
+            inheritFrom 'core-cli' // all pods will be named with this prefix
+            // idleMinutes 5  // how long the pod will live idle
+            yamlFile '.build-pod.yaml' // path to the pod definition relative to the root
+            defaultContainer 'docker' // define a default container - will default to jnlp container
+        }
+    }
+
+    stages {
+        // Drop parallel, both containers appear to run in same directory on same storage, .venv clashes.
+        stage('Test python 3.9') {
+            steps {
+                container("python39") {
+                    sh "python -m pip install --upgrade uv"
+                    sh "uv sync --all-extras"
+                    sh "uv run pytest --cov --cov-report=xml"
+                }
+            }
+        }
+        stage('Test python 3.10') {
+            steps {
+                container("python") {
+                    sh "python -m pip install --upgrade uv"
+                    sh "uv sync --all-extras"
+                    sh "uv run pytest --cov --cov-report=xml"
+                    sh "uv run pre-commit run --all-files"
+                }
+            }
+        }
+
+        stage('Security Checks') {
+            parallel {
+                stage('KubeScore analysis') {
+                    when {
+                        anyOf {
+                            branch "main"
+                            branch "score"
+                            buildingTag()
+                        }
+                    }
+                    steps {
+                        container("kube-score") {
+                            script {
+                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                    sh "mkdir -p reports"
+                                    sh "helm template chart | kube-score score -o ci - | tee reports/kube-scan.json"
+                                    archiveArtifacts artifacts: 'reports/kube-scan.json', fingerprint: true
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('SonarQube analysis') {
+                    steps {
+                        withSonarQubeEnv('sonarqube') {
+                            container("jnlp") {
+                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                    sh '$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=NEOS-Critical_neos-platform-cli_AYSllUiFMpAbRG9xVdpO -Dsonar.projectVersion=v$VERSION-$BUILD_NUMBER'
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('Dependency analysis') {
+                    steps {
+                        container("trivy") {
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                sh 'wget -c https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl'
+                                sh 'mkdir -p reports && trivy filesystem --ignore-unfixed --vuln-type os,library --format template --template "@html.tpl" -o reports/scan.html ./'
+                                publishHTML target : [
+                                    allowMissing: true,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: true,
+                                    reportDir: 'reports',
+                                    reportFiles: 'scan.html',
+                                    reportName: 'Dependencies Scan',
+                                    reportTitles: 'Depdndencies Scan'
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Publish') {
+            when {
+                buildingTag()
+            }
+            steps {
+                container("python") {
+                    withCredentials([usernamePassword(credentialsId: 'pypi_token', passwordVariable: 'pass', usernameVariable: 'user')]) {
+                        sh "uv build"
+                        sh "TWINE_USERNAME=$user TWINE_PASSWORD=$pass uvx twine upload dist/*"
+                    }
+                }
+            }
+        }
+
+        stage('Notify') {
+            when {
+                buildingTag()
+            }
+            steps {
+                container("jnlp") {
+                    script {
+                        slackSend color: "good", message: "neos-platform-cli >> \nPublish successful - $TAG_NAME (<${env.BUILD_URL}|Open>)"
+                    }
+                }
+            }
+        }
+    }
+}

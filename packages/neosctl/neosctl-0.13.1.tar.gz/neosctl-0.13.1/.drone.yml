@@ -1,0 +1,181 @@
+---
+kind: pipeline
+name: Test Python 3.9
+
+trigger:
+  ref:
+    include:
+      - refs/heads/main
+      - refs/pull/**
+      - refs/tags/v**
+
+steps:
+
+  - name: Test Python 3.9
+    image: python:3.9-bookworm
+    commands:
+      - python -m pip install --upgrade uv
+      - uv sync --all-extras
+      - uv run pytest --cov --cov-report=xml
+
+---
+kind: pipeline
+name: Test Python 3.10
+
+trigger:
+  ref:
+    include:
+      - refs/heads/main
+      - refs/pull/**
+      - refs/tags/v**
+
+steps:
+
+  - name: Test Python 3.10
+    image: python:3.10-bookworm
+    commands:
+      - python -m pip install --upgrade uv
+      - uv sync --all-extras
+      - uv run pytest --cov --cov-report=xml
+
+---
+kind: pipeline
+name: Test Python 3.11
+
+trigger:
+  ref:
+    include:
+      - refs/heads/main
+      - refs/pull/**
+      - refs/tags/v**
+
+steps:
+
+  - name: Test Python 3.11
+    image: python:3.11-bookworm
+    commands:
+      - python -m pip install --upgrade uv
+      - uv sync --all-extras
+      - uv run pytest --cov --cov-report=xml
+
+---
+kind: pipeline
+name: Test Python 3.12
+
+trigger:
+  ref:
+    include:
+      - refs/heads/main
+      - refs/pull/**
+      - refs/tags/v**
+
+steps:
+
+  - name: Test Python 3.12
+    image: python:3.12-bookworm
+    commands:
+      - python -m pip install --upgrade uv
+      - uv sync --all-extras
+      - uv run pytest --cov --cov-report=xml
+# ---
+# kind: pipeline
+# name: Test Python 3.13
+
+# trigger:
+#   ref:
+#     include:
+#       - refs/heads/main
+#       - refs/pull/**
+#       - refs/tags/v**
+
+# steps:
+
+#   - name: Test Python 3.13
+#     image: python:3.13-bookworm
+#     commands:
+#       - apt-get update && apt-get install -y rustc cargo
+#       - python -m pip install --upgrade uv
+#       - uv sync --all-extras
+#       - uv run pytest --cov --cov-report=xml
+#       - uv run pre-commit run --all-files
+
+---
+kind: pipeline
+name: test
+depends_on:
+  - Test Python 3.9
+  - Test Python 3.10
+  - Test Python 3.11
+  - Test Python 3.12
+  # - Test Python 3.13
+
+trigger:
+  ref:
+    include:
+      - refs/heads/main
+      - refs/pull/**
+      - refs/tags/v**
+
+steps:
+
+  - name: sonarqube-analysis
+    image: sonarsource/sonar-scanner-cli:latest
+    user: root
+    environment:
+      SONAR_HOST_URL:
+        from_secret: SONARQUBE_HOST
+      SONAR_TOKEN:
+        from_secret: SONARQUBE_TOKEN
+    commands:
+      - sonar-scanner -X -Dsonar.projectKey=NEOS-Critical_neos-platform-cli_AYSllUiFMpAbRG9xVdpO -Dsonar.projectVersion=${DRONE_TAG}
+
+  - name: dependency-analysis
+    image: aquasec/trivy:latest
+    commands:
+      - wget -c https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
+      - mkdir -p reports
+      - trivy fs --ignore-unfixed --vuln-type os,library --format template --template "@html.tpl" -o reports/scan.html ./
+      - trivy fs --vuln-type os,library --format json -o reports/trivy.json ./
+    depends_on:
+      - sonarqube-analysis
+
+---
+kind: pipeline
+name: publish
+depends_on:
+  - test
+
+trigger:
+  ref:
+    include:
+      - refs/tags/v**
+
+steps:
+
+  - name: publish
+    image: python:3.10-bookworm
+    environment:
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD:
+        from_secret: PYPI_TOKEN
+    commands:
+      - python -m pip install --upgrade uv
+      - uv build
+      - uvx twine upload dist/*
+    when:
+      event:
+        - tag
+
+---
+kind: pipeline
+type: docker
+name: notify
+depends_on:
+  - publish
+
+steps:
+
+  - name: notify
+    image: alpine:latest
+    commands:
+      - echo "I would notify Slack"
