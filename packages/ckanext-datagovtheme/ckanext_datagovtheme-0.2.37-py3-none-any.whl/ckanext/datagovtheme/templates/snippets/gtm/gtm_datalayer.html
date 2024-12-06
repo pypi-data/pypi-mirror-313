@@ -1,0 +1,27 @@
+
+{% set pkg = c.pkg_dict %}
+{% if pkg %}
+
+  {% block gtmdatalayer %}
+      {% set pkgid = pkg.id or "" %}
+      {% set dataset = pkg.title or pkg.name or "Data.gov Dataset" %}
+      {% set organization = pkg.organization.title or pkg.organization.name or "error-org" %}
+      {% set publisher = pkg.extras.publisher or pkg.organization.name or "error-publsiher" %}
+      {% set language = pkg.extras.language or "en" %}
+
+      <script>
+        window.dataLayer = window.dataLayer || [];
+
+        dataLayer.push({
+          "nodeID": "{{ pkg.id }}",
+          "contentType": "dataset",
+          "language": "{{ language }}",
+          "homepageTest": "not_homepage",
+          "basicPagesubType": "dataset",
+          "Page_Type": "Dataset Page",
+          "organization": "{{ organization }}",
+          "publisher": "{{ publisher }}"
+        });
+      </script>
+  {% endblock %}
+{% endif %}
