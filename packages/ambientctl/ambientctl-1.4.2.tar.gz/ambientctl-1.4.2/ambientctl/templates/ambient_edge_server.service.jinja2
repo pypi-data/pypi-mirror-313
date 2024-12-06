@@ -1,0 +1,21 @@
+[Unit]
+Description={{ service.description }}
+After=network.target
+
+[Service]
+Type=simple
+User={{ service.user }}
+Group={{ service.group }}
+ExecStart={{ service.exec_start }}
+Restart=on-failure
+{% if service.environment %}
+{% for key, value in service.environment.items() %}
+Environment="{{ key }}={{ value }}"
+{% endfor %}
+{% endif %}
+# WorkingDirectory={{ service.working_directory }}
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
