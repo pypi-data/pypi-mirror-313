@@ -1,0 +1,63 @@
+[project]
+requires-python = ">=3.12"
+
+[tool.poetry]
+name = "logicblocks.event.store"
+version = "0.1.3a38"
+description = "Eventing infrastructure for event sourced architectures."
+authors = [
+    "Toby Clemson <tobyclemson@gmail.com>",
+    "Jonas Svalin <jonassvalin@gmail.com>"
+]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "logicblocks", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+psycopg = {extras = ["binary", "pool"], version = "^3.2.3"}
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.9"
+poethepoet = "^0.29.0"
+pyright = "^1.1.383"
+pytest = "^8.3.3"
+pytest-pretty = "^1.2.0"
+pytest-diff = "^0.1.14"
+pytest-repeat = "^0.9.3"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs-material = "^9.5.47"
+mkdocstrings = {extras = ["python"], version = "^0.27.0"}
+black = "^24.10.0"
+
+[tool.pyright]
+include = ["src", "tests/shared", "tests/unit", "tests/integration"]
+extraPaths = ["src", "tests/shared"]
+strict = ["src"]
+reportMissingTypeStubs = "error"
+
+[tool.ruff]
+namespace-packages = ["logicblocks/event"]
+line-length = 79
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "tests/shared"]
+addopts = ["--import-mode=importlib"]
+
+[tool.poe.tasks]
+lint-check = "ruff check"
+lint-fix = "ruff check --fix"
+format-check = "ruff format --check"
+format-fix = "ruff format"
+type-check = "pyright"
+test-unit = "pytest -vv tests/unit"
+test-integration = "pytest -vv tests/integration"
+docs-serve = "mkdocs serve"
+docs-build = "mkdocs build"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
