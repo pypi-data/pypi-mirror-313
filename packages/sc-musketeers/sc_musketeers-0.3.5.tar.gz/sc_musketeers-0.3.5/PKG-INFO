@@ -1,0 +1,90 @@
+Metadata-Version: 2.1
+Name: sc-musketeers
+Version: 0.3.5
+Summary: A tri-partite modular autoencoder for addressing imbalanced cell type annotation and batch effect reduction
+Home-page: https://sc-musketeers.readthedocs.io/
+License: MIT
+Author: AntoineCollin
+Requires-Python: >=3.10,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: ax-platform (>=0.4.0,<0.5.0)
+Requires-Dist: keras (>=3.3.3,<4.0.0)
+Requires-Dist: matplotlib (>=3.9.3,<4.0.0)
+Requires-Dist: neptune (>=1.10.4,<2.0.0)
+Requires-Dist: numpy (>=1.23,<2.0)
+Requires-Dist: pandas (>=2.2.3,<3.0.0)
+Requires-Dist: pillow (>=11.0.0,<12.0.0)
+Requires-Dist: poetry (>=1.8.1,<2.0.0)
+Requires-Dist: pympler (>=1.0.1,<2.0.0)
+Requires-Dist: scanpy (>=1.10.1,<2.0.0)
+Requires-Dist: scikit-learn (>=1.5.2,<2.0.0)
+Requires-Dist: seaborn (>=0.13.2,<0.14.0)
+Requires-Dist: tensorflow (>=2.10.0,<3.0.0)
+Requires-Dist: torch (>=2.3.1,<3.0.0)
+Project-URL: Repository, https://github.com/AntoineCollin/scMusketeers/
+Description-Content-Type: text/markdown
+
+# scMusketeers : A tri-partite modular autoencoder for addressing imbalanced cell type annotation and batch effect reduction
+
+
+## Summary
+
+We developed scMusketeer, a modular deep learning model producing an optimal dimension-reduced representation with a focus on imbalanced cell type annotation and batch effect reduction. The architecture of scMusketeers is made of three modules. The first module is an autoencoder which provides a reduced latent representation, while removing noise, thus resulting in a better data reconstruction. The second module, is a classifier with a focal loss providing higher prediction for smaller populations of cell types. The third module is an adversarial domain adaptation (DANN) module that corrects batch effect.
+
+scMusketeers performance was optimized after conducting a precise ablation study to assess model's hyperparameters. The model was compared to reference tools for single-cell integration and annotation. It was at least on par with state-of-the-art models, often outperforming most of them. It showed increased performance on the identification of rare cell types. Despite the rather simple structure of its deep learning model, it demonstrated equivalent performance to UCE foundation model. Finally, scMusketeers was able to transfer the cell label from single-cell RNA-Seq to spatial transcriptomics. 
+
+Our tripartite modular autoencoder demonstrates versatile capabilities while addressing key challenges in single-cell atlas reconstruction. We noticed in particular that the generic modular framework of scMusketeers should be easily generalized to other large-scale biology projects that require deep learning models.
+
+
+
+
+## Tutorial
+
+[Access to the tutorial on Google collab](https://colab.research.google.com/github/AntoineCollin/scMusketeers/blob/main/tutorial/scMusketeers-tutorial_deprez_lung.ipynb)
+
+We will see in this tutorial two use-cases:
+- Transfer cell annotation to unlabeled cells
+- Transfer cell annotation and reduce batch from a query atlas to a reference atlas 
+
+## Install
+
+You can install sc_musketeers with Pypi:
+
+```bash
+$ pip install sc-musketeers
+```
+with conda
+
+```bash
+$ conda -c bioconda sc-musketeers
+```
+
+with docker
+
+
+## Examples
+
+sc-musketeers can be used for different task in integration and annotation of single-cell atlas. 
+
+Here are 2 different examples:
+
+- Transfer cell annotation to unlabeled cells
+
+```bash
+$ sc-musketeers transfer my_atlas --class_key celltype --batch_key donor --unlabeled_category=Unknown
+```
+
+- Transfer cell annotation and reduce batch from a query atlas to a reference atlas 
+
+```bash
+$ sc-musketeers transfer ref_dataset --query_path query_dataset --class_key=celltype --batch_key donor --unlabeled_category=Unknown
+```
+
+
+
+Read the [CONTRIBUTING.md](docs/contributing.md) file.
+
