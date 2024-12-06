@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "konduktor-nightly"
+version = "0.1.0.dev20241204104807"
+description = "GPU Cluster Health Management"
+packages = [
+    {include = "konduktor"}
+]
+authors = ["Andrew Aikawa <asai@berkeley.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+colorama = "^0.4.6"
+kubernetes = "^30.1.0"
+click = "^8.1.7"
+
+[tool.poetry.scripts]
+konduktor = 'konduktor:cli.main'
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.5.1"
+mypy = "^1.10.1"
+pytest = "^8.2.2"
+pytest-xdist = "^3.6.1"
+types-colorama = "^0.4.15.20240311"
+types-requests = "^2.32.0.20240622"
+
+[tool.poetry.group.dashboard.dependencies]
+fastapi = "^0.115.4"
+python-socketio = "^5.11.4"
+uvicorn = ">=0.28.0,<=0.32.0"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+# pyflakes, pycodestyle, isort
+select = ["F", "E", "W", "I001"]
+
+[tool.mypy]
+python_version = "3.10"
+follow_imports = "skip"
+ignore_missing_imports = true
+allow_redefinition = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
