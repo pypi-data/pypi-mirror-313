@@ -1,0 +1,232 @@
+Metadata-Version: 2.3
+Name: ravenpy
+Version: 0.16.1
+Summary: A Python wrapper to setup and run the hydrologic modelling framework Raven.
+Keywords: raven,raven-hydro,hydrology,gis,analysis,modelling
+Author-email: David Huard <huard.david@ouranos.ca>, Richard Arsenault <Richard.Arsenault@etsmtl.ca>
+Maintainer-email: Trevor James Smith <smith.trevorj@ouranos.ca>
+Requires-Python: >=3.10.0
+Description-Content-Type: text/x-rst
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Scientific/Engineering :: Atmospheric Science
+Classifier: Topic :: Scientific/Engineering :: GIS
+Classifier: Topic :: Scientific/Engineering :: Hydrology
+Requires-Dist: cftime
+Requires-Dist: cf-xarray >=0.9.3
+Requires-Dist: click >=8.0.0
+Requires-Dist: climpred >=2.4.0
+Requires-Dist: dask>=2024.4.0
+Requires-Dist: h5netcdf >=1.3.0
+Requires-Dist: haversine >=2.8.0
+Requires-Dist: matplotlib >=3.6.0
+Requires-Dist: netCDF4 <=1.6.5
+Requires-Dist: numpy >=1.23,<2.0.0
+Requires-Dist: owslib >=0.29.1
+Requires-Dist: pandas >=2.2.0
+Requires-Dist: pint >=0.20,<0.24
+Requires-Dist: platformdirs
+Requires-Dist: pydantic >=2.0
+Requires-Dist: pydap >=3.4.0
+Requires-Dist: pymbolic >=2024.2
+Requires-Dist: raven-hydro >=0.3.1,<1.0
+Requires-Dist: scipy >=1.9.0
+Requires-Dist: spotpy >=1.6.1
+Requires-Dist: statsmodels >=0.14.2
+Requires-Dist: typing-extensions
+Requires-Dist: xarray >=2023.11.0
+Requires-Dist: xclim >=0.50.0
+Requires-Dist: xskillscore
+Requires-Dist: ravenpy[dev] ; extra == "all"
+Requires-Dist: ravenpy[docs] ; extra == "all"
+Requires-Dist: ravenpy[gis] ; extra == "all"
+Requires-Dist: black ==24.8.0 ; extra == "dev"
+Requires-Dist: blackdoc ==0.3.9 ; extra == "dev"
+Requires-Dist: bump-my-version >=0.28.1 ; extra == "dev"
+Requires-Dist: coverage >=7.5.0 ; extra == "dev"
+Requires-Dist: coveralls >=4.0.1 ; extra == "dev"
+Requires-Dist: filelock ; extra == "dev"
+Requires-Dist: flake8 >=7.1.1 ; extra == "dev"
+Requires-Dist: flake8-rst-docstrings >=0.3.0 ; extra == "dev"
+Requires-Dist: flit >=3.9.0,<4.0 ; extra == "dev"
+Requires-Dist: holoviews ; extra == "dev"
+Requires-Dist: hvplot ; extra == "dev"
+Requires-Dist: isort ==5.13.2 ; extra == "dev"
+Requires-Dist: mypy ; extra == "dev"
+Requires-Dist: nbval ; extra == "dev"
+Requires-Dist: numpydoc >=1.8.0 ; extra == "dev"
+Requires-Dist: pip >=24.2.0 ; extra == "dev"
+Requires-Dist: pre-commit >=3.5.0 ; extra == "dev"
+Requires-Dist: pylint ; extra == "dev"
+Requires-Dist: pytest >=8.3.2 ; extra == "dev"
+Requires-Dist: pytest-cov >=5.0.0 ; extra == "dev"
+Requires-Dist: pytest-xdist >=3.2.0 ; extra == "dev"
+Requires-Dist: ruff >=0.7.0 ; extra == "dev"
+Requires-Dist: tox >=4.18.0 ; extra == "dev"
+Requires-Dist: watchdog >=4.0.0 ; extra == "dev"
+Requires-Dist: autodoc-pydantic ; extra == "docs"
+Requires-Dist: birdhouse-birdy ; extra == "docs"
+Requires-Dist: cairosvg >=2.6.0 ; extra == "docs"
+Requires-Dist: cartopy >=0.23.0 ; extra == "docs"
+Requires-Dist: clisops >=0.13.0 ; extra == "docs"
+Requires-Dist: gcsfs ; extra == "docs"
+Requires-Dist: intake <2.0.0 ; extra == "docs"
+Requires-Dist: intake-esm ; extra == "docs"
+Requires-Dist: intake-xarray ; extra == "docs"
+Requires-Dist: ipykernel ; extra == "docs"
+Requires-Dist: ipyleaflet ; extra == "docs"
+Requires-Dist: ipython ; extra == "docs"
+Requires-Dist: ipywidgets ; extra == "docs"
+Requires-Dist: jupyter-cache ; extra == "docs"
+Requires-Dist: jupyter_client ; extra == "docs"
+Requires-Dist: jupytext ; extra == "docs"
+Requires-Dist: myst_nb ; extra == "docs"
+Requires-Dist: nbsphinx ; extra == "docs"
+Requires-Dist: numpydoc >=1.8.0 ; extra == "docs"
+Requires-Dist: pygments ; extra == "docs"
+Requires-Dist: pymetalink >=6.5.2 ; extra == "docs"
+Requires-Dist: salib ; extra == "docs"
+Requires-Dist: s3fs ; extra == "docs"
+Requires-Dist: sphinx >=7.0.0 ; extra == "docs"
+Requires-Dist: sphinx-click ; extra == "docs"
+Requires-Dist: sphinx-codeautolink ; extra == "docs"
+Requires-Dist: sphinx-copybutton ; extra == "docs"
+Requires-Dist: sphinx-rtd-theme >=1.0 ; extra == "docs"
+Requires-Dist: sphinxcontrib-svg2pdfconverter >=1.2.3 ; extra == "docs"
+Requires-Dist: xesmf ; extra == "docs"
+Requires-Dist: affine >=2.4.0 ; extra == "gis"
+Requires-Dist: fiona >=1.9 ; extra == "gis"
+Requires-Dist: geopandas >=1.0 ; extra == "gis"
+Requires-Dist: gdal >=3.1 ; extra == "gis"
+Requires-Dist: lxml ; extra == "gis"
+Requires-Dist: pyproj >=3.3.0 ; extra == "gis"
+Requires-Dist: rasterio ; extra == "gis"
+Requires-Dist: rioxarray ; extra == "gis"
+Requires-Dist: setuptools >=71.0 ; extra == "gis"
+Requires-Dist: shapely >=2.0 ; extra == "gis"
+Project-URL: About CSHS-CWRA, https://cwra.org/en/
+Project-URL: About Ouranos, https://ouranos.ca/en/
+Project-URL: Changelog, https://ravenpy.readthedocs.io/en/latest/changelog.html
+Project-URL: Homepage, https://ravenpy.readthedocs.io
+Project-URL: Issue tracker, https://github.com/CSHS-CWRA/RavenPy/issues
+Project-URL: Source, https://github.com/CSHS-CWRA/RavenPy
+Provides-Extra: all
+Provides-Extra: dev
+Provides-Extra: docs
+Provides-Extra: gis
+
+=======
+RavenPy
+=======
+
++----------------------------+-----------------------------------------------------+
+| Versions                   | |pypi| |versions|                                   |
++----------------------------+-----------------------------------------------------+
+| Documentation and Support  | |docs|                                              |
++----------------------------+-----------------------------------------------------+
+| Open Source                | |license| |ossf|                                    |
++----------------------------+-----------------------------------------------------+
+| Coding Standards           | |black| |ruff| |pre-commit|                         |
++----------------------------+-----------------------------------------------------+
+| Development Status         | |status| |build| |coveralls|                        |
++----------------------------+-----------------------------------------------------+
+
+
+A Python wrapper to setup and run the hydrologic modelling framework Raven_.
+
+* Free software: MIT license
+* Documentation: https://ravenpy.readthedocs.io
+
+`RavenPy` is a Python wrapper for Raven_, accompanied by utility functions that facilitate model configuration, calibration, and evaluation.
+
+Raven_ is an hydrological modeling framework that lets hydrologists build hydrological models by combining different hydrological processes together. It can also be used to emulate a variety of existing lumped and distributed models. Model structure, parameters, initial conditions and forcing files are configured in text files, which Raven parses to build and run hydrological simulations. A detailed description about modeling capability of Raven_ can be found in the `docs`_.
+
+`RavenPy` provides a Python interface to Raven_, automating the creation of configuration files and allowing the model to be launched from Python. Results, or errors, are automatically parsed and exposed within the programming environment. This facilitates the launch of parallel simulations, multi-model prediction ensembles, sensitivity analyses and other experiments involving a large number of model runs.
+
+Note that version 0.12 includes major changes compared to the previous 0.11 release, and breaks backward compatibility. The benefits of these changes are a much more intuitive interface for configuring and running the model.
+
+Features
+--------
+
+* Configure, run and parse Raven outputs from Python
+* Utility command to create grid weight files
+* Extract physiographic information about watersheds
+* Algorithms to estimate model parameters from ungauged watersheds
+* Exposes outputs (flow, storage) as `xarray.DataArray` objects
+
+Install
+-------
+
+Please see the detailed `installation docs`_.
+
+Acknowledgements
+----------------
+
+RavenPy's development has been funded by CANARIE_ and Ouranos_ and would be not be possible without the help of Juliane Mai and James Craig.
+
+This package was created with Cookiecutter_ and the `Ouranosinc/cookiecutter-pypackage`_ project template.
+
+.. _CANARIE: https://www.canarie.ca
+.. _Cookiecutter: https://github.com/cookiecutter/cookiecutter
+.. _Ouranos: https://www.ouranos.ca
+.. _Ouranosinc/cookiecutter-pypackage: https://github.com/Ouranosinc/cookiecutter-pypackage
+.. _Raven: https://raven.uwaterloo.ca
+.. _docs: https://raven.uwaterloo.ca/files/v3.8/RavenManual_v3.8.pdf
+.. _installation docs: https://ravenpy.readthedocs.io/en/latest/installation.html
+.. _raven-hydro: https://github.com/Ouranosinc/raven-hydro
+
+
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+        :target: https://github.com/psf/black
+        :alt: Python Black
+
+.. |build| image:: https://github.com/CSHS-CWRA/RavenPy/actions/workflows/main.yml/badge.svg
+        :target: https://github.com/CSHS-CWRA/RavenPy/actions
+        :alt: Build Status
+
+.. |coveralls| image:: https://coveralls.io/repos/github/CSHS-CWRA/RavenPy/badge.svg
+        :target: https://coveralls.io/github/CSHS-CWRA/RavenPy
+        :alt: Coveralls
+
+.. |docs| image:: https://readthedocs.org/projects/RavenPy/badge/?version=latest
+        :target: https://ravenpy.readthedocs.io/en/latest/?version=latest
+        :alt: Documentation Status
+
+.. |license| image:: https://img.shields.io/github/license/CSHS-CWRA/RavenPy.svg
+        :target: https://github.com/CSHS-CWRA/RavenPy/blob/master/LICENSE
+        :alt: License
+
+.. |ossf| image:: https://api.securityscorecards.dev/projects/github.com/CSHS-CWRA/RavenPy/badge
+        :target: https://securityscorecards.dev/viewer/?uri=github.com/CSHS-CWRA/RavenPy
+        :alt: OpenSSF Scorecard
+
+.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/CSHS-CWRA/RavenPy/master.svg
+        :target: https://results.pre-commit.ci/latest/github/CSHS-CWRA/RavenPy/master
+        :alt: pre-commit.ci status
+
+.. |pypi| image:: https://img.shields.io/pypi/v/RavenPy.svg
+        :target: https://pypi.python.org/pypi/RavenPy
+        :alt: PyPI
+
+.. |ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+        :target: https://github.com/astral-sh/ruff
+        :alt: Ruff
+
+.. |status| image:: https://www.repostatus.org/badges/latest/active.svg
+        :target: https://www.repostatus.org/#active
+        :alt: Project Status: Active - The project has reached a stable, usable state and is being actively developed.
+
+.. |versions| image:: https://img.shields.io/pypi/pyversions/RavenPy.svg
+        :target: https://pypi.python.org/pypi/RavenPy
+        :alt: Supported Python Versions
+
