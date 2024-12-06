@@ -1,0 +1,176 @@
+from enum import Enum
+from typing import Annotated, TypeAlias
+
+from pydantic import BaseModel, BeforeValidator, computed_field
+
+from prediction_market_agent_tooling.gtypes import OutcomeStr, Probability
+from prediction_market_agent_tooling.tools.utils import DatetimeUTC
+
+
+class Currency(str, Enum):
+    xDai = "xDai"
+    Mana = "Mana"
+    USDC = "USDC"
+
+
+class Resolution(str, Enum):
+    YES = "YES"
+    NO = "NO"
+    CANCEL = "CANCEL"
+    MKT = "MKT"
+
+    @staticmethod
+    def from_bool(value: bool) -> "Resolution":
+        return Resolution.YES if value else Resolution.NO
+
+
+class TokenAmount(BaseModel):
+    amount: float
+    currency: Currency
+
+    def __str__(self) -> str:
+        return f"Amount {self.amount} currency {self.currency}"
+
+
+BetAmount: TypeAlias = TokenAmount
+ProfitAmount: TypeAlias = TokenAmount
+
+
+class Bet(BaseModel):
+    id: str
+    amount: BetAmount
+    outcome: bool
+    created_time: DatetimeUTC
+    market_question: str
+    market_id: str
+
+    def __str__(self) -> str:
+        return f"Bet for market {self.market_id} for question {self.market_question} created at {self.created_time}: {self.amount} on {self.outcome}"
+
+
+class ResolvedBet(Bet):
+    market_outcome: bool
+    resolved_time: DatetimeUTC
+    profit: ProfitAmount
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def is_correct(self) -> bool:
+        return self.outcome == self.market_outcome
+
+    def __str__(self) -> str:
+        return f"Resolved bet for market {self.market_id} for question {self.market_question} created at {self.created_time}: {self.amount} on {self.outcome}. Bet was resolved at {self.resolved_time} and was {'correct' if self.is_correct else 'incorrect'}. Profit was {self.profit}"
+
+
+class TokenAmountAndDirection(TokenAmount):
+    direction: bool
+
+
+def to_boolean_outcome(value: str | bool) -> bool:
+    if isinstance(value, bool):
+        return value
+
+    elif isinstance(value, str):
+        value = value.lower().strip()
+
+        if value in {"true", "yes", "y", "1"}:
+            return True
+
+        elif value in {"false", "no", "n", "0"}:
+            return False
+
+        else:
+            raise ValueError(f"Expected a boolean string, but got {value}")
+
+    else:
+        raise ValueError(f"Expected a boolean or a string, but got {value}")
+
+
+Decision = Annotated[bool, BeforeValidator(to_boolean_outcome)]
+
+
+class ProbabilisticAnswer(BaseModel):
+    p_yes: Probability
+    confidence: float
+    reasoning: str | None = None
+
+    @property
+    def p_no(self) -> Probability:
+        return Probability(1 - self.p_yes)
+
+
+class Position(BaseModel):
+    market_id: str
+    amounts: dict[OutcomeStr, TokenAmount]
+
+    @property
+    def total_amount(self) -> TokenAmount:
+        return TokenAmount(
+            amount=sum(amount.amount for amount in self.amounts.values()),
+            currency=self.amounts[next(iter(self.amounts.keys()))].currency,
+        )
+
+    def __str__(self) -> str:
+        amounts_str = ", ".join(
+            f"{amount.amount} '{outcome}' tokens"
+            for outcome, amount in self.amounts.items()
+        )
+        return f"Position for market id {self.market_id}: {amounts_str}"
+
+
+class TradeType(str, Enum):
+    SELL = "sell"
+    BUY = "buy"
+
+
+class Trade(BaseModel):
+    trade_type: TradeType
+    outcome: bool
+    amount: TokenAmount
+
+
+class PlacedTrade(Trade):
+    id: str | None = None
+
+    @staticmethod
+    def from_trade(trade: Trade, id: str) -> "PlacedTrade":
+        return PlacedTrade(
+            trade_type=trade.trade_type,
+            outcome=trade.outcome,
+            amount=trade.amount,
+            id=id,
+        )
+
+
+class SimulatedBetDetail(BaseModel):
+    strategy: str
+    url: str
+    market_p_yes: float
+    agent_p_yes: float
+    agent_conf: float
+    org_bet: float
+    sim_bet: float
+    org_dir: bool
+    sim_dir: bool
+    org_profit: float
+    sim_profit: float
+    timestamp: DatetimeUTC
+
+
+class SharpeOutput(BaseModel):
+    annualized_volatility: float
+    mean_daily_return: float
+    annualized_sharpe_ratio: float
+
+
+class SimulatedLifetimeDetail(BaseModel):
+    p_yes_mse: float
+    total_bet_amount: float
+    total_bet_profit: float
+    total_simulated_amount: float
+    total_simulated_profit: float
+    roi: float
+    simulated_roi: float
+    sharpe_output_original: SharpeOutput
+    sharpe_output_simulation: SharpeOutput
+    maximize: float
