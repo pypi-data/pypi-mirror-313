@@ -1,0 +1,16 @@
+package messages
+public
+	with Base_Types, Data_Model;
+    {% for type in types %}
+    data {{type.name}}
+        features
+            {% for field in type.fields %}
+            {% if field.type == 'real'%}
+            {{field.name}}: provides data access Base_Types::Float_64;
+            {% endif %}
+            {% endfor %}
+    end {{type.name}};
+
+    {% endfor %}
+
+end messages;
