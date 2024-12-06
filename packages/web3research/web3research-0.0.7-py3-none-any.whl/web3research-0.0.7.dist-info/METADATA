@@ -1,0 +1,88 @@
+Metadata-Version: 2.1
+Name: web3research
+Version: 0.0.7
+Summary: Python SDK for Web3Research Platform
+Home-page: https://github.com/njublockchain/web3research-py
+License: MIT
+Keywords: web3,web3research,blockchain,ethereum,tron,web3.py
+Author: NJU Blockchain
+Author-email: admin@nju.im
+Requires-Python: >=3.8,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: base58 (>=2.1.1,<3.0.0)
+Requires-Dist: clickhouse-connect (>=0.7.10,<0.8.0)
+Requires-Dist: web3 (>=6.20,<7.0)
+Project-URL: Bug Tracker, https://github.com/njublockchain/web3research-py/issues
+Project-URL: Documentation, https://github.com/njublockchain/web3research-py
+Project-URL: Repository, https://github.com/njublockchain/web3research-py
+Description-Content-Type: text/markdown
+
+# Web3Research Python Toolkit
+
+`web3research-py` is the official python software development kit for leveraging datasets on [Web3Research Platform](http://web3resear.ch)
+
+**WARNING**: This package is not built for Web3Research dashboards, which means that you might not be able to run on the Python Cards.
+
+## Installation
+
+From pypi (stable)
+```bash
+pip install -U web3research
+```
+
+From github (latest)
+```bash
+pip install -U git+https://github.com/njublockchain/web3research-py
+```
+
+## Usage
+
+Example: fetch and parse a USDT Transfer Event
+
+```python
+import os
+import web3
+import web3research
+from web3research.evm import SingleEventDecoder
+from web3research.common import Address
+
+# for internet
+w3r = web3research.Web3Research(api_token=YOUT_APIKEY)
+
+USDT_address = Address('0xdac17f958d2ee523a2206206994597c13d831ec7')
+
+log = w3r.eth.events(
+    where=f"address = {USDT_address}", 
+    order_by={"blockNumber", True},
+    limit=1
+)[0]
+
+w3 = web3.Web3()
+
+abi = {
+    "anonymous": False,
+    "inputs": [
+        {"indexed": True, "name": "from", "type": "address"},
+        {"indexed": True, "name": "to", "type": "address"},
+        {"indexed": False, "name": "value", "type": "uint256"},
+    ],
+    "name": "Transfer",
+    "type": "event",
+}
+decoder = SingleEventDecoder(w3, event_abi=abi)
+result = decoder.decode(log)
+print(result)
+
+```
+
+More practical examples are shown on [web3research-py-examples](http://github.com/njublockchain/web3research-py-examples)
+
+You can read detailed guide on [our document site](https://doc.web3resear.ch/). Auto-generated python API document is available  on https://web3research.readthedocs.io/.
+
