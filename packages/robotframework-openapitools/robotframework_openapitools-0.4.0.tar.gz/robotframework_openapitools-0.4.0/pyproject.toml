@@ -1,0 +1,141 @@
+[tool.poetry]
+name="robotframework-openapitools"
+version = "0.4.0"
+description = "A set of Robot Framework libraries to test APIs for which the OAS is available."
+license = "Apache-2.0"
+authors = [
+    "Bartlomiej Hirsz <bartek.hirsz@gmail.com>",
+    "Mateusz Nojek <matnojek@gmail.com>",
+    "Robin Mackaij <r.a.mackaij@gmail.com>"
+]
+maintainers = ["Robin Mackaij <r.a.mackaij@gmail.com>"]
+readme =  "./docs/README.md"
+homepage = "https://github.com/MarketSquare/robotframework-openapitools"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Testing :: Acceptance",
+    "Framework :: Robot Framework",
+]
+packages = [
+    {include = "OpenApiDriver", from = "src"},
+    {include = "OpenApiLibCore", from = "src"},
+    {include = "roboswag", from = "src"},
+]
+include = ["*.libspec"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+robotframework = {version = ">=6.0.0, !=7.0.0", allow-prereleases = false }
+robotframework-datadriver = ">=1.10.0"
+requests = ">=2.31.0"
+prance = {version = ">=23", extras = ["CLI"]}
+Faker = ">=23.1.0"
+rstr = ">=3.2.0"
+openapi-core = ">=0.19.0"
+rich_click = ">=1.7.0"
+black = ">=24.1.0"
+Jinja2 = ">=3.1.2"
+
+[tool.poetry.group.dev.dependencies]
+invoke = ">=2.2.0"
+robotframework-stacktrace = ">=0.4.0"
+uvicorn = ">=0.27.0"
+fastapi = ">=0.109.0"
+coverage = {version = ">=7.2.0", extras = ["toml"]}
+
+[tool.poetry.group.formatting.dependencies]
+isort = ">=5.13.0"
+robotframework-tidy = ">=4.9.0"
+
+[tool.poetry.group.type-checking.dependencies]
+mypy = ">=1.8.0"
+pyright = ">=1.1.350"
+types-requests = ">=2.31.0"
+types-invoke = ">=2.0.0.0"
+
+[tool.poetry.group.linting.dependencies]
+pylint = ">=3.0.0"
+ruff = ">=0.2.0"
+robotframework-robocop = ">=5.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+branch = true
+parallel = true
+source = ["src/OpenApiDriver", "src/OpenApiLibCore"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "@abstract"
+]
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+strict = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "prance.*",
+    "invoke",
+    "uvicorn",
+    "rstr"
+]
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+py_version=38
+src_paths = [
+    "src"
+]
+
+[tool.ruff]
+line-length = 120
+src = ["src/OpenApiDriver"]
+
+[tool.ruff.lint]
+select = ["E", "F", "PL"]
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = ["logging-fstring-interpolation", "missing-class-docstring"]
+
+[tool.pylint.'FORMAT CHECKER']
+max-line-length=120
+
+[tool.pylint.'SIMILARITIES CHECKER']
+ignore-imports="yes"
+
+[tool.robotidy]
+line_length = 120
+spacecount = 4
+
+[tool.robocop]
+filetypes = [".robot", ".resource"]
+configure = [
+    "line-too-long:line_length:120",
+    "too-many-calls-in-test-case:max_calls:15"
+]
+exclude = [
+    "missing-doc-suite",
+    "missing-doc-test-case",
+    "missing-doc-keyword",
+    "too-few-calls-in-test-case"
+]
