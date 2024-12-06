@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -eu
+
+if [ -n "${TUXPKG_RELEASE_KEY:-}" ]; then
+    gpg --batch --import ${TUXPKG_RELEASE_KEY}
+fi
+
+if [ -z "${TUXPKG_RELEASE_KEYID:-}" ]; then
+  echo "W: \${TUXPKG_RELEASE_KEYID} not defined, skipping"
+  exit
+fi
+
+gpg --list-secret-keys ${TUXPKG_RELEASE_KEYID}
+
+expiration=$(gpg -K --with-colons ${TUXPKG_RELEASE_KEYID:-} | awk -F : '{print($7); exit}')
+if [ -z "${expiration}" ]; then
+  echo "I: Signing key has no expiration date."
+  exit
+fi
+now=$(date +%s)
+days=$(( (expiration - now) / (24*60*60)))
+if [ $days -lt 90 ]; then
+  if [ $days -gt 0 ]; then
+    echo "E: Signing key will expire in ${days} days."
+  else
+    echo "E: Signing key is expired."
+  fi
+  exit 1
+else
+  echo "I: Signing key is OK, expiration in ${days} days."
+fi

@@ -1,0 +1,31 @@
+include:
+  - /gitlab-ci-pipeline.yml
+
+variables:
+  TUXPKG: python3 -m tuxpkg
+  TUXPKG_PROJECT: tuxpkg
+
+doc:
+  image: $CI_REGISTRY_IMAGE:ci-debian
+  stage: deploy
+  artifacts:
+    paths:
+      - public
+  script:
+    - make doc
+
+
+pages:
+  image: $CI_REGISTRY_IMAGE:ci-debian
+  stage: deploy
+  needs:
+    - test
+    - doc
+    - repository
+  only:
+    - tags
+  script:
+    - cp -r dist/repo public/packages
+  artifacts:
+    paths:
+      - public
