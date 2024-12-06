@@ -1,0 +1,247 @@
+[case testXDefinedHere]
+# mypy: show-error-context
+import a
+def f(): ...  # N: "f" defined here
+f(a=1)  # E: Unexpected keyword argument "a" for "f"  [call-arg]
+[file a.py]
+def f(): ...
+f(a=1)  # E: Unexpected keyword argument "a" for "f"  [call-arg]
+
+
+[case testIgnoreOnReveal]
+from typing import Any
+
+a: Any = 1  # E: Explicit "Any" is not allowed  [no-any-explicit]
+reveal_type(a)  # type: ignore[no-any-expr]  # N: Revealed type is "Any"
+
+
+[case testFakeColumn]
+# flags: --show-error-end
+if bool():  # type: ignore[truthy-bool]
+    1  # type: ignore[operator]
+[out]
+main:3:5:3:31: error: Unused "type: ignore" comment  [unused-ignore]
+
+
+[case testNarrowOnInitialAssignment]
+a: object = 1
+reveal_type(a)  # N: Revealed type is "int" (narrowed from "object")
+
+
+[case testNarrowWithAny]
+# mypy: allow-any-explicit, allow-any-expr
+from typing import Any, Union
+
+a: Union[int, Any]
+if bool():
+    a = 1
+    reveal_type(a)  # N: Revealed type is "int" (narrowed from "int | Any")
+b: Any = 1
+reveal_type(b)  # N: Revealed type is "Any"
+c: Any
+c = 1
+reveal_type(c)  # N: Revealed type is "Any"
+
+
+[case testNarrowWithTuple]
+# mypy: disallow-redefinition
+from typing import Tuple, TypeVar
+T = TypeVar('T')
+
+def f(x: T) -> Tuple[T, T]: ...
+x = None
+reveal_type(x) # N: Revealed type is "None" (narrowed from "partially defined: ? | None")
+x, *_ = f('')
+reveal_type(x) # N: Revealed type is "str" (narrowed from "str | None")
+[builtins fixtures/tuple.pyi]
+
+
+[case testNarrowWithFinal]
+# mypy: allow-any-expr, allow-any-explicit
+from __future__ import annotations
+from typing import Final, Any
+
+one: 1
+a1: Final[object] = 1
+reveal_type(a1)  # N: Revealed type is "1"
+b1: Final[object] = True
+reveal_type(a1)  # N: Revealed type is "1"
+reveal_type(b1)  # N: Revealed type is "True"
+b2: Final[object] = one
+reveal_type(b2)  # N: Revealed type is "1"
+
+any: Any
+list_any: list[Any]
+
+c: list[int] = list_any
+d: Final[list[object]] = list_any
+e: Final[list[int]] = list_any
+
+# make sure they don't become Any
+reveal_type(c)  # N: Revealed type is "list[int]"
+reveal_type(d)  # N: Revealed type is "list[object]"
+reveal_type(e)  # N: Revealed type is "list[int]"
+
+class C: ...
+class A:
+    a1: Final[object] = C()
+    b1: Final[int] = 1
+    c1: Final[list[object]] = list_any
+    def __init__(self):
+        self.a2: Final[object] = C()
+        self.b2: Final[int] = 1
+        self.c2: Final[list[object]] = list_any
+a: Final[object] = A()
+reveal_type(a)  # N: Revealed type is "__main__.A" (narrowed from "object")
+reveal_type(a.a1)  # N: Revealed type is "__main__.C"
+reveal_type(a.a2)  # N: Revealed type is "__main__.C"
+reveal_type(a.b1)  # N: Revealed type is "1"
+reveal_type(a.b2)  # N: Revealed type is "1"
+reveal_type(a.c1)  # N: Revealed type is "list[object]"
+reveal_type(a.c2)  # N: Revealed type is "list[object]"
+[builtins fixtures/tuple.pyi]
+
+
+[case testFunctionAnnotations]
+# flags: --python-version=3.8
+from typing import List
+def f():
+    a: list[int]
+    class A:
+        a: list[int]  # E: "list" is not subscriptable, use "typing.List" instead  [misc]
+        b: List[int]
+        def f(self):
+            a: list[int]
+            b: List[int]
+    def f(a: list[int], b: List[int]):  # E: "list" is not subscriptable, use "typing.List" instead  [misc]
+        ...
+[file main.pyi]
+from typing import List
+def f():
+    a: list[int]
+    class A:
+        a: list[int]
+        b: List[int]
+        def f(self):
+            a: list[int]
+            b: List[int]
+    def f(a: list[int], b: List[int]): ...
+
+[case testCastAtRuntime]
+# flags: --python-version=3.8
+from typing import cast, List
+cast(list[int], [])  # E: "list" is not subscriptable, use "typing.List" instead  [misc]
+cast("list[int]", [])
+cast(List[int], [])
+
+
+[case testCastAtRuntimeFuture]
+# flags: --python-version=3.8
+from __future__ import annotations
+from typing import cast, List
+cast(list[int], [])  # E: "list" is not subscriptable, use "typing.List" instead  [misc]
+cast("list[int]", [])
+cast(List[int], [])
+[builtins fixtures/tuple.pyi]
+
+
+[case testBasedTypesInFunction]
+def f():
+    a: 1 | 2
+    b: int & str
+    c: (int, str)
+    d: True | False
+    def guard(x: object) -> x is int:  # E: You need to put quotes around the entire type-guard, or enable `__future__.annotations`  [misc]
+        ...
+[builtins fixtures/tuple.pyi]
+
+
+[case testUsingDecoratedNone]
+from typing import TypeVar, Callable
+T = TypeVar("T")
+def deco(t: T) -> T: ...
+@deco
+def f1(): ...
+
+a = f1()  # E: "f1" does not return a value (it only ever returns None)  [func-returns-value]
+
+def becomes_none(f: object) -> Callable[[], None]: ...
+
+@becomes_none
+def f2() -> object: ...
+
+a = f2()  # E: "f2" does not return a value (it only ever returns None)  [func-returns-value]
+def becomes_object(f: object) -> Callable[[], object]: ...
+
+@becomes_object
+def f3(): ...
+
+a = f3()
+
+
+[case testDoubleAlwaysTrue]
+# testing that it doesn't become "True" after a condition
+# mypy: always-true=a
+a = False
+
+if a:
+    b = 1
+if a:
+    b = 1
+
+
+[case testAlwaysTrueDoesntNarrow]
+# testing that it doesn't become "True" after a condition
+#  but that narrowings in the body do
+# mypy: always-true=a
+a = False
+
+b: object
+if a:
+    b = 1
+reveal_type(b)  # N: Revealed type is "int" (narrowed from "object")
+
+
+[case testRedundantExprOnWhileTrue]
+for _ in [1]:
+    if True:  # E: Condition is always true  [redundant-expr]
+        reveal_type(1)  # N: Revealed type is "1"
+while True:
+    if True:  # E: Condition is always true  [redundant-expr]
+        reveal_type(1)  # N: Revealed type is "1"
+
+
+[case testWorkNotProperlyFunctionNamesModule]
+# flags: --config-file tmp/pyproject.toml
+import other
+
+class A:
+    def f(self, a: int): ...
+class B(A):
+    def f(self, b: int): ...  # E: Signature of "f" incompatible with supertype "A"  [override] \
+                              # N:      Superclass: \
+                              # N:          def f(self, a: int) -> None \
+                              # N:      Subclass: \
+                              # N:          def f(self, b: int) -> None \
+                              # E: Method "f" is not using @override but is overriding a method in class "__main__.A"  [explicit-override]
+
+[file other.py]
+class A:
+    def f(self, a: int): ...
+class B(A):
+    def f(self, b: int): ...  # E: Method "f" is not using @override but is overriding a method in class "other.A"  [explicit-override]
+
+[file pyproject.toml]
+\[[tool.mypy.overrides]]
+module="other"
+work_not_properly_function_names=true
+
+
+[case testErasedSelfType]
+
+class A:
+    def f(self: B):
+        reveal_type(self) # N: Revealed type is "__main__.B"
+class B(A): ...
+A().f()  # E: Invalid self argument "A" to attribute function "f" with type "def (self: B) -> None"  [misc]
+B().f()  # no error

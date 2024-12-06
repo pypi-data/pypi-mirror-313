@@ -1,0 +1,631 @@
+-- Tests for baseline
+-- ------------------------------
+-- See cmdline.test for specifics
+-- ----------------------------------------
+
+[case testWriteBaseline]
+# cmd: mypy --write-baseline --baseline-file a/b --error-summary pkg
+[file pkg/a.py]
+a
+[out]
+pkg/a.py:1:1: error: Name "a" is not defined  [name-defined]
+Found 1 error (1 new error) in 1 file (checked 1 source file)
+Baseline successfully written to a/b
+== Return code: 0
+
+
+-- TODO merge this with the first one?
+[case testWriteBaseline2]
+# cmd: mypy --write-baseline --baseline-file a/b pkg
+# dont-normalize-output:
+[file pkg/a.py]
+a
+[outfile a/b]
+{
+  "files": {
+    "pkg/a.py": [
+      {
+        "code": "name-defined",
+        "column": 0,
+        "message": "Name \"a\" is not defined",
+        "offset": 1,
+        "src": "a",
+        "target": "a"
+      }
+    ]
+  },
+  "format": "1.7",
+  "targets": [
+    "file:pkg"
+  ]
+}
+
+
+[case testRewriteBaseline]
+# cmd: mypy --write-baseline --error-summary pkg
+[file pkg/a.py]
+1 + ""
+"" + 1
+[file .mypy/baseline.json]
+{"files": {"pkg/a.py": [{"code": "operator", "offset": 2, "message": "Unsupported operand types for + (\"str\" and \"int\")", "src": "\"\" + 1"}]},
+"format": "1.7",
+"targets": ["file:pkg"]
+}
+[out]
+pkg/a.py:1:5: error: Unsupported operand types for + ("int" and "str")  [operator]
+Found 2 errors (1 new error) in 1 file (checked 1 source file)
+Baseline successfully written to .mypy/baseline.json
+== Return code: 0
+-- TODO merge this with the first one?
+
+
+[case testRewriteBaseline2]
+# cmd: mypy --write-baseline --error-summary pkg
+# dont-normalize-output:
+[file pkg/a.py]
+1 + ""
+"" + 1
+[file .mypy/baseline.json]
+{"pkg/a.py": [{"code": "operator", "offset": 2, "message": "Unsupported operand types for + (\"str\" and \"int\")", "src": ""}]}
+[outfile .mypy/baseline.json]
+{
+  "files": {
+    "pkg/a.py": [
+      {
+        "code": "operator",
+        "column": 4,
+        "message": "Unsupported operand types for + (\"int\" and \"str\")",
+        "offset": 1,
+        "src": "1 + \"\"",
+        "target": "a"
+      },
+      {
+        "code": "operator",
+        "column": 5,
+        "message": "Unsupported operand types for + (\"str\" and \"int\")",
+        "offset": 1,
+        "src": "\"\" + 1",
+        "target": "a"
+      }
+    ]
+  },
+  "format": "1.7",
+  "targets": [
+    "file:pkg"
+  ]
+}
+
+
+[case testRewriteEmpty]
+# cmd: mypy --write-baseline --error-summary pkg
+[file pkg/a.py]
+1 + 1
+"" + ""
+[file .mypy/baseline.json]
+{"files": {"pkg/a.py": [{"code": "operator", "offset": 2, "message": "Unsupported operand types for + (\"str\" and \"int\")", "src": ""}]},
+"format": "1.7",
+"targets": ["file:pkg"]
+}
+[out]
+No errors, baseline file removed
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testRewriteNoChange]
+# cmd: mypy --write-baseline --error-summary pkg
+[file pkg/a.py]
+a
+[file .mypy/baseline.json]
+{
+"targets": ["file:pkg"],
+"files": {"pkg/a.py": [{"code": "name-defined", "column": 0, "offset": 1, "message": "Name \"a\" is not defined", "target": "pkg.a", "src": "a"}]},
+"format": "1.7"
+}
+[out]
+Found 1 error (0 new errors) in 1 file (checked 1 source file)
+Baseline successfully written to .mypy/baseline.json
+== Return code: 0
+
+
+[case testAutoBaselineRemoves]
+# cmd: mypy --error-summary pkg
+[file pkg/a.py]
+1 + 1
+[file .mypy/baseline.json]
+{"targets": ["file:pkg"],
+"format": "1.7",
+"files": {"pkg/a.py": [{"offset": 2, "code": "name-defined", "message": "Name \"a\" is not defined", "src": ""}]
+}}
+[out]
+No errors, baseline file removed
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testAutoBaselineDoesntActivateWithErrors]
+# cmd: mypy --error-summary pkg
+[file pkg/a.py]
+a
+b
+[file .mypy/baseline.json]
+{"targets": ["file:pkg"], "format": "1.7",
+"files": {"pkg/a.py": [{"offset": 2, "code": "name-defined", "message": "Name \"a\" is not defined", "src": "a"}]}
+}
+[out]
+pkg/a.py:2:1: error: Name "b" is not defined  [name-defined]
+Found 1 error in 1 file (checked 1 source file)
+
+
+[case testAutoBaselineUpdates]
+# cmd: mypy --error-summary pkg
+[file pkg/a.py]
+a
+[file .mypy/baseline.json]
+{
+"targets": ["file:pkg"],
+"format": "1.7",
+"files": {"pkg/a.py": [{"offset": 2, "code": "name-defined", "message": "Name \"a\" is not defined", "src": "a"}]}
+}
+[out]
+Baseline successfully updated at .mypy/baseline.json
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testAutoBaselineDoesntMessageWhenSame]
+# cmd: mypy pkg
+# dont-normalize-output:
+[file pkg/a.py]
+a
+[file .mypy/baseline.json]
+{"targets": ["file:pkg"],
+"format": "1.7",
+"files": {"pkg/a.py": [{"code": "name-defined", "column": 0, "offset": 1, "message": "Name \"a\" is not defined", "target": "a", "src": "a"}]}
+}
+[outfile .mypy/baseline.json]
+{"targets": ["file:pkg"],
+"format": "1.7",
+"files": {"pkg/a.py": [{"code": "name-defined", "column": 0, "offset": 1, "message": "Name \"a\" is not defined", "target": "a", "src": "a"}]}
+}
+
+
+[case testAutoBaselineDoesntMessageWhenSame2]
+# cmd: mypy --error-summary pkg
+[file pkg/a.py]
+a
+[file .mypy/baseline.json]
+{"targets": ["file:pkg"],
+"format": "1.7",
+"files": {"pkg/a.py": [{"code": "name-defined", "column": 0, "offset": 1, "message": "Name \"a\" is not defined", "target": "a", "src": "a"}]}
+}
+[out]
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testInvalidFormat]
+# cmd: mypy --error-summary --baseline-file a/b pkg
+[file pkg/a.py]
+a
+[file a/b]
+{"__baseline_metadata__": {"targets": ["file:pkg"]}}
+[out]
+error: Baseline file 'a/b' has an invalid data format.
+It should be regenerated with `--write-baseline`.
+== Return code: 2
+
+
+[case testAutoBaselineDifferentTargets]
+# cmd: mypy --error-summary pkg
+[file pkg/a.py]
+a
+[file .mypy/baseline.json]
+{
+"targets": ["file:pkg/a.py"],
+"format": "1.7",
+"files": {"pkg/a.py": [{"offset": 2, "code": "name-defined", "message": "Name \"a\" is not defined", "src": "a"}]}
+}
+[out]
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testNoAutoBaseline]
+# cmd: mypy --no-auto-baseline --error-summary pkg
+[file pkg/a.py]
+a
+[file .mypy/baseline.json]
+{"files": {"pkg/a.py": [{"offset": 2, "code": "name-defined", "message": "Name \"a\" is not defined", "src": "a"}]}, "format": "1.7",
+"targets": ["file:pkg"]
+}
+[out]
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testNotFound]
+# cmd: mypy --baseline-file a/b --error-summary pkg
+[file pkg/a.py]
+[out]
+error: Baseline file not found at a/b
+== Return code: 2
+
+
+[case testInvalidJSON]
+# cmd: mypy --baseline-file a/b --error-summary pkg
+[file pkg/a.py]
+[file a/b]
+hi
+[out]
+error: Invalid JSON in baseline file a/b
+== Return code: 2
+
+
+[case testBaselineFilter]
+# cmd: mypy --error-summary pkg
+[file pkg/a.py]
+1 + ""
+"" + 1
+[file .mypy/baseline.json]
+{"files": {"pkg/a.py": [{"code": "operator", "offset": 2, "message": "Unsupported operand types for + (\"str\" and \"int\")", "src": "\"\" + 1"}]}, "format": "1.7",
+"targets": ["file:pkg"]}
+[out]
+pkg/a.py:1:5: error: Unsupported operand types for + ("int" and "str")  [operator]
+Found 1 error in 1 file (checked 1 source file)
+
+
+[case testBlockers]
+# cmd: mypy --write-baseline --error-summary main
+[file main]
+ 1
+[out]
+main:1:2: error: unexpected indent  [syntax]
+Found 1 error in 1 file (errors prevented further checking)
+== Return code: 2
+
+
+[case testBaselineFilterLinkedNotes]
+# cmd: mypy --error-summary pkg
+[file pkg/a.py]
+(a, 1 + "")  # type: ignore[name-defined]
+[file .mypy/baseline.json]
+{
+  "files": {
+    "pkg/a.py": [
+      {"code": "name-defined", "column": 0, "message": "Name \"a\" is not defined", "offset": 1, "src": "(a, 1 + \"\")  # type: ignore[name-defined]"},
+      {"code": "operator", "column": 0, "message": "Unsupported operand types for + (\"int\" and \"str\")", "offset": 0, "src": "(a, 1 + \"\")  # type: ignore[name-defined]"}
+    ]
+  },
+  "format": "1.7",
+  "targets": [ "file:pkg" ]
+}
+[out]
+Baseline successfully updated at .mypy/baseline.json
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testRevealType]
+# cmd: mypy --error-summary pkg
+[file pkg/main.py]
+a: int
+reveal_type(a)
+[file .mypy/baseline.json]
+{"files": {"pkg/main.py": [{"offset": 1, "code": "misc", "message": "test", "src": ""}]}, "format": "1.7", "targets": ["file:pkg"]}
+[out]
+pkg/main.py:2:13: note: Revealed type is "int"
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testRevealLocals]
+# cmd: mypy --error-summary pkg
+[file pkg/main.py]
+def foo() -> None:
+    a: int
+    reveal_locals()
+[file .mypy/baseline.json]
+{"files": {"main.py": [{"offset": 1, "code": "misc", "message": "test", "src": ""}]}, "format": "1.7", "targets": ["file:pkg"]}
+[out]
+pkg/main.py: note: In function "foo":
+pkg/main.py:3:5: note: Revealed local types are:
+pkg/main.py:3:5: note:     a: int
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testOldBaselineFormat]
+# cmd: mypy --error-summary pkg
+[file pkg/main.py]
+a: int = ''
+b: str = 1
+[file .mypy/baseline.json]
+{
+  "files": {
+    "pkg/main.py": [{"offset": 1, "code": "assignment", "message": "Incompatible types in assignment (expression has type \"str\", variable has type \"int\")"}]
+  },
+  "format": "1.3",
+  "targets": ["file:pkg/main.py"]
+}
+[out]
+error: Baseline file '.mypy/baseline.json' was generated with an old version of basedmypy.
+It should be regenerated with `--write-baseline`.
+== Return code: 2
+
+
+[case testOldBaselineFormat1_2]
+# cmd: mypy --error-summary pkg
+[file pkg/main.py]
+a: int = ''
+b: str = 1
+[file .mypy/baseline.json]
+{"__baseline_metadata__": {"format": "1.2"}}
+[out]
+error: Baseline file '.mypy/baseline.json' was generated with an old version of basedmypy.
+It should be regenerated with `--write-baseline`.
+== Return code: 2
+
+
+[case testInvalidBaselineFormat]
+# cmd: mypy --error-summary pkg
+[file pkg/main.py]
+a: int = ''
+b: str = 1
+[file .mypy/baseline.json]
+{}
+[out]
+error: Baseline file '.mypy/baseline.json' has an invalid data format.
+It should be regenerated with `--write-baseline`.
+== Return code: 2
+
+
+[case testBaselineWithPrettyAndDuplicates]
+# cmd: mypy --error-summary --pretty --show-error-context pkg
+[file pkg/main.py]
+def foo(a=b):
+    pass
+foo()
+[file .mypy/baseline.json]
+{
+  "files": {
+    "pkg/main.py": [
+        {
+            "code": "no-untyped-def",
+            "column": 0,
+            "message": "Function is missing a type annotation for one or more arguments",
+            "offset": 1,
+            "src": "def foo(a=b):",
+            "target": "test.foo"
+        },
+        {
+            "code": "name-defined",
+            "column": 10,
+            "message": "Name \"b\" is not defined",
+            "offset": 0,
+            "src": "def foo(a=b):",
+            "target": "test"
+        },
+        {
+            "code": "no-untyped-call",
+            "column": 0,
+            "message": "Call to incomplete function \"foo\" in typed context",
+            "offset": 2,
+            "src": "foo()",
+            "target": "test"
+        },
+        {
+            "code": "no-untyped-call",
+            "column": 0,
+            "message": "Type is \"def (a: Untyped =) -> None\"",
+            "offset": 0,
+            "src": "foo()",
+            "target": "test"
+        }
+    ]
+  },
+  "format": "1.7",
+  "targets": [
+    "package:pkg"
+  ]
+}
+[out]
+Success: no issues found in 1 source file
+== Return code: 0
+
+
+[case testBaselineWithPrettyAndDuplicatesOutFile]
+# cmd: mypy --error-summary --pretty --show-error-context pkg
+# dont-normalize-output:
+[file pkg/main.py]
+def foo(a=b):
+    pass
+foo()
+[file .mypy/baseline.json]
+{
+    "files": {
+        "pkg/main.py": [
+            {
+                "code": "no-untyped-def",
+                "column": 0,
+                "message": "Function is missing a type annotation for one or more arguments",
+                "offset": 1,
+                "src": "def foo(a=b):",
+                "target": "test.foo"
+            },
+            {
+                "code": "name-defined",
+                "column": 10,
+                "message": "Name \"b\" is not defined",
+                "offset": 0,
+                "src": "def foo(a=b):",
+                "target": "test"
+            },
+            {
+                "code": "no-untyped-call",
+                "column": 0,
+                "message": "Call to incomplete function \"foo\" in typed context",
+                "offset": 2,
+                "src": "foo()",
+                "target": "test"
+            },
+            {
+                "code": "no-untyped-call",
+                "column": 0,
+                "message": "Type is \"def (a: Untyped =) -> None\"",
+                "offset": 0,
+                "src": "foo()",
+                "target": "test"
+            }
+        ]
+    },
+    "format": "1.7",
+    "targets": [
+        "package:pkg"
+    ]
+}
+[outfile .mypy/baseline.json]
+{
+    "files": {
+        "pkg/main.py": [
+            {
+                "code": "no-untyped-def",
+                "column": 0,
+                "message": "Function is missing a type annotation for one or more arguments",
+                "offset": 1,
+                "src": "def foo(a=b):",
+                "target": "test.foo"
+            },
+            {
+                "code": "name-defined",
+                "column": 10,
+                "message": "Name \"b\" is not defined",
+                "offset": 0,
+                "src": "def foo(a=b):",
+                "target": "test"
+            },
+            {
+                "code": "no-untyped-call",
+                "column": 0,
+                "message": "Call to incomplete function \"foo\" in typed context",
+                "offset": 2,
+                "src": "foo()",
+                "target": "test"
+            },
+            {
+                "code": "no-untyped-call",
+                "column": 0,
+                "message": "Type is \"def (a: Untyped =) -> None\"",
+                "offset": 0,
+                "src": "foo()",
+                "target": "test"
+            }
+        ]
+    },
+    "format": "1.7",
+    "targets": [
+        "package:pkg"
+    ]
+}
+
+[case testSrcOtherFile]
+# cmd: mypy --write-baseline a.py --show-error-context
+[file a.py]
+from b import f
+f(a=1)
+[file b.py]
+# need
+# empty lines
+# here
+def f(): ...
+[out]
+a.py:2:1: error: Unexpected keyword argument "a" for "f"  [call-arg]
+b.py:4:1: note: "f" defined here
+Baseline successfully written to .mypy/baseline.json
+== Return code: 0
+
+[case testSrcOtherFile2]
+# cmd: mypy a.py --show-error-context
+[file a.py]
+from b import f
+f(a=1)
+[file b.py]
+# need
+# empty lines
+# here
+def f(): ...
+[file .mypy/baseline.json]
+{
+    "files": {
+        "a.py": [
+            {
+                "code": "no-untyped-def",
+                "column": 0,
+                "message": "Function is missing a type annotation for one or more arguments",
+                "offset": 1,
+                "src": "def foo(a=b):",
+                "target": "test.foo"
+            }
+        ]
+    },
+    "format": "1.7",
+    "targets": [
+        "file:a.py"
+    ]
+}
+[out]
+a.py:2:1: error: Unexpected keyword argument "a" for "f"  [call-arg]
+b.py:4:1: note: "f" defined here
+
+
+[case testErrorLink]
+# cmd: mypy a.py --show-error-code-links
+# We are testing that error links don't show if the error is baselined
+[file a.py]
+a
+[file .mypy/baseline.json]
+{
+    "files": {
+        "a.py": [
+            {
+                "code": "name-defined",
+                "column": 0,
+                "message": "Name \"a\" is not defined",
+                "offset": 1,
+                "src": "a",
+                "target": "a"
+            }
+        ]
+    },
+    "format": "1.7",
+    "targets": [
+        "file:a.py"
+    ]
+}
+
+[case testBaselineCache]
+# cmd: mypy --python-version 3.13 _program.py
+a
+[file .mypy/baseline.json]
+{
+    "files": {
+        "_program.py": [
+            {
+                "code": "name-defined",
+                "column": 0,
+                "message": "Name \"a\" is not defined",
+                "offset": 3,
+                "src": "a",
+                "target": "_program"
+            }
+        ]
+    },
+    "format": "1.7",
+    "targets": [
+        "file:_program.py"
+    ]
+}
+[outfile-re .mypy_cache/3.13/_program.data.json]
+.+
+[outfile-re .mypy_cache/3.13/_program.meta.json]
+.+

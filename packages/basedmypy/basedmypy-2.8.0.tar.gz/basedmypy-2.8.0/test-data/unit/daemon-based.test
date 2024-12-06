@@ -1,0 +1,30 @@
+-- End-to-end test cases for the daemon (dmypy).
+-- These are special because they run multiple shell commands.
+
+[case testDaemonBaseline]
+$ dmypy start -- --no-error-summary
+Daemon started
+$ dmypy check test.py
+$ {python} -c "print('\n')" >> test.py
+$ dmypy recheck
+[file .mypy/baseline.json]
+{
+    "files": {
+        "test.py": [
+            {
+                "code": "name-defined",
+                "column": 0,
+                "message": "Name \"a\" is not defined",
+                "offset": 1,
+                "src": "a",
+                "target": "test"
+            }
+        ]
+    },
+    "format": "1.7",
+    "targets": [
+        "file:test.py"
+    ]
+}
+[file test.py]
+a

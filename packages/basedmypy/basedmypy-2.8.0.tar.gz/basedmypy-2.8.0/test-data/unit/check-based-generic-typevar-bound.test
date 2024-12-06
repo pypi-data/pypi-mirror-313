@@ -1,0 +1,77 @@
+[case testGenericTypeVarBound]
+from typing import TypeVar, List
+
+T = TypeVar("T", bound=int)
+L = TypeVar("L", bound=List[T])
+
+def foo(l: L) -> T:
+    return l[0]
+
+reveal_type(foo([True]))  # N: Revealed type is "bool"
+foo([""])  # E: Value of type variable "T" of "foo" cannot be "str"  [type-var]
+
+
+[case testParamSpecEllipsis]
+from typing import TypeVar, Generic
+from typing_extensions import ParamSpec
+
+P = ParamSpec('P')
+T = TypeVar("T")
+
+class C(Generic[P]): ...
+CT = TypeVar("CT", bound=C[...])  # type: ignore[no-any-explicit]
+
+def f(ct: CT): ...  # E: Explicit "Any" is not allowed  [no-any-explicit]
+[builtins fixtures/tuple.pyi]
+
+
+[case testParamSpecWithGenericTypeVar-xfail]
+from typing import TypeVar, Generic, Callable
+from typing_extensions import ParamSpec
+
+P = ParamSpec('P')
+T = TypeVar("T")
+
+class C(Generic[P]):
+    c: Callable[P, int]
+CT = TypeVar("CT", bound=C[T])
+
+def f(t: T, ct: CT) -> int:
+    ct(1)  # E: what the?
+    return ct(t)
+
+f(1, C[str]())  # E: What the?
+f(1, C[int]())
+[builtins fixtures/tuple.pyi]
+
+
+[case testGenericTypeVarConstraint-xfail]
+from typing import TypeVar, Iterable
+
+E = TypeVar("E", int, str)
+I = TypeVar("I", bound=Iterable[E])
+
+def foo(i: I, e: E) -> I:
+    assert i[0] == e
+    return i
+
+reveal_type(foo([True], True))  # N: Revealed type is "list[int]"
+reveal_type(foo(["my"], "py"))  # N: Revealed type is "list[str]"
+reveal_type(foo(["my"], 10))  # E: argument 2 is bad
+reveal_type(foo([None], None))  # E: "I of foo" cannot be "list[None]"
+
+
+[case testGenericTypeVarConstraint2-xfail]
+from typing import TypeVar, Iterable, Set
+
+T = TypeVar("T", bound=int)
+C = TypeVar("L", Sequence[T], Mapping[T, T])
+
+def foo(c: C, t: T) -> C:
+    assert c[0] == t
+    return c
+
+reveal_type(foo([True], True))  # N: Revealed type is "Sequence[bool]"
+reveal_type(foo(["my"], "py"))  # E: "T of foo" can't be "str"
+reveal_type(foo({1: 1}, "10"))  # E: bad arg 2
+reveal_type(foo({True: True}, True))  # N: Mapping[bool]

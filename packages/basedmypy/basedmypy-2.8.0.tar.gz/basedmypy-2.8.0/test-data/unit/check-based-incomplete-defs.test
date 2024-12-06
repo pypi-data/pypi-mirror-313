@@ -1,0 +1,41 @@
+[case testCallingIncomplete]
+# flags: --config-file tmp/mypy.ini
+from b import foo
+foo(1, 2)  # E: Call to incomplete function "foo" in typed context  [no-untyped-call] \
+           # N: Type is "def (a: int, b: Untyped) -> None"
+
+[file b.py]
+def foo(a: int, b): ...
+
+[file mypy.ini]
+\[mypy]
+incomplete_is_typed = True
+allow_incomplete_defs = True
+allow_untyped_defs = True
+\[mypy-b]
+incomplete_is_typed = False
+
+
+[case testCallingIncompleteAsTyped]
+# flags: --config-file tmp/mypy.ini
+from b import foo
+foo(1, 2)
+
+[file b.py]
+def foo(a: int, b): ...
+
+[file mypy.ini]
+\[mypy]
+incomplete_is_typed = False
+allow_incomplete_defs = True
+allow_untyped_defs = True
+\[mypy-b]
+incomplete_is_typed = True
+
+
+[case typeIgnoreWorksProperly]
+# This test is to check that the `notes` param on `mypy.errors.Errors.report` works correctly
+def f(a, b: int = 1): ...  # type: ignore[no-untyped-def]
+f(
+1)  # type: ignore[no-untyped-call]
+[out]
