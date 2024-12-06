@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["e2clab*"]
+exclude = ["e2clab.tests*"]
+
+[project]
+name = "e2clab"
+description = "Your Edge-to-Cloud laboratory"
+readme = "README.rst"
+license = { file = "LICENSE.txt" }
+keywords = [
+  "methodology",
+  "reproducibility",
+  "optimization",
+  "edge",
+  "cloud",
+  "provenance",
+  "Grid5000",
+  "Chameleon",
+  "FIT IoT LAB",
+]
+requires-python = ">= 3.9,<3.12"
+dependencies = [
+  # Only install enoslib for supported testbeds
+  "enoslib[chameleon,iotlab]>=10,<11",
+  "click>=8.1.0",
+  "jsonschema>=3.2.0,<5",
+  "parallel-ssh>=2.3.2,<=2.5.4",
+  "questionary>2.0.0",
+  "python-dotenv",
+]
+authors = [{ name = "Daniel Rosendo", email = "daniel.rosendo@inria.fr" }]
+maintainers = [{ name = "Thomas Badts", email = "thomas.badts@inria.fr" }]
+classifiers = [
+  " Development Status :: 4 - Beta",
+  # Intended audience
+  "Intended Audience :: System Administrators",
+  "Intended Audience :: Science/Research",
+  # License
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  # OS support
+  "Operating System :: POSIX :: Linux",
+  # Python version support
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = { attr = "e2clab.__version__" }
+
+[project.urls]
+Homepage = "https://e2clab.gitlabpages.inria.fr/e2clab/"
+Documentation = "https://e2clab.gitlabpages.inria.fr/e2clab/"
+Repository = "https://gitlab.inria.fr/E2Clab/e2clab"
+
+[project.scripts]
+e2clab = "e2clab.cli:main"
+
+[project.optional-dependencies]
+# Docs and testing
+dev = ["tox", "pre-commit", "pytest", "pytest-cov", "ruff"]
+docs = [
+  "sphinx",
+  "sphinx_rtd_theme",
+  "sphinx-jsonschema",
+  "sphinx-design",
+  "sphinx-click",
+  "sphinx-copybutton",
+  "sphinx-tabs",
+]
+# Optimization capabilities
+opt = ["ray[tune]"]
