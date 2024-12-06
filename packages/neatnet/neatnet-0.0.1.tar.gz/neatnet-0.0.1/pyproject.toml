@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+
+[project]
+name = "neatnet"
+dynamic = ["version"]
+authors = [
+   { name = "Martin Fleischmann", email = "martin@martinfleischmann.net" },
+   { name = "Anastassia Vybornova", email = "anvy@itu.dk" },
+   { name = "James D. Gaboardi", email = "jgaboardi@gmail.com" },
+]
+
+license = { text = "BSD 3-Clause" }
+description = "Street geometry processing toolkit"
+keywords = [""]
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "esda>=2.6.0",
+    "geopandas>=1.0.1",
+    "libpysal>=4.12.1",
+    "momepy>=0.9.0",
+    "networkx>=3.3",
+    "numpy>=1.26.4",
+    "pandas>=2.2.3",
+    "scipy>=1.14.1",
+    "shapely>=2.0.6",
+]
+
+[project.urls]
+Home = "https://github.com/uscuni/"
+Repository = "https://github.com/uscuni/neatnet"
+
+[project.optional-dependencies]
+tests = [
+    "codecov",
+    "coverage",
+    "pre-commit",
+    "pyarrow>=17.0",
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+]
+
+[tool.setuptools.packages.find]
+include = ["neatnet", "neatnet.*"]
+
+[tool.ruff]
+line-length = 88
+extend-include = ["*.ipynb"]
+lint.select = ["E", "F", "W", "I", "UP", "N", "B", "A", "C4", "SIM", "ARG"]
+
+[tool.ruff.lint.per-file-ignores]
+ "*__init__.py" = [
+     "F401",  # imported but unused
+     "F403",  # star import; unable to detect undefined names
+ ]
+
+[tool.coverage.run]
+source = ["./neatnet"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "if self.debug:",
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "except ModuleNotFoundError:",
+    "except ImportError",
+]
+ignore_errors = true
+omit = ["neatnet/tests/*"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    # this is an internal warning thrown within ``neatnet.geometry.snap_to_targets()``
+    'ignore:Could not create a connection*:UserWarning',
+]
