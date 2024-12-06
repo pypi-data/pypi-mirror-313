@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block extratitle %}
+    {{ title }}
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li class="current">raport slotów</li>
+    <li class="current">{{ title }}</li>
+{% endblock %}
+
+{% block content %}
+    <h2>{{ title }}</h2>
+    <div class="grid-x">
+        <div class="large-8 medium-12 small-12 cell">
+            {% load crispy_forms_tags %}
+            {% crispy form %}
+            <div class="callout warning"><p><strong>Uwaga dla eksportu do formatu XLSX</strong></p><p>
+                W przypadku autorów, którzy za dany okres czasu mają prace w więcej, niż jednej dyscyplinie
+                i w podglądzie w przeglądarce widoczne są u nich przynajmniej dwie tabelki, skorzystaj z opcji "wyświetl
+                w przeglądarce" a następnie klikaj linki "pobierz XLS" nad tabelami, aby otrzymać
+                eksport danej tabeli.
+                </p><p>
+                W przypadku użycia od razu formatu XLSX w tym formularzu dla takich autorów zostanie
+                wyeksportowana wyłącznie pierwsza tabela, co może nie do końca odpowiadać Twoim oczekiwaniom.
+                </p>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        // modyfikacja pola 'slot' ma zaznaczyc 'zbierz prace do wysokosci slotu'
+        $(document).ready(function () {
+            $("#id_slot").change(function (v) {
+                var value = $("#id_slot").val()
+
+                if (value != "" && value != 0 && value != null)
+                    $("input[name=dzialanie][value=slot]").click();
+                else
+                    $("input[name=dzialanie][value=wszystko]").click()
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% load static %}
+{% load compress %}
+{% load i18n %}
+
+{% block title %}
+    BPP - wyszukiwanie zaawansowane
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+        /* multiseek.js needs that to be set before */
+        var djangoLanguageCode = '{{ LANGUAGE_CODE }}';
+        var multiseekDateFormat = 'yyyy-mm-dd';
+        var multiseekDateWeekStart = 1;
+    </script>
+
+{% endblock %}
+
+{% block breadcrumbs %}
+    {{ block.super }}
+    <li class="current">szukaj</li>
+{% endblock %}
+
+{% block content %}
+
+    <form>
+        {% include "multiseek/multiseek_fields.html" %}
+        <div class="grid-x grid-margin-x">
+            <div class="large-3 medium-3 cell">
+
+                <label for="id_report_type">Rodzaj raportu:</label>
+
+                <select name="{{ MULTISEEK_REPORT_TYPE }}" id="id_report_type">
+                    {% for t in report_types %}
+                        <option value="{{ forloop.counter0 }}">{{ t.label }}</option>
+                    {% endfor %}
+                </select>
+                <script type="text/javascript">
+                    /* Update results window with change of report type */
+                    $("select[name={{ MULTISEEK_REPORT_TYPE }}]").change(function () {
+                        $("#sendQueryButton").click();
+                    });
+                </script>
+
+            </div>
+
+            {% for element in order_boxes %}
+                <div class="large-3 medium-6 cell">
+                    <label for="id_ordering_{{ forloop.counter0 }}">
+                        {{ element }}
+                    </label>
+
+                    <div class="grid-x align-center-middle">
+                        <div class="large-8 small-8 cell">
+                            <select name="{{ MULTISEEK_ORDERING_PREFIX }}{{ forloop.counter0 }}"
+                                    class="multiseek-ordering"
+                                    id="id_ordering_{{ forloop.counter0 }}">
+                                {% for o in ordering %}
+                                    <option value="{{ forloop.counter0 }}">{{ o.label }}</option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+
+                        <div class="large-4 small-4 cell">
+                            <input type="checkbox"
+                                   id="{{ MULTISEEK_ORDERING_PREFIX }}{{ forloop.counter0 }}_dir"
+                                   name="{{ MULTISEEK_ORDERING_PREFIX }}{{ forloop.counter0 }}_dir"
+                                   value="1"><label for="{{ MULTISEEK_ORDERING_PREFIX }}{{ forloop.counter0 }}_dir">malejąco
+                        </label>
+                        </div>
+
+
+                    </div>
+
+                    <script type="text/javascript">
+                        /* Update results window when updating sort type */
+                        $("select[name={{ MULTISEEK_ORDERING_PREFIX }}{{ forloop.counter0 }}]").change(function () {
+                            $("#sendQueryButton").click();
+                        });
+                    </script>
+
+
+                    <script type="text/javascript">
+                        /* Update results window when updating sort type */
+                        $("input[name={{ MULTISEEK_ORDERING_PREFIX }}{{ forloop.counter0 }}_dir]").change(function () {
+                            $("#sendQueryButton").click();
+                        });
+                    </script>
+
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <div class="grid-x align-center-middle">
+            <div class="cell button-group stacked-for-small">
+
+                <button type="button" class="button success"
+                        onclick="submitEventMine(this);return false;"
+                        id="multiseek-szukaj">
+                    <i class="fi-magnifying-glass"></i> Wyświetl wyniki wyszukiwania
+                </button>
+
+                <button type="button" class="button" onclick="submitEvent(this); return false;"
+                        id="sendQueryButton">
+                    <i class="fi-refresh"></i> Odśwież podgląd
+                </button>
+
+                <button type="button" class="button alert" onclick="if (confirm('Czy na pewno? Zatwierdzenie tej opcji spowoduje zresetowanie formularza do stanu wyjściowego.')) { resetMultiseekTitle(this); return false; }"
+                        id="resetFormButton">
+                    <i class="fi-x"></i> Resetuj formularz
+                </button>
+
+                {% if user_allowed_to_save_forms %}
+                    <button class="button warning" type="button" onclick="saveForm(this);return false;"
+                            id="saveFormButton">
+                        <i class="fi-save"></i> Zapisz formularz
+                    </button>
+                {% endif %}
+
+                {% if saved_forms %}
+                    <button type="button" class="secondary dropdown button" data-toggle="multiseek-form-menu" href="#"
+                            data-dropdown="drop2">
+                        <i class="fi-upload"></i> Wczytaj formularz</a>
+                    </button>
+
+                    <div class="dropdown-pane" id="multiseek-form-menu" data-dropdown>
+                        <ul class="no-bullet">
+                            {% for form in saved_forms %}
+                                <li>
+                                    <a href="#"
+                                       onclick="location.href = multiseek.LOAD_FORM_URL + {{ form.pk }}">{{ form }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+
+
+                {% endif %}
+            </div>
+        </div>
+        <script type="text/javascript">
+
+            function submitEvent(button) {
+                var value = formAsJSON();
+
+                var form = $("<form/>").attr({
+                    method: "post",
+                    action: "./live-results/",
+                    target: "list_frame"
+                }).append($("<input/>").attr('name', 'json').attr({"value": value}));
+
+                $("body").append(form);
+
+                form.submit().remove();
+            }
+
+
+            function submitEventMine(button) {
+                var value = formAsJSON();
+
+                var form = $("<form/>").attr({
+                    method: "post",
+                    action: "./results/"
+                }).append($("<input/>").attr('name', 'json').attr({"value": value}));
+
+                $("body").append(form);
+
+                form.submit().remove();
+            }
+
+        </script>
+    </form>
+    <hr size="1"/>
+    <iframe src="./live-results/" width="100%" id="if"
+            name="list_frame" frameborder="0" scroll="no" scrolling="no"
+            height="400" onload="resizeIframe(this)">
+    </iframe>
+    <script type="text/javascript">
+
+        function resizeIframe(obj) {
+            obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+        }
+        function resetMultiseekTitle(form) {
+            $.ajax({
+                method: 'POST',
+                url: '{% url 'bpp:update_multiseek_title' %}',
+                data: {'value': ''},
+                success: function () {
+                    return resetForm(form);
+                }
+            });
+        }
+    </script>
+
+{% endblock %}
