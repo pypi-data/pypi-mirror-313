@@ -1,0 +1,23 @@
+FROM {{ namespace }}/{{ image_prefix }}cinder-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block cinder_api_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% set cinder_api_packages = [
+] %}
+
+{{ macros.install_packages(cinder_api_packages | customizable("packages")) }}
+
+COPY extend_start.sh /usr/local/bin/kolla_cinder_extend_start
+
+RUN mkdir -p /var/www/cgi-bin/cinder \
+    && cp -a /var/lib/kolla/venv/bin/cinder-wsgi /var/www/cgi-bin/cinder/cinder-wsgi \
+    && chmod 644 /usr/local/bin/kolla_cinder_extend_start \
+    && chmod 755 /var/www/cgi-bin/cinder/cinder-wsgi
+
+{% block cinder_api_footer %}{% endblock %}
+{% block footer %}{% endblock %}

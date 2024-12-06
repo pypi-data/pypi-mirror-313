@@ -1,0 +1,39 @@
+FROM {{ namespace }}/{{ image_prefix }}letsencrypt-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block letsencrypt_lego_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{{ macros.configure_user(name='letsencrypt', shell='/bin/bash') }}
+
+{% if base_package_type == 'rpm' %}
+    {% set letsencrypt_lego_packages = [
+        'openssh-clients',
+        'cronie',
+        'rsync'
+    ] %}
+{% elif base_package_type == 'deb' %}
+    {% set letsencrypt_lego_packages = [
+        'openssh-client',
+        'cron',
+        'rsync'
+    ] %}
+{% endif %}
+{{ macros.install_packages(letsencrypt_lego_packages | customizable("packages")) }}
+
+{% block letsencrypt_lego_install %}
+ADD letsencrypt-lego-archive /lego-source
+
+RUN cp -r /lego-source/lego /opt/
+{% endblock %}
+
+COPY letsencrypt-certificates.sh /usr/bin/letsencrypt-certificates
+COPY sync-and-update-certificate.sh /usr/bin/sync-and-update-certificate
+
+RUN chmod +x /usr/bin/letsencrypt-certificates /usr/bin/sync-and-update-certificate
+
+{% block letsencrypt_lego_footer %}{% endblock %}
+{% block footer %}{% endblock %}

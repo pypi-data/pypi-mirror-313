@@ -1,0 +1,31 @@
+FROM {{ namespace }}/{{ image_prefix }}nova-base:{{ tag }}
+{% block labels %}
+LABEL maintainer="{{ maintainer }}" name="{{ image_name }}" build-date="{{ build_date }}"
+{% endblock %}
+
+{% block nova_spicehtml5proxy_header %}{% endblock %}
+
+{% import "macros.j2" as macros with context %}
+
+{% if base_package_type == 'rpm' %}
+
+    {% set nova_spicehtml5proxy_packages = [
+        'python3-numpy',
+        'spice-html5'
+    ] %}
+
+{% elif base_package_type == 'deb' %}
+
+    {% set nova_spicehtml5proxy_packages = [
+        'spice-html5',
+        'websockify'
+    ] %}
+
+{% endif %}
+
+{{ macros.install_packages(nova_spicehtml5proxy_packages | customizable("packages")) }}
+
+{% block nova_spicehtml5proxy_footer %}{% endblock %}
+{% block footer %}{% endblock %}
+
+USER nova

@@ -1,0 +1,58 @@
+---
+- hosts: all
+  vars_files:
+    - ../vars/zuul.yml
+  vars:
+    tag_suffix: "{{ '-aarch64' if ansible_architecture == 'aarch64' else '' }}"
+    kolla_build_config:
+      DEFAULT:
+        debug: true
+        logs_dir: "{{ kolla_build_logs_dir }}"
+        quiet: true
+        base: "{{ base_distro }}"
+        engine: "{{ container_engine }}"
+        template_override: /etc/kolla/template_overrides.j2
+        # NOTE(yoctozepto): to avoid issues with IPv6 not enabled in the docker daemon
+        # and since we don't need isolated networks here, use host networking
+        network_mode: host
+  tasks:
+    - name: Ensure /etc/kolla exists
+      file:
+        path: /etc/kolla
+        state: directory
+        mode: 0777
+      become: true
+
+    - name: Use ubuntu/debian base image from mirror
+      vars:
+        kolla_mirror_config:
+          DEFAULT:
+            base_image: "quay.io/openstack.kolla/{{ base_distro }}"
+      set_fact:
+        kolla_build_config: "{{ kolla_build_config | combine(kolla_mirror_config, recursive=True) }}"
+      when: base_distro in ['debian', 'ubuntu']
+
+    - name: Add publisher config
+      vars:
+        kolla_publisher_config:
+          DEFAULT:
+            namespace: "{{ kolla_namespace }}"
+            tag: "{{ zuul.branch | basename }}-{{ base_distro }}-{{ base_distro_version }}{{ tag_suffix }}"
+      set_fact:
+        kolla_build_config: "{{ kolla_build_config | combine(kolla_publisher_config, recursive=True) }}"
+      when:
+        - publisher
+
+    - import_role:
+        name: kolla-build-config
+
+    - name: Template template_overrides.j2
+      template:
+        src: "{{ zuul.executor.work_root }}/{{ zuul.project.src_dir }}/tests/templates/template_overrides.j2"
+        dest: /etc/kolla/template_overrides.j2
+
+    - name: Run kolla-build to template out dockerfiles
+      command: "{{ virtualenv_path }}/bin/kolla-build --template-only --work-dir {{ kolla_build_logs_dir }}/work_dir"
+
+    - name: Run kolla-build
+      command: "{{ virtualenv_path }}/bin/kolla-build"
