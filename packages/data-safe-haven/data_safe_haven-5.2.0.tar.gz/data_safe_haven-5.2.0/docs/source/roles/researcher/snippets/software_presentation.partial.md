@@ -1,0 +1,2 @@
+- `LaTeX` / `pdflatex` / `xelatex` for technical writing
+- `LibreOffice` for creating documents and presentations

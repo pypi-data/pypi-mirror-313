@@ -1,0 +1,19 @@
+- `C` programming language
+- `C++` programming language
+- `clojure` programming language
+- `DotNet` runtime environment
+- `F#` programming language
+- `Fortran` programming language
+- `gcc` compilers
+- `Guile` programming language
+- `Haskell` language and packaging tools
+- `Java` runtime environment
+- `octave` programming language
+- `Python` programming language and `pip` package manager
+    - plus ability to install additional libraries
+- `R` programming language
+    - plus ability to install additional libraries
+- `Racket` programming language
+- `ruby` programming language
+- `Rust` language and `cargo` package manager
+- `scala` programming language

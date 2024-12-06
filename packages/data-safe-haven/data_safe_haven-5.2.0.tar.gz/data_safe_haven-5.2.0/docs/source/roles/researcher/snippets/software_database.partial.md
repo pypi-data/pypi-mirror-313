@@ -1,0 +1,3 @@
+- `Beekeeper Studio` desktop database management software
+- `psql` a command line PostgreSQL client
+- `unixodbc-dev` driver for interacting with Microsoft SQL databases

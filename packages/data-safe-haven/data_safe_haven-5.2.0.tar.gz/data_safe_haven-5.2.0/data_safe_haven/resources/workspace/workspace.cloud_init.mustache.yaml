@@ -1,0 +1,101 @@
+#cloud-config
+
+write_files:
+  - path: "/etc/systemd/system/desired-state.timer"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Run desired state script daily
+
+      [Timer]
+      OnCalendar=daily
+      Persistent=true
+
+      [Install]
+      WantedBy=timers.target
+
+  - path: "/etc/systemd/system/desired-state.service"
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Run desired state script
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      Type=oneshot
+      ExecStartPre=sleep 1m
+      ExecStart=/root/desired_state.sh
+      StandardOutput=journal+console
+
+  - path: "/root/desired_state.sh"
+    permissions: "0700"
+    content: |
+      #!/usr/bin/env bash
+      pushd /var/local/ansible
+      ansible-playbook desired_state.yaml
+      popd
+
+mounts:
+  # Mount ephemeral storage at resource instead of default /mnt
+  - [ephemeral0, /mnt/scratch]
+  # Desired state configuration is in a blob container mounted as NFSv3
+  - ["{{storage_account_desired_state_name}}.blob.core.windows.net:/{{storage_account_desired_state_name}}/desiredstate", /var/local/ansible, nfs, "ro,_netdev,sec=sys,vers=3,nolock,proto=tcp"]
+  # Secure data is in a blob container mounted as NFSv3
+  - ["{{storage_account_data_private_sensitive_name}}.blob.core.windows.net:/{{storage_account_data_private_sensitive_name}}/ingress", /mnt/input, nfs, "ro,_netdev,sec=sys,vers=3,nolock,proto=tcp"]
+  - ["{{storage_account_data_private_sensitive_name}}.blob.core.windows.net:/{{storage_account_data_private_sensitive_name}}/egress", /mnt/output, nfs, "rw,_netdev,sec=sys,vers=3,nolock,proto=tcp"]
+  # User data is in a file share mounted as NFSv4
+  - ["{{storage_account_data_private_user_name}}.file.core.windows.net:/{{storage_account_data_private_user_name}}/shared", /mnt/shared, nfs, "_netdev,sec=sys,nconnect=4"]
+  - ["{{storage_account_data_private_user_name}}.file.core.windows.net:/{{storage_account_data_private_user_name}}/home", /home, nfs, "_netdev,sec=sys,nconnect=4"]
+
+# Add additional apt repositories
+apt:
+  debconf_selections:
+    msodbcsql17: msodbcsql17 msodbcsql/ACCEPT_EULA boolean true
+  http_proxy: http://{{apt_proxy_server_hostname}}:8000
+  https_proxy: http://{{apt_proxy_server_hostname}}:8000
+  preserve_sources_list: true  # Append to the existing /etc/apt/sources.list
+  sources:
+    microsoft-general.list:
+      source: "deb https://packages.microsoft.com/ubuntu/22.04/prod jammy main"
+      keyid: BC528686B50D79E339D3721CEB3E94ADBE1229CF  # Microsoft (Release signing) <gpgsecurity@microsoft.com>
+
+# Install necessary apt packages
+packages:
+  - ansible
+  - libnss-ldapd  # LDAP login
+  - libpam-ldapd  # LDAP login
+  - ldap-utils    # LDAP login
+  - nfs-common    # Mounting shared volumes
+package_update: true
+package_upgrade: true
+
+runcmd:
+  # Mount all external volumes
+  # --------------------------
+  - echo ">=== Mounting all external volumes... ===<"
+  - grep -v -e '^[[:space:]]*$' /etc/fstab | sed 's|^|  /etc/fstab  |'
+  - mount -fav
+  - while (! mountpoint -q /mnt/input); do sleep 5; mount /mnt/input; done
+  - while (! mountpoint -q /var/local/ansible); do sleep 5; mount /var/local/ansible; done
+  - while (! mountpoint -q /home); do sleep 5; mount /home; done
+  - while (! mountpoint -q /mnt/output); do sleep 5; mount /mnt/output; done
+  - while (! mountpoint -q /mnt/shared); do sleep 5; mount /mnt/shared; done
+  - findmnt
+
+  # Enable and start desired state timer
+  # ------------------------------------
+  - echo ">=== Enabling desired state timer... ===<"
+  - systemctl daemon-reload
+  - systemctl enable desired-state.timer
+  - systemctl start desired-state.timer
+
+  # Run desired state service
+  # -------------------------
+  - echo ">=== Waiting for Pulumi vars file... ===<"
+  - while (! test -f /var/local/ansible/vars/pulumi_vars.yaml) do sleep 5; done
+  - echo ">=== Running initial desired state configuration... ===<"
+  - systemctl start desired-state
+
+  # Restart services
+  - systemctl restart nslcd

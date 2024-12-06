@@ -1,0 +1,3 @@
+- `Firefox` browser
+- `git` version control tool
+- `weka` data mining tools

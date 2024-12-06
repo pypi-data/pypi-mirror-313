@@ -1,0 +1,114 @@
+---
+name: Lint code
+
+# Run workflow on pushes to matching branches
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches: [develop, latest]
+  pull_request:
+
+jobs:
+  lint_caddy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install caddy
+        shell: bash
+        run: |
+          sudo mkdir -m 0755 -p /usr/share/keyrings/
+          sudo wget 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' -O - | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+          sudo wget 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' -O /etc/apt/sources.list.d/caddy-stable.list
+          sudo apt update
+          sudo apt install caddy
+      - name: Lint Caddy
+        shell: bash
+        run: |
+          # Check Caddyfile formatting
+          find . -name Caddyfile -print0 | xargs -0 -n 1 caddy fmt > /dev/null
+          # Check Caddyfile validity
+          find . -name Caddyfile -print0 | xargs -0 -n 1 -I {} caddy validate --config "{}"
+
+  lint_json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install requirements
+        shell: bash
+        run: npm install -g jsonlint mustache
+      - name: Lint JSON
+        shell: bash
+        run: |
+          echo "{}" > mustache_config.json
+          find . -name "*.json" | xargs -n 1 mustache mustache_config.json | jsonlint --quiet --compact
+
+  lint_markdown:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+      - name: Install requirements
+        shell: bash
+        run: gem install mdl
+      - name: Lint Markdown
+        run: mdl --style .mdlstyle.rb .
+
+  lint_python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - name: Install hatch
+        run: pip install hatch
+      - name: Print package versions
+        run: |
+          hatch run lint:ruff --version
+          hatch run lint:black --version
+      - name: Lint Python
+        run: hatch run lint:all
+
+  lint_shell:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install requirements
+        shell: bash
+        run: sudo apt install shellcheck
+      - name: Lint shell
+        shell: bash
+        run: find . -name "*.sh" | xargs shellcheck --format gcc --severity error
+
+  lint_yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install requirements
+        shell: bash
+        run: |
+          npm install -g mustache
+      - name: Expand mustache templates
+        shell: bash
+        run: |
+          echo '{"array": ["dummy"], "variable": "dummy"}' > .mustache_config.json
+          for yamlfile in $(find . -name "*.yml" -o -name "*.yaml"); do
+            sed "s|{{\([/#]\)[^}]*}}|{{\1array}}|g" $yamlfile > expanded.tmp  # replace mustache arrays
+            sed -i "s|{{[^#/].\{1,\}}}|{{variable}}|g" expanded.tmp           # replace mustache variables
+            mustache .mustache_config.json expanded.tmp > $yamlfile           # perform mustache expansion overwriting original file
+          done
+          rm expanded.tmp
+      - name: Lint YAML
+        uses: karancode/yamllint-github-action@v3.0.0
+        with:
+          yamllint_strict: true
+          yamllint_comment: false
