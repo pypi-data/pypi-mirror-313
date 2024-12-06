@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = [ "dependencies" ]
+name = "py-flare-common"
+version = "0.1.1"
+authors = [
+  { name="Matej Janezic", email="matej@flare.network" },
+  { name="Luka Avbreht", email="luka@flare.network" },
+  { name="Andraz Maier", email="andraz.maier@flare.network" },
+]
+description = "Python modules that are used across multiple Flare projects."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/flare-foundation/py-flare-common"
+Issues = "https://github.com/flare-foundation/py-flare-common/issues"
+
+[tool.setuptools.dynamic]
+dependencies = { file = [ "requirements.txt" ] }
+
+[tool.ruff.lint]
+select = [
+    'F',    # pyflakes
+    'E',    # pycodestyle
+    'W',    # pycodestyle
+    'I',    # isort
+    'UP',   # pyupgrade
+    'B',    # flake8-bugbear
+    'C',    # flake8-comprehensions
+    'DTZ',  # flake8-datetimez
+    'RUF',  # ruff
+]
+
+ignore = [
+    'E203', # whitespace before punctuation, conflict with black
+    'E501', # line too long, handled by black
+    'C901', # complex structure, not needed
+]
+
+[tool.ruff.lint.per-file-ignores]
+'project/settings/*.py' = [
+    'F403', # undefined local with import star
+    'F405', # undefined local with import star usage
+    'E402', # module import not at top of file
+]
+
+'__init__.py' = [
+    'F401', # unused import
+    'E402', # module import not at top of file
+]
+
+[tool.pytest.ini_options]
+pythonpath = [ "src" ]
+
