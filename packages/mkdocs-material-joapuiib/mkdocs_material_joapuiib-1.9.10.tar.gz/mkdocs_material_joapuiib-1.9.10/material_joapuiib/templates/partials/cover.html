@@ -1,0 +1,126 @@
+{% set cover = page.meta.cover or config.theme.cover or false %}
+
+{% if cover %}
+
+{% set cover_title = page.title %}
+{% set cover_logo = config.theme.cover.logo %}
+{% set cover_background = config.theme.cover.background %}
+{% set author = config.site_author %}
+{% set email = config.site_email %}
+{% set license_type = config.theme.license.type %}
+{% set license_text = config.theme.license.text %}
+{% set license_link = config.theme.license.link %}
+{% set license_image = config.theme.license.image %}
+
+{% if page.meta %}
+  {% set subtitle = page.meta.subtitle %}
+  {% set curs = page.meta.curs %}
+
+  {% if page.meta.cover %}
+    {% if page.meta.cover.logo is defined %}
+      {% set cover_logo = page.meta.cover.logo %}
+    {% endif %}
+    {% if page.meta.cover.title is defined %}
+      {% set cover_title = page.meta.cover.title %}
+    {% endif %}
+    {% if page.meta.cover.background is defined %}
+      {% set cover_background = page.meta.cover.background %}
+    {% endif %}
+  {% endif %}
+
+  {% if page.meta.author is defined %}
+    {% set author = page.meta.author %}
+  {% endif %}
+  {% if page.meta.email is defined %}
+    {% set email = page.meta.email %}
+  {% endif %}
+  {% if page.meta.original_author is defined %}
+    {% set original_author = page.meta.original_author %}
+  {% endif %}
+  {% if page.meta.license_type is defined %}
+    {% set license_type = page.meta.license_type %}
+  {% endif %}
+  {% if page.meta.license_text is defined %}
+    {% set license_text = page.meta.license_text %}
+  {% endif %}
+  {% if page.meta.license_link is defined %}
+    {% set license_link = page.meta.license_link %}
+  {% endif %}
+  {% if page.meta.license_image is defined %}
+    {% set license_image = page.meta.license_image %}
+  {% endif %}
+{% endif %}
+
+
+<div class="cover">
+
+{% block background %}
+{% if cover_background %}
+{% include "partials/cover/cipfp-mislata/background.html" %}
+{% endif %}
+{% endblock %}
+
+<div class="cover__content{% if cover_background %} with-background{% endif %}">
+
+{% block logo %}
+  {% if cover_logo %}
+    <div class="cover__logo">
+      {% if cover_logo.endswith('.svg') %}
+        {% include cover_logo %}
+      {% else %}
+        <img src="{{ cover_logo | url }}" alt="Logo" />
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}
+
+<h1>{{ cover_title }}</h1>
+
+{% if subtitle %}
+{% if subtitle is string %}
+  <h2>{{ subtitle }}</h2>
+{% else %}
+  <div>
+  {% for sub in subtitle %}
+    <h2>{{ sub }}</h2>
+  {% endfor %}
+  </div>
+{% endif %}
+{% endif %}
+
+<div class="cover__details">
+    {% if author %}
+    <p><strong>Autor:</strong> {{ author }}</p>
+    {% endif %}
+    {% if email %}
+    <p><strong>Correu electrònic:</strong> {{ email }}</p>
+    {% endif %}
+    {% if curs %}
+    <p><strong>Curs:</strong> {{ curs }}</p>
+    {% endif %}
+</div>
+
+<div class="cover__license">
+
+{% if original_author %}
+<p>Aquest material és una obra derivada a partir del material de: <strong>{{ original_author }}</strong></p>
+{% endif %}
+
+<p><strong>Llicència: {{ license_type }}</strong></p>
+{% if license_text %}
+<p class="">{{license_text}}</p>
+{% endif %}
+
+{% if license_image %}
+<div class="cover__license-img">
+<a href="{{ license_link }}" target="_blank">
+  <img class="" src="{{ license_image | url }}" alt="License" height="50" />
+</a>
+</div>
+{% endif %}
+
+</div><!--license-->
+</div><!--content-->
+</div><!--cover-->
+
+{% endif %}
