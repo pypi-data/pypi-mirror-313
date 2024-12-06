@@ -1,0 +1,141 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Toisto"
+version = "0.33.2"
+authors = [{ name = "Frank Niessink", email = "frank@niessink.com" }]
+description = "Toisto is a command-line terminal app to practice languages."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Education",
+]
+dependencies = [
+    "dramatic == 0.4.1.post1",
+    "gTTS == 2.5.4",
+    "pygame == 2.6.1",
+    "requests >= 2.28.0",
+    "rich == 13.9.4",
+    "rich-argparse == 1.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "bandit == 1.8.0",
+    "build == 1.2.2.post1",
+    "coverage == 7.6.8",
+    "fixit == 2.1.0",
+    "gprof2dot == 2024.6.6",
+    "green == 4.0.2",
+    "mypy == 1.13.0",
+    "ruff == 0.8.1",
+    "types-requests == 2.32.0.20241016",
+    "unittest-xml-reporting == 3.2.0",
+    "vulture == 2.13",
+]
+
+[project.scripts]
+toisto = "toisto.app:main"
+
+[project.urls]
+"Homepage" = "https://github.com/fniessink/toisto"
+"Issue tracker" = "https://github.com/fniessink/toisto/issues"
+"Changelog" = "https://github.com/fniessink/toisto/blob/main/CHANGELOG.md"
+
+[tool.coverage.run]
+branch = true
+relative_files = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+]
+fail_under = 100
+skip_covered = true
+
+[tool.coverage.xml]
+output = "build/coverage.xml"
+
+[tool.fixit]
+python-version = "3.10"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["dramatic", "green.output", "gtts", "xmlrunner.result"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "toisto.persistence.json_file"
+disable_error_code = "type-arg"         # Don't complain about JSON types not being completely specified
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+allow_untyped_defs = true # Allow for not specifying None as return value on every test method
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "C408",   # Prevent 'Unnecessary `dict` call (rewrite as a literal)' errors
+    "COM812", # This rule may cause conflicts when used with the ruff formatter
+    "D107",   # Prevent 'Missing docstring in `__init__`' errors
+    "D203",   # Prevent warning about incompatible rules
+    "D213",   # Prevent warning about incompatible rules
+    "DTZ005", # Prevent 'The use of `datetime.datetime.now()` without `tz` argument is not allowed' errors
+    "FBT003", # Prevent 'Boolean positional value in function call' errors
+    "ISC001", # This rule may cause conflicts when used with the ruff formatter
+    "PT",     # We don't use Pytest
+    "TC001",  # Prevent 'Move application import `...` into a type-checking block' errors
+    "TC002",  # Prevent 'Move third-party import `...` into a type-checking block' errors
+    "TC003",  # Prevent 'Move standard library import `...` into a type-checking block' errors
+    "TID252", # Prevent 'Relative imports from parent modules are banned' errors
+]
+
+[tool.ruff.lint.isort]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "second-party",
+    "first-party",
+    "local-folder",
+]
+
+[tool.ruff.lint.isort.sections]
+"second-party" = ["toisto"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/toisto/app.py" = ["E402"]
+"src/toisto/ui/speech.py" = ["FBT001", "FBT002"]
+"__init__.py" = ["D104"]
+"tests/*" = ["ANN201"]
+".vulture-whitelist.py" = ["ALL"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json"]
+languages = ["*.txt"]
+
+[tool.vulture]
+ignore_names = ["_SubParsersAction", "optionxform"]
