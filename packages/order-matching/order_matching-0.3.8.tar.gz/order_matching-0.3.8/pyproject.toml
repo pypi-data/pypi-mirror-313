@@ -1,0 +1,82 @@
+[project]
+name = "order-matching"
+version = "0.3.8"
+description = "Order Book Matching Engine"
+authors = [
+  { name = "Stanislav Khrapov", email = "khrapovs@gmail.com" },
+  { name = "Akanksha Toshniwal", email = "akanksha.toshniwal@chintai.io" },
+  { name = "Shannen Tioniwar", email = "shannen.tioniwar@chintai.io" },
+]
+readme = "README.md"
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+requires-python = ">=3.10"
+dependencies = ["pandas", "pandera", "faker"]
+
+[project.urls]
+Source = "https://github.com/khrapovs/OrderBookMatchingEngine"
+Documentation = "https://order-book-matching-engine.readthedocs.io/"
+
+[tool.uv]
+default-groups = ["dev", "test", "doc"]
+
+[dependency-groups]
+test = ["pytest", "pytest-cov", "pytest-xdist", "pytest-benchmark[histogram]"]
+doc = [
+  "mkdocs-material",
+  "mkdocstrings[python]",
+  "mkdocs-gen-files",
+  "mkdocs-literate-nav",
+  "mkdocs-macros-plugin",
+  "pymdown-extensions",
+]
+dev = ["pre-commit"]
+
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "--cov-config=.coveragerc --doctest-modules --doctest-glob='*.md' -n=auto --benchmark-disable"
+testpaths = ["tests", "src", "README.md"]
+
+[tool.setuptools_scm]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "D", "B", "I", "ARG"]
+ignore = [
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D106",
+  "D107",
+  "D213",
+  "D417",
+]
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.commitizen]
+version_scheme = "semver"
+version_provider = "pep621"
+update_changelog_on_bump = true
