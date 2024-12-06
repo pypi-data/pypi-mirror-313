@@ -1,0 +1,2577 @@
+{
+  "actions": {
+    "CreateApmInstance": {
+      "document": "业务购买APM实例，调用该接口创建",
+      "input": "CreateApmInstanceRequest",
+      "name": "创建APM实例",
+      "output": "CreateApmInstanceResponse",
+      "status": "online"
+    },
+    "DescribeApmAgent": {
+      "document": "获取APM Agent信息",
+      "input": "DescribeApmAgentRequest",
+      "name": "获取APM Agent信息",
+      "output": "DescribeApmAgentResponse",
+      "status": "online"
+    },
+    "DescribeApmInstances": {
+      "document": "APM实例列表拉取",
+      "input": "DescribeApmInstancesRequest",
+      "name": "拉取APM实例列表",
+      "output": "DescribeApmInstancesResponse",
+      "status": "online"
+    },
+    "DescribeGeneralApmApplicationConfig": {
+      "document": "查询应用配置信息",
+      "input": "DescribeGeneralApmApplicationConfigRequest",
+      "name": "查询应用配置信息",
+      "output": "DescribeGeneralApmApplicationConfigResponse",
+      "status": "online"
+    },
+    "DescribeGeneralMetricData": {
+      "document": "获取指标数据通用接口。用户根据需要上送请求参数，返回对应的指标数据。\n接口调用频率限制为：20次/秒，1200次/分钟。单请求的数据点数限制为1440个。",
+      "input": "DescribeGeneralMetricDataRequest",
+      "name": "获取指标数据通用接口",
+      "output": "DescribeGeneralMetricDataResponse",
+      "status": "online"
+    },
+    "DescribeGeneralSpanList": {
+      "document": "通用查询调用链列表",
+      "input": "DescribeGeneralSpanListRequest",
+      "name": "通用查询调用链列表",
+      "output": "DescribeGeneralSpanListResponse",
+      "status": "online"
+    },
+    "DescribeMetricRecords": {
+      "document": "拉取通用指标列表",
+      "input": "DescribeMetricRecordsRequest",
+      "name": "通用指标列表接口",
+      "output": "DescribeMetricRecordsResponse",
+      "status": "online"
+    },
+    "DescribeServiceOverview": {
+      "document": "服务概览数据拉取",
+      "input": "DescribeServiceOverviewRequest",
+      "name": "获取服务概览数据",
+      "output": "DescribeServiceOverviewResponse",
+      "status": "online"
+    },
+    "DescribeTagValues": {
+      "document": "根据维度名和过滤条件，查询维度数据.",
+      "input": "DescribeTagValuesRequest",
+      "name": "查询 Tag 数据",
+      "output": "DescribeTagValuesResponse",
+      "status": "online"
+    },
+    "ModifyApmInstance": {
+      "document": "修改APM实例接口",
+      "input": "ModifyApmInstanceRequest",
+      "name": "修改APM实例",
+      "output": "ModifyApmInstanceResponse",
+      "status": "online"
+    },
+    "ModifyGeneralApmApplicationConfig": {
+      "document": "对外开放的openApi，客户可以灵活的指定需要修改的字段，再加入需要修改的服务列表.",
+      "input": "ModifyGeneralApmApplicationConfigRequest",
+      "name": "修改应用配置信息",
+      "output": "ModifyGeneralApmApplicationConfigResponse",
+      "status": "online"
+    },
+    "TerminateApmInstance": {
+      "document": "apm销毁实例",
+      "input": "TerminateApmInstanceRequest",
+      "name": "销毁实例",
+      "output": "TerminateApmInstanceResponse",
+      "status": "online"
+    }
+  },
+  "metadata": {
+    "apiVersion": "2021-06-22",
+    "api_brief": "应用性能监控 API 文档\r\n主要包括\r\n1. 实例管理接口；\r\n2. 拓扑查询接口；\r\n3. 应用性能指标查询接口；\r\n4. 服务请求链路查询接口。",
+    "serviceNameCN": "应用性能监控",
+    "serviceShortName": "apm"
+  },
+  "objects": {
+    "APMKV": {
+      "document": "APM浮点数类型键值对",
+      "members": [
+        {
+          "disabled": false,
+          "document": "Key值定义\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "name",
+          "member": "string",
+          "name": "Key",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Value值定义\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0.0",
+          "member": "float",
+          "name": "Value",
+          "required": true,
+          "type": "float",
+          "value_allowed_null": true
+        }
+      ],
+      "usage": "out"
+    },
+    "APMKVItem": {
+      "document": "Apm通用KV结构",
+      "members": [
+        {
+          "disabled": false,
+          "document": "Key值定义\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "name",
+          "member": "string",
+          "name": "Key",
+          "output_required": true,
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Value值定义\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "xxxx",
+          "member": "string",
+          "name": "Value",
+          "output_required": true,
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        }
+      ],
+      "usage": "both"
+    },
+    "ApmAgentInfo": {
+      "document": "apm Agent信息",
+      "members": [
+        {
+          "disabled": false,
+          "document": "Agent下载地址\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "https://agent.tapm.tencentyun.com/DownloadAgent",
+          "member": "string",
+          "name": "AgentDownloadURL",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Collector上报地址\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "http://xxx.xxx.xx:8080",
+          "member": "string",
+          "name": "CollectorURL",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Token信息\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "14dac76ca10f4610f727ca68528758b43980251387493706d18988fa7d0621b7",
+          "member": "string",
+          "name": "Token",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "外网上报地址\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "http://xxx.xxx.xx:8080",
+          "member": "string",
+          "name": "PublicCollectorURL",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "自研VPC上报地址\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "http://xxx.xxx.xx:8080",
+          "member": "string",
+          "name": "InnerCollectorURL",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "内网上报地址(Private Link上报地址)\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "http://xxx.xxx.xx:8080",
+          "member": "string",
+          "name": "PrivateLinkCollectorURL",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        }
+      ],
+      "usage": "out"
+    },
+    "ApmApplicationConfigView": {
+      "document": "应用相关的配置列表项",
+      "members": [
+        {
+          "disabled": false,
+          "document": "业务系统ID\t",
+          "example": "apm-059oXBfTL",
+          "member": "string",
+          "name": "InstanceKey",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "应用名\t",
+          "example": "java-order-service\t",
+          "member": "string",
+          "name": "ServiceName",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "接口过滤",
+          "example": "RPCServer/market.MarketService2/(.*?)",
+          "member": "string",
+          "name": "OperationNameFilter",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "错误类型过滤",
+          "example": "io.grpc.StatusRuntimeException,java.sql.(.*?)\t",
+          "member": "string",
+          "name": "ExceptionFilter",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "HTTP状态码过滤",
+          "example": "400,500\t",
+          "member": "string",
+          "name": "ErrorCodeFilter",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "应用诊断开关（已废弃）\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "true",
+          "member": "bool",
+          "name": "EventEnable",
+          "output_required": true,
+          "required": false,
+          "type": "bool",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "URL收敛开关 0 关 1 开",
+          "example": "1",
+          "member": "int64",
+          "name": "UrlConvergenceSwitch",
+          "output_required": true,
+          "required": false,
+          "type": "int",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "URL收敛阈值\t",
+          "example": "50",
+          "member": "int64",
+          "name": "UrlConvergenceThreshold",
+          "output_required": true,
+          "required": false,
+          "type": "int",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "URL收敛规则正则\t",
+          "example": "market.StockService.getStock(.*?),market.StockService.getPreDayS\t",
+          "member": "string",
+          "name": "UrlConvergence",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "URL排除规则正则",
+          "example": "market.StockService.getStock(.*?),market.StockService.getPreDayS\t",
+          "member": "string",
+          "name": "UrlExclude",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "是否开启日志 0 关 1 开",
+          "example": "1",
+          "member": "int64",
+          "name": "IsRelatedLog",
+          "output_required": true,
+          "required": false,
+          "type": "int",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "日志源\t\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "CLS",
+          "member": "string",
+          "name": "LogSource",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "日志集 ",
+          "example": "postgres",
+          "member": "string",
+          "name": "LogSet",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "日志主题",
+          "example": "032f3078-10b6-46a0-978f-1696e8e79696",
+          "member": "string",
+          "name": "LogTopicID",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "方法栈快照开关 true 开启 false 关闭",
+          "example": "false",
+          "member": "bool",
+          "name": "SnapshotEnable",
+          "output_required": true,
+          "required": false,
+          "type": "bool",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "慢调用监听触发阈值",
+          "example": "2000",
+          "member": "int64",
+          "name": "SnapshotTimeout",
+          "output_required": true,
+          "required": false,
+          "type": "int",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "探针总开关",
+          "example": "true",
+          "member": "bool",
+          "name": "AgentEnable",
+          "output_required": true,
+          "required": false,
+          "type": "bool",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "组件列表开关（已废弃）\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "[{\"Name\":\"dubbo\",\"Enable\":true},{\"Name\":\"googlehttpclient\",\"Enable\":true},{\"Name\":\"grpc\",\"Enable\":true},{\"Name\":\"httpclient3\",\"Enable\":true},{\"Name\":\"httpclient4\",\"Enable\":true},{\"Name\":\"hystrix\",\"Enable\":true},{\"Name\":\"lettuce\",\"Enable\":true},{\"Name\":\"mongodb\",\"Enable\":true},{\"Name\":\"mybatis\",\"Enable\":true},{\"Name\":\"mysql\",\"Enable\":true},{\"Name\":\"okhttp\",\"Enable\":true},{\"Name\":\"redis\",\"Enable\":true},{\"Name\":\"rxjava\",\"Enable\":true},{\"Name\":\"spring-webmvc\",\"Enable\":true},{\"Name\":\"tomcat\",\"Enable\":true}]",
+          "member": "Instrument",
+          "name": "InstrumentList",
+          "output_required": true,
+          "required": false,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "链路压缩开关（已废弃）",
+          "example": "true",
+          "member": "bool",
+          "name": "TraceSquash",
+          "output_required": true,
+          "required": false,
+          "type": "bool",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "both"
+    },
+    "ApmField": {
+      "document": "指标维度信息",
+      "members": [
+        {
+          "disabled": false,
+          "document": "昨日同比指标值，已弃用，不建议使用\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "string",
+          "name": "CompareVal",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Compare值结果数组，推荐使用\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "无",
+          "member": "APMKVItem",
+          "name": "CompareVals",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "指标值\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0.0",
+          "member": "float",
+          "name": "Value",
+          "required": true,
+          "type": "float",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "指标所对应的单位\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "ms",
+          "member": "string",
+          "name": "Unit",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "请求数",
+          "example": "req_count",
+          "member": "string",
+          "name": "Key",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "同环比上周期具体数值\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "无",
+          "member": "APMKV",
+          "name": "LastPeriodValue",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": true
+        }
+      ],
+      "usage": "out"
+    },
+    "ApmInstanceDetail": {
+      "document": "apm实例信息",
+      "members": [
+        {
+          "disabled": false,
+          "document": "存储使用量(MB)\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "100",
+          "member": "float",
+          "name": "AmountOfUsedStorage",
+          "output_required": true,
+          "type": "float",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例名\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "测试Demo",
+          "member": "string",
+          "name": "Name",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例所属tag列表\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "无",
+          "member": "ApmTag",
+          "name": "Tags",
+          "output_required": true,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例ID",
+          "example": "52Dpv13GR",
+          "member": "string",
+          "name": "InstanceId",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "创建人Uin\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "12543625",
+          "member": "string",
+          "name": "CreateUin",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "该实例已上报的服务端应用数量\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "2",
+          "member": "int64",
+          "name": "ServiceCount",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "日均上报Span数\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "100",
+          "member": "int64",
+          "name": "CountOfReportSpanPerDay",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "AppId信息",
+          "example": "12653698",
+          "member": "int64",
+          "name": "AppId",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "Trace数据保存时长\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "604800",
+          "member": "int64",
+          "name": "TraceDuration",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例描述信息\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "实例描述",
+          "member": "string",
+          "name": "Description",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例状态\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "1",
+          "member": "int64",
+          "name": "Status",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例所属地域\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "ap-guangzhou",
+          "member": "string",
+          "name": "Region",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例上报额度\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "500000",
+          "member": "int64",
+          "name": "SpanDailyCounters",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例是否开通计费\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "1",
+          "member": "int64",
+          "name": "BillingInstance",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "错误率阈值\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "30",
+          "member": "int64",
+          "name": "ErrRateThreshold",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "采样率阈值\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "1",
+          "member": "int64",
+          "name": "SampleRate",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "是否开启错误采样 0  关 1 开\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "int64",
+          "name": "ErrorSample",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "慢调用保存阈值\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "500",
+          "member": "int64",
+          "name": "SlowRequestSavedThreshold",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "cls日志所在地域\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "ap-guangzhou",
+          "member": "string",
+          "name": "LogRegion",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "日志来源\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "CLS",
+          "member": "string",
+          "name": "LogSource",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "日志功能开关 0 关 | 1 开\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "int64",
+          "name": "IsRelatedLog",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "日志主题ID\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "xxxxxx",
+          "member": "string",
+          "name": "LogTopicID",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "该实例已上报的客户端应用数量\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "3",
+          "member": "int64",
+          "name": "ClientCount",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "该实例已上报的总应用数量\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "5",
+          "member": "int64",
+          "name": "TotalCount",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "CLS日志集 | ES集群ID\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "xxx",
+          "member": "string",
+          "name": "LogSet",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Metric数据保存时长\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "30",
+          "member": "int64",
+          "name": "MetricDuration",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "用户自定义展示标签列表\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "[\"custom_key_1\"]",
+          "member": "string",
+          "name": "CustomShowTags",
+          "output_required": true,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例计费模式\n1为预付费\n0为按量付费\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "1",
+          "member": "int64",
+          "name": "PayMode",
+          "output_required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "实例计费模式是否生效\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "true",
+          "member": "bool",
+          "name": "PayModeEffective",
+          "output_required": false,
+          "type": "bool",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "响应时间满意阈值\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "500",
+          "member": "int64",
+          "name": "ResponseDurationWarningThreshold",
+          "output_required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "是否免费（0=否，1=限额免费，2=完全免费），默认0\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "int64",
+          "name": "Free",
+          "output_required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "是否tsf默认业务系统（0=否，1-是）\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "int64",
+          "name": "DefaultTSF",
+          "output_required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "是否关联dashboard： 0 关 1 开\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "int64",
+          "name": "IsRelatedDashboard",
+          "output_required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "dashboard ID\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "xxxxxx",
+          "member": "string",
+          "name": "DashboardTopicID",
+          "output_required": false,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "是否开启组件漏洞检测\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "int64",
+          "name": "IsInstrumentationVulnerabilityScan",
+          "output_required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "是否开启SQL注入分析\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "int64",
+          "name": "IsSqlInjectionAnalysis",
+          "output_required": false,
+          "type": "int",
+          "value_allowed_null": true
+        }
+      ],
+      "usage": "out"
+    },
+    "ApmMetricRecord": {
+      "document": "指标列表单元",
+      "members": [
+        {
+          "disabled": false,
+          "document": "field数组",
+          "example": "无",
+          "member": "ApmField",
+          "name": "Fields",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "tag数组",
+          "example": "无",
+          "member": "ApmTag",
+          "name": "Tags",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "out"
+    },
+    "ApmTag": {
+      "document": "维度（标签）对象",
+      "members": [
+        {
+          "disabled": false,
+          "document": "维度Key(列名，标签Key)",
+          "example": "region",
+          "member": "string",
+          "name": "Key",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "维度值（标签值）",
+          "example": "ap-guangzhou",
+          "member": "string",
+          "name": "Value",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "both"
+    },
+    "CreateApmInstanceRequest": {
+      "document": "CreateApmInstance请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "实例名",
+          "example": "云监控-测试",
+          "member": "string",
+          "name": "Name",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "实例描述信息",
+          "example": "实例描述",
+          "member": "string",
+          "name": "Description",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "Trace数据保存时长，单位为天默认存储为3天",
+          "example": "3",
+          "member": "int64",
+          "name": "TraceDuration",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "标签列表",
+          "example": "[]",
+          "member": "ApmTag",
+          "name": "Tags",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "实例上报额度值，默认赋值为0表示不限制上报额度",
+          "example": "100000000",
+          "member": "uint64",
+          "name": "SpanDailyCounters",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "实例的计费模式",
+          "example": "1",
+          "member": "int64",
+          "name": "PayMode",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "（0=付费版；1=tsf受限免费版；2=免费版）",
+          "example": "0",
+          "member": "int64",
+          "name": "Free",
+          "required": false,
+          "type": "int"
+        }
+      ],
+      "type": "object"
+    },
+    "CreateApmInstanceResponse": {
+      "document": "CreateApmInstance返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "实例ID\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "Lcmm7a3kl",
+          "member": "string",
+          "name": "InstanceId",
+          "output_required": true,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeApmAgentRequest": {
+      "document": "DescribeApmAgent请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "实例ID",
+          "example": "jYm6_leMg",
+          "member": "string",
+          "name": "InstanceId",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "接入方式",
+          "example": "Skywalking",
+          "member": "string",
+          "name": "AgentType",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "环境",
+          "example": "外网",
+          "member": "string",
+          "name": "NetworkMode",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "语言",
+          "example": "Golang",
+          "member": "string",
+          "name": "LanguageEnvironment",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "上报方式",
+          "example": "http",
+          "member": "string",
+          "name": "ReportMethod",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeApmAgentResponse": {
+      "document": "DescribeApmAgent返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "Agent信息\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "无",
+          "member": "ApmAgentInfo",
+          "name": "ApmAgent",
+          "output_required": true,
+          "type": "object",
+          "value_allowed_null": true
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeApmInstancesRequest": {
+      "document": "DescribeApmInstances请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "Tag列表",
+          "example": "无",
+          "member": "ApmTag",
+          "name": "Tags",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "搜索实例名",
+          "example": "云监控-测试",
+          "member": "string",
+          "name": "InstanceName",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "过滤实例ID",
+          "example": "无",
+          "member": "string",
+          "name": "InstanceIds",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "是否查询官方demo实例",
+          "example": "无",
+          "member": "int64",
+          "name": "DemoInstanceFlag",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "是否查询全地域实例",
+          "example": "1",
+          "member": "int64",
+          "name": "AllRegionsFlag",
+          "required": false,
+          "type": "int"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeApmInstancesResponse": {
+      "document": "DescribeApmInstances返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "apm实例列表\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "无",
+          "member": "ApmInstanceDetail",
+          "name": "Instances",
+          "output_required": true,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeGeneralApmApplicationConfigRequest": {
+      "document": "DescribeGeneralApmApplicationConfig请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "应用名",
+          "example": "profile-service",
+          "member": "string",
+          "name": "ServiceName",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "业务系统ID",
+          "example": "apm-059oXBfTL",
+          "member": "string",
+          "name": "InstanceId",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeGeneralApmApplicationConfigResponse": {
+      "document": "DescribeGeneralApmApplicationConfig返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "应用配置项",
+          "example": "{\"InstanceKey\":\"apm-059oXBfTL\",\"ServiceName\":\"profile-service\",\"IgnoreOperationName\":\"\",\"IgnoreException\":\"\",\"ErrorCodeFilter\":\"\",\"EventEnable\":false,\"UrlConvergenceSwitch\":1,\"UrlConvergenceThreshold\":500,\"UrlConvergence\":\"RPCServer/market.MarketService2/(.*?)\",\"UrlExclude\":\"\",\"IsRelatedLog\":0,\"LogSource\":\"CLS\",\"LogSet\":\"\",\"LogTopicID\":\"\",\"SnapshotEnable\":true,\"SnapshotTimeout\":2000,\"AgentEnable\":true,\"InstrumentList\":[{\"Name\":\"dubbo\",\"Enable\":true},{\"Name\":\"googlehttpclient\",\"Enable\":true},{\"Name\":\"grpc\",\"Enable\":true},{\"Name\":\"httpclient3\",\"Enable\":true},{\"Name\":\"httpclient4\",\"Enable\":true},{\"Name\":\"hystrix\",\"Enable\":true},{\"Name\":\"lettuce\",\"Enable\":true},{\"Name\":\"mongodb\",\"Enable\":true},{\"Name\":\"mybatis\",\"Enable\":true},{\"Name\":\"mysql\",\"Enable\":true},{\"Name\":\"okhttp\",\"Enable\":true},{\"Name\":\"redis\",\"Enable\":true},{\"Name\":\"rxjava\",\"Enable\":true},{\"Name\":\"spring-webmvc\",\"Enable\":true},{\"Name\":\"tomcat\",\"Enable\":true}],\"TraceSquash\":true}",
+          "member": "ApmApplicationConfigView",
+          "name": "ApmApplicationConfigView",
+          "output_required": false,
+          "type": "object",
+          "value_allowed_null": false
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeGeneralMetricDataRequest": {
+      "document": "DescribeGeneralMetricData请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "要过滤的维度信息：\nservice_metric视图支持：service.name（服务名）、span.kind（客户端/服务端视角）为维度进行过滤，service.name（服务名）必填。\nspan.kind:\n\tserver:服务端视角\n\tclient:客户端视角\n默认为服务端视角进行查询。\nruntime_metric视图支持：service.name（服务名）维度进行过滤，service.name（服务名）必填。\nsql_metric视图支持：service.name（服务名）、db.instance（数据库名称）、db.ip（数据库实例ip）维度进行过滤，查询service_slow_sql_count（慢sql）指标时service.name必填，查询sql_duration_avg（耗时）指标时db.instance（数据库名称）必填。",
+          "example": "{ \"Key\": \"service.name\", \"Value\": \"java-order-service\" }  { \"Key",
+          "member": "GeneralFilter",
+          "name": "Filters",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "需要查询的指标，不可自定义输入。\nservice_metric视图支持：service_request_count（总请求）、service_duration（平均响应时间）、service_error_req_rate（平均错误率）、service_slow_call_count（慢调用）、service_error_request_count（异常数量）。\nruntime_metric视图支持：service_gc_full_count（Full GC）。\nsql_metric视图支持：service_slow_sql_count（慢sql）、sql_duration_avg（耗时）。",
+          "example": "\"service_request_count\"、“service_duration”",
+          "member": "string",
+          "name": "Metrics",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "业务系统ID",
+          "example": "apm-ylTJfTSbn",
+          "member": "string",
+          "name": "InstanceId",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "视图名称，不可自定义输入。支持：service_metric、runtime_metric、sql_metric。",
+          "example": "service_metric",
+          "member": "string",
+          "name": "ViewName",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "聚合维度：\nservice_metric视图支持：service.name（服务名）、span.kind （客户端/服务端视角）维度进行聚合，service.name（服务名）必填。\nruntime_metric视图支持：service.name（服务名）维度进行聚合，service.name（服务名）必填。\nsql_metric视图支持：service.name（服务名）、db.statement（sql语句）维度进行聚合，查询service_slow_sql_count（慢sql）时service.name（服务名）必填，查询sql_duration_avg（耗时）指标时service.name（服务名）、db.statement（sql语句）必填。",
+          "example": "\"service.name\"、\"span.kind\"",
+          "member": "string",
+          "name": "GroupBy",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "起始时间的时间戳，单位为秒，只支持查询2天内最多1小时的指标数据。",
+          "example": "1617123538",
+          "member": "int64",
+          "name": "StartTime",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "结束时间的时间戳，单位为秒，只支持查询2天内最多1小时的指标数据。",
+          "example": "1617123538",
+          "member": "int64",
+          "name": "EndTime",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "聚合粒度，单位为秒，最小为60s，即一分钟的聚合粒度；如果为空或0则计算开始时间到截止时间的指标数据，上报其他值会报错。",
+          "example": "60",
+          "member": "int64",
+          "name": "Period",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "对查询指标进行排序：\nservice_metric视图支持：service_request_count（总请求）、service_duration（平均响应时间）、service_error_req_rate（平均错误率）、service_slow_call_count（慢调用）、service_error_request_count（异常数量）。\nruntime_metric视图支持：service_gc_full_count（Full GC）。\nsql_metric视图支持：service_slow_sql_count（慢sql）、sql_duration_avg（耗时）。\nasc:对查询指标进行升序排序\ndesc：对查询指标进行降序排序",
+          "example": "\"OrderBy\": { \t\"Key\": \"sql_duration_avg\",         \"Value\": \"desc\"",
+          "member": "OrderBy",
+          "name": "OrderBy",
+          "required": false,
+          "type": "object"
+        },
+        {
+          "disabled": false,
+          "document": "查询指标的限制条数，目前最多展示50条数据，PageSize取值为1-50，上送PageSize则根据PageSize的值展示限制条数。",
+          "example": "5",
+          "member": "int64",
+          "name": "PageSize",
+          "required": false,
+          "type": "int"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeGeneralMetricDataResponse": {
+      "document": "DescribeGeneralMetricData返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "指标结果集\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "无",
+          "member": "Line",
+          "name": "Records",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeGeneralSpanListRequest": {
+      "document": "DescribeGeneralSpanList请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "分页",
+          "example": "1",
+          "member": "int64",
+          "name": "Offset",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "列表项个数",
+          "example": "15",
+          "member": "int64",
+          "name": "Limit",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "排序",
+          "example": "{}",
+          "member": "OrderBy",
+          "name": "OrderBy",
+          "required": false,
+          "type": "object"
+        },
+        {
+          "disabled": false,
+          "document": "span查询开始时间戳（单位:秒）",
+          "example": "1617123538",
+          "member": "int64",
+          "name": "StartTime",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "实例名",
+          "example": "52Dpv13GR",
+          "member": "string",
+          "name": "InstanceId",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "通用过滤参数",
+          "example": "{}",
+          "member": "Filter",
+          "name": "Filters",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "业务自身服务名",
+          "example": "tdmq",
+          "member": "string",
+          "name": "BusinessName",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "span查询结束时间戳（单位:秒）",
+          "example": "1617123538",
+          "member": "int64",
+          "name": "EndTime",
+          "required": false,
+          "type": "int"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeGeneralSpanListResponse": {
+      "document": "DescribeGeneralSpanList返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "总数量",
+          "example": "200",
+          "member": "int64",
+          "name": "TotalCount",
+          "required": true,
+          "type": "int",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "Span分页列表",
+          "example": "{}",
+          "member": "Span",
+          "name": "Spans",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": false
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeMetricRecordsRequest": {
+      "document": "DescribeMetricRecords请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "过滤条件",
+          "example": "[{\"Type\":\"=\",\"Key\":\"span.kind\",\"Value\":\"server\"}]",
+          "member": "Filter",
+          "name": "Filters",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "指标列表",
+          "example": "[{\"Compare\":\"1\",\"Compares\":[\"CompareByYesterday\",\"CompareByLastWeek\"],\"MetricName\":\"qps\"}]",
+          "member": "QueryMetricItem",
+          "name": "Metrics",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "聚合维度",
+          "example": "[\"service.instance\"]",
+          "member": "string",
+          "name": "GroupBy",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "排序",
+          "example": "{\"Key\":\"service_duration_avg\",\"Value\":\"DESC\"}",
+          "member": "OrderBy",
+          "name": "OrderBy",
+          "required": false,
+          "type": "object"
+        },
+        {
+          "disabled": false,
+          "document": "实例ID",
+          "example": "52Dpv13GR",
+          "member": "string",
+          "name": "InstanceId",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "每页大小",
+          "example": "10",
+          "member": "uint64",
+          "name": "Limit",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "开始时间",
+          "example": "1618361193",
+          "member": "uint64",
+          "name": "StartTime",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "分页起始点",
+          "example": "1",
+          "member": "int64",
+          "name": "Offset",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "结束时间",
+          "example": "1618361193",
+          "member": "uint64",
+          "name": "EndTime",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "业务名称（默认值：taw）",
+          "example": "taw",
+          "member": "string",
+          "name": "BusinessName",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "页码",
+          "example": "1",
+          "member": "int64",
+          "name": "PageIndex",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "页长",
+          "example": "10",
+          "member": "int64",
+          "name": "PageSize",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "Or过滤条件",
+          "example": "[{\"Type\":\"=\",\"Key\":\"span.kind\",\"Value\":\"server\"}]",
+          "member": "Filter",
+          "name": "OrFilters",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "数据来源",
+          "example": "service_runtime_thread_pool",
+          "member": "string",
+          "name": "Type",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeMetricRecordsResponse": {
+      "document": "DescribeMetricRecords返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "指标结果集\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "[{\"Fields\":[{\"LastPeriodValue\":[{\"Key\":\"abc\",\"Value\":0}],\"CompareVal\":\"abc\",\"Unit\":\"s\",\"Value\":691.42,\"Key\":\"ab\",\"CompareVals\":[{\"Value\":\"v1\",\"Key\":\"k1\"},{\"Key\":\"k2\",\"Value\":\"v2\"}]}],\"Tags\":[{\"Value\":\"v1\",\"Key\":\"k1\"}]}]",
+          "member": "ApmMetricRecord",
+          "name": "Records",
+          "output_required": true,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "查询指标结果集条数\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "1",
+          "member": "int64",
+          "name": "TotalCount",
+          "output_required": true,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeServiceOverviewRequest": {
+      "document": "DescribeServiceOverview请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "过滤条件",
+          "example": "无",
+          "member": "Filter",
+          "name": "Filters",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "指标列表",
+          "example": "无",
+          "member": "QueryMetricItem",
+          "name": "Metrics",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "聚合维度",
+          "example": "无",
+          "member": "string",
+          "name": "GroupBy",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "排序",
+          "example": "无",
+          "member": "OrderBy",
+          "name": "OrderBy",
+          "required": false,
+          "type": "object"
+        },
+        {
+          "disabled": false,
+          "document": "实例ID",
+          "example": "52Dpv13GR",
+          "member": "string",
+          "name": "InstanceId",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "每页大小",
+          "example": "10",
+          "member": "int64",
+          "name": "Limit",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "开始时间",
+          "example": "1618361193",
+          "member": "uint64",
+          "name": "StartTime",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "分页起始点",
+          "example": "1",
+          "member": "int64",
+          "name": "Offset",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "结束时间",
+          "example": "1618361193",
+          "member": "uint64",
+          "name": "EndTime",
+          "required": false,
+          "type": "int"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeServiceOverviewResponse": {
+      "document": "DescribeServiceOverview返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "指标结果集\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "无",
+          "member": "ApmMetricRecord",
+          "name": "Records",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeTagValuesRequest": {
+      "document": "DescribeTagValues请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "维度名",
+          "example": "service.name",
+          "member": "string",
+          "name": "TagKey",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "实例ID",
+          "example": "52Dpv13GR",
+          "member": "string",
+          "name": "InstanceId",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "结束时间",
+          "example": "1111",
+          "member": "int64",
+          "name": "EndTime",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "过滤条件",
+          "example": "无",
+          "member": "Filter",
+          "name": "Filters",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "开始时间",
+          "example": "1111",
+          "member": "int64",
+          "name": "StartTime",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "Or过滤条件",
+          "example": "无",
+          "member": "Filter",
+          "name": "OrFilters",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "使用类型",
+          "example": "agentConfig",
+          "member": "string",
+          "name": "Type",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "DescribeTagValuesResponse": {
+      "document": "DescribeTagValues返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "维度值列表",
+          "example": "[\"sso-api\", \"auth-api\"]",
+          "member": "string",
+          "name": "Values",
+          "output_required": true,
+          "type": "list",
+          "value_allowed_null": false
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "Filter": {
+      "document": "查询过滤参数",
+      "members": [
+        {
+          "disabled": false,
+          "document": "过滤方式（=, !=, in）",
+          "example": "=",
+          "member": "string",
+          "name": "Type",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "过滤维度名",
+          "example": "serviceName",
+          "member": "string",
+          "name": "Key",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "过滤值，in过滤方式用逗号分割多个值",
+          "example": "sso-api",
+          "member": "string",
+          "name": "Value",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "in"
+    },
+    "GeneralFilter": {
+      "document": "查询过滤参数",
+      "members": [
+        {
+          "disabled": false,
+          "document": "过滤维度名",
+          "example": "serviceName",
+          "member": "string",
+          "name": "Key",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "过滤值",
+          "example": "sso-api",
+          "member": "string",
+          "name": "Value",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "in"
+    },
+    "Instrument": {
+      "document": "组件",
+      "members": [
+        {
+          "disabled": false,
+          "document": "组件名称\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "Redis",
+          "member": "string",
+          "name": "Name",
+          "output_required": false,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "组件开关\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "true",
+          "member": "bool",
+          "name": "Enable",
+          "output_required": false,
+          "required": false,
+          "type": "bool",
+          "value_allowed_null": true
+        }
+      ],
+      "usage": "both"
+    },
+    "Line": {
+      "document": "指标曲线数据",
+      "members": [
+        {
+          "disabled": false,
+          "document": "指标名",
+          "example": "qps",
+          "member": "string",
+          "name": "MetricName",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "指标中文名",
+          "example": "吞吐量",
+          "member": "string",
+          "name": "MetricNameCN",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "时间序列",
+          "example": "[1617124595, 1617124596, 1617124597]",
+          "member": "int64",
+          "name": "TimeSerial",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "数据序列\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "[1.0, 2.0, 3.0]",
+          "member": "float",
+          "name": "DataSerial",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "维度列表\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "无",
+          "member": "ApmTag",
+          "name": "Tags",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": true
+        }
+      ],
+      "usage": "out"
+    },
+    "ModifyApmInstanceRequest": {
+      "document": "ModifyApmInstance请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "实例ID",
+          "example": "6Dxp7Nd0B",
+          "member": "string",
+          "name": "InstanceId",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "实例名",
+          "example": "云监控-测试",
+          "member": "string",
+          "name": "Name",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "标签列表",
+          "example": "无",
+          "member": "ApmTag",
+          "name": "Tags",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "实例详情",
+          "example": "无",
+          "member": "string",
+          "name": "Description",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "Trace数据保存时长",
+          "example": "604800",
+          "member": "int64",
+          "name": "TraceDuration",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "是否开启计费",
+          "example": "true",
+          "member": "bool",
+          "name": "OpenBilling",
+          "required": false,
+          "type": "bool"
+        },
+        {
+          "disabled": false,
+          "document": "实例上报额度",
+          "example": "10000000",
+          "member": "uint64",
+          "name": "SpanDailyCounters",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "错误率阈值",
+          "example": "11",
+          "member": "int64",
+          "name": "ErrRateThreshold",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "采样率",
+          "example": "11",
+          "member": "int64",
+          "name": "SampleRate",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "是否开启错误采样 0 关 1 开",
+          "example": "10",
+          "member": "int64",
+          "name": "ErrorSample",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "慢请求阈值",
+          "example": "500",
+          "member": "int64",
+          "name": "SlowRequestSavedThreshold",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "是否开启日志功能 0 关 1 开",
+          "example": "0",
+          "member": "int64",
+          "name": "IsRelatedLog",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "日志地域",
+          "example": "ap-guangzhou",
+          "member": "string",
+          "name": "LogRegion",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "CLS日志主题ID | ES 索引名",
+          "example": "xxxxx",
+          "member": "string",
+          "name": "LogTopicID",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "CLS日志集 | ES集群ID",
+          "example": "xxxxx",
+          "member": "string",
+          "name": "LogSet",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "CLS | ES",
+          "example": "CLS",
+          "member": "string",
+          "name": "LogSource",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "用户自定义展示标签列表",
+          "example": "无",
+          "member": "string",
+          "name": "CustomShowTags",
+          "required": false,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "修改计费模式\n1为预付费\n0为按量付费",
+          "example": "1",
+          "member": "int64",
+          "name": "PayMode",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "响应时间满意阈值",
+          "example": "500",
+          "member": "int64",
+          "name": "ResponseDurationWarningThreshold",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "（0=付费版；1=tsf受限免费版；2=免费版）",
+          "example": "0",
+          "member": "int64",
+          "name": "Free",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "是否关联dashboard： 0 关 1 开",
+          "example": "0",
+          "member": "int64",
+          "name": "IsRelatedDashboard",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "dashboard ID",
+          "example": "xxxxx",
+          "member": "string",
+          "name": "DashboardTopicID",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "是否开启SQL注入检测",
+          "example": "0",
+          "member": "int64",
+          "name": "IsSqlInjectionAnalysis",
+          "required": false,
+          "type": "int"
+        },
+        {
+          "disabled": false,
+          "document": "是否开启组件漏洞检测",
+          "example": "0",
+          "member": "int64",
+          "name": "IsInstrumentationVulnerabilityScan",
+          "required": false,
+          "type": "int"
+        }
+      ],
+      "type": "object"
+    },
+    "ModifyApmInstanceResponse": {
+      "document": "ModifyApmInstance返回参数结构体",
+      "members": [
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "ModifyGeneralApmApplicationConfigRequest": {
+      "document": "ModifyGeneralApmApplicationConfig请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "业务系统Id",
+          "example": "apm-059oXBfTL",
+          "member": "string",
+          "name": "InstanceId",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "disabled": false,
+          "document": "需要修改的字段key value分别指定字段名、字段值\n[具体字段请见](https://cloud.tencent.com/document/product/248/111241)",
+          "example": "\"Tags\":[{\"Key\":\"UrlConvergence\",\"Value\":\"RPCServer/market.MarketServiceleetcode9(.*?)\"},{\"Key\":\"UrlConvergenceThreshold\",\"Value\":\"600\"},{\"Key\":\"UrlConvergenceSwitch\",\"Value\":\"1\"},{\"Key\":\"AgentEnable\",\"Value\":\"true\"}]\t",
+          "member": "ApmTag",
+          "name": "Tags",
+          "required": true,
+          "type": "list"
+        },
+        {
+          "disabled": false,
+          "document": "需要修改配置的应用列表名称\t",
+          "example": "\"ServiceNames\":[\"stock-service\",\"profile-service28\",\"profile-service08\"],\t",
+          "member": "string",
+          "name": "ServiceNames",
+          "required": false,
+          "type": "list"
+        }
+      ],
+      "type": "object"
+    },
+    "ModifyGeneralApmApplicationConfigResponse": {
+      "document": "ModifyGeneralApmApplicationConfig返回参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "返回值描述",
+          "example": "Success",
+          "member": "string",
+          "name": "Message",
+          "output_required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "OrderBy": {
+      "document": "sql排序字段",
+      "members": [
+        {
+          "disabled": false,
+          "document": "需要排序的字段",
+          "example": "traceID",
+          "member": "string",
+          "name": "Key",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "顺序排序/倒序排序",
+          "example": "asc",
+          "member": "string",
+          "name": "Value",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "in"
+    },
+    "QueryMetricItem": {
+      "document": "查询",
+      "members": [
+        {
+          "disabled": false,
+          "document": "指标名",
+          "example": "request_count",
+          "member": "string",
+          "name": "MetricName",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "同比，已弃用，不建议使用",
+          "example": "YearOnYear",
+          "member": "string",
+          "name": "Compare",
+          "required": false,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "同比，支持多种同比方式",
+          "example": "无",
+          "member": "string",
+          "name": "Compares",
+          "required": false,
+          "type": "list",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "in"
+    },
+    "Span": {
+      "document": "Span对象",
+      "members": [
+        {
+          "disabled": false,
+          "document": "Trace Id\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "7a23429a8f7d6685",
+          "member": "string",
+          "name": "TraceID",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "日志\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "[]",
+          "member": "SpanLog",
+          "name": "Logs",
+          "output_required": false,
+          "required": false,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "标签\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "[]",
+          "member": "SpanTag",
+          "name": "Tags",
+          "output_required": true,
+          "required": false,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "上报应用服务信息\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "{}",
+          "member": "SpanProcess",
+          "name": "Process",
+          "output_required": true,
+          "required": false,
+          "type": "object",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "产生时间戳(毫秒)\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "1621843224175",
+          "member": "int64",
+          "name": "Timestamp",
+          "output_required": false,
+          "required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Span名称\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "span_foo3",
+          "member": "string",
+          "name": "OperationName",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "关联关系\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "[]",
+          "member": "SpanReference",
+          "name": "References",
+          "output_required": true,
+          "required": false,
+          "type": "list",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "产生时间戳(微秒)\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "1621843224175963",
+          "member": "int64",
+          "name": "StartTime",
+          "output_required": true,
+          "required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "持续耗时(微妙)\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "500098",
+          "member": "int64",
+          "name": "Duration",
+          "output_required": true,
+          "required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Span Id\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "7a23429a8f7d6685",
+          "member": "string",
+          "name": "SpanID",
+          "output_required": true,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "产生时间戳(毫秒)\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "1621843224175",
+          "member": "int64",
+          "name": "StartTimeMillis",
+          "output_required": false,
+          "required": false,
+          "type": "int",
+          "value_allowed_null": true
+        },
+        {
+          "disabled": false,
+          "document": "Parent Span Id\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "7a23429a8f7d6685",
+          "member": "string",
+          "name": "ParentSpanID",
+          "output_required": false,
+          "required": false,
+          "type": "string",
+          "value_allowed_null": true
+        }
+      ],
+      "usage": "both"
+    },
+    "SpanLog": {
+      "document": "Span日志部分\n\n",
+      "members": [
+        {
+          "disabled": false,
+          "document": "日志时间戳",
+          "example": "1621843224175",
+          "member": "int64",
+          "name": "Timestamp",
+          "required": true,
+          "type": "int",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "标签",
+          "example": "tags[]",
+          "member": "SpanTag",
+          "name": "Fields",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "both"
+    },
+    "SpanProcess": {
+      "document": "服务相关信息",
+      "members": [
+        {
+          "disabled": false,
+          "document": "应用服务名称",
+          "example": "broker-gz-test",
+          "member": "string",
+          "name": "ServiceName",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "Tags 标签数组",
+          "example": "tags[]",
+          "member": "SpanTag",
+          "name": "Tags",
+          "required": true,
+          "type": "list",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "both"
+    },
+    "SpanReference": {
+      "document": "Span上下游关联关系",
+      "members": [
+        {
+          "disabled": false,
+          "document": "关联关系类型",
+          "example": "CHILD_OF",
+          "member": "string",
+          "name": "RefType",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "Span ID",
+          "example": "7a23429a8f7d6685",
+          "member": "string",
+          "name": "SpanID",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "Trace ID",
+          "example": "7a23429a8f7d6685",
+          "member": "string",
+          "name": "TraceID",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "both"
+    },
+    "SpanTag": {
+      "document": "标签",
+      "members": [
+        {
+          "disabled": false,
+          "document": "标签类型",
+          "example": "string",
+          "member": "string",
+          "name": "Type",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "标签Key\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "status.code\"",
+          "member": "string",
+          "name": "Key",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        },
+        {
+          "disabled": false,
+          "document": "标签值\n注意：此字段可能返回 null，表示取不到有效值。",
+          "example": "0",
+          "member": "string",
+          "name": "Value",
+          "required": true,
+          "type": "string",
+          "value_allowed_null": false
+        }
+      ],
+      "usage": "both"
+    },
+    "TerminateApmInstanceRequest": {
+      "document": "TerminateApmInstance请求参数结构体",
+      "members": [
+        {
+          "disabled": false,
+          "document": "实例ID",
+          "example": "6Dxp7Nd0B",
+          "member": "string",
+          "name": "InstanceId",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    },
+    "TerminateApmInstanceResponse": {
+      "document": "TerminateApmInstance返回参数结构体",
+      "members": [
+        {
+          "document": "唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。",
+          "member": "string",
+          "name": "RequestId",
+          "type": "string"
+        }
+      ],
+      "type": "object"
+    }
+  },
+  "version": "1.0"
+}
