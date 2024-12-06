@@ -1,0 +1,124 @@
+Metadata-Version: 2.1
+Name: fixinventoryshell
+Version: 4.2.0
+Summary: Commandline interpreter to interact with Fix Inventory.
+Author: Some Engineering Inc.
+License: AGPLv3
+Project-URL: Documentation, https://inventory.fix.security
+Project-URL: Source, https://github.com/someengineering/fix/tree/main/fixshell
+Keywords: cloud security
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: System Administrators
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: Unix
+Classifier: Environment :: Console
+Classifier: Natural Language :: English
+Classifier: Topic :: Security
+Classifier: Topic :: Utilities
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: fixinventorylib==4.2.0
+Requires-Dist: prompt-toolkit
+Requires-Dist: rich
+Requires-Dist: fixinventoryclient
+Requires-Dist: aiohttp[speedups]
+
+# `fixsh`
+Fix Shell
+
+
+## Table of contents
+
+* [Overview](#overview)
+* [Usage](#usage)
+* [Examples](#examples)
+    * [Basics](#basics)
+    * [Intermediate](#intermediate)
+    * [Advanced](#advanced)
+* [Contact](#contact)
+* [License](#license)
+
+
+## Overview
+`fixsh` starts the fix shell. It is used to interact with `fixcore`. It allows you to explore the graph, find resources of interest, mark them for cleanup, fix their tagging, aggregate over their metadata to create metrics and format the output for use in a 3rd party script or system.
+
+More information can be found below and in [the docs](https://inventory.fix.security/docs/concepts/components/shell).
+
+
+## Usage
+`fixsh` uses the following commandline arguments:
+```
+  --fixcore-uri fixCORE_URI
+                        fixcore URI (default: https://localhost:8900)
+  --fixcore-section fixCORE_SECTION
+                        All queries are interpreted with this section name. If not set, the server default is used.
+  --fixcore-graph fixCORE_GRAPH
+                        The name of the graph to use by default. If not set, the server default is used.
+  --download-directory DOWNLOAD_DIRECTORY
+                        If files are received, they are written to this directory.
+  --no-color            Output should be rendered plain without any color escape sequences.
+  --stdin               Read from STDIN instead of opening a shell
+  --verbose, -v         Verbose logging
+  --quiet               Only log errors
+  --psk PSK             Pre-shared key
+  --ca-cert CA_CERT     Path to custom CA certificate file
+  --no-verify-certs     Turn off certificate verification
+```
+
+ENV Prefix: `fixSHELL_`
+Every CLI arg can also be specified using ENV variables.
+
+For instance `--fixcore-uri http://foobar.tld:8900` would become `fixSHELL_fixCORE_URI=http://foobar.tld:8900`.
+
+
+
+## Examples
+### Basics
+Enter `help` into `fixsh` to get an overview of all available commands
+
+Using `help` followed by a command will provide more information about that command.
+
+
+### Intermediate
+Show all storage volumes that are in use
+```
+> search is(volume) and volume_status = in-use
+```
+
+Show all storage volumes in use and format the output as CSV
+```
+> search is(volume) and volume_status = in-use | format {kind},{id},{name},{ctime}
+```
+
+Show all storage volumes not in use with a size of more than 10 GB
+```
+> search is(volume) and volume_status = available and volume_size > 10
+```
+
+
+### Advanced
+Find volumes in cloud AWS that are in use
+```
+search is(volume) and volume_status = in-use and /ancestors.cloud.reported.name = aws
+```
+
+Alternatively instead of filtering for storage volumes of the generic `volume` kind we can also be more specific
+```
+search is(aws_ec2_volume) and volume_status = in-use
+```
+
+Find unused AWS volumes older than 30 days with no I/O in the past 7 days
+```
+search is(aws_ec2_volume) and volume_status = available and ctime < -30d and atime < -7d and mtime < -7d
+```
+
+
+## Contact
+If you have any questions feel free to [join our Discord](https://discord.gg/fixsecurity) or [open a GitHub issue](https://github.com/someengineering/fix/issues/new).
+
+
+## License
+See [LICENSE](../LICENSE) for details.
