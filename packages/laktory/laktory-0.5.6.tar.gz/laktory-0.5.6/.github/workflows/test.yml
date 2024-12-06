@@ -1,0 +1,66 @@
+name: test
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+  push:
+    branches:
+      - main
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pyVersion:
+          - '3.9'
+          - '3.10'
+          - '3.11'
+    steps:
+      - name: Check if run tests
+        env:
+          VERSION_BUMP: ${{ contains(github.event.pull_request.labels.*.name, 'version-bump') }}
+        run: |
+          if ${VERSION_BUMP} == true; then
+            echo "run_tests=false" >> $GITHUB_ENV
+            echo "tests will be skipped"
+          else
+            echo "run_tests=true" >> $GITHUB_ENV
+            echo "tests will be run"
+          fi
+
+      - name: Checkout
+        if: ${{ env.run_tests == 'true' && success()}}
+        uses: actions/checkout@v3
+
+#      - name: Unshallow
+#        run: git fetch --prune --unshallow
+
+      - uses: actions/setup-python@v4
+        if: ${{ env.run_tests == 'true' && success()}}
+        with:
+          python-version: ${{ matrix.pyVersion }}
+
+      - name: Run tests
+        if: ${{ env.run_tests == 'true' && success()}}
+        run: make dev test
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+          DATABRICKS_WAREHOUSE_ID: ${{ vars.DATABRICKS_WAREHOUSE_ID }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          LAKEHOUSE_SA_CONN_STR: ${{ secrets.LAKEHOUSE_SA_CONN_STR }}
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          DATABRICKS_HOST_DEV: ${{ secrets.DATABRICKS_HOST_DEV }}
+          DATABRICKS_TOKEN_DEV: ${{ secrets.DATABRICKS_TOKEN_DEV }}
+
+#      - name: Publish test coverage
+#        uses: codecov/codecov-action@v1

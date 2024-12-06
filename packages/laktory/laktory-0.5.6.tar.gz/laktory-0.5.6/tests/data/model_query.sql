@@ -1,0 +1,6 @@
+SELECT
+--    name,
+    *
+FROM
+    table
+;
