@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=62"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atlantiscore"
+version = "9.12.1"
+description = "atlantiscore"
+readme = "README.md"
+authors = [{ name = "Atlantis Labs", email = "r00tail@protonmail.com" }]
+dependencies = [
+    "aiofiles ~= 23.2",
+    "codercore ~= 6.6.0",
+    "coincurve ~= 20.0",
+    "eth-hash[pycryptodome]~=0.5",
+    "eth-utils ~= 4.1",
+    "pydantic ~= 2.5",
+    "sqlalchemy[asyncio] ~= 2.0",
+    "web3[ipfs] ~= 6.9"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest ~= 7.2.0",
+    "pytest-asyncio ~= 0.20.1",
+    "pytest-cov ~= 4.0.0",
+    "pytest-mock ~= 3.10.0",
+    "pytest-xdist[psutil] ~= 3.0.2",
+]
+dev = [
+    "alembic ~= 1.13",
+    "black ~= 22.12",
+    "bumpver ~= 2022.1120",
+    "flake8 ~= 6.0",
+    "isort ~= 5.12",
+    "pre-commit ~= 2.21",
+]
+
+
+[tool.bumpver]
+current_version = "9.12.1"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+    'version = "{version}"'
+]
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["atlantiscore"]
+concurrency = ["greenlet", "thread"]
+
+[tool.coverage.report]
+show_missing = true
+omit = ["tests/*"]
+
+[tool.isort]
+profile = "black"
+src_paths = ["atlantiscore", "tests"]
+combine_as_imports = true
