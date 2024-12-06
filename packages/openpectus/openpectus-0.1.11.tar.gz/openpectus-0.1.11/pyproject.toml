@@ -1,0 +1,87 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "openpectus"
+authors = [{name = "Eskild Schroll-Fleischer", email = "eyfl@novonordisk.com"}, {name = "Morten Passow Odgaard", email = "mpo@mjolner.dk"}, {name = "Jan H. Knudsen", email = "jhk@mjolner.dk"}]
+dynamic = ["version", "description"]
+readme = "README.md"
+
+dependencies = [
+    "antlr4-python3-runtime==4.13.1",
+    "pint==0.22",
+    "typing_extensions==4.8.0",
+    "pydantic==1.10.13",
+    "fastapi==0.103.2",
+    "uvicorn[standard]==0.23.2",
+    "httpx==0.25.0",
+    "fastapi_websocket_rpc==0.1.25",
+    "fastapi_websocket_pubsub==0.3.8",
+    "colorlog==6.7.0",
+    "sqlalchemy==2.0.23",   
+    "asyncua==1.0.6",
+    "labjack-ljm==1.23.0",
+    "pyright==1.1.381",
+    "alembic==1.13.1",
+    "sentry-sdk==2.1.1",
+    "PyJWT==2.10.0",
+]
+
+[project.optional-dependencies]
+development = [
+    "flake8==6.1.0",   # dev
+    "black==23.3.0",   # dev
+    "build==0.10.0",   # dev
+]
+
+[tool.flit.sdist]
+include = ["openpectus"]
+exclude = [
+    "openpectus/frontend*",
+    "openpectus/engine/p1*",
+    "openpectus/.flake8*",
+    "openpectus/.idea*",
+    "openpectus/Dockerfile",
+    "openpectus/docker-compose.yml"
+]
+
+[project.scripts]
+pectus-aggregator = "openpectus.aggregator.main:main"
+pectus-engine = "openpectus.engine.main:main"
+
+[tool.flit.external-data]
+directory = "openpectus/aggregator/frontend-dist/"
+
+[tool.pyright]
+include = ["openpectus"]
+exclude = ["**/node_modules",
+    "**/__pycache__",
+    "openpectus/frontend",
+    "openpectus/lang/grammar/codegen/**",
+    "openpectus/engine/p1/**",
+    "openpectus/aggregator/frontend_ws/**",     #TODO fix
+    "openpectus/aggregator/spa.py",             #TODO fix
+]
+defineConstant = { DEBUG = true }
+venv = "env367"
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportImportCycles = true
+reportIncompatibleMethodOverride = true
+reportIncompatibleVariableOverride = true
+
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+
+reportMissingTypeArgument = true
+#reportUnnecessaryComparison = true # TODO consider enabling this
+reportImplicitStringConcatenation = true
+reportUnnecessaryTypeIgnoreComment = "warning"
+reportMatchNotExhaustive = true
+#reportImplicitOverride = true # TODO consider enabling this
+reportShadowedImports = true
+
+pythonVersion = "3.11"
+pythonPlatform = "Linux"
