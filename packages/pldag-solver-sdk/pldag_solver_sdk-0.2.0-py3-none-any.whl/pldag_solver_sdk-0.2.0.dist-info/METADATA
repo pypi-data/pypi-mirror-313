@@ -1,0 +1,30 @@
+Metadata-Version: 2.1
+Name: pldag-solver-sdk
+Version: 0.2.0
+Summary: Python SDK package for Solver API
+Author: znittzel
+Author-email: rikard@ourstudio.se
+Requires-Python: >=3.10,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: aiohttp (>=3.11.6,<4.0.0)
+Requires-Dist: pldag (>=0.10.2,<0.11.0)
+Description-Content-Type: text/markdown
+
+# How to use
+```python
+from solver import Solver, SolverType
+from pldag import PLDAG
+
+# Setup solver api
+solver = Solver(url="http://localhost:9000")
+
+# Setup a pldag model
+model = PLDAG()
+primitives = ["x", "y", "z"]
+root = model.set_and(model.set_primitives(primitives))
+solutions = solver.solve(model, [{}], {root: 0j}, SolverType.DEFAULT)
+```
