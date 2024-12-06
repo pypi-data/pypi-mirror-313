@@ -1,0 +1,123 @@
+# **********************************************************************************
+# * Copyright (C) 2024-present Bert Van Acker (B.MKR) <bert.vanacker@uantwerpen.be>
+# *
+# * This file is part of the roboarch R&D project.
+# *
+# * RAP R&D concepts can not be copied and/or distributed without the express
+# * permission of Bert Van Acker
+# **********************************************************************************
+from rpio.clientLibraries.rpclpy.node import Node
+import time
+
+try:
+    from .messages import *
+except (ValueError, ImportError):
+    from messages import *
+
+#<!-- cc_include START--!>
+# user includes here
+#<!-- cc_include END--!>
+
+#<!-- cc_code START--!>
+# user code here
+#<!-- cc_code END--!>
+
+class {{swc.name}}(Node):
+
+    def __init__(self, config='config.yaml',verbose=True):
+        super().__init__(config=config,verbose=verbose)
+
+        self._name = "{{swc.name}}"
+        self.logger.info("{{swc.name}} instantiated")
+
+        #<!-- cc_init START--!>
+        # user includes here
+        #<!-- cc_init END--!>
+
+    {% for thread in swc.threads %}
+    # -----------------------------AUTO-GEN SKELETON FOR {{thread.name}}-----------------------------
+    def {{thread.name}}(self,msg):
+        {% for feature in thread.features %}
+        {% if feature.featureType == 'inport'%}
+        {% if 'data' in feature.type %}
+        {{feature.name}} = self.knowledge.read("{{feature.name}}",queueSize=1)
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        {% for feature in thread.features %}
+        {% if feature.featureType == 'outport'%}
+        {% if 'data' in feature.type %}
+        _{{feature.message.name}} = {{feature.message.name}}()
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+
+        #<!-- cc_code_{{thread.name}} START--!>
+
+        # user code here for {{thread.name}}
+
+        {% for feature in thread.features %}
+        {% if feature.featureType == 'outport'%}
+        {% if 'data' in feature.type %}
+        {% for data in feature.message.features %}
+        _{{feature.message.name}}._{{data.name}}= "SET VALUE"    # datatype: {{data.dataType}}
+        {% endfor %}
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+
+        #<!-- cc_code_{{thread.name}} END--!>
+
+        {% for feature in thread.features %}
+        {% if feature.featureType == 'outport'%}
+        {% if 'event' not in feature.type%}
+        _success = self.knowledge.write(cls=_{{feature.message.name}})
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        {# {{ EVENTS TO BE SEND FROM OUTPUT EVENT OR EVENT DATA }} #}
+        # TODO: Put desired publish event inside user code and uncomment!!
+        {% for feature in thread.features %}
+        {% if feature.featureType == 'outport'%}
+        {% if 'data event' in feature.type%}
+        #self.publish_event(event_key='{{feature.name}}',message=_{{feature.message.name}})    # LINK <outport> {{feature.name}}
+        {% elif 'event' in feature.type%}
+        #self.publish_event(event_key='{{feature.name}}')    # LINK <outport> {{feature.name}}
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    {% endfor %}
+
+    {% if swc.threads|length >= 1 %}
+    def register_callbacks(self):
+        {# {{ EVENT TRIGGERS ON THREADS }} #}
+        {% for thread in swc.threads %}
+        {% if thread.eventTrigger != None%}
+        self.register_event_callback(event_key='{{thread.eventTrigger}}', callback=self.{{thread.name}})     # LINK <eventTrigger> {{thread.eventTrigger}}
+        {% endif %}
+        {# {{ EVENT TRIGGERS FROM INPORT EVENT OR EVENT DATA }} #}
+        {% for feature in thread.features %}
+        {% if feature.featureType == 'inport'%}
+        {% if 'event' in feature.type%}
+        self.register_event_callback(event_key='{{feature.name}}', callback=self.{{thread.name}})        # LINK <inport> {{feature.name}}
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+    {% endif %}
+
+def main(args=None):
+
+    node = {{swc.name}}(config='config.yaml')
+    {% if swc.threads|length >= 1 %}
+    node.register_callbacks()
+    {% endif %}
+    node.start()
+
+if __name__ == '__main__':
+    main()
+    try:
+       while True:
+           time.sleep(1)
+    except:
+       exit()

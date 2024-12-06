@@ -1,0 +1,30 @@
+{% for node in processor.processorBinding %}
+{% if prefix != None %}
+from {{prefix}}.{{package}}.Realization.ManagingSystem.Nodes.{{node.name}}.{{node.name}} import {{node.name}}
+{% else %}
+from {{package}}.Realization.ManagingSystem.Nodes.{{node.name}}.{{node.name}} import {{node.name}}
+{% endif %}
+{% endfor %}
+import time
+
+{% for node in processor.processorBinding %}
+_{{node.name}} = {{node.name}}("../Realization/ManagingSystem/Nodes/{{node.name}}/config.yaml")
+{% endfor %}
+
+{% for node in processor.processorBinding %}
+_{{node.name}}.register_callbacks()
+{% endfor %}
+
+{% for node in processor.processorBinding %}
+_{{node.name}}.start()
+{% endfor %}
+
+try:
+    print("Script is running. Press Ctrl+C to stop.")
+    while True:
+        time.sleep(1)  # Sleep to avoid busy-waiting
+except KeyboardInterrupt:
+    {% for node in processor.processorBinding %}
+    _{{node.name}}.shutdown()
+    {% endfor %}
+    print("\nKeyboard interruption detected. Exiting...")
