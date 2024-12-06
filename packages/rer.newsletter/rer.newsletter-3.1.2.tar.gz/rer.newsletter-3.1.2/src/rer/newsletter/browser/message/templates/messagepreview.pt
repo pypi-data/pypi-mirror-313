@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      lang="en"
+      xml:lang="en"
+      i18n:domain="rer.newsletter"
+>
+
+  <head>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1"
+    />
+    <meta name="color-scheme"
+          content="light dark"
+    />
+    <meta name="supported-color-schemes"
+          content="light dark"
+    />
+    <style tal:content="python: options.get('css',None) or view.getMessageStyle()"></style>
+    <meta name="x-apple-disable-message-reformatting" />
+    <!--[if !mso]><!-->
+    <meta http-equiv="X-UA-Compatible"
+          content="IE=edge"
+    />
+    <!--<![endif]-->
+  </head>
+  <body class="body">
+    <table role="presentation"
+           style="width:100%;border:0;border-spacing:0;color:#000"
+    >
+      <tr tal:replace="structure python: options.get('message_header', None) or view.getMessageHeader()"></tr>
+      <tr tal:replace="structure python: options.get('message_subheader', None) or view.getMessageSubHeader()"></tr>
+      <tr tal:replace="structure python: options.get('message_content', None) or view.getMessageContent()"></tr>
+      <tr tal:replace="structure python: options.get('message_footer', None) or view.getMessageFooter()"></tr>
+      <tr tal:content="structure python: options.get('message_unsubscribe_default', None) or ''"></tr>
+    </table>
+  </body>
+</html>

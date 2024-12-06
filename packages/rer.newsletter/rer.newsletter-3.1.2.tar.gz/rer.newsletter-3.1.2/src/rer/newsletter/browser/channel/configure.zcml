@@ -1,0 +1,192 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="rer.newsletter"
+    >
+
+  <!-- vista form per aggiungere singoli utenti al channel, lato admin -->
+  <browser:page
+      name="adduser_channel"
+      for="rer.newsletter.interfaces.IChannel"
+      class=".users.add.AddForm"
+      permission="zope2.View"
+      />
+
+  <!-- vista form per iscrizione al channel -->
+  <browser:page
+      name="subscribe"
+      for="rer.newsletter.interfaces.IChannel"
+      class=".subscribe.subscribe_view"
+      permission="zope2.View"
+      />
+
+  <!-- vista form per disiscrizione dal channel -->
+  <browser:page
+      name="unsubscribe"
+      for="rer.newsletter.interfaces.IChannel"
+      class=".unsubscribe.unsubscribe_view"
+      permission="zope2.View"
+      />
+
+  <!-- customize addForm for channel -->
+  <adapter
+      factory=".add.AddView"
+      provides="zope.publisher.interfaces.browser.IBrowserPage"
+      for="Products.CMFCore.interfaces.IFolderish
+           rer.newsletter.interfaces.IRerNewsletterLayer
+           plone.dexterity.interfaces.IDexterityFTI"
+      name="Channel"
+      />
+
+  <!-- view for users import -->
+  <browser:page
+      name="users_import"
+      for="rer.newsletter.interfaces.IChannel"
+      class=".users.usersimport.UsersImport"
+      permission="zope2.View"
+      />
+
+  <!-- view for manage users of a channel -->
+  <browser:page
+      name="manageusers"
+      for="rer.newsletter.interfaces.IChannel"
+      class=".manageusers.ManageUsers"
+      template="templates/manageusers.pt"
+      permission="rer.newsletter.ManageNewsletter"
+      />
+
+  <browser:pages
+      for="rer.newsletter.interfaces.IChannel"
+      class=".manageusers.ManageUsers"
+      permission="zope2.View"
+      >
+    <browser:page
+        name="exportUsersListAsFile"
+        attribute="exportUsersListAsFile"
+        />
+    <browser:page
+        name="exportUsersListAsJson"
+        attribute="exportUsersListAsJson"
+        />
+    <browser:page
+        name="deleteUser"
+        attribute="deleteUser"
+        />
+  </browser:pages>
+
+  <!-- view for confirm user action-->
+  <browser:page
+      name="confirm-subscription"
+      for="rer.newsletter.interfaces.IChannel"
+      class=".users.confirm_subscription.ConfirmSubscription"
+      template="templates/confirm_subscription.pt"
+      permission="zope2.View"
+      />
+
+  <!-- default view for channel -->
+  <browser:page
+      name="channel_view"
+      for="rer.newsletter.interfaces.IChannel"
+      class=".channelview.ChannelView"
+      template="templates/channelview.pt"
+      permission="zope2.View"
+      />
+
+  <!-- View for channel's history -->
+  <browser:page
+      name="channelhistory"
+      for="rer.newsletter.interfaces.IChannel"
+      class=".channelhistory.ChannelHistory"
+      template="templates/channelhistoryview.pt"
+      permission="rer.newsletter.ManageNewsletter"
+      />
+
+  <browser:pages
+      for="rer.newsletter.interfaces.IChannel"
+      class=".channelhistory.ChannelHistory"
+      permission="zope2.View"
+      >
+    <browser:page
+        name="getMessageSentDetails"
+        attribute="getMessageSentDetails"
+        />
+    <browser:page
+        name="deleteMessageFromHistory"
+        attribute="deleteMessageFromHistory"
+        />
+  </browser:pages>
+
+  <!-- Views for mail template -->
+  <browser:page
+      name="asynch_send_success"
+      for="*"
+      template="templates/mail_templates/asynch_send_success.pt"
+      permission="zope2.View"
+      />
+  <browser:page
+      name="asynch_send_fail"
+      for="*"
+      template="templates/mail_templates/asynch_send_fail.pt"
+      permission="zope2.View"
+      />
+  <browser:page
+      name="activeuser_template"
+      for="*"
+      template="templates/mail_templates/active_user.pt"
+      permission="zope2.View"
+      />
+  <browser:page
+      name="deleteuser_template"
+      for="*"
+      template="templates/mail_templates/delete_user.pt"
+      permission="zope2.View"
+      />
+  <browser:page
+      name="activeuserconfirm_template"
+      for="*"
+      template="templates/mail_templates/active_user_confirm.pt"
+      permission="zope2.View"
+      />
+  <browser:page
+      name="deleteuserconfirm_template"
+      for="*"
+      template="templates/mail_templates/delete_user_confirm.pt"
+      permission="zope2.View"
+      />
+  <browser:page
+      name="unsubscribe_channel_template"
+      for="*"
+      template="templates/mail_templates/unsubscribe_channel.pt"
+      permission="zope2.View"
+      />
+
+  <!-- channel viewlet -->
+  <browser:viewlet
+      name="manage_channel_viewlet"
+      for="rer.newsletter.interfaces.IChannel"
+      manager="plone.app.layout.viewlets.interfaces.IAboveContentTitle"
+      class=".channelviewlet.ChannelManagerViewlet"
+      template="templates/channelviewlet.pt"
+      permission="rer.newsletter.ManageNewsletter"
+      layer="rer.newsletter.interfaces.IRerNewsletterLayer"
+      />
+
+  <!-- vista per il cron che deve eliminare gli utenti con il token scaduto che non hanno confermato l'iscrizione -->
+  <browser:page
+      name="delete_expired_users"
+      for="*"
+      class=".deleteexpiredusers.DeleteExpiredUsersView"
+      permission="rer.newsletter.ManageNewsletter"
+      />
+
+  <browser:page
+      name="plone_version"
+      for="*"
+      class=".plone_version.PloneVersionView"
+      attribute="is_plone_6_or_above"
+      permission="zope2.View"
+      layer="rer.newsletter.interfaces.IRerNewsletterLayer"
+      />
+
+</configure>

@@ -1,0 +1,61 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      lang="en"
+      metal:use-macro="here/main_template/macros/master"
+      xml:lang="en"
+      i18n:domain="rer.newsletter"
+>
+
+  <body>
+    <metal:main fill-slot="main">
+      <metal:main-macro define-macro="main">
+
+        <div id="content">
+          <button title="chiudi"
+                  type="button"
+                  tal:define="
+                    plone_6 context/@@plone_version/is_plone_6_or_above;
+                  "
+                  tal:attributes="
+                    class python: plone_6 and 'button-plone-modal-close btn' or 'button-plone-modal-close plone-btn';
+                  "
+          >Chiudi</button>
+
+          <div class="content_container">
+            <div class="informativa"
+                 tal:define="
+                   privacy view/form_instance/getChannelPrivacyPolicy;
+                 "
+                 tal:condition="privacy"
+                 tal:content="structure privacy"
+            ></div>
+            <div class="subscription_form"
+                 id="content-core"
+                 data-abs
+                 tal:condition="view/form_instance/isVisible"
+                 tal:content="structure view/contents"
+                 tal:attributes="
+                   data-abs python:context.absolute_url();
+                 "
+            ></div>
+          </div>
+
+          <a class="redirect"
+             href=""
+             style="display: none;"
+             title="disiscrizione"
+             tal:attributes="
+               href python:context.absolute_url();
+             "
+          >
+                    Clicca questo link per cancellarti dalla newsletter
+          </a>
+        </div>
+
+      </metal:main-macro>
+    </metal:main>
+  </body>
+
+</html>

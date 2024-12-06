@@ -1,0 +1,116 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      lang="en"
+      metal:use-macro="here/main_template/macros/master"
+      xml:lang="en"
+      i18n:domain="rer.newsletter"
+>
+
+  <metal:block metal:fill-slot="style_slot">
+  </metal:block>
+
+  <metal:block metal:fill-slot="javascript_head_slot">
+  </metal:block>
+
+  <!-- disattivo le portlet in questa view -->
+  <metal:override fill-slot="top_slot"
+                  tal:define="
+                    disable_column_one python:request.set('disable_plone.leftcolumn',1);
+                    disable_column_two python:request.set('disable_plone.rightcolumn',1);
+                  "
+  />
+
+  <metal:content-core fill-slot="content-title">
+    <h1>Gestione degli Utenti</h1>
+  </metal:content-core>
+  <metal:content-core fill-slot="content-description">
+  </metal:content-core>
+  <body>
+    <metal:content-core fill-slot="content-core">
+      <a class="link-parent"
+         href=""
+         tal:attributes="
+           href python:context.absolute_url();
+         "
+         i18n:translate="come_back"
+      >
+        Come Back
+      </a>
+
+      <div id="content-core"
+           tal:define="
+             plone_6 context/@@plone_version/is_plone_6_or_above;
+           "
+      >
+        <div class="portalMessage"
+             style="display:none;"
+        >
+          <strong></strong>
+        </div>
+
+        <div style="margin-bottom: 2%;">
+          <span id="users-import">
+            <a id="button-import-users"
+               href="users_import"
+               tal:attributes="
+                 class python: plone_6 and 'btn btn-primary' or 'plone-btn plone-btn-primary';
+               "
+               i18n:translate="import_user_list"
+            >
+              Import Users List
+            </a>
+          </span>
+
+          <span id="users-export">
+            <span tal:attributes="
+                    class python: plone_6 and 'btn btn-primary' or 'plone-btn plone-btn-primary';
+                  "
+                  i18n:translate="export_user_list"
+            >
+              Export Users List
+            </span>
+          </span>
+
+          <span id="add-user">
+            <a id="button-add-user"
+               href="adduser_channel"
+               tal:attributes="
+                 class python: plone_6 and 'btn btn-large btn-primary' or 'plone-btn plone-btn-large plone-btn-primary';
+               "
+               i18n:translate="add_user"
+            >
+              Add User
+            </a>
+          </span>
+
+          <span id="delete-user">
+            <span tal:attributes="
+                    class python: plone_6 and 'btn btn-primary' or 'plone-btn plone-btn-primary';
+                  "
+                  i18n:translate="delete_user"
+            >
+              Delete User
+            </span>
+          </span>
+        </div>
+
+        <table class="display"
+               id="users-table"
+               cellspacing="0"
+               width="100%"
+        >
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Data di creazione</th>
+              <th>Stato di attivazione</th>
+            </tr>
+          </thead>
+        </table>
+
+      </div>
+    </metal:content-core>
+  </body>
+</html>

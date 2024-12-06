@@ -1,0 +1,42 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xml:lang="en"
+      i18n:domain="rer.newsletter"
+>
+  <body>
+    <div class="tile tileNewsletter"
+         tal:attributes="
+           class view/getPortletClass;
+         "
+         i18n:domain="rer.newsletter"
+    >
+      <div class="tile-container">
+        <h3 class="tileTitle"
+            tal:condition="view/data/header"
+        >
+                    ${view/data/header}
+        </h3>
+        <div class="tileBody">
+          <div id="channel-subscribe">
+            <a tal:define="
+                 is_subscribable view/is_subscribable;
+                 absUrl view/getNewsletterUrl;
+                 plone_6 context/@@plone_version/is_plone_6_or_above;
+               "
+               tal:condition="python:is_subscribable and absUrl"
+               tal:attributes="
+                 href python:absUrl + '/@@subscribe';
+                 class python: plone_6 and 'btn btn-primary' or 'plone-btn plone-btn-primary';
+               "
+               i18n:translate="subscribe"
+            >
+                            Subscribe
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

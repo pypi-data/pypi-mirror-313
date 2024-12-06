@@ -1,0 +1,52 @@
+<div id="manage-message"
+     tal:define="
+       plone_6 context/@@plone_version/is_plone_6_or_above;
+     "
+     i18n:domain="rer.newsletter"
+>
+  <div style="margin-bottom: 2%;">
+    <span id="message-preview">
+      <a tal:condition="context/can_manage_newsletter"
+         tal:attributes="
+           href string:${context/absolute_url}/@@messagepreview_view;
+           class python: plone_6 and 'btn btn-primary' or 'plone-btn plone-btn-primary';
+         "
+         i18n:translate="message_preview"
+      >
+          Message Preview
+      </a>
+    </span>
+    <span id="message-test">
+      <a tal:condition="context/can_manage_newsletter"
+         tal:attributes="
+           href string:${context/absolute_url}/@@sendingtest_view;
+           class python: plone_6 and 'btn btn-primary' or 'plone-btn plone-btn-primary';
+         "
+         i18n:translate="message_test"
+      >
+          Message test
+      </a>
+    </span>
+    <span id="message-preview"
+          tal:define="
+            already_sent context/message_already_sent;
+          "
+          tal:condition="context/can_send_message"
+    >
+      <a tal:condition="not: already_sent"
+         tal:attributes="
+           href string:${context/absolute_url}/@@send_message_view;
+           class python: plone_6 and 'btn btn-primary' or 'plone-btn plone-btn-primary';
+         "
+         i18n:translate="send_message_confirm"
+      >Send Message</a>
+      <a tal:condition="already_sent"
+         tal:attributes="
+           href string:${context/absolute_url}/@@send_message_view;
+           class python: plone_6 and 'btn btn-primary' or 'plone-btn plone-btn-primary';
+         "
+         i18n:translate="resend_message_confirm"
+      >Re-send Message</a>
+    </span>
+  </div>
+</div>

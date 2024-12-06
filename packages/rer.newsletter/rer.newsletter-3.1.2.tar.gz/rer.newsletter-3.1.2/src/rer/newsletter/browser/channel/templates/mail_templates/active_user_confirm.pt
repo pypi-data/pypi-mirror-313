@@ -1,0 +1,53 @@
+<tal:root define="
+            header python:options['header'] if options['header'] else '';
+            footer python:options['footer'] if options['footer'] else '';
+            style python:options['style'];
+            channel_name python:options['channel_name'];
+          ">
+  <html xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+        xmlns:metal="http://xml.zope.org/namespaces/metal"
+        xmlns:tal="http://xml.zope.org/namespaces/tal"
+        lang="en"
+        xml:lang="en"
+        i18n:domain="rer.newsletter"
+  >
+
+    <head>
+      <meta name="viewport"
+            content="width=device-width,initial-scale=1"
+      />
+      <meta name="color-scheme"
+            content="light dark"
+      />
+      <meta name="supported-color-schemes"
+            content="light dark"
+      />
+      <style tal:content="style"></style>
+      <meta name="x-apple-disable-message-reformatting" />
+      <!--[if !mso]><!-->
+      <meta http-equiv="X-UA-Compatible"
+            content="IE=edge"
+      />
+      <!--<![endif]-->
+    </head>
+    <body class="body">
+      <table role="presentation"
+             style="width:100%;border:0;border-spacing:0;color:#000"
+      >
+        <span tal:replace="structure header"></span>
+        <tr>
+          <td align="left"
+              colspan="2"
+          >
+            <p class="message_core">
+            La tua iscrizione alla newsletter ${channel_name} &egrave; stata effettuata con successo.
+            </p>
+            <br />
+          </td>
+        </tr>
+        <span tal:replace="structure footer"></span>
+      </table>
+    </body>
+  </html>
+</tal:root>

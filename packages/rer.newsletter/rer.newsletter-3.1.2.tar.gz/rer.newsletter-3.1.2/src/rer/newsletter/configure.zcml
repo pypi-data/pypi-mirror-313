@@ -1,0 +1,85 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="rer.newsletter"
+    >
+
+  <i18n:registerTranslations directory="locales" />
+
+  <permission
+      id="rer.newsletter.ManageNewsletter"
+      title="rer.newsletter: Manage Newsletter"
+      />
+  <permission
+      id="rer.newsletter.AddChannel"
+      title="rer.newsletter: Add Channel"
+      />
+  <permission
+      id="rer.newsletter.AddMessage"
+      title="rer.newsletter: Add Message"
+      />
+  <permission
+      id="rer.newsletter.SendMessage"
+      title="rer.newsletter: Send Newsletter"
+      />
+  <permission
+      id="rer.newsletter.ResendMessage"
+      title="rer.newsletter: Resend Newsletter"
+      />
+
+  <include package=".adapter" />
+  <include package=".behaviors" />
+  <include package=".blocks_converter" />
+  <include package=".browser" />
+  <include package=".portlets" />
+  <include package=".tiles" />
+  <include file="upgrades.zcml" />
+  <include package=".contentrules" />
+  <include package=".restapi" />
+
+  <genericsetup:registerProfile
+      name="default"
+      title="rer.newsletter"
+      description="Installs the rer.newsletter add-on."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      directory="profiles/default"
+      post_handler=".setuphandlers.post_install"
+      />
+
+  <genericsetup:registerProfile
+      name="uninstall"
+      title="rer.newsletter (uninstall)"
+      description="Uninstalls the rer.newsletter add-on."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      directory="profiles/uninstall"
+      post_handler=".setuphandlers.uninstall"
+      />
+
+  <genericsetup:registerProfile
+      name="to_1005"
+      title="rer.newsletter: disable bundle"
+      description="Disable the rer.newsletter bundle."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      directory="profiles/to_1005"
+      />
+
+  <!-- registro l'utility per la coda dei messaggi -->
+  <utility
+      factory=".queue.handler.TCMessageQueue"
+      provides=".queue.interfaces.IMessageQueue"
+      zcml:condition="installed collective.taskqueue"
+      />
+
+  <utility
+      factory=".setuphandlers.HiddenProfiles"
+      name="rer.newsletter-hiddenprofiles"
+      />
+
+  <utility
+      name="rer.newsletter.subscribablenewsletter.vocabulary"
+      component=".vocabularies.SubscribableNewsletterVocabulary"
+      />
+
+</configure>
