@@ -1,0 +1,61 @@
+
+{# Button to trigger input form #}
+<button type="button" 
+        class="btn btn-outline-primary" 
+        data-bs-toggle="modal"
+        data-bs-target="#{{predictor.name.lower}}Modal">
+  <span class="me-1">New {{predictor.title}}</span>
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="{{predictor.name.lower}}Modal" tabindex="-1" 
+     aria-labelledby="{{predictor.name.lower}}ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="me-3">
+          <h3 class="modal-title" id="{{predictor.name.lower}}ModalLabel">New Predictor</h3> </span>
+        <div class="d-flex justify-content-end align-items-center">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="container">
+            {% comment %}
+            <!--
+            From <a href="https://json-editor.github.io/json-editor/form-submission.html">source</a>
+            See <a href="https://json-editor.github.io/json-editor/">also</a>
+
+            The form is set to send a <code>GET</code> request to the same page.
+            A change event listener has been added to the editor so that whenever the form changes, the editor value
+            is stored in a hidden input using <code>JSON.stringify()</code>.
+
+            The option <code>use_name_attributes</code> was set to <code>false</code>
+            to avoid sending the other field with the request.
+
+            When the form is submitted only the hidden input is sent in the request.
+            This allows to send data structures like arrays and object.
+            Also the same schema that is used to build the form can be used as parameter to backend json validators tools.
+            Try yourself, submit the form and look in the network tab of the developer tool.
+            -->
+            {% endcomment %}
+
+            <div class="form-group"></div>
+            <form id="{{predictor.name}}" action="./" method="post" >
+              {% csrf_token %}
+              <input id="input" type="hidden" name="json">
+              <div id="{{predictor.name}}-editor" data-schema="{{predictor.schema}}" ></div>
+              <input id="submit" class="btn btn-primary" width="100" type="submit">
+            </form>
+            <br>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        Predictor builder
+      </div>
+    </div>
+  </div>
+</div>
