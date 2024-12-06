@@ -1,0 +1,52 @@
+Metadata-Version: 2.1
+Name: nagra-network-cloudflare-utils
+Version: 0.2.11
+Summary: 
+Author: David Gallay
+Author-email: david.gallay@nagra.com
+Requires-Python: >=3.9,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: click (>=8.1.7,<9.0.0)
+Requires-Dist: cloudflare (>=3.1.1,<4.0.0)
+Requires-Dist: glom (>=23.5.0,<24.0.0)
+Requires-Dist: nagra-network-misc-utils (==0.2.7)
+Requires-Dist: pydantic (>=2.9.2,<3.0.0)
+Description-Content-Type: text/markdown
+
+# Utils
+
+Cloudflare utilities.
+This utilities are meant to be used in CI/CD pipelines.
+
+You can use it as a pre-commit.
+Nb: No public hook is available since it would need to expose the repository => this must be defined locally
+
+```yaml
+- repo: local
+  hooks:
+  - id: cfutils-check
+    name: cfutils-check
+    description: check csv files containing DNS records
+    entry: cfutils check
+    language: python
+    pass_filenames: false
+    files: ^(.*/)?dns_records\.csv$
+    args: ["-f", "dns_records.csv"]
+    additional_dependencies: ["nagra_network_cloudflare_utils==0.2.1"]
+
+  - id: cfutils-sort
+    name: cfutils-sort
+    description: sort csv files containing DNS records
+    entry: cfutils sort
+    language: python
+    pass_filenames: false
+    files: ^(.*/)?dns_records\.csv$
+    args: ["-f", "dns_records.csv"]
+    additional_dependencies: ["nagra_network_cloudflare_utils==0.2.1"]
+```
+
