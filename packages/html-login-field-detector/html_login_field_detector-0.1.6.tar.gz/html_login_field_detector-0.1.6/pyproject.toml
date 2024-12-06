@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "sphinx", "sphinx-rtd-theme"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "html-login-field-detector"
+version = "0.1.6"
+description = "A library for detecting login fields in HTML using DistilBERT."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Victor Delaplaine", email = "vdelaplainess@gmail.com"}]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "transformers>=4.33.0",
+    "datasets>=2.14.0",
+    "beautifulsoup4>=4.11.0",
+    "diskcache>=5.6.0",
+    "huggingface_hub>=0.15.0",
+    "scikit-learn>=1.1.0",
+    "matplotlib>=3.5.0",
+    "lxml>=4.8.0",
+    "lxml_html_clean>=0.4.0",
+    "certifi>=2024.6.0",
+    "tensorboard>=2.17.0",
+    "babel>=2.8.0",
+    "fake-useragent>=1.5.1",
+    "playwright==1.39.0",
+    "playwright-stealth>=1.0.4",
+]
+
+[project.optional-dependencies]
+cpu = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "torchaudio>=2.0.0",
+]
+
+gpu = [
+    "torch==2.5.1+cu118",
+    "torchvision==0.20.1+cu118",
+    "torchaudio==2.5.1+cu118",
+]
+docs = [
+    "sphinx>=7.2",
+    "sphinxcontrib-napoleon",  # For Google/NumPy docstring styles
+    "sphinx-rtd-theme",        # Optional theme
+]
+test = ["pytest", "pytest-cov"]
+
+[project.urls]
+homepage = "https://github.com/ByVictorrr"
+repository = "https://github.com/ByVictorrr/LoginFieldDetector"
+documentation = "https://byvictorrr.github.io/LoginFieldDetector/"
+
+[tool.pytest.ini_options]
+addopts="-v --cov"
+markers = [
+    "external: marks tests that require access to external websites",
+    "internal: marks tests that do not require external access to websites"
+]
+testpaths = ["tests/"]
+
+[tool.setuptools]
+packages = ["login_field_detector"]
+
+[tool.setuptools.package-data]
+# Include keywords.json within the package
+"login_field_detector" = ["keywords.json"]
+
+[tool.setuptools.data-files]
+# Install these files relative to the installation prefix
+"dataset" = ["dataset/training_urls.json"]
+"docs" = ["README.md"]
+
+[tool.coverage.run]
+# The source directories to include in the coverage
+source = ["login_field_detector"]
+
+# Patterns to omit from coverage
+omit = [
+    "/tmp/*",
+    "*/_remote_module_non_scriptable.py",
+    "tests/*"  # Example: Exclude tests
+]
+
+[tool.coverage.report]
+# Patterns for lines to exclude from coverage
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:"
+]
+
+# Show missed lines in the terminal report
+show_missing = true
+
+# Fail if the total coverage falls below this percentage
+fail_under = 80
+
+[tool.coverage.html]
+# Directory to save the HTML coverage report
+directory = "htmlcov"
