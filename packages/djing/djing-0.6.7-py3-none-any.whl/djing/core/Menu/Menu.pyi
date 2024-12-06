@@ -1,0 +1,13 @@
+from Illuminate.Contracts.Support.JsonSerializable import JsonSerializable
+from Illuminate.Database.Serializable import Serializable
+from _typeshed import Incomplete
+from djing.core.Http.Requests.DjingRequest import DjingRequest as DjingRequest
+from djing.core.Makeable import Makeable as Makeable
+
+class Menu(Serializable, Makeable, JsonSerializable):
+    items: Incomplete
+    def __init__(self, items=[]) -> None: ...
+    @classmethod
+    def wrap(cls, menu): ...
+    def json_serialize(self) -> dict: ...
+    def check_authorization(self, request: DjingRequest, item) -> bool: ...

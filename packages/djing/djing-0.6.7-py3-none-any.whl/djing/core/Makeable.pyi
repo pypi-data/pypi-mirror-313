@@ -1,0 +1,3 @@
+class Makeable:
+    @classmethod
+    def make(cls, *args, **kwargs): ...

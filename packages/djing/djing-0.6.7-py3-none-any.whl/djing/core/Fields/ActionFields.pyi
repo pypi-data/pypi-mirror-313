@@ -1,0 +1,3 @@
+from djing.core.Fields.ResolvedFields import ResolvedFields as ResolvedFields
+
+class ActionFields(ResolvedFields): ...

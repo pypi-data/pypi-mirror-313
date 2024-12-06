@@ -1,0 +1,3 @@
+from djing.djing_application import djing_application as djing_application
+
+def handle_command() -> None: ...
