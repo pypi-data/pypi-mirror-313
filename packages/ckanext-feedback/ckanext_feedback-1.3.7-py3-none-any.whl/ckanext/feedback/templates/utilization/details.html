@@ -1,0 +1,213 @@
+{% if h.is_enabled_utilizations() %}
+
+  {% extends "page.html" %}
+
+  {% block styles %}
+    {{ super() }}
+    {% asset 'feedback/feedback-details-css' %}
+  {% endblock %}
+
+  {% block breadcrumb_content %}
+    <li class="inactive"><a href="{{ h.url_for('utilization.search') }}">{{ _('Utilization') }}</a></li>
+    <li class="active"><a href="{{ h.url_for('utilization.details', utilization_id=utilization_id) }}">{{ _('Details') }}</a></li>
+  {% endblock %}
+
+  {% block title %}{{ _('Details on Utilization') }} - {{ utilization.title }} - {{ utilization.package_name }} - {{ utilization.resource_name }} - CKAN{% endblock %}
+
+  {% block primary %}
+    <article class="module" role="main">
+      <div class="module-content">
+        {% set row = utilization %}
+        <div class="centered-content">
+          {% if c.userobj.sysadmin or h.has_organization_admin_role(utilization.owner_org) %}
+            <form name="admin_form" action="{{h.url_for('utilization.approve', utilization_id=utilization_id ) }}" method="post">
+              <a class="btn btn-primary right-aligned spaced-left" href="{{ h.url_for('utilization.edit', utilization_id=utilization_id) }}">{{ _('Edit') }}</a>
+              {% if row.approval == false %}
+                <button class="btn btn-primary right-aligned" onclick="setButtonDisable(this);">{{ _('Approve') }}</button>
+              {% endif %}
+              <br>
+            </form>
+            <hr class="divider">
+          {% endif %}
+          <div class="wrap-text">
+            <h1>{{ row.title }}</h1>
+            <hr>
+            <h4>{{ _('Dataset') }}</h4>
+            <a href="{{ h.url_for('dataset.search') }}{{ row.package_name }}">{{ row.package_name }}</a>
+            <hr>
+            <h4>{{ _('Resource') }}</h4>
+            <a href="{{ h.url_for('dataset.search') }}{{ row.package_name }}/resource/{{ row.resource_id }}">{{ row.resource_name }}</a>
+            <hr>
+            <h4>{{ _('URL') }}</h4>
+            <a href="{{ row.url }}" target="_blank">{{ row.url }}</a>
+            <hr>
+            <h4>{{ _('Utilization description') }}</h4>
+            <p class="multiple-line">{{ row.description }}</p>
+            <hr>
+          </div>
+          <h4>{{ _('Issue Resolutions') }}</h4>
+          {% if h.is_base_public_folder_bs3() %}
+            <a href="#issue-resolution-detail" data-toggle="modal">
+          {% else %}
+            <a href="#issue-resolution-detail" data-bs-toggle="modal">
+          {% endif %}
+            {% if issue_resolutions|length > 0 %}
+              <img id="issue-resolution" src="/images/issue_resolution_badge_medium.png" alt="issue resolution badge">
+            {% endif %}
+            {{ issue_resolutions|length }}
+          </a>
+          {% if c.userobj.sysadmin or h.has_organization_admin_role(utilization.owner_org) %}
+            {% if h.is_base_public_folder_bs3() %}
+              <button class="btn btn-primary right-aligned" data-toggle="modal" data-target="#issue-resolution-form">{{ _('Resolve issue') }}</button>
+            {% else %}
+              <button class="btn btn-primary right-aligned" data-bs-toggle="modal" data-bs-target="#issue-resolution-form">{{ _('Resolve issue') }}</button>
+            {% endif %}
+          {% endif %}
+          <br>
+          <hr>
+          <h4>{{ _('Comments') }}</h4>
+          <p>{{ row.comment }}</p>
+          <hr>
+          <form id="comment_form" name="comment_form" action="{{ h.url_for('utilization.create_comment', utilization_id=utilization_id ) }}" method="post">
+            <h4>{{ _('Comment') }}</h4>
+            <select name="category" id="category">
+              {% for category in categories %}
+                {% if category.name == selected_category %}
+                <option value="{{ category.name }}" selected>{{ _(category.value) }}</option>
+                {% else %}
+                <option value="{{ category.name }}">{{ _(category.value) }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            <br>
+            <br>
+            <textarea class="form-control" cols="20" rows="5" id="comment-content" name="content" maxlength="1000">{{ content }}</textarea>
+            <div class="char-count"><span id="comment-count" class="comment-count">0</span>/1000</div>
+            <div>
+              <p id="comment-none-error" class="alert alert-error" style="display: none;">{{ _('Please enter your comment') }}</p>
+              <p id="comment-over-error" class="alert alert-error" style="display: none;">{{ _('Please keep the comment length below 1000') }}</p>
+            </div>
+            <br>
+            <button class="btn btn-primary right-aligned" onclick="return checkCommentExists(this);">{{ _('Send') }}</button>
+            <br>
+            <br>
+            <br>
+          </form>
+          {% if page.collection|length %}
+            <hr class="divider">
+          {% endif %}
+          {% for comment in page.collection %}
+            {% if (c.userobj.sysadmin or h.has_organization_admin_role(utilization.owner_org)) and comment.approval == false %}
+              <form name="approval_form" action="{{h.url_for('utilization.approve_comment', utilization_id=utilization_id, comment_id=comment.id) }}" method="post">
+                <button class="btn btn-primary right-aligned" onclick="setButtonDisable(this);">{{ _('Approve') }}</button>
+              </form>
+            {% endif %}
+            <h4>
+              {{ comment.created.strftime('%Y/%m/%d %H:%M') }}
+              {% for category in categories %}
+                {% if comment.category.name in category.name %}
+                  {{ _(comment.category.value) }}
+                {% endif %}
+              {% endfor %}
+            </h4>
+            <br>
+            <p class="multiple-line wrap-text {{'unapproved' if not comment.approval }}">{{ comment.content }}</p>
+            <hr class="divider">
+          {% endfor %}
+          {% block page_pagination %}
+            {{ page.pager(utilization_id=utilization_id) }}
+          {% endblock %}
+        </div>
+      </div>
+    </article>
+
+    <div id="issue-resolution-form" class="modal fade" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form name="issue_resolution_form" class="top-centered-content" action="{{h.url_for('utilization.create_issue_resolution', utilization_id=utilization_id ) }}" method="post">
+            <div class="modal-header">
+              {% if h.is_base_public_folder_bs3() %}
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2 class="modal-title">{{ _('Certification of issue resolution') }}</h2>
+              {% else %}
+                <h2 class="modal-title">{{ _('Certification of issue resolution') }}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              {% endif %}
+            </div>
+            <div class="modal-body">
+              <div>
+                <p><small>{{ _('What is certification of issue resolution?') }}</small></p>
+                <p><small>{{ _('If it is determined that the content of the utilization method leads to the solution of the problem, it can be certified as a problem solution.') }}</small></p>
+              </div>
+              <div class="form-group control-full">
+                <label class="control-label" for="code">{{ _('Resolved Issue') }}</label>
+                <div class="controls">
+                  <textarea id="description" name="description" cols="20" rows="3" placeholder="" class="form-control"></textarea>
+                </div>
+                <div>
+                  <p id="description-error" class="alert alert-error" style="display: none;">{{ _('Please enter your issue resolution content') }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" onclick="return checkDescriptionExists(this)">{{ _('Certificate') }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="issue-resolution-detail" class="modal fade" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            {% if h.is_base_public_folder_bs3() %}
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h2 class="modal-title">{{ _('Resolved Issue details') }}</h2>
+            {% else %}
+              <h2 class="modal-title">{{ _('Resolved Issue details') }}</h2>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            {% endif %}
+          </div>
+          <div id="issue-resolution-table" class="modal-body">
+            <div>
+              <table class="table table-bordered table-striped table-responsive">
+                <thead class="table-header">
+                  <tr>
+                    <th class="col-md-3">{{ _('Certificated') }}</th>
+                    <th>{{ _('Resolved Issue') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for issue_resolution in issue_resolutions %}
+                    <tr>
+                      <td>{{ issue_resolution.created.strftime('%Y/%m/%d %H:%M:%S') }}</td>
+                      <td class="multiple-line">{{ issue_resolution.description }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endblock %}
+
+  {% block secondary %}{% endblock %}
+
+  {%- block scripts %}
+    {{ super() }}
+    {% asset 'feedback/feedback-detail-js' %}
+    {% if h.is_enabled_feedback_recaptcha() %}
+      <script src="https://www.google.com/recaptcha/api.js?render={{ h.get_feedback_recaptcha_publickey() }}"></script>
+      <script>
+        const feedbackRecaptchaTargetForm = 'comment_form'
+        const feedbackRecaptchaAction = 'utilization_comment'
+        const feedbackRecaptchaPublickey = '{{ h.get_feedback_recaptcha_publickey() }}'
+      </script>
+      {% asset 'feedback/feedback-recaptcha-js'%}
+    {% endif %}
+  {% endblock -%}
+
+{% endif %}

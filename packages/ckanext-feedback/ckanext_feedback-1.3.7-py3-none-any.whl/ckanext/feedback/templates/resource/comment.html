@@ -1,0 +1,203 @@
+{% if h.is_enabled_resources() %}
+
+  {% extends "package/base.html" %}
+
+  {% block styles %}
+    {{ super() }}
+    {% asset 'feedback/feedback-comment-css' %}
+  {% endblock %}
+
+  {% block breadcrumb_content_selected %} class="inactive"{% endblock %}
+
+  {% block breadcrumb_content %}
+    {{ super() }}
+    <li class="inactive"><a href="{{ h.url_for('dataset.search') }}{{ pkg_dict.name }}/resource/{{ resource.id }}">{{ resource.name|truncate(30) }}</a></li>
+    <li class="active"><a href="#">{{ _('Comment') }}</a></li>
+  {% endblock %}
+
+  {% block title %}{{ _('Comment on Resource') }} - {{ pkg_dict.title }} - {{ resource.name }} - CKAN{% endblock %}
+
+  {% block primary %}
+    <article class="module" role="main">
+      <div class="module-content">
+        <div class="centered-content">
+          <div class="wrap-text">
+            <h4>{{ _('Dataset') }}</h4>
+            <a href="{{ h.url_for('dataset.search') }}{{ pkg_dict.name }}">{{ pkg_dict.name }}</a>
+            <hr>
+            <h4>{{ _('Resource') }}</h4>
+            <a href="{{ h.url_for('dataset.search') }}{{ pkg_dict.name }}/resource/{{ resource.id }}">{{ resource.name }}</a>
+            <hr>
+          </div>
+          <h4>{{ _('Comments') }}</h4>
+          <p>{{ h.get_resource_comments(resource.id) }}</p>
+          <hr>
+          <h4>{{ _('Comment') }}</h4>
+          {% if not cookie or not (h.is_disabled_repeat_post_on_resource(pkg_dict.owner_org)) %}
+            {% if h.is_enabled_rating(pkg_dict.owner_org) %}
+              {{ _('Rating') }}
+              <span class="group-stars" id="rateable" name="rateable">
+                {% for i in range(5) %}
+                  <img class="rating-star" src="/images/empty_rating_star_small.png" alt="rating star" data-rating="{{ i + 1 }}" onclick="selectRating(this);"/>
+                {% endfor %}
+              </span>
+              <div>
+                <p id="rating-error" class="alert alert-error" style="display: none;">{{ _('Please select your rating') }}</p>
+              </div>
+            {% endif %}
+            <br>
+            <form id="comment_form" name="comment_form" action="{{ h.url_for('resource_comment.create_comment', resource_id=resource.id ) }}" method="post">
+              <input type="hidden" id="rating" name="rating" value=""/>
+              <input type="hidden" id="package_name" name="package_name" value="{{ pkg_dict.name }}">
+              <select name="category" id="category">
+                {% for category in categories %}
+                {% if category.name == selected_category %}
+                <option value="{{ category.name }}" selected>{{ _(category.value) }}</option>
+                {% else %}
+                <option value="{{ category.name }}">{{ _(category.value) }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+              <br>
+              <br>
+              <textarea class="form-control" cols="20" rows="5" id="comment-content" name="comment-content" maxlength="1000">{{ content }}</textarea>
+              <div class="char-count"><span id="comment-count" class="comment-count">0</span>/1000</div>
+              <div>
+                <p id="comment-none-error" class="alert alert-error" style="display: none;">{{ _('Please enter your comment') }}</p>
+                <p id="comment-over-error" class="alert alert-error" style="display: none;">{{ _('Please keep the comment length below 1000') }}</p>
+              </div>
+              {% if h.is_disabled_repeat_post_on_resource(pkg_dict.owner_org) %}
+                <p class="comment-explanation">{{ _('(In order to prevent potential spam, only a single comment is allowed per data resouce)') }}</p>
+              {% endif %}
+              <br>
+              <div class="form-actions">
+                <button class="btn btn-primary" onclick="return checkCommentExists(this);">{{ _('Send') }}</button>
+              </div>
+              <br>
+              <br>
+            </form>
+          {% else %}
+            <p class="comment-disallowed">{{ _('* You have already commented on this data resource') }}</p>
+            <p class="comment-explanation">{{ _('(In order to prevent potential spam, only a single comment is allowed per data resouce)') }}</p>
+          {% endif %}
+          <br>
+          {% if page.collection|length %}
+            <hr class="divider">
+          {% endif %}
+          {% for comment in page.collection %}
+            {% set created = comment.created.strftime('%Y/%m/%d %H:%M') %}
+            {% set reply = h.get_comment_reply(comment.id) %}
+            {% if c.userobj.sysadmin or h.has_organization_admin_role(resource.package.owner_org) %}
+              {% if comment.approval %}
+                {% if not reply %}
+                  {% if h.is_base_public_folder_bs3() %}
+                    <input type="button" class="btn btn-primary pull-right" data-toggle='modal' data-target='#reply-form-window' onclick="setReplyFormContent('{{ comment.id }}')" value="{{ _('Reply') }}"/>
+                  {% else %}
+                    <input type="button" class="btn btn-primary float-end" data-bs-toggle='modal' data-bs-target='#reply-form-window' onclick="setReplyFormContent('{{ comment.id }}')" value="{{ _('Reply') }}"/>
+                  {% endif %}
+                {% else %}
+                  <input type="button" class="btn btn-primary float-end" value="{{ _('Reply') }}" disabled/>
+                {% endif %}
+              {% else %}
+                <form name="approval_form" action="{{h.url_for('resource_comment.approve_comment', resource_id=resource.id ) }}" method="post">
+                  {% if h.is_base_public_folder_bs3() %}
+                    <button class="btn btn-primary pull-right" id="resource_comment_id" name="resource_comment_id" value="{{ comment.id }}" onclick="setButtonDisable(this);">{{ _('Approve') }}</button>
+                  {% else %}
+                    <button class="btn btn-primary float-end" id="resource_comment_id" name="resource_comment_id" value="{{ comment.id }}" onclick="setButtonDisable(this);">{{ _('Approve') }}</button>
+                  {% endif %}
+                </form>
+              {% endif %}
+            {% endif %}
+            <h4>
+              <span id="comment-created-{{ comment.id }}">{{ created }}</span>
+              {% if comment.category %}
+                <span id="comment-category-{{ comment.id }}">{{ _(comment.category.value) }}</span>
+              {% endif %}
+              {% if h.is_enabled_rating(pkg_dict.owner_org) %}
+                {% if comment.rating %}
+                  <span class="group-stars">
+                    {% for i in range(comment.rating) %}
+                      <img class="rating-star" src="/images/rating_star_small.png" alt="rating star"/>
+                    {% endfor %}
+                    {% for i in range(5 - comment.rating) %}
+                      <img class="rating-star" src="/images/empty_rating_star_small.png" alt="empty rating star"/>
+                    {% endfor %}
+                  </span>
+                {% endif %}
+              {% endif %}
+              {% if not comment.approval %}
+                {{ _('Unapproved') }}
+              {% endif %}
+            </h4>
+            <div class="content-align wrap-text {{'unapproved' if not comment.approval }}">
+              {% if comment.content %}
+                <div class="{{'unapproved' if not comment.approval }}">
+                  <span class="comment-content" id="comment-content-{{ comment.id }}">{{ comment.content }}</span>
+                </div>
+              {% endif %}
+              {% if reply %}
+                <hr>
+                <h4 class="reply">{{ reply.created.strftime('%Y/%m/%d %H:%M') }}</h4>
+                <p class="comment-content reply">{{ reply.content }}</p>
+              {% endif %}
+            </div>
+            <hr class="divider">
+          {% endfor %}
+          {% block page_pagination %}
+            {{ page.pager(resource_id=resource.id) }}
+          {% endblock %}
+        </div>
+      </div>
+    </article>
+
+    <div id="reply-form-window" class="modal fade" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="reply-form" class="top-centered-content" action="{{h.url_for('resource_comment.reply', resource_id=resource.id ) }}" method="post">
+            <input type="hidden" id="selected_resource_comment_id" name="resource_comment_id">
+            <div class="modal-header">
+              {% if h.is_base_public_folder_bs3() %}
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              {% else %}
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              {% endif %}
+            </div>
+            <div class="modal-body">
+              <h4 id="selected_comment_header"></h4>
+              <p class="content-align wrap-text" id="selected_comment"></p>
+              <div class="form-group control-full">
+                <label class="control-label" for="code">{{ _('Input') }}</label>
+                <div class="controls">
+                  <textarea id="reply_content" name="reply_content" cols="20" rows="3" placeholder="" class="form-control"></textarea>
+                </div>
+                <div>
+                  <p id="reply-error" class="alert alert-error" style="display: none;">{{ _('Please enter your reply') }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" onclick="return checkReplyExists(this);">{{ _('Send') }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endblock -%}
+
+  {% block secondary %}{% endblock %}
+
+  {%- block scripts %}
+    {{ super() }}
+    {% asset 'feedback/feedback-comment-js' %}
+    {% if h.is_enabled_feedback_recaptcha() %}
+      <script src="https://www.google.com/recaptcha/api.js?render={{ h.get_feedback_recaptcha_publickey() }}"></script>
+      <script>
+        const feedbackRecaptchaTargetForm = 'comment_form'
+        const feedbackRecaptchaAction = 'resource_comment'
+        const feedbackRecaptchaPublickey = '{{ h.get_feedback_recaptcha_publickey() }}'
+      </script>
+      {% asset 'feedback/feedback-recaptcha-js'%}
+    {% endif %}
+  {% endblock -%}
+
+{% endif %}

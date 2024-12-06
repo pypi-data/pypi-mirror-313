@@ -1,0 +1,65 @@
+{% ckan_extends %}
+
+{% block resources_inner %}
+  {% asset 'feedback/feedback-package-item-css' %}
+  {% asset 'feedback/feedback-tooltip-css' %}
+  {% for resource in h.dict_list_reduce(package.resources, 'format') %}
+    <li>
+      {% if h.is_base_public_folder_bs3() %}
+        <a href="{{ h.url_for(package.type ~ '.read', id=package.name) }}" class="label label-default" data-format="{{ resource.lower() }}">{{ resource }}</a>
+      {% else %}
+        <a href="{{ h.url_for(package.type ~ '.read', id=package.name) }}" class="badge badge-default" data-format="{{ resource.lower() }}">{{ resource }}</a>
+      {% endif %}
+    </li>
+  {% endfor %}
+  <br>
+  <li>
+    {% if h.is_enabled_downloads(package.owner_org) %}
+      <div class = "bubble">
+        <i class="fa-solid fa-arrow-circle-down" style="vertical-align: middle;"></i>
+        {{ h.get_package_downloads(package.id) }}
+        <div class="bubbleText">{{ _('Downloads') }}</div>
+      </div>
+    {% endif %}
+  </li>
+  <li>
+    {% if h.is_enabled_utilizations(package.owner_org) %}
+      <div class="utilization-data bubble">
+        <i class="fa-solid fa-seedling" style="vertical-align: middle;"></i>
+        <a href="{{ h.url_for('utilization.search', id=package.id, disable_keyword=true) }}">{{ h.get_package_utilizations(package.id) }}</a>
+        <div class="bubbleText">{{ _('Utilizations') }}</div>
+      </div>
+    {% endif %}
+  </li>
+  <li>
+    {% if h.is_enabled_resources(package.owner_org) %}
+      <a style="color: inherit; text-decoration: none; background-color: transparent;" href="{{ h.url_for(package.type ~ '.read', id=package.name) }}">
+        <div class="utilization-data bubble">
+          <i class="fa-solid fa-comment-dots" style="vertical-align: middle;"></i>
+          {{ h.get_package_comments(package.id) }}
+          <div class="bubbleText">{{ _('Comments') }}</div>
+        </div>
+      </a>
+    {% endif %}
+  </li>
+  <li>
+    {% if h.is_enabled_resources(package.owner_org) %}
+      {% if h.is_enabled_rating(package.owner_org) %}
+        <div class="utilization-data bubble">
+          <i class="fa-solid fa-star" style="vertical-align: middle;"></i>
+          {{ h.get_package_rating(package.id)|round(1) }}
+          <div class="bubbleText">{{ _('Rating') }}</div>
+        </div>
+      {% endif %}
+    {% endif %}
+  </li>
+  <li>
+    {% if h.is_enabled_utilizations(package.owner_org) %}
+      <div class="bubble">
+        <img id="issue-resolution" style="vertical-align: middle;" src="/images/issue_resolution_badge_small.png">
+        {{ h.get_package_issue_resolutions(package.id) }}
+        <div class="bubbleText">{{ _('Issue Resolutions') }}</div>
+      </div>
+    {% endif %}
+  </li>
+{% endblock %}
