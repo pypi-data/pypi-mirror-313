@@ -1,0 +1,40 @@
+module Stdlib.Data.Bool;
+
+import Stdlib.Data.Bool.Base open public;
+import Stdlib.Data.Pair.Base open;
+import Stdlib.Data.String.Base open;
+import Stdlib.Trait.Eq open;
+import Stdlib.Trait.Ord open;
+import Stdlib.Trait.Show open;
+
+{-# specialize: true, inline: case #-}
+instance
+eqBoolI : Eq Bool :=
+  mkEq@{
+    eq (x y : Bool) : Bool :=
+      case x, y of
+        | true, true := true
+        | false, false := true
+        | _ := false;
+  };
+
+{-# specialize: true, inline: case #-}
+instance
+ordBoolI : Ord Bool :=
+  mkOrd@{
+    cmp (x y : Bool) : Ordering :=
+      case x, y of
+        | false, false := Equal
+        | false, true := LessThan
+        | true, false := GreaterThan
+        | true, true := Equal;
+  };
+
+instance
+showBoolI : Show Bool :=
+  mkShow@{
+    show (x : Bool) : String :=
+      if
+        | x := "true"
+        | else := "false";
+  };
