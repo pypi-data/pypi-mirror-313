@@ -1,0 +1,68 @@
+### Site metadata ###
+
+site_name: pypackitup - Python Package Template
+site_description: Template repository for developing Python packages.
+site_url: https://pypackitup.wrencode.dev
+site_author: "Wren J. Rudolph for Wrencode, LLC"
+
+repo_url: https://github.com/wrencode/pypackitup
+edit_uri: ""
+
+### Build settings ###
+
+extra:
+  version: !ENV [PYTHON_PACKAGE_VERSION, 'vX.X.X']
+
+docs_dir: docs-mkdocs
+site_dir: docs
+
+theme:
+#  name: mkdocs
+  name: readthedocs
+  color_mode: auto
+  user_color_mode_toggle: true
+  navigation_depth: 6
+  include_sidebar: true
+  logo: wrencode-logo.svg
+
+extra_css:
+  - extra.css
+
+extra_javascript:
+  - extra.js
+
+nav:
+  - Introduction: index.md
+  - README: readme.md
+  - Deployment: deployment.md
+  - Package:
+    - Example: helloworld.md
+  - Tests:
+    - PyTest: tests.md
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.snippets:
+      check_paths: true
+  - sane_lists
+  - smarty
+  - codehilite
+  - fenced_code
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      enabled: !ENV [ENABLE_MKDOCSTRINGS, true]
+#      custom_templates: templates
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: true
+            separate_signature: true
+            show_submodules: true
+            docstring_section_style: table
+            members_order: source
+            summary: true

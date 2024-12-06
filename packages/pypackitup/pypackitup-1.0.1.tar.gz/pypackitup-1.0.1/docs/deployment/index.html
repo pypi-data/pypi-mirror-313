@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Wren J. Rudolph for Wrencode, LLC" /><link rel="canonical" href="https://pypackitup.wrencode.dev/deployment/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Deployment - pypackitup - Python Package Template</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="../extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Deployment";
+        var mkdocs_page_input_path = "deployment.md";
+        var mkdocs_page_url = "/deployment/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="..">
+          <img src="../wrencode-logo.svg" class="logo" alt="Logo"/>
+        </a>
+        <div class="version">
+          v1.0.0
+        </div><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Introduction</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">README</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Deployment</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#table-of-contents">Table of Contents</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#initial-deployment">Initial Deployment</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#subsequent-deployment">Subsequent Deployment</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Package</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../helloworld/">Example</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tests</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../tests/">PyTest</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">pypackitup - Python Package Template</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Deployment</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Permanent link">&para;</a></h1>
+<hr />
+<div class="hide-next-element"></div>
+
+<h3 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h3>
+<div class="hide-next-element"></div>
+
+<ul>
+<li><a href="#initial-deployment">Initial Deployment</a></li>
+<li><a href="#subsequent-deployment">Subsequent Deployment</a></li>
+</ul>
+<div class="hide-next-element"></div>
+
+<hr />
+<p><a name="initial-deployment"></a></p>
+<h3 id="initial-deployment">Initial Deployment<a class="headerlink" href="#initial-deployment" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><em>(Required for initial publication on PyPI as needed)</em> Register a <a href="https://pypi.org/account/register/">new account on PyPI</a> (do the same for Test PyPI as needed).</p>
+</li>
+<li>
+<p><em>(Required for initial publication on PyPI)</em> Configure <a href="https://pypi.org/help/#apitoken">API token authentication for PyPI</a> by creating an API token (do the same for Test PyPI as needed) and copy the value of the API token.</p>
+</li>
+<li>
+<p><em>(Required for initial publication on PyPI)</em> Create a <code>.env</code> file by running <code>cp .env.template .env</code> in the command line from the project root directory and paste the PyPI API token from the previous step as the value for <code>UV_PUBLISH_TOKEN</code> (this environment variable is used in the Makefile by <code>uv publish</code> to <a href="https://docs.astral.sh/uv/guides/publish/#publishing-your-package">publish the package using uv</a>).</p>
+</li>
+<li>
+<p><em>(Optional after initial package publication on PyPI)</em> Configure a <em>new</em> <a href="https://pypi.org/manage/project/pypackitup/settings/">package-specific PyPI API token</a> and update the above <code>UV_PUBLISH_TOKEN</code> environment variable in the <code>.env</code> to use it.</p>
+</li>
+<li>
+<p><em>(Optional if using Twine)</em> Install <code>twine</code> (if not already installed) with <code>uv add twine</code>.</p>
+</li>
+<li>
+<p><em>(Optional if using custom domain for GitHub Pages)</em> Follow the <a href="https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site">steps for managing a custom domain for GitHub Pages</a>.</p>
+</li>
+<li>
+<p>If you want to use a subdomain, you should follow the <a href="https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site#configuring-a-subdomain">steps for configuring a subdomain for GitHub Pages</a>, which require the creation of a <code>CNAME</code> DNS record for your custom domain.</p>
+</li>
+<li>
+<p><strong><em>Note</em></strong>: If you are using CloudFlare and you create a <code>CNAME</code> record for your GitHub Pages subdomain, you must turn off &ldquo;Proxy status&rdquo; so that it is &ldquo;DNS only&rdquo; or else HTTPS will not work!</p>
+</li>
+</ul>
+<hr />
+<p><a name="subsequent-deployment"></a></p>
+<h3 id="subsequent-deployment">Subsequent Deployment<a class="headerlink" href="#subsequent-deployment" title="Permanent link">&para;</a></h3>
+<ul>
+<li>
+<p><em>(Optional)</em> Check <code>pyproject.toml</code> for latest dependency versions.</p>
+</li>
+<li>
+<p><em>(Optional)</em> Update virtual machine with the latest dependencies (<code>make update</code> in Makefile):</p>
+</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>uv<span class="w"> </span>sync<span class="w"> </span>--all-extras<span class="w"> </span>--dev
+</code></pre></div>
+
+<ul>
+<li>Lint code with <code>ruff</code> (<code>make lint</code> in Makefile):</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>ruff<span class="w"> </span>check<span class="w"> </span>.
+</code></pre></div>
+
+<ul>
+<li>Check code security with <code>bandit</code> (<code>make secure</code> in Makefile):</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>bandit<span class="w"> </span>-c<span class="w"> </span>pyproject.toml<span class="w"> </span>-r<span class="w"> </span>.
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Run <em>all</em> <code>pytest</code> tests (see following commands for running subsets of tests) (<code>make test_code</code> in Makefile):</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Run <em>all</em> <code>pytest</code> tests <em>verbosely</em>:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="w"> </span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>-s<span class="w"> </span>tests
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Run all tests from <code>pytest</code> file:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>-s<span class="w"> </span>tests/test_helloworld.py
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Run <em>specific</em> test from <code>pytest</code> file:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-v<span class="w"> </span>-s<span class="w"> </span>tests/test_helloworld.py<span class="w"> </span>-k<span class="w"> </span>test_main
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Test Python support using <a href="https://github.com/nektos/act">act</a> for GitHub Actions:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>act<span class="w"> </span>-j<span class="w"> </span>build
+</code></pre></div>
+
+<p><strong><em>Note</em></strong>: If <code>act</code> is unable to locate Docker, make sure that the required <code>/var/run/docker.sock</code> symlink exists. If it does not, you can fix it by running:</p>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.docker/run/docker.sock&quot;</span><span class="w"> </span>/var/run/docker.sock<span class="sb">`</span>
+</code></pre></div>
+
+<p><strong><em>Note</em></strong>: If you are running macOS on a devices with an M-series chip (Apple Silicon), you will need to specify <code>linux/amd64</code> architecture when running <code>act</code>:</p>
+<div class="codehilite"><pre><span></span><code>act<span class="w"> </span>--container-architecture<span class="w"> </span>linux/amd64<span class="w"> </span>-j<span class="w"> </span>build
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Build the PyPI package independent of deployment:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>make<span class="w"> </span>build
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Test packages for PyPI deployment:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>make<span class="w"> </span>verify_build
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Check MkDocs documentation by serving it at <a href="http://localhost:8000/">http://localhost:8000/</a> locally:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>make<span class="w"> </span>test_docs
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Build the PyPI package and MkDocs documentation independent of deployment:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>make<span class="w"> </span>docs
+</code></pre></div>
+
+<p><strong><em>Note</em></strong>: Running <code>make test_docs</code> from the previous step recreates the documentation without building the PyPI package.</p>
+<ul>
+<li>Create a git commit:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s1">&#39;commit message&#39;</span>
+</code></pre></div>
+
+<ul>
+<li>Update the git tag with the new version (<code>git tag -a [tag_name/version] -m [message]</code>):</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v1.0.0<span class="w"> </span>-m<span class="w"> </span><span class="s1">&#39;release message&#39;</span>
+git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>--tags
+</code></pre></div>
+
+<ul>
+<li><em>(Optional)</em> Test deployment by building the PyPI packages, recreating the documentation, and deploying to Test PyPI:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>make<span class="w"> </span>uv_test_deploy
+</code></pre></div>
+
+<ul>
+<li>Deploy the package by building it, recreating the documentation, and deploying the package to PyPI:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>make<span class="w"> </span>uv_deploy
+</code></pre></div>
+
+<ul>
+<li>Create a second git commit with updated version number and documentation:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s1">&#39;updated version number and documentation&#39;</span>
+</code></pre></div>
+
+<ul>
+<li>Update package git repository:</li>
+</ul>
+<div class="codehilite"><pre><span></span><code>git<span class="w"> </span>push
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../readme/" class="btn btn-neutral float-left" title="README"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../helloworld/" class="btn btn-neutral float-right" title="Example">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/wrencode/pypackitup" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../readme/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../helloworld/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../extra.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
