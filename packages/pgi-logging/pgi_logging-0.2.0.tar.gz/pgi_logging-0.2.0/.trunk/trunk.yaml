@@ -1,0 +1,83 @@
+# trunk-ignore-all(prettier)
+# This file controls the behavior of Trunk: https://docs.trunk.io/cli
+# To learn more about the format of this file, see https://docs.trunk.io/reference/trunk-yaml
+version: 0.1
+cli:
+  version: 1.22.2
+
+# Trunk provides extensibility via plugins. (https://docs.trunk.io/plugins)
+plugins:
+  sources:
+    - id: trunk
+      ref: v1.6.1
+      uri: https://github.com/trunk-io/plugins
+
+# Many linters and tools depend on runtimes - configure them here. (https://docs.trunk.io/runtimes)
+runtimes:
+  enabled:
+    - node@18.12.1
+    - python@3.11.6
+    - go@1.21.0
+
+# This is the section where you manage your linters. (https://docs.trunk.io/check/configuration)
+lint:
+  ignore:
+    - linters: [ALL]
+      paths:
+        - .*cache*/**
+        - .git/**
+        - .venv/**
+        - poetry.lock
+        - "**/ruff.toml"
+        - file_shuttle/**
+        
+    - linters: [prettier]
+      paths:
+        - "**/*.yml"
+        - "**/*.yaml"
+        - "**/*.md"
+        
+  enabled:
+    #- autopep8@2.3.1
+    - circleci@0.1.30549
+    - osv-scanner@1.8.3 # Open Source Vulnerability Scanner
+    - hadolint@2.12.0 # Dockerfile linter
+    - shellcheck@0.10.0 # Shell script analysis
+    - shfmt@3.6.0 # Shell script formatter
+    - checkov@3.2.222 # Infrastructure as code static analysis
+    - codespell@2.3.0 # Spell checker for source code
+    - markdownlint@0.41.0 # Markdown linting
+    - trivy@0.54.1 # Vulnerability scanner for containers and other artifacts
+    - yamllint@1.35.1 # YAML linting
+    - taplo@0.9.3 # TOML and JSON5 linter
+    - prettier@3.3.3 # Code formatter for JavaScript, TypeScript, HTML, CSS, JSON, and Markdown
+    - ruff@0.5.7: # General purpose linter and formatter for python files
+        commands:
+          - lint     # Enable ruff linting
+          - format    # Enable ruff formatting
+
+  disabled:
+    - pre-commit-hooks
+    - trufflehog
+    - dotenv-linter
+    - oxipng
+    - git-diff-check
+    - mypy
+    - bandit
+    - black
+    - flake8
+    - isort
+    - pylint
+    - autopep8
+
+actions: # These are the actions that Trunk will run when you push to a branch.
+  disabled:
+    - trunk-announce
+  enabled:
+    - trunk-check-pre-commit
+    - poetry-check
+    - trunk-upgrade-available
+    - trunk-check-pre-push
+    - trunk-fmt-pre-commit
+    - trunk-cache-prune
+    - trunk-upgrade-available

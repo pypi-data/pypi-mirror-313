@@ -1,0 +1,50 @@
+[project]
+name = "pgi-logging"
+version = "0.2.0"
+description = ""
+authors = [
+    { name = "Christopher Endres", email = "cmendres@pathwaysgi.com" }
+]
+readme = "README.md"
+packages = [{ include = "pgi_logging" }]
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "colorlog",
+    "pydantic",
+    "cloudpathlib"
+]
+
+[tool.uv]
+managed = true
+cache-dir = "./.uv_cache"
+python-preference = "system"   # Managed in nix flake
+environments = ["sys_platform == 'linux'", "sys_platform == 'win32'"] #, "sys_platform == 'win32'", "sys_platform != 'macos'"]
+dev-dependencies = [
+    "pytest",
+    "ruff",
+    "keyboard"
+]
+
+[tool.uv.pip]
+#python-version = "3.11"
+python-platform = "linux"
+
+[tool.pytest.ini_options]
+# This is the pytest configuration, https://docs.pytest.org/en/8.1.x/reference/reference.html#ini-options-ref
+minversion = "6.0"
+cache_dir = ".cache/pytest"
+addopts = "-ra -q --color=yes -vv"
+console_output_style = "progress"
+testpaths = "tests"
+tmp_path_retention_count = 3
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "pgi_recorder/__about__.py"
+
+[tool.ruff]
+# Extend the `ruff.toml` configuration file in trunk
+extend = ".trunk/configs/ruff.toml"
