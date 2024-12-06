@@ -1,0 +1,114 @@
+###############################################################################
+## SPORTS2D PROJECT PARAMETERS                                               ##
+###############################################################################
+
+# Configure your project parameters here
+
+# Then open an Anaconda prompt and enter:
+# conda activate Sports2D
+# ipython
+# from Sports2D import Sports2D
+# Sports2D.process('Config_demo.toml')
+
+
+[project]
+video_input = 'demo.mp4' # 'webcam' or '<video_path.ext>', or ['video1_path.mp4', 'video2_path.avi>', ...]
+                        # Time ranges can be different for each video. All other processing arguments will be identical.
+                        # Beware that images won't be saved if paths contain non ASCII characters.
+person_height = 1.70    # Height of the person in meters (for pixels -> meters conversion)
+load_trc = ''           # If you do not want to recalculate pose, load it from a trc file (in px, not in m)
+compare = false         # Not implemented yet
+
+# Video parameters
+time_range = []   # [] for the whole video, or [start_time, end_time] (in seconds), or [[start_time1, end_time1], [start_time2, end_time2], ...]
+video_dir = ''    # If empty, result dir is current dir
+
+# Webcam parameters
+webcam_id = 0 # your webcam id (0 is default)
+input_size = [1280, 720] # [W, H]. Lower resolution will be faster but less precise.
+
+
+[process]
+multiperson = true   # Saving the motions of all the persons detected and tracked in the video. 
+                     # If false, the person saved will be the one with the highest sum of keypoint scores over the video
+show_realtime_results = true
+save_vid = true
+save_img = true
+save_pose = true
+calculate_angles = true
+save_angles = true
+result_dir = '' # If empty, project dir is current dir
+
+
+##########################
+# ADVANCED CONFIGURATION #
+##########################
+[pose]
+# Pixel to meters conversion
+to_meters = true
+# If conversion from a calibration file
+calib_file = ''         # Calibration in the Pose2Sim format. 'calib_demo.toml', or '' if not available
+# If conversion from person_height
+calib_on_person_id = 0  # Person to use for calibration
+floor_angle = 'auto'    # 'auto' or a value in degrees, eg 2.3. If 'auto', estimated from the line formed by the toes when they are on the ground (where speed = 0)
+xy_origin = ['auto']    # ['auto'] or [px_x,px_y]. N.B.: px_y points downwards. If ['auto'], direction estimated from the start to the end of the line formed by the toes when they are on the ground
+save_calib = true
+
+# Slow motion factor
+slowmo_factor = 1       # 1 for normal speed. For a video recorded at 240 fps and exported to 30 fps, it would be 240/30 = 8
+
+# Pose detection parameters
+pose_model = 'body_with_feet' # Only body_with_feet is available for now
+mode = 'balanced'       # 'lightweight', 'balanced', or 'performance'
+det_frequency = 1       # Run person detection only every N frames, and inbetween track previously detected bounding boxes (keypoint detection is still run on all frames). 
+                        # Equal to or greater than 1, can be as high as you want in simple uncrowded cases. Much faster, but might be less accurate. 
+tracking_mode = 'sports2d' # 'rtmlib' or 'sports2d'. 'sports2d' is generally much more accurate and comparable in speed
+
+# Processing parameters
+keypoint_likelihood_threshold = 0.3 # Keypoints whose likelihood is lower will not be taken into account
+average_likelihood_threshold = 0.5  # Person will be ignored if average likelihood of good keypoints is lower than this value
+keypoint_number_threshold = 0.3     # Person will be ignored if the number of good keypoints is less than this fraction
+
+
+[angles]
+display_angle_values_on = ['body', 'list'] # 'body', 'list', ['body', 'list'], 'none'. Display angle values on the body, as a list in the upper left of the image, both, or do not display them.
+fontSize = 0.3
+
+# Select joint angles among
+# ['Right ankle', 'Left ankle', 'Right knee', 'Left knee', 'Right hip', 'Left hip', 'Right shoulder', 'Left shoulder', 'Right elbow', 'Left elbow', 'Right wrist', 'Left wrist']
+joint_angles = ['Right ankle', 'Left ankle', 'Right knee', 'Left knee', 'Right hip', 'Left hip', 'Right shoulder', 'Left shoulder', 'Right elbow', 'Left elbow']
+# Select segment angles among
+# ['Right foot', 'Left foot', 'Right shank', 'Left shank', 'Right thigh', 'Left thigh', 'Pelvis', 'Trunk', 'Shoulders', 'Head', 'Right arm', 'Left arm', 'Right forearm', 'Left forearm']
+segment_angles = ['Right foot', 'Left foot', 'Right shank', 'Left shank', 'Right thigh', 'Left thigh', 'Pelvis', 'Trunk', 'Shoulders', 'Head', 'Right arm', 'Left arm', 'Right forearm', 'Left forearm']
+
+# Processing parameters
+flip_left_right = true  # Same angles whether the participant faces left/right. Set it to false if you want timeseries to be continuous even when the participent switches their stance.
+
+
+[post-processing]
+interpolate = true
+interp_gap_smaller_than = 10        # do not interpolate bigger gaps
+fill_large_gaps_with = 'last_value' # 'last_value', 'nan', or 'zeros' 
+
+filter = true
+show_graphs = true            # Show plots of raw and processed results
+filter_type = 'butterworth'   # butterworth, gaussian, LOESS, median
+   [post-processing.butterworth]
+   order = 4 
+   cut_off_frequency = 3 # Hz
+   [post-processing.gaussian]
+   sigma_kernel = 1 #px
+   [post-processing.loess]
+   nb_values_used = 5 # = fraction of data used * nb frames
+   [post-processing.median]
+   kernel_size = 3
+
+
+[inverse-kinematics]
+do_ik = false # Do scaling and inverse kinematics?
+person_orientation = ['front', 'none', 'left'] # Choose among 'auto', 'none', 'front', 'back', 'left', 'right'
+                     # if 'none', no IK will be performed on the corresponding person
+                     # if 'auto', will be either 'left' or 'right' depending on the direction of the motion
+                     # Example with one person on one video: ['front']
+                     # Or ['front', 'none', 'left'] with 3 persons on one video
+osim_setup_path = '../OpenSim_setup' # Path to the OpenSim setup folder
