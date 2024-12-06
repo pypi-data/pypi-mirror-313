@@ -1,0 +1,55 @@
+[project]
+name = "dekmedia"
+version = "0.1.12"
+description = ""
+authors = [
+    { name = "sanzenwin", email = "sanzenwin@gmail.com" },
+]
+dependencies = [
+    "dektools<1.0.0",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.license]
+text = "MIT"
+
+[project.optional-dependencies]
+audio = [
+    "just-playback<=0.1.8",
+]
+image = [
+    "pillow<=10.3.0",
+    "dekmedia[font]",
+]
+font = [
+    "matplotlib<=3.9.2",
+]
+svg = [
+    "svglib<=1.5.1",
+    "pymupdf<=1.22.5",
+    "svgpathtools<=1.6.1",
+    "svg.path<=6.3",
+    "scour<=0.38.2",
+    "dektools[yaml]<1.0.0",
+]
+all = [
+    "dekmedia[audio,image,svg,font]",
+]
+
+[project.scripts]
+dekmedia = "dekmedia.click.__entry__:main"
+
+[tool.pdm.build]
+includes = [
+    "dekmedia",
+]
+excludes = [
+    "tests",
+]
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
