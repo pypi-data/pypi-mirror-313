@@ -1,0 +1,240 @@
+# This is an example configuration file, which stores the settings used previously.
+
+title = "pyGCG Configuration"
+
+[files]
+root_dir = "" # The root dir, from which all other paths will be resolved
+out_dir = "" # The location of the primary configuration file.
+extractions_dir = "" # The directory in which NIRISS extractions are stored.
+cat_path = "" # [optional] The file path of the NIRISS catalogue. Must contain id, ra, dec columns. Defaults to "*ir.cat.fits" inside $EXTRACTIONS_DIR.
+prep_dir = "" # [optional] The directory containing the segmentation map and direct images.
+cube_path = "" # [optional] The file path of the corresponding MUSE datacube.
+temp_dir = "" # [optional] The directory in which temporary files are stored. Defaults to $OUT_DIR/.temp/
+skip_existing = false # [optional] Skip loading objects which already exist in the output catalogue.
+out_cat_name = "" # [optional] The name of the output catalogue. Defaults to "pyGCG_output.fits"
+
+[grisms]
+# [optional] Change these if using different grisms. R, G, B refer to the red, green and blue channels in the image viewer.
+R = "F200W"
+G = "F150W"
+B = "F115W"
+# [optional] Change these if using different orientations
+PA1 = 72.0
+PA2 = 341.0
+
+[catalogue]
+# [optional] If the catalogue does not contain id, ra, and dec column names, specify the equivalent labels here.
+id = "NUMBER"
+ra = "X_WORLD"
+dec = "Y_WORLD"
+seg_id = "NUMBER" # [optional] If the galaxy id is different to the id in the segmentation map, and by extension, the grizli output files
+seg_id_length = 5 # [optional] The number of characters in $SEG_ID.
+mag = "MAG_AUTO"
+radius = "KRON_RCIRC"
+plate_scale = 0.03 # arcsec/pixel. If specified, radii are taken to be in pixels, and converted to arcseconds.
+
+
+[lines]
+# [optional] These tables define the lines shown in the redshift tab.
+# Lines are separated into `emission` and `absorption`, although there
+# is no physical distinction between the two as yet.
+# For example, the `emission` group could be set to the most common
+# lines, and the `absorption` group a much rarer set of lines often
+# seen in AGN. The only constraint is that each table key
+# (lines.emission.XXX) must be unique.
+
+    [lines.emission]
+    # These are the emission lines.
+
+        [lines.emission.Lyman_alpha]
+        tex_name = 'Ly$\alpha$'
+        centre = 1215.24
+
+        [lines.emission.NV-1240]
+        tex_name = 'N V'
+        centre = 1240.81
+
+        [lines.emission.NIV-1487]
+        tex_name = 'N IV'
+        centre = 1487.0
+
+        [lines.emission.CIV_1549]
+        tex_name = 'C IV'
+        centre = 1549.48
+
+        [lines.emission.HeII-1640]
+        tex_name = 'He II'
+        centre = 1640.4
+
+        [lines.emission.OIII-1665]
+        tex_name = 'O III'
+        centre = 1665.85
+
+        [lines.emission.NIII-1750]
+        tex_name = 'N III'
+        centre = 1750.0
+
+        [lines.emission.CIII-1908] # Doublet
+        tex_name = 'C III'
+        centre = 1907.7085
+
+        [lines.emission.MgII-2799]
+        tex_name = 'Mg II'
+        centre = 2799.12
+
+        [lines.emission.OII_3728]
+        tex_name = 'OII'
+        centre = 3728.4835
+
+        [lines.emission.H_delta]
+        tex_name = 'H$\delta$'
+        centre = 4102.89
+
+        [lines.emission.H_gamma]
+        tex_name = 'H$\gamma$'
+        centre = 4341.68
+
+        [lines.emission.OIII_4364]
+        tex_name = 'OIII'
+        centre = 4364.436
+
+        [lines.emission.H_beta]
+        tex_name = 'H$\beta$'
+        centre = 4862.68
+
+        [lines.emission.OIII_4960]
+        tex_name = 'OIII'
+        centre = 4960.295
+
+        [lines.emission.OIII_5008]
+        tex_name = 'OIII'
+        centre = 5008.24
+
+        [lines.emission.NII_6550]
+        tex_name = 'NII'
+        centre = 6549.86
+
+        [lines.emission.H_alpha]
+        tex_name = 'H$\alpha$'
+        centre = 6564.61
+
+        [lines.emission.NII_6585]
+        tex_name = 'NII'
+        centre = 6585.27
+
+        [lines.emission.SII_6718]
+        tex_name = 'SII'
+        centre = 6718.29
+
+        [lines.emission.SII_6733]
+        tex_name = 'SII'
+        centre = 6732.67
+
+        [lines.emission.SIII_9069]
+        tex_name = 'SIII'
+        centre = 9071.1
+
+        [lines.emission.SIII_9531]
+        tex_name = 'SIII'
+        centre = 9533.2
+
+        [lines.emission.PaD]
+        tex_name = 'Pa-$\delta$'
+        centre = 10052.1
+
+        [lines.emission.HeI_10830]
+        tex_name = 'HeI'
+        centre = 10830.3398
+
+        [lines.emission.PaG]
+        tex_name = 'Pa-$\gamma$'
+        centre = 10941.1
+
+        [lines.emission.FeII_12570]
+        tex_name = 'FeII'
+        centre = 12570.21
+
+        [lines.emission.PaB]
+        tex_name = 'Pa-$\beta$'
+        centre = 12821.6
+
+        [lines.emission.MgI_1503]
+        tex_name = "MgI"
+        centre = 15029.10
+
+        [lines.emission.SiI_1589]
+        tex_name = "SiI"
+        centre = 15892.73
+
+        [lines.emission.FeII_16440]
+        tex_name = 'FeII'
+        centre = 16440.02
+
+        [lines.emission.PaA]
+        tex_name = 'Pa-$\alpha$'
+        centre = 18756.1
+
+        [lines.emission.H2_19570]
+        tex_name = 'H2'
+        centre = 19575.59
+
+        [lines.emission.H2_21218]
+        tex_name = 'H2'
+        centre = 21218.34
+
+    [lines.absorption]
+    # These are the absorption lines.
+
+        [lines.absorption.K_3935]
+        tex_name = 'K'
+        centre = 3934.777
+
+        [lines.absorption.H_3970]
+        tex_name = 'H'
+        centre = 3969.588
+
+        [lines.absorption.G_4306]
+        tex_name = 'G'
+        centre = 4305.61
+
+        [lines.absorption.Mg_5177]
+        tex_name = 'Mg'
+        centre = 5176.7
+
+        [lines.absorption.Na_5896]
+        tex_name = 'Na'
+        centre = 5895.6
+
+        [lines.absorption.Ca_8500]
+        tex_name = 'CaII'
+        centre = 8500.36
+
+        [lines.absorption.Ca_8544]
+        tex_name = 'CaII'
+        centre = 8544.44
+
+        [lines.absorption.Ca_8564]
+        tex_name = 'CaII'
+        centre = 8564.52
+
+
+[appearance] # Appearance-related settings
+
+# System (default), light, or dark.
+appearance_mode = "system"
+
+# Blue (default), dark-blue, or green. The CustomTKinter color theme.
+# Can also point to the location of a custom .json file describing the
+# desired theme.
+theme = "blue"
+
+
+[spectrum] # Settings related to the spectrum tab
+
+# Due to limitations in the CTK framework, the slider min/max
+# must be integers
+z_slider_min = 0
+z_slider_max = 8
+
+# Appearance of the 1D spectrum: "step" or "point"
+spec_line = "step"
