@@ -1,0 +1,41 @@
+from assemblyline import odm
+from assemblyline.common import forge, constants
+from assemblyline.odm.models.submission import ServiceSelection
+
+Classification = forge.get_classification()
+
+ENCODINGS = {"cart", "raw", "zip"}
+VIEWS = {"report", "details"}
+
+
+@odm.model(index=False, store=False, description="Model of User Settings")
+class UserSettings(odm.Model):
+    classification = odm.Classification(default=Classification.UNRESTRICTED,
+                                        description="Default submission classification")
+    deep_scan = odm.Boolean(default=False, description="Should a deep scan be performed?")
+    description = odm.Keyword(default="", description="Default description")
+    download_encoding = odm.Enum(values=ENCODINGS, default="cart",
+                                 description="Default download encoding when downloading files")
+    default_external_sources = odm.List(odm.Keyword(), default=[],
+                                        description="List of sha256 sources to check by default")
+    default_zip_password = odm.Text(
+        default="infected",
+        description="Default user-defined password for creating password protected ZIPs when downloading files"
+    )
+    executive_summary = odm.Boolean(default=True, description="Should executive summary sections be shown?")
+    expand_min_score = odm.Integer(default=500, description="Auto-expand section when score bigger then this")
+    generate_alert = odm.Boolean(default=False, description="Generate an alert?")
+    ignore_cache = odm.Boolean(default=False, description="Ignore service caching?")
+
+    #the following 1 line can be removed after assemblyline 4.6+
+    ignore_dynamic_recursion_prevention = odm.Boolean(default=False, description="Ignore dynamic recursion prevention?")
+    ignore_recursion_prevention = odm.Boolean(default=False, description="Ignore all service recursion prevention?")
+    ignore_filtering = odm.Boolean(default=False, description="Ignore filtering services?")
+    malicious = odm.Boolean(default=False, description="Is the file submitted already known to be malicious?")
+    priority = odm.Integer(default=1000, description="Default priority for the submissions",
+                           min=1, max=constants.MAX_PRIORITY)
+    profile = odm.Boolean(default=False, description="Should the submission do extra profiling?")
+    service_spec = odm.Mapping(odm.Mapping(odm.Any()), default={}, description="Default service specific settings")
+    services = odm.Compound(ServiceSelection, default={}, description="Default service selection")
+    submission_view = odm.Enum(values=VIEWS, default="report", description="Default view for completed submissions")
+    ttl = odm.Integer(default=30, description="Default submission TTL, in days")
