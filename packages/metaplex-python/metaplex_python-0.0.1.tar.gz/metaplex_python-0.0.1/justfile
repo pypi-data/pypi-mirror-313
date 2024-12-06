@@ -1,0 +1,25 @@
+project := "metaplex_python"
+pip := "uv pip"
+
+venv:
+    uv venv --python 3.13
+
+init reinstall="0":
+    . .venv/bin/activate
+    {{ pip }} install --upgrade -e .[dev] \
+        {{ if reinstall == "1" { "--reinstall" } else { "" } }}
+
+build release="0":
+    maturin develop --uv \
+        {{ if release == "1" { "--release" } else { "" } }}
+
+test:
+    . .venv/bin/activate
+    hatch test
+
+upload:
+    maturin publish
+
+clean full="0":
+    cargo clean
+    {{ if full == "0" { "" } else { "rm Cargo.lock" } }}

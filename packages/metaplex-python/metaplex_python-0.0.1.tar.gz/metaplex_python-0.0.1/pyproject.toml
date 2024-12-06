@@ -1,0 +1,26 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "metaplex_python"
+description = "Python bindings for Solana Metaplex"
+version = "0.0.1"
+requires-python = ">=3.13.0"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+readme = "README.md"
+
+[project.optional-dependencies]
+dev = ["build", "hatch", "maturin", "pytest", "solana", "solders", "twine"]
+
+[tool.hatch.envs.default]
+installer = "uv"
+
+[tool.hatch.envs.test]
+dependencies = ["pytest", "solana", "solders"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
