@@ -1,0 +1,83 @@
+Metadata-Version: 2.1
+Name: devart-googlesheets-connector
+Version: 1.0.0
+Summary: New level of functionality and performance in data access via Python
+Home-page: https://devart.com
+Author: Devart
+Author-email: support@devart.com
+License: Other/Proprietary License
+Project-URL: Homepage, http://devart.com/python/googlesheets
+Project-URL: Download, http://devart.com/python/googlesheets/download.html
+Project-URL: History, http://devart.com/python/googlesheets/revision_history.html
+Project-URL: License, https://www.devart.com/python/eula.html
+Project-URL: Documentation, http://docs.devart.com/python/googlesheets/overview.htm
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Python Connector for Google Sheets #
+
+Python Connector for Google Sheets is a connectivity solution for accessing
+Google Sheets Customer Engagement (formerly Dynamics CRM) from Python
+applications to read and update data. It fully implements the Python DB API
+2.0 specification. The connector is distributed as a wheel package for Windows
+and Windows Server.
+
+Standard SQL syntax
+
+The connector fully supports the ANSI SQL standard and lets you execute SQL
+statements against your Google Sheets data just like you would normally work
+with relational databases. Simple queries are directly converted to Google
+Sheets API calls and executed on the Google Sheets side.
+Complex queries are transformed into simpler queries, which are then converted
+to Google Sheets API calls. The embedded SQL engine then processes the results
+in the local cache and applies advanced SQL features from the original complex
+query.
+
+## Using the connector ##
+
+To retrieve data from [!ProductNameMix]:
+
+Import the module.
+```
+import devart.googlesheets as googlesheets
+```
+
+Connect to a database using the `connect()` module method and obtain a `connection` object.
+```
+response = googlesheets.signin()
+my_spreadsheet = googlesheets.getspreadsheet("RefreshToken=" + response["Refresh Token"])
+my_connection = googlesheets.connect(
+    SpreadsheetId=my_spreadsheet["Spreadsheet Id"]
+    RefreshToken=response["Refresh Token"]
+)
+```
+Create a `cursor` object using the `cursor()` connection method.
+```
+my_cursor = my_connection.cursor()
+```
+Execute the SQL statement using the `execute()` cursor method.
+```
+my_cursor.execute("SELECT * FROM Company")
+```
+Retrieve the result set using one of the `fetch*()` cursor methods.
+```
+for row in my_cursor.fetchall(): 
+    print(row)
+```
+
+## Ordering and activating the license ##
+
+You can purchase a license for the connector on the ordering page:             
+https://www.devart.com/python/googlesheets/ordering.html
+
+To activate the license, follow the instructions in the documentation:             
+https://docs.devart.com/python/googlesheets/activate-a-license.htm
+
+## What's new ##
+
+Python Connector for Google Sheets 1.0 Beta
+
+- Initial release of Python Connector for Google Sheets
+- Added support for Windows 32-bit and 64-bit
+- Added support for Windows Server 32-bit and 64-bit
