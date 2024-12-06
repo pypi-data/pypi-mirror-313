@@ -1,0 +1,234 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+{% include "static/style.css" %}
+    </style>
+    <title>TDS: {{ resource.resource_key }}</title>
+</head>
+<body>
+
+<div id="topBar">
+    Data validation charts:
+        <span class='plot_tds_data_validation toggle-indicator'>ON</span>
+        <button id="toggle_plot_tds_data_validation">Toggle</button>
+        |
+    Long-term status and trend charts:
+        <span class='salinity_status_and_trend toggle-indicator'>ON</span>
+        <button id="toggle_salinity_status_and_trend">Toggle</button>
+        |
+    Five-year trend charts:
+        <span class='plot_salinity_trend toggle-indicator'>ON</span>
+        <button id="toggle_plot_salinity_trend">Toggle</button>
+
+    <br />
+    SA Geodata + <a href="#Data_validation">Data_validation</a> &#8594;
+    <a href='file:///{{ resource.data_path }}\validated_data_{{ resource.resource_key }}.xlsx'>validated_data_{{ resource.resource_key }}.xlsx</a>
+    + <a href="#Triclass_trend_thresholds">Triclass_trend_thresholds</a> &#8594;
+    <a href='file:///{{ resource.data_path }}\salinity_trends_{{ resource.resource_key }}.xlsx'>salinity_trends_{{ resource.resource_key }}.xlsx</a>
+
+</div>
+
+<div id="leftCol">
+
+    <ul>
+        <li><a href="#general-info">General information</a></li>
+        <li><a href="#Data_validation">Data validation rules</a></li>
+        <li><a href="#Tech_note_sentences">Tech Note sentences</a></li>
+        <li><a href="#Current_tds">Current TDS</a></li>
+        <li><a href="#long-term-status">Long-term status (% &#916; from mean)</a></li>
+        <li><a href="#long-term-trend">Long-term trend (% &#916; over trend pd)</a></li>
+        <li><a href="#Final_trends">Triclass 5-year trends</a></li>
+        <li><a href="#Well_charts">Well charts</a></li>
+        <li><a href="#Triclass_trend_thresholds">Triclass trend thresholds</a></li>
+    </ul>
+    <p>Wells with a current salinity:
+        <br />(<button type="submit" form="form-current_wells">map</button>):
+    </p>
+    {% for well in current_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+    {% endfor %}
+
+    <p>Wells included in long-term salinity status (curr_pct_diff):
+        <br />(<button type="submit" form="form-curr_pct_diff_wells">map</button>):</p>
+    {% for well in curr_pct_diff_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+    {% endfor %}
+
+    <p>Wells included in long-term salinity trend (tds_trend_pct):
+        <br />(<button type="submit" form="form-tds_trend_pct_wells">map</button>):</p>
+    {% for well in tds_trend_pct_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+    {% endfor %}
+
+    
+    <p>Wells included in 5-yr salinity trends:
+        <br />(<button type="submit" form="form-trend_wells">map</button>):
+    </p>
+
+    {% for well in trend_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+    {% endfor %}
+
+    <p>Wells excluded:
+        <br />(<button type="submit" form="form-excluded_wells">map</button>):
+    </p>
+
+    {% for well in excluded_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+    {% endfor %}
+
+</div>
+
+<div id="content">
+
+    <h1>WRAP Groundwater Salinity QA: {{ resource.resource_key }}</h1>
+
+    <h2><a class="anchor" id="general-info"></a>General information</h2>
+
+    <p><img src="../{{ resource.resource_key }}_plot_tds_resource_monitoring_history.png" /></p>
+    <p><img src="../{{ resource.resource_key }}_plot_tds_resource_variability.png" /></p>
+    <p><img src="../{{ resource.resource_key }}_plot_salinity_historical_pct_diffs.png" /></p>
+
+    <h2><a class="anchor" id="Data_validation"></a>Data validation rules</h2>
+    <p>{{ data_val.sort_values("action").to_html()|safe }}</p>
+
+    <h2><a class="anchor" id="Tech_note_sentences"></a>Tech Note sentences</h3>
+    {% for sentence in sentences %}
+    <p>{{ sentence|safe }}</p>
+    {% endfor %}
+
+    <h2><a class="anchor" id="Current_tds"></a>Current TDS</h2>
+
+    <p><img src="../{{ resource.resource_key }}_tds_current_internal.png" /></p>
+    <p>{{ anntds_summ.to_html(index=True)|safe }}</p>
+    <p>{{ anntds.to_html()|safe }}</p>
+
+    
+        <h2><a class="anchor" id="long-term-status"></a>Long-term status (% &#916; from mean)</h2>
+
+        <p><img src="../{{ resource.resource_key }}_plot_salinity_curr_pct_diffs_summary.png" /></p>
+        <p><img src="../{{ resource.resource_key }}_curr_pct_diff_map.png" /></p>
+        <p>{{ curr_pct_diff_summ.to_html(index=False)|safe }}</p>
+        <p>{{ curr_pct_diff_summ_1.to_html(index=True)|safe }}</p>
+        <p></p>{{ curr_pct_diff.sort_values("curr_tds_pct_diff").reset_index().round(2)[["well_id", "mean_tds",
+        "curr_tds",
+        "curr_tds_pct_diff", "curr_tds_pct_diff_indicator"]].to_html(index=True)|safe }}</p>
+
+        <h2><a class="anchor" id="long-term-trend"></a>Long-term trend (% &#916; over trend pd)</h2>
+
+        <p><img src="../{{ resource.resource_key }}_plot_salinity_trend_pct_summary.png" /></p>
+        <p><img src="../{{ resource.resource_key }}_tds_trend_pct_change_map.png" /></p>
+        <p>{{ trend_pct_summ.to_html(index=False)|safe }}</p>
+        <p>{{ trend_pct_summ_1.to_html(index=True)|safe }}</p>
+        <p>{{ trend_pct.sort_values("slope_pct_change_yr").reset_index().round(2)[["well_id", "mean_tds", "curr_tds",
+            "slope_pct_change_yr", "slope_pct_change_trend_pd", "tds_trend_pct_change_indicator"]].to_html(index=True)|safe }}</p>
+
+
+    <h2><a class="anchor" id="Final_trends"></a>Triclass 5-year trends</h2>
+
+    <h3>... by mg/L/y</h3>
+
+    <p><img src="../{{ resource.resource_key }}_tds_trends_mgL_internal.png" /></p>
+    
+    <p>Summary statistics of mg/L/y broken down by "status_change":</p>        
+    <p>{{ tdstrends_mgl_summ_1.to_html(index=True)|safe }}</p>
+    
+    <p>Summary statistics for mg/L/y for all wells with 5-year trend results:</p>
+    <p>{{ tdstrends_mgl_summ_2.to_html(index=True)|safe }}</p>
+
+    <h3>... by mg/L per 5 year period and by % change over 5 years</h3>
+
+    <p><img src="../{{ resource.resource_key }}_tds_trends_5yr_pct_internal.png" /></p>
+
+    <p>Summary statistics for five-year change in salinity in both mg/L and as % change -- broken down by "status_change":</p>        
+    <p>{{ tdstrends_5yr_summ_1.to_html(index=True)|safe }}</p>
+    
+    <p>Summary statistics for five-year change in salinity in both mg/L and as % change -- for all wells:</p>
+    <p>{{ tdstrends_5yr_summ_2.to_html(index=True)|safe }}</p>
+
+    <p>All wells with 5-year trend results:</p>
+
+    <p>{{ tdstrends.to_html()|safe }}</p>
+
+    <h3>Long term salinity changes</h3>
+
+    <p>{{ tds_changes|safe }}</p>
+
+    <h1><a class="anchor" id="Well_charts"></a>Well charts</h1>
+
+    {% for well in wells %}
+        <h2><a class="anchor" id="charts-{{ well.well_id }}"></a>--------- {{ well.well_id }} ----------</h2>
+        <p>
+            <a href="http://bunyip:8091/well/{{ well.well_id }}/salinity">Waterkennect</a>
+            | <a href="https://www.waterconnect.sa.gov.au/Systems/GD/Pages/Details.aspx?DHNO={{ well.dh_no }}">Groundwater Data</a>
+            | <a href="#toc">Return to table of contents</a></p>
+        
+        <p>{{ data_val[data_val.well_id == well.well_id].to_html()|safe }}</p>
+        <p><img src="plot_tds_data_validation_{{ well.well_id }}.png" class="plot_tds_data_validation" /></p>
+        <p><img src="plot_salinity_trend_{{ well.well_id }}.png" class="plot_salinity_trend" /></p>
+        <p>{{ indicators_all[indicators_all.well_id == well.well_id][["well_id", "include_curr_pct_diff", "include_trend_pct", "validation_comment"]].to_html(escape=False)|safe }}</p>
+        <p><img src="salinity_status_and_trend_{{ well.well_id }}.png" class="salinity_status_and_trend" /></p>
+    {% endfor %}
+
+    <h3><a class="anchor" id="Triclass_trend_thresholds"></a>Triclass trend thresholds</h3>
+    <p>{{ resource.read_table('Definitions_Triclass_trend_thresholds').T.to_html()|safe }}</p>
+
+    <h2><a class="anchor" id="toc"></a>List of wells</h2>
+
+    <div id="well-summary">
+        {{ wells_html|safe }}
+    </div>
+
+</div>
+
+
+<form id="form-trend_wells" style="display: none;" action="http://bunyip:8091/wells/query" method="POST">
+    <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+    <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+    <textarea name="full_query" style='visible: false;'>
+        {% for well in trend_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+</form>
+
+<form id="form-current_wells" style="display: none;" action="http://bunyip:8091/wells/query" method="POST">
+    <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+    <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+    <textarea name="full_query" style='visible: false;'>
+        {% for well in current_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+</form>
+
+<form id="form-excluded_wells" style="display: none;" action="http://bunyip:8091/wells/query" method="POST">
+    <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+    <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+    <textarea name="full_query" style='visible: false;'>
+        {% for well in excluded_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+</form>
+
+<script  type="text/javascript">
+    $("#toggle_plot_tds_data_validation").click(function(){
+        $(".plot_tds_data_validation").toggle();
+    })
+    $("#toggle_plot_salinity_trend").click(function(){
+        $(".plot_salinity_trend").toggle();
+    })
+    $("#toggle_salinity_status_and_trend").click(function(){
+        $(".salinity_status_and_trend").toggle();
+    })
+
+
+</script>
+
+</body>
+</html>

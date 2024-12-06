@@ -1,0 +1,301 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+        {% include "static/style.css" %}
+    </style>
+    <title>WL: {{ resource.resource_key }}</title>
+
+</head>
+
+<body>
+
+    <div id="topBar">
+        Data validation charts:
+        <span class='plot_wl_data_validation toggle-indicator'>ON</span>
+        <button id="toggle_plot_wl_data_validation">Toggle</button>
+        |
+        Ranked recovered WL charts:
+        <span class='plot_wl_bom_classes toggle-indicator'>ON</span>
+        <button id="toggle_plot_wl_bom_classes">Toggle</button>
+        |
+        Seasonality charts:
+        <span class='plot_wl_seasonality toggle-indicator'>ON</span>
+        <button id="toggle_plot_wl_seasonality">Toggle</button>
+        |
+        Five-year trend charts:
+        <span class='plot_wl_trend toggle-indicator'>ON</span>
+        <button id="toggle_plot_wl_trend">Toggle</button>
+
+        <br />
+        SA Geodata + <a href="#Data_validation">Data_validation</a> &#8594;
+        <a
+            href='file:///{{ resource.data_path }}\validated_data_{{ resource.resource_key }}.xlsx'>validated_data_{{ resource.resource_key }}.xlsx</a>
+        + <a href="#Season_definitions">Season_definitions</a> &#8594;
+        <a
+            href='file:///{{ resource.data_path }}\recovery_wl_data_{{ resource.resource_key }}.xlsx'>recovery_wl_data_{{ resource.resource_key }}.xlsx</a>
+        + <a href="#Triclass_trend_thresholds">Triclass_trend_thresholds</a> &#8594;
+        <a
+            href='file:///{{ resource.data_path }}\recovery_wl_trends_{{ resource.resource_key }}.xlsx'>recovery_wl_trends_{{ resource.resource_key }}.xlsx</a>
+
+    </div>
+
+    <div id="leftCol">
+        <ul>
+            <li><a href="#Summary_charts">Historical rankings</a></li>
+            <li><a href="#Selected_hydrographs">Selected hydrographs</a></li>
+            <li><a href="#Data_validation">Data validation rules</a></li>
+            <li><a href="#Tech_note_sentences">Tech Note sentences</a></li>
+            <li><a href="#Current_ranks">Current rankings</a></li>
+            <li><a href="#Total_changes">Total WL changes over a long term</a></li>
+            <li><a href="#Final_trends">Five-year trends</a></li>
+            <li><a href="#Well_charts">Well charts</a></li>
+            <li><a href="#Tech_note_charts">Tech Note charts</li>
+            <li><a href="#Current_ranks_QC">Current rankings - QC</a></li>
+            <li><a href="#Season_definitions">Season definitions</a></li>
+            <li><a href="#Triclass_trend_thresholds">Triclass trend thresholds</a></li>
+        </ul>
+
+        <p>All wells:
+            <br />(<button type="submit" form="form-wells">map</button>):
+        </p>
+
+        {% for well in wells %}
+        <a href="#charts-{{ well.well_id }}">{{ well.well_id }}</a><br />
+        {% endfor %}
+
+        <p>Current ranked WL wells (included):
+            <br />(<button type="submit" form="form-curr_rank_wells">map</button>):
+        </p>
+
+        {% for well in curr_rank_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+        {% endfor %}
+
+        <p>Final 5-year trend wells (included):
+            <br />(<button type="submit" form="form-final_trend_wells">map</button>):
+        </p>
+
+        {% for well in final_trend_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+        {% endfor %}
+
+        <p>Current ranked WL wells (excluded):
+            <br />(<button type="submit" form="form-curr_rank_excluded_wells">map</button>):
+        </p>
+
+        {% for well in curr_rank_excluded_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+        {% endfor %}
+
+        <p>5-yr trend wells (excluded):
+        <br />(<button type="submit" form="form-excluded_trend_wells">map</button>):
+        </p>
+
+        {% for well in excluded_trend_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+        {% endfor %}
+
+        <p>All other wells (not included in results):
+        <br />(<button type="submit" form="form-unlisted_wells">map</button>):
+        </p>
+
+        {% for well in unlisted_wells %}
+        <a href="#charts-{{ well }}">{{ well }}</a><br />
+        {% endfor %}
+
+    </div>
+
+    <div id="content">
+
+        <h1>WRAP Groundwater Level QA: {{ resource.resource_key }}</h1>
+
+        <h3><a class="anchor" id="Summary_charts"></a>Historical WL rankings for all wells</h3>
+        
+        <p><img src="../{{ resource.resource_key }}_wl_historical_rankings.png" /></p>
+
+        <h3><a class="anchor" id="Selected_hydrographs"></a>Selected WL hydrographs</h3>
+
+        <p><img src="../wl_hydrographs_{{ resource.resource_key }}.png" width=1000 /></p>
+        
+        <h3><a class="anchor" id="Data_validation"></a>Data validation rules</h3>
+        <p>{{ data_val.to_html()|safe }}</p>
+
+        <h3><a class="anchor" id="Tech_note_sentences"></a>Tech Note sentences</h3>
+
+        {% for sentence in sentences %}
+        <p>{{ sentence|safe }}</p>
+        {% endfor %}
+
+        <h3><a class="anchor" id="Current_ranks"></a>Current WL rankings</h3>
+
+        <p><img src="../{{ resource.resource_key }}_wl_rankings_internal.png" /></p>
+        <p>{{ curr_ranks_summ.to_html(index=True)|safe }}</p>
+        <p>{{ curr_ranks_summ_grpd.to_html(index=True)|safe }}</p>
+        <p>{{ curr_ranks.to_html()|safe }}</p>
+
+        <h3><a class="anchor" id="Total_changes"></a>Total WL changes over a long term</h3>
+
+        <p>Summary data for: total WL changes between a 3-year period X years ago, and now -- across all wells:</p>
+        <p>{{ total_wl_changes_summ_1.to_html(index=True)|safe }}</p>
+
+        <p>Summary data for: total WL changes between a 3-year period X years ago, and now -- broken down by whether the change is increasing or decreasing:</p>
+        <p>{{ total_wl_changes_summ_2.to_html(index=True)|safe }}</p>
+
+        <p>Total WL changes between now and a 3-year period X years ago:</p>
+        <p>{{ total_wl_changes.to_html(index=True)|safe }}</p>
+
+        <h3><a class="anchor" id="Final_trends"></a>Final 5-year trends</h3>
+
+        <p><img src="../{{ resource.resource_key }}_wl_trends_internal.png" /></p>
+        <p>Summary statistics of "slope_yr" (i.e. m/y) broken down by "status_change":</p>        
+        <p>{{ wltrends_summ_by_triclass.to_html(index=True)|safe }}</p>
+        <p>Summary statistics for "slope_yr" for all wells with 5-year trend results:</p>
+        <p>{{ wltrends_summ_all.to_html(index=True)|safe }}</p>
+        <p>All wells with 5-year trend results:</p>
+        <p>{{ final_trends.to_html()|safe }}</p>
+
+        <h2><a class="anchor" id="Well_charts"></a>Well charts for data validation</h2>
+
+        {% for well in wells %}
+        <h3><a class="anchor" id="charts-{{ well.well_id }}"></a>{{ well.well_id }}</h3>
+
+        <p>
+            <a href="http://bunyip:8091/well/{{ well.well_id }}/waterlevel">Waterkennect</a>
+            | <a href="https://www.waterconnect.sa.gov.au/Systems/GD/Pages/Details.aspx?DHNO={{ well.dh_no }}">Groundwater
+                Data</a>
+            | <a href="#toc">Return to table of contents</a></p>
+        <p><img src="plot_wl_data_validation_{{ well.well_id }}.png" class="plot_wl_data_validation" /></p>
+        <p><img src="plot_wl_bom_classes_{{ well.well_id }}.png" class="plot_wl_bom_classes" /></p>
+        <p><img src="plot_wl_seasonality_{{ well.well_id }}.png" class="plot_wl_seasonality" /></p>
+        <p><img src="plot_wl_trend_{{ well.well_id }}.png" class="plot_wl_trend" /></p>
+        {% endfor %}
+
+        <h3><a class="anchor" id="Tech_note_charts"></a>Charts for the technical notes</h3>
+        
+        <p><img src="../{{ resource.resource_key }}_rankings.png" width=500 /></p>
+
+        <p><img src="../{{ resource.resource_key }}_rankings_map.png" width=300 /></p>
+
+        <p><img src="../{{ resource.resource_key }}_trend_triclass.png" width=500 /></p>
+
+        <p><img src="../{{ resource.resource_key }}_trend_triclass_map.png" width=300 /></p>
+
+        
+        <h3><a class="anchor" id="Current_ranks_QC"></a>Current WL rankings - QC</h3>
+        <p>{{ curr_ranks_qc.to_html()|safe }}</p>
+
+        <h3><a class="anchor" id="Season_definitions"></a>Water level seasonal recovery definitions</h3>
+        <p>{{ resource.read_table('Season_definitions').to_html()|safe }}</p>
+
+        <h3><a class="anchor" id="Triclass_trend_thresholds"></a>Triclass ("5-yr") trend thresholds</h3>
+        <p>{{ resource.read_table('Definitions_triclass_trend_thresholds').T.to_html()|safe }}</p>
+
+        <h2><a class="anchor" id="toc"></a>List of wells</h2>
+
+        <div id="well-summary">
+            {{ wells_html|safe }}
+        </div>
+
+    </div>
+
+    <form id="form-wells" style="display: none;" action="http://bunyip:8091/wells/query"
+        method="POST">
+        <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+        <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+        <textarea name="full_query" style='visible: false;'>
+        {% for well in wells %}
+            {{ well.well_id }}
+        {% endfor %}
+    </textarea>
+    </form>
+
+    <form id="form-curr_rank_wells" style="display: none;" action="http://bunyip:8091/wells/query"
+        method="POST">
+        <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+        <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+        <textarea name="full_query" style='visible: false;'>
+        {% for well in curr_rank_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+    </form>
+
+    <form id="form-final_trend_wells" style="display: none;" action="http://bunyip:8091/wells/query"
+        method="POST">
+        <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+        <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+        <textarea name="full_query" style='visible: false;'>
+        {% for well in final_trend_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+    </form>
+
+    <form id="form-curr_rank_excluded_wells" style="display: none;"
+        action="http://bunyip:8091/wells/query" method="POST">
+        <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+        <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+        <textarea name="full_query" style='visible: false;'>
+        {% for well in curr_rank_excluded_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+    </form>
+
+    <form id="form-excluded_trend_wells" style="display: none;"
+        action="http://bunyip:8091/wells/query" method="POST">
+        <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+        <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+        <textarea name="full_query" style='visible: false;'>
+        {% for well in excluded_trend_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+    </form>
+
+    <form id="form-unlisted_wells" style="display: none;" action="http://bunyip:8091/wells/query"
+        method="POST">
+        <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+        <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+        <textarea name="full_query" style='visible: false;'>
+        {% for well in unlisted_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+    </form>
+
+
+    <script type="text/javascript">
+        $("#toggle_plot_wl_data_validation").click(function () {
+            $(".plot_wl_data_validation").toggle();
+        })
+        $("#toggle_plot_wl_bom_classes").click(function () {
+            $(".plot_wl_bom_classes").toggle();
+        })
+        $("#toggle_plot_wl_seasonality").click(function () {
+            $(".plot_wl_seasonality").toggle();
+        })
+        $("#toggle_plot_wl_trend").click(function () {
+            $(".plot_wl_trend").toggle();
+        })
+
+    // $("#link-included_wells").click(function(e){
+    //     e.preventDefault();
+    //     $("form-included_wells").submit()
+    // })
+
+    // $("#link-excluded_wells").click(function(e){
+    //     e.preventDefault();
+    //     $("form-excluded_wells").submit()
+    // })
+
+    </script>
+
+</body>
+
+</html>

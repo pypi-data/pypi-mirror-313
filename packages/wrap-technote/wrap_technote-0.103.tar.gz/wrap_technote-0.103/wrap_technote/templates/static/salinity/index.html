@@ -1,0 +1,239 @@
+{% extends "static/bootstrap_base.html" %}
+{% block content %}
+
+<h2 id="general-information">General information</h2>
+
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_plot_tds_resource_monitoring_history.png" /></p>
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_plot_tds_resource_variability.png" /></p>
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_plot_salinity_historical_pct_diffs.png" /></p>
+
+<h2 id="current-tds">Current salinity (TDS in mg/L)</h2>
+
+<p>Each data point represents one salinity value per well. If a well has multiple data points in the
+    calendar year, they are averaged. Any wells excluded through the
+    <a href="#data-validation">data validation process</a> is not included in this chart.
+</p>
+
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_tds_current_internal.png" /></p>
+
+<p id="current-tds-summary-stats">Summary descriptive statistics for all wells with annual mean salinities are below.
+    The numbers
+    in this table should match those shown on the chart above:
+</p>
+{{ anntds_summ.to_html(index=True, classes=["table", "table-sm", "table-hover"])|safe }}
+
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_current.png" /></p>
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_current_map.png" /></p>
+
+<p><a id="current-tds-wells"></a>The list of wells with current salinity values is shown here, ordered by
+    salinity value:</p>
+
+{{ anntds.reset_index().to_html(classes=["table", "table-sm", "table-hover"])|safe }}
+
+<h2 id="long-term-status">Long-term status (pct_diff: % difference to long-term mean)</h2>
+
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_plot_salinity_curr_pct_diffs_summary.png" /></p>
+
+{{ curr_pct_diff_summ.to_html(index=False, classes=["table", "table-sm", "table-hover"])|safe }}
+
+{{ curr_pct_diff_summ_1.to_html(index=True, classes=["table", "table-sm", "table-hover"])|safe }}
+
+{{ curr_pct_diff.sort_values("curr_tds_pct_diff").reset_index().round(2)[["well_id", "mean_tds", "curr_tds",
+"curr_tds_pct_diff", "curr_tds_pct_diff_indicator"]].to_html(index=True, classes=["table", "table-sm",
+"table-hover"])|safe }}
+
+<!-- "curr_pct_diff_summ": curr_pct_diff_summ,
+"curr_pct_diff": curr_pct_diff,
+"trend_pct_summ": trend_pct_summ,
+"trend_pct": trend_pct, -->
+
+<h2 id="long-term-trend">Long-term trend (tds_trend_pct: % change over period)</h2>
+
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_plot_salinity_trend_pct_summary.png" /></p>
+
+{{ trend_pct_summ.to_html(index=False, classes=["table", "table-sm", "table-hover"])|safe }}
+
+{{ trend_pct_summ_1.to_html(index=True, classes=["table", "table-sm", "table-hover"])|safe }}
+
+{{ trend_pct.sort_values("slope_pct_change_yr").reset_index().round(2)[["well_id", "mean_tds", "curr_tds",
+"slope_pct_change_yr", "slope_pct_change_trend_pd", "tds_trend_pct_change_indicator"]].to_html(index=True,
+classes=["table", "table-sm",
+"table-hover"])|safe }}
+
+<h2 id="triclass-trends">Triclass trends (increasing/stable/decreasing)</h2>
+
+<p>These results show triclass trends (i.e. classified by increasing/stable/decreasing):</p>
+
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_trend_triclass.png" /></p>
+<p id="current-tds-chart"><img src="../{{ resource.resource_key }}_trend_triclass_map.png" /></p>
+
+<h3>... by mg/L/y</h3>
+
+<p><img src="../{{ resource.resource_key }}_tds_trends_mgL_internal.png" /></p>
+
+<p>Summary statistics of mg/L/y broken down by "status_change":</p>
+<p>{{ tdstrends_mgl_summ_1.to_html(index=True, classes=["table", "table-sm", "table-hover"])|safe }}</p>
+
+<p>Summary statistics for mg/L/y for all wells with 5-year trend results:</p>
+<p>{{ tdstrends_mgl_summ_2.to_html(index=True, classes=["table", "table-sm", "table-hover"])|safe }}</p>
+
+<h3>... by mg/L per 5 year period and by % change over 5 years</h3>
+
+<p><img src="../{{ resource.resource_key }}_tds_trends_5yr_pct_internal.png" /></p>
+
+<p>Summary statistics for five-year change in salinity in both mg/L and as % change -- broken down by "status_change":
+</p>
+<p>{{ tdstrends_5yr_summ_1.to_html(index=True, classes=["table", "table-sm", "table-hover"])|safe }}</p>
+
+<p>Summary statistics for five-year change in salinity in both mg/L and as % change -- for all wells:</p>
+<p>{{ tdstrends_5yr_summ_2.to_html(index=True, classes=["table", "table-sm", "table-hover"])|safe }}</p>
+
+<p>All wells with 5-year trend results, ordered by rate of change:</p>
+
+<p>{{ tdstrends.sort_values("slope_yr").reset_index().to_html(index=False, classes=["table", "table-sm",
+    "table-hover"])|safe }}</p>
+
+<h2 id="long-term-change">Long-term salinity changes</h2>
+
+<p>{{ tdschange.to_html(index=False, classes=["table", "table-sm", "table-hover"])|safe }}</p>
+
+{% endblock %}
+<!-- 
+<div id="leftCol">
+    
+    <ul>
+        <li><a href="#Data_validation">Data validation rules</a></li>
+        <li><a href="#Current_tds">Current TDS</a></li>
+        <li><a href="#Final_trends">Final 5-year trends</a></li>
+        <li><a href="#Well_charts">Well charts</a></li>
+        <li><a href="#Triclass_trend_thresholds">Triclass trend thresholds</a></li>
+    </ul>
+    <p>Wells with a current salinity:
+        <br />(<button type="submit" form="form-current_wells">map</button>):
+    </p>
+
+    {% for well in current_wells %}
+    <a href="#charts-{{ well }}">{{ well }}</a><br />
+    {% endfor %}
+
+
+    <p>Wells included in 5-yr salinity trends:
+        <br />(<button type="submit" form="form-trend_wells">map</button>):
+    </p>
+
+    {% for well in trend_wells %}
+    <a href="#charts-{{ well }}">{{ well }}</a><br />
+    {% endfor %}
+
+    <p>Wells excluded:
+        <br />(<button type="submit" form="form-excluded_wells">map</button>):
+    </p>
+
+    {% for well in excluded_wells %}
+    <a href="#charts-{{ well }}">{{ well }}</a><br />
+    {% endfor %} -->
+
+<!-- </div>
+
+<div id="content">
+
+    <h1>WRAP Groundwater Salinity QA: {{ resource.resource_key }}</h1>
+
+    <h3><a class="anchor" id="Data_validation"></a>Data validation rules</h3>
+    <p>{{ data_val.to_html()|safe }}</p>
+
+    <h3><a class="anchor" id="Current_tds"></a>Current TDS</h3>
+
+    <p><img src="../{{ resource.resource_key }}_tds_current_internal.png" /></p>
+    <p>{{ anntds_summ.to_html(index=True)|safe }}</p>
+    <p>{{ anntds.to_html()|safe }}</p>
+
+    <h2><a class="anchor" id="Final_trends"></a>Final 5-year trends</h2>
+
+    <h3>... by mg/L/y</h3>
+
+    <p><img src="../{{ resource.resource_key }}_tds_trends_mgL_internal.png" /></p>
+
+    <p>Summary statistics of mg/L/y broken down by "status_change":</p>
+    <p>{{ tdstrends_mgl_summ_1.to_html(index=True)|safe }}</p>
+
+    <p>Summary statistics for mg/L/y for all wells with 5-year trend results:</p>
+    <p>{{ tdstrends_mgl_summ_2.to_html(index=True)|safe }}</p>
+
+    <h3>... by mg/L per 5 year period and by % change over 5 years</h3>
+
+    <p><img src="../{{ resource.resource_key }}_tds_trends_5yr_pct_internal.png" /></p>
+
+    <p>Summary statistics for five-year change in salinity in both mg/L and as % change -- broken down by
+        "status_change":</p>
+    <p>{{ tdstrends_5yr_summ_1.to_html(index=True)|safe }}</p>
+
+    <p>Summary statistics for five-year change in salinity in both mg/L and as % change -- for all wells:</p>
+    <p>{{ tdstrends_5yr_summ_2.to_html(index=True)|safe }}</p>
+
+    <p>All wells with 5-year trend results:</p>
+
+    <p>{{ tdstrends.to_html()|safe }}</p>
+
+    <h3>Long term salinity changes</h3>
+
+    <p>{{ tds_changes|safe }}</p>
+
+    <h2><a class="anchor" id="Well_charts"></a>Well charts</h2>
+
+    {% for well in wells %}
+    <h3><a class="anchor" id="charts-{{ well.well_id }}"></a>{{ well.well_id }}</h3>
+    <p>
+        <a href="http://bunyip:8091/well/{{ well.well_id }}/salinity">Waterkennect</a>
+        | <a href="https://www.waterconnect.sa.gov.au/Systems/GD/Pages/Details.aspx?DHNO={{ well.dh_no }}">Groundwater
+            Data</a>
+        | <a href="#toc">Return to table of contents</a>
+    </p>
+    <p><img src="plot_tds_data_validation_{{ well.well_id }}.png" class="plot_tds_data_validation" /></p>
+    <p><img src="plot_salinity_trend_{{ well.well_id }}.png" class="plot_salinity_trend" /></p>
+    {% endfor %}
+
+    <h3><a class="anchor" id="Triclass_trend_thresholds"></a>Triclass trend thresholds</h3>
+    <p>{{ resource.read_table('Triclass_trend_thresholds').to_html()|safe }}</p>
+
+    <h2><a class="anchor" id="toc"></a>List of wells</h2>
+
+    <div id="well-summary">
+        {{ wells_html|safe }}
+    </div>
+
+</div>
+
+
+<form id="form-trend_wells" style="display: none;" action="http://bunyip:8091/wells/query"
+    method="POST">
+    <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+    <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+    <textarea name="full_query" style='visible: false;'>
+        {% for well in trend_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+</form>
+
+<form id="form-current_wells" style="display: none;" action="http://bunyip:8091/wells/query"
+    method="POST">
+    <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+    <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+    <textarea name="full_query" style='visible: false;'>
+        {% for well in current_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+</form>
+
+<form id="form-excluded_wells" style="display: none;" action="http://bunyip:8091/wells/query"
+    method="POST">
+    <input type="checkbox" name="full_query_find_units" id="find_obswells" value="Y" checked />
+    <input type="checkbox" name="full_query_find_obswells" id="find_obswells" value="Y" checked />
+    <textarea name="full_query" style='visible: false;'>
+        {% for well in excluded_wells %}
+            {{ well }}
+        {% endfor %}
+    </textarea>
+</form> -->
