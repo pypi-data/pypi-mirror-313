@@ -1,0 +1,172 @@
+Metadata-Version: 2.1
+Name: jolt
+Version: 0.9.346
+Summary: A task executor
+Home-page: https://github.com/srand/jolt
+Author: Robert Andersson
+Author-email: srand@github.com
+Keywords: bazel,build,cmake,conan,jolt,make,meson,msbuild,xcode
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: System Administrators
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: Topic :: Software Development :: Testing
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: C
+Classifier: Programming Language :: C++
+Classifier: Programming Language :: Java
+Classifier: Programming Language :: JavaScript
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.8
+Requires-Dist: MarkupSafe
+Requires-Dist: SecretStorage
+Requires-Dist: backports.tarfile==1.2.0
+Requires-Dist: bz2file==0.98
+Requires-Dist: certifi==2024.8.30
+Requires-Dist: cffi==1.17.1
+Requires-Dist: charset-normalizer==3.3.2
+Requires-Dist: click==8.1.7
+Requires-Dist: colorama==0.4.6
+Requires-Dist: fasteners==0.19
+Requires-Dist: grpcio==1.66.1
+Requires-Dist: idna==3.10
+Requires-Dist: importlib-metadata==8.5.0
+Requires-Dist: importlib_metadata
+Requires-Dist: jaraco.classes==3.4.0
+Requires-Dist: jaraco.context==6.0.1
+Requires-Dist: jaraco.functools==4.0.2
+Requires-Dist: jeepney==0.8.0
+Requires-Dist: jinja2==3.1.4
+Requires-Dist: keyring==25.4.1
+Requires-Dist: keyrings.alt==5.0.2
+Requires-Dist: lxml==5.3.0
+Requires-Dist: more-itertools==10.5.0
+Requires-Dist: multi_key_dict
+Requires-Dist: ninja==1.11.1.1
+Requires-Dist: protobuf==5.28.2
+Requires-Dist: psutil==6.0.0
+Requires-Dist: pycparser==2.22
+Requires-Dist: pygit2==1.15.1
+Requires-Dist: requests==2.32.3
+Requires-Dist: tqdm==4.66.5
+Requires-Dist: urllib3==1.26.20
+Requires-Dist: zipp==3.20.2
+Requires-Dist: zstandard==0.23.0
+Provides-Extra: allure
+Requires-Dist: allure-python-commons; extra == "allure"
+Provides-Extra: conan
+Requires-Dist: conan<2.0; extra == "conan"
+Provides-Extra: dev
+Requires-Dist: check-manifest; extra == "dev"
+Provides-Extra: doc
+Requires-Dist: sphinx-click; extra == "doc"
+Requires-Dist: sphinx-rtd-theme; extra == "doc"
+Provides-Extra: test
+Requires-Dist: coverage; extra == "test"
+
+Jolt
+============================
+
+.. image:: https://img.shields.io/pypi/v/jolt.svg
+   :target: https://pypi.python.org/pypi/jolt/
+   
+.. image:: https://readthedocs.org/projects/jolt/badge/?version=latest
+   :target: http://jolt.readthedocs.io/?badge=latest
+
+
+Jolt is a task execution tool designed for software development tasks.
+It can build your C/C++ applications and React frontends, run tests, deploy your web services, 
+and much more.
+
+Tasks are defined in Python scripts. They may be executed locally by developers or by automation software 
+such as Jenkins in a continuous integration pipeline. In both cases, tasks may be distributed and executed 
+in parallel in a server cluster. The output of each task is cached to reduce overall execution times on 
+repeat attempts. In one real world deployment, Jolt shortend the CI build duration from 10 hours to 10 minutes
+on average.
+ 
+Example C++ application task:
+  
+.. code:: python
+ 
+   class CppApp(CXXExecutable):
+       """ Builds a C++ application """
+       arch = Parameter(values=["arm", "x64"])
+       requires = [
+          "git:url=https://github.com/org/cppapp.git",
+          "gcc:arch={arch},version=9.1.1",
+       ]
+       sources = ["cppapp/include/*.hpp", "cppapp/src/*.cpp"]
+
+.. code:: bash
+ 
+  $ jolt build cppapp:arch=x64
+
+
+Example Node.js tasks:
+       
+.. code:: python
+ 
+  class NodeJS(Download):
+      """ Downloads and publishes Node.js. Adds binaries to PATH. """
+
+      version = Parameter("14.16.1")
+      url = "https://nodejs.org/dist/v{version}/node-v{version}-win-x64.zip"
+
+      def publish(self, artifact, tools):
+          super(publish).publish(artifact, tools)
+          artifact.environ.PATH.append("node-v{version}-win-x64")
+
+
+   class WebApp(Task):
+       """ Builds a really cool WebApp """
+       
+       requires = [
+           "git:url=https://github.com/org/webapp.git",
+           "nodejs"
+       ]
+ 
+       def run(self, deps, tools):
+           with tools.cwd("webapp"):
+               tools.run("npm ci")
+               tools.run("npm build")
+   
+.. code:: bash
+ 
+  $ jolt build webapp
+
+A common command line interface for all tasks enables developers from different 
+disciplines to quickly run each others tasks without in-depth knowledge of the underlying technology - 
+a C++ developer doesn't have to learn NPM and a React developer doesn't have to know anything about 
+CMake, Make, MSBuild, etc. Required tools and dependencies are also provisioned automatically.
+
+For full documentation, please visit http://jolt.readthedocs.io/
+
+
+Installing
+----------
+
+Jolt is available in the Python Package Index:
+
+.. code:: bash
+
+  $ pip install jolt
+  $ jolt
+
+And as a Docker image:
+
+.. code:: bash
+
+  $ docker run robrt/jolt
+
+A thin Python wrapper is available for the Docker images. By using it, multiple versions
+of Jolt can coexist on the host since the version used is selected during runtime rather
+than install time. To use a specific version in a project, add a version attribute in the
+Jolt manifest. By always using a specific version cache hits become more likely.
+
+.. code:: bash
+
+  $ pip install jolt_docker
+  $ jolt

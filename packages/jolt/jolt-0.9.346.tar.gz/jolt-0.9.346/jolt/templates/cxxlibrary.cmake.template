@@ -1,0 +1,63 @@
+project({{ task.canonical_name }})
+cmake_minimum_required(VERSION 3.0)
+
+{% if task.asflags %}
+set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS}{% for flags in task.asflags %} {{ flags }}{% endfor %}")
+{% endif %}
+{% if task.cflags %}
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}{% for flags in task.cflags %} {{ flags }}{% endfor %}")
+{% endif %}
+{% if task.cxxflags %}
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}{% for flags in task.cxxflags %} {{ flags }}{% endfor %}")
+{% endif %}
+{% if task.ldflags %}
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}{% for flags in task.ldflags %} {{ flags }}{% endfor %}")
+{% endif %}
+
+{% for macro in task.macros %}
+add_definitions("{{ macro }}")
+{% endfor %}
+
+{% for inc in task.incpaths %}
+include_directories("{{ inc }}")
+{% endfor %}
+
+{% for _, dep in deps.items() %}
+{% for inc in dep.cxxinfo.incpaths.items() %}
+include_directories("{{ tools.sandbox(dep) }}/{{ inc }}")
+{% endfor %}
+{% for lib in dep.cxxinfo.libpaths.items() %}
+link_directories("{{ tools.sandbox(dep) }}/{{ lib }}")
+{% endfor %}
+{% endfor %}
+
+add_library(
+    {{ task.binary or task.canonical_name }}
+    {% if task.shared %}
+    SHARED
+    {% else %}
+    STATIC
+    {% endif %}
+{% for source in task.sources %}
+    {{ tools.expand_relpath(os.path.join(task.joltdir, source), tools.getcwd()) }}
+{% endfor %}
+{% for _, dep in deps.items() %}
+{% for src in dep.cxxinfo.sources.items() %}
+   "{{ tools.sandbox(dep) }}/{{ src }}"
+{% endfor %}
+{% endfor %}
+)
+
+{% if task.shared %}
+{% for lib in task.libraries %}
+target_link_libraries("{{ lib }}")
+{% endfor %}
+
+{% for _, dep in deps.items() %}
+{% for lib in dep.cxxinfo.libraries.items() %}
+target_link_libraries("{{ lib }}")
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+install(TARGETS {{ task.canonical_name }})
