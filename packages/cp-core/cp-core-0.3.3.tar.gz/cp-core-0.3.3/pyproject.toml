@@ -1,0 +1,58 @@
+[project]
+name = "cp_core"
+description = "cathodic protection core problem"
+dynamic = []
+authors = [
+    { name = "svtter", email = "svtter@qq.com" },
+]
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "numpy>=2.1.3",
+    "pandas>=2.2.3",
+    "setuptools~=60.6.0",
+    "loguru>=0.7.2",
+    "openpyxl>=3.0.10",
+    "pyinstaller>=6.10.0",
+    "pydantic>=2.10.2",
+]
+version = "0.3.3"
+
+[project.license]
+text = "not open"
+
+[build-system]
+requires = [
+    "pdm-pep517",
+]
+build-backend = "pdm.pep517.api"
+
+[tool.pdm]
+source = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/simple", verify_ssl = false, name = "pypi" },
+]
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pip>=24.0",
+]
+
+[tool.pdm.version]
+source = "file"
+path = "./src/cp_core/__init__.py"
+
+[tool.pdm.scripts]
+start = "streamlit run src/webapp/app.py"
+test = "pytest"
+serve_test = "allure serve ./tmp/allure"
+
+[tool.mypy]
+exclude = [
+    ".venv",
+]
+
+[tool.pytest.ini_options]
+addopts = "-m 'not python_knowledge' -v -n auto"
+markers = [
+    "v3: mark test as v3",
+    "python_knowledge: mark test as python knowledge",
+]
