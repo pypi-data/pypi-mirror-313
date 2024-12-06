@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flogin"
+description = "A Python wrapper for Flow Launcher's v2 python api"
+readme = { file = "README.rst", content-type = "text/x-rst" }
+requires-python = ">=3.11"
+authors = [{ name = "cibere" }]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+dynamic = ["version", "dependencies"]
+
+[project.urls]
+Documentation = "https://flogin.readthedocs.io/en/latest/"
+"Issue tracker" = "https://github.com/cibere/flogin/issues"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx>=7.0.0,<8.0.0",
+    "furo>=2023.9.10,<2024.0.0", # theme // https://pradyunsg.me/furo/customisation/announcement/
+    "sphinx-autodoc-typehints>=1.25.0,<2.0.0",  # https://github.com/tox-dev/sphinx-autodoc-typehints
+    "sphinx-toolbox>=3.5,<4.0",  # https://sphinx-toolbox.readthedocs.io/en/latest/extensions/index.html
+]
+dev = [
+    "black==24.10.0",
+    "isort==5.13.2",
+]
+
+[tool.setuptools.dynamic]
+dependencies = { file = "requirements.txt" }
+
+[tool.setuptools]
+packages = [
+    "flogin",
+    "flogin.flow_api",
+    "flogin.jsonrpc",
+]

@@ -1,0 +1,93 @@
+Metadata-Version: 2.1
+Name: flogin
+Version: 0.0.5
+Summary: A Python wrapper for Flow Launcher's v2 python api
+Author: cibere
+Project-URL: Documentation, https://flogin.readthedocs.io/en/latest/
+Project-URL: Issue tracker, https://github.com/cibere/flogin/issues
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Utilities
+Classifier: Typing :: Typed
+Requires-Python: >=3.11
+Description-Content-Type: text/x-rst
+Requires-Dist: aioconsole==0.8.1
+Requires-Dist: click==8.1.7
+Provides-Extra: docs
+Requires-Dist: sphinx<8.0.0,>=7.0.0; extra == "docs"
+Requires-Dist: furo<2024.0.0,>=2023.9.10; extra == "docs"
+Requires-Dist: sphinx-autodoc-typehints<2.0.0,>=1.25.0; extra == "docs"
+Requires-Dist: sphinx-toolbox<4.0,>=3.5; extra == "docs"
+Provides-Extra: dev
+Requires-Dist: black==24.10.0; extra == "dev"
+Requires-Dist: isort==5.13.2; extra == "dev"
+
+flogin
+=======
+A wrapper for Flow Lancher's V2 jsonrpc api using python, to easily and quickly make **Flo**\ w launcher plu\ **gin**\ s.
+
+Flogin's `documentation can be viewed online <https://flogin.readthedocs.io/en/latest/>`_
+
+.. WARNING::
+    This library is still in alpha development, so expect breaking changes
+
+Key Features
+-------------
+
+- Modern Pythonic API using ``async`` and ``await``.
+- Fully Typed
+- Easy to use with an object oriented design
+
+Installing
+----------
+
+**Python 3.11 or higher is required**
+
+To install flogin, do the following:
+
+.. code:: sh
+
+    pip install flogin
+
+To install the development version, ensure `git <https://git-scm.com/>`_ is installed, then do the following:
+
+.. code:: sh
+
+    pip install git+https://github.com/cibere/flogin
+
+Basic Example
+-------------
+.. code:: py
+
+    from flogin import Plugin, Query
+
+    plugin = Plugin()
+
+    @plugin.event
+    async def on_query(data: Query):
+        return f"You wrote {data.text}"
+    
+    plugin.run()
+
+You can find more examples in the examples directory.
+
+Links
+------
+
+- `Documentation <https://flogin.readthedocs.io/en/latest/index.html>`_
+- `Flow Launcher's Official Discord Server <https://discord.gg/QDbDfUJaGH>`_
+
+Contributing
+============
+Contributions are greatly appriciated, I just have a couple of requests:
+
+1. Your code is run through isort and black
+2. Your code is properly typed
+3. Your code is tested
+4. Your code is documented
