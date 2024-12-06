@@ -1,0 +1,102 @@
+name: Package Wheels
+
+on:
+  push: 
+    branches: ["main"]
+    tags: ['v*']
+  # release:
+  #   branches: [ "main" ]
+
+jobs:
+  build_wheels:
+    name: Wheel build for ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }} ${{ matrix.buildplat[2] }}
+    runs-on: ${{ matrix.buildplat[0] }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Github Actions doesn't support pairing matrix values together, let's improvise
+        # https://github.com/github/feedback/discussions/7835#discussioncomment-1769026
+        buildplat:
+        # should also be able to do multi-archs on a single entry, e.g.
+        # [os-image, os-name, os-arch]
+        - [ubuntu-latest, manylinux, x86_64]
+        - [macos-latest, macosx, x86_64]
+        - [macos-latest, macosx, arm64]
+        - [windows-latest, win, native]
+        python: [["cp39", "3.9"], ["cp310", "3.10"], ["cp311", "3.11"], ["cp312", "3.12"], ["cp313", "3.13"]]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true 
+
+      - uses: actions/setup-python@v5
+        name: Install Python
+        with:
+          python-version: "3.10"
+
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install cibuildwheel
+        
+      - name: Set VSDev RC (windows only)
+        if: runner.os == 'Windows'
+        run: | 
+          function Invoke-VSDevEnvironment {
+            $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+              $installationPath = & $vswhere -prerelease -legacy -latest -property installationPath
+              $Command = Join-Path $installationPath "Common7\Tools\vsdevcmd.bat"
+            & "${env:COMSPEC}" /s /c "`"$Command`" -arch=amd64 -no_logo && set" | Foreach-Object {
+                  if ($_ -match '^([^=]+)=(.*)') {
+                      [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+                  }
+              }
+          }
+          Invoke-VSDevEnvironment
+          Get-Command rc.exe | Format-Table -AutoSize
+
+      # - name: Install Clang with OpenMP support using Chocolatey
+      #   if: runner.os == 'Windows'
+      #   run: |
+      #     choco install -y llvm --params "clang;compiler=clang" --version 18.1.0
+      #     $env:PATH = "C:\Program Files\LLVM\bin;$env:PATH"
+      #     clang --version
+
+      - name: Build wheels via cibuildwheel
+        uses: pypa/cibuildwheel@v2.21.3
+        env:
+          CIBW_BUILD: ${{ matrix.python[0] }}-${{ matrix.buildplat[1] }}*
+          CIBW_ARCHS: ${{ matrix.buildplat[2] }}
+          # define CC, CXX so meson will use clang-cl instead of MSVC
+
+          # CC: gcc
+          # CXX: g++
+          # -Wl,-S equivalent to gcc's -Wl,--strip-debug
+          LDFLAGS: "-Wl,-S"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.buildplat[1] }}-${{ matrix.buildplat[2] }}-${{ matrix.python[0] }}
+          path: wheelhouse/*.whl
+
+
+  upload_all:
+    needs: [build_wheels]
+    environment: pypi
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    # if: github.event_name == 'release' && github.event.action == 'published'
+    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: artifact
+        path: |
+          dist
+          wheelhouse
+          dist/wheelhouse
+    - uses: pypa/gh-action-pypi-publish@release/v1

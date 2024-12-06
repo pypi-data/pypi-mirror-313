@@ -1,0 +1,157 @@
+env: 
+  CIRRUS_CLONE_SUBMODULES: true
+
+  # Coveralls configuration
+  CI_NAME: cirrus-ci
+  CI_BRANCH: ${CIRRUS_BRANCH}
+  CI_PULL_REQUEST: ${CIRRUS_PR}
+  CI_BUILD_NUMBER: ${CIRRUS_BUILD_ID}
+  CI_BUILD_URL: https://cirrus-ci.com/build/${CIRRUS_BUILD_ID}
+  COVERALLS_PARALLEL: "true"
+  COVERALLS_FLAG_NAME: ${CIRRUS_TASK_NAME}
+
+# See: https://github.com/pypa/manylinux
+# 2_24_x86_64 is EOF / discontinued. 
+# quay.io/pypa/manylinux2014_x86_64  # CentOS 7  (use GCC 10)
+# quay.io/pypa/manylinux_2_24_x86_64 # Debian    (unknown)
+# quay.io/pypa/manylinux_2_28_x86_64 # AlmaLinux (use clang)
+# - image: quay.io/pypa/manylinux_2_24_x86_64 # Debian, no c++20 support
+# - image: ghcr.io/cirruslabs/macos-runner:sonoma
+# - image: cirrusci/windowsservercore:2019
+# - image: mcr.microsoft.com/windows/servercore:ltsc2019
+# - image: windows-2019
+
+lint_task: 
+  only_if: changesInclude('.cirrus.yml', '**.{h,cpp,py,toml,build}')
+  container:
+    image: quay.io/pypa/manylinux_2_28_x86_64 # AlmaLinux
+  env:
+    PATH: /opt/python/cp310-cp310/bin:${PATH}
+  pip_cache:
+    folder: ~/.cache/pip
+    fingerprint_script: echo $PYTHON_VERSION
+  before_script: |
+    python -m pip install --upgrade pip ruff
+  lint_script: |
+    python -m ruff check src/*
+  
+build_and_test_task:
+  only_if: changesInclude('.cirrus.yml', '**.{h,cpp,py,toml,build}')
+  matrix:
+    - name: AlmaLinux build
+      container: 
+        image: quay.io/pypa/manylinux_2_28_x86_64 # AlmaLinux
+  env:
+    # CC: clang 
+    # CXX: clang++
+    CC: gcc 
+    CXX: g++
+    PATH: /opt/python/cp310-cp310/bin:${PATH}
+  before_script: |
+    python -m pip install --upgrade pip uv
+  pip_cache:
+    folder: ~/.cache/pip
+    fingerprint_script: "{ echo $PYTHON_VERSION; uv pip compile pyproject.toml --no-annotate --no-header; } | tr \"\n\" \" \""
+    populate_script: python -m uv pip install -r pyproject.toml 
+  build_script: |
+    python -m uv pip install '.[test]' --verbose
+  test_script: |
+    python -m pytest tests/ --cov=primate --benchmark-skip  
+    coverage report -m
+  coverage_script: |
+    pipx run 'coverage[toml]' xml -o coverage.xml --rcfile=pyproject.toml
+    pipx run 'coveralls<4' --submit coverage.xml --rcfile=pyproject.toml
+    pipx run 'coveralls<4' --finish
+
+
+# uninstall_script: |
+#   python -m pip uninstall primate --yes
+# wheel_script: |
+#   python -m build
+# install_script: |
+#   python -m pip install dist/scikit_primate*.whl
+# test_coverage_script: |
+#   python -m pytest tests/ --cov=primate --benchmark-skip
+#   coverage report -m
+
+# coverage_report_task:
+#   # only_if: changesInclude('.cirrus.yml', '**.{h,cpp,py,toml,build}')
+#   depends_on: build_and_test
+#   # only_if: $CI_PLATFORM == 'almalinux'
+#   name: Submit coverage info
+#   container:
+#     image: quay.io/pypa/manylinux_2_28_x86_64
+#     PATH: /opt/python/cp310-cp310/bin:${PATH}
+#   script:
+#     - pipx run 'coverage[toml]' xml -o coverage.xml
+#     - pipx run 'coveralls<4' --submit coverage.xml
+#     - pipx run 'coveralls<4' --finish
+  
+
+  
+# python -m coveralls --submit coverage.xml
+# python -m coveralls --finish
+# macos_task:
+#   container:
+#     image: ghcr.io/cirruslabs/macos-ventura-base:latest
+#   only_if: changesInclude('.cirrus.yml', '**.{h,cpp,py}') 
+#   env:
+#     CC: clang 
+#     CXX: clang++
+#   pip_cache:
+#     folder: ~/.cache/pip
+#     fingerprint_script: echo $PYTHON_VERSION
+#   before_script: |
+#     python -m pip install --upgrade pip
+#     python -m pip install build pytest pytest-cov pytest-benchmark
+#   dependencies_script: |
+#     bash tools/cibw_macos.sh
+#   build_script: |
+#     python -m pip install . --verbose
+#   test_script: |
+#     python -m pytest tests/ --cov=primate --benchmark-skip
+#   uninstall_script: |
+#     python -m pip uninstall primate --yes
+#   wheel_script: |
+#     python -m build
+#   install_script: |
+#     python -m pip install dist/primate*.whl
+#   test_post_script: |
+#     python -m pytest tests/ --cov=primate --benchmark-skip
+#     coverage report -m
+  
+# windows_task:
+#   windows_container:
+#     image: cirrusci/windowsservercore:2019
+#   only_if: changesInclude('.cirrus.yml', '**.{h,cpp,py}') 
+#   setup_python_script: |
+#     choco install -y python311
+#   setup_clang_script: |
+#     choco install -y llvm 
+#     clang --version
+#   env: 
+#     PATH: '%PATH%;C:\ProgramData\chocolatey\bin;C:\Python311;C:\Program Files\LLVM\bin;'
+#     CXX: clang++
+#     CC: clang
+#   pip_depends_script: |
+#     python -m pip install --upgrade pip
+#     python -m pip install build pytest pytest-cov pytest-benchmark
+#   build_pkg_script: |
+#     python -m pip install . --verbose
+#   test_pkg_script: |
+#     python -m pytest tests/ --cov=primate --benchmark-skip
+#   uninstall_pkg_script: |
+#     python -m pip uninstall primate -y
+#   build_wheel_script: |
+#     python -m build 
+#   install_wheel_script: |
+#     python -m pip install dist/primate*.whl
+#   test_wheel_script: |
+#     python -m pytest tests/ --cov=primate --benchmark-skip
+#     coverage report -m
+
+
+# image: ghcr.io/getsentry/pypi-manylinux-amd64-ci
+# image: python:slim
+# image: quay.io/repository/pypa/manylinux_2_28_x86_64 
+# skip: "!changesInclude('.cirrus.yml', '**.{js,ts}')"
