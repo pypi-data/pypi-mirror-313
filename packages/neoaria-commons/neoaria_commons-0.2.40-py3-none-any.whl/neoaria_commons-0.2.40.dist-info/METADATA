@@ -1,0 +1,585 @@
+Metadata-Version: 2.1
+Name: neoaria-commons
+Version: 0.2.40
+Summary: neoaria commons module for neoaria-backend-generator
+Home-page: https://www.neoaria.io
+Author: yakenator
+Author-email: yakenator@neoaria.io
+License: MIT License
+Classifier: Environment :: Web Environment
+Classifier: Framework :: FastAPI
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Description-Content-Type: text/markdown
+
+neoaria-commons
+===============
+
+This software is one of the systems that form the basis of software produced by NeoAria Co., Ltd.
+
+It mainly aims to provide the foundation for the back-end system, and among the foundations, it focuses on implementing and operating the source system (data, events, search, web socket).
+
+# Quick start
+
+It can be installed through pip application. 
+
+* **If installing from scratch** :: pip install neoaria-commons
+
+* **In case of update** :: pip install --upgrade neoaria-commons
+
+# How to use
+
+First, after installation, access must be possible through internal Python.
+
+## DataSource
+The data source class is a class that focuses on integrating and using various data sources.  This class is closely related to the configuration and use of MongoDB, MariaDB, Kafka, Solr, and WebSocket, and the initial configuration values ​​must be defined by the system using this class.
+
+Data sources have a total of three types.   Fundamentally, it is divided into DataSource, which manages the state of data, EventSource, which processes data events, and SearchSource, which adjusts data to be searched efficiently.\
+
+### DataSource
+
+* **MongoDBDataSource**
+
+This is a source that is primarily intended to store and update the state of a specific object, and is the main database for the system currently being built in NeoAria.
+
+* **MariaDBDataSource**
+
+Although this source is not currently in active use, it is also a source used for the main purpose of creating and updating the state of data.
+
+### EventSource
+
+* **KafkaDataSource**
+
+This source is for event processing between external systems and will be the only system that can be used at present.
+
+* **RabbitMQDataSource**
+
+Support will be provided later.
+
+### SearchSource
+
+* **SolrDataSource**
+
+It is a data source that searches data by registering a schema, a series of data models, with the main role of searching through data indexing.   It plays an important role in separating and reflecting the existing editing model and service model.
+
+## Business
+
+Based on the actual business model, it is composed of BusinessParameter, BusinessResponse, and BusinessCommon and forms a common business.
+
+
+### BusinessParamter
+
+It is a class that transmits parameters for executing a business, and its main purpose is to transmit an object with a Key-Value structure by inheriting BaseModel.
+
+### BusinessResponse
+
+Business is a program that ultimately produces results.  The main purpose of BusinessResponse is to contain and deliver the results.   Like BusinessPrarameter, this also aims to convey values ​​centered on Key-Value.
+
+### BusinessCommon
+
+As a common class for all businesses, all businesses must inherit and implement this class.  Contains a list of most implementations.
+
+# Version History
+## 0.2 :
+(since 0.2.40)
+#### Major Changes
+- Refactored Kafka and Solr implementations to use the Singleton pattern for common sources
+- Modified application initialization process in `main.py`
+
+#### Implementation Details
+- Common data sources (Kafka, Solr) are now implemented as singletons for better resource management
+- Application initialization now requires explicit configuration of business annotations and common sources
+- Example initialization:
+  ```python
+  # Setup target business and data source
+  # data source: mongodb_001, event: kafka_001, search: solr_001 
+  businessAnnotation = BusinessAnnotation({ 'event':'kafka_001' })
+  commonSource = CommonSource({
+      'data': 'mongodb_001',
+      'event': 'kafka_001',
+      'search': 'solr_001'
+  })
+
+  def create_business() -> TouristDestinationBusiness:
+      return TouristDestinationBusiness(commonSource)
+  ```
+
+(since 0.2.39)
+update ElementStatus model, add INITIALIZED status
+
+```python
+class ElementStatus(Enum):
+    REVIEWREQUESTED = "ReviewRequested" # 검토요청
+    REVIEWREJECTED = "ReviewRejected" # 검토반려
+    REVIEWCOMPLETED = "ReviewCompleted" # 검토완료
+    APPROVED = "Approved" # 승인완료
+    APPROVEDREJECTED = "ApprovalRejected" # 승인반려
+    EDITING = "Editing" # 수정중
+    INITIALIZED = "Initialized" # 배포 (서비스 되고 있는 상태)
+```
+
+(since 0.2.35)
+update BaseValue model, add None type in value field
+
+```python
+class BaseValue(BaseModel):
+    value: Union[str, int, float, None]
+    VT: str
+    TT: str
+```
+
+(since 0.2.33)
+update DeepLLanguages for ZH_HANS = "Chinese (simplified)", ZH_HANT = "Chinese (traditional)"
+```python
+class DeepLLanguages(Enum):
+    BG = { 'name': 'Bulgarian'}
+    CS = "Czech"
+    DA = "Danish"
+    DE = "German"
+    EL = "Greek"
+    EN = "English"
+    EN_GB = "English (British)"
+    EN_US = "English (American)"
+    ES = "Spanish"
+    ET = "Estonian"
+    FI = "Finnish"
+    FR = "French"
+    HU = "Hungarian"
+    ID = "Indonesian"
+    IT = "Italian"
+    JA = "Japanese"
+    KO = "Korean"
+    LT = "Lithuanian"
+    LV = "Latvian"
+    NB = "Norwegian (Bokmål)"
+    NL = "Dutch"
+    PL = "Polish"
+    PT = "Portuguese"
+    PT_PT = "Portuguese (European)"
+    PT_BR = "Portuguese (Brazilian)"
+    RO = "Romanian"
+    RU = "Russian"
+    SK = "Slovak"
+    SL = "Slovenian"
+    SV = "Swedish"
+    TR = "Turkish"
+    UK = "Ukrainian"
+    ZH = "Chinese (Simplified)"
+    ZH_HANS = "Chinese (simplified)"
+    ZH_HANT = "Chinese (traditional)"
+```
+
+(since 0.2.32)
+## Remove configuration on middleware.yaml ###
+1. JWT-based permission verification has been consolidated to be performed at a single point. Please define middleware.yaml as follows.
+```yaml
+jwt:
+  enabled: True
+  secret_key: '******'
+  algorithms: HS256
+  targets:
+    - /api/v1/*
+  permission_service:
+    host: 'account_service_host'
+    port: 8000
+    endpoint: 'account/data/detail'
+    cache_expire: 300
+```
+
+(since 0.2.31)
+1. no longer need to include the SID key in the request header. Instead, please define source.yaml as follows.
+
+## Append configuration on source.yaml ###
+```yaml
+service:
+  name: 'service_name'
+  id: 'd680658d-a3a3-4d00-b782-3c36423a93f8'
+```
+
+2. Account service configuration has been added to the middleware for JWT-based permission verification. Please define middleware.yaml as follows.
+
+## Append configuration on middleware.yaml ###
+```yaml
+jwt:
+  enabled: True
+  secret_key: '******'
+  algorithms: HS256
+  targets:
+    - /api/v1/*
+  account_service:
+    host: 'account_service_host'
+    port: 8000
+    endpoint: 'account/data/detail'
+    cache_expire: 300
+  permission_service:
+    host: 'permission_service_host'
+    port: 8000
+    endpoint: 'permission/data/detail'
+```
+
+## Append configuration on source.yaml ###
+(since 0.2.28)
+must be setup for **websocket_for_actors**
+```yaml
+websocket_for_actors:
+  type: 'kafka'
+  data:
+    id: 'websocket_for_actors'
+    consumer:
+      settings:
+        bootstrap.servers: '192.168.1.100:9091,192.168.1.100:9092,192.168.1.100:9093,192.168.1.100:9094,192.168.1.100:9095'
+        group.id: 'file'
+        auto.offset.reset: 'earliest'
+        enable.auto.commit: True
+      topics: 
+        - 'rms.websocket'
+    producer:
+      settings:
+        bootstrap.servers: '192.168.1.100:9091,192.168.1.100:9092,192.168.1.100:9093,192.168.1.100:9094,192.168.1.100:9095'
+      topics: 
+        - 'rms.websocket'
+```
+
+## BusinessAnnotation ###
+(since 0.2.26)
+The part where service permissions were defined through annotations has been separated.
+Definitions can now be made as follows: businessAnnotation = BusinessAnnotation({'event':'kafka_001'}), where only the event source is defined in the existing business.
+
+## Consolidation of Unnecessary Items ##
+
+Previously, the business was defined as:
+
+```python
+business: FileBusiness = FileBusiness({'data':'mongodb_001', 'event':'kafka_001', 'search':'solr_001'})
+business.service(id='2da46ef1-0009-4a0b-a05e-6c3601cf1066', title='File Service')
+```
+
+To ensure thread-safe operation, it has been reorganized as follows
+
+```python
+def create_business() -> TokenBusiness:
+    return TokenBusiness({'data':'mongodb_001', 'event':'kafka_001', 'search':'solr_001'})
+
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, business: CommonBusiness = Depends(create_business)):
+    await business.setWebsocket(websocket, webcoekt_callback)
+```
+
+Each provided API endpoint is adjusted to inject dependencies using Depends(create_business).
+
+### Based on certain information in the headers, the execution of the JWT and method is determined ###
+(since 0.2.22)
+1.	Information that requires login must be defined in middleware.yaml under jwt.targets with the related paths.
+2.	The JWT token must include the userId.
+3.	The request header must include the service ID of the service being called. The service ID is unique for each service and is specified as ‘SID’.
+
+### The ‘router’ package is no longer supported ###
+(since 0.2.19)
+1.	From now on, all programs should be written in main.py. It is recommended to merge all contents from the existing router.py file into main.py and use it there.
+2.	There are changes in neoaria.middleware. Please refer to the history project for the main usage.
+3.	There are changes in neoaria.commons. An annotation for permission handling has been added.
+
+### For a smooth workflow, the program supports three classes ###
+(since 0.2.17)
+1. neoaria.archive.Zip: Compresses and creates files in ZIP format. (Available from version 0.2.17)
+2. neoaria.pdf: Creates and provides PDF files. (Not yet available.)
+3. neoaria.microsoft.Excel, neoaria.microsoft.PowerPoint: Creates files compatible with Microsoft Excel and PowerPoint. (Not yet available.)
+
+### Append determine_cid function ###
+(since 0.2.16)
+Checks the format of the content’s CID. The result will be a value of the CIDType type.
+
+### A model that can be commonly used has been added ###
+(since 0.2.14)
+![Class Diagram](https://www.neoaria.io/classes.png)
+
+### When searching through lists based on the search engine ###
+(since 0.2.8)
+Apache Solr is an open-source search engine primarily used for text-based search and analysis. While Solr provides powerful search capabilities on its own, it can be extended and customized to meet user needs by using various search engine types. The following are the main types of search engines available in Solr:
+
+	1.	StandardQueryParser (Default Query Parser): Solr’s default query parser, supporting everything from simple searches to complex logical queries. It is widely used for general text-based searches.
+	2.	DisMax (Disjunction Max Query Parser): Executes queries across multiple fields and performs a search reflecting the highest score from each field. It is useful when conducting searches across various fields using simple syntax. Particularly advantageous for searching for the presence of words across multiple fields.
+	3.	Extended DisMax (eDisMax): An extended version of DisMax, supporting more complex queries and filters. It provides flexible search options to yield specific and precise search results. For instance, it supports complex queries like phrase search, boolean operators, and grouping.
+	4.	Lucene Query Parser: Uses the query parser from Apache Lucene, Solr’s underlying search engine. It offers powerful and diverse functionalities but may require complex query syntax.
+	5.	Function Query: Supports various function-based queries, such as numeric operations, date comparisons, and geographic distance calculations. Useful for searching special data like numbers or dates.
+	6.	Spatial Query: Performs searches based on geographic location. For example, it is used to search for data within a certain distance from specific coordinates.
+	7.	Join Query: Supports queries similar to the JOIN operation in relational databases. It adjusts search results based on the relationships between different documents.
+	8.	MoreLikeThis (MLT) Query: Used to search for documents similar to a given document. Useful in recommendation systems or finding related documents.
+
+Currently, only the DisMax search method is supported.
+
+```python
+
+from neoaria.commons import SolrSearchParams, DisMaxSearchCondition ...
+
+...
+
+class SearchCondition(BaseModel):
+    pass
+
+class SpatialSearchCondition(SearchCondition):
+    pass
+
+class MoreLinkThisSearchCondition(SearchCondition):
+    pass
+
+class JoinSearchCondition(SearchCondition):
+    pass
+
+class FunctionSearchCondition(SearchCondition):
+    pass
+
+class LuceneSearchCondition(SearchCondition):
+    pass
+
+class StandardSearchCondition(SearchCondition):
+    pass
+
+class DisMaxSearchCondition(SearchCondition):
+    fq: Optional[List[str]] = Field(None, description="Filter query")
+    rows: Optional[int] = Field(10, ge=1, le=100, description="Number of results to return")
+    start: Optional[int] = Field(0, ge=0, description="Start index for pagination")
+    sort: Optional[str] = Field(None, description="Sort order")
+    fl: Optional[str] = Field(None, description="Fields to return")
+    qf: Optional[List[str]] = Field([], description="Query fields")
+    df: Optional[str] = Field('title', description="Default query field")
+
+class SolrSearchParams(BaseModel):
+    q: Optional[str] = Field('*:*', description="Search query")
+    condition: SearchCondition
+
+
+```
+
+
+### Annotation-based Permission Configuration for Business Logic ###
+
+A new annotation named business has been added, allowing you to configure permissions at the method level within the business logic. This annotation can be defined above methods and used as shown below:
+
+```python
+# Method-level annotation for business permissions
+@business.permission(default={
+        'administrator': True,
+        'manager': True,
+        'operator': False,
+        'viewer': False,
+    }, custom={
+        'Construction Staff': True,
+        'Daegu Stone Administrator': True,
+        'VK Administrator': True,
+        'Gallery Administrator': True,
+    }
+)
+```
+
+The object definition at the top is as follows:
+
+```python
+from neoaria.commons import business
+```
+
+### Centralized Router Creation for Permission Service Notifications ###
+
+When creating a router, we plan to notify the permission service using the business logic as a parameter. Therefore, we intend to extract the attributes and configured permission information of the relevant business methods, create a model, and then pass it to the service. The extraction process has been completed so far.
+
+The implementation is in router.py, and it is used as follows:
+
+```python
+router = build_router(business, '/permission')
+```
+
+### Name Changes for Objects Related to the Use of the RMS System
+
+	•	RmsAccount → DefaultAccount
+	•	RmsDepartment → DefaultDepartment
+	•	RmsOrganization → DefaultOrganization
+
+### New Permission-Related Objects Have Been Registered
+
+ 	•	DefaultApplications: A model for applications that can be used by default.
+	•	DefaultFunctions: A model that represents the functions of an application.
+	•	DefaultPermission: A model configured to grant permissions for applications and functions to organizations, departments, and users.
+As a result, the models DefaultOrganization, DefaultDepartment, and DefaultAccount have been updated to include a new attribute permission: DefaultPermission = None.
+
+```python
+class DefaultAccount(BaseModel):
+
+    id: Optional[str] = None
+    name: Optional[str] = None
+    position: Optional[str] = None
+    rank: Optional[str] = None
+    id_number: Optional[str] = None
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    created_at: Optional[datetime] = None
+    modificated_at: Optional[datetime] = None
+
+    permission: DefaultPermission = None
+
+    ...
+
+```
+
+### Provides an intuitive way for a service to call another service.
+
+	•	Communicator: Calls a service and returns results based on the information of already deployed services. and The configuration file for operation has been added.
+
+```yaml
+services:
+  account:
+    host: 'localhost'
+    port: 5000
+
+7b2c679f-1a62-4a0d-bde8-979ae03870da:
+  service: 'account'
+  api: '/account'
+  method: 'GET'
+  desc: 'getting account information'
+
+```
+
+
+
+## 0.1 : 
+### Middleware Configuration
+
+This project now supports middleware configuration through a centralized settings file. The available middleware options include:
+
+- **Logging**: Customize logging behavior to track and store application logs.
+- **JWT (JSON Web Token)**: Configure JWT for secure token-based authentication.
+- **Gzip Response**: Enable gzip compression for responses to improve performance.
+- **CORS (Cross-Origin Resource Sharing)**: Set up CORS policies to control resource sharing between different domains.
+- **System Preformance Monitoring for Prometheus**: Integrate with Prometheus for system monitoring and metrics collection.
+
+To configure these middleware options, please refer to the settings in the `config/middleware.yaml` file. Each section of the file corresponds to one of the middleware components, and you can modify the parameters according to your requirements.
+
+The code to use is provided below.
+
+```python
+from app.routers import router
+from neoaria.middleware import setupMiddleware
+
+app = createFastAPI()
+app.include_router(router.router)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+And to use it this way, specify it in a similar format in the config/middleware.yaml file within your project folder as follows.
+
+- The latest version adds the ability to send logs through kafka.
+
+```yaml
+logging:
+  enabled: True
+  level: 'DEBUG' # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  include_headers: True # True, False
+  type: kafka # http, syslog, kafka
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  servers:
+    http:
+      host: localhost
+      port: 8080
+      endpoint: /log/create
+    syslog:
+      host: localhost
+      port: 514
+    kafka:
+      producer:
+        bootstrap.servers: '192.168.1.100:9091,192.168.1.100:9092,192.168.1.100:9093,192.168.1.100:9094,192.168.1.100:9095'
+        client.id: 'token-manager'
+        retries: 5
+      topic: 'rms.log'
+  
+jwt:
+  enabled: True
+  secret_key: '******'
+  algorithms: HS256
+  targets:
+    - /api/v1/*
+
+  
+gzip-response:
+  enabled: True
+  minimum_size: 1024
+
+cors:
+  enabled: True
+  allow_credentials: True
+  allow_origins: ['*']
+  allow_methods: ['*']
+  allow_headers: ['*']
+
+performance-monitor:
+  enabled: True
+```
+
+and source.yaml
+
+```yaml
+mongodb_001:
+  type: 'mongodb'
+  data:
+    id:  'mongodb_001'  
+    uri: 'mongodb://user:pass@ip:port'
+    database: 'token'
+    collection: 'white_list'
+
+mongodb_002:
+  type: 'mongodb'
+  data:
+    id:  'mongodb_002'  
+    uri: 'mongodb://user:pass@ip:port'
+    database: 'token'
+    collection: 'black_list'
+
+kafka_001:
+  type: 'kafka'
+  data:
+    id: 'kafka_001'
+    consumer:
+      settings:
+        bootstrap.servers: 'ip1:port1,ip2:port2'
+        group.id: 'kafka.group.id'
+        auto.offset.reset: 'earliest'
+        enable.auto.commit: True
+      topics: 
+        - 'kafka.topic.1'
+    producer:
+      settings:
+        bootstrap.servers: 'ip1:port1,ip2:port2'
+      topics: 
+        - kafka.topic.1
+        - kafka.topic.2
+
+solr_001:
+  type: 'solr'
+  data:
+    id: 'solr_001'
+    url: 'http://ip:port/solr/collection_name'
+
+websocket_001:
+  type: 'websocket'
+  data:
+    id: 'websocket_001'
+```
+
+## Common model information
+Common models have been added for shared use. The common models are as follows:
+
+	1.	Package Name: **neoaria.models.rms** 
+	2.	**class DeployStatus(Enum)** : Enum representing deployment status
+	3.	**class ElementStatus(Enum)** : Enum representing approval status
+	4.	**class Language(Enum)** : Enum representing types of translation languages
+	5.	**class FormType(Enum)** : Enum representing types of documents
+	6.	**class ContentsType(Enum)** : Enum representing types of content
+	7.	**class ImageContentsType(Enum)** : Enum representing types of images
+	8.	**class TranslationStatus(Enum)** : Enum representing translation status
+	9.	**class RmsAccount(BaseModel)** : Class representing account information
+	10.	**class RmsDepartment(BaseModel)** : Class representing department information
+	11.	**class RmsOrganization(BaseModel)** : Class representing organization information
