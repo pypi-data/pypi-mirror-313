@@ -1,0 +1,2 @@
+TYPING_KEYBOARD_3_SECONDS_GOOGLE_DRIVE_DOWNLOAD_URL = 'https://drive.google.com/file/d/179wzrnFwcy15wG4X1_BcGuN6JUSYE6ej/view?usp=sharing'
+SILENCE_10_SECONDS_GOOGLE_DRIVE_DOWNLOAD_URL = 'https://drive.google.com/file/d/1yL8eAMS5FlT3L3tjJsftcema5BW-HFcJ/view?usp=sharing'
