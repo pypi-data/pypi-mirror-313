@@ -1,0 +1,103 @@
+[build-system]
+requires = ["hatchling>=1.26.1"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kevinbotlib"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+keywords = []
+authors = [
+  { name = "Kevin Ahr", email = "meowmeowahr@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+]
+dependencies = [
+  "pyserial~=3.5",
+  "loguru~=0.7.2",
+  "pydantic~=2.9.2",
+  "click~=8.1.7",
+  "paho-mqtt~=2.1.0",
+  "platformdirs~=4.3.6",
+  "pyyaml~=6.0.2",
+  "xbee~=2.3.2",
+  "shortuuid~=1.0.13"
+]
+
+[project.scripts]
+kevinbot = "kevinbotlib.cli:main"
+
+[project.urls]
+Documentation = "https://github.com/meowmeowahr/kevinbotlib#readme"
+Issues = "https://github.com/meowmeowahr/kevinbotlib/issues"
+Source = "https://github.com/meowmeowahr/kevinbotlib"
+
+
+[tool.hatch.version]
+path = "src/kevinbotlib/__about__.py"
+
+[tool.hatch.envs]
+default = { dependencies = ["mkdocs", "mkdocs-material", "mkdocstrings[python]>=0.18"], scripts = { serve-docs = "mkdocs serve", build-docs = "mkdocs build" }}
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/kevinbotlib tests}"
+
+[tool.coverage.run]
+source_pkgs = ["kevinbotlib", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/kevinbotlib/__about__.py",
+]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.13", "3.12", "3.11", "3.10"]
+
+[tool.hatch.envs.hatch-test]
+dependencies = [
+  "coverage-enable-subprocess==1.0",
+  "coverage[toml]~=7.4",
+  "pytest~=8.1",
+  "pytest-mock~=3.12",
+  "pytest-randomly~=3.15",
+  "pytest-rerunfailures~=14.0",
+  "pytest-xdist[psutil]~=3.5",
+]
+
+[tool.hatch.envs.hatch-test.scripts]
+python = ["3.12", "3.11", "3.10"]
+run = "pytest{env:HATCH_TEST_ARGS:} {args}"
+run-cov = "coverage run -m pytest{env:HATCH_TEST_ARGS:} {args}"
+cov-combine = "coverage combine"
+cov-report = "coverage report"
+
+[tool.coverage.paths]
+kevinbotlib = ["src/kevinbotlib", "*/kevinbotlib/src/kevinbotlib"]
+tests = ["tests", "*/kevinbotlib/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[[tool.mypy.overrides]]
+module = "xbee"
+ignore_missing_imports = true
