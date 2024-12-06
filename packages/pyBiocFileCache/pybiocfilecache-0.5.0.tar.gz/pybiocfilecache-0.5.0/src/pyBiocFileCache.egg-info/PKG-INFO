@@ -1,0 +1,116 @@
+Metadata-Version: 2.1
+Name: pyBiocFileCache
+Version: 0.5.0
+Summary: File based cache for resources and metadata
+Home-page: https://github.com/epiviz/pyBiocFileCache
+Author: jkanche
+Author-email: jayaram.kancherla@gmail.com
+License: MIT
+Project-URL: Documentation, https://pyscaffold.org/
+Platform: any
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python
+Description-Content-Type: text/markdown; charset=UTF-8; variant=GFM
+License-File: LICENSE.txt
+License-File: AUTHORS.md
+Requires-Dist: importlib-metadata; python_version < "3.8"
+Requires-Dist: sqlalchemy
+Provides-Extra: testing
+Requires-Dist: setuptools; extra == "testing"
+Requires-Dist: pytest; extra == "testing"
+Requires-Dist: pytest-cov; extra == "testing"
+
+[![Project generated with PyScaffold](https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold)](https://pyscaffold.org/)
+[![PyPI-Server](https://img.shields.io/pypi/v/pyBiocFileCache.svg)](https://pypi.org/project/pyBiocFileCache/)
+![Unit tests](https://github.com/BiocPy/pyBiocFileCache/actions/workflows/pypi-test.yml/badge.svg)
+
+# pyBiocFileCache
+
+`pyBiocFileCache` is a Python package that provides a robust file caching system with resource validation, cache size management, file compression, and resource tagging. Compatible with [BiocFileCache R package](https://github.com/Bioconductor/BiocFileCache).
+
+## Installation
+
+Install from [PyPI](https://pypi.org/project/pyBiocFileCache/),
+
+```bash
+pip install pybiocfilecache
+```
+
+## Quick Start
+
+```python
+from biocfilecache import BiocFileCache
+
+# Initialize cache
+cache = BiocFileCache("path/to/cache/directory")
+
+# Add a file to cache
+resource = cache.add("myfile", "path/to/file.txt")
+
+# Retrieve a file from cache
+resource = cache.get("myfile")
+
+# Use the cached file
+print(resource.rpath)  # Path to cached file
+```
+
+## Advanced Usage
+
+### Configuration
+
+```python
+from biocfilecache import BiocFileCache, CacheConfig
+from datetime import timedelta
+from pathlib import Path
+
+# Create custom configuration
+config = CacheConfig(
+    cache_dir=Path("cache_directory"),
+    max_size_bytes=1024 * 1024 * 1024,  # 1GB
+    cleanup_interval=timedelta(days=7),
+    compression=True
+)
+
+# Initialize cache with configuration
+cache = BiocFileCache(config=config)
+```
+
+### Resource Management
+
+```python
+# Add file with tags and expiration
+from datetime import datetime, timedelta
+
+resource = cache.add(
+    "myfile",
+    "path/to/file.txt",
+    tags=["data", "raw"],
+    expires=datetime.now() + timedelta(days=30)
+)
+
+# List resources by tag
+resources = cache.list_resources(tag="data")
+
+# Search resources
+results = cache.search("myfile", field="rname")
+
+# Update resource
+cache.update("myfile", "path/to/new_file.txt")
+
+# Remove resource
+cache.remove("myfile")
+```
+
+### Cache Statistics and Maintenance
+
+```python
+# Get cache statistics
+stats = cache.get_stats()
+print(stats)
+
+# Clean up expired resources
+removed_count = cache.cleanup()
+
+# Purge entire cache
+cache.purge()
+```
