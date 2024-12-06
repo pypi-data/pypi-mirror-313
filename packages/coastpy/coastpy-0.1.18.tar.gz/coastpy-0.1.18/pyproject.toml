@@ -1,0 +1,85 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "coastpy"
+dynamic = ["version"]
+description = "Python tools for cloud-native coastal analytics."
+authors = [{ name = "Floris Calkoen", email = "your-email@example.com"}]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
+
+dependencies = [
+    "shapely>=2.0.0",
+    "pyproj",
+    "pyogrio",
+    "geopandas",
+    "rioxarray",
+    "fsspec",
+    "pyarrow",
+    "duckdb>=1.0.0",
+    "pystac",
+    "dask_geopandas",
+    "distributed",
+    "antimeridian",
+    "mercantile",
+]
+
+[project.urls]
+Homepage = "https://github.com/TUDelft-CITG/coastpy"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/coastpy/_version.py"
+
+
+[tool.ruff]
+line-length = 88
+src = ["src"]
+target-version = "py312"
+
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "W", # flake8
+  "B",           # flake8-bugbear
+  "I",           # isort
+  "ARG",         # flake8-unused-arguments
+  "C4",          # flake8-comprehensions
+  "EM",          # flake8-errmsg
+  "ICN",         # flake8-import-conventions
+  "PIE",         # flake8-pie
+  "PL",          # pylint
+  "PT",          # flake8-pytest-style
+  "RUF",         # Ruff-specific
+  "SIM",         # flake8-simplify
+  "TID251",      # flake8-tidy-imports.banned-api
+  "UP",          # pyupgrade
+  "YTT",         # flake8-2020
+]
+extend-ignore = [
+  "PLR",    # Design related pylint codes
+  "E501",   # Line too long
+  "E402",   # Module level import not at top of file
+  "PT004",  # Incorrect check, usefixtures is the correct way to do this
+  "RUF012", # Would require a lot of ClassVar's
+]
+
+exclude = []
+unfixable = ["T20", "F841"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
