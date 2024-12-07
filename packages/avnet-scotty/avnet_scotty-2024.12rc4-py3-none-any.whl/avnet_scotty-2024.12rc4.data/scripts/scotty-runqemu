@@ -1,0 +1,89 @@
+#!/bin/bash
+# SPDX-FileCopyrightText: (C) 2022 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+scotty_dir=$(dirname "${0}")
+SCOTTY_QEMUPARAMS="${SCOTTY_QEMUPARAMS:--smp 4}"
+
+# Prints script info
+#
+function print_help() {
+	printf "Scotty-runqemu: A tool script for running qemu using compiled images\n"
+	printf "Usage: scotty-runqemu [option] <image-name>\n"
+	printf "  -h, --help\t\t show this help message and exit\n"
+	printf "  -t, --testimage\t perform image testing\n"
+	printf "  -d <build-dir>, --build-dir <build-dir>
+			 specify build directory\n"
+}
+
+# Runs a compiled image
+#
+# string image_name and additional arguments
+function run_qemu() {
+	DOCKER_EXTRA_ARGS="${DOCKER_EXTRA_ARGS} --network host"
+
+	# shellcheck source=/dev/null
+	source "${scotty_dir}"/scotty
+	run_command scotty runqemu "${@}"
+}
+
+# Compiles and runs a test image
+#
+# scotty arguments and bitbake arguments (must include image_name)
+function test_image() {
+	IFS=" " read -r -a scotty_args <<< "${1}"
+	# This qemu requirement is not explicitly stated in case of an error.
+	if echo "${@}" | grep -v "image-\|-image\|simplecore-simpleswitch-sdk"; then
+		echo "Image name must include \"image-\" or \"-image\" substrings or it must be \"simplecore-simpleswitch-sdk\""
+		exit 1
+	fi
+
+	# shellcheck source=/dev/null
+	source "${scotty_dir}"/scotty
+	run_command scotty runqemu --testimage "${scotty_args[@]}"
+}
+
+
+build_dir="build"
+test_image=false
+
+if ! TEMP=$(getopt -o 'htd:' --long 'help,testimage,build-dir:' \
+		-n "$(basename "${0}")" -- "$@")
+then
+	exit 1
+fi
+eval set -- "${TEMP}"
+
+while true; do
+	case "${1}" in
+		-h|--help)
+			print_help
+			exit 0
+			;;
+
+		-t|--testimage)
+			test_image=true
+			shift 1
+			;;
+
+		-d|--build-dir)
+			build_dir="${2}"
+			shift 2
+			;;
+
+		--)
+			shift
+			break
+			;;
+	esac
+done
+
+# Leftover arguments after processing options are treated as the image
+image="${*}"
+
+if [ true = ${test_image} ]; then
+	test_image "--build-dir ${build_dir}" "${image}"
+	exit 0
+fi
+
+run_qemu --build-dir "${build_dir}" "${image}"
