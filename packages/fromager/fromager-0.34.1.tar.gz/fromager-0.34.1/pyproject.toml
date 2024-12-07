@@ -1,0 +1,134 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fromager"
+authors = [
+    { name = "Mark McLoughlin", email = "markmc@redhat.com" },
+    { name = "Doug Hellmann", email = "dhellmann@redhat.com" },
+]
+description = "Wheel maker"
+readme = "README.md"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Utilities",
+]
+
+requires-python = ">=3.11"
+
+[tool.setuptools.dynamic]
+optional-dependencies.build = { file = ["requirements-build.txt"] }
+optional-dependencies.mypy = { file = ["requirements-mypy.txt"] }
+optional-dependencies.test = { file = ["requirements-test.txt"] }
+optional-dependencies.docs = { file = ["docs/requirements.txt"] }
+dependencies = { file = ["requirements.txt"] }
+
+[project.urls]
+Repository = "https://github.com/python-wheel-build/fromager"
+Documentation = "https://fromager.readthedocs.io/en/latest/"
+
+[project.scripts]
+fromager = "fromager.__main__:invoke_main"
+
+[project.entry-points."fromager.override_methods"]
+# override methods and their default implementations
+get_build_system_dependencies = "fromager.dependencies:default_get_build_system_dependencies"
+get_build_backend_dependencies = "fromager.dependencies:default_get_build_backend_dependencies"
+get_build_sdist_dependencies = "fromager.dependencies:default_get_build_sdist_dependencies"
+resolver_provider = "fromager.resolver:default_resolver_provider"
+download_source = "fromager.sources:default_download_source"
+resolve_source = "fromager.sources:default_resolve_source"
+build_sdist = "fromager.sources:default_build_sdist"
+build_wheel = "fromager.wheels:default_build_wheel"
+
+[tool.coverage.run]
+branch = true
+parallel = true
+relative_files = true
+source = ["fromager", "tests/"]
+
+[tool.coverage.paths]
+source = ["src/fromager", ".tox/**/site-packages/fromager"]
+tests = ["tests/"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "@abc.abstractmethod",
+    "@typing.overload",
+    "if typing.TYPE_CHECKING",
+]
+
+[tool.setuptools_scm]
+version_file = "src/fromager/version.py"
+
+[tool.ruff]
+target-version = "py311"
+# same as black's default line length
+line-length = 88
+exclude = [
+    "src/fromager/version.py", # file is generated dynamically, out of our control
+]
+
+[tool.ruff.lint]
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+select = [
+    "B",   # flake8-bugbear
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "Q",   # flake8-quotes
+    "I",   # isort
+    "N",   # pep8-naming
+    "W",   # pycodestyle
+    "RUF", # ruff-specific rules
+    "UP",  # pyupgrade
+    "TID", # flake8-tidy-imports
+]
+ignore = [
+    "E501",   # Line too long
+    "RUF005", # Consider iterable unpacking instead of concatenation
+    "TID252", # Prefer absolute imports over relative imports from parent modules
+    "UP015",  # Unnecessary open mode parameters
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["fromager"]
+
+[tool.mypy]
+mypy_path = ["src"]
+# TODO: tighten type checks
+# check_untyped_defs = true
+# disallow_incomplete_defs = true
+# disallow_untyped_defs = true
+# warn_return_any = true
+
+# TODO: remove excludes and silent follow
+follow_imports = "silent"
+exclude = [
+    "^src/fromager/sources\\.py$",
+    "^src/fromager/sdist\\.py$",
+    "^src/fromager/commands/build\\.py$",
+    "^src/fromager/settings\\.py$",
+]
+
+[[tool.mypy.overrides]]
+# packages without typing annotations and stubs
+module = ["pyproject_hooks", "requests_mock", "resolver", "stevedore"]
+ignore_missing_imports = true
