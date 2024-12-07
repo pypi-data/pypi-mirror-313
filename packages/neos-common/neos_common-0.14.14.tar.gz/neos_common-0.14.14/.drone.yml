@@ -1,0 +1,224 @@
+kind: pipeline
+name: Test
+
+trigger:
+  ref:
+    include:
+      - refs/heads/main
+      - refs/pull/**
+      - refs/tags/v**
+
+steps:
+  - name: Test Python
+    image: python:3.10.6
+    commands:
+      - python -m pip install --upgrade uv invoke
+      - uv sync --all-extras
+      - uv run pytest --cov --cov-report=xml
+      - uv run pre-commit run --all-files
+
+---
+kind: pipeline
+name: SonarQube
+
+trigger:
+  ref:
+    include:
+      - refs/heads/main
+      - refs/pull/**
+      - refs/tags/v**
+
+steps:
+  - name: sonarqube-analysis
+    image: sonarsource/sonar-scanner-cli:latest
+    network_mode: host
+    user: root
+    environment:
+      SONAR_HOST_URL:
+        from_secret: SONARQUBE_HOST
+      SONAR_TOKEN:
+        from_secret: SONARQUBE_TOKEN
+    commands:
+      - VERSION=$(cat neos_common/__init__.py | sed 's/^.*__version__ = "\([^"]*\).*/\1/')
+      - sonar-scanner -X -Dsonar.projectKey=NEOS-Critical_neos-platform-common_AYSllwJcMpAbRG9xVdpa -Dsonar.projectVersion=v$VERSION-$DRONE_TAG
+
+  - name: dependency-analysis
+    image: aquasec/trivy:latest
+    network_mode: host
+    commands:
+      - wget -c https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl
+      - mkdir -p reports
+      - trivy fs --ignore-unfixed --vuln-type os,library --format template --template "@html.tpl" -o reports/scan.html ./
+      - trivy fs --vuln-type os,library --format json -o reports/trivy.json ./
+
+---
+kind: pipeline
+name: publish
+depends_on:
+  - Test
+  - SonarQube
+
+trigger:
+  ref:
+    include:
+      - refs/tags/v**
+
+steps:
+  - name: publish
+    image: python:3.10.6
+    environment:
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD:
+        from_secret: PYPI_TOKEN
+    commands:
+      - python -m pip install --upgrade uv
+      - uv build
+      - uvx twine upload dist/*
+
+
+
+---
+  kind: pipeline
+  name: devsecops
+
+
+  trigger:
+    ref:
+      branch:
+        - devsecops-security-checks
+
+
+  environment:
+    DD_URL: "http://defectdojo-defectdojo-django.defectdojo.svc.cluster.local"
+    DD_PRODUCT_TYPE_NAME: "Neos"
+    DD_PRODUCT_NAME: "neos-platform-common"
+    DD_SSL_VERIFY: "False"
+
+
+  steps:
+    - name: fetching
+      image: alpine:3.20
+      network_mode: host
+      commands:
+        - mkdir -p security_reports
+
+
+    - name: cloc
+      image: docker.cloudsmith.io/neom/platform-containers/plugins/devsecops-cloc:ccadfb
+      pull: if-not-exists
+      settings:
+        file_name: "security_reports/cloc.json"
+      depends_on:
+        - fetching
+
+
+    - name: cloc-dojo
+      image: docker.cloudsmith.io/neom/platform-containers/plugins:devsecops-dojo-import
+      settings:
+        dojo_url: "http://defectdojo-defectdojo-django.defectdojo.svc.cluster.local"
+        dojo_api_key:
+          from_secret: DRONE_DD_API_KEY
+        product_type_name: "Neos"
+        product_name: "neos-platform-common"
+        import_languages: true
+        file_name: "security_reports/cloc.json"
+      depends_on:
+        - cloc
+
+
+
+
+    - name: gitleaks
+      image: docker.cloudsmith.io/neom/platform-containers/plugins:devsecops-gitleaks
+      pull: if-not-exists
+      settings:
+        file_name: "security_reports/gitleaks.json"
+      depends_on:
+        - fetching
+
+
+    - name: gitleaks-dojo
+      image: docker.cloudsmith.io/neom/platform-containers/plugins:devsecops-dojo-import
+      pull: if-not-exists
+      settings:
+        dojo_url: "http://defectdojo-defectdojo-django.defectdojo.svc.cluster.local"
+        dojo_api_key:
+          from_secret: DRONE_DD_API_KEY
+        product_type_name: "Neos"
+        product_name: "neos-platform-common"
+        test_type_name: "Gitleaks Scan"
+        test_name: "Secrets scan"
+        file_name: "security_reports/gitleaks.json"
+      depends_on:
+        - gitleaks
+
+
+    - name: bandit
+      image: docker.cloudsmith.io/neom/platform-containers/plugins/devsecops-bandit:b7e277
+      pull: if-not-exists
+      settings:
+        exclusions:
+          - ./tests/
+        file_name: "security_reports/bandit-sast.json"
+      depends_on:
+        - fetching
+
+
+    - name: bandit-dojo
+      image: docker.cloudsmith.io/neom/platform-containers/plugins:devsecops-dojo-import
+      pull: if-not-exists
+      settings:
+        dojo_url: "http://defectdojo-defectdojo-django.defectdojo.svc.cluster.local"
+        dojo_api_key:
+          from_secret: DRONE_DD_API_KEY
+        product_type_name: "Neos"
+        product_name: "neos-platform-common"
+        test_type_name: "Bandit Scan"
+        test_name: "Bandit SAST Scan"
+        file_name: "security_reports/bandit-sast.json"
+      depends_on:
+        - bandit
+
+
+    - name: semgrep
+      image: docker.cloudsmith.io/neom/platform-containers/plugins/devsecops-semgrep:1f6904
+      pull: if-not-exists
+      settings:
+        exclusions:
+          - tests/
+        file_name: "security_reports/semgrep-sast.json"
+      depends_on:
+        - fetching
+
+
+    - name: semgrep-dojo
+      image: docker.cloudsmith.io/neom/platform-containers/plugins:devsecops-dojo-import
+      pull: if-not-exists
+      settings:
+        dojo_url: "http://defectdojo-defectdojo-django.defectdojo.svc.cluster.local"
+        dojo_api_key:
+          from_secret: DRONE_DD_API_KEY
+        product_type_name: "Neos"
+        product_name: "neos-platform-common"
+        test_type_name: "Semgrep JSON Report"
+        test_name: "Semgrep SAST Scan"
+        file_name: "security_reports/semgrep-sast.json"
+      depends_on:
+        - semgrep
+
+
+    - name: notify
+      image: docker.cloudsmith.io/neom/platform-containers/devsecops-tools
+      pull: if-not-exists
+      commands:
+        - rm -rf security_reports
+        - echo "Security analysis done."
+      depends_on:
+        - cloc-dojo
+        - gitleaks-dojo
+        - bandit-dojo
+        - semgrep-dojo
+
+
+  image_pull_secrets:
+  - CLOUDSMITH_DOCKER
