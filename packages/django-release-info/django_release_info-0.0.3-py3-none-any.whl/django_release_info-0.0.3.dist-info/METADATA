@@ -1,0 +1,78 @@
+Metadata-Version: 2.1
+Name: django-release-info
+Version: 0.0.3
+Summary: A Django app to show CHANGELOG.md.
+Author-email: pragmatic minds <info@pragmaticminds.de>
+Project-URL: Homepage, https://github.com/pragmaticindustries/django-release-info
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Django
+Classifier: Framework :: Django :: 3.2
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: Dynamic Content
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: Django>=3.2
+Requires-Dist: markdown==3.7
+
+# django release info app
+
+Show you CHANGELOG.md in your application
+
+## How to use
+
+Install the python package and add the app to installed apps
+
+`pip install django-release-info`
+
+Add you assets like logo and fonts to static files.
+
+Add the config to settings.py
+
+```
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "release_info"
+]
+```
+
+
+```python
+RELEASE_INFO = {
+    "product_name": "Django Release Info",
+    "author": "pragmatic minds",
+    "author_url": "https://pragmaticminds.de",
+    "contact_email": "info@pragmaticminds.de",
+    "contact_text": "You need help or have a question?",
+    "picture_path": "images/logo.svg",
+    "fonts": {
+        "header": {"name": "FuturaStd-Medium", "url": "fonts/FuturaStd-Medium.woff2"},
+        "content" : {"name": "FuturaStd-Book", "url": "fonts/FuturaStd-Book.woff2"},
+    },
+}
+```
+
+Add the page URL to urls.py
+
+```
+urlpatterns = [
+    .....
+    path("release", include("release_info.urls")),
+    ......
+]
+```
