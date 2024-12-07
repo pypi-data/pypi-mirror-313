@@ -1,0 +1,1 @@
+ALPHASCREENS_FOLDER = 'resources/alphascreens/'
