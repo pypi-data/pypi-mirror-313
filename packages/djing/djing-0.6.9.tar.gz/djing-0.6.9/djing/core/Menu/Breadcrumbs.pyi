@@ -1,0 +1,9 @@
+from Illuminate.Contracts.Support.JsonSerializable import JsonSerializable
+from djing.core.AuthorizedToSee import AuthorizedToSee as AuthorizedToSee
+from djing.core.Http.Requests.DjingRequest import DjingRequest as DjingRequest
+from djing.core.Makeable import Makeable as Makeable
+
+class Breadcrumbs(AuthorizedToSee, Makeable, JsonSerializable):
+    def __init__(self, items=[]) -> None: ...
+    def items(self, items) -> None: ...
+    def json_serialize(self) -> list: ...

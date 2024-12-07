@@ -1,0 +1,13 @@
+from Illuminate.Contracts.Support.JsonSerializable import JsonSerializable
+from _typeshed import Incomplete
+from djing.core.AuthorizedToSee import AuthorizedToSee as AuthorizedToSee
+from djing.core.Http.Requests.DjingRequest import DjingRequest as DjingRequest
+from djing.core.Makeable import Makeable as Makeable
+from djing.core.Resource import Resource as Resource
+
+class Breadcrumb(AuthorizedToSee, Makeable, JsonSerializable):
+    def __init__(self, name, path: Incomplete | None = None) -> None: ...
+    def path(self, path): ...
+    @classmethod
+    def resource(cls, resource_class: type[Resource]): ...
+    def json_serialize(self) -> dict: ...

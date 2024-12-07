@@ -1,0 +1,16 @@
+from djing.core.Element import Element as Element
+
+class Card(Element):
+    FULL_WIDTH: str
+    ONE_THIRD_WIDTH: str
+    ONE_HALF_WIDTH: str
+    ONE_QUARTER_WIDTH: str
+    TWO_THIRDS_WIDTH: str
+    THREE_QUARTERS_WIDTH: str
+    FIXED_HEIGHT: str
+    DYNAMIC_HEIGHT: str
+    def width(self, width): ...
+    def hight(self, height): ...
+    def dynamic_hight(self): ...
+    def fixed_hight(self): ...
+    def json_serialize(self) -> dict: ...

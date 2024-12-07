@@ -1,0 +1,6 @@
+from djing.core.Http.Requests.ResourceIndexRequest import ResourceIndexRequest as ResourceIndexRequest
+from djing.core.Http.Resources.Resource import Resource as Resource
+
+class IndexViewResource(Resource):
+    def authorized_resource_for_request(self, request: ResourceIndexRequest): ...
+    def json(self, request: ResourceIndexRequest): ...

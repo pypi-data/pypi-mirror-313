@@ -1,0 +1,6 @@
+from djing.core.Fields.Avatar import Avatar as Avatar
+from djing.core.Fields.Unfillable import Unfillable as Unfillable
+
+class Gravatar(Avatar, Unfillable):
+    def __init__(self, name: str = 'Avatar', attribute: str = 'email') -> None: ...
+    def json_serialize(self): ...
