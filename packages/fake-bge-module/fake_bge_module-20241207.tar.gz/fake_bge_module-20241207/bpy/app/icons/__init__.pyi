@@ -1,0 +1,26 @@
+import typing
+import collections.abc
+import typing_extensions
+
+def new_triangles(range, coords: bytes | None, colors: bytes | None) -> int:
+    """Create a new icon from triangle geometry.
+
+    :param range: Pair of ints.
+    :param coords: Sequence of bytes (6 floats for one triangle) for (X, Y) coordinates.
+    :type coords: bytes | None
+    :param colors: Sequence of bytes (12 for one triangles) for RGBA.
+    :type colors: bytes | None
+    :return: Unique icon value (pass to interface icon_value argument).
+    :rtype: int
+    """
+
+def new_triangles_from_file(filepath) -> int:
+    """Create a new icon from triangle geometry.
+
+    :param filepath: File path.
+    :return: Unique icon value (pass to interface icon_value argument).
+    :rtype: int
+    """
+
+def release(icon_id):
+    """Release the icon."""
