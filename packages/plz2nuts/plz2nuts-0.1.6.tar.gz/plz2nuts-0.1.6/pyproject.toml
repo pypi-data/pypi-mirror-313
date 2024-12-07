@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "dirty-tag"
+write_to = "plz_to_nuts/_version.py"
+write_to_template = "__version__ = '{version}'\n"
+
+[project]
+name = "plz2nuts"
+dynamic = ["version"]
+authors = [
+    { name = "Jonathan Sejdija", email = "sejdija@fh-aachen.de" }
+]
+description = "A Python package to convert German ZIP codes to NUTS IDs."
+readme = "README.md"
+license = { file = "LICENSES/AGPL-3.0-or-later.txt" }
+requires-python = ">=3.7"
+dependencies = ["pgeocode"]
+
+[project.urls]
+Documentation = "https://github.com/NOWUM/plz-to-nuts"
+
+[project.scripts]
+plz2nuts = "plz_to_nuts.main:plz2nuts_cli"
+
+[tool.setuptools]
+packages = ["plz_to_nuts"]
