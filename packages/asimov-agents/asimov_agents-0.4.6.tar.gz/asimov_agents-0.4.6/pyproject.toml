@@ -1,0 +1,108 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "asimov-agents"
+dynamic = ["version"]
+description = "A library of primitives for building agentic flows."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+keywords = ["git", "agent", "bismuth", "ai"]
+authors = [
+  { name = "Ian Butler", email = "ian@bismuth.cloud" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "gitpython>=3.1.0,<4.0.0",
+  "httpx>=0.23.0,<1.0.0",
+  "opentelemetry-instrumentation-httpx",
+  "aioboto3>=13.0.0",
+  "pydantic>=2.0.0",
+  "psycopg2-binary>=2.9.0",
+  "opentelemetry-instrumentation-psycopg2",
+  "lupa==2.2.0",
+  "jsonpickle>=3.0.0",
+  "redis>=5.0.0",
+  "opentelemetry-api>=1.27.0",
+  "google-cloud-aiplatform==1.69.0",
+  "backoff>=2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black>=23.1.0",
+  "mypy>=1.0.0",
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0",
+  "pytest-asyncio>=0.24.0",
+  "graphviz",
+]
+
+[project.urls]
+Homepage = "https://github.com/BismuthCloud/asimov"
+URL = "https://github.com/BismuthCloud/asimov"
+Documentation = "https://github.com/BismuthCloud/asimov"
+Issues = "https://github.com/BismuthCloud/asimov/issues"
+Source = "https://github.com/BismuthCloud/asimov"
+
+[tool.hatch.version]
+path = "asimov/__init__.py"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["312"]
+
+[tool.hatch.envs.hatch-test]
+extra-dependencies = [
+  "pytest-asyncio>=0.24.0",
+  "pytest-timeout>=2.0.0",
+]
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+  # types-lupa is wrong in a bunch of places
+  "types-aioboto3>=13.0.0",
+]
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:asimov}"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "asimov/__init__.py"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["asimov/"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/.github",
+  "/docs",
+  "/tests",
+]
+
+[tool.pytest.ini_options]
+timeout = 10
+timeout_method = "thread"
+asyncio_default_fixture_loop_scope = "function"
