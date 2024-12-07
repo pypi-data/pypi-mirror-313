@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "poetry-versions-plugin"
+version = "0.5.0"
+description = "Poetry plugin that automates version management and records Git information for Python projects."
+authors = ["xy.kong <xy.kong@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "poetry_versions_plugin" }]
+license = "Apache-2.0"
+homepage = "https://github.com/xykong/poetry-versions-plugin"
+repository = "https://github.com/xykong/poetry-versions-plugin"
+documentation = "https://github.com/xykong/poetry-versions-plugin/blob/master/README.md"
+keywords = ["packaging", "poetry", "plugin", "versioning", "git"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4"
+gitpython = "^3.1.43"
+poetry = "^1.8.4"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+
+[tool.versions]
+branch = "release/0.5.0"
+commit = "fdae5e8"
+commit_count = 58
+is_dirty = false
+datetime = "2024-12-06 18:19:55"
+version = "0.5.0"
+
+[tool.versions.settings]
+allow_dirty = false
+commit = true
+commit_on = ["major", "minor"]
+commit_message = "Bump version: {current_version} → {new_version}"
+filename = [
+    "poetry_versions_plugin/versions.py",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.plugins."poetry.plugin"]
+versions = "poetry_versions_plugin.plugin:VersionsPlugin"
+
+[tool.poetry.plugins."poetry.application.plugin"]
+versions = "poetry_versions_plugin.plugin:VersionsApplicationPlugin"
+
+[tool.poetry.scripts]
+release = "scripts.release:main"
