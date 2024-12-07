@@ -1,0 +1,68 @@
+Metadata-Version: 2.3
+Name: anomed-challenge
+Version: 0.0.2
+Summary: A library aiding to create challenges for the AnoMed competition platform.
+Author-email: Yannik Potdevin <ypo.uzl@proton.me>
+Maintainer-email: Yannik Potdevin <ypo.uzl@proton.me>
+License: MIT License
+        
+        Copyright (c) 2024 Yannik Potdevin
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Requires-Python: >=3.10
+Requires-Dist: anomed-utils
+Requires-Dist: falcon~=4.0
+Requires-Dist: numpy~=1.26
+Provides-Extra: dev
+Requires-Dist: ruff~=0.7; extra == 'dev'
+Provides-Extra: test
+Requires-Dist: coverage~=7.6; extra == 'test'
+Requires-Dist: pytest~=8.3; extra == 'test'
+Description-Content-Type: text/markdown
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+![pipeline status](https://git.uni-luebeck.de/its/anomed/challenge/badges/main/pipeline.svg?ignore_skipped=true)
+![coverage](https://git.uni-luebeck.de/its/anomed/challenge/badges/main/coverage.svg?job=run_tests)
+
+# Challenge
+
+A library aiding to create challenges for the AnoMed competition platform.
+
+# Usage Example
+
+```python
+import challenge
+import challenge_server
+import numpy as np
+from challenge import InMemoryNumpyArrays
+
+
+example_challenge = challenge.SupervisedLearningMIAChallenge(
+    training_data=InMemoryNumpyArrays(X=np.arange(70), y=np.arange(70)),
+    tuning_data=InMemoryNumpyArrays(X=np.arange(30), y=np.arange(30)),
+    validation_data=InMemoryNumpyArrays(X=np.arange(20), y=np.arange(20)),
+    anonymizer_evaluator=challenge.strict_binary_accuracy,
+    MIA_evaluator=challenge.evaluate_MIA,
+)
+app = challenge_server.supervised_learning_MIA_challenge_server_factory(
+    example_challenge
+)
+```
