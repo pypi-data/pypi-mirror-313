@@ -1,0 +1,114 @@
+{% include '_head.html' %}
+<script type="text/javascript" src="/static/beheer.js"></script>
+<link rel="stylesheet" href="/static/beheer.css" />
+{% set notadminonly = ['s_uni', 's_program', 's_stream', 's_group'] %}
+</head>
+<body>
+    {% include '_menu.html' %}
+        <menu class="submenu">
+            <ul>
+                {% if props.magda(['admin']) %}
+                    <li style="background-color: dodgerblue; color: white;"><a href="/beheer/courses">courses</a></li>
+                    <li style="width: 2px; height: 2em; padding: 0; background-color: black; margin-left: 0.25em;"></li>
+                {% endif %}
+                {% for thing in lijsten %}
+                    {% if thing in notadminonly and thing != 's_course' %}
+                        <li class="{{ 'actief'|safe if thing == syslname }}"><a href="/beheer/{{ thing }}">{{ lijsten[thing] }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if props.magda(['admin']) %}
+                    <li style="width: 2px; height: 2em; padding: 0; background-color: black; margin-left: 0.25em;"></li>
+                {% endif %}
+
+                {% for thing in lijsten %}
+                    {% if thing not in notadminonly and props.magda(['admin']) and thing != 's_courseX' %}
+                        <li class="{{ 'actief'|safe if thing == syslname }}"><a href="/beheer/{{ thing }}">{{ lijsten[thing] }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if props.magda(['admin']) %}
+                    <li style="width: 2px; height: 2em; padding: 0; background-color: black; margin-left: 0.25em;"></li>
+                    <li style="background-color: red; color: white;"><a href="/beheer/generate/all">generate</a></li>
+                {% endif %}
+            </ul>
+        </menu>
+    </header>
+    <main>
+        {% if syslname != '' %}
+            {% if thysl is not none %}
+                <section class="form">
+                    <form class="edit" name="edit" action="/beheer/{{ syslname }}/{{ id }}" method="post">
+                        <p>
+                            <span>id</span>
+                            <input readonly type="number" name="id" value="{{ thysl._try('id') }}">
+                            <input type="hidden" name="ordering" value="">
+                        </p>
+                        <p>
+                            <span>name</span>
+                            <input type="text" name="name" value="{{ thysl._try('name') }}">
+                        </p>
+                        <p>
+                            <span>color</span>
+                            <input type="color" name="color" value="{{ thysl._try('color') }}">
+                        </p>
+                        <p>
+                            <span>extra</span>
+                            <input type="text" name="extra" value="{{ thysl._try('extra') }}">
+                        </p>
+                        <p>
+                            <span>status</span>
+                            passive: <input type="radio" name="status" value="0" {{ 'checked' if thysl._try('status') == 0 }}>
+                            active: <input type="radio" name="status" value="1" {{ 'checked' if thysl._try('status') == 1 }}>
+                        </p>
+                        <p>
+                            <span><button class="new" style="color: green;">New</button></span>
+                            {% if props.magda(['admin']) %}
+                                <input class="" style="color: var(--signaal);" type="submit" name="action" value="Delete">
+                            {% endif %}
+                            <input class="" type="submit" name="action" value="Save">
+                        </p>
+                    </form>
+                </section>
+            {% endif %}
+
+            <section class="table">
+                <form name="order" method="post" action="/beheer/ordering/{{ syslname }}">
+                    <input type="hidden" name="ordering" value="">
+                    <input type="submit" name="order" value="Save ordering">
+                </form>
+                <table>
+                    <thead>
+                        <tr>
+                        {% for thing in fields %}
+                            {% if thing == 'ordering' %}
+                                <th style="display: none;" id="{{ thing }}"><span></span> {{ thing }}</th>
+                            {% else %}
+                                <th id="{{ thing }}"><span></span> {{ thing }}</th>
+                            {% endif %}
+                        {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody class="sort">
+                    {% for row in allitems %}
+                        <tr data-id="{{ row._try('id') }}" data-ordering="{{ row._try('ordering') }}">
+                            <td class="idfield"><a class="asbutton" href="/beheer/{{ syslname }}/{{ row._try('id') }}">{{ row._try('id') }}</a></td>
+                            <td>{{ row._try('name')|nonone }}</td>
+                            <td class="kleur" style="background-color: {{ row._try('color') }};">{{ row._try('color')|nonone }}</td>
+                            <td>{{ row._try('extra')|nonone }}</td>
+                            <td>{% if row._try('status') == 1 %}active{% else %}passive{% endif %}</td>
+                            <td style="display: none;" >{{ row._try('ordering') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        {% endif %}
+    </main>
+<script>
+    // if id given in url
+    let id = {{ id }};
+    let syslname = "{{ syslname }}";
+</script>
+</body>
+</html>
