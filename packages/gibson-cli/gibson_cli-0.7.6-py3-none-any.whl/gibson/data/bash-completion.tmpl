@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+# bash completion for Gibson CLI
+
+if ! command -v gibson &>/dev/null; then
+    return
+fi
+
+__gibson_generate_completion() {
+    declare current_word
+    current_word="${COMP_WORDS[COMP_CWORD]}"
+    # shellcheck disable=SC2207
+    COMPREPLY=($(compgen -W "$1" -- "${current_word}"))
+    return 0
+}
+
+__gibson_commands_and_options() {
+    declare current_word
+    declare command
+
+    current_word="${COMP_WORDS[COMP_CWORD]}"
+    COMMANDS='
+        auth
+        build
+        code
+        conf
+        count
+        dev
+        forget
+        help
+        import
+        list
+        merge
+        modify
+        new
+        remove
+        rename
+        rewrite
+        show
+        tree
+        q
+    '
+    SHORT_OPTIONS='-v'
+    LONG_OPTIONS='--version'
+    OPTIONS="${SHORT_OPTIONS} ${LONG_OPTIONS}"
+
+    case "${current_word}" in
+    -*) __gibson_generate_completion "${OPTIONS}" ;;
+    *) __gibson_generate_completion "${COMMANDS}" ;;
+    esac
+}
+
+__gibson_completions() {
+    declare previous_word
+    previous_word="${COMP_WORDS[COMP_CWORD - 1]}"
+
+    case "${previous_word}" in
+    gibson) __gibson_commands_and_options ;;
+    auth) __gibson_generate_completion "login logout" ;;
+    code) __gibson_generate_completion "api base entity models schemas tests" ;;
+    conf) __gibson_generate_completion "id api::key code::custom::model::class code::custom::model::path code::frameworks::api code::frameworks::model code::frameworks::revision code::frameworks::schema code::frameworks::test code::language datastore::type datastore::uri meta::project::description" ;;
+    dev) __gibson_generate_completion "on off" ;;
+    forget) __gibson_generate_completion "stored last all" ;;
+    import) __gibson_generate_completion "api mysql pg_dump openapi" ;;
+    list) __gibson_generate_completion "entities projects" ;;
+    new) __gibson_generate_completion "project module entity" ;;
+    rename) __gibson_generate_completion "entity" ;;
+    esac
+
+    return 0
+}
+
+# complete is a bash builtin, but recent versions of ZSH come with a function
+# called bashcompinit that will create a complete in ZSH. If the user is in
+# ZSH, load and run bashcompinit before calling the complete function.
+if [[ -n ${ZSH_VERSION-} ]]; then
+    # First calling compinit (only if not called yet!)
+    # and then bashcompinit as mentioned by zsh man page.
+    if ! command -v compinit >/dev/null; then
+        autoload -U +X compinit && if [[ ${ZSH_DISABLE_COMPFIX-} = true ]]; then
+            compinit -u
+        else
+            compinit
+        fi
+    fi
+    autoload -U +X bashcompinit && bashcompinit
+fi
+
+complete -o default -F __gibson_completions gibson
