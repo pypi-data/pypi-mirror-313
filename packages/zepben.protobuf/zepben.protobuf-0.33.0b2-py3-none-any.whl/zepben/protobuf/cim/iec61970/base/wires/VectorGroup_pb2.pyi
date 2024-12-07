@@ -1,0 +1,174 @@
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf import descriptor as _descriptor
+from typing import ClassVar as _ClassVar
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class VectorGroup(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = []
+    UNKNOWN: _ClassVar[VectorGroup]
+    DD0: _ClassVar[VectorGroup]
+    DZ0: _ClassVar[VectorGroup]
+    DZN0: _ClassVar[VectorGroup]
+    YNY0: _ClassVar[VectorGroup]
+    YNYN0: _ClassVar[VectorGroup]
+    YY0: _ClassVar[VectorGroup]
+    YYN0: _ClassVar[VectorGroup]
+    ZD0: _ClassVar[VectorGroup]
+    ZND0: _ClassVar[VectorGroup]
+    DYN1: _ClassVar[VectorGroup]
+    DZ1: _ClassVar[VectorGroup]
+    DZN1: _ClassVar[VectorGroup]
+    YD1: _ClassVar[VectorGroup]
+    YND1: _ClassVar[VectorGroup]
+    YNZN1: _ClassVar[VectorGroup]
+    YZ1: _ClassVar[VectorGroup]
+    YZN1: _ClassVar[VectorGroup]
+    ZD1: _ClassVar[VectorGroup]
+    ZND1: _ClassVar[VectorGroup]
+    ZNYN1: _ClassVar[VectorGroup]
+    ZY1: _ClassVar[VectorGroup]
+    ZYN1: _ClassVar[VectorGroup]
+    DY5: _ClassVar[VectorGroup]
+    DYN5: _ClassVar[VectorGroup]
+    YD5: _ClassVar[VectorGroup]
+    YND5: _ClassVar[VectorGroup]
+    YNZ5: _ClassVar[VectorGroup]
+    YNZN5: _ClassVar[VectorGroup]
+    YZ5: _ClassVar[VectorGroup]
+    YZN5: _ClassVar[VectorGroup]
+    ZNY5: _ClassVar[VectorGroup]
+    ZNYN5: _ClassVar[VectorGroup]
+    ZY5: _ClassVar[VectorGroup]
+    ZYN5: _ClassVar[VectorGroup]
+    DD6: _ClassVar[VectorGroup]
+    DZ6: _ClassVar[VectorGroup]
+    DZN6: _ClassVar[VectorGroup]
+    YNY6: _ClassVar[VectorGroup]
+    YNYN6: _ClassVar[VectorGroup]
+    YY6: _ClassVar[VectorGroup]
+    YYN6: _ClassVar[VectorGroup]
+    ZD6: _ClassVar[VectorGroup]
+    ZND6: _ClassVar[VectorGroup]
+    DY7: _ClassVar[VectorGroup]
+    DYN7: _ClassVar[VectorGroup]
+    DZ7: _ClassVar[VectorGroup]
+    DZN7: _ClassVar[VectorGroup]
+    YD7: _ClassVar[VectorGroup]
+    YND7: _ClassVar[VectorGroup]
+    YNZN7: _ClassVar[VectorGroup]
+    YZ7: _ClassVar[VectorGroup]
+    YZN7: _ClassVar[VectorGroup]
+    ZD7: _ClassVar[VectorGroup]
+    ZND7: _ClassVar[VectorGroup]
+    ZNYN7: _ClassVar[VectorGroup]
+    ZY7: _ClassVar[VectorGroup]
+    ZYN7: _ClassVar[VectorGroup]
+    DY11: _ClassVar[VectorGroup]
+    DYN11: _ClassVar[VectorGroup]
+    YD11: _ClassVar[VectorGroup]
+    YND11: _ClassVar[VectorGroup]
+    YNZ11: _ClassVar[VectorGroup]
+    YNZN11: _ClassVar[VectorGroup]
+    YZ11: _ClassVar[VectorGroup]
+    YZN11: _ClassVar[VectorGroup]
+    ZNY11: _ClassVar[VectorGroup]
+    ZNYN11: _ClassVar[VectorGroup]
+    ZY11: _ClassVar[VectorGroup]
+    ZYN11: _ClassVar[VectorGroup]
+    DY1: _ClassVar[VectorGroup]
+    Y0: _ClassVar[VectorGroup]
+    YN0: _ClassVar[VectorGroup]
+    D0: _ClassVar[VectorGroup]
+    ZNY1: _ClassVar[VectorGroup]
+    ZNY7: _ClassVar[VectorGroup]
+    DDN0: _ClassVar[VectorGroup]
+    DND0: _ClassVar[VectorGroup]
+    DNYN1: _ClassVar[VectorGroup]
+    DNYN11: _ClassVar[VectorGroup]
+    YNDN1: _ClassVar[VectorGroup]
+    YNDN11: _ClassVar[VectorGroup]
+    TTN11: _ClassVar[VectorGroup]
+UNKNOWN: VectorGroup
+DD0: VectorGroup
+DZ0: VectorGroup
+DZN0: VectorGroup
+YNY0: VectorGroup
+YNYN0: VectorGroup
+YY0: VectorGroup
+YYN0: VectorGroup
+ZD0: VectorGroup
+ZND0: VectorGroup
+DYN1: VectorGroup
+DZ1: VectorGroup
+DZN1: VectorGroup
+YD1: VectorGroup
+YND1: VectorGroup
+YNZN1: VectorGroup
+YZ1: VectorGroup
+YZN1: VectorGroup
+ZD1: VectorGroup
+ZND1: VectorGroup
+ZNYN1: VectorGroup
+ZY1: VectorGroup
+ZYN1: VectorGroup
+DY5: VectorGroup
+DYN5: VectorGroup
+YD5: VectorGroup
+YND5: VectorGroup
+YNZ5: VectorGroup
+YNZN5: VectorGroup
+YZ5: VectorGroup
+YZN5: VectorGroup
+ZNY5: VectorGroup
+ZNYN5: VectorGroup
+ZY5: VectorGroup
+ZYN5: VectorGroup
+DD6: VectorGroup
+DZ6: VectorGroup
+DZN6: VectorGroup
+YNY6: VectorGroup
+YNYN6: VectorGroup
+YY6: VectorGroup
+YYN6: VectorGroup
+ZD6: VectorGroup
+ZND6: VectorGroup
+DY7: VectorGroup
+DYN7: VectorGroup
+DZ7: VectorGroup
+DZN7: VectorGroup
+YD7: VectorGroup
+YND7: VectorGroup
+YNZN7: VectorGroup
+YZ7: VectorGroup
+YZN7: VectorGroup
+ZD7: VectorGroup
+ZND7: VectorGroup
+ZNYN7: VectorGroup
+ZY7: VectorGroup
+ZYN7: VectorGroup
+DY11: VectorGroup
+DYN11: VectorGroup
+YD11: VectorGroup
+YND11: VectorGroup
+YNZ11: VectorGroup
+YNZN11: VectorGroup
+YZ11: VectorGroup
+YZN11: VectorGroup
+ZNY11: VectorGroup
+ZNYN11: VectorGroup
+ZY11: VectorGroup
+ZYN11: VectorGroup
+DY1: VectorGroup
+Y0: VectorGroup
+YN0: VectorGroup
+D0: VectorGroup
+ZNY1: VectorGroup
+ZNY7: VectorGroup
+DDN0: VectorGroup
+DND0: VectorGroup
+DNYN1: VectorGroup
+DNYN11: VectorGroup
+YNDN1: VectorGroup
+YNDN11: VectorGroup
+TTN11: VectorGroup

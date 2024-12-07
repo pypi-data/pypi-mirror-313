@@ -1,0 +1,290 @@
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf import descriptor as _descriptor
+from typing import ClassVar as _ClassVar
+
+DESCRIPTOR: _descriptor.FileDescriptor
+
+class UnitSymbol(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = []
+    NONE: _ClassVar[UnitSymbol]
+    METRES: _ClassVar[UnitSymbol]
+    KG: _ClassVar[UnitSymbol]
+    SECONDS: _ClassVar[UnitSymbol]
+    A: _ClassVar[UnitSymbol]
+    K: _ClassVar[UnitSymbol]
+    MOL: _ClassVar[UnitSymbol]
+    CD: _ClassVar[UnitSymbol]
+    DEG: _ClassVar[UnitSymbol]
+    RAD: _ClassVar[UnitSymbol]
+    SR: _ClassVar[UnitSymbol]
+    GY: _ClassVar[UnitSymbol]
+    BQ: _ClassVar[UnitSymbol]
+    DEGC: _ClassVar[UnitSymbol]
+    SV: _ClassVar[UnitSymbol]
+    F: _ClassVar[UnitSymbol]
+    C: _ClassVar[UnitSymbol]
+    SIEMENS: _ClassVar[UnitSymbol]
+    HENRYS: _ClassVar[UnitSymbol]
+    V: _ClassVar[UnitSymbol]
+    OHM: _ClassVar[UnitSymbol]
+    J: _ClassVar[UnitSymbol]
+    N: _ClassVar[UnitSymbol]
+    HZ: _ClassVar[UnitSymbol]
+    LX: _ClassVar[UnitSymbol]
+    LM: _ClassVar[UnitSymbol]
+    WB: _ClassVar[UnitSymbol]
+    T: _ClassVar[UnitSymbol]
+    W: _ClassVar[UnitSymbol]
+    PA: _ClassVar[UnitSymbol]
+    M2: _ClassVar[UnitSymbol]
+    M3: _ClassVar[UnitSymbol]
+    MPERS: _ClassVar[UnitSymbol]
+    MPERS2: _ClassVar[UnitSymbol]
+    M3PERS: _ClassVar[UnitSymbol]
+    MPERM3: _ClassVar[UnitSymbol]
+    KGM: _ClassVar[UnitSymbol]
+    KGPERM3: _ClassVar[UnitSymbol]
+    M2PERS: _ClassVar[UnitSymbol]
+    WPERMK: _ClassVar[UnitSymbol]
+    JPERK: _ClassVar[UnitSymbol]
+    PPM: _ClassVar[UnitSymbol]
+    ROTPERS: _ClassVar[UnitSymbol]
+    RADPERS: _ClassVar[UnitSymbol]
+    WPERM2: _ClassVar[UnitSymbol]
+    JPERM2: _ClassVar[UnitSymbol]
+    SPERM: _ClassVar[UnitSymbol]
+    KPERS: _ClassVar[UnitSymbol]
+    PAPERS: _ClassVar[UnitSymbol]
+    JPERKGK: _ClassVar[UnitSymbol]
+    VA: _ClassVar[UnitSymbol]
+    VAR: _ClassVar[UnitSymbol]
+    COSPHI: _ClassVar[UnitSymbol]
+    VS: _ClassVar[UnitSymbol]
+    V2: _ClassVar[UnitSymbol]
+    AS: _ClassVar[UnitSymbol]
+    A2: _ClassVar[UnitSymbol]
+    A2S: _ClassVar[UnitSymbol]
+    VAH: _ClassVar[UnitSymbol]
+    WH: _ClassVar[UnitSymbol]
+    VARH: _ClassVar[UnitSymbol]
+    VPERHZ: _ClassVar[UnitSymbol]
+    HZPERS: _ClassVar[UnitSymbol]
+    CHARACTER: _ClassVar[UnitSymbol]
+    CHARPERS: _ClassVar[UnitSymbol]
+    KGM2: _ClassVar[UnitSymbol]
+    DB: _ClassVar[UnitSymbol]
+    WPERS: _ClassVar[UnitSymbol]
+    LPERS: _ClassVar[UnitSymbol]
+    DBM: _ClassVar[UnitSymbol]
+    HOURS: _ClassVar[UnitSymbol]
+    MIN: _ClassVar[UnitSymbol]
+    Q: _ClassVar[UnitSymbol]
+    QH: _ClassVar[UnitSymbol]
+    OHMM: _ClassVar[UnitSymbol]
+    APERM: _ClassVar[UnitSymbol]
+    V2H: _ClassVar[UnitSymbol]
+    A2H: _ClassVar[UnitSymbol]
+    AH: _ClassVar[UnitSymbol]
+    COUNT: _ClassVar[UnitSymbol]
+    FT3: _ClassVar[UnitSymbol]
+    M3PERH: _ClassVar[UnitSymbol]
+    GAL: _ClassVar[UnitSymbol]
+    BTU: _ClassVar[UnitSymbol]
+    L: _ClassVar[UnitSymbol]
+    LPERH: _ClassVar[UnitSymbol]
+    LPERL: _ClassVar[UnitSymbol]
+    GPERG: _ClassVar[UnitSymbol]
+    MOLPERM3: _ClassVar[UnitSymbol]
+    MOLPERMOL: _ClassVar[UnitSymbol]
+    MOLPERKG: _ClassVar[UnitSymbol]
+    SPERS: _ClassVar[UnitSymbol]
+    HZPERHZ: _ClassVar[UnitSymbol]
+    VPERV: _ClassVar[UnitSymbol]
+    APERA: _ClassVar[UnitSymbol]
+    VPERVA: _ClassVar[UnitSymbol]
+    REV: _ClassVar[UnitSymbol]
+    KAT: _ClassVar[UnitSymbol]
+    JPERKG: _ClassVar[UnitSymbol]
+    M3UNCOMPENSATED: _ClassVar[UnitSymbol]
+    M3COMPENSATED: _ClassVar[UnitSymbol]
+    WPERW: _ClassVar[UnitSymbol]
+    THERM: _ClassVar[UnitSymbol]
+    ONEPERM: _ClassVar[UnitSymbol]
+    M3PERKG: _ClassVar[UnitSymbol]
+    PAS: _ClassVar[UnitSymbol]
+    NM: _ClassVar[UnitSymbol]
+    NPERM: _ClassVar[UnitSymbol]
+    RADPERS2: _ClassVar[UnitSymbol]
+    JPERM3: _ClassVar[UnitSymbol]
+    VPERM: _ClassVar[UnitSymbol]
+    CPERM3: _ClassVar[UnitSymbol]
+    CPERM2: _ClassVar[UnitSymbol]
+    FPERM: _ClassVar[UnitSymbol]
+    HPERM: _ClassVar[UnitSymbol]
+    JPERMOL: _ClassVar[UnitSymbol]
+    JPERMOLK: _ClassVar[UnitSymbol]
+    CPERKG: _ClassVar[UnitSymbol]
+    GYPERS: _ClassVar[UnitSymbol]
+    WPERSR: _ClassVar[UnitSymbol]
+    WPERM2SR: _ClassVar[UnitSymbol]
+    KATPERM3: _ClassVar[UnitSymbol]
+    D: _ClassVar[UnitSymbol]
+    ANGLEMIN: _ClassVar[UnitSymbol]
+    ANGLESEC: _ClassVar[UnitSymbol]
+    HA: _ClassVar[UnitSymbol]
+    TONNE: _ClassVar[UnitSymbol]
+    BAR: _ClassVar[UnitSymbol]
+    MMHG: _ClassVar[UnitSymbol]
+    MILES_NAUTICAL: _ClassVar[UnitSymbol]
+    KN: _ClassVar[UnitSymbol]
+    MX: _ClassVar[UnitSymbol]
+    G: _ClassVar[UnitSymbol]
+    OE: _ClassVar[UnitSymbol]
+    VH: _ClassVar[UnitSymbol]
+    WPERA: _ClassVar[UnitSymbol]
+    ONEPERHZ: _ClassVar[UnitSymbol]
+    VPERVAR: _ClassVar[UnitSymbol]
+    OHMPERM: _ClassVar[UnitSymbol]
+    KGPERJ: _ClassVar[UnitSymbol]
+    JPERS: _ClassVar[UnitSymbol]
+NONE: UnitSymbol
+METRES: UnitSymbol
+KG: UnitSymbol
+SECONDS: UnitSymbol
+A: UnitSymbol
+K: UnitSymbol
+MOL: UnitSymbol
+CD: UnitSymbol
+DEG: UnitSymbol
+RAD: UnitSymbol
+SR: UnitSymbol
+GY: UnitSymbol
+BQ: UnitSymbol
+DEGC: UnitSymbol
+SV: UnitSymbol
+F: UnitSymbol
+C: UnitSymbol
+SIEMENS: UnitSymbol
+HENRYS: UnitSymbol
+V: UnitSymbol
+OHM: UnitSymbol
+J: UnitSymbol
+N: UnitSymbol
+HZ: UnitSymbol
+LX: UnitSymbol
+LM: UnitSymbol
+WB: UnitSymbol
+T: UnitSymbol
+W: UnitSymbol
+PA: UnitSymbol
+M2: UnitSymbol
+M3: UnitSymbol
+MPERS: UnitSymbol
+MPERS2: UnitSymbol
+M3PERS: UnitSymbol
+MPERM3: UnitSymbol
+KGM: UnitSymbol
+KGPERM3: UnitSymbol
+M2PERS: UnitSymbol
+WPERMK: UnitSymbol
+JPERK: UnitSymbol
+PPM: UnitSymbol
+ROTPERS: UnitSymbol
+RADPERS: UnitSymbol
+WPERM2: UnitSymbol
+JPERM2: UnitSymbol
+SPERM: UnitSymbol
+KPERS: UnitSymbol
+PAPERS: UnitSymbol
+JPERKGK: UnitSymbol
+VA: UnitSymbol
+VAR: UnitSymbol
+COSPHI: UnitSymbol
+VS: UnitSymbol
+V2: UnitSymbol
+AS: UnitSymbol
+A2: UnitSymbol
+A2S: UnitSymbol
+VAH: UnitSymbol
+WH: UnitSymbol
+VARH: UnitSymbol
+VPERHZ: UnitSymbol
+HZPERS: UnitSymbol
+CHARACTER: UnitSymbol
+CHARPERS: UnitSymbol
+KGM2: UnitSymbol
+DB: UnitSymbol
+WPERS: UnitSymbol
+LPERS: UnitSymbol
+DBM: UnitSymbol
+HOURS: UnitSymbol
+MIN: UnitSymbol
+Q: UnitSymbol
+QH: UnitSymbol
+OHMM: UnitSymbol
+APERM: UnitSymbol
+V2H: UnitSymbol
+A2H: UnitSymbol
+AH: UnitSymbol
+COUNT: UnitSymbol
+FT3: UnitSymbol
+M3PERH: UnitSymbol
+GAL: UnitSymbol
+BTU: UnitSymbol
+L: UnitSymbol
+LPERH: UnitSymbol
+LPERL: UnitSymbol
+GPERG: UnitSymbol
+MOLPERM3: UnitSymbol
+MOLPERMOL: UnitSymbol
+MOLPERKG: UnitSymbol
+SPERS: UnitSymbol
+HZPERHZ: UnitSymbol
+VPERV: UnitSymbol
+APERA: UnitSymbol
+VPERVA: UnitSymbol
+REV: UnitSymbol
+KAT: UnitSymbol
+JPERKG: UnitSymbol
+M3UNCOMPENSATED: UnitSymbol
+M3COMPENSATED: UnitSymbol
+WPERW: UnitSymbol
+THERM: UnitSymbol
+ONEPERM: UnitSymbol
+M3PERKG: UnitSymbol
+PAS: UnitSymbol
+NM: UnitSymbol
+NPERM: UnitSymbol
+RADPERS2: UnitSymbol
+JPERM3: UnitSymbol
+VPERM: UnitSymbol
+CPERM3: UnitSymbol
+CPERM2: UnitSymbol
+FPERM: UnitSymbol
+HPERM: UnitSymbol
+JPERMOL: UnitSymbol
+JPERMOLK: UnitSymbol
+CPERKG: UnitSymbol
+GYPERS: UnitSymbol
+WPERSR: UnitSymbol
+WPERM2SR: UnitSymbol
+KATPERM3: UnitSymbol
+D: UnitSymbol
+ANGLEMIN: UnitSymbol
+ANGLESEC: UnitSymbol
+HA: UnitSymbol
+TONNE: UnitSymbol
+BAR: UnitSymbol
+MMHG: UnitSymbol
+MILES_NAUTICAL: UnitSymbol
+KN: UnitSymbol
+MX: UnitSymbol
+G: UnitSymbol
+OE: UnitSymbol
+VH: UnitSymbol
+WPERA: UnitSymbol
+ONEPERHZ: UnitSymbol
+VPERVAR: UnitSymbol
+OHMPERM: UnitSymbol
+KGPERJ: UnitSymbol
+JPERS: UnitSymbol
