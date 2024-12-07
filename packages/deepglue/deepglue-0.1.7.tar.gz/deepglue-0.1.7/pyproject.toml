@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling>=1.26.1"]
+build-backend = "hatchling.build"
+
+[project]
+name = "deepglue"
+description = "deepglue: A utility package for deep learning projects. Keeping things together."
+authors = [{ name = "Eric Thomson", email = "thomson.eric@gmail.com" }]
+license = { text = "MIT" }
+readme = "readme.md"
+dependencies = [
+    "torch", 
+    "torchvision",
+    "numpy",
+    "matplotlib",
+    "scikit-learn",
+    "scikit-image",
+    "joblib",
+    "tqdm",
+    "bokeh"
+    ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.9"
+
+# following is so version control works
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/EricThomson/deepglue"
+
+# Optional dependencies for documentation [docs] and testing/linting [dev]:
+[project.optional-dependencies]
+docs = [
+    'mkdocs',
+    'mkdocstrings[python]',
+    'mkdocs_section_index',
+    'mkdocs_gen_files',
+    'mkdocs_literate_nav',
+    'mkdocs-gallery',
+]
+dev = [
+    "black",                        # Code formatter
+    "isort",                        # Import sorter
+    "pytest",                       # Testing framework
+    "ruff",                         # Code linter
+    "pytest-cov",                   # Test coverage plugin for pytest
+    "pytest-mock",                  # Mocking support for pytest
+    "pydocstyle",                    # Docstrings linter
+]
+
+[tool.hatch.build.targets.wheel]
+include = ["src/deepglue/**"]
+
+[tool.hatch.build]
+packages = ["src/deepglue"]  # Specify the path to the package directory
+
+[tool.hatch.version]
+path = "src/deepglue/__init__.py"
+pattern = '^__version__ = "(?P<version>.*)"' 
+
