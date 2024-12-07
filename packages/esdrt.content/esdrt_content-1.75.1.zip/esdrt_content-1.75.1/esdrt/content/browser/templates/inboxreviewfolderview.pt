@@ -1,0 +1,151 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      lang="en"
+      metal:use-macro="context/main_template/macros/master"
+      i18n:domain="esdrt.content">
+  <tal:block metal:fill-slot="javascript_head_slot">
+    <script tal:attributes="src string:${portal_url}/++resource++esdrt.content/cookies.js"></script>
+    <script tal:attributes="src string:${portal_url}/++resource++esdrt.content/inbox_view.js"></script>
+    <script type="text/javascript" src="++resource++orderedselect_input.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $(".chosen-select").chosen({width: "100%", allow_single_deselect: true});
+      })
+    </script>
+  </tal:block>
+  <tal:block metal:fill-slot="style_slot">
+    <link rel="stylesheet" type="text/css" tal:attributes="href string:${portal_url}/++resource++esdrt.content/inbox_view.css" />
+  </tal:block>
+<body>
+
+  <metal:main fill-slot="content-core"
+              tal:define="
+                macro_template python:here.restrictedTraverse('@@macros');
+                macro_observationlist python:macro_template['macros']['observationlist'];
+                sections view/get_sections;
+                sections_viewable sections/viewable;
+                sections_total_obs sections/total_sum;
+                sec_cur python:request.get('section', '');
+                req_params python:[(k, v) for k, v in request.form.items() if k != 'section' and 'b_start' not in k]">
+    <metal:content-core define-macro="content-core">
+
+  <div id="inbox-view-content">
+  <div class="actions" tal:condition="view/can_add_observation">
+    <a tal:attributes="href string:${here/absolute_url}/++add++Observation" class="standardButton defaultWFButton">New observation</a>
+  </div>
+
+  <div id="tabs">
+    <div class="tabs">
+      <div>
+        <a class="eea-icon overview" tal:attributes="href string:${here/absolute_url}/view">Overview list</a>
+      </div>
+      <div class="active">
+        <a class="eea-icon inbox" tal:attributes="href string:${here/absolute_url}/inboxview">My view</a>
+      </div>
+      <div tal:condition="python:view.can_view_tableau_dashboard()">
+        <a class="eea-icon overview" tal:attributes="href string:${here/absolute_url}/tableau_dashboard">Statistics</a>
+      </div>
+      <div>
+        <a class="eea-icon inbox" tal:attributes="href string:${here/absolute_url}/finalisedfolderview">Finalised observations</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="filters">
+    <div class="row" style="padding-top:30px">
+      <div class="cell position-1 width-9 esdLabel">Free text</div>
+      <div class="cell position-10 width-3 esdLabel">Author</div>
+    </div>
+    <div class="row">
+      <form action="./inboxview" method="GET" tal:define="freeText request/freeText|nothing">
+        <div class="cell position-1 width-9">
+          <tal:params repeat="req_param python:[x for x in req_params if x[0] not in ['freeText', 'obsAuthor']]">
+            <input type="hidden" tal:attributes="name python:req_param[0]; value python:req_param[1]" />
+          </tal:params>
+          <input type="text" style="width:100%;border-radius:5px;height:21px" name="freeText" tal:attributes="value freeText" />
+        </div>
+        <div class="cell position-10 width-3 esdLabel">
+           <select id="obsAuthorFilter" name="obsAuthor" class="chosen-select" data-placeholder="Select author"
+                tal:define="obsAuthor python:'';
+                            obsAuthor request/obsAuthor | obsAuthor">
+              <option></option>
+              <tal:option repeat="author python:view.get_indexed_authors()">
+                <option
+                  tal:attributes="value python:author[0]; selected python:author[0] == obsAuthor"
+                  tal:content="python:author[1]"></option>
+              </tal:option>
+            </select>
+        </div>
+        <div class="cell position-14 width-1">
+          <input type="submit" class="standardButton" id="btnFilter" value="Search" />
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="observations" class="myview" tal:condition="not:here/@@plone_portal_state/anonymous">
+    <div class="page-content">
+      <div class="menu">
+        <button class="pull-right" style="display: none" id="toggleEmpty">Collapse view</button>
+        <ul class="menu-role">
+          <tal:section repeat="role sections_viewable">
+            <li>
+              <span class="section-role" tal:content="role/title"></span>
+              <ul class="menu-section">
+                <li tal:repeat="action python:role['actions']">
+                  <span class="section-title"tal:content="action/title"></span>
+                  <ul class="menu-subsection">
+                    <tal:subsec repeat="subsec action/sec">
+                    <tal:subsec-def define="current python:subsec['slug'] == sec_cur; num_obs subsec/num_obs">
+                    <li tal:attributes="class python:'section-subsection' + 'current' if current else ''">
+                      <span tal:condition="not:num_obs" class="muted" tal:content="subsec/title"></span>
+                      <a tal:condition="num_obs" tal:attributes="href python:'./inboxview?' + '&'.join(['='.join(x) for x in req_params + [('section', subsec['slug'])]])" tal:content="subsec/title"></a>
+                      <span tal:condition="num_obs" class="obs-count">(<span tal:replace="num_obs" />)</span>
+                    </li>
+                    </tal:subsec-def>
+                    </tal:subsec>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </tal:section>
+        </ul>
+        <script>ecsm.inbox.init_toggler('.menu-section li', '#toggleEmpty');</script>
+      </div>
+      <div class="menu-body">
+        <tal:section repeat="role sections_viewable">
+          <tal:action repeat="action role/actions">
+            <tal:subsec repeat="subsec action/sec">
+              <tal:content condition="python:subsec['slug'] == sec_cur">
+                <h2><span tal:replace="action/title" /> - <span tal:replace="subsec/title" /></h2>
+                <div tal:define="observations subsec/objs; idx subsec/slug">
+                  <metal:obslist use-macro="macro_observationlist" />
+                </div>
+              </tal:content>
+            </tal:subsec>
+          </tal:action>
+        </tal:section>
+        <tal:content condition="python:sec_cur and not sections_total_obs">
+          <div class="menu-body-message">
+            <p>You have no pending actions.</p>
+          </div>
+        </tal:content>
+        <tal:content condition="python:not sec_cur and sections_total_obs">
+          <div class="menu-body-message">
+            <p>Please select a section on the left.</p>
+          </div>
+        </tal:content>
+        <tal:content condition="python:not sec_cur and not sections_total_obs">
+          <div class="menu-body-message">
+            <p>You have no pending actions.</p>
+          </div>
+        </tal:content>
+      </div>
+    </div>
+  </div>
+</div>
+</metal:content-core>
+</metal:main>
+</body>
+</html>
