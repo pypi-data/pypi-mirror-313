@@ -1,0 +1,156 @@
+{% macro generate_sidebar(active) %}
+    {% set valid_links = ['Event', 'User', 'Branchadmin', 'Organizer', 'Coordinator', 'Participant', 'Team', 'Profile', 'CreateEvent'] %}
+    {% if active not in valid_links %}
+        {{ raise_error('Invalid link. Valid links are: ' ~ valid_links) }}
+    {% endif %}
+
+    {% if active == valid_links[0] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.home') }}">
+            <i class="bx bxs-calendar-star fs-4"></i>
+            <span>Events</span>
+            </a>
+        </li>    
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.home') }}">
+            <i class="bx bxs-calendar-star fs-4"></i>
+            <span>Events</span>
+            </a>
+        </li>    
+    {% endif %}
+
+    <hr>
+
+    <li class="nav-heading">Users</li>
+
+    {% if active == valid_links[1] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.users') }}">
+                <i class="bi bi-people-fill fs-4"></i>
+                <span>All Users</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.users') }}">
+                <i class="bi bi-people-fill fs-4"></i>
+                <span>All Users</span>
+            </a>
+        </li>
+    {% endif %}
+
+    {% if active == valid_links[2] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.branchadmins') }}">
+                <i class="bi bi-building-fill fs-4"></i>
+                <span>Departmental Heads</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.branchadmins') }}">
+                <i class="bi bi-building-fill fs-4"></i>
+                <span>Departmental Heads</span>
+            </a>
+        </li>    
+    {% endif %}
+
+    {% if active == valid_links[3] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.organizers') }}">
+                <i class="bi bi-person-badge-fill fs-4"></i>
+                <span>Organizers</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.organizers') }}">
+                <i class="bi bi-person-badge-fill fs-4"></i>
+                <span>Organizers</span>
+            </a>
+        </li>
+    {% endif %}
+
+    {% if active == valid_links[4] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.coordinators') }}">
+                <i class="bi bi-person-bounding-box fs-4"></i>
+                <span>Co-ordinators</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.coordinators') }}">
+                <i class="bi bi-person-bounding-box fs-4"></i>
+                <span>Co-ordinators</span>
+            </a>
+        </li>
+    {% endif %}
+
+    {% if active == valid_links[5] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.participants') }}">
+                <i class="bi bi-person-vcard-fill fs-4"></i>
+                <span>Participants</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.participants') }}">
+                <i class="bi bi-person-vcard-fill fs-4"></i>
+                <span>Participants</span>
+            </a>
+        </li>
+    {% endif %}
+
+    {% if active == valid_links[6] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.teams') }}">
+                <i class="ri-team-fill fs-4"></i>
+                <span>Teams</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.teams') }}">
+                <i class="ri-team-fill fs-4"></i>
+                <span>Teams</span>
+            </a>
+        </li>
+    {% endif %}
+
+    <hr>
+
+    {% if active == valid_links[7] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.profile') }}">
+                <i class="bi bi-person-circle fs-4"></i>
+                <span>Profile</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.profile') }}">
+                <i class="bi bi-person-circle fs-4"></i>
+                <span>Profile</span>
+            </a>
+        </li>
+    {% endif %}
+
+    {% if active == valid_links[8] %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('Admin.create_event') }}">
+                <i class="bi bi-patch-plus-fill fs-4"></i>
+                <span>Create Event</span>
+            </a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('Admin.create_event') }}">
+                <i class="bi bi-patch-plus-fill fs-4"></i>
+                <span>Create Event</span>
+            </a>
+        </li>
+    {% endif %}
+{% endmacro %}
