@@ -1,0 +1,107 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:browser="http://namespaces.zope.org/browser"
+  xmlns:plone="http://namespaces.plone.org/plone"
+  i18n_domain="eea">
+
+  <browser:page
+    name="view"
+    for="eea.api.dataconnector.interfaces.IConnectorDataProvider"
+    permission="zope2.View"
+    template="pt/data_connector_view.pt"
+  />
+
+  <browser:page
+    name="provided_data"
+    for="eea.api.dataconnector.interfaces.IBasicDataProvider"
+    permission="zope2.View"
+    template="pt/provided_data.pt"
+    class=".dataprovider.DataProviderView"
+  />
+
+  <browser:page
+    name="download-provider-data"
+    for="eea.api.dataconnector.interfaces.IBasicDataProvider"
+    permission="zope2.View"
+    class=".dataprovider.DataProviderDownload"
+  />
+
+  <browser:page
+    name="view"
+    for="eea.api.dataconnector.interfaces.IDataVisualization"
+    permission="zope2.View"
+    template="pt/visualization_view.pt"
+  />
+
+
+  <browser:page
+    name="view"
+    for="eea.api.dataconnector.interfaces.IMapVisualization"
+    permission="zope2.View"
+    template="pt/arcgis_map_view.pt"
+  />
+
+  <browser:page
+    name="view"
+    for="eea.api.dataconnector.interfaces.ITableauVisualization"
+    permission="zope2.View"
+    template="pt/tableau_view.pt"
+  />
+
+  <browser:page
+    name="flourish"
+    for="*"
+    class=".flourish.FlourishDownload"
+    permission="zope2.View"
+  />
+
+  <browser:page
+    name="flourish_upload"
+    for="*"
+    template="pt/flourish_upload.pt"
+    class=".flourish.FlourishUpload"
+    permission="cmf.ManagePortal"
+  />
+
+  <!--  Serializations -->
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldSerializationTransformer"
+    factory=".blocks.EmbedContentSerializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldSerializationTransformer"
+    factory=".blocks.EmbedVisualizationSerializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldSerializationTransformer"
+    factory=".blocks.EmbedTableauVisualizationSerializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldSerializationTransformer"
+    factory=".blocks.EmbedMapsSerializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldSerializationTransformer"
+    factory=".blocks.EmbedEEAMapBlockSerializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldSerializationTransformer"
+    factory=".blocks.PlotlyChartSerializationTransformer" />
+
+    <adapter factory=".serializer.dxfields.JSONFieldSerializer" />
+
+  <!--  Deserializations -->
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldDeserializationTransformer"
+    factory=".blocks.EmbedContentDeserializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldDeserializationTransformer"
+    factory=".blocks.EmbedVisualizationDeserializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldDeserializationTransformer"
+    factory=".blocks.EmbedEEAMapBlockDeserializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldDeserializationTransformer"
+    factory=".blocks.EmbedTableauVisualizationDeserializationTransformer" />
+  <subscriber
+    provides="plone.restapi.interfaces.IBlockFieldDeserializationTransformer"
+    factory=".blocks.EmbedMapsDeserializationTransformer" />
+
+  <adapter factory=".deserializer.dxfields.JSONFieldDeserializer" />
+
+</configure>

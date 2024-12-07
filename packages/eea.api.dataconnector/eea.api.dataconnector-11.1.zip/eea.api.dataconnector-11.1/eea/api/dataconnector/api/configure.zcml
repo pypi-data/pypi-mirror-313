@@ -1,0 +1,62 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="eea.dataconnector">
+
+    <include package="plone.restapi"  />
+
+    <!-- Adapter for ConnectorData -->
+    <adapter
+        factory=".dataconnector.ConnectorData"
+        provides="plone.restapi.interfaces.IExpandableElement"
+        name="connector-data"
+        for="eea.api.dataconnector.interfaces.IBasicDataProvider
+             zope.interface.Interface"
+    />
+
+    <!-- Adapter for ElasticConnectorData -->
+    <adapter
+        factory=".dataconnector.ElasticConnectorData"
+        provides="plone.restapi.interfaces.IExpandableElement"
+        name="connector-data"
+        for="eea.api.dataconnector.interfaces.IElasticDataProvider
+             zope.interface.Interface"
+    />
+
+    <!-- Plone services -->
+    <plone:service
+        method="GET"
+        for="*"
+        factory=".dataconnector.ConnectorDataGet"
+        name="@connector-data"
+        permission="zope2.View"
+    />
+    
+    <!-- TODO: this should be eea.dataconnector.interfaces.IBasicDataProvider -->
+    <plone:service
+        method="POST"
+        for="*"
+        factory=".dataconnector.ConnectorDataPost"
+        name="@connector-data"
+        permission="zope2.View"
+    />
+
+    <plone:service
+        method="GET"
+        for="*"
+        factory=".visualization.VisualizationGet"
+        name="@visualization"
+        permission="zope2.View"
+    />
+
+    <plone:service
+        method="GET"
+        for="*"
+        factory=".visualization.VisualizationLayoutGet"
+        name="@visualization-layout"
+        permission="zope2.View"
+    />
+
+</configure>
