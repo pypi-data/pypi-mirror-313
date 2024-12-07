@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+void lexicalAnalyser(char str[])
+{
+    int i = 0; // Initialize index
+    printf("Debug: Starting lexical analysis\n");
+    while (str[i] != '\0') // Process until end of string
+    {
+        if (isalpha(str[i]))
+        {
+            printf("identifier: ");
+            while (isalnum(str[i]))
+            {
+                printf("%c", str[i]);
+                i++;
+            }
+            printf("\n");
+        }
+        else if (isdigit(str[i]))
+        {
+            printf("constant: ");
+            while (isdigit(str[i]))
+            {
+                printf("%c", str[i]);
+                i++;
+            }
+            printf("\n");
+        }
+        else if (isspace(str[i]))
+        {
+            i++; // Skip whitespace
+        }
+        else
+        {
+            printf("special character: %c\n", str[i]);
+            i++; // Skip special characters
+        }
+    }
+    printf("Debug: Lexical analysis complete\n");
+}
+
+int main()
+{
+    char input[100];
+    printf("Enter input: ");
+    if (fgets(input, sizeof(input), stdin) != NULL)
+    {
+        input[strcspn(input, "\n")] = '\0'; // Remove trailing newline
+        lexicalAnalyser(input);
+    }
+    return 0;
+}

@@ -1,0 +1,52 @@
+lex
+
+%{
+#include <stdio.h>
+#include "y.tab.h"
+%}
+
+%%
+
+[0-9]+   { yylval = atoi(yytext); return NUM; }
+[+\-*/]  { return yytext[0]; }
+
+%%
+
+int main() {
+    yyparse();
+    return 0;
+}
+
+
+//yacc
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%token NUM
+
+%%
+
+expr: expr '+' term   { printf("+ "); }
+    | expr '-' term   { printf("- "); }
+    | term            { printf("%d ", $1); }
+    ;
+
+term: term '*' factor { printf("* "); }
+    | term '/' factor { printf("/ "); }
+    | factor          { printf("%d ", $1); }
+    ;
+
+factor: NUM           { printf("%d ", $1); }
+      | '(' expr ')'  { printf("( ) "); }
+      ;
+
+%%
+
+int main() {
+    printf("Enter arithmetic expression: ");
+    yyparse();
+    return 0;
+}

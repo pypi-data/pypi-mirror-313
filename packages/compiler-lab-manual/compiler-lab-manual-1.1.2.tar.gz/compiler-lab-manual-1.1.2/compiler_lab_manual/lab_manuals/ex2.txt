@@ -1,0 +1,15 @@
+%{
+#include <stdio.h>
+%}
+
+%%
+[a-zA-Z][a-zA-Z0-9]*    { printf("Identifier: %s\n", yytext); }
+[0-9]+                  { printf("Constant: %s\n", yytext); }
+[ \t\n]                 { /* Ignore whitespace */ }
+.                       { printf("Unknown Token: %s\n", yytext); }
+%%
+
+int main() {
+    yylex();
+    return 0;
+}
