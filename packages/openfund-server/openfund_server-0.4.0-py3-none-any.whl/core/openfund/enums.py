@@ -1,0 +1,545 @@
+from enum import Enum
+
+APP_NAME = "pyopenfund"
+
+BINANCE_EXCHANGE = "binance"
+OKX_EXCHANGE = "okx"
+
+SYMBOL_TYPE_SPOT = "SPOT"
+
+ORDER_STATUS_NEW = "NEW"
+ORDER_STATUS_PARTIALLY_FILLED = "PARTIALLY_FILLED"
+ORDER_STATUS_FILLED = "FILLED"
+ORDER_STATUS_CANCELED = "CANCELED"
+ORDER_STATUS_PENDING_CANCEL = "PENDING_CANCEL"
+ORDER_STATUS_REJECTED = "REJECTED"
+ORDER_STATUS_EXPIRED = "EXPIRED"
+
+
+class KlineInterval(Enum):
+    KLINE_INTERVAL_1SECOND = ("1s", 1, "s")
+    KLINE_INTERVAL_10SECOND = ("10s", 10, "s")
+    KLINE_INTERVAL_1MINUTE = ("1m", 1, "m")
+    KLINE_INTERVAL_3MINUTE = ("3m", 3, "m")
+    KLINE_INTERVAL_5MINUTE = ("5m", 5, "m")
+    KLINE_INTERVAL_15MINUTE = ("15m", 15, "m")
+    KLINE_INTERVAL_30MINUTE = ("30m", 30, "m")
+    KLINE_INTERVAL_1HOUR = ("1h", 1, "h")
+    KLINE_INTERVAL_2HOUR = ("2h", 2, "h")
+    KLINE_INTERVAL_4HOUR = ("4h", 4, "h")
+    KLINE_INTERVAL_6HOUR = ("6h", 6, "h")
+    KLINE_INTERVAL_8HOUR = ("8h", 8, "h")
+    KLINE_INTERVAL_12HOUR = ("12h", 12, "h")
+    KLINE_INTERVAL_1DAY = ("1d", 1, "d")
+    KLINE_INTERVAL_3DAY = ("3d", 3, "d")
+    KLINE_INTERVAL_1WEEK = ("1w", 1, "d")
+    KLINE_INTERVAL_1MONTH = ("1M", 1, "M")
+
+    def __init__(self, value: str, unit: int, unitType: str):
+        self._value_ = value
+        self.unit = unit
+        self.unitType = unitType
+
+    @classmethod
+    def getByUnit(cls, unit: int, unitType: str) -> str:
+        for interval in KlineInterval:
+            if interval.unit == unit and interval.unitType == unitType:
+                return interval.value
+        return None
+
+
+# KLINE_INTERVAL_1SECOND = "1s"
+# KLINE_INTERVAL_1MINUTE = "1m"
+# KLINE_INTERVAL_3MINUTE = "3m"
+# KLINE_INTERVAL_5MINUTE = "5m"
+# KLINE_INTERVAL_15MINUTE = "15m"
+# KLINE_INTERVAL_30MINUTE = "30m"
+# KLINE_INTERVAL_1HOUR = "1h"
+# KLINE_INTERVAL_2HOUR = "2h"
+# KLINE_INTERVAL_4HOUR = "4h"
+# KLINE_INTERVAL_6HOUR = "6h"
+# KLINE_INTERVAL_8HOUR = "8h"
+# KLINE_INTERVAL_12HOUR = "12h"
+# KLINE_INTERVAL_1DAY = "1d"
+# KLINE_INTERVAL_3DAY = "3d"
+# KLINE_INTERVAL_1WEEK = "1w"
+# KLINE_INTERVAL_1MONTH = "1M"
+
+SIDE_BUY = "BUY"
+SIDE_SELL = "SELL"
+
+ORDER_TYPE_LIMIT = "LIMIT"
+ORDER_TYPE_MARKET = "MARKET"
+ORDER_TYPE_STOP_LOSS = "STOP_LOSS"
+ORDER_TYPE_STOP_LOSS_LIMIT = "STOP_LOSS_LIMIT"
+ORDER_TYPE_TAKE_PROFIT = "TAKE_PROFIT"
+ORDER_TYPE_TAKE_PROFIT_LIMIT = "TAKE_PROFIT_LIMIT"
+ORDER_TYPE_LIMIT_MAKER = "LIMIT_MAKER"
+
+FUTURE_ORDER_TYPE_LIMIT = "LIMIT"
+FUTURE_ORDER_TYPE_MARKET = "MARKET"
+FUTURE_ORDER_TYPE_STOP = "STOP"
+FUTURE_ORDER_TYPE_STOP_MARKET = "STOP_MARKET"
+FUTURE_ORDER_TYPE_TAKE_PROFIT = "TAKE_PROFIT"
+FUTURE_ORDER_TYPE_TAKE_PROFIT_MARKET = "TAKE_PROFIT_MARKET"
+FUTURE_ORDER_TYPE_LIMIT_MAKER = "LIMIT_MAKER"
+FUTURE_ORDER_TYPE_TRAILING_STOP_MARKET = "TRAILING_STOP_MARKET"
+
+TIME_IN_FORCE_GTC = "GTC"  # Good till cancelled
+TIME_IN_FORCE_IOC = "IOC"  # Immediate or cancel
+TIME_IN_FORCE_FOK = "FOK"  # Fill or kill
+TIME_IN_FORCE_GTX = "GTX"  # Post only order
+
+ORDER_RESP_TYPE_ACK = "ACK"
+ORDER_RESP_TYPE_RESULT = "RESULT"
+ORDER_RESP_TYPE_FULL = "FULL"
+
+WEBSOCKET_DEPTH_5 = "5"
+WEBSOCKET_DEPTH_10 = "10"
+WEBSOCKET_DEPTH_20 = "20"
+
+NO_SIDE_EFFECT_TYPE = "NO_SIDE_EFFECT"
+MARGIN_BUY_TYPE = "MARGIN_BUY"
+AUTO_REPAY_TYPE = "AUTO_REPAY"
+# BTC、ETH、Sol、matic、DYD、AAVE、GMT、STarl、LTC、Blur
+CUR_SYMBOL_POOL = [
+    "AAVEUSDT",
+    "BTCBUSD",
+    "BTCDOMUSDT",
+    "BTCSTUSDT",
+    "BTCUSDT",
+    "BTCUSDT_231229",
+    "BTCUSDT_240329",
+    "BLURUSDT",
+    "DYDXUSDT",
+    "ETHBTC",
+    "ETHBUSD",
+    "ETHUSDT",
+    "ETHUSDT_231229",
+    "ETHUSDT_240329",
+    "GMTBUSD",
+    "GMTUSDT",
+    "LTCBUSD",
+    "LTCUSDT",
+    "MATICBUSD",
+    "MATICUSDT",
+    "SOLBUSD",
+    "SOLUSDT",
+]
+
+NEW_SYMBOL_POLL = [
+    "BTCUSDT",
+    "YFIUSDT",
+    "ETHUSDT",
+    "MKRUSDT",
+    "BNBUSDT",
+    "BCHUSDT",
+    "XMRUSDT",
+    "LTCUSDT",
+    "AAVEUSDT",
+    "COMPUSDT",
+    "GMXUSDT",
+    "BSVUSDT",
+    "DASHUSDT",
+    "EGLDUSDT",
+    "TRBUSDT",
+    "ZECUSDT",
+    "KSMUSDT",
+    "SOLUSDT",
+    "ETCUSDT",
+    "AVAXUSDT",
+    "ENSUSDT",
+    "NEOUSDT",
+    "ZENUSDT",
+    "ATOMUSDT",
+    "LINKUSDT",
+    "LPTUSDT",
+    "APTUSDT",
+    "AXSUSDT",
+    "ARUSDT",
+    "ANTUSDT",
+    "UNIUSDT",
+    "DOTUSDT",
+    "ORDIUSDT",
+    "FILUSDT",
+    "BALUSDT",
+    "ICPUSDT",
+    "MASKUSDT",
+    "QTUMUSDT",
+    "SNXUSDT",
+    "BADGERUSDT",
+    "LDOUSDT",
+    "OPUSDT",
+    "UMAUSDT",
+    "WLDUSDT",
+    "APEUSDT",
+    "NEARUSDT",
+    "API3USDT",
+    "BANDUSDT",
+    "USDCUSDT",
+    "ARBUSDT",
+    "XTZUSDT",
+    "SUSHIUSDT",
+    "PERPUSDT",
+    "THETAUSDT",
+    "KNCUSDT",
+    "EOSUSDT",
+    "AGLDUSDT",
+    "IMXUSDT",
+    "MATICUSDT",
+    "XRPUSDT",
+    "MAGICUSDT",
+    "STXUSDT",
+    "OMGUSDT",
+    "CRVUSDT",
+    "SUIUSDT",
+    "CELOUSDT",
+    "BNTUSDT",
+    "MINAUSDT",
+    "STORJUSDT",
+    "SANDUSDT",
+    "MANAUSDT",
+    "ADAUSDT",
+    "RDNTUSDT",
+    "BICOUSDT",
+    "YGGUSDT",
+    "FTMUSDT",
+    "ZRXUSDT",
+    "LRCUSDT",
+    "BLURUSDT",
+    "BATUSDT",
+    "WOOUSDT",
+    "ONTUSDT",
+    "GMTUSDT",
+    "IOTAUSDT",
+    "CFXUSDT",
+    "KLAYUSDT",
+    "XLMUSDT",
+    "ALGOUSDT",
+    "FLMUSDT",
+    "GRTUSDT",
+    "TRXUSDT",
+    "ALPHAUSDT",
+    "CVCUSDT",
+    "DOGEUSDT",
+    "CHZUSDT",
+    "HBARUSDT",
+    "RENUSDT",
+    "ZILUSDT",
+    "RVNUSDT",
+    "GALAUSDT",
+    "PEOPLEUSDT",
+    "IOSTUSDT",
+    "RSRUSDT",
+    "SLPUSDT",
+    "GASUSDT",
+]
+
+
+ALL_SYMBOL_POOL = [
+    "1000BONKUSDT",
+    "1000FLOKIUSDT",
+    "1000LUNCBUSD",
+    "1000LUNCUSDT",
+    "1000PEPEUSDT",
+    "1000SHIBBUSD",
+    "1000SHIBUSDT",
+    "1000XECUSDT",
+    "1INCHUSDT",
+    "AAVEUSDT",
+    "ACHUSDT",
+    "ADABUSD",
+    "ADAUSDT",
+    "AGIXBUSD",
+    "AGIXUSDT",
+    "AGLDUSDT",
+    "ALGOUSDT",
+    "ALICEUSDT",
+    "ALPHAUSDT",
+    "AMBBUSD",
+    "AMBUSDT",
+    "ANCBUSD",
+    "ANKRUSDT",
+    "ANTUSDT",
+    "APEBUSD",
+    "APEUSDT",
+    "API3USDT",
+    "APTBUSD",
+    "APTUSDT",
+    "ARBUSDT",
+    "ARKMUSDT",
+    "ARKUSDT",
+    "ARPAUSDT",
+    "ARUSDT",
+    "ASTRUSDT",
+    "ATAUSDT",
+    "ATOMUSDT",
+    "AUCTIONBUSD",
+    "AUDIOUSDT",
+    "AVAXBUSD",
+    "AVAXUSDT",
+    "AXSUSDT",
+    "BADGERUSDT",
+    "BAKEUSDT",
+    "BALUSDT",
+    "BANDUSDT",
+    "BATUSDT",
+    "BCHUSDT",
+    "BEAMXUSDT",
+    "BELUSDT",
+    "BICOUSDT",
+    "BIGTIMEUSDT",
+    "BLUEBIRDUSDT",
+    "BLURUSDT",
+    "BLZUSDT",
+    "BNBBTC",
+    "BNBBUSD",
+    "BNBUSDT",
+    "BNTUSDT",
+    "BNXUSDT",
+    "BONDUSDT",
+    "BSVUSDT",
+    "BTCBUSD",
+    "BTCDOMUSDT",
+    "BTCSTUSDT",
+    "BTCUSDT",
+    "BTCUSDT_231229",
+    "BTCUSDT_240329",
+    "BTSUSDT",
+    "C98USDT",
+    "CAKEUSDT",
+    "CELOUSDT",
+    "CELRUSDT",
+    "CFXUSDT",
+    "CHRUSDT",
+    "CHZUSDT",
+    "CKBUSDT",
+    "COCOSUSDT",
+    "COMBOUSDT",
+    "COMPUSDT",
+    "COTIUSDT",
+    "CRVUSDT",
+    "CTKUSDT",
+    "CTSIUSDT",
+    "CVCUSDT",
+    "CVXBUSD",
+    "CVXUSDT",
+    "CYBERUSDT",
+    "DARUSDT",
+    "DASHUSDT",
+    "DEFIUSDT",
+    "DENTUSDT",
+    "DGBUSDT",
+    "DODOBUSD",
+    "DODOXUSDT",
+    "DOGEBUSD",
+    "DOGEUSDT",
+    "DOTBUSD",
+    "DOTUSDT",
+    "DUSKUSDT",
+    "DYDXUSDT",
+    "EDUUSDT",
+    "EGLDUSDT",
+    "ENJUSDT",
+    "ENSUSDT",
+    "EOSUSDT",
+    "ETCBUSD",
+    "ETCUSDT",
+    "ETHBTC",
+    "ETHBUSD",
+    "ETHUSDT",
+    "ETHUSDT_231229",
+    "ETHUSDT_240329",
+    "FETUSDT",
+    "FILBUSD",
+    "FILUSDT",
+    "FLMUSDT",
+    "FLOWUSDT",
+    "FOOTBALLUSDT",
+    "FRONTUSDT",
+    "FTMBUSD",
+    "FTMUSDT",
+    "FTTBUSD",
+    "FTTUSDT",
+    "FXSUSDT",
+    "GALABUSD",
+    "GALAUSDT",
+    "GALBUSD",
+    "GALUSDT",
+    "GASUSDT",
+    "GLMRUSDT",
+    "GMTBUSD",
+    "GMTUSDT",
+    "GMXUSDT",
+    "GRTUSDT",
+    "GTCUSDT",
+    "HBARUSDT",
+    "HFTUSDT",
+    "HIFIUSDT",
+    "HIGHUSDT",
+    "HNTUSDT",
+    "HOOKUSDT",
+    "HOTUSDT",
+    "ICPUSDT",
+    "ICXUSDT",
+    "IDEXUSDT",
+    "IDUSDT",
+    "ILVUSDT",
+    "IMXUSDT",
+    "INJUSDT",
+    "IOSTUSDT",
+    "IOTAUSDT",
+    "IOTXUSDT",
+    "JASMYUSDT",
+    "JOEUSDT",
+    "KASUSDT",
+    "KAVAUSDT",
+    "KEYUSDT",
+    "KLAYUSDT",
+    "KNCUSDT",
+    "KSMUSDT",
+    "LDOBUSD",
+    "LDOUSDT",
+    "LEVERBUSD",
+    "LEVERUSDT",
+    "LINAUSDT",
+    "LINKBUSD",
+    "LINKUSDT",
+    "LITUSDT",
+    "LOOMUSDT",
+    "LPTUSDT",
+    "LQTYUSDT",
+    "LRCUSDT",
+    "LTCBUSD",
+    "LTCUSDT",
+    "LUNA2USDT",
+    "MAGICUSDT",
+    "MANAUSDT",
+    "MASKUSDT",
+    "MATICBUSD",
+    "MATICUSDT",
+    "MAVUSDT",
+    "MBLUSDT",
+    "MDTUSDT",
+    "MEMEUSDT",
+    "MINAUSDT",
+    "MKRUSDT",
+    "MTLUSDT",
+    "NEARBUSD",
+    "NEARUSDT",
+    "NEOUSDT",
+    "NKNUSDT",
+    "NMRUSDT",
+    "NTRNUSDT",
+    "OCEANUSDT",
+    "OGNUSDT",
+    "OMGUSDT",
+    "ONEUSDT",
+    "ONTUSDT",
+    "OPUSDT",
+    "ORBSUSDT",
+    "ORDIUSDT",
+    "OXTUSDT",
+    "PENDLEUSDT",
+    "PEOPLEUSDT",
+    "PERPUSDT",
+    "PHBBUSD",
+    "PHBUSDT",
+    "POLYXUSDT",
+    "POWRUSDT",
+    "PYTHUSDT",
+    "QNTUSDT",
+    "QTUMUSDT",
+    "RADUSDT",
+    "RAYUSDT",
+    "RDNTUSDT",
+    "REEFUSDT",
+    "RENUSDT",
+    "RIFUSDT",
+    "RLCUSDT",
+    "RNDRUSDT",
+    "ROSEUSDT",
+    "RSRUSDT",
+    "RUNEUSDT",
+    "RVNUSDT",
+    "SANDBUSD",
+    "SANDUSDT",
+    "SCUSDT",
+    "SEIUSDT",
+    "SFPUSDT",
+    "SKLUSDT",
+    "SLPUSDT",
+    "SNTUSDT",
+    "SNXUSDT",
+    "SOLBUSD",
+    "SOLUSDT",
+    "SPELLUSDT",
+    "SRMUSDT",
+    "SSVUSDT",
+    "STEEMUSDT",
+    "STGUSDT",
+    "STMXUSDT",
+    "STORJUSDT",
+    "STPTUSDT",
+    "STRAXUSDT",
+    "STXUSDT",
+    "SUIUSDT",
+    "SUSHIUSDT",
+    "SXPUSDT",
+    "THETAUSDT",
+    "TIAUSDT",
+    "TLMBUSD",
+    "TLMUSDT",
+    "TOKENUSDT",
+    "TOMOUSDT",
+    "TRBUSDT",
+    "TRUUSDT",
+    "TRXBUSD",
+    "TRXUSDT",
+    "TUSDT",
+    "TWTUSDT",
+    "UMAUSDT",
+    "UNFIUSDT",
+    "UNIBUSD",
+    "UNIUSDT",
+    "USDCUSDT",
+    "VETUSDT",
+    "WAVESBUSD",
+    "WAVESUSDT",
+    "WAXPUSDT",
+    "WLDUSDT",
+    "WOOUSDT",
+    "XEMUSDT",
+    "XLMUSDT",
+    "XMRUSDT",
+    "XRPBUSD",
+    "XRPUSDT",
+    "XTZUSDT",
+    "XVGUSDT",
+    "XVSUSDT",
+    "YFIUSDT",
+    "YGGUSDT",
+    "ZECUSDT",
+    "ZENUSDT",
+    "ZILUSDT",
+    "ZRXUSDT",
+]
+
+
+class HistoricalKlinesType(Enum):
+    SPOT = 1
+    FUTURES = 2
+    FUTURES_COIN = 3
+
+
+class FuturesType(Enum):
+    USD_M = 1
+    COIN_M = 2
+
+
+class ContractType(Enum):
+    PERPETUAL = "PERPETUAL"  # 永续期货合约
+    CURRENT_QUARTER = "CURRENT_QUARTER"
+    NEXT_QUARTER = "NEXT_QUARTER"
+    NEXT_MONTH = "NEXT_MONTH"
+    CURRENT_MONTH = "CURRENT_MONTH"
