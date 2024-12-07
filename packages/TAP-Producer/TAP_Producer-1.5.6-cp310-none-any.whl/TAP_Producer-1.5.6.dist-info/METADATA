@@ -1,0 +1,160 @@
+Metadata-Version: 2.2
+Requires-Python: >=3.10, <3.14
+Name: TAP-Producer
+Version: 1.5.6
+Provides-Extra: ci
+Requires-Dist: tox>4; extra=="ci"
+Requires-Dist: tox-gh>1.2; extra=="ci"
+Provides-Extra: fix
+Requires-Dist: black>=24.3; extra=="fix"
+Requires-Dist: ruff>=0.1.6; extra=="fix"
+Requires-Dist: autoflake; extra=="fix"
+Requires-Dist: isort; extra=="fix"
+Provides-Extra: dist
+Requires-Dist: python-semantic-release; extra=="dist"
+Requires-Dist: sigstore; extra=="dist"
+Provides-Extra: lint
+Requires-Dist: bandit[toml]; extra=="lint"
+Requires-Dist: black>=24.3; extra=="lint"
+Requires-Dist: flake8; extra=="lint"
+Requires-Dist: isort; extra=="lint"
+Requires-Dist: mypy; extra=="lint"
+Requires-Dist: pyright; extra=="lint"
+Requires-Dist: readme-renderer[md]; extra=="lint"
+Requires-Dist: Flake8-pyproject; extra=="lint"
+Requires-Dist: flake8-annotations; extra=="lint"
+Requires-Dist: flake8-broken-line; extra=="lint"
+Requires-Dist: flake8-bugbear; extra=="lint"
+Requires-Dist: flake8-comprehensions; extra=="lint"
+Requires-Dist: flake8-datetimez; extra=="lint"
+Requires-Dist: flake8-docstring-checker; extra=="lint"
+Requires-Dist: flake8-eradicate; extra=="lint"
+Requires-Dist: flake8-fixme; extra=="lint"
+Requires-Dist: flake8-leading-blank-lines; extra=="lint"
+Requires-Dist: flake8-no-pep420; extra=="lint"
+Requires-Dist: flake8-pyi; extra=="lint"
+Requires-Dist: flake8-pytest-style; extra=="lint"
+Requires-Dist: flake8-quotes; extra=="lint"
+Requires-Dist: flake8-tidy-imports; extra=="lint"
+Requires-Dist: flake8-type-checking; extra=="lint"
+Provides-Extra: test
+Requires-Dist: coverage[toml]; extra=="test"
+Requires-Dist: pytest; extra=="test"
+Requires-Dist: hypothesis[all]; extra=="test"
+Requires-Dist: pytest-asyncio; extra=="test"
+Requires-Dist: pytest-cov; extra=="test"
+Requires-Dist: pytest-randomly; extra=="test"
+Requires-Dist: pytest-tcpclient; extra=="test"
+Requires-Dist: pytest-xdist; extra=="test"
+Summary: Test Anything Protocol producer API for Python.
+Home-page: https://rjdbcm.github.io/rjdbcm/
+Author: Eden Ross Duff MSc
+Author-email: help@oziproject.dev
+License: Apache-2.0 WITH LLVM-exception
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Testing
+Classifier: Typing :: Typed
+Classifier: Environment :: Console
+Project-URL: Documentation, https://tap-producer.readthedocs.io/en/latest/
+Project-URL: Source, https://github.com/OZI-Project/TAP-Producer
+Download-URL: https://github.com/OZI-Project/TAP-Producer/archive/refs/tags/1.5.6.tar.gz
+Requires-Dist: PyYAML~=6.0
+Description-Content-Type: text/x-rst
+Description:
+
+
+.. OZI
+  Classifier: License-Expression :: Apache-2.0 WITH LLVM-exception
+  Classifier: License-File :: LICENSE.txt
+
+..
+  Part of TAP-Producer.
+  See LICENSE.txt in the project root for details.
+
+============
+TAP-Producer
+============
+
+Producer for Test Anything Protocol output in Python.
+
+.. code-block::
+
+   from tap_producer import TAP
+   with TAP() as t:
+     t.ok('passed')
+     t.ok('also passed')
+     
+The TAP class automatically counts test points at call time for TAP version 12, 13, and 14.
+
+.. code-block::
+
+   from tap_producer import TAP
+   @TAP(plan=1, version=14)
+   def f() -> None:
+      TAP.ok('reason')
+   f()
+
+TAP can also be used as a function decorator.
+
+.. code-block::
+
+   from tap_producer import TAP
+   TAP.version(14)
+   TAP.ok('passed')
+   TAP.end()
+
+The TAP class can also be used as a purely functional API. Normally TAP calls ``end()`` on its own. 
+
+.. code-block::
+
+   from tap_producer import TAP
+   with TAP() as t:
+      t.ok('passed').comment('debug information')
+      if FAIL_CONDITION:
+         t.not_ok('did not pass')
+         t.bail_out()
+
+TAP using version 12 supports plan, ok, not ok, diagnostic comment, and bail out
+functionality.
+
+.. code-block::
+
+   with TAP(version=13).subtest('subtest') as st:
+      st.plan(count=1, skip_count=0).ok('ok', {'yaml-key': 'yaml-val'})
+
+TAP version 13 supports the aforementioned as well as subtest context manager
+and YAML diagnostic output.
+
+.. code-block::
+
+   from tap_producer import TAP
+   with TAP() as t:
+      with t.suppress():
+         t.ok('passed but suppressed')
+      with t.strict()
+         t.not_ok('this is now a Python exception')
+
+TAP-Producer also includes two decorators, a suppress context manager for
+suppressing TAP output and a strict context manager for raising not ok test
+cases to Python errors.
+
+License
+-------
+
+Licensed Apache-2.0 WITH LLVM-exception, no NOTICE file needed if you want
+to vendor TAP-Producer into your project, see LICENSE.txt for more information.
+
+.. image:: https://raw.githubusercontent.com/sigstore/community/main/artwork/badge/sigstore_codesigned_purple.png
+ :align: right
+ :height: 140
+ :target: https://www.sigstore.dev/
