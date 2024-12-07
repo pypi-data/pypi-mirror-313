@@ -1,0 +1,161 @@
+Metadata-Version: 2.1
+Name: DiaModality
+Version: 0.1.7
+Summary: Tool to plot modality vector diagrams
+Author-email: konung-yaropolk <yaropolk1995@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2024 konung-yaropolk
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Project-URL: Homepage, https://github.com/konung-yaropolk/DiaModality
+Project-URL: Issues, https://github.com/konung-yaropolk/DiaModality/issues
+Keywords: Visualization,Plotting,Matplotlib
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: Natural Language :: English
+Classifier: Topic :: Scientific/Engineering :: Visualization
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+
+# DiaModality - The Modality Diagram
+
+Simple tool to plot vector modality diagram  
+
+[![pypi_version](https://img.shields.io/pypi/v/diamodality?label=PyPI&color=green)](https://pypi.org/project/diamodality)
+[![PyPI - License](https://img.shields.io/pypi/l/diamodality)](https://pypi.org/project/diamodality)
+[![Python](https://img.shields.io/badge/Python-v3.10%5E-green?logo=python)](https://pypi.org/project/diamodality)  
+
+
+### To install package run the command:
+```bash
+pip install diamodality
+```
+
+
+### Example of use:
+See the /demo directory on Git repo or  
+create and run the following two files:  
+*(file names don't matter)*
+
+---
+``generate_sample_data.py``:
+```python
+import csv
+import random
+import os
+
+num_rows = 1500
+output_file = 'modality_data.csv'
+
+# locate working directory
+script_dir = os.path.dirname(os.path.realpath(__file__))
+file_path = os.path.join(script_dir, output_file)
+
+# Open a new CSV file to write the data
+with open(file_path, mode='w', newline='') as file:
+    writer = csv.writer(file)
+
+    # Generate the data
+    signal_treshold = 1.5
+    for _ in range(num_rows):
+
+        # generate data columns:
+        col1 = random.uniform(0, 2.7)
+        col2 = random.uniform(0, 3.3)
+        col3 = random.uniform(0, 7.3)
+
+        # generate binarization columns:
+        col4 = 1 if col1 > signal_treshold else ''
+        col5 = 1 if col2 > signal_treshold else ''
+        col6 = 1 if col3 > signal_treshold else ''
+
+        writer.writerow([col1, col2, col3, col4, col5, col6])
+
+```
+
+
+---
+``plot_sample_data.py``:
+```python
+import DiaModality.CsvParser as csv
+import DiaModality.ModalityPlot as plt
+import os
+
+# input files:
+files = ['modality_data.csv']
+
+# Get full path
+script_dir = os.path.dirname(os.path.realpath(__file__))
+
+for file in files:
+
+    # Get full path of input files
+    file_path = os.path.join(script_dir, file)
+
+    # Parse data from csv file
+    new_csv = csv.LoadCsv(file_path)
+    data, binarization = new_csv.ParseCsv(3, 3)
+
+    # Make figure:
+    plot = plt.ModalityPlot(
+        data,
+        binarization,
+        modalities=['Set 1', 'Set 2', 'Set 3'],
+        angles=[210, 90, 330],
+        labels=False,
+        scalecircle=0.5,           # Scale circle radius
+        scalecircle_linestyle=':',
+        scalecircle_linewidth=0.75,
+        marker='',                 # vector endpoints marker
+        linestyle='-',
+        linewidth=0.5,
+        alpha=0.5,
+        same_scale=False,          # Draw all the subplots in the same scale
+        full_center=True,          # Draw all vectors in the central subplot,
+                                   # else draw trimodal vectors only
+        whole_sum=True,            # Calculate all three modality vectors despite binarization
+        figsize=(10, 10),
+        title='Modality Diagram Example',
+        colors=(
+            'tab:green',   # Set 1 color
+            'navy',        # Set 2 color
+            'tab:red',     # Set 3 color
+            '#1E88E5',     # Sets 1 & 2 intersection color
+            '#FF9933',     # Sets 1 & 3 intersection color
+            '#9900FF',     # Sets 2 & 3 intersection color
+            'black',       # All sets   intersection color
+        ),      
+    )
+
+    plot.save(file_path, type='png', transparent=False)
+    plot.show()
+```
+
+Source page: 
+https://github.com/konung-yaropolk/DiaModality
+
+
+![modality_data csv](https://github.com/user-attachments/assets/eb77b4d7-281f-45b0-a5ce-4c2442fc9a75)
