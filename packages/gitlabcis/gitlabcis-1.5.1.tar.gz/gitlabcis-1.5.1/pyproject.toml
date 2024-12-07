@@ -1,0 +1,213 @@
+# -----------------------------------------------------------------------------
+# Build:
+# -----------------------------------------------------------------------------
+
+[build-system]
+requires = ["setuptools>=61.2", "wheel>=0.42", "setuptools-scm>=8.1.0"]
+build-backend = "setuptools.build_meta"
+
+# -----------------------------------------------------------------------------
+# Project:
+# -----------------------------------------------------------------------------
+
+[project]
+name = "gitlabcis"
+version = "1.5.1"
+requires-python = ">=3.9"
+description = "An automated tool that assesses the GitLab CIS benchmarks against a project."
+authors = [
+    {name = "Nate Rosandich", email = "nrosandich+gitlabcis@gitlab.com"},
+    {name = "Neil McDonald", email = "nmcdonald+gitlabcis@gitlab.com"},
+    {name = "Mitra JozeNazemian", email = "mjozenazemian+gitlabcis@gitlab.com"}
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+    "GitLab Benchmarks",
+    "CIS Benchmarks",
+    "GitLab Hardening",
+    "GitLab Recommendations",
+    "GitLabcis",
+    "GitLab CIS Benchmarks",
+    "gitlabcis",
+    "GitLab",
+    "CIS",
+    "Benchmark Scanner",
+    "GitLab CIS Benchmark scanner",
+    "GitLab CIS"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Benchmark",
+    "Topic :: Security"
+]
+dependencies = [
+    "PyYAML == 6.0.1",
+    "python-gitlab ~=4.13.0",
+    "tabulate == 0.9.0",
+    "tqdm == 4.66.4",
+    "defusedxml == 0.7.1",
+    "python-dateutil == 2.9.0.post0",
+    "gql == 3.5.0"
+]
+
+[project.optional-dependencies]
+build = [
+    "setuptools ~=75.6",
+    "wheel ==0.45.1",
+    "build ==1.2.2.post1",
+    "setuptools-scm ~= 8.1.0",
+    "python-semantic-release == 9.8.8",
+    "pre-commit ~=4.0.1",
+    "twine ==6.0.1"
+]
+test = [
+    "pytest ==8.3.4",
+    "flake8 ~=7.1.1",
+    "bandit ==1.8.0",
+    "yamllint == 1.35.1",
+    "pytest-cov ==6.0.0",
+    "coverage ==7.6.8",
+    "tox ~=4.23.2"
+]
+
+[project.scripts]
+gitlabcis = "gitlabcis.cli.main:main"
+
+[project.urls]
+homepage = "https://gitlab.com/gitlab-org/govern/compliance/engineering/cis/gitlabcis/"
+documentation = "https://gitlab.com/gitlab-org/govern/compliance/engineering/cis/gitlabcis/-/tree/main/docs"
+issues = "https://gitlab.com/gitlab-org/govern/compliance/engineering/cis/gitlabcis/-/issues"
+changelog = "https://gitlab.com/gitlab-org/govern/compliance/engineering/cis/gitlabcis/-/tree/main/CHANGELOG.md"
+download = "https://gitlab.com/gitlab-org/govern/compliance/engineering/cis/gitlabcis/-/releases"
+
+# -----------------------------------------------------------------------------
+# Semantic Release:
+# -----------------------------------------------------------------------------
+
+[tool.semantic_release]
+build_command = """
+    python3 -m pip install -e .[build]
+    python3 -m build .
+"""
+version_variables = ["gitlabcis/__init__.py:__version__"]
+version_toml = ["pyproject.toml:project.version"]
+commit_parser = "angular"
+changelog_file = "CHANGELOG.md"
+commit_message = "chore(release): bump version to {version}"
+log_level = "info"
+logging_use_named_masks = true
+upload_to_vcs_release = true
+patch_without_tag = false
+upload_to_pypi = false
+major_on_zero = false
+allow_zero_version = false
+
+[tool.semantic_release.changelog]
+exclude_commit_patterns = [
+  '''chore(?:\([^)]*?\))?: .+''',
+  '''ci(?:\([^)]*?\))?: .+''',
+  '''refactor(?:\([^)]*?\))?: .+''',
+  '''style(?:\([^)]*?\))?: .+''',
+  '''test(?:\([^)]*?\))?: .+''',
+  '''build\((?!deps\): .+)''',
+  '''Merged? .*''',
+  '''lint(?:\([^)]*?\))?: .+''',
+  '''Initial Commit.*'''
+]
+
+[tool.semantic_release.commit_parser_options]
+allowed_types = [
+    "build", "chore", "ci", "docs", "feat", "fix",
+    "perf", "refactor", "test", "style"
+]
+minor_types = ["feat"]
+patch_types = ["fix", "perf", "docs"]
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+prerelease_token = "rc"
+
+[tool.semantic_release.remote]
+type = "gitlab"
+token = { env = "GITLAB_TOKEN" }
+
+# -----------------------------------------------------------------------------
+# Coverage:
+# -----------------------------------------------------------------------------
+
+[tool.coverage.paths]
+source = ["*gitlabcis*"]
+
+[tool.coverage.run]
+include = ["*gitlabcis*"]
+branch = true
+parallel = true
+omit = [
+    "gitlabcis/tests/*",
+    ".tox/*"
+]
+
+[tool.coverage.report]
+show_missing = true
+precision = 2
+
+# -----------------------------------------------------------------------------
+# Tox:
+# -----------------------------------------------------------------------------
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    env_list = py{39,310,311,312,313},flake8,cover,bandit,baseline,yamllint,benchmarks
+    skip_missing_interpreters = true
+
+    [testenv]
+    description = run unit tests
+    deps = pyproject.toml
+    extras = test
+    commands = pytest {posargs:gitlabcis/tests}
+
+    [testenv:flake8]
+    description = run linter
+    commands = flake8 ./gitlabcis
+
+    [testenv:cover]
+    description = check code coverage
+    commands = pytest -vv --cov=./gitlabcis --cov-config={toxinidir}/pyproject.toml \
+            --cov-report=term-missing --cov-report=html {posargs}
+
+    [testenv:bandit]
+    description = run bandit sast scan
+    commands = bandit -r gitlabcis -x tests,.tox
+
+    [testenv:baseline]
+    description = run baseline tests against the recommendations
+    commands = pytest gitlabcis/tests/unit/yaml -s -vv
+
+    [testenv:yamllint]
+    description = run yamllint against the recommendation yaml files
+    commands = yamllint gitlabcis/recommendations
+
+    [testenv:benchmarks]
+    description = run tests against the benchmark functions
+    commands = pytest gitlabcis/tests/unit/benchmarks -s -vv
+    """
