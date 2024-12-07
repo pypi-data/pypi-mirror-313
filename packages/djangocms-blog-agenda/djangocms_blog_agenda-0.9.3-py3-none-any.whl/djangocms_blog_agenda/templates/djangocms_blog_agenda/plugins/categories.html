@@ -1,0 +1,18 @@
+{% load i18n %}
+{% load apphooks_config_tags %}
+
+{% spaceless %}
+  <div class="plugin plugin-blog">
+    <h3>{% trans "Categories" %}</h3>
+    <ul class="blog-categories">
+      {% for category in categories %}
+        <li>
+          {% namespace_url "agenda-events-category" category=category.slug only_upcoming_events=only_upcoming_events|default:False as url %}
+          {% include "djangocms_blog_agenda/includes/item_with_counter.html" with url=url label=category.name counter=category.count %}
+        </li>
+      {% empty %}
+        <li class="blog-empty"><p>{% trans "No categories found." %}</p></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endspaceless %}

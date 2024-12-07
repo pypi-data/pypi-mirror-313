@@ -1,0 +1,18 @@
+{% load i18n %}
+{% load apphooks_config_tags %}
+
+{% spaceless %}
+  <div class="plugin plugin-blog">
+    <h3>{% trans "Tags" %}</h3>
+    <ul class="blog-tags">
+      {% for tag in tags %}
+        <li>
+          {% namespace_url 'agenda-events-tagged' tag=tag.slug only_upcoming_events=only_upcoming_events|default:False as url %}
+          {% include "djangocms_blog_agenda/includes/item_with_counter.html" with url=url label=tag.name counter=tag.count %}
+        </li>
+      {% empty %}
+        <li class="blog-empty"><p>{% trans "No article found." %}</p></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endspaceless %}
