@@ -1,0 +1,2 @@
+UNION_SERVE_CONFIG_FILE_NAME: str = "union_serve_config.json"
+UNION_SERVE_CONFIG_ENV_VAR: str = "UNION_SERVICE_CONFIG"
