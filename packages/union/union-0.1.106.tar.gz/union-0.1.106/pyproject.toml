@@ -1,0 +1,102 @@
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "union"
+dynamic = ["version"]
+authors = [{ name = "unionai", email = "info@union.ai" }]
+description = "Adds Union specific functionality to Flytekit"
+license = { file = "LICENSE" }
+readme = { file = "README_PYPI.md", content-type = "text/markdown" }
+requires-python = ">=3.9"
+dependencies = [
+    "googleapis-common-protos>=1.57",
+    "grpcio",
+    "grpcio-status",
+    "keyring",
+    "importlib-metadata",
+    "fsspec>=2023.3.0",
+    "aiofiles>=23.2.1",
+    "click",
+    "rich",
+    "rich_click",
+    "flytekit>=1.13.3",
+    "flyteidl>=1.13.1",
+    "sentry-sdk>=2.0.0",
+    "mashumaro",
+    # Required to have flyte deck work out of the box. Remove when `flytekit` gets fixed.
+    "jinja2",
+    # Actors are only required for linux and exectuion
+    "unionai-actor>=0.1.4; platform_system == 'Linux' and platform_machine == 'x86_64'",
+    "pyyaml",
+    "typing_extensions",
+    # Temporary fix for segfault issue on windows
+    "protobuf<5.28.0; platform_system == 'Windows'",
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.optional-dependencies]
+byoc = ["unionmeta-byoc"]
+
+[project.urls]
+Homepage = "https://www.union.ai/"
+
+[project.scripts]
+union = "union.cli._main:main"
+
+[project.entry-points."fsspec.specs"]
+unionmeta = "union.filesystems:AsyncUnionMetaFS"
+union = "union.filesystems:AsyncUnionFS"
+
+[project.entry-points."flytekit.configuration.plugin"]
+union = "union.configuration:UnionAIPlugin"
+
+[project.entry-points."flytekit.plugins"]
+union_image = "union.ucimage"
+union_artifacts = "union.artifacts"
+union_actor = "union.actor"
+
+[project.entry-points."keyring.backends"]
+union_keyring_file = "union._keyring.file"
+
+[tool.setuptools]
+include-package-data = true
+license-files = ["licenses/*.txt", "LICENSE"]
+
+[tool.setuptools.packages.find]
+include = ["union*"]
+
+[tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+norecursedirs = ["fsspec"]
+log_cli = true
+log_cli_level = 20
+markers = []
+
+[tool.coverage.run]
+branch = true
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["union/internal", "flytekit"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"examples/*" = ["E402"]
