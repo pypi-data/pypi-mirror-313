@@ -1,0 +1,42 @@
+{% extends "layouts/dev-page__one-panel.html" %}
+{% from "macros/render_panel.html"  import render_panel  %}
+{% set random_num = range(1, 99999)|random %}
+{% set panel_div_id = "__panel__" ~ random_num %}
+{% set spinner_id   = "__spinner__" ~ random_num %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
+
+    <style>
+        .panel_div {
+            flex:auto;
+        }
+        .col-style {
+            border: 1px dashed #0b5ed7 ;
+            background-color: #e8f4fd;
+            align-items: start;
+            justify-content: left;
+        }
+
+        .spinner_reload {
+            width : 20px  ;
+            height : 20px ;
+        }
+
+    </style>
+{% endblock extra_css %}
+
+{% block content_container %}
+    <div class="col-12" style="padding:10px">
+        <div>
+            <button id="{{ panel_div_id }}_reload" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
+                Reload &nbsp;
+                <i id="{{ spinner_id }}" class="spinner_reload spinner-border me-2" role="status" style="display:none;"></i>
+            </button>
+        </div>
+    </div>
+{% endblock %}
+
+{%  block content_one_panel %}
+    {{ render_panel(class_name=class_name, method_name=method_name, method_kwargs=method_kwargs, div_id=panel_div_id, spinner_id=spinner_id) }}
+{% endblock %}

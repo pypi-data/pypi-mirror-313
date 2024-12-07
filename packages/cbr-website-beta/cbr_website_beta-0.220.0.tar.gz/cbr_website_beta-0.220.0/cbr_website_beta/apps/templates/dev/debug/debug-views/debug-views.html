@@ -1,0 +1,36 @@
+{% from "macros/render_panel.html"  import render_panel  %}
+
+<style>
+    .render_panel { padding :10px;
+                    margin  :10px ;
+                    border  : 1px solid #C0C0C0 }
+</style>
+<script>
+    var method_kwargs  = {{  method_kwargs | tojson  }}
+    var views_mappings = {{ views_mappings | tojson }}
+    {% include 'dev/debug/debug-views/scripts.js' %}</script>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-1">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#debuggingViews" aria-expanded="true" aria-controls="debuggingViews">
+                        X
+                    </button>
+                </div>
+            </div>
+            <div class="col-11">
+                <div class="collapse show" id="debuggingViews">
+                    {%  include 'dev/debug/debug-views/select-target.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="render_panel">
+        <a href="#" onclick="submit_debug_view_form()">refresh</a>
+    </div>
+    <div class="render_panel">
+        {{ render_panel(class_name=class_name, method_name=method_name, method_kwargs=method_kwargs, div_id=div_id) }}
+    </div>
+<script>
+</script>

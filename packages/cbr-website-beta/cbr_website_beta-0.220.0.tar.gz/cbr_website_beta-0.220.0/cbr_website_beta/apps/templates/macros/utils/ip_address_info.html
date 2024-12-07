@@ -1,0 +1,88 @@
+{% from "macros/utils/cell_ti_status.html"  import cell_ti_status  %}
+{% macro ip_address_info(ip_address, ip_data) %}
+    <hr>
+    <div class="label label-warning"><h3>{{ ip_address }} IP Address Info and Threat Intel</h3></div>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .ip_container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .column {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #eeeeee;
+        }
+    </style>
+
+    <div class="ip_container">
+        <div class="column">
+            <h2>General Information</h2>
+            <table>
+                <tr><th>Field</th><th>Value</th></tr>
+                <tr><td>IP</td><td>{{ ip_data.get('ip', 'N/A') }}</td></tr>
+
+                <tr><td>City</td><td>{{ ip_data.get('city', 'N/A') }}</td></tr>
+                <tr><td>Postal address</td><td>{{ ip_data.get('postal', 'N/A') }}</td></tr>
+                <tr><td>Region</td><td>{{ ip_data.get('region', 'N/A') }} ({{ ip_data.get('region_code', 'N/A') }})</td></tr>
+                <tr><td>Country</td><td>{{ ip_data.get('country_name', 'N/A') }} ({{ ip_data.get('emoji_flag', 'N/A') }})</td></tr>
+                <tr><td>Continent</td><td>{{ ip_data.get('continent_name', 'N/A') }}</td></tr>
+                <tr><td>Latitude & Longitude</td>
+                    <td>
+                        {{ ip_data.get('latitude', 'N/A') }},{{ ip_data.get('longitude', 'N/A') }}
+                        <br/>
+                        <a href="https://www.google.com/maps/search/{{ ip_data.get('latitude', 'N/A') }},{{ip_data.get('longitude', 'N/A') }}" target="_blank">
+                            (open in Google Maps)
+                        </a>
+                    </td></tr>
+            </table>
+        </div>
+        <div class="column">
+            <h2>Threat Intel</h2>
+            <table>
+                <tr><th>Field</th><th>Value</th></tr>
+                <tr><td>blocklists       </td><td>{{ ip_data.get('threat', {}).get('blocklists', 'N/A') }}</td></tr>
+                <tr><td>is_anonymous     </td><td>{{ cell_ti_status(ip_data, 'is_anonymous')}}      </td></tr>
+                <tr><td>is_bogon         </td><td>{{ cell_ti_status(ip_data, 'is_bogon')}}          </td></tr>
+                <tr><td>is_datacenter    </td><td>{{ cell_ti_status(ip_data, 'is_datacenter')}}     </td></tr>
+                <tr><td>is_icloud_relay  </td><td>{{ cell_ti_status(ip_data, 'is_icloud_relay')}}   </td></tr>
+                <tr><td>is_known_abuser  </td><td>{{ cell_ti_status(ip_data, 'is_known_abuser')}}   </td></tr>
+                <tr><td>is_known_attacker</td><td>{{ cell_ti_status(ip_data, 'is_known_attacker')}} </td></tr>
+                <tr><td>is_proxy         </td><td>{{ cell_ti_status(ip_data, 'is_proxy')}}          </td></tr>
+                <tr><td>is_threat        </td><td>{{ cell_ti_status(ip_data, 'is_threat')}}         </td></tr>
+                <tr><td>is_tor           </td><td>{{ cell_ti_status(ip_data, 'is_tor')}}            </td></tr>
+            </table>
+        </div>
+        <div class="column">
+            <h2>Additional Information</h2>
+            <table>
+                <tr><th>Field</th><th>Value</th></tr>
+                <tr><td>ASN</td><td>{{ ip_data.get('asn', {}).get('name', 'N/A') }} ({{ ip_data.get('asn', {}).get('asn', 'N/A') }})</td></tr>
+                <tr><td>ISP Domain</td><td>{{ ip_data.get('asn', {}).get('domain', 'N/A') }}</td></tr>
+                <tr><td>Time Zone</td><td>{{ ip_data.get('time_zone', {}).get('name', 'N/A') }} ({{ ip_data.get('time_zone', {}).get('current_time', 'N/A') }})</td></tr>
+                <tr><td>Currency</td><td>{{ ip_data.get('currency', {}).get('name', 'N/A') }} ({{ ip_data.get('currency', {}).get('symbol', 'N/A') }})</td></tr>
+                <tr><td>Language</td><td>{{ ip_data.get('languages', [{}])[0].get('name', 'N/A') }}</td></tr>
+                <!-- Add more rows as needed -->
+            </table>
+        </div>
+
+    </div>
+<hr>
+<div class="label label-success"><h3>{{ ip_address }} All traffic logged for this IP Address</h3></div>
+{% endmacro %}

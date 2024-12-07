@@ -1,0 +1,43 @@
+
+<div class="container-fluid" id="doc-page">
+
+    <div class="row">
+        <div class="col-12" id="doc-navigation">
+
+            <p>
+                {% if parent_folder == 'docs' and path == 'index' %}
+                    {# For now do nothing if the condition is met #}
+                {% else %}
+                    [ <a href="{{ parent_folder }}/index">{{ parent_folder }}</a> ]
+                {% endif %}
+
+                {% for folder in folders %}
+                    | <a href="{{ base_folder }}/{{folder }}/index">{{ folder }}</a>
+                    {% endfor %}
+                <hr/>
+                {% for file in files %}
+                     | <a href="{{ base_folder }}/{{file }}">{{ file }}</a>
+                {% endfor %}
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body" id="doc-content">
+                    {{ content | safe}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if g.user_groups and 'CBR-Team' in g.user_groups %}
+        <hr/>
+        <a href="docs/markdown/edit/{{path}}" >edit this page</a>
+    {% endif %}
+</div>
+
+
+
+{% include 'docs/markdown-ui-fixes.html' %}

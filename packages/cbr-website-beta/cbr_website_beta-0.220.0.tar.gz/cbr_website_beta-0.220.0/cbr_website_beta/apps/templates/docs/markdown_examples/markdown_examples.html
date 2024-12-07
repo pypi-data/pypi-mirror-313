@@ -1,0 +1,144 @@
+
+<link rel="stylesheet" href="/assets/plugins/highlight/default.min.css">
+<script src="/assets/plugins/highlight/highlight.min.js"></script>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    window.mermaid = mermaid
+    mermaid.initialize({ startOnLoad: true });
+</script>
+
+<div class="container-fluid" id="doc-page">
+
+    <div class="row">
+        <div class="col-12">
+            <h2>Markdown Edit Sandbox</h2>
+            <p>
+                This is a simple markdown editor that allows you to
+                write markdown on the left and see the rendered HTML on the right.
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Markdown Examples</h5>
+                    <p>
+                        Here are a number of Markdown examples that show how to use various features of
+                        the default Markdown (python) API and the extra extensions developed for this site.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'docs/markdown_examples/examples_form.html' %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Edit and preview</h5>
+                    <p>
+                        Here you can edit the markdown on the left and see the rendered HTML on the right.
+                        Choose one of the examples above to get started.
+                    </p>
+                    <p>
+                        Here are some markdown references that might help:
+                    </p>
+                    <ul>
+                        <li><a target='_blank' href="https://www.markdownguide.org"     >Markdown guide   </a></li>
+                        <li><a target='_blank' href="https://python-markdown.github.io" >Python Markdown</a></li>
+                        <li><a target='_blank' href="https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax">GitHub's Markdown Guidance</a></li>
+                        <li><a target='_blank' href="https://mermaid.js.org/syntax/examples.html" >Mermaid Examples (official site)   </a></li>
+                        <li><a target='_blank' href="https://github.com/rudolfolah/mermaid-diagram-examples/tree/main/diagrams" >Mermaid Examples (rudolfolah/mermaid-diagram-examples)    </a></li>
+
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body" id="doc-content">
+                    <textarea id="markdown-input" class="form-control" rows="20" placeholder="Enter Markdown here...">
+# Markdown Editor
+
+start typing here, or choose one of the examples from the options above
+                    </textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    <div id="html-output">
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <textarea id="html-raw"  class="form-control">
+                    </textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function update_raw_html(value) {
+        let textarea = document.getElementById('html-raw');
+        textarea.value = value
+        textarea.style.height = 'auto'; // Reset the height
+        textarea.style.height = (textarea.scrollHeight) + 'px'; // Set the height to the scroll height
+        }
+
+    function renderMarkdown() {
+        const markdownText = $('#markdown-input').val();
+        $.ajax({
+            url: '/markdown/render/markdown-to-html',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ text: markdownText }),
+            success: function(response) {
+                $('#html-output').html(response);
+                update_raw_html(response)
+                window.response=response
+                apply_ui_fixes__markdown()
+            },
+            error: function(error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+    function apply_ui_fixes__markdown() {
+        // Add Bootstrap classes to each table
+        const bootstrap_table_classes = 'table table-striped table-bordered table-hover table-sm'
+        $('table').each(function() { $(this).addClass(bootstrap_table_classes);});
+        // trigger mermain rendering
+        window.mermaid?.contentLoaded();
+        //window.hljs?.highlightAll()
+    }
+
+$(document).ready(function() {
+    let timeout = null;
+
+
+
+    $('#markdown-input').on('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(renderMarkdown, 100); // 500ms delay after the user stops typing
+    });
+
+    // Call renderMarkdown on page load
+    renderMarkdown();
+});
+</script>
+
