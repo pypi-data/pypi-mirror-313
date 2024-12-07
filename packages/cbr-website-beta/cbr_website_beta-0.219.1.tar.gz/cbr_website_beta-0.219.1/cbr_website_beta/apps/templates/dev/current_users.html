@@ -1,0 +1,56 @@
+<h2>Current Users</h2>
+<hr>
+
+<p>
+    <span id='session-count' class="btn btn-dark text-white">
+        <b># users</b>: {{ current_users | length }}
+    </span>
+    <span id='updated-at'>
+        <b>last updated at:</b> {{ metadata.get('timestamp_date') }} | {{ metadata.get('timestamp_time') }}
+    </span>
+</p>
+ <p>
+    Reload this data on the <a href="dev/odin-actions">Odin Actions</a> page
+</p>
+
+<table id="session_data_table" >
+    <thead>
+        <tr>
+            <th>User_id</th>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>Role</th>
+            <th>Organisation</th>
+            <th>Linkedin</th>
+            <th>Country</th>
+            <th>Sector</th>
+            <th>Org</th>
+        </tr>
+    </thead>
+</table>
+
+<script>
+    var consolidatedData = {{  current_users | tojson}}
+    $(document).ready(function() {
+
+        render_link =  function(data, type, row) {
+                            return '<a href="dev/current-user/' + data + '">' + data + '</a>';
+                        }
+        $('#session_data_table').DataTable({
+            "dom": '<"top"f>rt<"bottom"i><"clear">',
+            "pageLength": -1,
+            data: consolidatedData,
+            columns: [
+                { data: 'user_id'       , render   : render_link},
+                { data: 'first_name'    , className: 'dt-center'},
+                { data: 'last_name'     , className: 'dt-center'},
+                { data: 'last_name'     , className: 'dt-center'},
+                { data: 'organisation'  , className: 'dt-center'},
+                { data: 'linkedin'      , className: 'dt-center'},
+                { data: 'country'       , className: 'dt-center'},
+                { data: 'sector'        , className: 'dt-center'},
+                { data: 'org_size'      , className: 'dt-center'},
+
+            ]
+        });
+    });

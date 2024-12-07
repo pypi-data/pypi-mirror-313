@@ -1,0 +1,35 @@
+{% extends "layouts/base.html" %}
+{% from "macros/chats/render_chat_thread.html" import render_chat_thread %}
+
+{% block title %}User Chat Threads{% endblock %}
+
+{% block stylesheets %}
+    <style>
+
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+
+    <div id="chat-threads" class="container-fluid">
+
+        <div id='intro-section' class="row">
+            <div class="col-md-12">
+                <div class="card" style="padding: 10px">
+                    <h3>Past Chat Threads</h3>
+                    <p>Please see below your past conversations and debates with Athena)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div id='threads-section' class="row">
+            {% for  thread_id, thread_data in  threads_data.items()%}
+                <hr/>
+                {{ render_chat_thread(thread_id, thread_data) }}
+                <hr/>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

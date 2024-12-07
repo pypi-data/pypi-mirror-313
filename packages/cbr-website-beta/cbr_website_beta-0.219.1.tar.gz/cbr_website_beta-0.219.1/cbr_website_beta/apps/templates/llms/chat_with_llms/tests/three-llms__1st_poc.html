@@ -1,0 +1,91 @@
+<script type="text/javascript" src="/assets/plugins/golden-layout/goldenlayout.min.js"></script>
+<link type="text/css" rel="stylesheet" href="/assets/plugins/golden-layout/goldenlayout-base.css" />
+<link type="text/css" rel="stylesheet" href="/assets/plugins/golden-layout/goldenlayout-dark-theme.css" />
+
+<div id="layout" style="widxth: 100%; height: 100vh;"></div>
+
+<script>
+    $(function() {
+        var config = {
+        content: [{
+            type: 'row',
+            content:[{  type: 'component',
+                        componentName: 'chatbotMain',
+                        componentState: {
+                            url: "{{ url_athena }}",
+                            name: "{{ title }}",
+                            model: "{{ model }}",
+                            platform: "{{ platform }}",
+                            provider: "{{ provider }}",
+                            channel: "chatbot-1"
+                        },
+                        width: 66.66
+                    },
+                {
+                type: 'column',
+                content:[{type: 'component',
+                        componentName: 'chatbotMain',
+                        componentState: {
+                            url: "{{ url_athena }}",
+                            name: "{{ title }}",
+                            model: "{{ model }}",
+                            platform: "{{ platform }}",
+                            provider: "{{ provider }}",
+                            channel: "chatbot-2"
+                        },
+                        width: 66.66
+                    }
+                    ,{type: 'component',
+                        componentName: 'chatbotMain',
+                        componentState: {
+                            url: "{{ url_athena }}",
+                            name: "{{ title }}",
+                            model: "{{ model }}",
+                            platform: "{{ platform }}",
+                            provider: "{{ provider }}",
+                            channel: "chatbot-3"
+                        },
+                        width: 66.66
+                    }]
+            }]
+        }]
+    };
+
+    var myLayout = new GoldenLayout( config , "#layout");
+
+    myLayout.registerComponent( 'testComponent', function( container, componentState ){
+        container.getElement().html( '<h2>' + componentState.label + '</h2>' );
+    });
+
+    //myLayout.init();
+
+    window.myLayout = myLayout
+
+
+           myLayout.registerComponent('chatbotMain', function(container, componentState) {
+            {#    window.componentState = componentState#}
+            {#   const title = document.createElement('h1')#}
+            {#   title.innerHTML = componentState.channel#}
+            {#   container.getElement().append(title);#}
+            {#const element = document.createElement('chatbot-openai');#}
+            {#element.setAttribute('url', componentState.url);#}
+            {#element.setAttribute('name', componentState.name);#}
+            {#element.setAttribute('model', componentState.model);#}
+            {#element.setAttribute('platform', componentState.platform);#}
+            {#element.setAttribute('provider', componentState.provider);#}
+            {#element.setAttribute('channel', componentState.channel);#}
+            {#element.setAttribute('title' ,'aaaa')#}
+            {#window.element=element#}
+            {#console.log(element.outerHTML)#}
+            {#container.getElement().append(element);#}
+               html = `<chatbot-openai name="${componentState.name}"
+                                       channel="${componentState.channel}">
+                       </chatbot-openai>`
+               container.getElement().html(html)
+        });
+    setTimeout(()=>{
+        //myLayout.destroy();
+        myLayout.init()
+    }, 1)
+});
+</script>

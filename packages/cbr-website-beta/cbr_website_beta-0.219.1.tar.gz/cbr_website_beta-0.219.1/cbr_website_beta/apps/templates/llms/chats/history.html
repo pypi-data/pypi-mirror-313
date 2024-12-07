@@ -1,0 +1,34 @@
+   <div class="container mt-5">
+        <h1 class="mb-4">Chat History</h1>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>User Prompt</th>
+                        <th>LLM Answer</th>
+                        <th>Size</th>
+                        <th># of History</th>
+                        <th>Chat ID</th>
+                        <th>Platform</th>
+                        <th>Provider</th>
+                        <th>Model</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chat in chats %}
+                    <tr>
+                        <td>{{ chat.get('user_prompt', '')[:128] }}{% if chat.get('user_prompt', '')|length > 128 %}...{% endif %}</td>
+                        <td>{{ chat.get('llm_answer', '')[:128] }}{% if chat.get('llm_answer', '')|length > 128 %}...{% endif %}</td>
+                        <td>{{ chat.get('user_prompt', '') | length }} / {{ chat.get('llm_answer', '') | length }}</td>
+
+                        <td>{{ chat.get('histories', [])|length }}</td>
+                        <td><a href="/web/chat/view/{{ chat.get('chat_thread_id') }}">{{ chat.get('chat_thread_id') }}</a></td>
+                        <td>{{ chat.get('user_data', {}).get('selected_platform', '') }}</td>
+                        <td>{{ chat.get('user_data', {}).get('selected_provider', '') }}</td>
+                        <td>{{ chat.get('user_data', {}).get('selected_model', '') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>

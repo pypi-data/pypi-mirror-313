@@ -1,0 +1,55 @@
+{% extends "layouts/dev-page.html" %}
+{% from "macros/table_list.html" import table_list %}
+
+{%  block card_body %}
+    <style>
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; /* This creates space between the cells horizontally and vertically */
+        justify-content: flex-start; /* Aligns items to the start of the container */
+        row-gap: 20px;
+    }
+
+    .user-cell {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 3px solid #333;
+        border-radius: 15px; /* Circular corners */
+        background: #e8f4fd; /* Light grey background */
+        padding: 10px; /* Add padding to ensure content does not touch the borders */
+        box-sizing: border-box; /* Include padding and border in the width and height */
+        flex: 1 0 calc(15% - 20px); /* Adjust the basis to 33% minus twice the gap for 3 items per row */
+        min-height: 50px; /* Set a minimum height */
+        word-wrap: break-word; /* Ensure that the text wraps within the cell */
+        text-align: center; /* Center the text horizontally */
+    }
+</style>
+
+
+    <p>
+        <span id='duration-session-count' class="btn btn-dark text-white">
+            <b># users</b>: {{ current_users.stats.get('session_count')}}
+        </span>
+        <span id='duration-data-fetch' class="btn btn-primary text-white">
+            loaded in {{ current_users.stats.get('s3_fetch_duration')}} secs
+        </span>
+    </p>
+
+    <div id="current-users-cells">
+        <div class="container-fluid">
+            {% for chunk in current_users.data %}
+                <div class="row">
+                    {% for user_id in chunk %}
+                        <div class="col-2 user-cell">
+                            <a href="dev/current-user/{{ user_id }}"}>{{ user_id }}</a>
+                        </div>
+                    {% endfor %}
+                </div>
+                <br/>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock card_body %}
