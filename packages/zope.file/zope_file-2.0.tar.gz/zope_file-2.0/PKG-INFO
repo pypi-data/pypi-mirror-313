@@ -1,0 +1,962 @@
+Metadata-Version: 2.1
+Name: zope.file
+Version: 2.0
+Summary: Efficient File Implementation for Zope Applications
+Home-page: https://github.com/zopefoundation/zope.file
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.org
+License: ZPL 2.1
+Keywords: zope3 web html ui file pattern
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Framework :: Zope :: 3
+Requires-Python: >=3.8
+License-File: LICENSE.txt
+Requires-Dist: setuptools
+Requires-Dist: ZODB
+Requires-Dist: zope.annotation
+Requires-Dist: zope.component
+Requires-Dist: zope.container
+Requires-Dist: zope.contenttype
+Requires-Dist: zope.event
+Requires-Dist: zope.filerepresentation
+Requires-Dist: zope.i18nmessageid
+Requires-Dist: zope.lifecycleevent
+Requires-Dist: zope.interface
+Requires-Dist: zope.location
+Requires-Dist: zope.mimetype>=2.3.0
+Requires-Dist: zope.schema
+Requires-Dist: zope.security>=7.1
+Requires-Dist: zope.size
+Provides-Extra: test
+Requires-Dist: zope.browser; extra == "test"
+Requires-Dist: zope.browserresource; extra == "test"
+Requires-Dist: zope.publisher>=4.3.1; extra == "test"
+Requires-Dist: zope.formlib; extra == "test"
+Requires-Dist: zope.app.basicskin>=4.0.0; extra == "test"
+Requires-Dist: zope.app.http; extra == "test"
+Requires-Dist: zope.app.pagetemplate>=4.0.0; extra == "test"
+Requires-Dist: zope.app.principalannotation; extra == "test"
+Requires-Dist: zope.app.publication; extra == "test"
+Requires-Dist: zope.app.wsgi; extra == "test"
+Requires-Dist: zope.applicationcontrol; extra == "test"
+Requires-Dist: zope.browser; extra == "test"
+Requires-Dist: zope.browsermenu; extra == "test"
+Requires-Dist: zope.copypastemove; extra == "test"
+Requires-Dist: zope.login; extra == "test"
+Requires-Dist: zope.password; extra == "test"
+Requires-Dist: zope.principalregistry; extra == "test"
+Requires-Dist: zope.proxy>=4.2.1; extra == "test"
+Requires-Dist: zope.securitypolicy; extra == "test"
+Requires-Dist: zope.testbrowser>=5.2; extra == "test"
+Requires-Dist: zope.testing; extra == "test"
+Requires-Dist: zope.testrunner; extra == "test"
+Provides-Extra: browser
+Requires-Dist: zope.browser; extra == "browser"
+Requires-Dist: zope.browserresource; extra == "browser"
+Requires-Dist: zope.publisher>=4.3.1; extra == "browser"
+Requires-Dist: zope.formlib; extra == "browser"
+
+The `zope.file` package provides a content object used to store a
+file. The interface supports efficient upload and download.
+
+
+.. contents::
+
+=============
+ File Object
+=============
+
+The `zope.file` package provides a content object used to store a
+file.  The interface supports efficient upload and download.  Let's
+create an instance:
+
+  >>> from zope.file.file import File
+  >>> f = File()
+
+The object provides a limited number of data attributes.  The
+`mimeType` attribute is used to store the preferred MIME
+content-type value for the data:
+
+  >>> f.mimeType
+
+  >>> f.mimeType = "text/plain"
+  >>> f.mimeType
+  'text/plain'
+
+  >>> f.mimeType = "application/postscript"
+  >>> f.mimeType
+  'application/postscript'
+
+The `parameters` attribute is a mapping used to store the content-type
+parameters.  This is where encoding information can be found when
+applicable (and available):
+
+  >>> f.parameters
+  {}
+  >>> f.parameters["charset"] = "us-ascii"
+  >>> f.parameters["charset"]
+  'us-ascii'
+
+Both, `parameters` and `mimeType` can optionally also be set when
+creating a `File` object:
+
+  >>> f2 = File(mimeType = "application/octet-stream",
+  ...           parameters = dict(charset = "utf-8"))
+  >>> f2.mimeType
+  'application/octet-stream'
+
+  >>> f2.parameters["charset"]
+  'utf-8'
+
+File objects also sport a `size` attribute that provides the number of
+bytes in the file:
+
+  >>> f.size
+  0
+
+The object supports efficient upload and download by providing all
+access to content data through accessor objects that provide (subsets
+of) Python's file API.
+
+A file that hasn't been written to is empty.  We can get a reader by calling
+`open()`. Note that all blobs are binary, thus the mode always contains a
+'b':
+
+  >>> r = f.open("r")
+  >>> r.mode
+  'rb'
+
+The `read()` method can be called with a non-negative integer argument
+to specify how many bytes to read, or with a negative or omitted
+argument to read to the end of the file:
+
+  >>> r.read(10)
+  b''
+  >>> r.read()
+  b''
+  >>> r.read(-1)
+  b''
+
+Once the accessor has been closed, we can no longer read from it:
+
+  >>> r.close()
+  >>> r.read()
+  Traceback (most recent call last):
+  ValueError: I/O operation on closed file
+
+We'll see that readers are more interesting once there's data in the
+file object.
+
+Data is added by using a writer, which is also created using the
+`open()` method on the file, but requesting a write file mode:
+
+  >>> w = f.open("w")
+  >>> w.mode
+  'wb'
+
+The `write()` method is used to add data to the file, but note that
+the data may be buffered in the writer:
+
+  >>> _ = w.write(b"some text ")
+  >>> _ = w.write(b"more text")
+
+The `flush()` method ensure that the data written so far is written to
+the file object:
+
+  >>> w.flush()
+
+We need to close the file first before determining its file size
+
+  >>> w.close()
+  >>> f.size
+  19
+
+We can now use a reader to see that the data has been written to the
+file:
+
+  >>> w = f.open("w")
+  >>> _ = w.write(b'some text more text')
+  >>> _ = w.write(b" still more")
+  >>> w.close()
+  >>> f.size
+  30
+
+
+Now create a new reader and let's perform some seek operations.
+
+  >>> r = f.open()
+
+The reader also has a `seek()` method that can be used to back up or
+skip forward in the data stream.  Simply passing an offset argument,
+we see that the current position is moved to that offset from the
+start of the file:
+
+  >>> _ = r.seek(20)
+  >>> r.read()
+  b'still more'
+
+That's equivalent to passing 0 as the `whence` argument:
+
+  >>> _ = r.seek(20, 0)
+  >>> r.read()
+  b'still more'
+
+We can skip backward and forward relative to the current position by
+passing 1 for `whence`:
+
+  >>> _ = r.seek(-10, 1)
+  >>> r.read(5)
+  b'still'
+  >>> _ = r.seek(2, 1)
+  >>> r.read()
+  b'ore'
+
+We can skip to some position backward from the end of the file using
+the value 2 for `whence`:
+
+  >>> _ = r.seek(-10, 2)
+  >>> r.read()
+  b'still more'
+
+  >>> _ = r.seek(0)
+  >>> _ = r.seek(-4, 2)
+  >>> r.read()
+  b'more'
+
+  >>> r.close()
+
+
+Attempting to write to a closed writer raises an exception:
+
+
+  >>> w = f.open('w')
+  >>> w.close()
+
+  >>> w.write(b'foobar')
+  Traceback (most recent call last):
+  ValueError: I/O operation on closed file
+
+Similarly, using `seek()` or `tell()` on a closed reader raises an
+exception:
+
+  >>> r.close()
+  >>> _ = r.seek(0)
+  Traceback (most recent call last):
+  ValueError: I/O operation on closed file
+
+  >>> r.tell()
+  Traceback (most recent call last):
+  ValueError: I/O operation on closed file
+
+
+==========================
+ Downloading File Objects
+==========================
+
+The file content type provides a view used to download the file,
+regardless of the browser's default behavior for the content type.
+This relies on browser support for the Content-Disposition header.
+
+The download support is provided by two distinct objects:  A view that
+provides the download support using the information in the content
+object, and a result object that can be used to implement a file
+download by other views.  The view can override the content-type or the
+filename suggested to the browser using the standard IResponse.setHeader
+method.
+
+Note that result objects are intended to be used once and then
+discarded.
+
+Let's start by creating a file object we can use to demonstrate the
+download support:
+
+  >>> import transaction
+  >>> from zope.file.file import File
+  >>> f = File()
+  >>> getRootFolder()['file'] = f
+  >>> transaction.commit()
+
+Headers
+=======
+
+Now, let's get the headers for this file.  We use a utility function called
+``getHeaders``:
+
+  >>> from zope.file.download import getHeaders
+  >>> headers = getHeaders(f, contentDisposition='attachment')
+
+Since there's no suggested download filename on the file, the
+Content-Disposition header doesn't specify one, but does indicate that
+the response body be treated as a file to save rather than to apply
+the default handler for the content type:
+
+  >>> sorted(headers)
+  [('Content-Disposition', 'attachment; filename="file"'),
+   ('Content-Length', '0'),
+   ('Content-Type', 'application/octet-stream')]
+
+
+Note that a default content type of 'application/octet-stream' is
+used.
+
+If the file object specifies a content type, that's used in the headers
+by default:
+
+  >>> f.mimeType = "text/plain"
+  >>> headers = getHeaders(f, contentDisposition='attachment')
+  >>> sorted(headers)
+  [('Content-Disposition', 'attachment; filename="file"'),
+   ('Content-Length', '0'),
+   ('Content-Type', 'text/plain')]
+
+Alternatively, a content type can be specified to ``getHeaders``:
+
+  >>> headers = getHeaders(f, contentType="text/xml",
+  ...                      contentDisposition='attachment')
+  >>> sorted(headers)
+  [('Content-Disposition', 'attachment; filename="file"'),
+   ('Content-Length', '0'),
+   ('Content-Type', 'text/xml')]
+
+The filename provided to the browser can be controlled similarly.  If
+the content object provides one, it will be used by default:
+
+  >>> headers = getHeaders(f, contentDisposition='attachment')
+  >>> sorted(headers)
+  [('Content-Disposition', 'attachment; filename="file"'),
+   ('Content-Length', '0'),
+   ('Content-Type', 'text/plain')]
+
+Providing an alternate name to ``getHeaders`` overrides the download
+name from the file:
+
+  >>> headers = getHeaders(f, downloadName="foo.txt",
+  ...                      contentDisposition='attachment')
+  >>> sorted(headers)
+  [('Content-Disposition', 'attachment; filename="foo.txt"'),
+   ('Content-Length', '0'),
+   ('Content-Type', 'text/plain')]
+
+The default Content-Disposition header can be overridden by providing
+an argument to ``getHeaders``:
+
+  >>> headers = getHeaders(f, contentDisposition="inline")
+  >>> sorted(headers)
+  [('Content-Disposition', 'inline; filename="file"'),
+   ('Content-Length', '0'),
+   ('Content-Type', 'text/plain')]
+
+If the ``contentDisposition`` argument is not provided, none will be
+included in the headers:
+
+  >>> headers = getHeaders(f)
+  >>> sorted(headers)
+  [('Content-Length', '0'),
+   ('Content-Type', 'text/plain')]
+
+
+Body
+====
+
+We use DownloadResult to deliver the content to the browser.  Since
+there's no data in this file, there are no body chunks:
+
+  >>> transaction.commit()
+  >>> from zope.file.download import DownloadResult
+  >>> result = DownloadResult(f)
+  >>> list(result)
+  []
+
+We still need to see how non-empty files are handled.  Let's write
+some data to our file object:
+
+  >>> with f.open("w") as w:
+  ...    _ = w.write(b"some text")
+  ...    w.flush()
+  >>> transaction.commit()
+
+Now we can create a result object and see if we get the data we
+expect:
+
+  >>> result = DownloadResult(f)
+  >>> L = list(result)
+  >>> b"".join(L)
+  b'some text'
+
+If the body content is really large, the iterator may provide more
+than one chunk of data:
+
+  >>> with f.open("w") as w:
+  ...   _ = w.write(b"*" * 1024 * 1024)
+  ...   w.flush()
+  >>> transaction.commit()
+
+  >>> result = DownloadResult(f)
+  >>> L = list(result)
+  >>> len(L) > 1
+  True
+
+Once iteration over the body has completed, further iteration will not
+yield additional data:
+
+  >>> list(result)
+  []
+
+
+The Download View
+=================
+
+Now that we've seen the ``getHeaders`` function and the result object,
+let's take a look at the basic download view that uses them.  We'll need
+to add a file object where we can get to it using a browser:
+
+  >>> f = File()
+  >>> f.mimeType = "text/plain"
+  >>> with f.open("w") as w:
+  ...    _ = w.write(b"some text")
+  >>> transaction.commit()
+
+  >>> getRootFolder()["abcdefg"] = f
+
+  >>> transaction.commit()
+
+Now, let's request the download view of the file object and check the
+result:
+
+  >>> print(http(b"""
+  ... GET /abcdefg/@@download HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Disposition: attachment; filename="abcdefg"
+  Content-Length: 9
+  Content-Type: text/plain
+  <BLANKLINE>
+  some text
+
+
+The Inline View
+===============
+
+In addition, it is sometimes useful to view the data inline instead of
+downloading it.  A basic inline view is provided for this use case.
+Note that browsers may decide not to display the image when this view
+is used and there is not page that it's being loaded into: if this
+view is being referenced directly via the URL, the browser may show
+nothing:
+
+  >>> print(http(b"""
+  ... GET /abcdefg/@@inline HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Disposition: inline; filename="abcdefg"
+  Content-Length: 9
+  Content-Type: text/plain
+  <BLANKLINE>
+  some text
+
+
+The Default Display View
+========================
+
+This view is similar to the download and inline views, but no content
+disposition is specified at all.  This lets the browser's default
+handling of the data in the current context to be applied:
+
+  >>> print(http(b"""
+  ... GET /abcdefg/@@display HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Length: 9
+  Content-Type: text/plain
+  <BLANKLINE>
+  some text
+
+Large Unicode Characters
+========================
+
+We need to be able to support Unicode characters in the filename
+greater than what Latin-1 (the encoding used by WSGI) can support.
+
+Let's rename a file to contain a high Unicode character and try to
+download it; the filename will be encoded:
+
+  >>> getRootFolder()["abcdefg"].__name__ = u'Big \U0001F4A9'
+  >>> transaction.commit()
+
+  >>> print(http(b"""
+  ... GET /abcdefg/@@download HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Disposition: attachment; filename="Big ð©"
+  Content-Length: 9
+  Content-Type: text/plain
+  <BLANKLINE>
+  some text
+
+
+======================
+ Uploading a new file
+======================
+
+There's a simple view for uploading a new file.  Let's try it:
+
+  >>> from io import BytesIO as StringIO
+
+  >>> sio = StringIO(b"some text")
+
+  >>> from zope.testbrowser.wsgi import Browser
+  >>> browser = Browser()
+  >>> browser.handleErrors = False
+  >>> browser.addHeader("Authorization", "Basic mgr:mgrpw")
+  >>> browser.addHeader("Accept-Language", "en-US")
+
+  >>> browser.open("http://localhost/@@+/zope.file.File")
+
+  >>> ctrl = browser.getControl(name="form.data")
+  >>> ctrl.add_file(
+  ...     sio, "text/plain; charset=utf-8", "plain.txt")
+  >>> browser.getControl("Add").click()
+
+Now, let's request the download view of the file object and check the
+result:
+
+  >>> print(http(b"""
+  ... GET /plain.txt/@@download HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Disposition: attachment; filename="plain.txt"
+  Content-Length: 9
+  Content-Type: text/plain;charset=utf-8
+  <BLANKLINE>
+  some text
+
+We'll peek into the database to make sure the object implements the
+expected MIME type interface:
+
+  >>> from zope.mimetype import types
+  >>> ob = getRootFolder()["plain.txt"]
+  >>> types.IContentTypeTextPlain.providedBy(ob)
+  True
+
+We can upload new data into our file object as well:
+
+  >>> sio = StringIO(b"new text")
+  >>> browser.open("http://localhost/plain.txt/@@edit.html")
+
+  >>> ctrl = browser.getControl(name="form.data")
+  >>> ctrl.add_file(
+  ...     sio, "text/plain; charset=utf-8", "stuff.txt")
+  >>> browser.getControl("Edit").click()
+
+Now, let's request the download view of the file object and check the
+result:
+
+  >>> print(http(b"""
+  ... GET /plain.txt/@@download HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Disposition: attachment; filename="plain.txt"
+  Content-Length: 8
+  Content-Type: text/plain;charset=utf-8
+  <BLANKLINE>
+  new text
+
+If we upload a file that has imprecise content type information (as we
+expect from browsers generally, and MSIE most significantly), we can
+see that the MIME type machinery will improve the information where
+possible:
+
+  >>> sio = StringIO(b"<?xml version='1.0' encoding='utf-8'?>\n"
+  ...                b"<html>...</html>\n")
+
+  >>> browser.open("http://localhost/@@+/zope.file.File")
+
+  >>> ctrl = browser.getControl(name="form.data")
+  >>> ctrl.add_file(
+  ...     sio, "text/html; charset=utf-8", "simple.html")
+  >>> browser.getControl("Add").click()
+
+Again, we'll request the download view of the file object and check
+the result:
+
+  >>> print(http(b"""
+  ... GET /simple.html/@@download HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Disposition: attachment; filename="simple.html"
+  Content-Length: 56
+  Content-Type: application/xhtml+xml;charset=utf-8
+  <BLANKLINE>
+  <?xml version='1.0' encoding='utf-8'?>
+  <html>...</html>
+  <BLANKLINE>
+
+Further, if a browser is bad and sends a full path as the file name (as
+sometimes happens in many browsers, apparently), the name is correctly
+truncated and changed.
+
+  >>> sio = StringIO(b"<?xml version='1.0' encoding='utf-8'?>\n"
+  ...                b"<html>...</html>\n")
+
+  >>> browser.open("http://localhost/@@+/zope.file.File")
+
+  >>> ctrl = browser.getControl(name="form.data")
+  >>> ctrl.add_file(
+  ...     sio, "text/html; charset=utf-8", r"C:\Documents and Settings\Joe\naughty name.html")
+  >>> browser.getControl("Add").click()
+
+
+Again, we'll request the download view of the file object and check
+the result:
+
+  >>> print(http(b"""
+  ... GET /naughty%20name.html/@@download HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... """, handle_errors=False))
+  HTTP/1.1 200 Ok
+  Content-Disposition: attachment; filename="naughty name.html"
+  Content-Length: 56
+  Content-Type: application/xhtml+xml;charset=utf-8
+  <BLANKLINE>
+  <?xml version='1.0' encoding='utf-8'?>
+  <html>...</html>
+  <BLANKLINE>
+
+In zope.file <= 0.5.0, a redundant ObjectCreatedEvent was fired in the
+Upload view.  We'll demonstrate that this is no longer the case.
+
+  >>> import zope.component
+  >>> from zope.file.interfaces import IFile
+  >>> from zope.lifecycleevent import IObjectCreatedEvent
+
+We'll register a subscriber for IObjectCreatedEvent that simply increments
+a counter.
+
+  >>> count = 0
+  >>> def inc(*args):
+  ...   global count; count += 1
+  >>> zope.component.provideHandler(inc, (IFile, IObjectCreatedEvent))
+
+  >>> browser.open("http://localhost/@@+/zope.file.File")
+
+  >>> ctrl = browser.getControl(name="form.data")
+  >>> sio = StringIO(b"some data")
+  >>> ctrl.add_file(
+  ...     sio, "text/html; charset=utf-8", "name.html")
+  >>> browser.getControl("Add").click()
+
+The subscriber was called only once.
+
+  >>> print(count)
+  1
+
+
+====================================
+ Content type and encoding controls
+====================================
+
+Files provide a view that supports controlling the MIME content type
+and, where applicable, the content encoding.  Content encoding is
+applicable based on the specific content type of the file.
+
+Let's demonstrate the behavior of the form with a simple bit of
+content.  We'll upload a bit of HTML as a sample document:
+
+  >>> from io import BytesIO
+  >>> sio = BytesIO(b"A <sub>little</sub> HTML."
+  ...               b"  There's one 8-bit Latin-1 character: \xd8.")
+
+  >>> from zope.testbrowser.wsgi import Browser
+  >>> browser = Browser()
+  >>> browser.handleErrors = False
+  >>> browser.addHeader("Authorization", "Basic mgr:mgrpw")
+  >>> browser.addHeader("Accept-Language", "en-US")
+  >>> browser.open("http://localhost/@@+/zope.file.File")
+
+  >>> ctrl = browser.getControl(name="form.data")
+  >>> ctrl.add_file(
+  ...     sio, "text/html", "sample.html")
+  >>> browser.getControl("Add").click()
+
+We can see that the MIME handlers have marked this as HTML content:
+
+  >>> import zope.mimetype.interfaces
+  >>> import zope.mimetype.mtypes
+
+  >>> file = getRootFolder()[u"sample.html"]
+  >>> zope.mimetype.mtypes.IContentTypeTextHtml.providedBy(file)
+  True
+
+It's important to note that this also means the content is encoded
+text:
+
+  >>> zope.mimetype.interfaces.IContentTypeEncoded.providedBy(file)
+  True
+
+The "Content Type" page will show us the MIME type and encoding that
+have been selected:
+
+  >>> browser.getLink("sample.html").click()
+  >>> browser.getLink("Content Type").click()
+
+  >>> browser.getControl(name="form.mimeType").value
+  ['zope.mimetype.mtypes.IContentTypeTextHtml']
+
+The empty string value indicates that we have no encoding
+information:
+
+  >>> ctrl = browser.getControl(name="form.encoding")
+  >>> print(ctrl.value)
+  ['']
+
+Let's now set the encoding value to an old favorite, Latin-1:
+
+  >>> ctrl.value = ["iso-8859-1"]
+  >>> browser.handleErrors = False
+  >>> browser.getControl("Save").click()
+
+We now see the updated value in the form, and can check the value in
+the MIME content-type parameters on the object:
+
+  >>> ctrl = browser.getControl(name="form.encoding")
+  >>> print(ctrl.value)
+  ['iso-8859-1']
+
+  >>> file = getRootFolder()["sample.html"]
+  >>> file.parameters
+  {'charset': 'iso-8859-1'}
+
+Something more interesting is that we can now use a non-encoded
+content type, and the encoding field will be removed from the form:
+
+  >>> ctrl = browser.getControl(name="form.mimeType")
+  >>> ctrl.value = ["zope.mimetype.mtypes.IContentTypeImageTiff"]
+  >>> browser.getControl("Save").click()
+
+  >>> browser.getControl(name="form.encoding")
+  Traceback (most recent call last):
+    ...
+  LookupError: name 'form.encoding'
+  ...
+
+If we switch back to an encoded type, we see that our encoding wasn't
+lost:
+
+  >>> ctrl = browser.getControl(name="form.mimeType")
+  >>> ctrl.value = ["zope.mimetype.mtypes.IContentTypeTextHtml"]
+  >>> browser.getControl("Save").click()
+
+  >>> browser.getControl(name="form.encoding").value
+  ['iso-8859-1']
+
+On the other hand, if we try setting the encoding to something which
+simply cannot decode the input data, we get an error message saying
+that's not going to work, and no changes are saved:
+
+  >>> ctrl = browser.getControl(name="form.encoding")
+  >>> ctrl.value = ["utf-8"]
+
+  >>> browser.getControl("Save").click()
+
+  >>> print(browser.contents)
+  <...Selected encoding cannot decode document...
+
+
+=======================
+ Presentation Adapters
+=======================
+
+Object size
+===========
+
+The size of the file as presented in the contents view of a container is
+provided using an adapter implementing the `zope.size.interfaces.ISized`
+interface. Such an adapter is available for the file object.
+
+Let's do some imports and create a new file object:
+
+  >>> from zope.file.file import File
+  >>> from zope.file.browser import Sized
+  >>> from zope.size.interfaces import ISized
+
+  >>> f = File()
+  >>> f.size
+  0
+
+  >>> s = Sized(f)
+  >>> ISized.providedBy(s)
+  True
+  >>> s.sizeForSorting()
+  ('byte', 0)
+  >>> s.sizeForDisplay()
+  '0 KB'
+
+Let's add some content to the file:
+
+  >>> with f.open('w') as w:
+  ...    _ =  w.write(b"some text")
+
+The sized adapter now reflects the updated size:
+
+  >>> s.sizeForSorting()
+  ('byte', 9)
+  >>> s.sizeForDisplay()
+  '1 KB'
+
+Let's try again with a larger file size:
+
+  >>> with f.open('w') as w:
+  ...    _ = w.write(b"x" * (1024*1024+10))
+
+  >>> s.sizeForSorting()
+  ('byte', 1048586)
+  >>> m = s.sizeForDisplay()
+  >>> m
+  '${size} MB'
+  >>> dict(m.mapping)
+  {'size': '1.00'}
+
+And still a bigger size:
+
+  >>> with f.open('w') as w:
+  ...    _ = w.write(b"x" * 3*512*1024)
+
+  >>> s.sizeForSorting()
+  ('byte', 1572864)
+  >>> m = s.sizeForDisplay()
+  >>> m
+  '${size} MB'
+  >>> dict(m.mapping)
+  {'size': '1.50'}
+
+
+=========
+ CHANGES
+=========
+
+2.0 (2024-12-06)
+================
+
+- Drop support for Python 2.7, 3.5, 3.6, 3.7.
+
+- Add support for Python 3.9, 3.10, 3.11, 3.12, 3.13.
+
+- Update tests to ``zope.i18nmessageid >= 7``.
+
+
+1.2.0 (2020-03-06)
+==================
+
+- Add support for Python 3.7 and 3.8.
+
+- Drop Python 3.4 support.
+
+
+1.1.0 (2017-09-30)
+==================
+
+- Move more browser dependencies to the ``browser`` extra.
+
+- Begin testing PyPy3 on Travis CI.
+
+
+1.0.0 (2017-04-25)
+==================
+
+- Remove unneeded test dependencies zope.app.server,
+  zope.app.component, zope.app.container, and others.
+
+- Update to work with zope.testbrowser 5.
+
+- Add PyPy support.
+
+- Add support for Python 3.4, 3.5 and 3.6.
+  See `PR 5 <https://github.com/zopefoundation/zope.file/pull/5>`_.
+
+0.6.2 (2012-06-04)
+==================
+
+- Moved menu-oriented registrations into new menus.zcml. This is now
+  loaded if zope.app.zcmlfiles is available only.
+
+- Increase test coverage.
+
+0.6.1 (2012-01-26)
+==================
+
+- Declared more dependencies.
+
+
+0.6.0 (2010-09-16)
+==================
+
+- Bug fix: remove duplicate firing of ObjectCreatedEvent in
+  zope.file.upload.Upload (the event is already fired in its base class,
+  zope.formlib.form.AddForm).
+
+- Move browser-related zcml to `browser.zcml` so that it easier for
+  applications to exclude it.
+
+- Import content-type parser from zope.contenttype, adding a dependency on
+  that package.
+
+- Removed undeclared dependency on zope.app.container, depend on zope.browser.
+
+- Using Python's ``doctest`` module instead of deprecated
+  ``zope.testing.doctest``.
+
+0.5.0 (2009-07-23)
+==================
+
+- Change package's mailing list address to zope-dev at zope.org instead
+  of the retired one.
+
+- Made tests compatible with ZODB 3.9.
+
+- Removed not needed install requirement declarations.
+
+
+0.4.0 (2009-01-31)
+==================
+
+- `openDetached` is now protected by zope.View instead of zope.ManageContent.
+
+- Use zope.container instead of zope.app.container.
+
+0.3.0 (2007-11-01)
+==================
+
+- Package data update.
+
+0.2.0 (2007-04-18)
+==================
+
+- Fix code for Publisher version 3.4.
+
+0.1.0 (2007-04-18)
+==================
+
+- Initial release.
