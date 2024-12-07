@@ -1,0 +1,19 @@
+<div class="container">
+    <ul class="list-unstyled">
+        {% for item in g.trace_call.view_model %}
+        <li>
+            <div class="d-flex">
+                <span>{{ item.prefix|replace(" ", "&nbsp;")|safe }}</span>
+                <span>{{ item.tree_branch|replace(" ", "&nbsp;")|safe }}</span>
+                <span>{{ item.emoji }}</span>
+                <span>{{ item.method_name }}</span>
+                {% if item.parent_info %}
+                <div class="ms-auto">
+                    <span class="text-muted">| {{ item.parent_info }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>

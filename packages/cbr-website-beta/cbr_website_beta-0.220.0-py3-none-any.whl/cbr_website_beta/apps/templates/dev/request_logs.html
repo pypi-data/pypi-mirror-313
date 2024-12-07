@@ -1,0 +1,124 @@
+{% extends "layouts/dev-page.html" %}
+
+{% from "macros/utils/ip_address_info.html"  import ip_address_info  %}
+
+{% block card_body %}
+    <style>
+        .custom-table-padding td, .custom-table-padding th {
+              padding-top   : 5px     ;
+              padding-bottom: 0       ;
+              font-size     : 10px    ;
+              white-space   : nowrap  ;
+              overflow      : hidden  ;
+              text-overflow : ellipsis;
+            }
++            /* your styles here */
+     </style>
+
+    <h2>Site requests {% if hours %} (for last {{ hours }} hours) {% endif %}</h2>
+    {%  if key %}
+        Using <div class='btn btn-primary'>Filter</div> | <div class='btn btn-secondary'>{{ key }}</div> equal to <div class='btn btn-secondary'>{{ value }}</div>
+    {% endif %}
+    <hr/>
+    <div class="container_">
+
+        <p>
+            See logs for:
+            <a href="dev/request-logs?partition=LOCAL&hours=12">local</a> |
+            <a href="dev/request-logs?partition=DEV&hours=12">dev</a> |
+            <a href="dev/request-logs?partition=PROD&hours=12">prod</a>
+        </p>
+
+        <div class="row">
+            <div class="col">
+                <h6>
+                    <!--<span class="badge bg-dark">{{ g.app_id }}</span>
+                    <span class="badge bg-secondary">{{ g.app_started }}</span>-->
+                    <span id="log_count">0 logs loaded</span>
+                </h6>
+            </div>
+            <!--<div class="col">
+                <button id="refreshButton" class="btn btn-primary">Refresh Data</button>
+            </div>
+            <div class="col-auto">
+                <div id="loading">
+                    <span class="spinner-border" role="status"></span>
+                </div>
+            </div>-->
+        </div>
+
+        {% if key == 'ip_address' %}
+            {{ ip_address_info(value, ip_address_data) }}
+        {% endif %}
+
+        <hr/>
+        <table class="table table-striped custom-table-padding">
+          <thead id="headers">
+            <tr>
+                  <!-- headers will go here -->
+            </tr>
+          </thead>
+          <tbody id="rows">
+                <!-- rows will go here -->
+          </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block extra_section %}
+    {% include "includes/component/trace-viewer.html" %}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function loadData() {
+        // Show loading icon
+        $("#loading").show();
+
+        // Fetch headers and populate table header
+        $.get("dev/api-log-headers", function(headers) {
+            $("#headers").empty(); // Clear existing headers
+            $("#headers").append("<th scope='col'>#</th>"); // Add a column for row numbers
+            headers.forEach(function(header) {
+                $("#headers").append(`<th scope="col">${capitalize(header)}</th>`);
+            });
+
+            // Once headers are fetched and added, fetch and populate rows
+            $.get("dev/api-log-data?hours={{ hours }}&partition={{ partition }}", function(data) {
+                $("#rows").empty(); // Clear existing rows
+
+                data.forEach(function(row, index) {
+                    let rowHTML = "<tr>";
+                    rowHTML += `<td>${index + 1}</td>`;
+                    headers.forEach(function(header) {
+                        rowHTML += `<td>${row[header] || ''}</td>`;
+                    });
+                    rowHTML += "</tr>";
+                    $("#rows").append(rowHTML);
+                    $("#log_count").text(`${data.length} logs loaded`);
+                });
+
+                // Hide loading icon
+                $("#loading").hide();
+            });
+        });
+    }
+
+    $(document).ready(function() {
+        // Load data initially
+        loadData();
+
+        // Attach click event handler to the refresh button
+        $("#refreshButton").click(function() {
+            // Reload data when the button is clicked
+            loadData();
+        });
+    });
+</script>
+{% endblock %}
+
+

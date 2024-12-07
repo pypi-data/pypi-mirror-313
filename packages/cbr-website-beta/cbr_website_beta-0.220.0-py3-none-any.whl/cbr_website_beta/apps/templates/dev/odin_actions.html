@@ -1,0 +1,46 @@
+{% extends "layouts/dev-page.html" %}
+
+{%  block card_body %}
+
+    <div class="container">
+        <h2>Odin Actions</h2>
+
+        <div class="col">
+            <p>
+                <button id="reload-session-data" class="btn btn-primary">Reload Session Data</button>
+            </p>
+            <p>
+                This will reload the S3 data that is used in the
+                <a href="dev/current-sessions">current-sessions</a> and
+                <a href="dev/current-users">current-users</a> pages
+            </p>
+
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+
+            function reload_session_data(){
+                $("#reload-session-data").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Reloading...');
+                $.ajax({
+                    url: '/dev/api/odin/update-s3-data',
+                    type: 'GET',
+                    success: function(data) {
+                        $("#reload-session-data").html('Session Data reloaded OK');
+                        $("#reload-session-data").attr('class', 'btn btn-success text-white');
+                        //console.log(data);
+                    },
+                    error: function(data) {
+                        $("#reload-session-data").html('FAILED to reload Session Data')
+                        $("#reload-session-data").attr('class', 'btn btn-danger text-white');
+                        //console.log(data);
+                    }
+                });
+            }
+            $("#reload-session-data").click(function() {
+
+                reload_session_data();
+            });
+        });
+    </script>
+{% endblock %}

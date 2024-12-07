@@ -1,0 +1,109 @@
+
+<!-- query.html -->
+<html>
+<head>
+    <title>ChatGPT UI -Simple (now with stream support)</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.0/dist/js.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
+    <script>
+        $(document).ready(function() {
+            // Send the form on enter keypress and avoid if shift is pressed
+            $('#prompt').keypress(function(event) {
+                if (event.keyCode === 13 && !event.shiftKey) {
+                    event.preventDefault();
+                    $('form').submit();
+                }
+            });
+            $('form').on('submit', function(event) {
+                event.preventDefault();
+            // get the CSRF token from the cookie
+            var csrftoken = Cookies.get('csrftoken');
+
+            // set the CSRF token in the AJAX headers
+            $.ajaxSetup({
+                headers: { 'X-CSRFToken': csrftoken }
+            });
+                // Get the prompt
+                var prompt = $('#prompt').val();
+                var dateTime = new Date();
+                var time = dateTime.toLocaleTimeString();
+                // Add the prompt to the response div
+                $('#response').append('<p id="GFG1"><i class="bi bi-person"></i>: ' + prompt + '</p>');
+                $('#response #GFG1').css({"color": "green", "width": "90%", "float": "left", "white-space": "pre-wrap"});
+                $('#response').scrollTop($('#response')[0].scrollHeight);
+                // Clear the prompt
+                $('#prompt').val('');
+                $.ajax({
+                    url: 'https://7crg65ubx4wo3mujxqr5dys7ci0gbenh.lambda-url.eu-west-2.on.aws/open_ai/prompt_simple',
+                    type: 'POST',
+                    contentType: 'application/json', // Set the content type to JSON
+                    data: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        user_prompt: prompt // Get the user's prompt from the textarea
+                    }),
+                    dataType: 'json',
+                    success: function(data) {
+                        var raw_data = data.answer;
+                        console.log(raw_data)
+                        $('#response').append('<p id="GFG2"> <i class="bi bi-robot"></i>: ' + raw_data + '</p>');
+                        $('#response #GFG2').css({"color": "blue", "width": "90%", "float": "right"});
+                        $('#response').scrollTop($('#response')[0].scrollHeight);
+                        $('#loadingIndicator').hide();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $('#response').append('<p id="error"> <i class="bi bi-exclamation-triangle"></i>: Error occurred: ' + textStatus + ' - ' + errorThrown + '</p>');
+                        $('#response #error').css({"color": "red", "width": "90%", "float": "right"});
+                        $('#response').scrollTop($('#response')[0].scrollHeight);
+                        $('#loadingIndicator').hide();
+                    }
+                });
+            });
+
+            // Event handler for dropdown change
+            $('#questionDropdown').change(function() {
+                var selectedQuestion = $(this).val(); // Get selected value
+                $('#prompt').val(selectedQuestion); // Set value of textarea
+            });
+
+            // ... rest of your existing setup ...
+        });
+
+
+    </script>
+</head>
+<body>
+    <div class="container p-3">
+        <h3>ChatGPT UI -Simple (now with stream support)</h3>
+
+        <div class="mb-3">
+            <select id="questionDropdown" class="form-select" aria-label="Question dropdown">
+                <option selected>Choose a question...</option>
+                {% for question in questions %}
+                    <option value="{{ question }}">{{ question }}</option>
+                {% endfor %}
+            </select>
+            <form method="post">
+
+                <label for="prompt" class="form-label"><strong>Prompt: </strong></label>
+                <textarea class="form-control" type="textarea" id="prompt" name="prompt" rows="3">Hi</textarea>
+                <br>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                    <div id="loadingIndicator" class="spinner-border text-primary" role="status" style="display:none; width: 1.5rem; height: 1.5rem; margin-left: 10px;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <br>
+        <div class="mb-3">
+            <h6>Response:</h6>
+            <div class="container border overflow-auto h-50" id="response"></div>
+
+        </div>
+    </div>
+</body>
+</html>

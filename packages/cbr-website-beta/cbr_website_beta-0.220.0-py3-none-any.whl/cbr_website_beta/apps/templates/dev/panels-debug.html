@@ -1,0 +1,27 @@
+{% extends "layouts/base-fullscreen.html" %}
+{% from "macros/render_panel.html"  import render_panel  %}
+{% set random_num = range(1, 99999)|random %}
+{% set panel_debug_div_id = "__panel__" ~ random_num %}
+{% set spinner_id         = "__spinner__" ~ random_num %}
+
+
+{% block content %}
+
+    <style>
+        .spinner_reload {
+                width : 20px  ;
+                height : 20px ;
+            }
+    </style>
+    <div class="col-12" style="padding:10px">
+        <div>
+            <button id="{{ panel_debug_div_id }}_reload" class="btn btn-primary btn-lg w-100 d-flex align-items-center justify-content-center">
+                Reload &nbsp;
+                <i id="{{ spinner_id }}" class="spinner_reload spinner-border me-2" role="status" style="display:none;"></i>
+            </button>
+        </div>
+    </div>
+
+    {{ render_panel(class_name=class_name, method_name=method_name, method_kwargs=method_kwargs, div_id=panel_debug_div_id,spinner_id=spinner_id) }}
+
+{% endblock %}
