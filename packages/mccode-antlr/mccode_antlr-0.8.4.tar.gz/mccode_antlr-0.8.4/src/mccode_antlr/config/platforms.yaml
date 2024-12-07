@@ -1,0 +1,49 @@
+
+Linux:
+  cc: gcc
+  acc: nvc
+  flags:
+    cc: -g -O2 -std=c99 -x c -D_POSIX_C_SOURCE=2
+    ld: -lm
+    acc: -lm -fast -Minfo=accel -acc=gpu -gpu=managed -DOPENACC -x c -D_POSIX_C_SOURCE
+    nexus: -DUSE_NEXUS -lNeXus
+    mpi: -DUSE_MPI -lmpi
+    gsl: -lgsl -lgslcblas
+    xrl: -lxrl
+  mpi:
+    cc: mpicc
+    run: mpirun
+    nodes: auto
+  ext: .out
+Darwin:
+  cc: /usr/bin/clang
+  acc: /usr/bin/clang
+  flags:
+    cc: -g -O2 -std=c99 -x c -D_DARWIN_C_SOURCE
+    ld: -lm
+    acc: -lm -ta:multicore -DOPENACC -x c -D_DARWIN_C_SOURCE
+    nexus: -DUSE_NEXUS -lNeXus
+    mpi:  -DUSE_MPI -lmpi
+    gsl: -lgsl -lgslcblas
+    xrl: -lxrl
+  mpi:
+    cc: mpicc.clang
+    run: mpirun
+    nodes: auto
+  ext: .out
+Windows:
+  cc: gcc
+  acc: gcc
+  flags:
+    cc: -g -O2 -std=c99 -x c -D_POSIX_C_SOURCE
+    ld: -lm
+    acc: -lm -ta:multicore -DOPENACC -x c -D_POSIX_C_SOURCE
+    nexus: -Wl,-rpath,"C:/Program Files/NeXus Data Format/bin" -L"C:/Program Files/NeXus Data Format/bin" -DUSE_NEXUS -lNeXus-0 -I"C:/Program Files/Nexus Data Format/include/nexus"
+    mpi: -DUSE_MPI -lmsmpi
+    gsl: -lgsl -lgslcblas
+    xrl: -lxrl
+  mpi:
+    cc: mpicc.bat
+    run: mpiexec.exe
+    nodes: auto
+  ext: .exe
