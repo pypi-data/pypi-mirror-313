@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vtes-archon"
+dynamic = ["version"]
+authors = [{ name = "VEKN" }]
+description = "VTES tournament management"
+keywords = ["vtes", "Vampire: The Eternal Struggle", "CCG", "Tournament"]
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Framework :: FastAPI",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+]
+dependencies = [
+    "aiohttp",
+    "fastapi[standard]",
+    "itsdangerous",
+    "jinja2",
+    "krcg",
+    "orjson",
+    "psycopg[binary,pool]",
+    "pyjwt",
+    "python-dotenv",
+    "typer",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "build",
+    "check-manifest",
+    "debugpy",
+    "ipython",
+    "pytest",
+    "ruff",
+    "setuptools-scm",
+    "twine",
+]
+
+[project.scripts]
+archon = "archon.cli:app"
+
+[project.urls]
+Repository = "https://github.com/vtes-biased/archon"
+
+[tool.setuptools_scm]

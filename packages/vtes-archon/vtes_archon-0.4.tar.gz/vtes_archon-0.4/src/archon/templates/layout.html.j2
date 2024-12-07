@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    {% block head %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Vampire: the Eternal Struggle (VTES) tournament manager">
+    <meta name="keywords" content="Archon, Vampire, the Eternal Struggle, VTES, CCG, Tournament">
+    {% block meta %}{% endblock %}
+    <link rel="shortcut icon" href="{{ url_for('img', path='favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='layout.css') }}">
+    <script async src="{{ url_for('static', path='login.js') }}" type="module"></script>
+    {% block scripts %}{% endblock %}
+    <title>Archon: VTES Tournament Manager</title>
+    {% endblock %}
+</head>
+
+<body>
+    <header role="banner">
+        <nav id="navigation" class="navbar bg-dark navbar-expand-sm mb-3" data-bs-theme="dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ url_for('index') }}">
+                    <img src="{{ url_for('img', path='black-chantry-icon.webp') }}" alt="BCP logo" width="48px">
+                </a>
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('tournament_list') }}">Tournaments</a>
+                    </li>
+                </ul>
+                {% if member %}
+                <a type="button" class="btn btn-secondary ms-2" href="{{ url_for('profile') }}">
+                    <i class="bi bi-person-fill"></i> Profile
+                </a>
+                {% else %}
+                <button type="button" class="btn btn-primary ms-2" id="loginButton">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </button>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true" aria-labelledby="loginModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="loginModalLabel">Login</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <a type="button" class="btn btn-sm btn-discord my-2 w-100" href="{{ discord_oauth }}">
+                        <i class="bi bi-discord"></i>
+                        Discord login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container" id="contentContainer">
+        {% block content %}{% endblock %}
+    </div>
+    <div aria-live="polite" aria-atomic="true" class="position-static">
+        <div class="toast-container bottom-0 end-0 p-3">
+            <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="bi-exclamation-circle-fill text-danger"></i>
+                    <strong class="me-auto">Error</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    Error
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="container-fluid">
+        {% block footer %}{% endblock %}
+    </footer>
+</body>
+
+</html>
