@@ -1,0 +1,281 @@
+import typing
+import re
+from collections.abc import Mapping, Sequence
+
+
+T = typing.TypeVar("T")
+
+
+def simple_pipeline(*fns):
+    def _pipeline(x):
+        for fn in fns:
+            x = fn(x)
+        return x
+
+    return _pipeline
+
+
+def try_chain(
+    fns: list[typing.Callable[..., T]], fail=False, default_value: T | None = None
+) -> typing.Callable[..., T | None]:
+    def _try_chain(value):
+        for fn in fns:
+            try:
+                return fn(value)
+            except Exception:
+                continue
+        if fail:
+            raise ValueError(f"Could not process {value}")
+        return default_value
+
+    return _try_chain
+
+
+T = typing.TypeVar("T")
+X = typing.TypeVar("X")
+
+
+def deep_attribute_get(
+    obj: typing.Any,
+    path: str,
+    default: typing.Any = None,
+    debug: bool = False,
+    return_paths: bool = False,
+) -> typing.Union[
+    typing.Any, typing.List[typing.Any], typing.List[typing.Tuple[typing.Any, str]]
+]:
+    segments = re.split(r"\.(?![^\[]*\])", path)
+    if debug:
+        print(f"Path segments: {segments}")
+    result = _traverse(obj, segments, default, debug, "", return_paths)
+    flattened = _flatten_and_filter(result, return_paths)
+
+    if return_paths:
+        filtered = [(value, path) for value, path in flattened if value is not None]
+        return filtered[0] if len(filtered) == 1 else filtered
+    else:
+        filtered = [value for value in flattened if value is not None]
+        return filtered[0] if len(filtered) == 1 else filtered
+
+
+def _traverse(
+    obj: typing.Any,
+    segments: list[str],
+    default: typing.Any,
+    debug: bool,
+    current_path: str,
+    return_paths: bool,
+) -> typing.Any:
+    if not segments:
+        return (obj, current_path) if return_paths else obj
+
+    current_segment = segments[0]
+    remaining_segments = segments[1:]
+
+    if debug:
+        print(f"Current segment: {current_segment}")
+        print(f"Object type: {type(obj)}")
+
+    if current_segment == "*":
+        if isinstance(obj, Mapping):
+            return [
+                _traverse(
+                    value,
+                    remaining_segments,
+                    default,
+                    debug,
+                    f"{current_path}.{key}",
+                    return_paths,
+                )
+                for key, value in obj.items()
+            ]
+        elif isinstance(obj, Sequence) and not isinstance(obj, (str, bytes)):
+            return [
+                _traverse(
+                    item,
+                    remaining_segments,
+                    default,
+                    debug,
+                    f"{current_path}[{i}]",
+                    return_paths,
+                )
+                for i, item in enumerate(obj)
+            ]
+        else:
+            if debug:
+                print(f"Wildcard '*' not applicable for object of type {type(obj)}")
+            return default
+
+    if "[" in current_segment and "]" in current_segment:
+        key, index = current_segment.split("[", 1)
+        index = index.rstrip("]")
+        if key:
+            obj = anyget(obj, key, default)
+            current_path = f"{current_path}.{key}" if current_path else key
+            if obj is default:
+                if debug:
+                    print(f"Key '{key}' not found in object")
+                return default
+        if index == "*":
+            if isinstance(obj, Sequence) and not isinstance(obj, (str, bytes)):
+                return [
+                    _traverse(
+                        item,
+                        remaining_segments,
+                        default,
+                        debug,
+                        f"{current_path}[{i}]",
+                        return_paths,
+                    )
+                    for i, item in enumerate(obj)
+                ]
+            else:
+                if debug:
+                    print(
+                        f"Wildcard '[*]' not applicable for object of type {type(obj)}"
+                    )
+                return default
+        try:
+            obj = obj[int(index)]
+            current_path = f"{current_path}[{index}]"
+        except (IndexError, ValueError, TypeError):
+            if debug:
+                print(f"Invalid index {index} for object of type {type(obj)}")
+            return default
+    else:
+        if isinstance(obj, Mapping):
+            matching_keys = [
+                k for k in obj.keys() if re.fullmatch(current_segment, str(k))
+            ]
+            if debug:
+                print(f"Matching keys for pattern '{current_segment}': {matching_keys}")
+            if len(matching_keys) == 1:
+                obj = obj[matching_keys[0]]
+                current_path = (
+                    f"{current_path}.{matching_keys[0]}"
+                    if current_path
+                    else matching_keys[0]
+                )
+            elif len(matching_keys) > 1:
+                return [
+                    _traverse(
+                        obj[k],
+                        remaining_segments,
+                        default,
+                        debug,
+                        f"{current_path}.{k}",
+                        return_paths,
+                    )
+                    for k in matching_keys
+                ]
+            else:
+                if debug:
+                    print(f"No matching keys found for pattern '{current_segment}'")
+                return default
+        # if isinstance(obj, Mapping):
+        #     matching_keys = [k for k in obj.keys() if re.match(current_segment, str(k))]
+        #     if debug:
+        #         print(f"Matching keys for pattern '{current_segment}': {matching_keys}")
+        #     if len(matching_keys) == 1:
+        #         obj = obj[matching_keys[0]]
+        #         current_path = (
+        #             f"{current_path}.{matching_keys[0]}"
+        #             if current_path
+        #             else matching_keys[0]
+        #         )
+        #     elif len(matching_keys) > 1:
+        #         return [
+        #             _traverse(
+        #                 obj[k],
+        #                 remaining_segments,
+        #                 default,
+        #                 debug,
+        #                 f"{current_path}.{k}",
+        #                 return_paths,
+        #             )
+        #             for k in matching_keys
+        #         ]
+        #     else:
+        #         if debug:
+        #             print(f"No matching keys found for pattern '{current_segment}'")
+        #         return default
+        else:
+            obj = anyget(obj, current_segment, default)
+            current_path = (
+                f"{current_path}.{current_segment}" if current_path else current_segment
+            )
+
+        if obj is default:
+            if debug:
+                print(f"Segment '{current_segment}' not found in object")
+            return default
+
+    return _traverse(
+        obj, remaining_segments, default, debug, current_path, return_paths
+    )
+
+
+def _flatten_and_filter(result: typing.Any, return_paths: bool) -> typing.List:
+    if isinstance(result, list):
+        return [
+            item
+            for sublist in [
+                _flatten_and_filter(i, return_paths) for i in result if i is not None
+            ]
+            for item in sublist
+        ]
+    if return_paths:
+        return [result] if result[0] is not None else []
+    return [result] if result is not None else []
+
+
+def anyget(obj: typing.Any, key: str, default: X = None) -> T | X:
+    if isinstance(obj, Mapping):
+        return obj.get(key, default)
+    elif hasattr(obj, key):
+        return getattr(obj, key)
+    return default
+
+
+def anyset(obj: dict[str, T], key, value: T) -> dict[str, T]:
+    if isinstance(obj, dict):
+        obj[key] = value
+    else:
+        setattr(obj, key, value)
+    return obj
+
+
+def deep_attribute_set(obj: typing.Any, path: str, value: typing.Any) -> typing.Any:
+    if "." not in path:
+        return anyset(obj, path, value)
+    key, rest = path.split(".", 1)
+    return deep_attribute_set(anyget(obj, key, {}), rest, value)
+
+
+def set_defaults(__base: dict | None = None, **kwargs):
+    if not __base:
+        __base = {}
+    for k, v in kwargs.items():
+        if k not in __base:
+            __base[k] = v
+    return __base
+
+
+# def filter_nulls(obj):
+#     if isinstance(obj, dict):
+#         return {k: filter_nulls(v) for k, v in obj.items() if v}
+#     elif isinstance(obj, list):
+#         return [filter_nulls(v) for v in obj if v]
+#     else:
+#         return obj
+def filter_nulls(obj):
+    if isinstance(obj, dict):
+        return {
+            k: v
+            for k, v in ((k, filter_nulls(v)) for k, v in obj.items())
+            if v not in (None, {}, [])
+        }
+    elif isinstance(obj, list):
+        return [v for v in (filter_nulls(v) for v in obj) if v not in (None, {}, [])]
+    else:
+        return obj
