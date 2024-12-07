@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+_wirescale_completion() {
+  local cur prev words cword
+  _init_completion || return
+
+  case "${words[1]}" in
+    down)
+      if [[ ${#words[@]} -eq 3 ]]; then
+        # Offer completion for .conf files in /run/wirescale, without the .conf extension
+        COMPREPLY=($(compgen -W "$(find /run/wirescale -name '*.conf' -exec basename {} .conf \;)" -- "$cur"))
+      fi
+      ;;
+    exit-node)
+      if [[ ${#words[@]} -eq 3 ]]; then
+        # Same as down, plus a stop option
+        COMPREPLY=($(compgen -W "$(find /run/wirescale -name '*.conf' -exec basename {} .conf \;) --status --stop --sync" -- "$cur"))
+      fi
+      ;;
+    upgrade)
+      if [[ ${#words[@]} -eq 3 ]]; then
+        # Offer peer names for the first argument of 'upgrade'
+        # Get Tailscale status and process it with jq
+        local json_output=$(tailscale status --json 2> /dev/null)
+        local suffix=$(echo "$json_output" | jq -r '.MagicDNSSuffix')
+        # Remove the domain suffix from peer names
+        local peers=$(echo "$json_output" | jq -r --arg suffix ".$suffix" '.Peer[].DNSName | sub($suffix; "")')
+        COMPREPLY=($(compgen -W "$peers" -- "$cur"))
+      elif [[ ${#words[@]} -gt 3 ]]; then
+        # Offer additional options for 'upgrade' after the peer name is specified
+        COMPREPLY=($(compgen -W "--iptables-accept --no-iptables-accept --iptables-forward --no-iptables-forward --iptables-masquerade --no-iptables-masquerade --suffix --no-suffix --suffix-number --interface -i --remote-interface --recover-tries --recreate-tries" -- "$cur"))
+      fi
+      ;;
+    *)
+      # If no subcommand is specified yet, offer available subcommands
+      COMPREPLY=($(compgen -W "down exit-node upgrade" -- "$cur"))
+      ;;
+  esac
+}
+
+complete -F _wirescale_completion wirescale

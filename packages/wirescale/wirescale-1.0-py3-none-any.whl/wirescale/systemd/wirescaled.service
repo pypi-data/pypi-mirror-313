@@ -1,0 +1,14 @@
+[Unit]
+Description=Wirescale service
+After=network.target tailscaled.service
+BindsTo=wirescaled.socket
+Wants=tailscaled.service
+
+[Service]
+ExecStart=wirescale daemon start
+ExecStop=wirescale daemon stop
+TimeoutStopSec=60
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

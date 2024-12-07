@@ -1,0 +1,185 @@
+#!/usr/bin/env sh
+
+interface_exists() {
+  { ip link show "$interface"; } > /dev/null 2>&1
+}
+
+check_interface_and_file() {
+  interface_exists && [ ! -f "$flag_file_stop" ]
+}
+
+check_elapsed_time() {
+  seconds=$1
+  elapsed_time=$(($(date +%s) - start_time))
+  [ "$elapsed_time" -ge "$seconds" ]
+}
+
+ping_wg_periodic() {
+  echo "Initiate a periodic ping to monitor the health of the tunnel"
+  while check_interface_and_file; do
+    ping -q -I "$interface" -c 2 -W 0.05 "$wg_ip" > /dev/null 2>&1
+    sleep 5
+  done
+  echo "End the periodic ping to discontinue monitoring the tunnel's health"
+}
+
+tailscale_ping() {
+  seconds=$((62 * 60))
+  sleep_time=5
+  while ! check_elapsed_time "$seconds" && check_interface_and_file; do
+    tailscale ping -c 1 "$ts_ip" > /dev/null 2>&1 &
+    sleep "$sleep_time"
+  done
+}
+
+recover() {
+  wait_time=30
+  tries="$recover_tries"
+  while interface_exists && [ "$tries" -ne 0 ]; do
+    echo "Trying to force a new endpoint..."
+    wirescale recover "$interface"
+    status=$?
+    if [ "$status" -eq 0 ]; then
+      echo "Success! Connection recovered. Restarting this unit..."
+      exit 0
+    elif [ "$status" -eq 1 ]; then
+      echo "Error: It was impossible to recover the connection"
+      return 1
+    elif [ "$status" -eq 3 ]; then
+      return 1
+    elif [ "$status" -eq 4 ]; then
+      echo "Error: The other peer is currently unreachable. Will try again in $wait_time seconds..."
+    elif [ "$status" -eq 5 ]; then
+      echo "The latest handshake has been updated, so connection is not dead"
+      autoremove
+      exit 0
+    fi
+    sleep "$wait_time"
+    if [ "$tries" -gt 0 ]; then
+      tries=$((tries - 1))
+    fi
+  done
+}
+
+remove_interface() {
+  if ! interface_exists; then
+    echo "Interface $interface does not exist"
+    exit 0
+  fi
+  echo "Removing interface $interface"
+  wirescale down "$interface"
+  rm -rf "$flag_file_stop"
+}
+
+finish() {
+  recover
+  remove_interface
+  if [ "$recreate_tries" -ne 0 ]; then
+    echo "Launching a unit to create a new tunnel with the same settings"
+    systemd-run -u recreate-"$interface" /bin/sh /run/wirescale/wirescale-autoremove new_upgrade "$interface" "$suffix" "$ts_ip" \
+      "$remote_interface" "$iptables" "$recover_tries" "$recreate_tries"
+  fi
+  exit 0
+}
+
+autoremove() {
+  rm -rf "$flag_file_stop"
+  last_received=0
+  while interface_exists; do
+    if [ -f "$flag_file_stop" ]; then
+      echo "Terminating autoremove function, as flag file '$flag_file_stop' exists"
+      exit 0
+    fi
+    received=$(wg show "$interface" transfer | awk -v pubkey="$remote_pubkey" '$1 == pubkey {print $2}')
+    if [ "$received" -gt "$last_received" ]; then
+      last_received=$received
+    else
+      echo "Connection appears to be broken..."
+      break
+    fi
+    sleep 20
+  done
+
+  finish
+}
+
+start() {
+  interface=$1
+  suffix=$2
+  ts_ip=$3
+  remote_pubkey=$4
+  wg_ip=$5
+  running_in_remote=$6
+  start_second=$7
+  local_port=$8
+  local_ext_port=$9
+  nat=${10}
+  remote_interface=${11}
+  remote_port=${12}
+  iptables=${13}
+  recover_tries=${14}
+  recreate_tries=${15}
+  flag_file_stop="/run/wirescale/control/$interface-stop"
+  start_time=$(date +%s)
+  export interface suffix ts_ip remote_pubkey wg_ip running_in_remote local_port remote_interface
+  export remote_port start_time iptables recover_tries recreate_tries flag_file_stop
+
+  rm -rf "$flag_file_stop"
+  ping_wg_periodic &
+  if [ "$nat" -eq 1 ]; then
+    tailscale_ping &
+  fi
+  autoremove
+}
+
+new_upgrade() {
+  suffix=$2
+  interface=$(echo "$1" | sed "s/$suffix\$//")
+  ts_ip=$3
+  remote_interface=$4
+  iptables=$5
+  recover_tries=$6
+  recreate_tries=$7
+  status=1
+  tries="$recreate_tries"
+  call="wirescale upgrade --no-suffix --interface $interface --remote-interface $remote_interface \
+        --recover-tries $recover_tries --recreate-tries $recreate_tries"
+  if [ "$suffix" -ne 0 ]; then
+    call="$call --suffix-number $suffix"
+  fi
+  if [ "$iptables" -eq 0 ]; then
+    call="$call --no-iptables"
+  else
+    call="$call --iptables"
+  fi
+  call="$call $ts_ip"
+  while [ "$status" -ne 0 ] && [ "$tries" -ne 0 ]; do
+    eval "$call"
+    status=$?
+    if [ "$status" -eq 2 ] || [ "$status" -eq 3 ]; then
+      exit 0
+    fi
+    if [ "$tries" -gt 0 ]; then
+      tries=$((tries - 1))
+    fi
+    sleep 60
+  done
+}
+
+# Ensure at least one argument (the function name) was provided
+if [ "$#" -eq 0 ]; then
+  echo "Error: You must provide the function name as the first argument."
+  exit 1
+fi
+
+# Extract the first argument and then remove it from the argument list
+func_name=$1
+shift
+
+# Verify the function exists before attempting to invoke it
+if type "$func_name" > /dev/null 2>&1; then
+  "$func_name" "$@"
+else
+  echo "Error: The function $func_name does not exist in this script."
+  exit 1
+fi
