@@ -1,0 +1,155 @@
+{% include '_head.html' %}
+<link rel="stylesheet" href="/static/studenten.css" />
+</head>
+<body>
+    {% include '_menu.html' %}
+        <menu class="submenu">
+            <ul>
+                {% for thing in filters %}
+                    <li class="{{ 'actief'|safe if thing == filter }}"><a href="/studenten/{{ thing }}">{{ thing|filtername }} [{{ tellers[thing] }}]</a></li>
+                {% endfor %}
+            </ul>
+        </menu>
+    </header>
+    <main>
+        {% if filter == 'registratie' and props.magda(['administratie', 'beheer']) %}
+            <div class="links topcenter">
+                <a style="background-color: var(--menu); color: black;" class="asbutton" href="/studenten/new">new student</a>
+                <a style="background-color: dodgerblue; color: white;" class="asbutton" href="/studenten/import">import list JB</a>
+            </div>
+        {% endif %}
+        <table class="links">
+            <thead>
+                <tr>
+                    <th class="no-sort"><input type="checkbox" name="add" value="all"></th>
+                    <th class="smal" id="id"><span>&uarr;</span>id</th>
+                    <th id="s_group"><span></span>group</th>
+                    <th id="firstname"><span></span>f. name</th>
+                    <th id="lastname"><span></span>s.name</th>
+                    <th id="email"><span></span>email</th>
+                    <th class="smal" id="s_gender"><span></span>&#9893;</th>
+                    <th class="smal" id="pf_url"><span></span>pf</th>
+                    <th id="s_status"><span></span>status</th>
+
+                    <th class="smal" id="assessment"><span></span>ass</th>
+                    <th class="smal" id="grade"><span></span>grade</th>
+                    <th id="grade_ts"><span></span>per</th>
+
+                    <th id="s_year"><span></span>year</th>
+                    <th id="s_term"><span></span>p</th>
+                    <th class="smal" id="s_ec"><span></span>ecs</th>
+                    <th class="smal" id="s_lang"><span></span>lang</th>
+                    <th id="s_course"><span></span>minor</th>
+                    <th id="s_stream"><span></span>stream</th>
+                    <th id="s_origin"><span></span>origin</th>
+                    <th id="s_uni"><span></span>institute</th>
+                    <th id="s_program"><span></span>program</th>
+                    <th id="created_ts"><span></span>created</th>
+                    <th id="password"><span></span>password</th>
+                    <th id="samestudent"><span></span>same</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for s in students %}
+                {% set id = s._id() %}
+                <tr id="{{ id }}" data-status="{{ s._try('s_status') }}" data-filter="{{ s._try('filter') }}">
+                    <td style="background-color: var(--donkergrijs); border-radius: 0;"><input type="checkbox" name="add" value="{{ id }}"></td>
+                    <td data-csv="{{ id }}" class="" data-th="id"><a class="asbutton {{ 'valop' if s._try('todo') == 1 }}" href="/studenten/single/{{ id }}">{{ id|vier }}</a></td>
+
+                    {% set item = s._s_item('s_group') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_group" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    <td data-csv="{{ s._try('firstname') }}" data-th="firstname">{{ s._try('firstname') }}</td>
+                    <td data-csv="{{ s._try('lastname') }}" data-th="lastname">{{ s._try('lastname') }}</td>
+                    <td class="dblignore" data-csv="{{ s._try('email') }}" data-th="email">{{ s._try('email') }}</td>
+
+                    {% set item = s._s_item('s_gender') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" class="smal" data-th="s_gender" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|gender|safe }}</td>
+
+                    <td class="dblignore" data-csv="{{ s._try('pf_url') }}" class="smal" data-th="pf_url">{% if s._try('pf_url') != '' %}<a class="asbutton" href="{{ s._try('pf_url') }}" target="_blank">&rarr;</a>{% else %}&nbsp;{% endif %}</td>
+
+                    {% set item = s._s_item('s_status') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_status" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    <td data-csv="{{ s._try('assessment', default=0) }}" class="smal " style="background-color: {{ s._ass() }}" data-th="grade">&nbsp;</td>
+                    <td data-csv="{{ s._try('grade') }}" class="smal {{ s._try('grade')|gradecss }}" data-th="grade">{{ s._try('grade') }}</td>
+                    <td data-csv="{{ s._try('grade_ts')|date }}" data-th="grade_ts">{{ s._try('grade_ts')|date }}</td>
+
+                    {% set item = s._s_item('s_year') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_year" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    {% set item = s._s_item('s_term') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_term" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    {% set item = s._s_item('s_ec') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" class="smal" data-th="s_ec" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    {% set item = s._s_item('s_lang') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" class="smal" data-th="s_lang" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    {% set item = s._s_item('s_course') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_course" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    {% set item = s._s_item('s_stream') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_stream" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    {% set item = s._s_item('s_origin') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_origin" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    {% set item = s._s_item('s_uni') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_uni" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    {% set item = s._s_item('s_program') %}
+                    <td data-csv="{{ item['name']|nbsp|safe }}" data-th="s_program" data-idnr="{{ item['id'] }}" style="background-color: {{ item['color'] }};">{{ item['name']|nbsp|safe }}</td>
+
+                    <td data-csv="{{ s._try('created_ts')|date }}" data-th="created_ts">{{ s._try('created_ts')|date }}</td>
+
+                    <td data-csv="{{ s._try('password') }}" data-th="password">{{ s._try('password') }}</td>
+
+                    {% set same = s._try('samestudent', default=[]) %}
+                    {% for ss in same %}
+                        <td><a class="asbutton" href="/studenten/single/{{ ss }}">{{ ss }}</a></td>
+                    {% endfor %}
+                    <td></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% if props.magda(['docent', 'beheer']) and students|length > 0 %}
+            <form class="links" style="display: block;" name="to-collectief" action="/studenten/collectief" method="post">
+                <input type="hidden" name="col-ids" value="">
+                <select name="to-group">
+                    <option value="0">naar groep</option>
+                    {% for item in sysls['s_group'].values() %}
+                        <option value="{{ item['id'] }}">{{ item['name'] }}</option>
+                    {% endfor %}
+                </select>
+                <select name="to-status">
+                    <option value="0">naar status</option>
+                    {% for item in sysls['s_status'].values() %}
+                        <option value="{{ item['id'] }}">{{ item['name'] }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" name="save" value="Ga" >
+            </form>
+        {% endif %}
+
+        {% if props.magda(['administratie', 'beheer']) and students|length > 0 %}
+            <form action="/studenten/to-excel" method="post">
+                <div class="links" >
+                    <textarea name="csv-data" id="csv-area" style="width: 800px; display: none;" rows="10"></textarea>
+                    <input type="hidden" name="comes-from" value="{{ url_for(request.endpoint, **request.view_args) }}">
+                    <!-- <input type="button" name="to-emails" value="Email-adressen" > -->
+                    <!-- <input type="button" name="to-csv" value=" As CSV " > -->
+                    <input style="background-color: var(--menu);" type="submit" name="to-excel" value="Download checked students as Excel" >
+                </div>
+            </form>
+        {% endif %}
+    </main>
+
+<script>
+    {% include 'studenten.js' %}
+</script>
+</body>
+</html>
