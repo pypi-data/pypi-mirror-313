@@ -1,0 +1,50 @@
+Metadata-Version: 2.1
+Name: python3-cyberfusion-ferm-support
+Version: 1.2
+Summary: Library for ferm.
+Author-email: Cyberfusion <support@cyberfusion.io>
+Project-URL: Source, https://github.com/CyberfusionIO/python3-cyberfusion-ferm-support
+Description-Content-Type: text/markdown
+Requires-Dist: cached_property==1.5.2
+Requires-Dist: python3-cyberfusion-common~=2.0
+Requires-Dist: python3-cyberfusion-systemd-support~=2.0
+
+# python3-cyberfusion-ferm-support
+
+Library for [ferm](http://ferm.foo-projects.org/).
+
+# Install
+
+## PyPI
+
+Run the following command to install the package from PyPI:
+
+    pip3 install python3-cyberfusion-ferm-support
+
+## Debian
+
+Run the following commands to build a Debian package:
+
+    mk-build-deps -i -t 'apt -o Debug::pkgProblemResolver=yes --no-install-recommends -y'
+    dpkg-buildpackage -us -uc
+
+# Configure
+
+No configuration is supported.
+
+# Usage
+
+## Example
+
+```python
+from cyberfusion.FermSupport.configuration import Configuration
+
+c = Configuration(path="/etc/ferm/vars.d/example.conf")
+
+c.add_variable(
+    name="EXAMPLE",
+    values=["2001:0db8::/32"]
+)
+
+c.save()
+```
