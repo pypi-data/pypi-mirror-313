@@ -1,0 +1,68 @@
+Metadata-Version: 2.1
+Name: whitesmith
+Version: 4.0.1
+Summary: Testing toolbox for blacksmith
+Author-Email: Guillaume Gauvrit <guillaume@gauvr.it>
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Software Development :: Testing :: Mocking
+Project-URL: Homepage, https://github.com/mardiros/whitesmith
+Project-URL: Documentation, https://github.com/mardiros/whitesmith/blob/main/README.rst
+Project-URL: Repository, https://github.com/mardiros/whitesmith.git
+Project-URL: Issues, https://github.com/mardiros/whitesmith/issues
+Project-URL: Changelog, https://github.com/mardiros/whitesmith/blob/main/CHANGELOG.rst
+Requires-Python: >=3.9
+Requires-Dist: pydantic>=2.6.0
+Requires-Dist: blacksmith<5,>=4.0.0
+Requires-Dist: Jinja2<4,>=3.1.2
+Requires-Dist: polyfactory<3,>=2.14.0
+Description-Content-Type: text/x-rst
+
+Whitesmith
+==========
+
+Test helper for blacksmith resources.
+
+.. image:: https://github.com/mardiros/whitesmith/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/mardiros/whitesmith/actions/workflows/tests.yml
+   :alt: Continuous Integration
+
+Motivation
+----------
+
+While using blacksmith, resources are declared using pydantic, and, while testing,
+we never do http calls.
+
+Whitesmith is a helper that create pytest fixtures for blacksmith resources and
+generate handlers for tests.
+
+
+Usage
+-----
+
+::
+
+  whitesmith generate -m my_package.resources --out-dir tests/
+
+
+The commande above will generate a folder ``tests/whitesmith`` containing
+handlers for all the api call with a default implementation.
+
+
+.. note::
+    | If you run the command again, the command does not overrite generated files.
+    | To generate newer version, use the ``--overwrite`` flag.
+
+
+The command will generate also a `conftest.py` file containing two fixtures,
+
+for sync and async version.
+
+
+Tests that require those fixture are suppose to be created inside the whitesmith folder.
+
+To create the test elsewhere, you have to copy create your own fixtures by copy,
+pasting and adapting import path.

@@ -1,0 +1,102 @@
+[project]
+name = "whitesmith"
+version = "4.0.1"
+description = "Testing toolbox for blacksmith"
+authors = [
+    { name = "Guillaume Gauvrit", email = "guillaume@gauvr.it" },
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing :: Mocking",
+]
+requires-python = ">=3.9"
+readme = "README.rst"
+dependencies = [
+    "pydantic>=2.6.0",
+    "blacksmith >=4.0.0,<5",
+    "Jinja2 >=3.1.2,<4",
+    "polyfactory >=2.14.0,<3",
+]
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+Homepage = "https://github.com/mardiros/whitesmith"
+Documentation = "https://github.com/mardiros/whitesmith/blob/main/README.rst"
+Repository = "https://github.com/mardiros/whitesmith.git"
+Issues = "https://github.com/mardiros/whitesmith/issues"
+Changelog = "https://github.com/mardiros/whitesmith/blob/main/CHANGELOG.rst"
+
+[project.scripts]
+whitesmith = "whitesmith.entrypoint:main"
+
+[tool.pdm.build]
+includes = [
+    "src",
+    "CHANGELOG.rst",
+]
+excludes = [
+    "tests",
+]
+
+[tool.mypy]
+overrides = [
+    { disallow_any_generics = true, disallow_untyped_defs = true, module = "whitesmith.*" },
+]
+
+[tool.pyright]
+ignore = [
+    "examples",
+]
+include = [
+    "src",
+    "tests",
+]
+reportPrivateUsage = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
+reportShadowedImports = false
+typeCheckingMode = "strict"
+venvPath = ".venv"
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = [
+    "B",
+    "I",
+    "F",
+    "UP",
+    "RUF",
+]
+ignore = [
+    "RUF022",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "if TYPE_CHECKING:",
+    "except ImportError:",
+    "\\s+\\.\\.\\.$",
+    "# coverage: ignore",
+]
+
+[dependency-groups]
+dev = [
+    "pytest >=8.3.3,<9",
+    "pytest-cov >=6.0.0,<7",
+    "mypy>=1.4.1,<2",
+]
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
