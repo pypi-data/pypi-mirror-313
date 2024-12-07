@@ -1,0 +1,53 @@
+[project]
+name = "django-resume"
+version = "0.1.10"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "django>=4.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+include = ["src/django_resume"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8",
+    "pytest-django>=4",
+    "django-extensions>=3",
+    "django-stubs[compatible-mypy]>=5",
+    "coverage>=7",
+    "pytest-playwright>=0.5",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+base_url = "http://localhost:8000"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+plugins = ["mypy_django_plugin.main"]
+exclude = "[a-zA-Z]*/(migrations)|(example)/(.)*"  # ignore migrations
+
+[tool.django-stubs]
+django_settings_module = "tests.settings"
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = [
+    "*/migrations/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
