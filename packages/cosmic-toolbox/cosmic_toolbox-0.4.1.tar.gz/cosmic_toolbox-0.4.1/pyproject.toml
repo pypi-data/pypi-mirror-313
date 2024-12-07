@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools >= 40.6.0", "wheel", "numpy"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.black]
+include = '\.pyi?$'
+exclude = '''
+(
+    \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build/
+  | build/
+  | dist
+)
+'''
+
+[tool.pytest.ini_options]
+addopts = "-v -ra"
+testpaths = ["tests"]
+filterwarnings = ["ignore:invalid"]
+
+[tool.tox]
+legacy_tox_ini = '''
+[tox]
+isolated_build = true
+envlist = py38,py39,py10
+setenv =
+    PIP_EXTRA_INDEX_URL=https://cosmo-pypi.phys.ethz.ch/simple
+    HTTP_PROXY=http://proxy.ethz.ch:3128
+    HTTPS_PROXY=http://proxy.ethz.ch:3128
+
+[testenv]
+skip_install = false
+passenv = *
+extras = dev
+allowlist_externals = pytest
+commands =
+    pytest --color=yes
+'''
