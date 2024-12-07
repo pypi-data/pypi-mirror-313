@@ -1,0 +1,248 @@
+# Queen
+
+A wrapper around [Borg backup](https://www.borgbackup.org/).
+
+Like other borg wrappers, queen defines a site config file format that specifies
+what contents should go in a borg archive. It also defines a standard location
+in /etc/ where it will look for these site config files automatically. Unlike other
+wrappers, it can run some predefined actions (called plugins), that generate
+files to be included in the backup.
+
+Currently, there are three plugins:
+
+-	'postgres' that creates binary dumps using `pg_dump`
+-	'mysql' that creates sql dumps using `mysqldump`
+-	'docker_volume' that creates tarballs out of docker volumes
+
+More plugins may be defined in the future.
+
+## Installation
+
+Install using pip.
+
+You must also have `borg` installed and available on the PATH.
+
+If you use the `postgres` plugin, you also need `pg_dump` installed.
+
+If you use the `mysql` plugin, you also need `mysqldump` installed.
+
+If you use the `docker_volume` plugin, you also need `docker` installed.
+
+## Usage
+
+    usage: queen [-h] [-s SITE_CONFIG]
+
+    Take backups using Borg
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -s SITE_CONFIG, --site-config SITE_CONFIG
+                            Backup using the supplied config file instead of those
+                            in /etc/queen/sites.d/
+
+
+Unless supplied with `-s`, queen will process all site configs in
+`/etc/queen/sites.d/`.
+
+## Configuration
+
+Queen reads its configuration from `/etc/queen/queen.toml`
+
+```toml
+repo_prefix = 'some@repo:prefix'
+sentry_dsn = 'some sentry dsn'
+
+[logging]
+directory = '/some/directory/'
+
+[borg_env]
+BORG_RELOCATED_REPO_ACCESS_IS_OK = 'yes'
+
+[plugins.postgres]
+host = 'localhost'
+```
+
+`repo_prefix`, `sentry_dsn` and `logging.directory` are required.
+
+The repo location will be a subdirectory inside `repo_prefix` named after your
+site config's `project_name`. You can pass a [remote repository URL][1] to
+create your repo in a remote host, such as `user@host:/path`. The path
+specified in `repo_prefix` must already exist.
+
+
+[1]: https://borgbackup.readthedocs.io/en/stable/usage/general.html#repository-urls
+
+The `borg_env` table may contain environment variables. These will be used for
+the call to `borg create`.
+
+The `plugins` table may contain a table of tables. Keys under `plugins` must
+correspond to plugin names. Key inside each plugin will be merged with each
+site's plugin configs, with the site's values taking precedence.
+
+## Site config example
+Site configs should be in toml and placed in `/etc/queen/sites.d/`
+
+```toml
+project_name = 'myproject'
+passphrase = 'some secret'
+paths = [
+	'/srv/python/myproject',
+	'/etc/myproject'
+]
+
+[[plugins.postgres]]
+database = 'myproject'
+
+[[plugins.mysql]]
+database = 'myproject'
+user = 'dbuser'
+password = 'dbpassword'
+```
+
+Some notes:
+
+-	`project_name` and `passphrase` are required
+-	`paths` should be absolute
+-	If any of the paths does not exist, queen will emit a WARNING and create a
+	borg archive with the rest of the configuration (existing paths and plugins)
+
+## Plugin configuration
+
+Plugins may be configured both globally and per site. When both configurations
+are present, they are merged with the site's configuration taking precedence.
+
+For example, if you want to use a specific username & password for backing up
+postgres databases, you may specify them in the global configuration's `plugins.postgres`
+table. You can then specify the rest of the configuration (eg. `database`) in each
+site without repeating the username & password. If a single still site needs to override
+the username & password, you can specify it on just that site and they will override the
+ones in the global configuration.
+
+### Postgres
+
+`plugins.postgres` should be a list of tables, each one describing a database.
+Each table may contain the following keys:
+
+-	`database`
+-	`user`
+-	`password`
+-	`host`
+-	`port`
+-	`pg_dump`
+
+Only `database` is required, all other keys are optional.
+
+`user`, `password`, `host` and `port` will be used to connect to postgres.
+
+`pg_dump` must be a list of strings and will be used as the binary to use for taking
+backups. It is useful for specifying wrapper scripts for pg_dump, for example:
+
+-	`['sudo', '-iu', 'postgres', 'pg_dump']` for changing the unix user that will invoke pg_dump.
+-	`['docker', 'exec', 'container_name', 'pg_dump']` to take a backup from a running postgres
+	container.
+-	Your own custom shell scripts, wrapping pg_dump
+
+It must be compatible with the actual pg_dump binary and it defaults to `['pg_dump']`.
+
+
+For backwards compatibility, `plugins.postgres` may be a list of strings, which
+are interpreted as database names.
+
+#### Sample config
+
+Full config:
+
+```toml
+# ...
+[[plugins.postgres]]
+database = 'database_1'
+user = 'user'
+password = 'password'
+host = 'host'
+port = 1234
+pg_dump = ['sudo', '-iu', 'postgres', 'pg_dump']
+
+[[plugins.postgres]]
+database = 'database_2'
+user = 'user'
+password = 'password'
+host = 'host'
+port = 1234
+```
+
+Legacy config:
+
+```toml
+[plugins]
+postgres = [
+	'database_1',
+	'database_2'
+]
+```
+
+### MySQL
+
+`plugins.mysql` should be a list of tables, each one describing a database.
+Each table may contain the following keys:
+
+-	`database`
+-	`user`
+-	`password`
+-	`host`
+-	`port`
+
+Only `database` is required, all other keys are optional.
+
+#### Sample config
+
+```toml
+[[plugins.mysql]]
+database = 'myproject'
+host = '127.0.0.1'
+port = 1234
+user = 'dbuser'
+password = 'dbpassword'
+```
+
+### docker volume
+
+`plugins.docker_volume` should be a list of tables, each one describing a
+docker volume. Each table may contain the following keys:
+
+- `name`: the name of the docker volume. Required.
+-	`image`: the image that will be used for making the tarball. Defaults to `alpine`
+
+#### Sample config
+```toml
+[[plugins.docker_volume]]
+name = 'my_volume'
+
+[[plugins.docker_volume]]
+name = 'my_other_volume'
+image = 'debian:bullseye-slim'
+```
+
+
+## Repo/Archive Format
+
+Queen is going to use your project as the repo name and create it if it does
+not exist. Each Archive will be named as the ISO-8601 timestamp of the time the
+backup was taken in UTC (unlike borg's `{utcnow}` it includes a timezone).
+
+Inside each archive, your `paths` are included as is. Plugins place their
+content inside `_queen/{plugin_name}`.
+
+Using the config above as an example your archive would contain:
+
+	srv/
+		python/
+			myproject/
+				...
+	etc/
+		myproject/
+			...
+	_queen/
+		postgres/
+			myproject.pgdump
+		mysql/
+			myproject.dump.sql
