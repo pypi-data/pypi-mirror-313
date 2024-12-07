@@ -1,0 +1,39 @@
+[project]
+name = "multi-agent-rlenv"
+dynamic = ["version"]
+description = "A strongly typed Multi-Agent Reinforcement Learning framework"
+authors = [
+    { "name" = "Yannick Molinghen", "email" = "yannick.molinghen@ulb.be" },
+]
+readme = "README.md"
+requires-python = ">=3.10, <4"
+dependencies = ["numpy>=2.0.0", "opencv-python>=4.10.0.84", "gymnasium>=0.29.1"]
+urls = { "repository" = "https://github.com/yamoling/multi-agent-rlenv" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 140
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/marlenv"]
+
+[tool.hatch]
+version = { "path" = "src/marlenv/__init__.py", "attr" = "__version__" }
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = "src"
+# Ignore deprecation warnings caused by SMAC
+filterwarnings = "ignore::DeprecationWarning"
+
+[dependency-groups]
+dev = ["orjson>=3.10.12", "pytest>=8.3.2"]
