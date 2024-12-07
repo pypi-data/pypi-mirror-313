@@ -1,0 +1,28 @@
+---
+apiVersion: server.eidolonai.com/v1alpha1
+kind: Reference
+metadata:
+  name: MistralLarge
+  annotations:
+    - title: "Mistral Large"
+spec:
+  implementation: ConversationalAPU
+  audio_unit: OpenAiSpeech
+  image_unit: OpenAIImageUnit
+  llm_unit:
+    implementation: MistralGPT
+    model: "mistral-large-latest"
+---
+apiVersion: server.eidolonai.com/v1alpha1
+kind: Reference
+metadata:
+  name: "mistral-large-latest"
+spec:
+  implementation: LLMModel
+  human_name: Mistral Large
+  name: "mistral-large-latest"
+  input_context_limit: 32000
+  output_context_limit: 4096
+  supports_tools: True
+  supports_image_input: False
+  supports_audio_input: False
