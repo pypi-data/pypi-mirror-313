@@ -1,0 +1,32 @@
+CombustionEngine is Physics.Interactions.Interaction1DOF:
+  with Physics.Signals.Torque1DOutputTrait
+  with Physics.Signals.FractionInputTrait
+  .doc: """
+  'displacement_volume' represents the engine's total displacement volume, essentially, the combined volumes of all its cylinders.
+  'max_torque' indicates the maximum brake torque that the engine can supply, either for brief or sustained periods.
+  'max_torque_RPM' is the crankshaft rotation speed at which the maximum allowable torque is produced.
+  'max_power_RPM' is the rotational speed of the crankshaft when the engine is delivering its maximum rated power.
+  'idle_RPM' refers to the speed of the idle crankshaft; it's the speed at which the engine runs when it's not working.
+  'crank_shaft_inertia' is the internal inertia of the engine
+  The default values are chosen from Figure 1-11, Pulkabek2004, Engineering fundamentals of the internal combustion engine.
+  The initial_throttle is a value between 0-1, where 0 is no throttle, and 1 is max throttle.
+
+  """
+  displacement_volume is Real: 0.0074
+  max_torque is Real: 556
+  max_torque_RPM is Real: 3200
+  max_power_RPM is Real: 4200
+  idle_RPM is Real: 1000
+  crank_shaft_inertia is Real: 2.0
+
+  initial_throttle is Real: 0.0
+
+  min_effort: 0
+  max_effort: max_torque
+
+  torque_output is Physics.Signals.Torque1DOutput:
+    source: this
+    enabled: false
+
+  throttle_input is Physics.Signals.FractionInput:
+    source: this

@@ -1,0 +1,16 @@
+# Cylindrical has two DOFs, both Hinges and Prismatics DOFs
+Cylindrical is Mate:
+    .doc: """
+    A cylindrical which constrain four degrees of freedom between two bodies.
+    The rotation around and translation along the main axis of the two charges is free.
+    The translational friction along and rotational friction around the axis may be specified.
+
+    """
+    # SNAP will try to reposition connected body according to initial_angle
+    initial_angle is Real: 0.0
+    initial_position is Real: 0.0
+    dissipation becomes Physics3D.Interactions.Dissipation.DefaultCylindricalDissipation
+    flexibility becomes Physics3D.Interactions.Flexibility.DefaultCylindricalFlexibility
+    toughness becomes Physics3D.Interactions.Toughness.DefaultCylindricalToughness
+    friction_translational is Physics.Interactions.Dissipation.DefaultFriction
+    friction_rotational is Physics.Interactions.Dissipation.DefaultFriction
