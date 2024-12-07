@@ -1,0 +1,157 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scores"
+dynamic = ["version"]
+authors = [
+  { name="Tennessee Leeuwenburg", email="tennessee.leeuwenburg@bom.gov.au" },
+]
+description = """\
+Scores is a Python package containing mathematical functions \
+for the verification, evaluation and optimisation of forecasts, predictions or models.
+"""
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = ["xarray ~= 2024.1", "pandas ~= 2.0", "scipy ~= 1.13", "bottleneck ~= 1.3"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-watch",
+    "pytest-cov",
+    "pre-commit",
+    "black == 24.1.0",
+    "mypy == 1.13.0",
+    "pylint == 3.3.1",
+    "bandit == 1.7.8",
+    "dask",
+    "h5netcdf",
+    "pandas-stubs",
+    "nbmake"
+]
+tutorial = [
+    "jupyterlab",
+    "matplotlib",
+    "h5netcdf",
+    "rasterio",
+    "rioxarray",
+    "plotly",
+    "dask",
+    "gcsfs",
+    "zarr"
+]
+maintainer = ["build",
+              "hatch",
+              "sphinx",
+              "myst-parser",
+              "sphinx-book-theme",
+              "nbsphinx",
+              "sphinx_gallery",
+              "ipywidgets",
+              "twine",
+              "pandoc",
+              "pip-tools",
+]
+all = ["scores[dev,tutorial]"]
+
+[project.urls]
+"Repository" = "https://github.com/nci/scores" 
+"Documentation" = "https://scores.readthedocs.io/en/stable/"
+
+[tool.hatch.build]
+exclude = [
+    "/tutorials/",
+    "/docs/",
+    "/tests/"
+]
+dependencies = [
+    "tomlkit",
+]
+
+[tool.hatch.build.hooks.custom]
+override = true  # This is required to activate the build hook.
+
+[tool.hatch.metadata.hooks.custom.config]
+# The pinned versions of these dependencies will be subsituted during package builds.
+# Pinned versions will only be substitued for packages that are already in this package's dependencies list.
+pinned_dependencies = [
+    "xarray ~= 2024.1",
+    "pandas ~= 2.0",
+    "scipy ~= 1.13",
+    "bottleneck ~= 1.3"
+]
+
+[tool.hatch.version]
+path = "src/scores/__init__.py"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 120
+
+[tool.mypy]
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = "scipy.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+
+[tool.coverage.paths]
+source = ["/src/"]
+
+[tool.coverage.report]
+exclude_also = [
+    "@overload",
+    "raise NotImplementedError"
+]
+
+[tool.pyright]
+reportPrivateImportUsage = false
+
+[tool.pytest.ini_options]
+addopts = [
+    '--cov-fail-under=99',
+    '--cov-branch',
+    '--cov-report=html',
+    '--cov-report=term-missing',
+    '--junitxml=report.xml',
+    # Ignore notebooks which depend on external data for E2E tests
+    '--ignore=tutorials/First_Data_Fetching.ipynb',
+    '--ignore=tutorials/Mean_Squared_Error.ipynb',
+    '--ignore=tutorials/Root_Mean_Squared_Error.ipynb',
+    '--ignore=tutorials/Weighting_Results.ipynb',
+    '--ignore=tutorials/Mean_Absolute_Error.ipynb',
+    '--ignore=tutorials/Additive_and_multiplicative_bias.ipynb'
+]
+
+[tool.pylint.master]
+# https://github.com/PyCQA/pylint/issues/4081#issuecomment-778242554
+init-hook = 'import sys; sys.setrecursionlimit(3 * sys.getrecursionlimit())'
+fail-under=9.8
+ignore-paths = [
+    'docs/'
+]
+
+[tool.pylint.DESIGN]
+max-args=10
+
+[tool.pylint.FORMAT]
+max-line-length=150  # Deliberately "too long" to avoid disagreements with black formatter
+
+[tool.pylint.messages_control]
+good-names=['df','da','x','y','z','i','j','k','ae']  # pylint: disable=E0015
+disable = [
+    "too-many-positional-arguments",
+]
