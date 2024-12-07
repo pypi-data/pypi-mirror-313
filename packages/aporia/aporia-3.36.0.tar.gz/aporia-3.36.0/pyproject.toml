@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "aporia"
+version = "3.36.0"
+description = ""
+authors = ["Aporia <support@aporia.com>"]
+readme = "README.md"
+packages = [
+    { include = "aporia", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8, <4.0"
+pydantic = "^1.10"
+requests = "^2.28"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+isort = "~5.10.1"
+mypy = "~0.982"
+types-requests = "^2.28"
+
+[tool.black]
+line-length = 100
+
+[tool.isort]
+profile = "black"
+force_sort_within_sections = true
+lexicographical = true
+order_by_type = false
+group_by_package = true
+no_lines_before = ['LOCALFOLDER']
+line_length = 100
+
+[tool.mypy]
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["boto3", "botocore.exceptions"]
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
