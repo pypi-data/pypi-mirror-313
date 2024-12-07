@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "davidkhala.databricks"
+version = "0.0.3"
+description = ""
+authors = ["David Liu <david-khala@hotmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "workspace" }, { include = "lineage" }, { include = "common" }]
+
+
+[tool.poetry.dependencies]
+python = "^3.10"
+databricks-sdk = "*"
+davidkhala-utils = "*"
+# for extras
+databricks-connect = { version = "^15", optional = true }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+
+[tool.poetry.scripts]
+test = "pytest:main"
+
+[tool.poetry.extras]
+connect = ["databricks-connect"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
