@@ -1,0 +1,66 @@
+Metadata-Version: 2.3
+Name: print-wp-sources
+Version: 0.5
+Summary: Print sources from Wikipedia or Wikinews articles to stdout.
+Project-URL: Homepage, https://codeberg.org/hyperreal/print-wp-sources
+Project-URL: Issues, https://codeberg.org/hyperreal/print-wp-sources/issues
+Author-email: Jeffrey Serio <hyperreal@fedoraproject.org>
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.10
+Requires-Dist: beautifulsoup4>=4.12.3
+Requires-Dist: requests>=2.32.3
+Description-Content-Type: text/markdown
+
+# print-wp-sources
+
+This program just prints the sources of the given Wikipedia or Wikinews article to standard output.
+
+## Installation
+
+``` shell
+pipx install print-wp-sources
+```
+
+## Usage
+
+Use the Wikipedia or WikiNews article's URL as the argument.
+
+``` shell
+print-wp-sources "https://en.wikinews.org/wiki/Israel-Lebanon_ceasefire_faces_several_violations"
+
+Output:
+https://en.wikinews.org/w/index.php?title=Special:Log&type=review&page=Israel-Lebanon_ceasefire_faces_several_violations
+https://en.wikinews.org/w/index.php?title=Israel-Lebanon_ceasefire_faces_several_violations&action=info#mw-flaggedrevs-action-info-pages-waiting-for-review
+https://thedefensepost.com/2024/12/06/israel-strikes-hezbollah-smuggling-routes/
+https://www.cbsnews.com/news/israel-war-palestinians-ceasefire-hezbollah-lebanon-strained-by-strikes/
+https://www.cbsnews.com/news/israel-hezbollah-ceasefire-claims-of-violations-on-day-2-war-hamas-gaza/
+https://theconversation.com/why-israel-and-hezbollah-reached-a-ceasefire-now-and-what-it-means-for-israel-lebanon-biden-and-trump-244700
+https://www.abc.net.au/news/2024-11-25/lebanon-ceasefire-pending-israeli-response/104642856
+https://www.aljazeera.com/news/liveblog/2024/11/25/live-destruction-in-tel-aviv-beirut-amid-hezbollah-israel-missile-fire
+```
+
+```shell
+print-wp-sources "https://en.wikipedia.org/wiki/Automatic_negative_thoughts"
+
+Output:
+https://pubmed.ncbi.nlm.nih.gov/26431418
+https://www.theguardian.com/lifeandstyle/2014/aug/11/how-to-silence-negative-thinking
+https://www.inc.com/chris-winfield/is-stomping-ants-the-key-to-living-a-happier-life.html
+https://doi.org/10.1007%2Fbf01178214
+https://api.semanticscholar.org/CorpusID:22915336
+https://www.huffingtonpost.com/entry/how-to-stop-automatic-negative-thoughts_us_58330f18e4b0eaa5f14d4833
+https://doi.org/10.1037%2F0022-006x.51.5.721
+https://pubmed.ncbi.nlm.nih.gov/6630686
+https://wikimediafoundation.org/
+```
+
+> Note: make sure to use quotes around the article URL in the argument to `print-wp-sources`.
+
+One can also easily pipe the output to a file.
+
+``` shell
+print-wp-sources "https://en.wikipedia.org/wiki/Automatic_negative_thoughts" > sources.txt
+print-wp-sources "https://en.wikipedia.org/wiki/Python_(programming_language)" | tee sources.txt
+```
