@@ -1,0 +1,103 @@
+# Disclaimer
+
+This is a MAJOR work in progress, and everything is subject to change. Questions and bug reports are encouraged!
+
+# What is PyTRADE?
+
+
+
+The purpose of this project is to enable developers to use TRADE, a java-based middleware, in Python. [DIARC](https://github.com/mscheutz/diarc) is a cognitive architecture that utilizes TRADE as its middleware.
+
+With this wrapper, developers are able to utilize, integrate, and implement java-based DIARC components with Python. Example use cases include as Python-based simulation environments or Python reinforcement learning libraries.
+
+The process for using PyTRADE is simple: Install it with pip, initialize your TRADE wrapper, and you're good to go. You can also create python implementations of Java interfaces, allowing you to implement new TRADE services in Python.
+
+
+# Installation
+
+To install this package, make sure you have pip installed on your machine and then run:
+
+`pip install pytrade-wrapper`
+
+# Setup
+
+1. Set up [DIARC](https://github.com/mscheutz/diarc). See the DIARC readme for install instructions.
+2. In your DIARC directory, Run the command: `./gradlew publishToMavenLocal`.
+3. From the DIARC readme, follow instructions for setting up Metric-FF. This will include creating/modifying
+   `gradle.properties`. 
+4. From the DIARC repo's `trade.properties.default` file, follow the instructions for making your own trade.properties file for java.
+5. In your personal `trade.properties`, change `STARTDISCOVERY` to `true`.
+
+# Using the Wrapper
+
+## Initializing 
+1. If you just want to use TRADE, you can just import `pyTRADE.core.wrapper`. The JVM will automatically start.
+2. If you want to use the DIARC wrapper, instantiate the `TRADEWrapper` object.
+3. You can now use its various methods, most importantly `call_trade(...)`. 
+
+Note: After importing trade_wrapper, you can also import anything from the DIARC and TRADE jars, following normal JPype standards. Import order matters here!
+
+## Implementing an Existing Java Interface
+
+The primary reason you would want to implement an existing Java interface is to provide Python implementations for TRADE services. For example, if you wish to control a robotic arm through Python, and advertise that controller to TRADE, you can implement the `ArmInterface` from `edu.tufts.hrilab.interfaces.ArmInterface`.
+
+It may be useful to read the [JPype documentation on this process](https://jpype.readthedocs.io/en/latest/userguide.html#jimplements) first. 
+
+1. Create a new python class, such as `PythonArmComponent`
+2. Decorate it with `@JImplements([YourInterface])`, e.g. `@JImplements(ArmInterface)`. Make sure you have [YourInterface] imported!
+3. For every method in the interface, implement it by decorating a standard python function definition with `@JOverride`
+4. Instantiate an instance of the class you just created, and register it with TRADE using: `TRADE.registerAllServices([your_object], "")`
+
+Your methods from your new class should now be available via TRADE, assuming they implement a function annotated with `@TRADEService` in Java.
+
+Please see the examples for additional guidance.
+
+## Making a new interface
+
+If you need to advertise new TRADE services that aren't covered by any existing interfaces in DIARC, follow these steps.
+
+1. Create your new interface in the appropriate location in Java.
+2. Make sure you annotate the relevant methods with `@TRADEService`
+3. Run `./gradlew publishToMavenLocal`
+
+You can now follow the steps from the previous section to implement your new interface.
+
+# Example
+
+```python
+import time
+
+from pyTRADE.core.wrapper import TRADEWrapper
+from ai.thinkingrobots.trade import TRADE
+from jpype import JImplements, JOverride, JClass
+from edu.tufts.hrilab.interfaces import DockingInterface
+
+
+@JImplements(DockingInterface)
+class dummyWrapper:
+    @JOverride
+    def dock(self, dockId):
+        pass
+
+    @JOverride
+    def undock(self):
+        print("Undocking")
+        pass
+
+
+if __name__ == '__main__':
+    wrapper = TRADEWrapper()
+    dummyObject = dummyWrapper()
+    TRADE.registerAllServices(dummyObject, "")
+    time.sleep(1)
+    print(TRADE.getAvailableServices())
+    wrapper.call_trade("undock", )
+```
+
+## Todo:
+
+- Use uberjar instead of regular jar to remove hosting dependency jars on pypi
+- Implement DIARC detectors
+- Let users add to the classpath
+
+For questions, email (marlow.fawn@gmail.com)
