@@ -1,0 +1,1 @@
+from Adlib import funcoes.finalizarPorHora
