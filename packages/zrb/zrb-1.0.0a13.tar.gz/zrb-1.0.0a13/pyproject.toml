@@ -1,0 +1,73 @@
+[tool.poetry]
+name = "zrb"
+version = "1.0.0a13"
+description = "Your Automation Powerhouse"
+authors = ["Go Frendi Gunawan <gofrendiasgard@gmail.com>"]
+license = "AGPL-3.0-or-later"
+readme = "README.md"
+homepage = "https://github.com/state-alchemists/zrb"
+repository = "https://github.com/state-alchemists/zrb"
+documentation = "https://github.com/state-alchemists/zrb"
+keywords = ["Automation", "Task Runner", "Code Generator", "Monorepo", "Low Code"]
+exclude = [
+    "__pycache__",
+    "_images",
+    ".github",
+    ".pytest_cache",
+    ".venv",
+    ".vscode",
+    "dist",
+    "docker",
+    "docs",
+    "htmlcov",
+    "playground",
+    "test",
+    ".coverage",
+    ".coveragerc",
+    ".cprofile.prof",
+    ".cprofile.svg",
+    ".env",
+    ".flake8",
+    ".gitignore",
+    ".python-version",
+    "install.sh",
+    "project.sh",
+    "README.md",
+    "template.env",
+    "zrb_init.py"
+]
+
+[tool.poetry.dependencies]
+python = ">=3.10.0,<4.0.0"
+python-dotenv = "^1.0.1"
+autopep8 = "^2.0.4"
+black = "~24.10.0"
+isort = "~5.13.2"
+requests = "^2.32.3"
+libcst = "^1.5.0"
+litellm = "^1.52.12"
+chromadb = {version = "^0.5.20", optional = true}
+pdfplumber = {version = "^0.11.4", optional = true}
+beautifulsoup4 = "^4.12.3"
+fastapi = {extras = ["standard"], version = "^0.115.5"}
+
+[tool.poetry.extras]
+# poetry install -E rag
+rag = ["chromadb", "pdfplumber"]
+
+[tool.poetry.dev-dependencies]
+flake8 = "~7.1.1"
+pytest = "~8.3.3"
+pytest-cov = "~6.0.0"
+pytest-asyncio = "~0.24.0"
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.poetry.scripts]
+zrb = "zrb.__main__:serve_cli"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
