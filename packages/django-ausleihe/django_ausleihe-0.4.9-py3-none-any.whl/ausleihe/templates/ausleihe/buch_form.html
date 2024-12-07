@@ -1,0 +1,80 @@
+      <form method="post" accept-charset="utf-8">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="titel"><strong>Titel</strong></label>
+          <input class="form-control enter-next" id="titel" name="titel" data-index="1" required value="{{ buch.titel }}" />
+          <small id="medium_help" class="form-text text-muted">
+            Zur schnelleren Eingabe, kannst du mittels Enter <kbd>⏎</kbd> von Titel → Mediatheknummer → ISBN → Ausgabe → Verlag weiterspringen.
+          </small>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="form-group">
+              <label for="medium_id"><strong>Mediatheknummer</strong></label>
+              <input
+                class="form-control enter-next {% if errors.medium_id %}is-invalid{% endif %}"
+                id="medium_id" name="medium_id" aria-describedby="medium_help" data-index="2" required value="{{ buch.medium_id }}" />
+              {% if errors.medium_id %}
+              <div class="invalid-feedback">
+                {{ errors.medium_id }}
+              </div>
+              {% else %}
+              <small id="medium_help" class="form-text text-muted">Die Nummer auf dem Mediathek-Sticker.</small>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label for="isbn">ISBN</label>
+              <input class="form-control enter-next" id="isbn" name="isbn" data-index="3" value="{{ buch.isbn }}" />
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label for="ausgabe">Ausgabe</label>
+              <input class="form-control enter-next" id="ausgabe" name="ausgabe" data-index="4" value="{{ buch.ausgabe }}" />
+              <small id="ausgabe_help" class="form-text text-muted">
+                Siehe <a href="https://de.wikipedia.org/wiki/Edition">Edition</a> bei Wikipedia.
+              </small>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="col">
+            <div class="form-group">
+              <label for="verlag">Verlag</label>
+              <select class="form-control enter-next special-select" id="verlag" name="verlag" data-index="5">
+                <option value=""></option>
+                {% for verlag in verlage %}
+                <option value="{{ verlag.id }}" {% if verlag == buch.verlag %}selected{% endif %}>{{ verlag.name }}</option>
+                {% endfor %}
+              </select>
+              {% if perms.ausleihe.add_verlag %}
+              <small id="verlag_help" class="form-text text-muted">
+                <a href="{% url 'ausleihe:verlag-create' %}" target="_blank">Füge hier einen fehlenden Verlag hinzu.</a>
+              </small>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label for="autoren">Autoren</label>
+              <select class="form-control special-select" id="autoren" name="autoren" multiple="multiple">
+                {% for autor in autoren %}
+                <option value="{{ autor.id }}" {% if autor in buch.autoren.all %}selected{% endif %}>{{ autor }}</option>
+                {% endfor %}
+              </select>
+              {% if perms.ausleihe.add_autor %}
+              <small id="autoren_help" class="form-text text-muted">
+                <a href="{% url 'ausleihe:autor-create' %}" target="_blank">Füge hier fehlende Autor:innen hinzu.</a>
+              </small>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="beschreibung">Beschreibung</label>
+          <textarea class="form-control" id="beschreibung" name="beschreibung" rows="3">{{ buch.beschreibung }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Speichern</button>
+      </form>

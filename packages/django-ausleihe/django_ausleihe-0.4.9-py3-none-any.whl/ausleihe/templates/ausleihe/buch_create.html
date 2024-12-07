@@ -1,0 +1,36 @@
+{% extends "ausleihe/base.html" %}
+
+{% load static sekizai_tags %}
+
+{% block css %}
+{% addtoblock "css" %}
+{% include "ausleihe/buch_common_css.html" %}
+{% endaddtoblock %}
+{% endblock css %}
+
+{% block js %}
+{% addtoblock "js" %}
+{% include "ausleihe/buch_common_js.html" %}
+{% endaddtoblock %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:buch-list' %}"><strong>Bücher</strong></a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:autor-list' %}">Autoren</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:verlag-list' %}">Verlage</a></li>
+      <li class="breadcrumb-item active" aria-current="page">hinzufügen</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col">
+      {% include "ausleihe/buch_form.html" %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
