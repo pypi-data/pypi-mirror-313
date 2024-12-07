@@ -1,0 +1,52 @@
+[project]
+name = "custom-json-diff"
+version = "2.1.5"
+description = "CycloneDx BOM and Oasis CSAF diffing and comparison tool."
+authors = [
+  { name = "Caroline Russell", email = "caroline@appthreat.dev" },
+]
+dependencies = ["jinja2>=3.1.4", "json-flatten>=0.3", "packageurl-python>=0.15.6", "semver>=3.0.0", "toml>=0.10"]
+license = { text = "Apache-2.0" }
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: Apache Software License",
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Environment :: Console",
+  "Topic :: Utilities",
+  "Topic :: File Formats :: JSON",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/appthreat/custom-json-diff"
+"Bug Tracker" = "https://github.com/appthreat/custom-json-diff/issues"
+"Funding" = "https://github.com/sponsors/cerrussell"
+
+[project.scripts]
+cjd = "custom_json_diff.cli:main"
+custom-json-diff = "custom_json_diff.cli:main"
+
+[project.optional-dependencies]
+dev = [
+  "mypy",
+  "pytest",
+]
+
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+  "custom_json_diff",
+  "custom_json_diff.lib",
+  ]
+include-package-data = true
+
+[tool.pylint.messages_control]
+disable = "C0114,C0115,C0116,C0301"
