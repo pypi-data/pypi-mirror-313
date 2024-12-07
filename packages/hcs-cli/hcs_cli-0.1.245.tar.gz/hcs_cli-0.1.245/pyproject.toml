@@ -1,0 +1,54 @@
+[project]
+name = "hcs-cli"
+description = "Horizon Cloud Service CLI module."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name="Nanw1103", email="nanw1103@gmail.com" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+keywords = [
+    "Horizon", "Horizon Cloud", "Horizon Cloud Service", "CLI"
+]
+
+dynamic = ["version", "dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+version = {file = "VERSION"}
+
+[tool.setuptools.package-data]
+hcs_cli = ["*.yaml", "*.yml", "*.json"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["hcs_cli*"]
+exclude = ["lab*", "tests*"]
+
+[project.scripts]
+hcs = "hcs_cli.main:main"
+
+
+[project.urls]
+Homepage = "https://github.com/vmware/horizon-cloud-service-cli"
+"Bug Tracker" = "https://github.com/vmware/horizon-cloud-service-cli/issues"
+documentation = "https://readthedocs.org"
+repository = "https://github.com/vmware/horizon-cloud-service-cli"
+changelog = "https://github.com/vmware/horizon-cloud-service-cli/blob/main/CHANGELOG.md"
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+# A regex preceded with ^/ will apply only to files and directories
+# in the root of the project.
+^/foo.py  # exclude a file named foo.py in the root of the project (in addition to the defaults)
+'''
