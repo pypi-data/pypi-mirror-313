@@ -1,0 +1,76 @@
+[project]
+name = "backupmaster"
+version = "1.2.21"
+description = "Backup import files across entire disk"
+authors = [{name = "Quinten Roets", email = "qdr2104@columbia.edu"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4 >=4.12.2, <5",
+    "lxml >=4.9.3, <6",
+    "package-utils[context] >=0.6.4, <1",
+    "powercli >=0.3.0, <1",
+    "PyYAML >=6.0.1, <7",
+    "xattr >=0.10.1, <2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "dirhash >=0.2.1, <1",
+    "package-dev-tools >=0.6.0, <1",
+    "package-dev-utils >=0.1.6, <1",
+    "types-beautifulsoup4 >=4.12.0.20240106, <5",
+]
+
+[project.urls]
+"Source Code" = "https://github.com/quintenroets/backup"
+
+[project.scripts]
+backup = "backup.cli.entry_point:entry_point"
+mount-remote = "backup.cli.mount:entry_point"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.coverage.run]
+command_line = "-m pytest tests"
+
+[tool.coverage.report]
+precision = 4
+fail_under = 100
+
+[tool.mypy]
+strict = true
+no_implicit_reexport = false
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "src", ".",
+]
+
+[tool.ruff]
+fix = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN101",   # annotate self
+    "ANN102",   # annotate cls
+    "ANN401",   # annotated with Any
+    "D",        # docstrings
+    "G004",     # logging f-string
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401"  # unused import
+]
+"tests/*" = [
+    "S101",    # assert used
+    "PLR2004"  # Magic value used in comparison
+]
+
+[tool.setuptools.package-data]
+backup = ["py.typed"]
