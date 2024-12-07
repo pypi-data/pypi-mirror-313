@@ -1,0 +1,92 @@
+Metadata-Version: 2.1
+Name: graphrs_python
+Version: 0.11.0.post2
+Summary: A Python module that wraps the high-performance `graphrs` Rust library.
+Author-email: Malcolm van Raalte <malcolm@van.raalte.ca>
+License: MIT License
+        
+        Copyright (c) 2024 Malcolm van Raalte
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Repository, https://github.com/malcolmvr/graphrs_python
+Keywords: graph,network,graph theory,network theory,graph algorithms,network algorithms
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Rust
+Classifier: Topic :: Scientific/Engineering :: Information Analysis
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Typing :: Typed
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# graphrs_python
+
+`graphrs_python` is a Python wrapper around the high-performance [graphrs](<https://crates.io/crates/graphrs>)
+Rust crate. See the [performance documentation](<https://github.com/malcolmvr/graphrs/blob/main/performance.md>)
+for a comparison of the performance of `graphrs` to other graph libraries.
+
+## Example Usage
+
+```python
+import graphrs_python as grs
+
+nodes = ["n1", "n2", "n3", "n4"]
+edges = [("n1", "n2", 1.0), ("n2", "n3", 1.0), ("n3", "n4", 1.0), ("n4", "n2", 1.0)]
+graph = grs.create_graph_from_nodes_and_edges(nodes, edges, directed=True)
+
+print(grs.betweenness_centrality(graph, weighted=True, normalized=True))
+print(grs.closeness_centrality(graph, weighted=True, wf_improved=True))
+print(grs.eigenvector_centrality(graph, weighted=True))
+```
+
+Graphs can also be created from just edges:
+
+```python
+import graphrs_python as grs
+
+edges = [("n1", "n2", 1.0), ("n2", "n3", 1.0), ("n3", "n4", 1.0), ("n4", "n2", 1.0)]
+graph = grs.create_graph_from_edges(edges, directed=True)
+```
+
+And graphs can also be created from NetworkX `Graph` objects:
+
+```python
+import graphrs_python as grs
+import networkx
+
+graph = nx.DiGraph()
+graph.add_edges_from(
+    [
+        ("n1", "n2", {"weight": 1.0}),
+        ("n2", "n3", {"weight": 1.0}),
+        ("n3", "n4", {"weight": 1.0}),
+        ("n4", "n2", {"weight": 1.0}),
+    ]
+)
+graph = grs.create_graph_from_networkx(graph, weight="weight")
+```
+
+## License
+
+MIT
