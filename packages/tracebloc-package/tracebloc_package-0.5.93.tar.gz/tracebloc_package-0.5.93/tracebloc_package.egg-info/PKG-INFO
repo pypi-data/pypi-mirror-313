@@ -1,0 +1,78 @@
+Metadata-Version: 2.1
+Name: tracebloc_package
+Version: 0.5.93
+Summary: Package required to run Tracebloc jupyter notebook to create experiment
+Home-page: https://gitlab.com/tracebloc/tracebloc-py-package
+Author: Tracebloc
+Author-email: lukas-wutke@tracebloc.io
+License: MIT
+Requires-Python: >=3
+Description-Content-Type: text/markdown
+Requires-Dist: absl-py
+Requires-Dist: dill
+Requires-Dist: protobuf
+Requires-Dist: requests
+Requires-Dist: rich
+Requires-Dist: silence-tensorflow
+Requires-Dist: tensorflow
+Requires-Dist: tensorflow-datasets
+Requires-Dist: termcolor
+Requires-Dist: timm
+Requires-Dist: torch
+Requires-Dist: torchlightning
+Requires-Dist: torchmetrics
+Requires-Dist: torchvision
+Requires-Dist: tqdm
+Requires-Dist: transformers
+Requires-Dist: twine
+
+# Tracebloc package
+This package is pre-requiste to run tracebloc jupyter notebook.
+
+
+This package helps to create and start the experiment for training ML models in 
+tracebloc environment.
+
+
+# Deployment Steps
+
+Pre Requisite - Make sure you have a PyPi account and have access to tracebloc-package and tracebloc-package-dev
+
+### Step 1 - Clean up:
+
+Delete the following folders if they exist
+
+- dist
+- tracebloc_package.egg-info
+- tracebloc_package_dev.egg-info
+
+### Step 2 - Update Config:
+
+Update the following details in setup.py and commit
+
+- Version
+    - As applicable
+
+### Step 3 - Install Requirements:
+
+```
+pip install -r requirements.txt
+```
+
+### Step 4 - Build:
+**For Dev**
+```
+python setup.py sdist
+```
+
+**For Prod/Live**
+```
+python setup.py sdist --live
+```
+
+### Step 5 - Upload:
+```
+twine upload dist/*
+    username: __token__
+    password: <your auth token>
+```
