@@ -1,0 +1,175 @@
+# ofbahar PDF Converter
+
+An MCP (Model Context Protocol) server that provides various PDF manipulation tools. This project allows you to create, merge, encrypt PDFs and more through a simple interface - developed by ofbahar.
+
+## Features
+
+- **Text to PDF Conversion**
+  - Convert text to PDF with formatting options
+  - Custom font, size, and color support
+  - Rich text formatting capabilities
+
+- **PDF Manipulation**
+  - Merge multiple PDFs
+  - Encrypt PDFs with password protection
+  - Extract text from PDFs
+  - Add images to PDFs
+  - Compress PDFs
+  - Update PDF metadata
+
+## Prerequisites
+
+- Python 3.12 or higher
+- uv package manager
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/ofbahar/pdf_converter.git
+cd pdf_converter
+```
+
+2. Create a virtual environment and install dependencies:
+```bash
+uv venv
+uv pip install -e .
+```
+
+## Configuration
+
+### Claude Desktop Configuration
+
+#### Location
+- On MacOS: `~/Library/Application\ Support/Claude/claude_desktop_config.json`
+- On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+<details>
+  <summary>Development/Unpublished Servers Configuration</summary>
+
+```json
+{
+  "mcpServers": {
+    "ofbahar_pdf_converter": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "C:\\Users\\OmerFarukBAHAR(ADEO)\\Desktop\\Proje\\CTICrawler\\MCPDevelopment\\pdf_converter",
+        "run",
+        "ofbahar_pdf_converter"
+      ]
+    }
+  }
+}
+```
+</details>
+
+<details>
+  <summary>Published Servers Configuration</summary>
+
+```json
+{
+  "mcpServers": {
+    "ofbahar_pdf_converter": {
+      "command": "uvx",
+      "args": [
+        "ofbahar_pdf_converter"
+      ]
+    }
+  }
+}
+```
+</details>
+
+### Environment Variables
+- `PDF_OUTPUT_DIR`: Specify output directory for PDFs (optional)
+- Default output directory: `output_pdfs` in current working directory
+
+## Usage Examples
+
+### Example Operations
+
+1. Creating a PDF:
+```
+Create a PDF with the text "Hello World"
+```
+
+2. Formatting Text:
+```
+Create a PDF with formatted text using Helvetica font, size 14, and red color
+```
+
+3. Merging PDFs:
+```
+Merge file1.pdf and file2.pdf into merged.pdf
+```
+
+4. Encrypting PDFs:
+```
+Encrypt document.pdf with password "secure123"
+```
+
+5. Extracting Text:
+```
+Extract text from document.pdf
+```
+
+6. Updating Metadata:
+```
+Update metadata of document.pdf with title "My Document" and author "ofbahar"
+```
+
+## Development
+
+### Building and Publishing
+
+1. Sync dependencies and update lockfile:
+```bash
+uv sync
+```
+
+2. Build package distributions:
+```bash
+uv build
+```
+
+This will create source and wheel distributions in the `dist/` directory.
+
+3. Publish to PyPI:
+```bash
+uv publish
+```
+
+Note: You'll need to set PyPI credentials via environment variables or command flags:
+- Token: `--token` or `UV_PUBLISH_TOKEN`
+- Or username/password: `--username`/`UV_PUBLISH_USERNAME` and `--password`/`UV_PUBLISH_PASSWORD`
+
+### Debugging
+
+Since MCP servers run over stdio, debugging can be challenging. For the best debugging
+experience, we strongly recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector).
+
+You can launch the MCP Inspector via [`npm`](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) with this command:
+
+```bash
+npx @modelcontextprotocol/inspector uv --directory C:\Users\OmerFarukBAHAR(ADEO)\Desktop\Proje\CTICrawler\MCPDevelopment\pdf_converter run ofbahar-pdf-converter
+```
+
+Upon launching, the Inspector will display a URL that you can access in your browser to begin debugging.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+- **Ömer Faruk BAHAR** - Initial work - [ofbahar](https://github.com/ofbahar)
+
+## Acknowledgments
+
+- Built with Python MCP Server SDK
+- Uses ReportLab and PyPDF2 for PDF operations
