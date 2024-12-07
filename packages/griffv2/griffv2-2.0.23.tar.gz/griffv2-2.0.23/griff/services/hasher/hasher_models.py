@@ -1,0 +1,2 @@
+UnHashedStr = str
+HashedStr = str
