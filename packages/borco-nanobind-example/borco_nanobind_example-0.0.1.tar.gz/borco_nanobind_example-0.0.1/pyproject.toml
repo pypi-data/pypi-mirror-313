@@ -1,0 +1,48 @@
+[project]
+name = "borco-nanobind-example"
+version = "0.0.1"
+description = "Example creating a Python binding for C++ with nanobind"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+authors = [
+    { name = "Ioan Călin", email = "iborco@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
+    # "Typing :: Typed",
+]
+dependencies = []
+
+
+[build-system]
+requires = [
+    "scikit-build-core>=0.10.7",
+    "nanobind>=2.3.0",
+]
+build-backend = "scikit_build_core.build"
+
+
+[tool.scikit-build]
+# Verbose printout when building.
+build.verbose = false
+
+# The logging level to display.
+logging.level = "INFO"
+
+# Take minimum version from the [build-system] table.
+minimum-version = "build-system.requires"
+
+# Setuptools-style build caching in a local directory.
+build-dir = "build/{wheel_tag}"
+
+# Build stable ABI wheels for CPython 3.12+.
+wheel.py-api = "cp312"
+
+# Rebuild the project when the package is imported.
+# The build-directory must be set.
+editable.rebuild = true
