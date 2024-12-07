@@ -1,0 +1,71 @@
+[project]
+name = "omu-eddy-covariance"
+# version属性は"setuptools_scm"が自動的に設定
+dynamic = ["version"]
+description = "This package provides methods for analyzing atmospheric observation data, primarily eddy covariance methods."
+authors = [{ name = "connect0459", email = "connect0459@gmail.com" }]
+# PILの代わりにfork先のpillowをインストール
+# 詳細は<https://pillow.readthedocs.io/en/stable/>を参照
+dependencies = [
+  "contextily>=1.6.2",
+  "folium>=0.18.0",
+  "geopandas>=1.0.1",
+  "jpholiday",
+  "matplotlib",
+  "numpy",
+  "openpyxl>=3.1.5",
+  "pandas",
+  "pillow",
+  "pyproj>=3.7.0",
+  "scipy",
+  "shapely>=2.0.6",
+  "tqdm",
+]
+readme = "README.md"
+requires-python = ">= 3.11"
+# PyPIで公開するための追加情報
+license = "MIT"
+classifiers = [
+  "Development Status :: 3 - Alpha",                        # "Alpha":開発初期段階を示す
+  "Intended Audience :: Science/Research",                  # "Science/Research":科学研究者向け
+  "License :: OSI Approved :: MIT License",                 # MITライセンスで公開
+  "Programming Language :: Python :: 3",                    # Python 3 系列に対応
+  "Programming Language :: Python :: 3.11",                 # 特にPython 3.11 に対応
+  "Topic :: Scientific/Engineering :: Atmospheric Science", # "Atmospheric Science":大気科学分野
+]
+keywords = [
+  "omu",
+  "meteorology",
+  "eddy",
+  "covariance",
+  "flux",
+  "powerspectrum",
+  "cospectrum",
+  "spectrum",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/omu-meteorology/omu-eddy-covariance"
+"Bug Tracker" = "https://github.com/omu-meteorology/omu-eddy-covariance/issues"
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/omu_eddy_covariance"]
+
+[tool.uv]
+managed = true
+dev-dependencies = [
+  "build>=1.2.2.post1",
+  "hatchling>=1.25.0",
+  "ipykernel>=6.29.5",
+  "pytest>=7.4.0",
+  "python-dotenv>=1.0.1",
+  "ruff>=0.6.8",
+  "twine>=5.1.1",
+]
