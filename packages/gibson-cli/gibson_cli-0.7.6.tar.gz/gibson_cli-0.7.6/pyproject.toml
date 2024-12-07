@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=60", "setuptools_scm[toml]>=7", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gibson-cli"
+authors = [{ name = "GibsonAI", email = "noc@gibsonai.com" }]
+description = "Gibson Command Line Interface"
+dynamic = ["dependencies"]
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "Operating System :: OS Independent",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3.9",
+]
+version = "0.7.6"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = ["*tests"]
+
+[tool.setuptools.package-data]
+gibson = ["data/*"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[project.urls]
+Homepage = "https://gibsonai.com/"
+Documentation = "https://docs.gibsonai.com/"
+Repository = "https://github.com/gibsonai/cli"
+Issues = "https://github.com/gibsonai/cli/issues"
+Changelog = "https://github.com/gibsonai/cli/releases"
+
+[project.scripts]
+gibson = "gibson.bin.gibson:main"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.isort]
+profile = "black"

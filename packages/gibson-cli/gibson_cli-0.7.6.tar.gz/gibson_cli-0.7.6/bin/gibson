@@ -1,0 +1,26 @@
+#!/Library/Frameworks/Python.framework/Versions/3.9/bin/python3.9
+# -*- coding: utf-8 -*-
+
+# This file is identical to what pip creates when you install an executable package, but it adds a dev mode banner.
+# To easily switch between dev mode and installed mode, add the following functions to your .zshrc or .bashrc:
+#
+# cli_dev_on() {
+#   export PATH="$HOME/src/gibson/cli/bin:$PATH"
+#   export PYTHONPATH="$HOME/src/gibson/cli:$PYTHONPATH"
+# }
+#
+# cli_dev_off() {
+#   export PATH=${PATH#$HOME/src/gibson/cli/bin:}
+#   export PYTHONPATH=${PYTHONPATH#:$HOME/src/gibson/cli:}
+# }
+
+import re
+import sys
+
+from gibson.bin.gibson import main
+from gibson.display.Header import Header
+
+if __name__ == "__main__":
+    print(f"{Header().render('dev mode')}\n")
+    sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])
+    sys.exit(main())
