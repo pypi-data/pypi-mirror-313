@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lisa-globalfit-framework"
+description = "LISA GlobalFit Framework"
+dynamic = ["version"]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "deprecated", # @deprecated notices until we can safely use Python 3.13 stdlib
+  "nats-py", # event bus
+  "aiobotocore", # S3 SDK for monitoring
+  "types-aiobotocore[s3]", # types hints for aiobotocore
+  "aiosqlite", # async version of stdlib sqlite
+  "numpy<2.0.0", # models, arrays # Warning: version dependency <2.0.0 can be removed if version constraint h5py!=3.11.0 is removed, because only h5py>=3.11.0 supports numpy>=2.0.0.
+  "scipy", # distributions
+  "corner", # corner plots for monitoring
+  "emcee", # MCMC stub
+  "h5py", # dataset files
+  "matplotlib", # visualization
+  "aiohttp", # monitoring server
+  "jinja2", # monitoring server
+]
+
+[project.urls]
+Homepage = "https://gitlab.esa.int/lisa-sgs/globalfit/framework"
+Repository = "https://gitlab.esa.int/lisa-sgs/globalfit/framework.git"
+Issues = "https://gitlab.esa.int/lisa-sgs/globalfit/framework/-/issues"
+Changelog = "https://gitlab.esa.int/lisa-sgs/globalfit/framework/-/blob/develop/CHANGELOG.md"
+
+[tool.setuptools]
+# See https://github.com/astral-sh/uv/issues/9513#issuecomment-2519527822
+license-files = []
+
+[dependency-groups]
+dev = [
+  "pylint",
+  "pytest",
+  "pytest-asyncio",
+  "py-spy",
+  "aiobotocore[awscli]",
+  "sphinx",
+  "setuptools_scm",
+]
+
+[project.scripts]
+lgfk-cli = "lisa.globalfit.framework.cli:main"
+lgfk-simulate-signal = "lisa.globalfit.framework.scripts.simulate_signal:main"
+lgfk-monitor = "lisa.globalfit.framework.scripts.monitor:main"
+lisa-rule-engine = "lisa.globalfit.framework.engine.cli:main"
+lisa-workflow-submit = "lisa.globalfit.framework.pipelinerunner.bridge:main"
+lisa-dag-submitter = "lisa.globalfit.framework.pipelinerunner.submitter:main"
+
+[tool.setuptools_scm]
+
+[tool.setuptools.package-data]
+"lisa.globalfit.framework" = [
+  "**/*.html",
+  "**/*.css",
+]
+
+[tool.ruff]
+# Ruff supports a top-level `src` option in lieu of isort's `src_paths` setting.
+# All paths are relative to the project root, which is the directory containing the pyproject.toml.
+src = ["src"]
+
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules
+select = [
+  "ASYNC",
+  "C",
+  "D2",
+  "D4",
+  "E",
+  "F",
+  "I",
+  "N",
+  "NPY",
+  "RUF",
+  "S",
+  "UP",
+  "W"
+]
+
+[tool.ruff.lint.per-file-ignores]
+# See https://github.com/astral-sh/ruff/issues/4368
+"tests/**/*.py" = [
+    "S101", # Allow `assert` in tests
+]
+
+# We assume the pipeline runner is running in a trusted environment.
+"src/lisa/globalfit/framework/pipelinerunner/*.py" = [
+  "S603", # `subprocess` call: check for execution of untrusted input
+  "S607", # Starting a process with a partial executable path
+]
+
+[tool.pytest.ini_options]
+addopts = "--asyncio-mode=auto"
+
+[tool.mypy]
+warn_unused_configs = true
+exclude = [
+    "docs/source/.*",  # TOML basic string (double-quotes, backslash and other characters need escaping)
+]

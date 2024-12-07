@@ -1,0 +1,322 @@
+variables:
+  # Change pip's cache directory to be inside the project directory since we can only cache local items.
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  UV_CACHE_DIR: .uv-cache
+  PRE_COMMIT_HOME: .pre-commit-cache
+
+  DEMO_LOG_LEVEL: DEBUG
+  DEMO_SIGNAL: simulated_signal.h5
+  DEMO_SIGNAL_PREPROCESSED: simulated_signal_preprocessed.h5
+  DEMO_STUB_GROUP_CONFIG: group_config_stub.json
+  DEMO_CHECKPOINT: checkpoint.json
+  DEMO_ITERATION_DECISION: iteration_decision.json
+  DEMO_EXPECTED_GROUPS: groups.json
+
+lint:
+  image: ghcr.io/astral-sh/uv:python3.11-bookworm
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - $UV_CACHE_DIR
+      - $PRE_COMMIT_HOME
+  script:
+    - uv tool run pre-commit run --all-files --show-diff-on-failure
+
+pages:
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+  image: ghcr.io/astral-sh/uv:python3.11-bookworm
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - $UV_CACHE_DIR
+  script:
+    - uv tool run --from sphinx sphinx-build docs/source public
+  artifacts:
+    paths:
+      - public
+    expire_in: 6 months
+
+test:
+  image: ghcr.io/astral-sh/uv:python3.11-bookworm
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - $UV_CACHE_DIR
+  script:
+    - uv sync
+    - uv run pytest
+
+get-version:
+  image: ghcr.io/astral-sh/uv:python3.11-bookworm
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - $UV_CACHE_DIR
+  before_script:
+    - git fetch --prune --tags --unshallow
+  script:
+    - echo "SETUPTOOLS_SCM_PRETEND_VERSION=$(uv run python -m setuptools_scm)" > version.env
+    - echo "RELEASE_VERSION=${CI_COMMIT_TAG:-$CI_COMMIT_REF_SLUG}" >> version.env
+    - cat version.env
+  artifacts:
+    reports:
+      dotenv: version.env
+
+build-package:
+  image: ghcr.io/astral-sh/uv:python3.11-bookworm
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - $UV_CACHE_DIR
+  before_script:
+    - git fetch --prune --tags --unshallow
+  script:
+    - uv build
+  artifacts:
+    expire_in: 1h
+    paths:
+      - dist
+
+publish-package-internal:
+  needs:
+    - lint
+    - test
+    - build-package
+  image: ghcr.io/astral-sh/uv:python3.11-bookworm
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH =~ /feature.*/
+    - if: $CI_COMMIT_TAG
+  script:
+    - UV_PUBLISH_PASSWORD=${CI_JOB_TOKEN} UV_PUBLISH_USERNAME=gitlab-ci-token uv publish --publish-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi
+
+publish-package-pypi:
+  needs:
+    - lint
+    - test
+    - build-package
+  image: ghcr.io/astral-sh/uv:python3.11-bookworm
+  rules:
+    - if: $CI_COMMIT_TAG
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+  script:
+    - pip install twine
+    - UV_PUBLISH_PASSWORD=${PYPI_JOB_TOKEN} UV_PUBLISH_USERNAME=__token__ uv publish
+
+.build-image-arch-template:
+  needs:
+    - lint
+    - test
+    - get-version
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH =~ /feature.*/
+    - if: $CI_COMMIT_BRANCH =~ /release.*/
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo "building image ${IMAGE_TAG} with package version ${SETUPTOOLS_SCM_PRETEND_VERSION}"
+    # See https://gitlab.in2p3.fr/cc-in2p3-gitlab/maintenance/-/issues/184#note_209582
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${IMAGE_TAG}"
+      --build-arg SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}
+      --cache=true
+      --cache-ttl=336h
+
+build-image-arm64:
+  extends: .build-image-arch-template
+  variables:
+    # For gitlab-runner in Kubernetes only with mixed arch, select the right architecture.
+    KUBERNETES_NODE_SELECTOR_ARCH: 'kubernetes.io/arch=arm64'
+  tags:
+    # Selects the right gitlab-runner for ARM.
+    - arm64
+  # Manual because it needs a ARM Gitlab Runner
+  when: manual
+  before_script:
+    - export IMAGE_TAG=$CI_REGISTRY_IMAGE:${RELEASE_VERSION}-arm64
+
+build-image-amd64:
+  extends: .build-image-arch-template
+  variables:
+    # For gitlab-runner in Kubernetes only with mixed arch, select the right architecture.
+    KUBERNETES_NODE_SELECTOR_ARCH: 'kubernetes.io/arch=amd64'
+  before_script:
+    - export IMAGE_TAG=$CI_REGISTRY_IMAGE:${RELEASE_VERSION}-amd64
+
+.build-arch-template:
+  image:
+    name: mplatform/manifest-tool:alpine-v2.1.6
+    entrypoint: [""]
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE
+    GIT_STRATEGY: none
+  script:
+    - >-
+      manifest-tool
+      --username=${CI_REGISTRY_USER}
+      --password=${CI_REGISTRY_PASSWORD}
+      push from-args
+      --platforms ${BUILD_PLATFORMS}
+      --template ${IMAGE_NAME}:${RELEASE_VERSION}-ARCH
+      --target ${IMAGE_NAME}:${RELEASE_VERSION}
+
+build-multi-arch:
+  extends: .build-arch-template
+  needs:
+    - build-image-amd64
+    - build-image-arm64
+    - get-version
+  variables:
+    BUILD_PLATFORMS: "linux/amd64,linux/arm64"
+  # Manual because it needs a ARM Gitlab Runner
+  when: manual
+
+build-mono-arch:
+  extends: .build-arch-template
+  needs:
+    - build-image-amd64
+    - get-version
+  variables:
+    BUILD_PLATFORMS: "linux/amd64"
+
+run-globalfit-prepare-data:
+  needs:
+    - build-mono-arch
+    - get-version
+  image:
+    name: $CI_REGISTRY_IMAGE:${RELEASE_VERSION}
+    entrypoint: [""]
+  timeout: 5m
+  script:
+    - lgfk-simulate-signal --output-path "${DEMO_SIGNAL}"
+  artifacts:
+    expire_in: 1h
+    paths:
+      - "${DEMO_SIGNAL}"
+      - "*.png"
+
+run-globalfit-demo-iter0:
+  needs:
+    - run-globalfit-prepare-data
+    - get-version
+  image:
+    name: $CI_REGISTRY_IMAGE:${RELEASE_VERSION}
+    entrypoint: [""]
+  services:
+  # It would be nice to split this job into concurrent jobs sharing the same NATS service,
+  # but this is not supported by GitLab yet.
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/15153
+  - name: nats:2.10
+    alias: nats
+    command:
+      - "--jetstream"
+  timeout: 5m
+  script:
+    - echo '[{"label":"stub"}]' > ${DEMO_EXPECTED_GROUPS}
+    - >-
+      lgfk-cli
+      --servers nats://nats:4222
+      --pipeline-run-id $CI_COMMIT_SHA
+      --log-level ${DEMO_LOG_LEVEL}
+      start-engine
+      --expected-groups ${DEMO_EXPECTED_GROUPS}
+      --output-checkpoint ${DEMO_CHECKPOINT}
+      --output-iteration-decision ${DEMO_ITERATION_DECISION}
+      --max-iterations 2
+      --current-iteration 0
+      &
+    - >-
+      lgfk-cli
+      --servers nats://nats:4222
+      --pipeline-run-id $CI_COMMIT_SHA
+      --log-level ${DEMO_LOG_LEVEL}
+      preprocess
+      --input-data ${DEMO_SIGNAL}
+      --output-preprocessed-signal ${DEMO_SIGNAL_PREPROCESSED}
+      --output-group-configuration-path ${DEMO_STUB_GROUP_CONFIG}
+      --group-label stub
+    - >-
+     lgfk-cli
+     --servers nats://nats:4222
+     --pipeline-run-id $CI_COMMIT_SHA
+     --log-level ${DEMO_LOG_LEVEL}
+     start-modules
+     --input-data ${DEMO_SIGNAL_PREPROCESSED}
+     --input-group-configuration-path ${DEMO_STUB_GROUP_CONFIG}
+     --current-iteration 0
+    # Wait for background jobs. Once again, this would be nicer using foreground
+    # processes in distinct CI steps, but GitLab does not support shared services yet.
+    - wait
+  artifacts:
+    expire_in: 1h
+    paths:
+      # MCMC chains
+      - "*.h5"
+      # Iteration checkpoint
+      - "*.json"
+
+run-globalfit-demo-iter1:
+  needs:
+    - run-globalfit-demo-iter0
+    - get-version
+  image:
+    name: $CI_REGISTRY_IMAGE:${RELEASE_VERSION}
+    entrypoint: [""]
+  services:
+  - name: nats:2.10
+    alias: nats
+    command:
+      - "--jetstream"
+  timeout: 5m
+  script:
+    - echo '[{"label":"stub"}]' > ${DEMO_EXPECTED_GROUPS}
+    - >-
+      lgfk-cli
+      --servers nats://nats:4222
+      --pipeline-run-id $CI_COMMIT_SHA
+      --log-level ${DEMO_LOG_LEVEL}
+      start-engine
+      --expected-groups ${DEMO_EXPECTED_GROUPS}
+      --output-checkpoint ${DEMO_CHECKPOINT}
+      --output-iteration-decision ${DEMO_ITERATION_DECISION}
+      --max-iterations 2
+      --current-iteration 1
+      &
+    - >-
+      lgfk-cli
+      --servers nats://nats:4222
+      --pipeline-run-id $CI_COMMIT_SHA
+      --log-level ${DEMO_LOG_LEVEL}
+      preprocess
+      --input-data ${DEMO_SIGNAL}
+      --input-checkpoint ${DEMO_CHECKPOINT}
+      --output-preprocessed-signal ${DEMO_SIGNAL_PREPROCESSED}
+      --output-group-configuration-path ${DEMO_STUB_GROUP_CONFIG}
+      --group-label stub
+    - >-
+     lgfk-cli
+     --servers nats://nats:4222
+     --pipeline-run-id $CI_COMMIT_SHA
+     --log-level ${DEMO_LOG_LEVEL}
+     start-modules
+     --input-data ${DEMO_SIGNAL_PREPROCESSED}
+     --input-group-configuration-path ${DEMO_STUB_GROUP_CONFIG}
+     --current-iteration 1
+    - wait
+  artifacts:
+    expire_in: 1h
+    paths:
+      # MCMC chains
+      - "*.h5"
+      # Iteration checkpoint
+      - "*.json"
