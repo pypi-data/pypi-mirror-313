@@ -1,0 +1,70 @@
+Metadata-Version: 2.1
+Name: DLICV
+Version: 1.0.4
+Summary: DLICV - Deep Learning Intra Cranial Volume.
+Home-page: https://github.com/CBICA/DLICV/
+Download-URL: https://github.com/CBICA/DLICV/
+Author: Guray Erus, Vishnu Bashyam, George Aidinis, Alexander Getka, Kyunglok Baik, Wu Di
+Author-email: software@cbica.upenn.edu
+Maintainer: George Aidinis, Spiros Maggioros, Kyunglok Baik, Alexander Getka
+Maintainer-email: aidinisg@pennmedicine.upenn.edu, Spiros.Maggioros@pennmedicine.upenn.edu, kyunglok.baik@pennmedicine.upenn.edu, alexander.getka@pennmedicine.upenn.edu
+License: By installing/using DLICV, the user agrees to the following license: See https://www.med.upenn.edu/cbica/software-agreement-non-commercial.html
+Keywords: deep learning,image segmentation,semantic segmentation,medical image analysis,medical image segmentation,nnU-Net,nnunet
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Healthcare Industry
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Scientific/Engineering :: Image Processing
+Classifier: Topic :: Scientific/Engineering :: Medical Science Apps.
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: torch>=2.2.1
+Requires-Dist: nnunetv2==2.5.1
+Requires-Dist: argparse
+Requires-Dist: huggingface_hub
+
+# DLICV - Deep Learning Intra Cranial Volume
+
+## Overview
+
+DLICV uses a trained [nnUNet](https://github.com/MIC-DKFZ/nnUNet) model to compute the intracranial volume from structural MRI scans in the nifti image format, oriented in _**LPS**_ orientation.
+
+## Installation
+
+### As a python package
+```bash
+pip install DLICV
+```
+### Directly from this repository
+```bash
+git clone https://github.com/CBICA/DLICV
+cd DLICV
+pip install -e .
+```
+
+### Installing PyTorch
+Depending on your system configuration and supported CUDA version, you may need to follow the [PyTorch Installation Instructions](https://pytorch.org/get-started/locally/). 
+
+## Usage
+A pre-trained nnUNet model can be found at our [hugging face account](https://huggingface.co/nichart/DLICV).
+Feel free to use it under the package's [licence](LICENCE)
+```bash
+DLICV -i "input_folder" -o "output_folder" -device cpu
+```
+
+#### Troubleshooting model download failures
+Our model download process creates several deep directory structures. If you are on Windows and your model download process fails, it may be due to Windows file path limitations. 
+
+To enable long path support in Windows 10, version 1607, and later, the registry key `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem LongPathsEnabled (Type: REG_DWORD)` must exist and be set to 1.
+
+If this affects you, we recommend re-running DLICV with the `--clear_cache` flag set on the first run.
+
+
+## Contact
+For more information, please contact [CBICA Software](mailto:software@cbica.upenn.edu).
+
+## For developers
+Contributions are welcome! Please refer to our [CONTRIBUTING.md](CONTRIBUTING.md) for more information on how to report bugs, suggest enhancements, and contribute code.
+Please make sure to write tests for new code and run them before submitting a pull request.
