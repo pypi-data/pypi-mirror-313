@@ -1,0 +1,93 @@
+Metadata-Version: 2.1
+Name: shxarray
+Version: 1.2.0
+Summary: Spherical harmonic extension for Xarray
+Author-email: Roelof Rietbroek <r.rietbroek@utwente.nl>
+Project-URL: Homepage, https://github.com/ITC-Water-Resources/shxarray
+Project-URL: Bug Tracker, https://github.com/ITC-Water-Resources/shxarray/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering
+Classifier: Development Status :: 1 - Planning
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas>=2.0
+Requires-Dist: pyaml>=23.9.0
+Requires-Dist: scipy
+Requires-Dist: xarray>=2023.1.0
+Requires-Dist: numpy<2
+Requires-Dist: numba
+Requires-Dist: sparse
+Requires-Dist: importlib_metadata
+Requires-Dist: requests
+Requires-Dist: openpyxl
+Requires-Dist: geopandas
+Provides-Extra: dask
+Requires-Dist: dask>=2022.9.2; extra == "dask"
+
+#  Xarray Extension for working with spherical harmonic data
+[![Build](https://github.com/ITC-Water-Resources/shxarray/actions/workflows/python-publish.yml/badge.svg)](https://github.com/ITC-Water-Resources/shxarray/actions/workflows/python-publish.yml)
+[![PyPI version](https://badge.fury.io/py/shxarray.svg)](https://badge.fury.io/py/shxarray)
+[![Documentation Status](https://readthedocs.org/projects/shxarray/badge/?version=latest)](https://shxarray.wobbly.earth/latest/?badge=latest)
+
+This extension adds functionality to work with Spherical Harmonics to [Xarray](https://github.com/pydata/xarray).
+
+## Features and functionality (in progress)
+* Gravity functionals: (convert from Stokes coefficients to various gravity functionals, such as equivalent water heights, geoid changes, etc.)
+* Filter (e.g. Gaussian or anisotropic filter applied in the spectral domain)
+* The use of Xarray like operations allow for applying functionality to multi-dimensional datasets
+
+
+## Getting started
+The tutorials in the [documentation](https://shxarray.wobbly.earth/stable/tutorial.html) will gradually epxand and provide Jupyter notebook workflows to start with.
+
+
+## Installation
+You can install this package from PyPi using:
+```
+pip install shxarray
+```
+
+
+## Development Installation
+If you want to help in the development of this package, it's best to clone the repository to allow for modifications and pull requests. The extension makes use of [Cython](https://cython.readthedocs.io/en/latest/) generated code to speed up spherical harmonic synthesis and analysis.
+
+1. Create your own virtual environment with `venv` or Anaconda *(Optional but recommended, when a user installation is desired)*
+2. Clone this repository `git clone https://github.com/ITC-Water-Resources/shxarray.git`
+3. Change to the repository directory `cd shaxarray`
+4. Set the environment variable `export USE_CYTHON=1` *(Optional and only in the case Cython code is being developed or needs to be regenerated)*
+5. Install using pip  `pip install .` or use `pip install -e .` for an editable install
+ 
+### Cython build tip on an editable install
+From the repository root directory, regenerating the shared library running 
+
+```python ./setup.py build_ext``` 
+
+will be much faster than using 
+
+```pip install -e .``` 
+
+
+This will build the shared library in for example `./build/lib.linux-x86_64-cpython-3xx/shxarray/shlib.cpython-3xx-x86_64-linux-gnu.so`. To make sure changes are picked up in your editable install you can create a symbolic link in the Python part of the library e.g. :
+
+```
+cd src/shxarray/
+ln -sf ../../build/lib.linux-x86_64-cpython-311/shxarray/shlib.cpython-311-x86_64-linux-gnu.so
+```
+
+### Building against Numpy 2
+For portablity, the current C++ files are build against Numpy version 1.26 and are incompatible with a [Numpy 2.0](https://numpy.org/doc/stable/release/2.0.0-notes.html) installation. To build against Numpy 2.0, (1) change the Numpy version numbers in [pyproject.toml](pyproject.toml), (2) set the environment variable `export USE_CYTHON=1`, and (3) build the module as described above.
+
+
+## Contributing
+This repository is under development and contributions and feedback are welcome.
+
+### Contributors
+* Main developer: Roelof Rietbroek (r.rietbroek@utwente.nl)
+* ..
+
+
+
