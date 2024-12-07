@@ -1,0 +1,93 @@
+<div id="filter" class="menu">
+    <form id="filter-form" action="./requests" method="get">
+        <!-- <button type="submit">Filter</button> -->
+    </form>
+    <!-- <div class="menu-item ">
+        <div class="menu-item-outer">
+            <div class="menu-item-inner">
+                <label>View:
+                    <select name="view_style" form="filter-form" onchange="this.form.submit();">
+
+                        <option value="card" selected="">Cards</option>
+
+                        <option value="row">Rows</option>
+
+                    </select>
+                </label>
+            </div>
+        </div>
+    </div> -->
+    <div class="menu-item ">
+        <div class="menu-item-outer">
+            <div class="menu-item-inner">
+                <label for="category">Show:
+                    <select id="category" name="size" form="filter-form" onchange="this.form.submit();">
+
+                        {% for size_option in choices.page_size_options %}
+                        <option value="{{size_option}}" {% if pagination.page_size==size_option %}selected{% endif %}>
+                            {{size_option}}</option>
+                        {% endfor %}
+
+                    </select>
+                </label>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="menu-item">
+        <div class="menu-item-outer">
+            <div class="menu-item-inner">
+                <label>Order:
+                    <select name="order_by" form="filter-form" onchange="this.form.submit();">
+
+                        <option value="start_time" selected="">Recent</option>
+
+                        <option value="path">Path</option>
+
+                        <option value="num_sql_queries">Num. Queries</option>
+
+                        <option value="time_taken">Time</option>
+
+                        <option value="db_time">Time on queries</option>
+
+                    </select>
+                </label>
+            </div>
+        </div>
+    </div> -->
+    <div class="menu-item">
+        <div class="menu-item-outer">
+            <div class="menu-item-inner">
+                <label>Order Field:
+                    <select name="field_order_by" form="filter-form" onchange="this.form.submit();">
+
+                        {% for order_choice_name, order_choice_value in choices.field_order_by.items() %}
+                        <option value="{{order_choice_value}}" {% if field_order_by==order_choice_value %}selected{% endif %}>
+                            {{order_choice_name}}</option>
+                        {% endfor %}
+
+                    </select>
+                </label>
+                <label>Order:
+                    <select name="order_by" form="filter-form" onchange="this.form.submit();">
+
+                        {% for order_choice_name, order_choice_value in choices.order_by.items() %}
+                        <option value="{{order_choice_value}}" {% if order_by==order_choice_value %}selected{% endif %}>
+                            {{order_choice_name}}</option>
+                        {% endfor %}
+
+                    </select>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div id="filter-button" class="menu-item selectable-menu-item">
+        <div class="menu-item-outer">
+            <div class="menu-item-inner">
+                <div id="filter-item"><span id="num-filters"><sub>0</sub></span></div>
+            </div>
+        </div>
+    </div> -->
+
+
+</div>
