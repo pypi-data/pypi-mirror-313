@@ -1,0 +1,93 @@
+Metadata-Version: 2.1
+Name: csi_analysis
+Version: 0.4.0
+Summary: CSI-Cancer analysis pipeline templates.
+Author-email: Brian Zhang <8885230+brianjzhang@users.noreply.github.com>
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: csi_images
+Requires-Dist: pandas
+Requires-Dist: numpy
+Provides-Extra: images
+Requires-Dist: csi_images[imageio]; extra == "images"
+Requires-Dist: scikit-image; extra == "images"
+Requires-Dist: opencv-python; extra == "images"
+Provides-Extra: cpu-ml
+Requires-Dist: scikit-learn; extra == "cpu-ml"
+Provides-Extra: gpu-ml
+Requires-Dist: torch; extra == "gpu-ml"
+Requires-Dist: cuml; extra == "gpu-ml"
+Provides-Extra: cellpose
+Requires-Dist: cellpose; extra == "cellpose"
+Provides-Extra: dev
+Requires-Dist: pdoc; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: hatchling; extra == "dev"
+Requires-Dist: build; extra == "dev"
+Requires-Dist: twine; extra == "dev"
+Provides-Extra: all
+Requires-Dist: csi_analysis[images]; extra == "all"
+Requires-Dist: csi_analysis[cpu_ml]; extra == "all"
+Requires-Dist: csi_analysis[gpu_ml]; extra == "all"
+Requires-Dist: csi_analysis[cellpose]; extra == "all"
+Requires-Dist: csi_analysis[dev]; extra == "all"
+
+# csi_analysis: Analytical modules and pipelines for CSI-Cancer
+
+[![PyPI version](https://img.shields.io/pypi/v/csi-analysis)](https://pypi.org/project/csi-analysis/)
+
+This package contains classes and functions for running modular analysis pipelines on
+data types commonly used by CSI-Cancer. Currently, this only includes whole-slide
+images (immunoflourescent scans). In particular, this package is meant to provide
+abstract base classes that can be fit into an then run in a standard pipeline. This will
+enable more interchangeability and easier development of new modules, such as for image
+segmentation or feature extraction.
+
+While much of the functionality is specific to the CSI-Cancer organization, some of the
+functionality and structure may be beneficial for the broader community.
+Other packages in the CSI-Cancer organization may depend on this package.
+
+## Structure
+
+Currently, this package contains the main module: `csi_scan_pipeline.py`.
+This module contains the abstract base classes for the pipeline, as well as the
+`ScanPipeline` class, which is the main class for running the pipeline. This class
+contains the `run()` method, which handles parallelization, logging, and passing data
+between the module components. 4
+
+## Documentation
+
+For more detailed documentation, open up `docs/index.html` in your browser.
+
+To regenerate the documentation, ensure that you
+have [installed the package](#installation) and then run:
+
+```commandline
+make_docs
+```
+
+## Installation
+
+If you haven't yet, make sure
+to [set up an SSH key for GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
+
+1. Activate your `conda` (`conda activate yourenv`) or
+   `venv` (`source path/to/your/venv/bin/activate`) environment first.
+2. Clone `csi_images` and install:
+
+```commandline
+cd ~/path/to/your/repositories
+git clone git@github.com:CSI-Cancer/csi_analysis.git
+pip install ./csi_analysis
+```
+
+Alternatively, you can "editable" install the package, which will allow you to make
+changes to the package and have them reflected in your environment without reinstalling:
+
+```commandline
+pip install -e ./csi_analysis
+```
+
+This will add symbolic links to your `site-packages` directory instead of copying the
+package files over.

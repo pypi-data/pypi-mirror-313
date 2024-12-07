@@ -1,0 +1,54 @@
+[project]
+name = "csi_analysis"
+version = "0.4.0"
+description = "CSI-Cancer analysis pipeline templates."
+requires-python = ">=3.11"
+authors = [
+    { name = "Brian Zhang", email = "8885230+brianjzhang@users.noreply.github.com" }
+]
+readme = "README.md"
+
+dependencies = [
+    "csi_images",
+    "pandas",
+    "numpy",
+]
+
+
+[project.optional-dependencies]
+images = [
+    "csi_images[imageio]",
+    "scikit-image",
+    "opencv-python",
+]
+cpu_ml = [
+    "scikit-learn",
+]
+gpu_ml = [
+    "torch",
+    "cuml",
+]
+cellpose = [
+    "cellpose",
+]
+dev = [
+    "pdoc",
+    "pytest",
+    "hatchling",
+    "build",
+    "twine",
+]
+all = [
+    "csi_analysis[images]",
+    "csi_analysis[cpu_ml]",
+    "csi_analysis[gpu_ml]",
+    "csi_analysis[cellpose]",
+    "csi_analysis[dev]",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
