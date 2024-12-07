@@ -1,0 +1,46 @@
+Metadata-Version: 2.1
+Name: model-wrapper
+Version: 0.2.0
+Summary: Model wrapper for Pytorch, which can training, predict, evaluate, etc.
+Home-page: https://gitee.com/summry/model-wrapper
+Author: summy
+Author-email: xiazhongbiao@126.com
+License: UNKNOWN
+Keywords: Pytorch,Training,AI,Machine learning,Deep learning,torch
+Platform: UNKNOWN
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+
+Usage Sample
+''''''''''''
+
+.. code:: python
+
+        from model_wrapper import SplitClassModelWrapper
+
+        classes = ['class1', 'class2', 'class3'...]
+        X = [[...], [...],]
+        y = [0, 0, 1, 2, 1...]
+
+        model = ...
+        wrapper = SplitClassModelWrapper(model, classes=classes)
+        wrapper.train(X, y, val_size=0.2)
+
+        X_test = [[...], [...],]
+        y_test = [0, 1, 1, 2, 1...]
+        result = wrapper.evaluate(X_test, y_test)
+        # 0.953125
+
+        result = wrapper.predict(X_test)
+        # [0, 1]
+
+        result = wrapper.predict_classes(X_test)
+        # ['class1', 'class2']
+
+        result = wrapper.predict_proba(X_test)
+        # ([0, 1], array([0.99439645, 0.99190724], dtype=float32))
+
+        result = wrapper.predict_classes_proba(X_test)
+        # (['class1', 'class2'], array([0.99439645, 0.99190724], dtype=float32))
+
+
