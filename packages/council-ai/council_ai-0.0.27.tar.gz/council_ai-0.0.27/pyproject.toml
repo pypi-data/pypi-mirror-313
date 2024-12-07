@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
+
+[project]
+name = "council-ai"
+version = "0.0.27"
+description = "Council is an open-source framework for the rapid development and robust deployment of customized generative AI applications"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = []
+license = "Apache-2.0"
+
+dynamic = ["dependencies"]
+
+[project.urls]
+Source = "https://github.com/chain-ml/council"
+Documentation = "https://council.dev"
+
+[tool.hatch.build]
+include = [
+    "council/**/*.py",
+    "council/py.typed",
+    "council/**/*.yaml",
+]
+
+package = ['council_ai']
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.black]
+line-length = 120
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "DEBUG"
+log_cli_format="[%(asctime)s %(levelname)s %(threadName)s %(name)s:%(funcName)s:%(lineno)s] %(message)s"
+log_cli_date_format="%Y-%m-%d %H:%M:%S%z"
+
+[tool.ruff]
+exclude = ["__init__.py", "docs"]
+line-length = 120
+
+[tool.mypy]
+exclude = "(?x)(venv|docs)"
+mypy_path= "./stubs"
+explicit_package_bases = "true"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+py_version=39
+src_paths = ["src"]
+skip = ["__init__.py"]
+skip_glob = ["**/venv/*", "**/docs/*", "**/stubs/*", "**/tests/*"]
