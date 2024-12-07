@@ -1,0 +1,62 @@
+Metadata-Version: 2.1
+Name: py3-wget
+Version: 1.0.4
+Summary: A tool to download files. It supports progress bar, cksum, timeout, retry failed download.
+Author: Gabriele Berton
+Author-email: <berton.gabri@gmail.com>
+Keywords: python,download,progress bar
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: tqdm
+
+
+# py3_wget
+
+A tool like wget for python, supporting a (optional) progress bar, cksum, timeout, retry failed download.
+
+### Basic example
+![Demo](assets/e1.gif)
+
+### Recovering from download errors
+If errors occur, py3_wget re-runs the download
+
+### Overwrite
+Already existing files won't be downloaded by default
+![Demo](assets/e3.gif)
+
+### Cksum, MD5, SHA256
+py3_wget can automatically check the correctness of the download through cksum, MD5 or SHA256
+![Demo](assets/e4.gif)
+
+## Install
+Install with
+```
+pip install py3_wget
+```
+
+## Parameters
+py3_wget.download_file(
+    url,
+    output_path=None,
+    overwrite=False,
+    verbose=True,
+    cksum=None,
+    md5=None,
+    sha256=None,
+    max_tries=5,
+    block_size_bytes=8192,
+    retry_seconds=2,
+    timeout_seconds=60,
+)
+
+### TODO list
+- [ ] Optionally resume from partial download
+- [x] Optionally pass cksum to downloader to ensure file is correctly downloaded
+- [x] Optionally turn off tqdm (silent download)
+- [x] Optionally set timeout for download request
