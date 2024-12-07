@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Overview and Tutorial &#8212; gvar 13.1.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4848ba22" />
+    <link rel="stylesheet" type="text/css" href="_static/pyramid.css?v=310c80ee" />
+    <script src="_static/documentation_options.js?v=a9950f5c"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="gvar - Gaussian Random Variables" href="gvar.html" />
+    <link rel="prev" title="gvar Documentation" href="index.html" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head><body>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gvar.html" title="gvar - Gaussian Random Variables"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="gvar Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">gvar 13.1.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Overview and Tutorial</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="overview-and-tutorial">
+<h1>Overview and Tutorial<a class="headerlink" href="#overview-and-tutorial" title="Link to this heading">¶</a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
+<p>This module provides tools for representing, manipulating, and  simulating
+Gaussian random variables numerically.  It can deal with individual variables
+or arbitrarily large sets of variables, correlated or uncorrelated. It  also
+supports complicated (Python) functions of Gaussian variables,  automatically
+propagating uncertainties and correlations through the functions.</p>
+<p>A Gaussian variable <code class="docutils literal notranslate"><span class="pre">x</span></code> represents a Gaussian probability distribution, and
+is therefore completely characterized by its mean <code class="docutils literal notranslate"><span class="pre">x.mean</span></code> and standard
+deviation <code class="docutils literal notranslate"><span class="pre">x.sdev</span></code>. They are used to represent quantities whose values are
+uncertain: for example, the mass, 125.7±0.4 GeV, of the recently
+discovered Higgs boson from particle physics. The following code illustrates a
+(very) simple application of <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a>;  it calculates the Higgs boson’s
+energy when it carries momentum 50±0.15 GeV.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">gvar</span> <span class="k">as</span> <span class="nn">gv</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="mf">125.7</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>             <span class="c1"># Higgs boson mass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">)</span>               <span class="c1"># Higgs boson momentum</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">E</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span>  <span class="n">m</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>       <span class="c1"># Higgs boson energy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">E</span><span class="p">)</span>
+<span class="go">125.70(40) 135.28(38)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">E</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="s1">&#39;±&#39;</span><span class="p">,</span> <span class="n">E</span><span class="o">.</span><span class="n">sdev</span><span class="p">)</span>
+<span class="go">135.279303665 ± 0.375787639425</span>
+</pre></div>
+</div>
+<p>Here method <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a> creates objects <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">p</span></code> of type <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>
+that represent Gaussian random variables for the Higgs mass and momentum,
+respectively. The energy <code class="docutils literal notranslate"><span class="pre">E</span></code>
+computed from the mass and momentum must, like them, be uncertain and so is
+also an object of type <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> — with mean
+<code class="docutils literal notranslate"><span class="pre">E.mean=135.28</span></code> and standard deviation <code class="docutils literal notranslate"><span class="pre">E.sdev=0.38</span></code>. (Note
+that <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> uses the compact notation 135.28(38) to represent a Gaussian
+variable, where the number in  parentheses is the uncertainty in the
+corresponding rightmost digits of the quoted mean value.)</p>
+<p>A highly nontrivial feature of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s is that they <em>automatically</em> track
+statistical correlations between different Gaussian variables. In the
+Higgs boson code above, for example, the uncertainty in the energy
+is due mostly to the initial uncertainty in the boson’s mass. Consequently
+statistical fluctuations in the energy are strongly correlated with those
+in the mass, and largely cancel, for example, in the ratio:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">E</span> <span class="o">/</span> <span class="n">m</span><span class="p">)</span>
+<span class="go">1.07621(64)</span>
+</pre></div>
+</div>
+<p>The ratio is 4–5 times more accurate than the either
+the mass or energy separately.</p>
+<p>The correlation between <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">E</span></code> is obvious from their covariance and
+correlation matrices, both of which have large
+off-diagonal elements:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gv</span><span class="o">.</span><span class="n">evalcov</span><span class="p">([</span><span class="n">m</span><span class="p">,</span> <span class="n">E</span><span class="p">]))</span>           <span class="c1"># covariance matrix</span>
+<span class="go">[[ 0.16        0.14867019]</span>
+<span class="go">[ 0.14867019  0.14121635]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gv</span><span class="o">.</span><span class="n">evalcorr</span><span class="p">([</span><span class="n">m</span><span class="p">,</span> <span class="n">E</span><span class="p">]))</span>          <span class="c1"># correlation matrix</span>
+<span class="go">[[ 1.          0.98905722]</span>
+<span class="go"> [ 0.98905722  1.        ]]</span>
+</pre></div>
+</div>
+<p>The correlation matrix shows that there is a 98.9% statistical correlation
+between the mass and energy.</p>
+<p>A extreme example of correlation arises if we reconstruct the
+Higgs boson’s mass from its energy and momentum:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">((</span><span class="n">E</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">p</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">m</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">1 ± 1.4e-18</span>
+</pre></div>
+</div>
+<p>The numerator and denominator are completely correlated, indeed identical to
+machine precision, as they should be. This works only because <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> object
+<code class="docutils literal notranslate"><span class="pre">E</span></code> knows that its uncertainty comes from the uncertainties associated
+with variables <code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">p</span></code>.</p>
+<p>We can verify that the uncertainty in the Higgs boson’s energy comes mostly
+from its mass by creating an <em>error budget</em> for the Higgs energy (and for its
+energy to mass ratio):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;m&#39;</span><span class="p">:</span><span class="n">m</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="n">p</span><span class="p">}</span>             <span class="c1"># sources of uncertainty</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;E&#39;</span><span class="p">:</span><span class="n">E</span><span class="p">,</span> <span class="s1">&#39;E/m&#39;</span><span class="p">:</span><span class="n">E</span><span class="o">/</span><span class="n">m</span><span class="p">}</span>        <span class="c1"># derived quantities</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gv</span><span class="o">.</span><span class="n">fmt_errorbudget</span><span class="p">(</span><span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">))</span>
+<span class="go">Partial % Errors:</span>
+<span class="go">                   E       E/m</span>
+<span class="go">------------------------------</span>
+<span class="go">        p:      0.04      0.04</span>
+<span class="go">        m:      0.27      0.04</span>
+<span class="go">------------------------------</span>
+<span class="go">    total:      0.28      0.06</span>
+</pre></div>
+</div>
+<p>For each output (<code class="docutils literal notranslate"><span class="pre">E</span></code> and <code class="docutils literal notranslate"><span class="pre">E/m</span></code>), the error budget lists the contribution
+to the total uncertainty coming from  each of the inputs (<code class="docutils literal notranslate"><span class="pre">m</span></code> and <code class="docutils literal notranslate"><span class="pre">p</span></code>).
+The total uncertainty in the  energy is ±0.28%, and almost all of that
+comes from the mass — only ±0.04%  comes from the uncertainty in the
+momentum. The two sources of uncertainty contribute equally, however, to the
+ratio <code class="docutils literal notranslate"><span class="pre">E/m</span></code>, which has a total uncertainty of only 0.06%.</p>
+<p>This example is relatively simple. Module <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a>, however, can easily
+handle thousands of Gaussian random variables and all of their correlations.
+These can be combined in arbitrary arithmetic expressions and/or fed through
+complicated (pure) Python functions, while the <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s automatically
+track uncertainties and correlations for and between all of these variables.
+The code for tracking correlations is the most complex part of
+the module’s design, particularly since this is done automatically, behind the
+scenes.</p>
+<p>What follows is a tutorial showing how to create <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s and
+manipulate them to solve common problems in error propagation.
+Another way to learn about <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> is to look at the
+case studies later in the documentation. Each focuses on a single problem,
+and includes the full code and data, to allow for further experimentation.</p>
+<p><a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> was originally written for use by the <code class="xref py py-mod docutils literal notranslate"><span class="pre">lsqfit</span></code> module,
+which does multidimensional (Bayesian) least-squares fitting. It used to
+be distributed as part of <code class="xref py py-mod docutils literal notranslate"><span class="pre">lsqfit</span></code>, but is now distributed separately
+because it is used by other modules
+(<em>e.g.</em>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">vegas</span></code> for multidimensional
+Monte Carlo integration).</p>
+<p><em>About Printing:</em> The examples in this tutorial use the <code class="docutils literal notranslate"><span class="pre">print</span></code> function
+as it is used in Python 3. Drop the outermost parenthesis in each <code class="docutils literal notranslate"><span class="pre">print</span></code>
+statement if using Python 2; or add</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+</pre></div>
+</div>
+<p>at the start of your file.</p>
+</section>
+<section id="gaussian-random-variables">
+<h2>Gaussian Random Variables<a class="headerlink" href="#gaussian-random-variables" title="Link to this heading">¶</a></h2>
+<p>The Higgs boson mass (125.7±0.4 GeV) from the previous section is
+an example of a Gaussian random variable. As discussed above, such variables
+<code class="docutils literal notranslate"><span class="pre">x</span></code> represent Gaussian probability distributions, and therefore are
+completely characterized by their mean <code class="docutils literal notranslate"><span class="pre">x.mean</span></code>
+and standard deviation <code class="docutils literal notranslate"><span class="pre">x.sdev</span></code>.
+A mathematical function <code class="docutils literal notranslate"><span class="pre">f(x)</span></code> of a Gaussian variable is defined
+as the probability distribution of function values obtained by evaluating the
+function for random numbers drawn from the original distribution. The
+distribution of function values is itself approximately Gaussian provided the
+standard deviation <code class="docutils literal notranslate"><span class="pre">x.sdev</span></code> of the Gaussian variable  is sufficiently small
+(and the function is sufficiently smooth).
+Thus we can define a function <code class="docutils literal notranslate"><span class="pre">f</span></code> of a Gaussian  variable <code class="docutils literal notranslate"><span class="pre">x</span></code> to be a
+Gaussian variable itself, with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+<span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sdev</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">sdev</span> <span class="o">|</span><span class="sa">f</span><span class="s1">&#39;(x.mean)|,</span>
+</pre></div>
+</div>
+<p>which follows from linearizing the <code class="docutils literal notranslate"><span class="pre">x</span></code> dependence of <code class="docutils literal notranslate"><span class="pre">f(x)</span></code> about point
+<code class="docutils literal notranslate"><span class="pre">x.mean</span></code>. This formula, together with its multidimensional  generalization,
+lead to a full calculus for Gaussian random variables that assigns  Gaussian-
+variable values to arbitrary arithmetic expressions and functions  involving
+Gaussian variables. This calculus, which is built into <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a>, provides
+the rules for  standard error propagation — an important application
+of Gaussian random variables  and of the <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> module.</p>
+<p>A multidimensional collection <code class="docutils literal notranslate"><span class="pre">x[i]</span></code> of Gaussian variables is characterized
+by the means <code class="docutils literal notranslate"><span class="pre">x[i].mean</span></code> for each variable, together with a covariance
+matrix <code class="docutils literal notranslate"><span class="pre">cov[i,</span> <span class="pre">j]</span></code>. Diagonal elements of <code class="docutils literal notranslate"><span class="pre">cov</span></code> specify the standard
+deviations of different variables: <code class="docutils literal notranslate"><span class="pre">x[i].sdev</span> <span class="pre">=</span> <span class="pre">cov[i,</span> <span class="pre">i]**0.5</span></code>. Nonzero
+off-diagonal elements imply correlations (or  anti-correlations) between
+different variables:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cov</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&gt;</span>  <span class="o">-</span>  <span class="o">&lt;</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;</span> <span class="o">*</span> <span class="o">&lt;</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;y&gt;</span></code> denotes the expectation value or mean for a random variable
+<code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
+</section>
+<section id="creating-gaussian-variables">
+<span id="id1"></span><h2>Creating Gaussian Variables<a class="headerlink" href="#creating-gaussian-variables" title="Link to this heading">¶</a></h2>
+<p>Objects of type <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> are of two types: 1) primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s
+that are created from means and covariances using
+<a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a>; and 2) derived <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s that result
+from arithmetic expressions or functions involving <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s.
+The primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s are the primordial sources of all uncertainties
+in a <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> code. A single (primary) <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> is
+created from its mean <code class="docutils literal notranslate"><span class="pre">xmean</span></code> and standard deviation
+<code class="docutils literal notranslate"><span class="pre">xsdev</span></code> using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="n">xmean</span><span class="p">,</span> <span class="n">xsdev</span><span class="p">)</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>This function can also be used to convert strings like <code class="docutils literal notranslate"><span class="pre">&quot;-72.374(22)&quot;</span></code>
+or <code class="docutils literal notranslate"><span class="pre">&quot;511.2</span> <span class="pre">±</span> <span class="pre">0.3&quot;</span></code> into <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s: for example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">gvar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="mf">3.1415</span><span class="p">,</span> <span class="mf">0.0002</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="go">3.14150(20)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="s2">&quot;3.1415(2)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="go">3.14150(20)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="s2">&quot;3.1415 ± 0.0002&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="go">3.14150(20)</span>
+</pre></div>
+</div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">gvar.gvar(x)</span></code> is useful when you are unsure
+whether <code class="docutils literal notranslate"><span class="pre">x</span></code> is initially a <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> or a string representing a <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>. Note
+also that <code class="docutils literal notranslate"><span class="pre">'±'</span></code> in the above example
+could be replaced by <code class="docutils literal notranslate"><span class="pre">'+/-'</span></code> or <code class="docutils literal notranslate"><span class="pre">'+-'</span></code>.</p>
+<p><a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s are usually more interesting when used to describe multidimensional
+distributions, especially if there are correlations between different
+variables. Such distributions are represented by collections of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s in
+one of two standard formats: 1) <code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code>  arrays of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s (any
+shape); or, more flexibly, 2) Python dictionaries whose values are <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s or
+arrays of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s. Most functions in <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> that handle multiple
+<a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s work with either format, and if they return multidimensional results
+do so in the same format as the inputs (that is, arrays or dictionaries). Any
+dictionary is converted internally into a specialized (ordered) dictionary of
+type <a class="reference internal" href="gvar.html#gvar.BufferDict" title="gvar.BufferDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.BufferDict</span></code></a>, and dictionary-valued results are also <a class="reference internal" href="gvar.html#gvar.BufferDict" title="gvar.BufferDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.BufferDict</span></code></a>s.</p>
+<p>To create an array of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s with mean values specified by array
+<code class="docutils literal notranslate"><span class="pre">xmean</span></code> and covariance matrix <code class="docutils literal notranslate"><span class="pre">xcov</span></code>, use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="n">xmean</span><span class="p">,</span> <span class="n">xcov</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where array <code class="docutils literal notranslate"><span class="pre">x</span></code> has the same shape as <code class="docutils literal notranslate"><span class="pre">xmean</span></code> (and <code class="docutils literal notranslate"><span class="pre">xcov.shape</span> <span class="pre">=</span>
+<span class="pre">xmean.shape+xmean.shape</span></code>). Then each element <code class="docutils literal notranslate"><span class="pre">x[i]</span></code> of a one-dimensional
+array, for example, is a <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> where:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">xmean</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>         <span class="c1"># mean of x[i]</span>
+<span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">val</span>  <span class="o">=</span> <span class="n">xmean</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>         <span class="c1"># same as x[i].mean</span>
+<span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sdev</span> <span class="o">=</span> <span class="n">xcov</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="mf">0.5</span>  <span class="c1"># std deviation of x[i]</span>
+<span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">var</span>  <span class="o">=</span> <span class="n">xcov</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>       <span class="c1"># variance of x[i]</span>
+</pre></div>
+</div>
+<p>As an example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">10.</span><span class="p">],</span> <span class="p">[[</span><span class="mf">0.015625</span><span class="p">,</span> <span class="mf">0.24</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.24</span><span class="p">,</span> <span class="mf">4.</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x =&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;   y =&#39;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">x = 0.10(13)    y = 10.0(2.0)</span>
+</pre></div>
+</div>
+<p>makes <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s with standard deviations <code class="docutils literal notranslate"><span class="pre">sigma_x=0.125</span></code> and
+<code class="docutils literal notranslate"><span class="pre">sigma_y=2</span></code>, and a fairly strong statistical correlation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">evalcov</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]))</span>     <span class="c1"># covariance matrix</span>
+<span class="go">[[ 0.015625  0.24    ]</span>
+<span class="go"> [ 0.24      4.      ]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">evalcorr</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]))</span>    <span class="c1"># correlation matrix</span>
+<span class="go">[[ 1.    0.96]</span>
+<span class="go"> [ 0.96  1.  ]]</span>
+</pre></div>
+</div>
+<p>Here functions <a class="reference internal" href="gvar.html#gvar.evalcov" title="gvar.evalcov"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.evalcov()</span></code></a> and <a class="reference internal" href="gvar.html#gvar.evalcorr" title="gvar.evalcorr"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.evalcorr()</span></code></a> compute the
+covariance and correlation matrices, respectively, of the list of
+<a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s in their arguments.</p>
+<p><a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a> can also be used to convert strings or tuples stored in
+arrays or dictionaries into <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s: for example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">garray</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">([</span><span class="s1">&#39;2(1)&#39;</span><span class="p">,</span> <span class="s1">&#39;10±5&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">99</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">garray</span><span class="p">)</span>
+<span class="go">[2.0(1.0) 10.0(5.0) 99.0(3.0) 0 ± 2.0]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gdict</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="s1">&#39;2(1)&#39;</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;10±5&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mi">99</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gdict</span><span class="p">)</span>
+<span class="go">{&#39;a&#39;: 2.0(1.0),&#39;b&#39;: array([10.0(5.0), 99.0(3.0), 0 ± 2.0], dtype=object)}</span>
+</pre></div>
+</div>
+<p>If the covariance matrix in <code class="docutils literal notranslate"><span class="pre">gvar.gvar</span></code> is diagonal, it can be replaced
+by an array of standard deviations (square roots of diagonal entries in
+<code class="docutils literal notranslate"><span class="pre">cov</span></code>). The example above without correlations, therefore, would be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">10.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x =&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;   y =&#39;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">x = 0.10(12)    y = 10.0(2.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">evalcov</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]))</span>     <span class="c1"># covariance matrix</span>
+<span class="go">[[ 0.015625  0.      ]</span>
+<span class="go"> [ 0.        4.      ]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">evalcorr</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]))</span>    <span class="c1"># correlation matrix</span>
+<span class="go">[[ 1.  0.]</span>
+<span class="go"> [ 0.  1.]]</span>
+</pre></div>
+</div>
+</section>
+<section id="gvar-arithmetic-and-functions">
+<span id="id2"></span><h2><a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> Arithmetic and Functions<a class="headerlink" href="#gvar-arithmetic-and-functions" title="Link to this heading">¶</a></h2>
+<p>The <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s discussed in the previous section are all <em>primary</em> <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s
+since they were created by specifying their means and covariances
+explicitly, using <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a>. What makes <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s particularly
+useful is that they can be used in
+arithmetic expressions (and numeric pure-Python functions), just like
+Python floats. Such expressions result in new, <em>derived</em> <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s
+whose means, standard deviations, and correlations
+are determined from the covariance matrix of the
+primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s. The
+automatic propagation of correlations
+through arbitrarily complicated arithmetic is an especially useful
+feature of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s.</p>
+<p>As an example, again define</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">10.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>and set</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;f =&#39;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+<span class="go">f = 10.1(2.0)</span>
+</pre></div>
+</div>
+<p>Then <code class="docutils literal notranslate"><span class="pre">f</span></code> is a (derived) <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> whose variance <code class="docutils literal notranslate"><span class="pre">f.var</span></code> equals</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">/</span><span class="n">dx</span> <span class="n">cov</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="n">df</span><span class="o">/</span><span class="n">dx</span> <span class="o">+</span> <span class="mi">2</span> <span class="n">df</span><span class="o">/</span><span class="n">dx</span> <span class="n">cov</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="n">df</span><span class="o">/</span><span class="n">dy</span> <span class="o">+</span> <span class="o">...</span> <span class="o">=</span> <span class="mf">2.0039</span><span class="o">**</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">cov</span></code> is the original covariance matrix used to define <code class="docutils literal notranslate"><span class="pre">x</span></code> and
+<code class="docutils literal notranslate"><span class="pre">y</span></code> (in <code class="docutils literal notranslate"><span class="pre">gvar.gvar</span></code>). Note that while <code class="docutils literal notranslate"><span class="pre">f</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> separately have
+20% uncertainties in this example, the ratio <code class="docutils literal notranslate"><span class="pre">f/y</span></code> has much smaller
+errors:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span> <span class="o">/</span> <span class="n">y</span><span class="p">)</span>
+<span class="go">1.010(13)</span>
+</pre></div>
+</div>
+<p>This happens, of course, because the errors in <code class="docutils literal notranslate"><span class="pre">f</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are highly
+correlated — the error in <code class="docutils literal notranslate"><span class="pre">f</span></code> comes mostly from <code class="docutils literal notranslate"><span class="pre">y</span></code>. <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s
+automatically track correlations even through complicated arithmetic
+expressions and functions: for example, the following
+more complicated ratio has a still
+smaller error, because of stronger correlations between numerator and
+denominator:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span>
+<span class="go">1.4072(87)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">evalcorr</span><span class="p">([</span><span class="n">f</span><span class="p">,</span> <span class="n">y</span><span class="p">]))</span>
+<span class="go">[[ 1.          0.99805258]</span>
+<span class="go"> [ 0.99805258  1.        ]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">evalcorr</span><span class="p">([</span><span class="n">gvar</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">f</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">f</span><span class="p">]))</span>
+<span class="go">[[ 1.         0.9995188]</span>
+<span class="go"> [ 0.9995188  1.       ]]</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> module defines versions of the standard Python mathematical
+functions that work with <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> arguments. These include:
+<code class="docutils literal notranslate"><span class="pre">exp,</span> <span class="pre">log,</span> <span class="pre">sqrt,</span> <span class="pre">sin,</span> <span class="pre">cos,</span> <span class="pre">tan,</span> <span class="pre">arcsin,</span> <span class="pre">arccos,</span> <span class="pre">arctan,</span> <span class="pre">arctan2,</span> <span class="pre">sinh,</span> <span class="pre">cosh,</span>
+<span class="pre">tanh,</span> <span class="pre">arcsinh,</span> <span class="pre">arccosh,</span> <span class="pre">arctanh,</span> <span class="pre">erf,</span> <span class="pre">fabs,</span> <span class="pre">abs</span></code>. Numeric functions defined
+entirely in Python (<em>i.e.</em>, pure-Python functions)
+will likely also work with <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s.</p>
+<p>Numeric functions implemented by modules using low-level languages like C
+will <em>not</em> work with <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s. Such functions must
+be replaced by equivalent code written
+directly in Python. In some cases it is possible to construct
+a <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>-capable function from low-level code for the function and its
+derivative. For example, the following code defines a new version of the
+standard Python error function that accepts either floats or <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s
+as its argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">gvar</span>
+
+<span class="k">def</span> <span class="nf">erf</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gvar</span><span class="o">.</span><span class="n">GVar</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+        <span class="n">dfdx</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">dfdx</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">erf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here function <a class="reference internal" href="gvar.html#gvar.gvar_function" title="gvar.gvar_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar_function()</span></code></a> creates the <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> for a function with
+mean value <code class="docutils literal notranslate"><span class="pre">f</span></code> and derivative <code class="docutils literal notranslate"><span class="pre">dfdx</span></code> at point <code class="docutils literal notranslate"><span class="pre">x</span></code>. A more complete
+version of <code class="docutils literal notranslate"><span class="pre">erf</span></code> is included in <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a>. Note that <a class="reference internal" href="gvar.html#gvar.gvar_function" title="gvar.gvar_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar_function()</span></code></a>
+also works for functions of multiple variables. See
+<a class="reference internal" href="case-integral.html#case-study-creating-an-integrator"><span class="std std-ref">Case Study: Creating an Integrator</span></a> for a less trivial application.</p>
+<p>Some sample numerical analysis codes, adapted for use with <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s, are
+described in <a class="reference internal" href="gvar_other.html#numerical-analysis-modules-in-gvar"><span class="std std-ref">Numerical Analysis Modules in gvar</span></a>.</p>
+<p>Arithmetic operators <code class="docutils literal notranslate"><span class="pre">+</span> <span class="pre">-</span> <span class="pre">*</span> <span class="pre">/</span> <span class="pre">**</span> <span class="pre">==</span> <span class="pre">!=</span> <span class="pre">&lt;&gt;</span> <span class="pre">+=</span> <span class="pre">-=</span> <span class="pre">*=</span> <span class="pre">/=</span></code> are all defined
+for <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s. Comparison operators are also supported: <code class="docutils literal notranslate"><span class="pre">==</span> <span class="pre">!=</span> <span class="pre">&gt;</span> <span class="pre">&gt;=</span> <span class="pre">&lt;</span> <span class="pre">&lt;=</span></code>.
+They are applied to the mean values of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s: for example,
+<code class="docutils literal notranslate"><span class="pre">gvar.gvar(1,1)</span> <span class="pre">==</span> <span class="pre">gvar.var(1,2)</span></code> is true, as is <code class="docutils literal notranslate"><span class="pre">gvar.gvar(1,1)</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>.
+Logically <code class="docutils literal notranslate"><span class="pre">x&gt;y</span></code> for <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s should evaluate to a boolean-valued random
+variable, but such variables are beyond the scope of this module.
+Comparison operators that act only on the mean values make it easier to implement
+pure-Python functions that work with either <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s or <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>s
+as arguments.</p>
+<p><em>Implementation Notes:</em> Each <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> keeps track of three
+pieces of information: 1) its mean value; 2) its derivatives with respect to
+the primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s (created by <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a>);
+and 3) the location of the covariance matrix for the primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s.
+The standard deviations and covariances for all <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s originate with
+the primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s: any <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> <code class="docutils literal notranslate"><span class="pre">z</span></code> satisfies</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">.</span><span class="n">mean</span> <span class="o">+</span> <span class="n">sum_p</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">p</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span> <span class="o">*</span> <span class="n">dz</span><span class="o">/</span><span class="n">dp</span>
+</pre></div>
+</div>
+<p>where the sum is over all primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s <code class="docutils literal notranslate"><span class="pre">p</span></code>.
+<a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> uses this expression
+to calculate covariances from the derivatives,
+and the covariance matrix of the primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s. The derivatives for
+derived <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s are computed automatically, using <em>automatic
+differentiation</em>.</p>
+<p>The derivative of a <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> <code class="docutils literal notranslate"><span class="pre">f</span></code> with
+respect to a primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> <code class="docutils literal notranslate"><span class="pre">x</span></code> is obtained from <code class="docutils literal notranslate"><span class="pre">f.deriv(x)</span></code>. A list
+of derivatives with respect to all primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s is given by <code class="docutils literal notranslate"><span class="pre">f.der</span></code>,
+where the order of derivatives is the same as the order in which the primary
+<a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s were created.</p>
+<p>A <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> can be constructed at a
+very low level by supplying all the three
+essential pieces of information — for example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="n">fmean</span><span class="p">,</span> <span class="n">fder</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">fmean</span></code> is the mean, <code class="docutils literal notranslate"><span class="pre">fder</span></code> is an array where <code class="docutils literal notranslate"><span class="pre">fder[i]</span></code> is the
+derivative of <code class="docutils literal notranslate"><span class="pre">f</span></code> with respect to the <code class="docutils literal notranslate"><span class="pre">i</span></code>-th primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>
+(numbered in the order in which they were created using <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a>),
+and <code class="docutils literal notranslate"><span class="pre">cov</span></code> is the covariance matrix for the primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s (easily
+obtained from <code class="docutils literal notranslate"><span class="pre">gvar.gvar.cov</span></code>).</p>
+</section>
+<section id="error-budgets-from-gvars">
+<h2>Error Budgets from <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s<a class="headerlink" href="#error-budgets-from-gvars" title="Link to this heading">¶</a></h2>
+<p>It is sometimes useful to know how much of the uncertainty in a derived quantity
+is due to a particular input uncertainty. Continuing the example above, for
+example, we might want to know how much of <code class="docutils literal notranslate"><span class="pre">f</span></code>s standard deviation
+is due to the standard deviation of <code class="docutils literal notranslate"><span class="pre">x</span></code> and how much comes from <code class="docutils literal notranslate"><span class="pre">y</span></code>.
+This is easily computed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">10.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.125</span><span class="p">,</span> <span class="mf">2.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">partialsdev</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>        <span class="c1"># uncertainty in f due to x</span>
+<span class="go">0.125</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">partialsdev</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>        <span class="c1"># uncertainty in f due to y</span>
+<span class="go">2.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">partialsdev</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>     <span class="c1"># uncertainty in f due to x and y</span>
+<span class="go">2.00390244274</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">sdev</span><span class="p">)</span>                  <span class="c1"># should be the same</span>
+<span class="go">2.00390244274</span>
+</pre></div>
+</div>
+<p>This shows, for example, that most (2.0) of the uncertainty in <code class="docutils literal notranslate"><span class="pre">f</span></code> (2.0039)
+is from <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
+<p><a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> provides a useful tool for compiling an “error budget” for
+derived <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s relative to the primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s from which they
+were constructed: continuing the example above,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;f&#39;</span><span class="p">:</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;f/y&#39;</span><span class="p">:</span><span class="n">f</span><span class="o">/</span><span class="n">y</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">y</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">fmt_values</span><span class="p">(</span><span class="n">outputs</span><span class="p">))</span>
+<span class="go">Values:</span>
+<span class="go">                f/y: 1.010(13)</span>
+<span class="go">                  f: 10.1(2.0)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">fmt_errorbudget</span><span class="p">(</span><span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span> <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">))</span>
+<span class="go">Partial % Errors:</span>
+<span class="go">                 f/y         f</span>
+<span class="go">------------------------------</span>
+<span class="go">        y:      0.20     19.80</span>
+<span class="go">        x:      1.24      1.24</span>
+<span class="go">------------------------------</span>
+<span class="go">    total:      1.25     19.84</span>
+</pre></div>
+</div>
+<p>This shows <code class="docutils literal notranslate"><span class="pre">y</span></code> is responsible for 19.80% of the 19.84% uncertainty in <code class="docutils literal notranslate"><span class="pre">f</span></code>,
+but only 0.2% of the 1.25% uncertainty in <code class="docutils literal notranslate"><span class="pre">f/y</span></code>. The total uncertainty in each case
+is obtained by adding the <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> contributions in quadrature.</p>
+</section>
+<section id="formatting-gvars-for-printing-display">
+<span id="id3"></span><h2>Formatting <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s for Printing/Display<a class="headerlink" href="#formatting-gvars-for-printing-display" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s can be formatted analogously to floats:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span>  <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="mf">3.14159</span><span class="p">,</span> <span class="mf">0.0236</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.2g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.3f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.4e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.^20.2g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">3.1(0) 3.142(24) 3.1416(236)e+00 .......3.1(0).......</span>
+</pre></div>
+</div>
+<p>There are also two formats, <code class="docutils literal notranslate"><span class="pre">'p'</span></code> and <code class="docutils literal notranslate"><span class="pre">'P'</span></code>, that are specific to <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s.
+For these the precision field in the format specifies the number of digits
+displayed in the standard deviation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.2p</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">:</span><span class="s1">.3P</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">3.142(24) 3.1416 ± 0.0236</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">'P'</span></code> format always uses the <code class="docutils literal notranslate"><span class="pre">±</span></code> representation of a <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">'#p'</span></code> format is a variation on the <code class="docutils literal notranslate"><span class="pre">'p'</span></code> format. When the
+standard deviation is larger in magnitude than the mean, the <code class="docutils literal notranslate"><span class="pre">'#p'</span></code>
+format adjusts the precision so that at least one non-zero digit of the
+mean is included in the formatted string:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="mf">0.023</span><span class="p">,</span> <span class="mf">10.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s1">.2p</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s1">#.2p</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">0(10) 0.02(10.20)</span>
+</pre></div>
+</div>
+<p>The default format specification is <cite>#.2p</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+<span class="go">0.02(10.20) 0.02(10.20)</span>
+</pre></div>
+</div>
+<p>Multiple <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s in an array, or in a dictionary whose values are
+<a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s or arrays of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s can be formatted using
+<a class="reference internal" href="gvar.html#gvar.fmt" title="gvar.fmt"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.fmt()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">fmt</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">y</span><span class="p">),</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;{:.3P}&#39;</span><span class="p">))</span>
+<span class="go">{&#39;a&#39;: &#39;3.1416 ± 0.0236&#39;, &#39;b&#39;: &#39;0.023 ± 10.2&#39;}</span>
+</pre></div>
+</div>
+<p>Each <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> is replaced by its formatted string.</p>
+<p>The default format can be changed using the <a class="reference internal" href="gvar.html#gvar.GVar.set" title="gvar.GVar.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gvar.GVar.set()</span></code></a> method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">old_settings</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">GVar</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">default_format</span><span class="o">=</span><span class="s1">&#39;{:.2P}&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+<span class="go">0.023 ± 10 0.023 ± 10</span>
+</pre></div>
+</div>
+<p>The original default is restored here by <code class="docutils literal notranslate"><span class="pre">gvar.GVar.set(**old_settings)</span></code>.</p>
+<p><a class="reference internal" href="gvar.html#gvar.GVar.set" title="gvar.GVar.set"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gvar.GVar.set()</span></code></a> can also be used to replace the formatter
+with a different function. The following example switches to a format
+that would work in a LaTeX document:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">new_formatter</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="sa">r</span><span class="s1">&#39;${g.mean:</span><span class="si">{spec}</span><span class="s1">}\,\pm\,{g.sdev:</span><span class="si">{spec}</span><span class="s1">}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">g</span><span class="o">=</span><span class="n">g</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">old_settings</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">GVar</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="n">new_formatter</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="go">$0.023\,\pm\,10.2$</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">y</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="go">$0\,\pm\,10$</span>
+</pre></div>
+</div>
+<p>Again <code class="docutils literal notranslate"><span class="pre">gvar.GVar.set(**old_settings)</span></code> restores the original
+formatter.</p>
+</section>
+<section id="storing-gvars-for-later-use">
+<span id="id4"></span><h2>Storing <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s for Later Use<a class="headerlink" href="#storing-gvars-for-later-use" title="Link to this heading">¶</a></h2>
+<p>Storing <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s in a file for later use is complicated by the need to
+capture the covariances between different <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s as well as their
+means. The easiest way to save an array or dictionary or other
+object <code class="docutils literal notranslate"><span class="pre">g</span></code>  that contains
+<a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s is to use <a class="reference internal" href="gvar.html#gvar.dump" title="gvar.dump"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.dump()</span></code></a>: for example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gvar</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">&#39;gfile.pkl&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>saves the data from <code class="docutils literal notranslate"><span class="pre">g</span></code> in a Python <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code>
+file named <code class="docutils literal notranslate"><span class="pre">'gfile.pkl'</span></code>. To reassemble the the data
+from <code class="docutils literal notranslate"><span class="pre">g</span></code> we use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;gfile.pkl&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Functions <a class="reference internal" href="gvar.html#gvar.dump" title="gvar.dump"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.dump()</span></code></a> and <a class="reference internal" href="gvar.html#gvar.load" title="gvar.load"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.load()</span></code></a> are similar to the
+corresponding functions in Python’s <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code> module but they
+preserve information about the correlations between
+different <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s in <code class="docutils literal notranslate"><span class="pre">g</span></code>. Correlations with <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s that are not
+in <code class="docutils literal notranslate"><span class="pre">g</span></code> are lost, so it is important to include all <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s of
+interest in <code class="docutils literal notranslate"><span class="pre">g</span></code> before saving them.</p>
+<p><a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s can also be pickled easily if they are stored in a
+<a class="reference internal" href="gvar.html#gvar.BufferDict" title="gvar.BufferDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.BufferDict</span></code></a> since this data type has explicit support for pickling
+that preserves correlations.
+So if <code class="docutils literal notranslate"><span class="pre">g</span></code> is a
+<a class="reference internal" href="gvar.html#gvar.BufferDict" title="gvar.BufferDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.BufferDict</span></code></a> containing <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s (and/or arrays of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s),</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gfile.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>saves the contents of <code class="docutils literal notranslate"><span class="pre">g</span></code> to a file named <code class="docutils literal notranslate"><span class="pre">gfile.pkl</span></code>, and
+the <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s are retrieved using</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;gfile.pkl&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Of course, <code class="docutils literal notranslate"><span class="pre">gvar.dump(g,</span> <span class="pre">'gfile.pkl')</span></code> and <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">=</span> <span class="pre">gvar.load('gfile.pkl')</span></code>
+are simpler and achieve the same goal.</p>
+<p>Using <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code> to pickle an object containing <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s usually generates
+a warning about lost correlations. This can be ignored if correlations
+are unimportant. If <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code> must be used and correlations matter, <code class="docutils literal notranslate"><span class="pre">gvar.dumps/loads</span></code>
+can sometimes be used to make this possible. Consider, for example, a class <code class="docutils literal notranslate"><span class="pre">A</span></code> that stores
+<a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>. We might be able to modify it so that <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code> uses the
+<a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> routines: for example, the code</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+            <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">A</span><span class="p">,</span> <span class="p">(</span><span class="n">gv</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>has <code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code> convert the class’s dictionary into a byte stream
+using <code class="docutils literal notranslate"><span class="pre">gv.dumps(self.__dict__)</span></code> when pickling. This is reconstituted into
+a dictionary in <code class="docutils literal notranslate"><span class="pre">A.__init__</span></code>, using <code class="docutils literal notranslate"><span class="pre">gv.loads(a)</span></code>, upon un-pickling.</p>
+</section>
+<section id="sampling-distributions-non-gaussian-expectation-values">
+<span id="gvar-random-number-generators"></span><h2>Sampling Distributions; Non-Gaussian Expectation Values<a class="headerlink" href="#sampling-distributions-non-gaussian-expectation-values" title="Link to this heading">¶</a></h2>
+<p>By default functions of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s are also <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s, but there are cases where
+such functions cannot be represented accurately by Gaussian distributions. The
+product of 0.1(4) and 0.2(5), for example, is not very Gaussian because the
+standard deviations are large compared to the scale over which the product
+changes appreciably. In such cases one may want to use the true distribution
+of the function, instead of its Gaussian approximation, in an analysis.</p>
+<p>One approach to this problem is to use simulation. The following code analyzes
+the distribution of <code class="docutils literal notranslate"><span class="pre">f(p)</span> <span class="pre">=</span> <span class="pre">sin(p[0]</span> <span class="pre">*</span> <span class="pre">p[1])</span></code> where <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">=</span> <span class="pre">[0.1(4),</span> <span class="pre">0.2(5)]</span></code>. To do
+this:</p>
+<ol class="arabic simple">
+<li><p>it generates 100,000 samples <code class="docutils literal notranslate"><span class="pre">[ps[0,i],</span> <span class="pre">ps[1,i]]</span></code>, with <code class="docutils literal notranslate"><span class="pre">i=0...99,999</span></code>, drawn from the Gaussian distribution specified by <code class="docutils literal notranslate"><span class="pre">p</span></code>;</p></li>
+<li><p>it calculates <code class="docutils literal notranslate"><span class="pre">f(ps[:,i])</span> <span class="pre">=</span> <span class="pre">sin(ps[0,i]</span> <span class="pre">*</span> <span class="pre">ps[1,i])</span></code> for each sample <code class="docutils literal notranslate"><span class="pre">i</span></code>, thereby obtaining 100,000 samples drawn from the real distribution for <code class="docutils literal notranslate"><span class="pre">f(p)</span></code>;</p></li>
+<li><p>it estimates the mean and standard deviation of this distribution from the samples.</p></li>
+</ol>
+<p>The sampling in step #1 is done using <a class="reference internal" href="gvar.html#gvar.sample" title="gvar.sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.sample()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gvar</span> <span class="k">as</span> <span class="nn">gv</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">gvar</span><span class="p">([</span><span class="s1">&#39;0.1(4)&#39;</span><span class="p">,</span> <span class="s1">&#39;0.2(5)&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Gaussian approx.: </span><span class="si">{</span><span class="n">f</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="c1"># sample p, f(p) distributions</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">100_000</span>
+<span class="n">ps</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">nbatch</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>                             <span class="c1"># step #1</span>
+<span class="n">f_ps</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">ps</span><span class="p">)</span>                                            <span class="c1"># step #2</span>
+
+<span class="c1"># Gaussian approximation from simulation samples</span>
+<span class="n">f_p_sim</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">f_ps</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">f_ps</span><span class="p">))</span>          <span class="c1"># step #3</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Gaussian approx. to simulation: </span><span class="si">{</span><span class="n">f_p_sim</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Running this code generates the following output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Gaussian</span> <span class="n">approx</span><span class="o">.</span><span class="p">:</span> <span class="mf">0.020</span><span class="p">(</span><span class="mi">94</span><span class="p">)</span>
+<span class="n">Gaussian</span> <span class="n">approx</span><span class="o">.</span> <span class="n">to</span> <span class="n">simulation</span><span class="p">:</span> <span class="mf">0.02</span><span class="p">(</span><span class="mi">21</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Evaluating <code class="docutils literal notranslate"><span class="pre">f(p)</span></code> directly gives 0.020(94); estimating the mean and standard deviation
+from the samples gives 0.02(21). The means agree but the simulation gives a standard deviation
+that is more than twice as large, suggesting fat tails on the distribution.</p>
+<p>Note that the line calculating <code class="docutils literal notranslate"><span class="pre">f_p_sim</span></code> can be simplified
+using <a class="reference internal" href="gvar.html#gvar.gvar_from_sample" title="gvar.gvar_from_sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar_from_sample()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f_p_sim</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">gvar_from_sample</span><span class="p">(</span><span class="n">f_ps</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can look more closely at the <code class="docutils literal notranslate"><span class="pre">f(ps)</span></code> distribution by examining moments and a histogram
+of the distribution, adding the following to the code above:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">moments</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">f_ps</span><span class="p">,</span> <span class="n">f_ps</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">f_ps</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="n">f_ps</span><span class="o">**</span><span class="mi">4</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Moments: </span><span class="si">{</span><span class="n">moments</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">counts</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">f_ps</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">PDFStatistics</span><span class="p">(</span>
+    <span class="n">moments</span><span class="o">=</span><span class="n">moments</span><span class="p">,</span>
+    <span class="n">histogram</span><span class="o">=</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span>
+    <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Simulation statistics:&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This produces the following output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Moments</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01909415</span> <span class="mf">0.04337961</span> <span class="mf">0.00513808</span> <span class="mf">0.0115701</span> <span class="p">]</span>
+
+<span class="n">Simulation</span> <span class="n">statistics</span><span class="p">:</span>
+<span class="n">mean</span> <span class="o">=</span> <span class="mf">0.01909414973482394</span>   <span class="n">sdev</span> <span class="o">=</span> <span class="mf">0.2074</span>   <span class="n">skew</span> <span class="o">=</span> <span class="mf">0.29896</span>   <span class="n">ex_kurt</span> <span class="o">=</span> <span class="mf">3.0921</span>
+<span class="n">split</span><span class="o">-</span><span class="n">normal</span><span class="p">:</span> <span class="mf">0.00018</span><span class="p">(</span><span class="mi">79</span><span class="p">)</span> <span class="o">+/-</span> <span class="mf">0.2213</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span><span class="o">/</span><span class="mf">0.1930</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+      <span class="n">median</span><span class="p">:</span> <span class="mf">0.00702</span><span class="p">(</span><span class="mi">33</span><span class="p">)</span> <span class="o">+/-</span> <span class="mf">0.1675</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">/</span><span class="mf">0.13656</span><span class="p">(</span><span class="mi">95</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The moments indicate that the distribution
+is slightly skewed, but has a large
+excess kurtosis of 3.1, which is indicative of fat tails.
+The histogram provides an
+estimate of the median, which is slightly offset from the mean, as well as estimates for
+the interval on either side
+of the median (<code class="docutils literal notranslate"><span class="pre">(median-minus,median)</span></code> or <code class="docutils literal notranslate"><span class="pre">(median,median+plus)</span></code>)
+that contains 34% of the probability. These intervals are again broader than what is
+suggested by simply evaluating <code class="docutils literal notranslate"><span class="pre">f(p)</span></code>. The histogram data are also fit to a continuous
+2-sided Gaussian (split-normal).</p>
+<p>Finally we can look at the histogram for the distribution of <code class="docutils literal notranslate"><span class="pre">f(p)</span></code> inferred
+from the samples, again adding to the code above:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot histogram of f(p) distribution</span>
+<span class="n">plt</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">plot_histogram</span><span class="p">(</span><span class="n">fits</span><span class="o">=</span><span class="p">[])</span>
+
+<span class="c1"># compare with 2 Gaussian distributions</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">fmt</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">([</span><span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="s1">&#39;b:&#39;</span><span class="p">])</span>
+<span class="n">label</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">([</span><span class="s1">&#39;Gauss.&#39;</span><span class="p">,</span> <span class="s1">&#39;Gauss. Sim.&#39;</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">f_p_sim</span><span class="p">]:</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">f</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">f</span><span class="o">.</span><span class="n">var</span><span class="p">)</span> <span class="o">/</span> <span class="n">f</span><span class="o">.</span><span class="n">sdev</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">fmt</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;sin(p[0]*p[1])&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This generates the following figure:</p>
+<a class="reference internal image-reference" href="_images/histogram.png"><img alt="_images/histogram.png" src="_images/histogram.png" style="width: 75%;" /></a>
+<p>It shows the actual probability associated with each <code class="docutils literal notranslate"><span class="pre">f(p)</span></code> bin (gray bins),
+together with the
+shape (red dashed line) expected from the Gaussian approximation (0.020(94)).
+It also shows the Gaussian distribution corresponding to the correct mean
+and standard deviation (0.02(21)) of the distribution (blue dotted line).
+Neither Gaussian in this plot is quite right: the first is more accurate close
+to the maximum, while the second does better further out.</p>
+<p>This example is relatively simple since the underlying Gaussian
+distribution is only two dimensional and uncorrelated. <a class="reference internal" href="gvar.html#gvar.sample" title="gvar.sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.sample()</span></code></a>
+works well in higher dimensions and with correlated <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s.
+<a class="reference internal" href="gvar.html#gvar.sample" title="gvar.sample"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.sample()</span></code></a> is implemented using <a class="reference internal" href="gvar.html#gvar.raniter" title="gvar.raniter"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.raniter()</span></code></a>, which
+can be used to generate a series of sample batches. Both of these
+functions work for distributions defined by dictionaries, as well
+as arrays (or individual <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s).</p>
+<p>Note that <a class="reference internal" href="gvar.html#module-gvar" title="gvar: Correlated Gaussian random variables."><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code></a> provides limited support for non-Gaussian probability distributions
+through the <a class="reference internal" href="gvar.html#gvar.BufferDict" title="gvar.BufferDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.BufferDict</span></code></a> dictionary. This is illustrated by the following code fragment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">BufferDict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;log(x)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="s1">&#39;1(1)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;f(y)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">BufferDict</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+<span class="go">{&#39;log(x)&#39;: 1.0(1.0), &#39;f(y)&#39;: 0 ± 1.0}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
+<span class="go">2.7(2.7) 2.50(40)</span>
+</pre></div>
+</div>
+<p>Even though <code class="docutils literal notranslate"><span class="pre">'x'</span></code> and <code class="docutils literal notranslate"><span class="pre">'y'</span></code> are not keys, <code class="docutils literal notranslate"><span class="pre">b['x']</span></code> and <code class="docutils literal notranslate"><span class="pre">b['y']</span></code> are defined. <code class="docutils literal notranslate"><span class="pre">b['x']</span></code>
+is set equal to <code class="docutils literal notranslate"><span class="pre">exp(b['log(x)'])</span></code>. In a simulation this means that values for <code class="docutils literal notranslate"><span class="pre">b['log(x)']</span></code>
+will be drawn from a Gaussian distribution 1±1, while the values <code class="docutils literal notranslate"><span class="pre">b['x']</span></code> will be drawn
+from the corresponding log-normal distribution. Similarly the values for <code class="docutils literal notranslate"><span class="pre">b['f(y)']</span></code> are
+drawn from the Gaussian 0±1, while the values of <code class="docutils literal notranslate"><span class="pre">b['y']</span></code> are distributed uniformly on
+the interval between 2 and 3. Method <a class="reference internal" href="gvar.html#gvar.BufferDict.uniform" title="gvar.BufferDict.uniform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">gvar.BufferDict.uniform()</span></code></a> defines the
+function <code class="docutils literal notranslate"><span class="pre">f(y)</span></code> that connects the Gaussian and uniform distributions. The plot produced
+by the code</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bs</span> <span class="o">=</span> <span class="n">gv</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">nbatch</span><span class="o">=</span><span class="mi">100_000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">bs</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">stairs</span><span class="p">(</span><span class="n">counts</span> <span class="o">/</span> <span class="mi">100_000</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>shows small statistical fluctuations around a uniform probability distribution distribution:</p>
+<a class="reference internal image-reference" href="_images/unif-histogram.png"><img alt="_images/unif-histogram.png" src="_images/unif-histogram.png" style="width: 75%;" /></a>
+<p>Note finally that <em>bootstrap</em> copies of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s are easily created. A
+bootstrap copy of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">±</span> <span class="pre">dx</span></code> is another <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> with the same width but
+where the mean value is replaced by a random number drawn from the original
+distribution. Bootstrap copies of a data set, described by a collection of
+<a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s, can be used as new (fake) data sets having the same statistical
+errors and correlations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">([</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span> <span class="p">[[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="go">[1.10(10) 0.80(10)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">evalcov</span><span class="p">(</span><span class="n">g</span><span class="p">))</span>                  <span class="c1"># print covariance matrix</span>
+<span class="go">[[ 0.01   0.005]</span>
+<span class="go"> [ 0.005  0.01 ]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gbs_iter</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">bootstrap_iter</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gbs</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gbs_iter</span><span class="p">)</span>                    <span class="c1"># bootstrap copy of f</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gbs</span><span class="p">)</span>
+<span class="go">[1.14(10) 0.90(10)]                         # different means</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">gvar</span><span class="o">.</span><span class="n">evalcov</span><span class="p">(</span><span class="n">gbs</span><span class="p">))</span>
+<span class="go">[[ 0.01   0.005]                            # same covariance matrix</span>
+<span class="go"> [ 0.005  0.01 ]]</span>
+</pre></div>
+</div>
+<p>Such fake data sets are useful for analyzing non-Gaussian behavior, for
+example, in nonlinear fits.</p>
+</section>
+<section id="limitations">
+<h2>Limitations<a class="headerlink" href="#limitations" title="Link to this heading">¶</a></h2>
+<p>The most fundamental limitation of this module is that the calculus of
+Gaussian variables that it assumes is only valid when standard deviations
+are small (compared to the distances over which the functions of interest
+change appreciably). One way of dealing with this limitation is to use
+simulations, as discussed in <a class="reference internal" href="#gvar-random-number-generators"><span class="std std-ref">Sampling Distributions; Non-Gaussian Expectation Values</span></a>.</p>
+<p>Another potential issue is roundoff error, which can become problematic if
+there is a wide range of standard deviations among correlated modes. For
+example, the following code works as expected:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gvar</span> <span class="kn">import</span> <span class="n">gvar</span><span class="p">,</span> <span class="n">evalcov</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tiny</span> <span class="o">=</span> <span class="mf">1e-4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">gvar</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span> <span class="o">=</span> <span class="n">gvar</span><span class="p">(</span><span class="n">tiny</span><span class="p">,</span> <span class="n">tiny</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">ada</span> <span class="o">=</span> <span class="n">gvar</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">da</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">],</span> <span class="n">evalcov</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">+</span><span class="n">da</span><span class="p">]))</span> <span class="c1"># = a,a+da</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ada</span><span class="o">-</span><span class="n">a</span><span class="p">)</span>   <span class="c1"># should be da again</span>
+<span class="go">0.00010(10)</span>
+</pre></div>
+</div>
+<p>Reducing <code class="docutils literal notranslate"><span class="pre">tiny</span></code>, however, leads to problems:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gvar</span> <span class="kn">import</span> <span class="n">gvar</span><span class="p">,</span> <span class="n">evalcov</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tiny</span> <span class="o">=</span> <span class="mf">1e-8</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">gvar</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span> <span class="o">=</span> <span class="n">gvar</span><span class="p">(</span><span class="n">tiny</span><span class="p">,</span> <span class="n">tiny</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">ada</span> <span class="o">=</span> <span class="n">gvar</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">da</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">],</span> <span class="n">evalcov</span><span class="p">([</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">+</span><span class="n">da</span><span class="p">]))</span> <span class="c1"># = a, a+da</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ada</span><span class="o">-</span><span class="n">a</span><span class="p">)</span>   <span class="c1"># should be da again</span>
+<span class="go">1(0)e-08</span>
+</pre></div>
+</div>
+<p>Here the call to <a class="reference internal" href="gvar.html#gvar.evalcov" title="gvar.evalcov"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.evalcov()</span></code></a> creates a new covariance matrix for
+<code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">ada</span> <span class="pre">=</span> <span class="pre">a+da</span></code>, but the matrix does not have enough numerical
+precision to encode the size of <code class="docutils literal notranslate"><span class="pre">da</span></code>’s variance, which gets set, in
+effect, to zero. The problem arises here for values of <code class="docutils literal notranslate"><span class="pre">tiny</span></code> less than
+about 2e-8 (with 64-bit floating point numbers; <code class="docutils literal notranslate"><span class="pre">tiny**2</span></code> is what
+appears in the covariance matrix).</p>
+</section>
+<section id="optimizations">
+<h2>Optimizations<a class="headerlink" href="#optimizations" title="Link to this heading">¶</a></h2>
+<p>When there are lots of primary <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a>s, the number of derivatives stored
+for each derived <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> can
+become rather large, potentially (though not necessarily) leading to slower
+calculations. One way to alleviate this problem, should it arise, is to
+separate the primary variables into groups that are never mixed in
+calculations and to use different <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a>s when generating the
+variables in different groups. New versions of <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a> are
+obtained using <a class="reference internal" href="gvar.html#gvar.switch_gvar" title="gvar.switch_gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.switch_gvar()</span></code></a>: for example,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gvar</span>
+<span class="o">...</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="o">...</span> <span class="n">other</span> <span class="n">manipulations</span> <span class="n">involving</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">...</span>
+<span class="n">gvar</span><span class="o">.</span><span class="n">switch_gvar</span><span class="p">()</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">gvar</span><span class="o">.</span><span class="n">gvar</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">g</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="o">...</span> <span class="n">other</span> <span class="n">manipulations</span> <span class="n">involving</span> <span class="n">a</span> <span class="ow">and</span> <span class="n">b</span> <span class="p">(</span><span class="n">but</span> <span class="ow">not</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">y</span><span class="p">)</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>Here the <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a> used to create <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> is a different
+function than the one used to create <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>. A derived quantity,
+like <code class="docutils literal notranslate"><span class="pre">c</span></code>, knows about its derivatives with respect to <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>,
+and about their covariance matrix; but it carries no derivative information
+about <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>. Absent the <code class="docutils literal notranslate"><span class="pre">switch_gvar</span></code> line, <code class="docutils literal notranslate"><span class="pre">c</span></code> would have
+information about its derivatives with respect to <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> (zero
+derivative in both cases) and this would make calculations involving <code class="docutils literal notranslate"><span class="pre">c</span></code>
+slightly slower than with the <code class="docutils literal notranslate"><span class="pre">switch_gvar</span></code> line. Usually the difference
+is negligible — it used to be more important, in earlier implementations
+of <a class="reference internal" href="gvar.html#gvar.GVar" title="gvar.GVar"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code></a> before sparse matrices were introduced to keep track of
+covariances. Note that the previous <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a> can be restored using
+<a class="reference internal" href="gvar.html#gvar.restore_gvar" title="gvar.restore_gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.restore_gvar()</span></code></a>. Function <a class="reference internal" href="gvar.html#gvar.gvar_factory" title="gvar.gvar_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar_factory()</span></code></a> can also
+be used to create new versions of <a class="reference internal" href="gvar.html#gvar.gvar" title="gvar.gvar"><code class="xref py py-func docutils literal notranslate"><span class="pre">gvar.gvar()</span></code></a>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Overview and Tutorial</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#gaussian-random-variables">Gaussian Random Variables</a></li>
+<li><a class="reference internal" href="#creating-gaussian-variables">Creating Gaussian Variables</a></li>
+<li><a class="reference internal" href="#gvar-arithmetic-and-functions"><code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code> Arithmetic and Functions</a></li>
+<li><a class="reference internal" href="#error-budgets-from-gvars">Error Budgets from <code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code>s</a></li>
+<li><a class="reference internal" href="#formatting-gvars-for-printing-display">Formatting <code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code>s for Printing/Display</a></li>
+<li><a class="reference internal" href="#storing-gvars-for-later-use">Storing <code class="xref py py-class docutils literal notranslate"><span class="pre">gvar.GVar</span></code>s for Later Use</a></li>
+<li><a class="reference internal" href="#sampling-distributions-non-gaussian-expectation-values">Sampling Distributions; Non-Gaussian Expectation Values</a></li>
+<li><a class="reference internal" href="#limitations">Limitations</a></li>
+<li><a class="reference internal" href="#optimizations">Optimizations</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">gvar Documentation</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="gvar.html"
+                          title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gvar</span></code> - Gaussian Random Variables</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/overview.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="gvar.html" title="gvar - Gaussian Random Variables"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="gvar Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">gvar 13.1.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Overview and Tutorial</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2009-2023, G. P. Lepage.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+    </div>
+  </body>
+</html>
