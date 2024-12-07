@@ -1,0 +1,16 @@
+---
+- name: Install generic RPM packages
+  ansible.builtin.dnf:
+    name:
+      - make
+      - git
+      - dnf-utils
+      - python3-pip
+      - rpmdevtools
+      - bodhi-client
+      - fedpkg
+      - rsync
+    state: present
+    # needed when installing from koji - there are no GPG-signed packages
+    disable_gpg_check: true
+  become: true

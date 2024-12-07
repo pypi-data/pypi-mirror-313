@@ -1,0 +1,74 @@
+summary:
+  Full test suite of the Packit
+
+require:
+  - python3-flexmock
+  - python3-pytest
+  - python3-deepdiff
+  - python3-build
+  - hatch
+  - python3-hatch-vcs
+  - pyproject-rpm-macros
+  - python3-deprecated
+  - python3-gitlab
+  - python3-pygithub
+  - python3-distro
+  - python3-devel
+  - packit
+  - python3-packit
+  - python3-pytest-cov
+  - rpm-build
+  - rpmdevtools
+  - python3-bodhi-client
+  - python3-specfile
+  - python3-requests-kerberos
+  - fedpkg
+  - git
+  - make
+  #- rpmautospec-rpm-macros
+
+adjust:
+  - when: "distro == rhel-9 or distro == centos-9 or distro == centos-stream-9"
+    because: "build and deepdiff are not in EPEL 9: https://bugzilla.redhat.com/show_bug.cgi?id=2120251"
+    require-:
+      - python3-build
+      - python3-deepdiff
+
+component:
+  - packit
+tier: 1
+tag:
+  - full
+
+test: pytest-3 -v $TEST_TARGET
+duration: 30m
+
+/custom-target:
+  summary: Custom tests
+  description: |
+    Custom tests that are useful for debugging as it is much easier to override
+    the ‹TEST_TARGET› environment variable, disabled in CI as it is split into
+    the separate test suites.
+  tag: manual
+  adjust:
+    - when: initiator != human
+      enabled: false
+      because: "This test suite is for manually specifying the target and to be run locally"
+
+/unit:
+  summary: Unit tests
+  order: 1
+  environment+:
+    TEST_TARGET: unit/
+
+/integration:
+  summary: Integration tests
+  order: 2
+  environment+:
+    TEST_TARGET: integration/
+
+/functional:
+  summary: Functional tests
+  order: 3
+  environment+:
+    TEST_TARGET: functional/

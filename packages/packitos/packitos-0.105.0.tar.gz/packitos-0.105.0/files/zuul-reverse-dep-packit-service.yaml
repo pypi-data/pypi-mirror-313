@@ -1,0 +1,18 @@
+---
+- name: Check if we are not breaking packit-service
+  hosts: all
+  tasks:
+    - ansible.builtin.set_fact:
+        reverse_dir: "{{ ansible_user_dir }}/{{ zuul.projects['github.com/packit/packit-service'].src_dir }}"
+    - ansible.builtin.include_tasks: tasks/project-dir.yaml
+    - ansible.builtin.include_tasks: tasks/packit-service-requirements.yaml
+    - ansible.builtin.include_tasks: tasks/install-packit-service.yaml
+    - ansible.builtin.include_tasks: tasks/install-packit.yaml
+    - name: Run unit, integration tests
+      ansible.builtin.command: make check
+      args:
+        chdir: "{{ reverse_dir }}"
+      # Set 'COLOR' to no in the packit-service/Makefile to disable
+      # colored output in Zuul, in order to improve log readability.
+      environment:
+        COLOR: "no"

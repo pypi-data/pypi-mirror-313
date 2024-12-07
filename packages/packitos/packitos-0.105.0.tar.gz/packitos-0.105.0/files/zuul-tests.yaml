@@ -1,0 +1,12 @@
+---
+- name: This is a recipe for how to run packit tests
+  hosts: all
+  tasks:
+    - ansible.builtin.include_tasks: tasks/project-dir.yaml
+    - ansible.builtin.include_tasks: tasks/rpm-test-deps.yaml
+    - ansible.builtin.include_tasks: tasks/install-packit.yaml
+    - ansible.builtin.include_tasks: tasks/sandcastle.yaml
+    - name: Run unit, integration and functional tests
+      ansible.builtin.command: make check
+      args:
+        chdir: "{{ project_dir }}"
