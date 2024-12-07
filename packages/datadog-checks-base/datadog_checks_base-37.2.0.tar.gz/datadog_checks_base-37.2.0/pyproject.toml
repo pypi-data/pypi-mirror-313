@@ -1,0 +1,93 @@
+[build-system]
+requires = [
+    "hatchling>=0.11.2",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "datadog-checks-base"
+description = "The Datadog Check Toolkit"
+readme = "README.md"
+keywords = [
+    "datadog",
+    "agent",
+    "checks",
+]
+authors = [
+    { name = "Datadog", email = "packages@datadoghq.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Monitoring",
+]
+dynamic = [
+    "version",
+]
+license = "BSD-3-Clause"
+
+[project.optional-dependencies]
+db = [
+    "mmh3==4.1.0",
+]
+deps = [
+    "binary==1.0.1",
+    "cachetools==5.5.0",
+    "cryptography==43.0.1",
+    "ddtrace==2.10.6",
+    "importlib-metadata==2.1.3; python_version < '3.8'",
+    "jellyfish==1.1.0",
+    "prometheus-client==0.20.0",
+    "protobuf==5.27.3",
+    "pydantic==2.8.2",
+    "python-dateutil==2.9.0.post0",
+    "pywin32==306; sys_platform == 'win32'",
+    "pyyaml==6.0.2",
+    "requests-toolbelt==1.0.0",
+    "requests-unixsocket2==0.4.2",
+    "requests==2.32.3",
+    "simplejson==3.19.3",
+    "uptime==3.0.1",
+    "wrapt==1.16.0",
+]
+http = [
+    "aws-requests-auth==0.4.3",
+    "botocore==1.35.10",
+    "oauthlib==3.2.2",
+    "pyjwt==2.9.0",
+    "pyopenssl==24.2.1",
+    "pysocks==1.7.1",
+    "requests-kerberos==0.15.0",
+    "requests-ntlm==1.3.0",
+    "requests-oauthlib==2.0.0",
+]
+json = [
+    "orjson==3.10.7",
+]
+kube = [
+    "kubernetes==30.1.0",
+    "requests-oauthlib==2.0.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDog/integrations-core"
+
+[tool.hatch.version]
+path = "datadog_checks/base/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/datadog_checks",
+    "/tests",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/datadog_checks",
+]
+dev-mode-dirs = [
+    ".",
+]
