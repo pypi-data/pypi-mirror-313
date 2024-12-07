@@ -1,0 +1,238 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+      - "release-**"
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'requirements**.txt'
+      - 'tox.ini'
+      - 'scripts/*.sh' # Used by this workflow
+      - 'src/instructlab/profiles/**'
+      - '.github/workflows/test.yml' # This workflow
+  pull_request:
+    branches:
+      - "main"
+      - "release-**"
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'requirements**.txt'
+      - 'tox.ini'
+      - 'scripts/*.sh' # Used by this workflow
+      - 'src/instructlab/profiles/**'
+      - '.github/workflows/test.yml' # This workflow
+
+env:
+  LC_ALL: en_US.UTF-8
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+
+jobs:
+  test-workflow-ready:
+    permissions:
+      checks: read
+    uses: ./.github/workflows/status-checks.yml
+    with:
+      job_ids: >- # Space-separated job ids to wait on for status checks
+        DCO
+        actionlint
+        markdown-lint
+        shellcheck
+        spellcheck
+        lint-workflow-complete
+
+  test:
+    # Start name with 'test:' for test-workflow-complete job_ids
+    name: "test: ${{ matrix.python }} on ${{ matrix.platform }}"
+    needs: ["test-workflow-ready"]
+    runs-on: "${{ matrix.platform }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+          - "3.10"
+          - "3.11"
+        platform:
+          - "ubuntu-latest"
+        include:
+          - python: "3.11"
+            platform: "macos-latest"
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # https://github.com/actions/checkout/issues/249
+          fetch-depth: 0
+
+      - name: Free disk space
+        uses: ./.github/actions/free-disk-space
+
+      - name: Install the expect package
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get install -y expect
+
+      - name: Install go for skopeo
+        if: startsWith(matrix.platform, 'ubuntu')
+        uses: actions/setup-go@v5
+        with:
+          cache: false
+          go-version: 1.22.x
+
+        # Building from source because the latest version of skopeo
+        # available on Ubuntu is v1.4 which is very old and
+        # was running into issues downloading artifacts properly
+      - name: install skopeo from source
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get install libgpgme-dev libassuan-dev libbtrfs-dev libdevmapper-dev pkg-config -y
+          git clone --depth 1 https://github.com/containers/skopeo -b v1.9.0 "$GITHUB_WORKSPACE"/src/github.com/containers/skopeo
+          cd "$GITHUB_WORKSPACE"/src/github.com/containers/skopeo
+          make bin/skopeo
+          sudo install -D -m 755 bin/skopeo /usr/bin/skopeo
+          rm -rf "$GITHUB_WORKSPACE"/src/github.com/containers/skopeo
+          skopeo --version
+
+      - name: Install tools on MacOS
+        if: startsWith(matrix.platform, 'macos')
+        run: |
+          brew install expect coreutils bash skopeo
+
+      - name: Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: |
+            **/pyproject.toml
+            **/requirements*.txt
+
+      - name: Remove llama-cpp-python from cache
+        run: |
+          pip cache remove llama_cpp_python
+
+      - name: Cache huggingface
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
+        with:
+          path: ~/.cache/huggingface
+          # config contains DEFAULT_CHAT_MODEL
+          key: huggingface-${{ hashFiles('src/instructlab/configuration.py') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox tox-gh>=1.2
+
+      # see https://github.com/instructlab/instructlab/issues/1886
+      - name: Verify test isolation
+        run: |
+          mkdir -p ~/.config/instructlab
+          echo "broken" > ~/.config/instructlab/config.yaml
+
+          mkdir -p ~/.cache
+          echo "not a directory" > ~/.cache/instructlab
+
+          mkdir -p ~/.local/share
+          echo "not a directory" > ~/.local/share/instructlab
+
+      - name: Run unit and functional tests with tox
+        run: |
+          tox
+
+      - name: Remove llama-cpp-python from cache
+        if: always()
+        run: |
+          pip cache remove llama_cpp_python
+
+  docs:
+    needs: ["test-workflow-ready"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Harden Runner"
+        uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
+        with:
+          egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # https://github.com/actions/checkout/issues/249
+          fetch-depth: 0
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: 3.11
+          cache: pip
+          cache-dependency-path: |
+            **/pyproject.toml
+            **/requirements*.txt
+
+      - name: Remove llama-cpp-python from cache
+        run: |
+          pip cache remove llama_cpp_python
+
+      - name: Run tox docs target (expect failure since tox is not present)
+        run: |
+          make docs
+        continue-on-error: true
+
+      - name: Run tox docs target
+        id: tox-docs
+        run: |
+          make man || echo "status=failed" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Check for 'make man' failure
+        run: |
+          if [[ "${{ steps.tox-docs.outputs.status }}" != "failed" ]]; then
+            echo "'make man' did not fail as expected"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox
+
+      - name: Run tox docs target
+        run: |
+          make docs
+
+      - name: Check that man pages were generated
+        uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
+        with:
+          files: 'man/*.1'
+          fail: true
+
+      - name: Remove llama-cpp-python from cache
+        if: always()
+        run: |
+          pip cache remove llama_cpp_python
+
+  test-workflow-complete:
+    permissions:
+      checks: read
+    uses: ./.github/workflows/status-checks.yml
+    with:
+      job_ids: >- # Space-separated job ids to wait on for status checks
+        test-workflow-ready
+        test:
+        docs

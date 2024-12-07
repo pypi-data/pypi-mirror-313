@@ -1,0 +1,238 @@
+# SPDX-License-Identifier: Apache-2.0
+
+[build-system]
+requires = ["setuptools>=70.1.0", "setuptools_scm>=8", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "instructlab"
+authors = [{ name = "InstructLab", email = "dev@instructlab.ai" }]
+description = "CLI for interacting with InstructLab"
+readme = "README.md"
+license = { text = "Apache-2.0 AND MIT" }
+requires-python = ">=3.10,<3.12"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "License :: OSI Approved :: Apache Software License",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dynamic = ["dependencies", "optional-dependencies", "version"]
+
+[project.scripts]
+# defines ilab executable
+ilab = "instructlab.lab:ilab"
+
+[project.urls]
+homepage = "https://instructlab.ai"
+source = "https://github.com/instructlab/instructlab"
+issues = "https://github.com/instructlab/instructlab/issues"
+
+# command entry points
+[project.entry-points."instructlab.command"]
+"config" = "instructlab.config.config:config"
+"data" = "instructlab.cli.data.data:data"
+"model" = "instructlab.model.model:model"
+"system" = "instructlab.system.system:system"
+"taxonomy" = "instructlab.taxonomy.taxonomy:taxonomy"
+
+[project.entry-points."instructlab.command.config"]
+"edit" = "instructlab.config.edit:edit"
+"init" = "instructlab.config.init:init"
+"show" = "instructlab.config.show:show"
+
+[project.entry-points."instructlab.command.data"]
+"generate" = "instructlab.cli.data.generate:generate"
+"list" = "instructlab.cli.data.list:list_datasets"
+
+[project.entry-points."instructlab.command.model"]
+"chat" = "instructlab.model.chat:chat"
+"convert" = "instructlab.model.convert:convert"
+"download" = "instructlab.model.download:download"
+"evaluate" = "instructlab.model.evaluate:evaluate"
+"serve" = "instructlab.cli.model.serve:serve"
+"test" = "instructlab.model.test:test"
+"train" = "instructlab.cli.model.train:train"
+"list" = "instructlab.model.list:model_list"
+
+[project.entry-points."instructlab.command.system"]
+"info" = "instructlab.system.info:info"
+
+[project.entry-points."instructlab.command.taxonomy"]
+"diff" = "instructlab.taxonomy.diff:diff"
+
+[project.entry-points."instructlab.command.alias"]
+"chat" = "instructlab.model.chat:chat"
+"generate" = "instructlab.cli.data.generate:generate"
+"train" = "instructlab.cli.model.train:train"
+"serve" = "instructlab.cli.model.serve:serve"
+
+[tool.setuptools_scm]
+version_file = "src/instructlab/_version.py"
+# do not include +gREV local version, required for Test PyPI upload
+local_scheme = "no-local-version"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+optional-dependencies.cpu = { file = ["requirements/cpu.txt"] }
+optional-dependencies.cuda = { file = ["requirements/cuda.txt"] }
+optional-dependencies.hpu = { file = ["requirements/hpu.txt"] }
+optional-dependencies.mps = { file = ["requirements/mps.txt"] }
+optional-dependencies.rocm = { file = ["requirements/rocm.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = [
+  "instructlab",
+  "instructlab.chat",
+  "instructlab.generator",
+  "instructlab.cli",
+  "instructlab.cli.model",
+  "instructlab.train",
+  "instructlab.train.lora_mlx",
+  "instructlab.train.lora_mlx.models",
+  "instructlab.llamacpp",
+  "instructlab.mlx_explore",
+]
+
+[tool.check-wheel-contents]
+# W002 - Wheel contains duplicate files:
+#  instructlab/mlx_explore/LICENSE
+#  instructlab/train/lora_mlx/LICENSE
+ignore = ["W002"]
+
+[tool.ruff]
+target-version = "py310"
+# same as black's default line length
+line-length = 88
+
+[tool.ruff.lint]
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+# modern type annotations
+extend-safe-fixes = ["UP006", "UP007"]
+
+# Fixers will be enabled gradually.
+select = [
+  "B", # flake8-bugbear
+  "E", # pycodestyle
+  "F", # Pyflakes
+  "Q", # flake8-quotes
+  # Ruff does not support isort's import_headings feature, yet.
+  # "I",   # isort
+  # "UP",  # pyupgrade
+  "SIM", # flake8-simplify
+  "TID", # flake8-tidy-imports
+]
+ignore = [
+  "B904", # TODO: "raise from err" or "raise from None"
+  # some embedded strings are longer than 88 characters
+  "E501",   # line too long
+  "SIM108", # Use ternary operator
+  "SIM102", # Use a single if instead of nested if
+  "TID252", # Prefer absolute imports over relative imports from parent modules
+]
+
+[tool.ruff.lint.per-file-ignores]
+# vendored files, maintained externally
+"src/instructlab/llamacpp/llamacpp_convert_to_gguf.py" = ["ALL"]
+"src/instructlab/mlx_explore/**" = ["ALL"]
+"src/instructlab/train/lora_mlx/**" = ["ALL"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"yamllint".msg = "yamllint is for CLI usage only."
+
+[tool.ruff.lint.isort]
+# same as .isort.cfg
+from-first = true
+# not supported yet
+# import-heading-future=Future
+# import-heading-stdlib=Standard
+# import-heading-thirdparty=Third Party
+# import-heading-firstparty=First Party
+# import-heading-localfolder=Local
+known-local-folder = ["tuning"]
+
+[tool.mypy]
+mypy_path = ["src"]
+packages = ["instructlab", "tests"]
+disable_error_code = []
+# TODO: tighten MyPy checks by enabling these checks over time.
+check_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_defs = false
+warn_return_any = true
+# honor excludes by not following there through imports
+follow_imports = "silent"
+exclude = [
+  # These are files that were copied from the original codebase.
+  # We are trying to keep changes to a minimum.
+  "^src/instructlab/llamacpp/llamacpp_convert_to_gguf\\.py$",
+  "^src/instructlab/mlx_explore/gguf_convert_to_mlx\\.py$",
+  "^src/instructlab/mlx_explore/utils\\.py$",
+  "^src/instructlab/train/lora_mlx/convert\\.py$",
+  "^src/instructlab/train/lora_mlx/lora\\.py$",
+  "^src/instructlab/train/lora_mlx/models/llama\\.py$",
+  "^src/instructlab/train/lora_mlx/models/mixtral\\.py$",
+  "^src/instructlab/train/lora_mlx/models/models\\.py$",
+  "^src/instructlab/train/lora_mlx/models/phi2\\.py$",
+  "^src/instructlab/train/lora_mlx/models/lora\\.py$",
+  "^src/instructlab/train/lora_mlx/utils\\.py$",
+]
+
+[[tool.mypy.overrides]]
+# packages without typing annotations, without stubs, or not available.
+module = [
+  "click_didyoumean",
+  "datasets",
+  "fire",
+  "gitdb",
+  "habana_frameworks.torch",
+  "huggingface_hub.*",
+  "instructlab.eval.*",
+  "instructlab_quantize",
+  "instructlab.training",
+  "mlx.*",
+  "optimum.habana.*",
+  "sentencepiece",
+  "trl",
+  "transformers",
+]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+branch = false
+relative_files = true
+source = ["instructlab", "tests/"]
+omit = [
+  # omit instructlab code in different packages
+  "*/instructlab/dolomite/*",
+  "*/instructlab/eval/*",
+  "*/instructlab/schema/*",
+  "*/instructlab/sdg/*",
+  "*/instructlab/training/*",
+]
+
+[tool.coverage.paths]
+source = ["src/instructlab", "*.tox/*/lib*/python*/site-packages/instructlab"]
+tests = ["tests/"]
+
+[tool.coverage.report]
+exclude_lines = ["@abc.abstractmethod", "if typing.TYPE_CHECKING"]
+
+[tool.pytest.ini_options]
+# don't collect src/instructlab/model/linux_test.py
+testpaths = "tests"
+# verbose diffs
+verbosity_assertions = 2
