@@ -1,0 +1,84 @@
+Metadata-Version: 2.1
+Name: fused
+Version: 1.11.2
+Summary: 
+Requires-Python: >=3.9,<4
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Provides-Extra: batch
+Requires-Dist: affine (>=2,<3) ; extra == "batch"
+Requires-Dist: aiohttp (>=3.8.3,<4.0.0)
+Requires-Dist: click (>=8,<9) ; sys_platform != "emscripten"
+Requires-Dist: fsspec (>=2024.3.1,<2025.0.0) ; extra == "batch"
+Requires-Dist: geopandas (>=0.14,<0.15) ; extra == "batch"
+Requires-Dist: importlib-resources (>=5.12.0,<6.0.0) ; extra == "batch"
+Requires-Dist: jinja2 (>=3.1.2,<4.0.0) ; extra == "batch"
+Requires-Dist: loguru (>=0.6.0,<0.7.0)
+Requires-Dist: mercantile (>=1.2.1,<2.0.0) ; extra == "batch"
+Requires-Dist: pandas (<2) ; (python_version == "3.8") and (extra == "batch")
+Requires-Dist: pandas (>=2.2.0,<3.0.0) ; (python_version >= "3.9") and (extra == "batch")
+Requires-Dist: pyarrow (>=11)
+Requires-Dist: pydantic (>=2.7.0,<3.0.0)
+Requires-Dist: pyproj (>=3.3,<4.0) ; extra == "batch"
+Requires-Dist: requests (>=2.31,<3.0)
+Requires-Dist: rtoml (>=0.9.0,<0.10.0) ; sys_platform != "emscripten"
+Requires-Dist: shapely (>=2,<3) ; extra == "batch"
+Requires-Dist: xarray (==2024.3.0) ; (python_version >= "3.9") and (extra == "batch")
+Requires-Dist: xarray (>=2023.01.0,<2024.0.0) ; (python_version == "3.8") and (extra == "batch")
+Requires-Dist: yarl (>=1.9.4,<2.0.0)
+Description-Content-Type: text/markdown
+
+<h1 align="center">
+  Fused Public Python package
+</h1>
+<h3 align="center">
+  🌎 Code to Map. Instantly.
+</h3>
+<br><br>
+
+**Fused** is a Python library to code, scale, and ship geospatial workflows of any size. Express workflows as shareable UDFs (user defined functions) without thinking about the underlying compute. The Fused Python library is maintained by [Fused.io](https://fused.io).
+
+## Prerequisites
+
+Python >= 3.8
+
+## Install
+
+```
+pip install fused
+```
+
+## Quickstart
+
+```python3
+import fused
+
+# Declare UDF
+@fused.udf()
+def my_udf():
+    import pandas as pd
+    return pd.DataFrame({'hello': ['world']})
+
+df = fused.run(my_udf)
+print(df)
+
+dc_file_udf = fused.load('https://github.com/fusedio/udfs/tree/main/public/DC_File_Example')
+
+df2 = fused.run(dc_file_udf)
+print(df2)
+```
+
+## Resources
+
+- [Open source UDF catalog](https://github.com/fusedio/udfs/tree/main)
+- [Fused Discord community](https://discord.com/invite/BxS5wMzdRk)
+- [Twitter/X](https://twitter.com/Fused_io)
+- [LinkedIn](https://www.linkedin.com/company/fusedio)
+
+## Changelog
+See the [changelog](https://docs.fused.io/python-sdk/changelog/) for the latest changes.
+
