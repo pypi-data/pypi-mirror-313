@@ -1,0 +1,144 @@
+Metadata-Version: 2.1
+Name: MirMachine
+Version: 0.3.0b2
+Summary: MirMachine
+Home-page: https://github.com/sinanugur/MirMachine
+Author: Sinan U. Umu
+Author-email: sinanugur@gmail.com
+Keywords: RNA miRNA detection prediction
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Requires-Dist: appdirs>=1.4.3
+Requires-Dist: attrs>=19.3.0
+Requires-Dist: biopython>=1.76
+Requires-Dist: configargparse>=1.1
+Requires-Dist: datrie>=0.8.2
+Requires-Dist: decorator>=4.4.2
+Requires-Dist: docopt>=0.6.2
+Requires-Dist: docutils>=0.16
+Requires-Dist: gitdb>=4.0.2
+Requires-Dist: gitpython>=3.1.0
+Requires-Dist: importlib-metadata>=1.5.0
+Requires-Dist: ipython-genutils>=0.2.0
+Requires-Dist: jsonschema>=3.2.0
+Requires-Dist: jupyter-core>=4.6.3
+Requires-Dist: nbformat==5.0.4
+Requires-Dist: newick>=1.0.0
+Requires-Dist: numpy>=1.18.2
+Requires-Dist: psutil>=5.7.0
+Requires-Dist: pyrsistent>=0.15.7
+Requires-Dist: pyyaml>=5.4
+Requires-Dist: ratelimiter>=1.2.0
+Requires-Dist: smmap>=3.0.1
+Requires-Dist: snakemake>=6.10.0
+Requires-Dist: toposort>=1.5
+Requires-Dist: traitlets>=4.3.3
+Requires-Dist: wrapt>=1.12.1
+Requires-Dist: zipp>=3.1.0
+Requires-Dist: rich>=10.16.1
+Provides-Extra: dev
+Requires-Dist: pytest>=3.7; extra == "dev"
+
+# MirMachine
+
+[![Build Status](https://app.travis-ci.com/sinanugur/MirMachine.svg?branch=master)](https://app.travis-ci.com/sinanugur/MirMachine) [![Documentation Status](https://readthedocs.org/projects/mirmachine/badge/?version=latest)](https://mirmachine.readthedocs.io/en/latest/?badge=latest)  
+
+
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)  [![PyPI version](https://badge.fury.io/py/MirMachine.svg)](https://badge.fury.io/py/MirMachine)  [![Anaconda-Server Badge](https://anaconda.org/bioconda/mirmachine/badges/version.svg)](https://anaconda.org/bioconda/mirmachine)  [![Anaconda-Server Badge](https://anaconda.org/bioconda/mirmachine/badges/downloads.svg)](https://anaconda.org/bioconda/mirmachine)  
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/mirmachine/badges/latest_release_relative_date.svg)](https://anaconda.org/bioconda/mirmachine)  [![Docker Pulls](https://img.shields.io/docker/pulls/sinanugur/mirmachine)](https://hub.docker.com/r/sinanugur/mirmachine)  
+A command line tool to detect miRNA homologs in genome sequences.
+
+
+Installation
+------------
+To install this package with conda run:
+
+```
+conda install mirmachine -c bioconda -c conda-forge
+```
+
+Please add conda-forge as a channel. Installing via [mamba](https://github.com/mamba-org/mamba) is also strongly recommended for a faster installation. You can install __mamba__ and later MirMachine like this:
+```
+conda install mamba -c conda-forge
+mamba install mirmachine -c bioconda -c conda-forge
+```
+
+Check if the installation works by calling the main script.  
+```
+MirMachine.py --help
+```
+
+Note: You have to install dependencies if you prefer GitHub or PyPi installation.
+
+A warning for Apple Silicon users (e.g. M1 or M2): bedtools depedency is not available for arm64 architecture. You have to set your environment to osx-64. You can install like this, which create a new environment and will install MirMachine:
+```
+CONDA_SUBDIR=osx-64 mamba create -n mirmachine -c conda-forge -c bioconda mirmachine
+```
+
+Quick start example
+-------------------
+Create a new directory and run MirMachine there after the installation. MirMachine will create the required directories while running.
+```
+MirMachine.py -n Caenorhabditis -s Caenorhabditis_elegans --genome sample/genomes/ce11.fa --cpu 20
+```
+
+See our documentation for detailed explanations: https://mirmachine.readthedocs.io/
+
+Options and Arguments
+---------------------
+```
+Usage:
+    MirMachine.py --node <text> --species <text> --genome <text> [--model <text>] [--cpu <integer>] [--add-all-nodes|--single-node-only] [--unlock|--remove] [--dry]
+    MirMachine.py --species <text> --genome <text> --family <text> [--model <text>] [--unlock|--remove] [--dry]
+    MirMachine.py --node <text> [--add-all-nodes]
+    MirMachine.py --print-all-nodes
+    MirMachine.py --print-all-families
+    MirMachine.py --print-ascii-tree
+    MirMachine.py (-h | --help)
+    MirMachine.py --version
+
+Arguments:
+    -n <text>, --node <text>              Node name. (e.g. Caenorhabditis)
+    -s <text>, --species <text>           Species name. (e.g. Caenorhabditis_elegans)
+    -g <text>, --genome <text>            Genome fasta file location (e.g. data/genome/example.fasta)
+    -m <text>, --model <text>             Model type: deutero, proto, combined [default: combined]
+    -f <text>, --family <text>            Run only a single miRNA family (e.g. Let-7).
+    -c <integer>, --cpu <integer>         CPUs. [default: 2]
+
+Options:
+    -a, --add-all-nodes                 Move on the tree both ways.
+    -o, --single-node-only              Run only on the given node for miRNA families.
+    -p, --print-all-nodes               Print all available node options and exit.
+    -l, --print-all-families            Print all available families in this version and exit.
+    -t, --print-ascii-tree              Print ascii tree of the tree file.
+    -u, --unlock                        Rescue stalled jobs (Try this if the previous job ended prematurely).
+    -r, --remove                        Clear all output files (this won't remove input files).
+    -d, --dry                           Dry run.
+    -h, --help                          Show this screen.
+    --version                           Show version.
+```
+
+Output
+------
+The `MirMachine` main executable will generate GFF annotations (filtered and unfiltered) and some other files.
+You will see `results/predictions/` directory which contains:
+
+`gff/` __All predicted miRNA families.__  
+`filtered_gff/` __High confidence miRNA family predictions after bitscore filtering. (This file is what you need in most cases)__  
+`fasta/` __Both high and low confidence predictions in FASTA format.__  
+
+
+MirMachine's other repos
+------
+Web application repo: https://github.com/selfjell/MirMachine  
+Supplementary files repo: https://github.com/sinanugur/MirMachine-supplementary
+
+Citiation
+------
+Our Cell Genomics paper is here: [https://doi.org/10.1016/j.xgen.2023.100348](https://doi.org/10.1016/j.xgen.2023.100348)
+Please cite if you find our tool useful.
+
+
