@@ -1,0 +1,152 @@
+# Copyright Vespa.ai. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
+
+[build-system]
+requires = ["setuptools>=69", "wheel", "build", "twine", "versioneer[toml]"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyvespa"
+version = "0.51.0"
+description = "Python API for vespa.ai"
+readme = "README.md"
+keywords = ["vespa", "search engine", "data science"]
+classifiers = ["License :: OSI Approved :: Apache Software License"]
+dependencies = [
+    "requests",
+    "requests_toolbelt",
+    "docker",
+    "jinja2",
+    "cryptography",
+    "aiohttp",
+    "httpx[http2]",
+    "tenacity>=8.4.1",
+    "typing_extensions",
+    "python-dateutil",
+    "fastcore>=1.7.8",
+    "lxml",
+]
+
+requires-python = ">=3.8"
+
+[[project.authors]]
+name = "Thiago G. Martins"
+
+[[project.maintainers]]
+name = "Thomas Thoresen"
+email = "thomas@vespa.ai"
+
+[project.urls]
+homepage = "https://pypi.org/project/pyvespa"
+repository = "https://github.com/vespa-engine/pyvespa"
+
+[project.license]
+file = "LICENSE"
+
+[project.optional-dependencies]
+vespacli = ["vespacli"]
+build = [
+    "setuptools==69.0.3",
+    "build==1.0.3",
+    "twine==5.1.1",
+    "toml==0.10.2",
+    "ruff",
+]
+unittest = [
+    "pytest",
+    "requests-mock",
+    "vespacli",
+    "pytest-asyncio",
+]
+docs = [
+    "sphinx",
+    "nbsphinx",
+    "sphinx-rtd-theme>=0.5.0",
+    "ipykernel",
+]
+feed = [
+    "PyYAML",
+    "spacy",
+    "mmh3",
+    "requests<=2.31.0",
+    "html5lib",
+    "beautifulsoup4",
+    "markdownify",
+    "tiktoken",
+    "vespacli",
+]
+notebooks = [
+    "notebook",
+    "nbconvert<=7.12.0",
+    "ipykernel",
+    "jupytext",
+    "numpy",
+    "pandas",
+    "plotly",
+    "torch",
+    "openai",
+    "datasets>=2.19.1",
+    "ir_datasets",
+    "pytrec_eval",
+    "papermill",
+    "ipywidgets",
+]
+dev = [
+    "pre-commit",
+    "vespacli",
+    "datasets>=2.19.1",
+    "pyvespa[unittest]",
+    "pyvespa[build]",
+]
+
+[tool.setuptools]
+package-dir = {vespa = "vespa"}
+
+[tool.ruff]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+line-length = 88
+indent-width = 4
+
+[tool.setuptools.package-data]
+vespa = ["py.typed", "templates/*"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = ["F822", "F405", "F403"]
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = false
+docstring-code-line-length = "dynamic"
