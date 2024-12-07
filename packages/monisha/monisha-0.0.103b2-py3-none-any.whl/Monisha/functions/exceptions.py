@@ -1,0 +1,3 @@
+
+class Cancelled(Exception):
+    pass
