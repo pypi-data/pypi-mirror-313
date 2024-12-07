@@ -1,0 +1,88 @@
+Metadata-Version: 2.1
+Name: aioxmlrpc
+Version: 0.9.1
+Summary: XML-RPC client for asyncio
+Author-Email: Guillaume Gauvrit <guillaume@gauvr.it>
+License: MIT License
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Framework :: AsyncIO
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Information Technology
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: System :: Networking
+Classifier: Typing :: Typed
+Project-URL: Homepage, https://mardiros.github.io/aioxmlrpc
+Project-URL: Documentation, https://mardiros.github.io/aioxmlrpc
+Project-URL: Repository, https://github.com/mardiros/aioxmlrpc.git
+Project-URL: Issues, https://github.com/mardiros/aioxmlrpc/issues
+Project-URL: Changelog, https://mardiros.github.io/aioxmlrpc/user/changelog.html
+Requires-Python: >=3.9
+Requires-Dist: httpx<1,>=0.24
+Description-Content-Type: text/x-rst
+
+=========
+aioxmlrpc
+=========
+
+.. image:: https://github.com/mardiros/aioxmlrpc/actions/workflows/tests.yml/badge.svg
+   :target: https://github.com/mardiros/aioxmlrpc/actions/workflows/tests.yml
+
+
+.. image:: https://codecov.io/gh/mardiros/aioxmlrpc/branch/master/graph/badge.svg?token=BR3KttC9uJ
+   :target: https://codecov.io/gh/mardiros/aioxmlrpc
+
+
+Asyncio version of the standard lib ``xmlrpc``
+
+Currently only ``aioxmlrpc.client``, which works like ``xmlrpc.client`` but
+with coroutine is implemented.
+
+Fill free to fork me if you want to implement the server part.
+
+
+``aioxmlrpc`` is based on ``httpx`` for the transport, and just patch
+the necessary from the python standard library to get it working.
+
+
+Installation
+------------
+
+aioxmlrpc is available on PyPI, it can simply be installed with your favorite
+tool, example with pip here.
+
+::
+
+    pip install aioxmlrpc
+
+
+Getting Started
+---------------
+
+This example show how to print the current version of the Gandi XML-RPC api.
+
+
+::
+
+    import asyncio
+    from aioxmlrpc.client import ServerProxy
+
+
+    @asyncio.coroutine
+    def print_gandi_api_version():
+        api = ServerProxy('https://rpc.gandi.net/xmlrpc/')
+        result = yield from api.version.info()
+        print(result)
+
+    if __name__ == '__main__':
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(print_gandi_api_version())
+        loop.stop()
+
+
+Run the example
+
+::
+
+    uv run examples/gandi_api_version.py
