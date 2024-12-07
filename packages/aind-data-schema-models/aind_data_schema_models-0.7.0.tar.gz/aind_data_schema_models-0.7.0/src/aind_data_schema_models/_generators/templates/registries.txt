@@ -1,0 +1,37 @@
+"""Registries"""
+{% raw -%}
+from pydantic import Field, ConfigDict
+from typing import Literal, Union
+from typing_extensions import Annotated
+from aind_data_schema_models.pid_names import BaseName
+{% endraw %}
+
+class _RegistryModel(BaseName):
+    """Base model for registries"""
+    model_config = ConfigDict(frozen=True)
+    name: str
+    abbreviation: str
+
+{% for _, row in data.iterrows() %}
+class {{ row['abbreviation'] | to_class_name_underscored }}(_RegistryModel):
+    """Model {{row['abbreviation']}}"""
+    name: Literal["{{ row['name'] }}"] = "{{ row['name'] }}"
+    abbreviation: Literal["{{ row['abbreviation'] }}"] = "{{ row['abbreviation'] }}"
+
+{% endfor %}
+class Registry:
+    """Registries"""
+{% for _, row in data.iterrows() %}
+    {{ row['abbreviation'] | to_class_name | upper }} = {{ row['abbreviation'] | to_class_name_underscored }}()
+{%- endfor %}
+
+    ALL = tuple(_RegistryModel.__subclasses__())
+
+    ONE_OF = Annotated[Union[tuple(_RegistryModel.__subclasses__())], Field(discriminator="abbreviation")]
+
+    abbreviation_map = {m().abbreviation: m() for m in ALL}
+
+    @classmethod
+    def from_abbreviation(cls, abbreviation: str):
+        """Get registry from abbreviation"""
+        return cls.abbreviation_map.get(abbreviation, None)

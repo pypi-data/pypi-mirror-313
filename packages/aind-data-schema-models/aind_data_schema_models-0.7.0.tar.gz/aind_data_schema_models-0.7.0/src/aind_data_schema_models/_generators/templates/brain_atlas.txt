@@ -1,0 +1,40 @@
+"""Platforms"""
+{% raw -%}
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Literal, Union
+from typing_extensions import Annotated
+{% endraw %}
+
+class _BrainStructureModel(BaseModel):
+    """Base model for brain strutures"""
+    model_config = ConfigDict(frozen=True)
+    atlas: str
+    name: str
+    acronym: str
+    id: str
+
+{% for _, row in data.iterrows() %}
+class {{ row['acronym'] | to_class_name_underscored }}(_BrainStructureModel):
+    """Model {{row['acronym']}}"""
+    atlas: Literal["CCFv3"] = "CCFv3"
+    name: Literal["{{ row['name'] }}"] = "{{ row['name'] }}"
+    acronym: Literal["{{ row['acronym'] }}"] = "{{ row['acronym'] }}"
+    id: Literal["{{ row['id'] }}"] = "{{ row['id'] }}"
+
+{% endfor %}
+class CCFStructure:
+    """CCFStructure"""
+{% for _, row in data.iterrows() %}
+    {{ row['acronym'] | to_class_name | upper }} = {{ row['acronym'] | to_class_name_underscored }}()
+{%- endfor %}
+
+    ALL = tuple(_BrainStructureModel.__subclasses__())
+
+    ONE_OF = Annotated[Union[tuple(_BrainStructureModel.__subclasses__())], Field(discriminator="name")]
+
+    id_map = {m().id: m() for m in ALL}
+
+    @classmethod
+    def from_id(cls, id: int):
+        """Get structure from id"""
+        return cls.id_map.get(id, None)
