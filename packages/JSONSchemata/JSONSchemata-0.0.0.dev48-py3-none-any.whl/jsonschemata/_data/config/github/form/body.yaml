@@ -1,0 +1,49 @@
+$id: https://jsonschemata.repodynamics.com/config/github/form/body
+title: GitHub Form Body
+description: |
+  Definition of the elements in a GitHub form, according to GitHub's
+  [syntax for GitHub's form schema](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema),
+  which is shared between issue forms and discussion category forms.
+  
+  Each form must have a body, defined as an array of form elements for requesting user input.
+  Each form element itself is defined as a set of key-value pairs
+  that determine the type of the element, the properties of the element,
+  and the constraints you want to apply to the element.
+type: array
+minItems: 1
+items:
+  title: Form Element
+  description: Definition of a form element in the body.
+  type: object
+  required: [ type, attributes ]
+  properties:
+    type:
+      title: Type
+      description: Type of the element.
+      type: string
+      enum: [ checkboxes, dropdown, input, markdown, textarea ]
+    attributes:
+      title: Attributes
+      description: |
+        A set of key-value pairs that define the attributes of the element.
+        Depending on the `type` of the element, different keys are available,
+        defined in GitHub's [form schema syntax](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema).
+      type: object
+      additionalProperties: true
+    id:
+      title: ID
+      description: |
+        The canonical identifier for the element in URL query parameter prefills.
+        It can only use alpha-numeric characters, hyphens, and underscores,
+        and must be unique in the form definition.
+        Note that `markdown` elements cannot have an ID.
+      type: string
+      pattern: ^[A-Za-z][A-Za-z0-9_-]*$
+    validations:
+      title: Validations
+      description: |
+        A set of key-value pairs that set constraints on the element.
+        Depending on the `type` of the element, different keys are available,
+        defined in GitHub's [form schema syntax](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema).
+      type: object
+      additionalProperties: true
