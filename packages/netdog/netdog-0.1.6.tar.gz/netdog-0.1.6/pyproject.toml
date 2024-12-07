@@ -1,0 +1,49 @@
+[project]
+name = "netdog"
+dynamic = []
+description = "It is like netcat implemented in python."
+authors = [
+    { name = "vz-shark", email = "vz-shark@miraikanai.net" },
+]
+dependencies = [
+    "termcolor>=2.5.0",
+]
+requires-python = " <3.13,>=3.12"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+version = "0.1.6"
+
+[project.license]
+text = "MIT"
+
+[project.urls]
+Homepage = "https://github.com/vz-shark/netdog"
+Issues = "https://github.com/vz-shark/netdog/issues"
+
+[project.scripts]
+netdog = "netdog.cli:main"
+
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.version]
+source = "file"
+path = "src/netdog/__init__.py"
+
+[tool.pdm.scripts]
+build_exe = "pyinstaller --name netdog --onefile --distpath ./dist_exe/ --workpath ./build_exe/ --specpath ./build_exe/ src/netdog/cli.py"
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.11.1",
+]
