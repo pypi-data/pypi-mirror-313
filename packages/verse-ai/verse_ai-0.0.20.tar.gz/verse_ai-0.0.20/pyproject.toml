@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "verse-ai"
+version = "0.0.20"
+description = "Verse AI Components"
+authors = ["Verse <admin@rapidverse.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/rapidverse/verse"
+repository = "https://github.com/rapidverse/verse"
+documentation = "https://github.com/rapidverse/verse"
+keywords = ["verse", "ai", "components"]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+openai = { version = "*", optional = true }
+cohere = { version = "*", optional = true }
+# openai-whisper = {git = "https://github.com/openai/whisper.git", optional = true}
+torch = { version = "*", optional = true }
+transformers = { version = "*", optional = true }
+numpy = { version = "<2", optional = true }
+av = { version = "*", optional = true }
+azure-cognitiveservices-speech = { version = "*", optional = true }
+httpx = { version = "*", optional = true }
+
+[tool.poetry.extras]
+chat-completion-openai = ["openai"]
+chat-completion-cohere = ["cohere"]
+chat-completion-default = ["openai"]
+chat-completion-hosted = ["httpx"]
+
+image-captioning-blip = ["torch", "transformers", "numpy"]
+image-captioning-chat-completion-provider = []
+image-captioning-default = ["torch", "transformers", "numpy"]
+image-captioning-hosted = ["httpx"]
+
+image-embedding-clip = ["torch", "transformers", "numpy"]
+image-embedding-default = ["torch", "transformers", "numpy"]
+image-embedding-hosted = ["httpx"]
+
+speech-recognition-whisper = ["openai-whisper"]
+speech-recognition-azure-speech = ["azure-cognitiveservices-speech"]
+speech-recognition-default = ["openai-whisper"]
+speech-recognition-hosted = ["httpx"]
+
+zero-shot-image-classification-clip = ["torch", "transformers", "numpy"]
+zero-shot-image-classification-default = ["torch", "transformers", "numpy"]
+zero-shot-image-classification-hosted = ["httpx"]
+
+all = [
+    "openai",
+    "cohere",
+    "torch",
+    "transformers",
+    "numpy",
+    "openai-whisper",
+    "av",
+    "azure-cognitiveservices-speech",
+    "httpx"
+]
+
+[[tool.poetry.packages]]
+include = "verse"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
