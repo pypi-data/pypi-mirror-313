@@ -1,0 +1,3 @@
+from openai import OpenAI
+
+def create_llm_clients() -> tuple[OpenAI, OpenAI]: ...
