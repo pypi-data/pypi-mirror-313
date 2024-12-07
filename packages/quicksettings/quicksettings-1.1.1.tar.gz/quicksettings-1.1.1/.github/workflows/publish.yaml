@@ -1,0 +1,20 @@
+name: publish
+on:
+  release:
+    types: [published]
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Install the latest version of rye
+        uses: eifinger/setup-rye@v4
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: rye sync
+      - name: build
+        run: rye build
+      - name: publish
+        run: rye publish --token ${{ secrets.PYPI_TOKEN }} --yes
