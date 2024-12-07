@@ -1,0 +1,105 @@
+{
+  "type": "record",
+  "Aspect": {
+    "name": "assertionInferenceDetails"
+  },
+  "name": "AssertionInferenceDetails",
+  "namespace": "com.linkedin.pegasus2avro.assertion",
+  "fields": [
+    {
+      "type": [
+        "null",
+        "string"
+      ],
+      "name": "modelId",
+      "default": null,
+      "doc": "The id of the assertion prediction model."
+    },
+    {
+      "type": [
+        "null",
+        "string"
+      ],
+      "name": "modelVersion",
+      "default": null,
+      "doc": "The version of the model used to make the assertion."
+    },
+    {
+      "type": [
+        "null",
+        "float"
+      ],
+      "name": "confidence",
+      "default": null,
+      "doc": "The confidence of the inference, if available."
+    },
+    {
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ],
+      "name": "parameters",
+      "default": null,
+      "doc": "The parameters used to make the inference."
+    },
+    {
+      "type": [
+        "null",
+        "long"
+      ],
+      "name": "generatedAt",
+      "default": null,
+      "doc": "The time the inferred assertion was generated at in milliseconds."
+    },
+    {
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "AssertionAdjustmentSettings",
+          "namespace": "com.linkedin.pegasus2avro.assertion",
+          "fields": [
+            {
+              "type": {
+                "type": "enum",
+                "name": "AdjustmentAlgorithm",
+                "namespace": "com.linkedin.pegasus2avro.assertion",
+                "symbols": [
+                  "CUSTOM"
+                ],
+                "doc": "The adjustment algorithm to use when determining the threshold for an assertion."
+              },
+              "name": "algorithm",
+              "doc": "The algorithm to use to adjust assertion values to power the sensitivity control feature"
+            },
+            {
+              "type": "string",
+              "name": "algorithmName",
+              "doc": "The name of the algorithm to use to adjust assertion values to power the sensitivity control feature"
+            },
+            {
+              "type": [
+                "null",
+                {
+                  "type": "map",
+                  "values": "string"
+                }
+              ],
+              "name": "context",
+              "default": null,
+              "doc": "The context to use to adjust assertion values"
+            }
+          ],
+          "doc": "A set of settings that can be used to adjust assertion values\nThis is mainly applied against inferred assertions"
+        }
+      ],
+      "name": "adjustmentSettings",
+      "default": null,
+      "doc": "The settings used to adjust the assertion."
+    }
+  ],
+  "doc": "The details of an assertion that was inferred."
+}
