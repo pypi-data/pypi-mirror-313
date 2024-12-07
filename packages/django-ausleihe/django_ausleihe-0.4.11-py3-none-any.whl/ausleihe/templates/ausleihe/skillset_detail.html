@@ -1,0 +1,100 @@
+{% extends "ausleihe/base.html" %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-list' %}">Skills</a></li>
+      <li class="breadcrumb-item" aria-current="page">
+        {% if perms.ausleihe.change_skillset %}
+        <a href="{% url 'ausleihe:skillset-list' %}">Skill Sets</a>
+        {% else %}
+        Skill Sets
+        {% endif %}
+      </li>
+      <li class="breadcrumb-item" aria-current="page">{{ skillset.name }}</li>
+      {% if perms.ausleihe.change_skillset %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillset-edit' skillset.id %}">bearbeiten</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillset-duplicate' skillset.id %}">duplizieren und weiterbearbeiten</a></li>
+      {% endif %}
+    </ol>
+  </nav>
+  <div class="row">
+    <div class="col">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th>Mediatheknr.</th>
+            <td><a href="{% url 'ausleihe:medium-detail' skillset.medium_id %}">{{ skillset.medium }}</a></td>
+          </tr>
+          <tr>
+            <th>Name</th>
+            <td>{{ skillset.name }}</td>
+          </tr>
+          <tr>
+            <th>Skill</th>
+            <td>{{ skillset.skill.name }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <table class="table">
+        {% if skillset.item_relations.exists %}
+        <thead>
+          <tr>
+            <th>Anzahl</th>
+            <th>Item</th>
+          </tr>
+        </thead>
+        {% endif %}
+        <tbody>
+          {% for r in skillset.item_relations.all %}
+          <tr>
+            <td class="col-2">{{ r.anzahl }}</td>
+            <td>{{ r.item }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="2" class="text-secondary">Enthält nichts.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if messages %}
+  {% for message in messages %}
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-{{ message.tags}}">
+        {{ message }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if perms.ausleihe.delete_skillset %}
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-danger">
+        Wenn du das Skill Set löschen willst, dann erledige das
+        <a class="alert-link" target="_blank" href="{% url 'admin:ausleihe_skillset_change' skillset.id %}">über die Admin-Oberfläche</a>.
+        Die Mediatheknr. wird dabei nicht gelöscht. Auch dies kannst du
+        <a class="alert-link" target="_blank" href="{% url 'admin:ausleihe_medium_change' skillset.medium.id %}">über die Admin-Oberfläche</a>
+        erledigen.
+
+        {% if not user.is_staff %}
+        Dafür musst du von einem Administrator den <em>Mitarbeiter-Status</em> erhalten.
+        Wende dich an die Admins, damit sie dir das Häkchen setzen.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}
