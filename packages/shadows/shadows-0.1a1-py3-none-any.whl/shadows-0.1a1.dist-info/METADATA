@@ -1,0 +1,120 @@
+Metadata-Version: 2.3
+Name: shadows
+Version: 0.1a1
+Summary: Low-memory data interfaces for scverse
+Project-URL: Documentation, https://scverse.github.io/shadows
+Project-URL: Source, https://github.com/scverse/shadows
+Project-URL: Home-page, https://github.com/scverse/shadows
+Author: Danila Bredikhin
+Maintainer-email: Danila Bredikhin <danila@stanford.edu>
+License: BSD 3-Clause License
+        
+        Copyright (c) 2020, Danila Bredikhin
+        All rights reserved.
+        
+        Redistribution and use in source and binary forms, with or without
+        modification, are permitted provided that the following conditions are met:
+        
+        1. Redistributions of source code must retain the above copyright notice, this
+           list of conditions and the following disclaimer.
+        
+        2. Redistributions in binary form must reproduce the above copyright notice,
+           this list of conditions and the following disclaimer in the documentation
+           and/or other materials provided with the distribution.
+        
+        3. Neither the name of the copyright holder nor the names of its
+           contributors may be used to endorse or promote products derived from
+           this software without specific prior written permission.
+        
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+        AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+        IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+        DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+        FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+        DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+        SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+        CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+        OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+        OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Requires-Python: >=3.10
+Provides-Extra: all
+Requires-Dist: anndata>=0.8; extra == 'all'
+Requires-Dist: mudata>=0.2; extra == 'all'
+Requires-Dist: scipy; extra == 'all'
+Provides-Extra: dev
+Requires-Dist: setuptools-scm; extra == 'dev'
+Provides-Extra: doc
+Requires-Dist: furo; extra == 'doc'
+Requires-Dist: ipython; extra == 'doc'
+Requires-Dist: myst-parser; extra == 'doc'
+Requires-Dist: nbsphinx; extra == 'doc'
+Requires-Dist: pygments; extra == 'doc'
+Requires-Dist: readthedocs-sphinx-search; extra == 'doc'
+Requires-Dist: sphinx; extra == 'doc'
+Requires-Dist: sphinx-autodoc-typehints; extra == 'doc'
+Requires-Dist: sphinx-automodapi; extra == 'doc'
+Requires-Dist: sphinx-book-theme; extra == 'doc'
+Requires-Dist: sphinxcontrib-bibtex; extra == 'doc'
+Provides-Extra: test
+Requires-Dist: anndata; extra == 'test'
+Requires-Dist: mudata; extra == 'test'
+Requires-Dist: pqdata; extra == 'test'
+Requires-Dist: pytest; extra == 'test'
+Requires-Dist: pytest-cov; extra == 'test'
+Requires-Dist: scipy; extra == 'test'
+Requires-Dist: zarr; extra == 'test'
+Description-Content-Type: text/markdown
+
+<img src="./docs/img/shadows_header.jpg" data-canonical-src="./docs/img/shadows_header.svg" width="100%"/>
+
+# Shadows
+
+Shadows are on-disk interfaces for scverse data standards such as [AnnData](https://github.com/scverse/anndata) and [MuData](https://github.com/scverse/mudata).
+
+It is an experimental project.
+
+[![PyPi version](https://img.shields.io/pypi/v/shadows)](https://pypi.org/project/shadows)
+
+## Installation
+
+```
+pip install shadows
+# or
+pip install git+https://github.com/scverse/shadows
+```
+
+## Features
+
+The shadows library aims to implement the following features:
+
+- [x] **Shadow objects**: Read-only AnnDataShadow and MuDataShadow for HDF5 files.
+
+- [x] AnnDataShadow and MuDataShadow for Zarr files.
+
+- [x] AnnDataShadow and MuDataShadow for Parquet-based serialization ([pqdata](https://github.com/gtca/pqdata)).
+
+- [x] Data shadows for `.pqdata` and `.zarr` files on S3 storage.
+
+
+### Shadow objects
+
+Briefly, shadow objects simply work like this:
+
+```py
+from shadows import *
+ash = AnnDataShadow("pbmc3k.h5ad")
+msh = MuDataShadow("pbmc5k_citeseq.h5mu")
+```
+
+All the various features are showcased in the following tutorials:
+
+- [Getting started with shadow objects](/docs/examples/shadow-objects.ipynb)
+
+- [Advanced features of shadow objects](/docs/examples/shadows-features.ipynb)
+
