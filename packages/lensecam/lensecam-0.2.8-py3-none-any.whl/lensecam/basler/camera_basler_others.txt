@@ -1,0 +1,53 @@
+
+'''
+def capture_video(self):
+        try : 
+            if not self.camera.IsOpen():
+                self.camera.Open()
+            
+            if not self.camera.IsGrabbing():
+                self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
+            
+        except :
+            raise BaslerERROR("capture_video")
+        
+    def stop_video(self):
+        try : 
+            if self.camera.IsGrabbing():
+                self.camera.StopGrabbing()
+
+            if self.camera.IsOpen():
+                self.camera.Close()
+        except :
+            raise BaslerERROR("stop_video")
+
+    def get_image(self):
+        try :
+            if self.camera.IsOpen() and self.camera.IsGrabbing():
+                grab_result = self.camera.RetrieveResult(20000, pylon.TimeoutHandling_ThrowException)
+
+                if grab_result.GrabSucceeded():
+                    # Get the image data as a numpy array
+                    self.array = grab_result.Array
+
+                    grab_result.Release()
+                
+            elif not self.camera.IsOpen():
+                self.camera.Open()
+
+                grab_result = self.camera.GrabOne(20000)
+
+                if grab_result.GrabSucceeded():
+                    # Get the image data as a numpy array
+                    self.array = grab_result.Array
+
+                    grab_result.Release()
+                    
+                self.camera.Close()
+
+            return self.array
+        
+        except :
+            raise BaslerERROR("get_image")
+            
+'''
