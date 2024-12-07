@@ -1,0 +1,8 @@
+treturn = list()
+portfolio = list()
+buysell = list()
+drawdown = list()
+kline = list()
+position = list()
+order_info = list()
+ind_data = dict()
