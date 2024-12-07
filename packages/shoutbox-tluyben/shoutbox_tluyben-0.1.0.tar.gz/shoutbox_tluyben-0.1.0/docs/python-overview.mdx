@@ -1,0 +1,204 @@
+---
+title: "Python Integration Overview"
+description: "Overview of Python integration options for the Email API"
+---
+
+# Python Integration Options
+
+Our Email API offers multiple approaches for Python integration:
+
+1. Direct REST API calls (no dependencies)
+2. API Client (using our Python library)
+3. SMTP Client (using our Python library)
+4. Web Framework Integration (Flask/Django)
+
+## Comparison of Approaches
+
+### 1. Direct REST API
+
+[View Direct API Implementation →](/examples/python-direct-api)
+
+#### Pros
+- No dependencies required (except `requests`)
+- Complete control over requests
+- Lightweight implementation
+- Maximum flexibility
+- Simple integration
+- Suitable for minimal projects
+
+#### Example
+```python
+import requests
+
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': f'Bearer {api_key}',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': "sender@yourdomain.com",
+        'to': "recipient@example.com",
+        'subject': "Hello World",
+        'html': "<h1>Welcome!</h1>"
+    }
+)
+```
+
+### 2. API Client
+
+[View API Client Implementation →](/examples/python-api-client)
+
+#### Pros
+- Type-safe email options
+- Built-in error handling
+- Automatic request validation
+- Simple file attachment handling
+- Clean, object-oriented interface
+- Regular updates and improvements
+
+#### Example
+```python
+from shoutbox import ShoutboxClient, Email
+
+client = ShoutboxClient()
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Hello World",
+    html="<h1>Welcome!</h1>"
+)
+
+client.send(email)
+```
+
+### 3. SMTP Client
+
+[View SMTP Client Implementation →](/examples/python-smtp-client)
+
+#### Pros
+- SMTP protocol support
+- Legacy system compatibility
+- Same features as API client
+- Multiple recipient support
+- Custom headers support
+- Attachment handling
+
+#### Example
+```python
+from shoutbox import SMTPClient, Email
+
+client = SMTPClient()
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to=["recipient1@example.com", "recipient2@example.com"],
+    subject="Hello World",
+    html="<h1>Welcome!</h1>"
+)
+
+client.send(email)
+```
+
+### 4. Web Framework Integration
+
+[View Framework Integration →](/examples/python-frameworks)
+
+#### Flask Integration
+```python
+from flask import Flask
+from shoutbox import ShoutboxClient, Email
+
+app = Flask(__name__)
+client = ShoutboxClient()
+
+@app.route('/send-email', methods=['POST'])
+def send_email():
+    email = Email(
+        from_email="your-app@domain.com",
+        to=request.json['to'],
+        subject=request.json['subject'],
+        html=request.json['html']
+    )
+    
+    response = client.send(email)
+    return {'success': True}
+```
+
+#### Django Integration
+```python
+# settings.py
+EMAIL_BACKEND = 'myapp.backends.ShoutboxEmailBackend'
+SHOUTBOX_API_KEY = 'your-api-key'
+
+# views.py
+from django.core.mail import send_mail
+
+send_mail(
+    'Subject',
+    'Message',
+    'from@yourdomain.com',
+    ['to@example.com'],
+    html_message='<h1>HTML Message</h1>'
+)
+```
+
+## Feature Comparison
+
+| Feature                 | Direct API | API Client | SMTP Client | Web Framework |
+|------------------------|------------|------------|-------------|---------------|
+| Dependencies           | Minimal    | Library    | Library     | Framework     |
+| Type Safety            | ❌         | ✅         | ✅          | ✅            |
+| Error Handling         | Manual     | Built-in   | Built-in    | Built-in      |
+| Request Validation     | Manual     | Auto       | Auto        | Auto          |
+| File Attachments       | Manual     | Simple     | Simple      | Simple        |
+| Multiple Recipients    | Manual     | ✅         | ✅          | ✅            |
+| Custom Headers         | ✅         | ✅         | ✅          | ✅            |
+| Queue Support          | Manual     | Manual     | Manual      | Framework     |
+| Rate Limiting          | Manual     | Manual     | Manual      | Framework     |
+| Framework Features     | ❌         | ❌         | ❌          | ✅            |
+| Learning Curve         | Low        | Low        | Low         | Medium        |
+| Setup Complexity       | Minimal    | Simple     | Simple      | Moderate      |
+
+## Choosing the Right Approach
+
+### Use Direct API When:
+- You want minimal dependencies
+- You need complete control
+- You're building a minimal application
+- You prefer working directly with the API
+- You want the lightest implementation
+
+### Use API Client When:
+- You want a clean, object-oriented API
+- You need type safety
+- You want automatic error handling
+- You're using pip/PyPI
+- You're not using a web framework
+
+### Use SMTP Client When:
+- You need SMTP protocol support
+- You're integrating with legacy systems
+- You want the same features as API client
+- You need multiple recipient support
+- You prefer SMTP over REST
+
+### Use Web Framework Integration When:
+- You're using Flask or Django
+- You want framework integration
+- You need queue support
+- You want built-in rate limiting
+- You prefer dependency injection
+
+## Getting Started
+
+Choose your preferred approach and follow the detailed implementation guide:
+
+- [Direct API Implementation Guide →](/examples/python-direct-api)
+- [API Client Implementation Guide →](/examples/python-api-client)
+- [SMTP Client Implementation Guide →](/examples/python-smtp-client)
+- [Flask Integration Guide →](/examples/python-flask)
+- [Django Integration Guide →](/examples/python-django)
+
+All approaches are fully supported and maintained. Choose based on your project's specific needs and constraints.

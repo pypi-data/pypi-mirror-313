@@ -1,0 +1,299 @@
+---
+title: "Python Library Documentation"
+description: "Detailed documentation for the Python Shoutbox library"
+---
+
+# Python Library Documentation
+
+The Shoutbox Python library provides a robust, type-safe interface for sending emails through both REST API and SMTP protocols.
+
+## Installation
+
+Install using pip:
+
+```bash
+pip install shoutbox
+```
+
+## API Client Usage
+
+### Basic Usage
+
+```python
+from shoutbox import ShoutboxClient, Email
+
+# Initialize client
+client = ShoutboxClient(api_key='your-api-key')
+
+# Create and send a basic email
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Hello World",
+    html="<h1>Welcome!</h1><p>This is a test email.</p>"
+)
+
+response = client.send(email)
+```
+
+### With Named Recipients
+
+```python
+from shoutbox import ShoutboxClient, Email, EmailAddress
+
+client = ShoutboxClient()
+
+email = Email(
+    from_email=EmailAddress("sender@yourdomain.com", "Sender Name"),
+    to=[
+        EmailAddress("recipient1@example.com", "John Doe"),
+        EmailAddress("recipient2@example.com", "Jane Smith")
+    ],
+    subject="Hello",
+    html="<h1>Welcome!</h1>"
+)
+
+response = client.send(email)
+```
+
+### With Attachments
+
+```python
+from shoutbox import ShoutboxClient, Email, Attachment
+
+client = ShoutboxClient()
+
+# Create attachment
+with open('document.pdf', 'rb') as f:
+    attachment = Attachment(
+        filename='document.pdf',
+        content=f.read(),
+        content_type='application/pdf'
+    )
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Document Attached",
+    html="<h1>Please find the document attached</h1>",
+    attachments=[attachment]
+)
+
+response = client.send(email)
+```
+
+### With Custom Headers
+
+```python
+from shoutbox import ShoutboxClient, Email
+
+client = ShoutboxClient()
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Priority Email",
+    html="<h1>Important Message</h1>",
+    headers={
+        'X-Priority': '1',
+        'X-Custom-Header': 'Custom Value'
+    }
+)
+
+response = client.send(email)
+```
+
+## SMTP Client Usage
+
+### Basic SMTP Usage
+
+```python
+from shoutbox import SMTPClient, Email
+
+# Initialize SMTP client
+client = SMTPClient(api_key='your-api-key')
+
+# Create and send email
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Hello via SMTP",
+    html="<h1>Welcome!</h1>"
+)
+
+success = client.send(email)
+```
+
+### Custom SMTP Settings
+
+```python
+from shoutbox import SMTPClient, Email
+
+# Initialize with custom settings
+client = SMTPClient(
+    api_key='your-api-key',
+    host='custom.smtp.server',
+    port=465,
+    use_tls=True,
+    timeout=60
+)
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Custom SMTP Test",
+    html="<h1>Custom SMTP Test</h1>"
+)
+
+success = client.send(email)
+```
+
+## Email Object Reference
+
+### Properties
+
+- **from_email** (str | EmailAddress): Sender's email address
+- **to** (str | list[str] | EmailAddress | list[EmailAddress]): Recipient(s)
+- **subject** (str): Email subject
+- **html** (str): HTML content
+- **reply_to** (Optional[str | EmailAddress]): Reply-to address
+- **headers** (Optional[dict]): Custom headers
+- **attachments** (Optional[list[Attachment]]): File attachments
+
+### EmailAddress Properties
+
+- **email** (str): Email address
+- **name** (Optional[str]): Display name
+
+### Attachment Properties
+
+- **filename** (str): Name of the file
+- **content** (bytes): File content
+- **content_type** (Optional[str]): MIME type
+
+## Error Handling
+
+The library provides specific exceptions for different error cases:
+
+```python
+from shoutbox import ShoutboxClient, Email
+from shoutbox.exceptions import ShoutboxError, ValidationError, APIError
+
+client = ShoutboxClient()
+
+try:
+    email = Email(
+        from_email="sender@yourdomain.com",
+        to="recipient@example.com",
+        subject="Test Email",
+        html="<h1>Test</h1>"
+    )
+    response = client.send(email)
+except ValidationError as e:
+    print(f"Validation error: {e}")
+except APIError as e:
+    print(f"API error (status {e.status_code}): {e}")
+except ShoutboxError as e:
+    print(f"General error: {e}")
+```
+
+## Client Configuration
+
+### API Client Options
+
+- **api_key** (Optional[str]): Your API key (can be set via SHOUTBOX_API_KEY env var)
+- **base_url** (Optional[str]): API base URL (defaults to https://api.shoutbox.net)
+- **timeout** (Optional[int]): Request timeout in seconds (default: 30)
+- **verify_ssl** (Optional[bool]): Whether to verify SSL certificates (default: True)
+
+### SMTP Client Options
+
+- **api_key** (Optional[str]): Your API key (can be set via SHOUTBOX_API_KEY env var)
+- **host** (Optional[str]): SMTP host (default: smtp.shoutbox.net)
+- **port** (Optional[int]): SMTP port (default: 587)
+- **use_tls** (Optional[bool]): Whether to use TLS (default: True)
+- **timeout** (Optional[int]): Connection timeout in seconds (default: 30)
+
+## Best Practices
+
+1. **Environment Variables**
+   - Store API keys in environment variables
+   - Use .env files for development
+
+2. **Error Handling**
+   - Always wrap API calls in try-except blocks
+   - Handle specific exceptions appropriately
+   - Log errors for debugging
+
+3. **Resource Management**
+   - Use context managers (with statements) for clients
+   - Close connections properly
+
+4. **Security**
+   - Always use TLS for SMTP connections
+   - Validate email addresses
+   - Sanitize HTML content
+
+5. **Performance**
+   - Reuse client instances
+   - Use bulk operations when possible
+   - Set appropriate timeouts
+
+## Testing
+
+The library includes comprehensive test utilities:
+
+```python
+from shoutbox.testing import MockShoutboxClient
+
+# Create a mock client for testing
+mock_client = MockShoutboxClient()
+
+# Test your email sending logic
+email = Email(
+    from_email="test@example.com",
+    to="recipient@example.com",
+    subject="Test",
+    html="<h1>Test</h1>"
+)
+
+# No actual API calls will be made
+response = mock_client.send(email)
+```
+
+## Migration Guide
+
+### From Direct API to Library
+
+```python
+# Before (Direct API)
+requests.post(
+    'https://api.shoutbox.net/send',
+    headers={'Authorization': f'Bearer {api_key}'},
+    json={'from': 'sender@example.com', 'to': 'recipient@example.com'}
+)
+
+# After (Library)
+client = ShoutboxClient(api_key=api_key)
+email = Email(from_email='sender@example.com', to='recipient@example.com')
+client.send(email)
+```
+
+### From SMTP to API Client
+
+```python
+# Before (SMTP)
+smtp_client = SMTPClient(api_key=api_key)
+smtp_client.send(email)
+
+# After (API)
+api_client = ShoutboxClient(api_key=api_key)
+api_client.send(email)  # Same email object works with both
+```
+
+## Support
+
+- GitHub Issues for bug reports
+- Email support for critical issues
+- Regular updates and maintenance
+- Backward compatibility guaranteed

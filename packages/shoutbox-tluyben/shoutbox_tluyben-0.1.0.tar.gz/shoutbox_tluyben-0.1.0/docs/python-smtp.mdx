@@ -1,0 +1,328 @@
+---
+title: "Python SMTP Integration"
+description: "Detailed documentation for the Python Shoutbox SMTP integration"
+---
+
+# Python SMTP Integration
+
+The Shoutbox Python library provides SMTP support for sending emails through our SMTP servers, offering an alternative to the REST API.
+
+## SMTP vs API Client
+
+### When to Use SMTP
+
+- Legacy system integration
+- Firewall restrictions on HTTP
+- Specific SMTP requirements
+- Need for custom SMTP settings
+- Direct server-to-server communication
+
+### When to Use API Client
+
+- Modern application development
+- RESTful architecture
+- Webhook support needed
+- Advanced analytics required
+- Simpler implementation preferred
+
+## Installation
+
+Install using pip:
+
+```bash
+pip install shoutbox
+```
+
+## Basic Usage
+
+### Simple Email
+
+```python
+from shoutbox import SMTPClient, Email
+
+client = SMTPClient(api_key='your-api-key')
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Hello via SMTP",
+    html="<h1>Welcome!</h1><p>This is a test email via SMTP.</p>"
+)
+
+success = client.send(email)
+```
+
+### Multiple Recipients
+
+```python
+from shoutbox import SMTPClient, Email, EmailAddress
+
+client = SMTPClient()
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to=[
+        EmailAddress("recipient1@example.com", "John Doe"),
+        EmailAddress("recipient2@example.com", "Jane Smith")
+    ],
+    subject="Group Message",
+    html="<h1>Hello Everyone!</h1>"
+)
+
+success = client.send(email)
+```
+
+### With Attachments
+
+```python
+from shoutbox import SMTPClient, Email, Attachment
+
+client = SMTPClient()
+
+# Create attachment
+with open('document.pdf', 'rb') as f:
+    attachment = Attachment(
+        filename='document.pdf',
+        content=f.read(),
+        content_type='application/pdf'
+    )
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Document Attached",
+    html="<h1>Please find the document attached</h1>",
+    attachments=[attachment]
+)
+
+success = client.send(email)
+```
+
+## Advanced Configuration
+
+### Custom SMTP Settings
+
+```python
+from shoutbox import SMTPClient, Email
+
+client = SMTPClient(
+    api_key='your-api-key',
+    host='custom.smtp.server',
+    port=465,
+    use_tls=True,
+    timeout=60
+)
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Custom SMTP Test",
+    html="<h1>Custom SMTP Test</h1>"
+)
+
+success = client.send(email)
+```
+
+### Custom Headers
+
+```python
+from shoutbox import SMTPClient, Email
+
+client = SMTPClient()
+
+email = Email(
+    from_email="sender@yourdomain.com",
+    to="recipient@example.com",
+    subject="Priority Message",
+    html="<h1>Important!</h1>",
+    headers={
+        'X-Priority': '1',
+        'X-MSMail-Priority': 'High',
+        'Importance': 'High'
+    }
+)
+
+success = client.send(email)
+```
+
+## Error Handling
+
+```python
+from shoutbox import SMTPClient, Email
+from shoutbox.exceptions import ShoutboxError
+
+client = SMTPClient()
+
+try:
+    email = Email(
+        from_email="sender@yourdomain.com",
+        to="recipient@example.com",
+        subject="Test Email",
+        html="<h1>Test</h1>"
+    )
+    success = client.send(email)
+except ShoutboxError as e:
+    print(f"SMTP error: {e}")
+```
+
+## Configuration Options
+
+### Client Settings
+
+| Option    | Type    | Default           | Description                    |
+|-----------|---------|-------------------|--------------------------------|
+| api_key   | str     | None             | Your API key                   |
+| host      | str     | smtp.shoutbox.net| SMTP server hostname           |
+| port      | int     | 587              | SMTP server port               |
+| use_tls   | bool    | True             | Whether to use TLS             |
+| timeout   | int     | 30               | Connection timeout in seconds   |
+
+### Security Considerations
+
+1. **TLS Usage**
+   - Always use TLS in production
+   - Verify SSL certificates
+   - Use secure ports (587/465)
+
+2. **Authentication**
+   - Use API key for authentication
+   - Store credentials securely
+   - Use environment variables
+
+3. **Network Security**
+   - Configure firewalls appropriately
+   - Monitor SMTP logs
+   - Set appropriate timeouts
+
+## Best Practices
+
+### Connection Management
+
+```python
+# Use context manager for automatic cleanup
+with SMTPClient() as client:
+    email = Email(
+        from_email="sender@yourdomain.com",
+        to="recipient@example.com",
+        subject="Test",
+        html="<h1>Test</h1>"
+    )
+    success = client.send(email)
+```
+
+### Bulk Sending
+
+```python
+from shoutbox import SMTPClient, Email
+
+client = SMTPClient()
+
+# Create multiple emails
+emails = [
+    Email(
+        from_email="sender@yourdomain.com",
+        to=f"recipient{i}@example.com",
+        subject=f"Bulk Email {i}",
+        html=f"<h1>Email {i}</h1>"
+    )
+    for i in range(1, 4)
+]
+
+# Send emails
+for email in emails:
+    try:
+        success = client.send(email)
+    except Exception as e:
+        print(f"Failed to send to {email.to}: {e}")
+```
+
+### Error Recovery
+
+```python
+from shoutbox import SMTPClient, Email
+import time
+
+def send_with_retry(client, email, max_retries=3, delay=1):
+    for attempt in range(max_retries):
+        try:
+            return client.send(email)
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(delay * (attempt + 1))
+```
+
+## Testing
+
+### Mock SMTP Client
+
+```python
+from shoutbox.testing import MockSMTPClient
+
+# Create mock client
+mock_client = MockSMTPClient()
+
+# Test email sending
+email = Email(
+    from_email="test@example.com",
+    to="recipient@example.com",
+    subject="Test",
+    html="<h1>Test</h1>"
+)
+
+# No actual SMTP connection will be made
+success = mock_client.send(email)
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Connection Errors**
+   - Check network connectivity
+   - Verify firewall settings
+   - Confirm port availability
+
+2. **Authentication Failures**
+   - Verify API key
+   - Check credentials
+   - Confirm TLS settings
+
+3. **Timeout Issues**
+   - Adjust timeout settings
+   - Check network latency
+   - Monitor server response time
+
+### Logging
+
+```python
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('shoutbox.smtp')
+
+client = SMTPClient()
+# SMTP operations will now be logged
+```
+
+## Migration
+
+### From API to SMTP
+
+```python
+# Before (API Client)
+api_client = ShoutboxClient()
+response = api_client.send(email)
+
+# After (SMTP Client)
+smtp_client = SMTPClient()
+success = smtp_client.send(email)  # Same email object works with both
+```
+
+## Support
+
+- Technical documentation
+- GitHub Issues
+- Email support
+- Regular updates
+- Security patches

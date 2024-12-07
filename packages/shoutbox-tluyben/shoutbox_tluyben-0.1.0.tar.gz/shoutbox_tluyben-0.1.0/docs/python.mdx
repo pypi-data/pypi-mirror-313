@@ -1,0 +1,282 @@
+---
+title: "Without our library"
+description: "Simple, powerful email sending API with Python integration"
+---
+
+# Email API Python Client
+
+Simple, powerful email sending API with support for attachments and custom headers.
+
+## Quick Start
+
+```python
+import requests
+
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': 'sender@yourdomain.com',
+        'to': 'recipient@example.com',
+        'subject': 'Hello World',
+        'html': '<h1>Welcome!</h1>'
+    }
+)
+```
+
+## Authentication
+
+All API requests require an API key passed in the `headers` dictionary:
+
+```python
+headers = {
+    'Authorization': 'Bearer key_XXXXXXXXX'
+}
+```
+
+## Basic Request Structure
+
+| Field      | Type | Required | Description                 |
+| ---------- | ---- | -------- | --------------------------- |
+| `from`     | str  | Yes      | Sender email address        |
+| `to`       | str  | Yes      | Recipient email address(es) |
+| `subject`  | str  | Yes      | Email subject line          |
+| `html`     | str  | Yes      | HTML content of the email   |
+| `name`     | str  | No       | Sender name                 |
+| `reply_to` | str  | No       | Reply-to email address      |
+
+## Recipients
+
+### Multiple Recipients
+
+You can send to multiple recipients by separating email addresses with commas:
+
+```python
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': 'no-reply@yourdomain.com',
+        'to': 'user1@example.com,user2@example.com',
+        'subject': 'Team Update',
+        'html': '<h1>Important Announcement</h1>'
+    }
+)
+```
+
+### Named Recipients
+
+You can include recipient names using the format `Name <email@domain.com>`:
+
+```python
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': 'no-reply@yourdomain.com',
+        'to': 'John Doe <john@example.com>,Jane Smith <jane@example.com>',
+        'subject': 'Team Meeting',
+        'html': '<h1>Meeting Invitation</h1>'
+    }
+)
+```
+
+## Reply-To Address
+
+Set a different reply-to address using the `reply_to` field:
+
+```python
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': 'no-reply@yourdomain.com',
+        'reply_to': 'support@yourdomain.com',
+        'to': 'customer@example.com',
+        'subject': 'Support Ticket Update',
+        'html': '<h1>Your ticket has been updated</h1>'
+    }
+)
+```
+
+You can also include a name in the reply-to address:
+
+```python
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': 'no-reply@yourdomain.com',
+        'reply_to': 'Support Team <support@yourdomain.com>',
+        'to': 'customer@example.com',
+        'subject': 'Support Ticket Update',
+        'html': '<h1>Your ticket has been updated</h1>'
+    }
+)
+```
+
+## Attachments
+
+### Complete Example with Attachment
+
+```python
+import base64
+
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': 'reports@yourdomain.com',
+        'name': 'Reports Team',
+        'to': 'John Smith <john@example.com>',
+        'subject': 'Monthly Report - January 2024',
+        'html': '<h1>Monthly Report</h1><p>Please find your report attached.</p>',
+        'attachments': [
+            {
+                'content': base64.b64encode(open('january_report.pdf', 'rb').read()).decode(),
+                'filename': 'january_report.pdf'
+            },
+            {
+                'content': base64.b64encode(open('data.xlsx', 'rb').read()).decode(),
+                'filename': 'data.xlsx'
+            }
+        ]
+    }
+)
+```
+
+### Multiple Attachments with Headers
+
+```python
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': 'no-reply@yourdomain.com',
+        'name': 'Document System',
+        'to': 'Jane Doe <jane@example.com>,support@example.com',
+        'reply_to': 'Support <support@yourdomain.com>',
+        'subject': 'Your Requested Documents',
+        'html': '<h1>Documents Ready</h1><p>Please find your requested documents attached.</p>',
+        'attachments': [
+            {
+                'content': base64.b64encode(open('document1.pdf', 'rb').read()).decode(),
+                'filename': 'document1.pdf'
+            },
+            {
+                'content': base64.b64encode(open('document2.pdf', 'rb').read()).decode(),
+                'filename': 'document2.pdf'
+            }
+        ],
+        'headers': {
+            'X-Priority': '1',
+            'X-Document-Type': 'confidential',
+            'List-Unsubscribe': '<https://yourdomain.com/unsubscribe>',
+            'X-Tracking-ID': 'doc-123456'
+        }
+    }
+)
+```
+
+## Custom Headers
+
+### Complete Example with Headers
+
+```python
+response = requests.post(
+    'https://api.shoutbox.net/send',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'from': 'newsletter@yourdomain.com',
+        'name': 'Newsletter Team',
+        'to': 'Subscriber <subscriber@example.com>',
+        'reply_to': 'Newsletter Support <newsletter-support@yourdomain.com>',
+        'subject': 'Your Weekly Newsletter',
+        'html': "<h1>This Week's Updates</h1><p>Latest news and updates...</p>",
+        'headers': {
+            'List-Unsubscribe': '<https://yourdomain.com/unsubscribe>',
+            'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+            'X-Campaign-ID': 'newsletter_2024_01',
+            'X-Mailer': 'ShoutboxAPI/1.0',
+            'Precedence': 'bulk',
+            'X-Auto-Response-Suppress': 'OOF, AutoReply'
+        }
+    }
+)
+```
+
+## Security Best Practices
+
+<Info>
+### API Key Management
+Use environment variables to store your API key:
+
+```python
+import os
+
+api_key = os.getenv('SHOUTBOX_API_KEY')
+```
+
+### Error Handling
+
+Implement proper error handling:
+
+```python
+try:
+    response = requests.post(...)
+    response.raise_for_status()
+except requests.exceptions.RequestException as e:
+    print(f"Error sending email: {e}")
+```
+
+### File Operations
+
+Use context managers for file operations:
+
+```python
+with open('file.pdf', 'rb') as f:
+    content = base64.b64encode(f.read()).decode()
+```
+</Info>
+
+### Additional Security Measures
+
+1. Never share your API key publicly
+2. Validate email addresses before sending
+3. Use HTTPS for all API calls
+4. Base64 encode attachments properly
+5. Keep attachment sizes reasonable
+
+## Rate Limits
+
+<Warning>
+Please contact support for information about rate limits for your API key.
+</Warning>
+
+## Support
+
+For additional support or questions, please contact our support team.
