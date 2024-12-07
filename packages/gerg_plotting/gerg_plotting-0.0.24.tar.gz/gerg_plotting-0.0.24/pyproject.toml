@@ -1,0 +1,62 @@
+[tool.poetry]
+name = "gerg_plotting"
+version = "0.0.24"
+description = ""
+authors = ["Alec Krueger <alecmkrueger@tamu.edu>"]
+readme = "README.md"
+packages = [{include = "gerg_plotting", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numpy = "^2.0.0"
+pandas = "^2.2.2"
+matplotlib = "^3.9.1"
+xarray = "^2024.6.0"
+attrs = "^23.2.0"
+netcdf4 = "^1.7.1.post1"
+cmocean = "^4.0.3"
+scipy = "^1.14.0"
+mayavi = "^4.8.2"
+gsw = "^3.6.19"
+imageio = "^2.34.2"
+cartopy = "^0.23.0"
+notebook = "^7.2.2"
+configobj = "^5.0.9"
+opencv-python = "^4.10.0.84"
+wxpython = "^4.2.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+flake8 = "^7.1.0"
+isort = "^5.13.2"
+mypy = "^1.10.1"
+pylint = "^3.2.5"
+poetry-plugin-export = "^1.8.0"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.2.2"
+faker = "^26.0.0"
+pytest-cov = "^6.0.0"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    'ignore:numpy.ndarray size changed, may indicate binary incompatibility',
+    'ignore:More than 20 figures have been opened'
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "serial",
+    "example: marks tests as example (deselect with '-m \"not example\"')"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "if __name__ == .__main__.:"
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
