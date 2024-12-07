@@ -1,0 +1,36 @@
+[package]
+name = "lindera-py"
+version = "0.38.2"
+edition = "2021"
+description = "Python binding for Lindera."
+documentation = "https://docs.rs/lindera-py"
+homepage = "https://github.com/lindera-morphology/lindera-py"
+repository = "https://github.com/lindera-morphology/lindera-py"
+readme = "README.md"
+keywords = ["morphological", "analysis", "library", "python"]
+categories = ["text-processing"]
+license = "MIT"
+
+[lib]
+name = "lindera"
+crate-type = ["cdylib"]
+
+[features]
+default = []  # No directories included
+ipadic = ["lindera/ipadic"]  # Include IPADIC dictionary (Japanese)
+ipadic-neologd = ["lindera/ipadic-neologd"]  # Include IPADIC NEologd dictionary (Japanese)
+unidic = ["lindera/unidic"]  # Include UniDic dictionary (Japanese)
+ko-dic = ["lindera/ko-dic"]  # Include ko-dic dictionary (Korean)
+cc-cedict = ["lindera/cc-cedict"]  # Include CC-CEDICT dictionary (Chinese)
+compress = ["lindera/compress"]  # Compress dictionaries
+cjk = ["ipadic", "ko-dic", "cc-cedict", "compress"]  # Include CJK dictionary (Chinese, Japanese, Korean)
+
+[dependencies]
+pyo3 = { version = "0.23.3", features = ["extension-module"] }
+serde = { version = "1.0.214", features = ["derive"] }
+serde_json = "1.0.133"
+
+lindera = "0.38.1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+openssl = { version = "0.10.68", features = ["vendored"] }
