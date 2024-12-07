@@ -1,0 +1,14 @@
+#!/bin/bash
+# SPDX-FileCopyrightText: (C) 2024 Avnet Embedded GmbH
+# SPDX-License-Identifier: GPL-3.0-only
+
+SCOTTY_QEMUPARAMS="${SCOTTY_QEMUPARAMS:--smp 4}"
+
+sudo chown -R "${uid:-}:${gid:-}" "${HOME}"
+sudo mount -o remount,shared / /
+
+# Runs a command against scotty-test
+DOCKER_EXTRA_ARGS="${DOCKER_EXTRA_ARGS} --privileged --network host"
+# shellcheck disable=SC1091
+source "$(dirname "${0}")/scotty"
+run_command scotty-oeqa-report-enhancer "${@}"
