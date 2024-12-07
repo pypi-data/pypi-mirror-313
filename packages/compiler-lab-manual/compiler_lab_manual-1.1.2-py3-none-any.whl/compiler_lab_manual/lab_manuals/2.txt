@@ -1,0 +1,24 @@
+%{
+#include <stdio.h>
+%}
+
+%%
+
+int|float|char      { printf("Keyword: %s\n", yytext); }
+[0-9]+              { printf("Constant: %s\n", yytext); }
+[a-zA-Z_][a-zA-Z0-9_]* { printf("Identifier: %s\n", yytext); }
+[+\-*/=<>]          { printf("Operator: %s\n", yytext); }
+.                   { printf("Invalid character: %s\n", yytext); }
+
+%%
+
+int main() {
+    yylex();
+    return 0;
+}
+
+
+//compile cmd
+lex lexer.l
+gcc lex.yy.c -o lexer -ll
+./lexer

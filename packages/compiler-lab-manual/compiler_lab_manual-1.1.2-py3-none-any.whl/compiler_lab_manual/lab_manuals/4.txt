@@ -1,0 +1,38 @@
+lex
+
+%{
+#include <stdio.h>
+#include "y.tab.h"
+%}
+
+%%
+
+[a-zA-Z][a-zA-Z0-9]*   { yylval = strdup(yytext); return ID; }
+
+%%
+
+int main() {
+    yyparse();
+    return 0;
+}
+
+yacc
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%token ID
+
+%%
+
+var: ID { printf("Valid variable: %s\n", yytext); }
+    ;
+
+%%
+
+int main() {
+    printf("Enter a variable: ");
+    yyparse();
+    return 0;
+}

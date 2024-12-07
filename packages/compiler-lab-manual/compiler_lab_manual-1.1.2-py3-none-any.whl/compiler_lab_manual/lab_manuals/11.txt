@@ -1,0 +1,55 @@
+lex
+%{
+#include <stdio.h>
+#include "y.tab.h"
+%}
+
+%%
+
+[0-9]+      { yylval = atoi(yytext); return NUM; }    // Numeric values
+[+\-*/]      { return yytext[0]; }                    // Operators
+[ \t\n]      { /* ignore whitespace */ }
+.            { printf("Invalid character: %s\n", yytext); return 0; }
+
+%%
+
+int yywrap() { return 1; }  // End of file
+
+
+yacc
+%{
+#include <stdio.h>
+#include <stdlib.h>
+
+int yylex();  // Declare the lexer function
+void yyerror(char *s) { printf("Error: %s\n", s); }
+%}
+
+%token NUM
+
+%%
+
+calculation: expression '\n' { printf("Result = %d\n", $1); }
+           ;
+
+expression: expression '+' term  { $$ = $1 + $3; }
+          | expression '-' term  { $$ = $1 - $3; }
+          | term                 { $$ = $1; }
+          ;
+
+term: term '*' factor  { $$ = $1 * $3; }
+    | term '/' factor  { $$ = $1 / $3; }
+    | factor           { $$ = $1; }
+    ;
+
+factor: NUM            { $$ = $1; }
+       | '(' expression ')'  { $$ = $2; }
+       ;
+
+%%
+
+int main() {
+    printf("Enter an arithmetic expression: ");
+    yyparse();
+    return 0;
+}
