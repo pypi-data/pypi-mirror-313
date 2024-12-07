@@ -1,0 +1,47 @@
+Metadata-Version: 2.1
+Name: llama-index-postprocessor-bedrock-rerank
+Version: 0.3.0
+Summary: llama-index postprocessor bedrock rerank integration
+License: MIT
+Author: Your Name
+Author-email: you@example.com
+Requires-Python: >=3.9,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: boto3 (>=1.35.73,<2.0.0)
+Requires-Dist: llama-index-core (>=0.12.0,<0.13.0)
+Description-Content-Type: text/markdown
+
+# LlamaIndex Postprocessor Integration: AWS Bedrock Rerankers
+
+## Sample Usage
+
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.postprocessor.bedrock_rerank import AWSBedrockRerank
+
+
+documents = SimpleDirectoryReader("./data/paul_graham/").load_data()
+index = VectorStoreIndex.from_documents(documents=documents)
+reranker = AWSBedrockRerank(
+    top_n=3,
+    model_id="cohere.rerank-v3-5:0",
+    region_name="us-west-2",
+)
+query_engine = index.as_query_engine(
+    similarity_top_k=10,
+    node_postprocessors=[reranker],
+)
+response = query_engine.query(
+    "What did Sam Altman do in this essay?",
+)
+
+print(response)
+
+print(response.source_nodes)
+```
+
