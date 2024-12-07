@@ -1,0 +1,65 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: build
+
+on:
+  push:
+    branches: [ main, development]
+  pull_request:
+
+jobs:
+
+  lint:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+        # only run linting on a single python version (a recent one that is used for development)
+        python-version: ["3.11"]
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          make dev
+      
+      - name: Lint - isort, black
+        run: |
+          make lint
+
+  build:
+    needs: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-12, ubuntu-latest]
+        #TODO: Fix macos-12 to be macos-latest. Issue with using latest (arm?) and point cloud utils install. . 
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          make dev
+          make requirements
+          make install
+      # - name: Install Cython code
+      #   run: |
+      #     make build-cython
+      ## above only needed if specificalyl installing/building cython code. 
+      - name: Test with pytest
+        run: |
+          make test      
