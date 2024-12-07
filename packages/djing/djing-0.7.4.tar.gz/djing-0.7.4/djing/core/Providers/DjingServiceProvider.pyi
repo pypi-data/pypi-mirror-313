@@ -1,0 +1,9 @@
+from Illuminate.Contracts.Foundation.Application import Application as Application
+from Illuminate.Support.ServiceProvider import ServiceProvider
+from _typeshed import Incomplete
+
+class DjingServiceProvider(ServiceProvider):
+    app: Incomplete
+    def __init__(self, app: Application) -> None: ...
+    def register(self) -> None: ...
+    def boot(self) -> None: ...
