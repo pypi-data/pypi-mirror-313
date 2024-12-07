@@ -1,0 +1,1100 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../description/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.30">
+    
+    
+      
+        <title>Cli tools - Package auto assembler</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.3cba04c6.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../css/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#about" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Package auto assembler" class="md-header__button md-logo" aria-label="Package auto assembler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Package auto assembler
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Cli tools
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Package auto assembler" class="md-nav__button md-logo" aria-label="Package auto assembler" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Package auto assembler
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Intro
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Cli tools
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Cli tools
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#about" class="md-nav__link">
+    <span class="md-ellipsis">
+      About
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description-of-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description of tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Description of tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initializing-paa" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initializing PAA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating packages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checking-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checking dependencies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-apps-from-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running apps from packages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extracting-files-from-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extracting files from packages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-modules-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show modules info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other" class="md-nav__link">
+    <span class="md-ellipsis">
+      Other
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../description/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Description
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../package_structure/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Package structure
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python_packaging_repo/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Python packaging repo
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Release notes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#about" class="md-nav__link">
+    <span class="md-ellipsis">
+      About
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description-of-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description of tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Description of tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initializing-paa" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initializing PAA
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating packages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#checking-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Checking dependencies
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-apps-from-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running apps from packages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extracting-files-from-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extracting files from packages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-modules-info" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show modules info
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other" class="md-nav__link">
+    <span class="md-ellipsis">
+      Other
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  <h1>Cli tools</h1>
+
+<h2 id="about">About</h2>
+<p>One of available interfaces to use PAA capabalities is cli tools. After installing <a href="https://kiril-mordan.github.io/reusables/package_auto_assembler/"><code>package-auto-assembler</code></a> one can view the list of available cli tools like shown below.</p>
+<pre><code class="language-bash">paa --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa [OPTIONS] COMMAND [ARGS]...
+
+  Package Auto Assembler CLI tool.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  check-licenses               Check licenses of the module.
+  check-vulnerabilities        Check vulnerabilities of the module.
+  convert-drawio-to-png        Converts drawio file to .png
+  extract-module-artifacts     Extracts artifacts from packaged module.
+  extract-module-requirements  Extract module requirements.
+  extract-module-routes        Extracts routes for fastapi from packages...
+  extract-module-site          Extracts static mkdocs site from packaged...
+  extract-module-streamlit     Extracts streamlit from packages that have...
+  extract-tracking-version     Get latest package version.
+  init-config                  Initialize config file
+  init-paa                     Initialize paa tracking files and...
+  init-ppr                     Initialize ppr for a given workflows...
+  make-package                 Package with package-auto-assembler.
+  refresh-module-artifacts     Refreshes module artifact from links.
+  run-api-routes               Run fastapi with provided routes.
+  run-pylint-tests             Run pylint tests for a given module, file,...
+  run-streamlit                Run streamlit application from the package.
+  show-module-artifacts        Shows module artifacts.
+  show-module-artifacts-links  Shows module artifact links.
+  show-module-info             Shows module info.
+  show-module-licenses         Shows module licenses.
+  show-module-list             Shows module list.
+  show-module-requirements     Shows module requirements.
+  show-ref-local-deps          Shows paths to local dependencies...
+  test-install                 Test install module into local environment.
+  update-release-notes         Update release notes.
+</code></pre>
+<p>Available cli tools usually employ multiple internal components and range from relatively simple ones to more complex. </p>
+<p><img alt="publishing-repo" src="../images/package_auto_assembler-cli_capabilities.png" /></p>
+<h2 id="description-of-tools">Description of tools</h2>
+<h3 id="initializing-paa">Initializing PAA</h3>
+<p>Creating config file could be useful to avoid providing parameters manually. If no config file will be provided, by default values from <code>.paa.config</code> will be used.</p>
+<pre><code class="language-bash">paa init-config  --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa init-config [OPTIONS]
+
+  Initialize config file
+
+Options:
+  --full  If checked, dirs beyond essential would be mapped.
+  --help  Show this message and exit.
+</code></pre>
+<p>Packaging repository needs a place to keep some tracking files.
+Running it first time also initializes <code>.paa.config</code> and the second time
+will create directories specified there, if not already created.  </p>
+<pre><code class="language-bash">paa init-paa  --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa init-paa [OPTIONS]
+
+  Initialize paa tracking files and directores from .paa.config
+
+Options:
+  --full  If checked, dirs beyond essential would be mapped.
+  --help  Show this message and exit.
+</code></pre>
+<p>The package provides some templates for packaging repositories. Packaging repository after some additional preparations should allow to create and publish new packages with a use of ci/cd pipeline. </p>
+<pre><code class="language-bash">paa init-ppr --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa init-ppr [OPTIONS]
+
+  Initialize ppr for a given workflows platform.
+
+Options:
+  --github  If checked, git actions template would be set up.
+  --azure   If checked, azure devops pipelines template would be set up.
+  --full    If checked, dirs beyond essential would be mapped.
+  --help    Show this message and exit.
+</code></pre>
+<h3 id="creating-packages">Creating packages</h3>
+<p>Installing packages for a test in local environments could be a useful step to make sure everything works as expected before pushing changes to publishing repo. This creates an instance of the package in local environment with default version, with a greatly simplified building process that avoids making documentation, versioning and so on.</p>
+<pre><code class="language-bash">paa test-install [OPTIONS] MODULE_NAME
+</code></pre>
+<pre><code class="language-bash">Usage: paa test-install [OPTIONS] MODULE_NAME
+
+  Test install module into local environment.
+
+Options:
+  --config TEXT                   Path to config file for paa.
+  --module-filepath TEXT          Path to .py file to be packaged.
+  --mapping-filepath TEXT         Path to .json file that maps import to
+                                  install dependecy names.
+  --cli-module-filepath TEXT      Path to .py file that contains cli logic.
+  --fastapi-routes-filepath TEXT  Path to .py file that routes for fastapi.
+  --dependencies-dir TEXT         Path to directory with local dependencies of
+                                  the module.
+  --default-version TEXT          Default version.
+  --check-vulnerabilities         If checked, checks module dependencies with
+                                  pip-audit for vulnerabilities.
+  --build-mkdocs                  If checked, builds mkdocs documentation.
+  --check-licenses                If checked, checks module dependencies
+                                  licenses.
+  --keep-temp-files               If checked, setup directory won't be removed
+                                  after setup is done.
+  --skip-deps-install             If checked, existing dependencies from env
+                                  will be reused.
+  --help                          Show this message and exit.
+</code></pre>
+<p>Making package based on provided parameters can be useful in ci/cd pipelines to streamline creation of packages before publishing from something that could be as simple as <code>.py</code> file.</p>
+<pre><code class="language-bash">paa make-package --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa make-package [OPTIONS] MODULE_NAME
+
+  Package with package-auto-assembler.
+
+Options:
+  --config TEXT                   Path to config file for paa.
+  --module-filepath TEXT          Path to .py file to be packaged.
+  --mapping-filepath TEXT         Path to .json file that maps import to
+                                  install dependecy names.
+  --cli-module-filepath TEXT      Path to .py file that contains cli logic.
+  --dependencies-dir TEXT         Path to directory with local dependencies of
+                                  the module.
+  --kernel-name TEXT              Kernel name.
+  --python-version TEXT           Python version.
+  --default-version TEXT          Default version.
+  --ignore-vulnerabilities-check  If checked, does not check module
+                                  dependencies with pip-audit for
+                                  vulnerabilities.
+  --example-notebook-path TEXT    Path to .ipynb file to be used as README.
+  --execute-notebook              If checked, executes notebook before turning
+                                  into README.
+  --log-filepath TEXT             Path to logfile to record version change.
+  --versions-filepath TEXT        Path to file where latest versions of the
+                                  packages are recorded.
+  --help                          Show this message and exit.
+</code></pre>
+<h3 id="checking-dependencies">Checking dependencies</h3>
+<p>Checking vulnerabilities with <code>pip-audit</code> is usefull. This checks vulnerabilities of .py files and its local dependencies with <code>pip-audit</code>.</p>
+<pre><code class="language-bash">paa check-vulnerabilities --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa check-vulnerabilities [OPTIONS] MODULE_NAME
+
+  Check vulnerabilities of the module.
+
+Options:
+  --config TEXT               Path to config file for paa.
+  --module-filepath TEXT      Path to .py file to be packaged.
+  --mapping-filepath TEXT     Path to .json file that maps import to install
+                              dependecy names.
+  --cli-module-filepath TEXT  Path to .py file that contains cli logic.
+  --dependencies-dir TEXT     Path to directory with local dependencies of the
+                              module.
+  --help                      Show this message and exit.
+</code></pre>
+<p>Checking license labels of module dependencies tree could be useful to prevent using some dependencies early on.</p>
+<pre><code class="language-bash">Usage: paa check-licenses [OPTIONS] MODULE_NAME
+
+  Check licenses of the module.
+
+Options:
+  --config TEXT                   Path to config file for paa.
+  --module-filepath TEXT          Path to .py file to be packaged.
+  --mapping-filepath TEXT         Path to .json file that maps import to
+                                  install dependecy names.
+  --license-mapping-filepath TEXT
+                                  Path to .json file that maps license labels
+                                  to install dependecy names.
+  --cli-module-filepath TEXT      Path to .py file that contains cli logic.
+  --dependencies-dir TEXT         Path to directory with local dependencies of
+                                  the module.
+  --skip-normalize-labels         If checked, package license labels are not
+                                  normalized.
+  --help                          Show this message and exit.
+</code></pre>
+<h3 id="running-apps-from-packages">Running apps from packages</h3>
+<p>Packaging process could help building APIs as well. This package would call routes stored within other packages and routes stored in files to form one application, so that repeatable structure does not need to copied between projects, but instead built in one places and extended with some config files in many. Since routes are python code that can have its dependencies, it makes sense to store them within packages sometimes to take advantage of automated dependency handling and import code straight from the package, eliminating in turn situation when package release in no compatible anymore with routes based on them. </p>
+<p>Parameters for fastapi app description, middleware and run could be supplied via optional <code>.paa.api.config</code> file, with <code>DESCRIPTION</code> , <code>MIDDLEWARE</code> and <code>RUN</code> dictionary of parameters respectively. </p>
+<p>It could be beneficial to add a static page with documentation, so additional pages could be addded. First one would be accessible via <code>\mkdocs</code> and the following ones via <code>\mkdocs {i+1}</code>. Static package within package, that were packages by <code>package-auto-assemble&gt;0.5.1</code> would be accessible via <code>\{package_name}\docs</code> if available.</p>
+<pre><code class="language-bash">paa run-api-routes --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa run-api-routes [OPTIONS]
+
+  Run fastapi with provided routes.
+
+Options:
+  --api-config TEXT  Path to yml config file with app description, middleware
+                     parameters, run parameters, `.paa.api.config` is used by
+                     default.
+  --host TEXT        The host to bind to.
+  --port TEXT        The port to bind to.
+  --package TEXT     Package names from which routes will be added to the app.
+  --route TEXT       Paths to routes which will be added to the app.
+  --docs TEXT        Paths to static docs site which will be added to the app.
+  --help             Show this message and exit.
+</code></pre>
+<p>One of the convinient ways to access packaged code could be a streamlit application. This package allows for streamlit application to be stored within a package and then run with the following. Parameters that would be passed to <code>~/.streamlit/config.toml</code> can be provided via optional <code>.paa.streamlit.config</code> file, at which point it would copied to default location. The command can be used to run streamlit apps from a selected package, built with the tool, or from normal <code>.py</code> file with streamlit app.</p>
+<pre><code class="language-bash">paa run-streamlit --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa run-streamlit [OPTIONS]
+
+  Run streamlit application from the package.
+
+Options:
+  --app-config TEXT  Path to yml config for streamlit app.
+  --host TEXT        The host to bind to.
+  --port TEXT        The port to bind to.
+  --package TEXT     Package name from which streamlit app should be run.
+  --path TEXT        Path to streamlit app.
+  --help             Show this message and exit.
+</code></pre>
+<h3 id="extracting-files-from-packages">Extracting files from packages</h3>
+<p>Storing routes within package could be convinient, but extracting them from a package is not. To mitigate that, the following exists to extract <code>routes.py</code> from a package that contains it.</p>
+<pre><code class="language-bash">paa extract-module-routes --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa extract-module-routes [OPTIONS] PACKAGE_NAME
+
+  Extracts routes for fastapi from packages that have them into a file.
+
+Options:
+  --output-dir TEXT   Directory where routes extracted from the package will
+                      be copied to.
+  --output-path TEXT  Filepath to which routes extracted from the package will
+                      be copied to.
+  --help              Show this message and exit.
+</code></pre>
+<pre><code class="language-bash">paa extract-module-site --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa extract-module-site [OPTIONS] PACKAGE_NAME
+
+  Extracts static mkdocs site from packaged module.
+
+Options:
+  --output-dir TEXT   Directory where routes extracted from the package will
+                      be copied to.
+  --output-path TEXT  Filepath to which routes extracted from the package will
+                      be copied to.
+  --help              Show this message and exit.
+</code></pre>
+<p>Another option to access the artifacts is to copy them to a selected directory.</p>
+<pre><code class="language-bash">paa extract-module-artifacts --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa extract-module-artifacts [OPTIONS] PACKAGE_NAME
+
+  Extracts artifacts from packaged module.
+
+Options:
+  --artifact TEXT     Name of the artifact to be extracted.
+  --output-dir TEXT   Directory where artifacts extracted from the package
+                      will be copied to.
+  --output-path TEXT  Filepath to which artifact extracted from the package
+                      will be copied to.
+  --help              Show this message and exit.
+</code></pre>
+<p>Another option to access the packaged streamlit app is to copy it to a selected directory.</p>
+<pre><code class="language-bash">paa extract-module-streamlit --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa extract-module-streamlit [OPTIONS] PACKAGE_NAME
+
+  Extracts streamlit from packages that have them into a file.
+
+Options:
+  --output-dir TEXT   Directory where streamplit extracted from the package
+                      will be copied to.
+  --output-path TEXT  Filepath to which streamlit extracted from the package
+                      will be copied to.
+  --help              Show this message and exit.
+</code></pre>
+<h3 id="show-modules-info">Show modules info</h3>
+<p>Cli interface provides some additional tools to analyse locally installed packages if they were build with package-auto-assembler&gt;0.4.2. These include methods to list modules, show module info, extract requirements.</p>
+<pre><code class="language-bash">paa show-module-list --help
+</code></pre>
+<pre><code>Usage: paa show-module-list [OPTIONS]
+
+  Shows module list.
+
+Options:
+  --tags TEXT  Keyword tag filters for the package.
+  --help       Show this message and exit.
+</code></pre>
+<pre><code class="language-bash">paa show-module-info --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa show-module-info [OPTIONS] LABEL_NAME
+
+  Shows module info.
+
+Options:
+  --keywords      If checked, returns keywords for the package.
+  --classifiers   If checked, returns classfiers for the package.
+  --docstring     If checked, returns docstring of the package.
+  --author        If checked, returns author of the package.
+  --author-email  If checked, returns author email of the package.
+  --version       If checked, returns installed version of the package.
+  --pip-version   If checked, returns pip latest version of the package.
+  --help          Show this message and exit.
+</code></pre>
+<pre><code class="language-bash">paa show-module-requirements --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa show-module-requirements [OPTIONS] LABEL_NAME
+
+  Shows module requirements.
+
+Options:
+  --help  Show this message and exit.
+</code></pre>
+<pre><code class="language-bash">paa show-module-licenses --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa show-module-licenses [OPTIONS] PACKAGE_NAME
+
+  Shows module licenses.
+
+Options:
+  --normalize-labels  If checked, package license labels are normalized.
+  --help              Show this message and exit.
+</code></pre>
+<p>There is an option to package artifacts with the code. Packaged artifacts can be listed. </p>
+<pre><code class="language-bash">paa show-module-artifacts --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa show-module-artifacts [OPTIONS] LABEL_NAME
+
+  Shows module artifacts.
+
+Options:
+  --help  Show this message and exit.
+</code></pre>
+<p>It might be useful to inspect which artifacts come from links, whether these links are available and refresh these artifacts within installed package.</p>
+<pre><code class="language-bash">paa show-module-artifacts-links --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa show-module-artifacts-links [OPTIONS] LABEL_NAME
+
+  Shows module artifact links.
+
+Options:
+  --help  Show this message and exit.
+</code></pre>
+<p>A module can referance multiple other local dependencies. The following is meant to extract all of paths relates to the module within PPR.</p>
+<pre><code class="language-bash">paa show-ref-local-deps --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa show-ref-local-deps [OPTIONS] LABEL_NAME
+
+  Shows paths to local dependencies referenced in the module.
+
+Options:
+  --config TEXT            Path to config file for paa.
+  --module-dir TEXT        Path to folder with .py file to be packaged.
+  --dependencies-dir TEXT  Path to directory with local dependencies of
+                           the module.
+  --help                   Show this message and exit.
+</code></pre>
+<h3 id="other">Other</h3>
+<p>Some artifacts can come from links and there might be a need to refresh or even download these files (depending on how a link was provided). </p>
+<pre><code class="language-bash">paa refresh-module-artifacts --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa refresh-module-artifacts [OPTIONS] LABEL_NAME
+
+  Refreshes module artifact from links.
+
+Options:
+  --help  Show this message and exit.
+</code></pre>
+<p>Core of paa automation is the ability to extract requirements from <code>.py</code> files. The tool shown below is a part of requirements extraction pipeline, designed to run within PPR, but could also work outside, if imports are handled in a specific way (more in description).</p>
+<pre><code class="language-bash">paa extract-module-requirements --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa extract-module-requirements [OPTIONS] MODULE_NAME
+
+  Extract module requirements.
+
+Options:
+  --config TEXT                   Path to config file for paa.
+  --module-dir TEXT               Path to folder where module is stored.
+  --mapping-filepath TEXT         Path to .json file that maps import to
+                                  install dependecy names.
+  --cli-module-filepath TEXT      Path to .py file that contains cli logic.
+  --routes-module-filepath TEXT   Path to .py file that contains fastapi
+                                  routes.
+  --streamlit-module-filepath TEXT
+                                  Path to .py file that contains streamlit
+                                  app.
+  --dependencies-dir TEXT         Path to directory with local dependencies of
+                                  the module.
+  --show-extra                    If checked, list will show which
+                                  requirements are extra.
+  --skip-extra                    If checked, list will not include extra.
+  --help                          Show this message and exit.
+</code></pre>
+<p>Maintaining release notes could be very useful, but also tedious task. 
+Since commit messages are rather standard practice, by taking advantage of them and constructing release notes based on them, each release could contain notes with appropriate version automatically, when itegrated into ci/cd pipeline, given that commit messages are written in a specific way. </p>
+<pre><code class="language-bash">paa update-release-notes --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa update-release-notes [OPTIONS] LABEL_NAME
+
+  Update release notes.
+
+Options:
+  --version TEXT           Version of new release.
+  --notes TEXT             Optional manually provided notes string, where each
+                           note is separated by ; and increment type is
+                           provide in accordance to paa documentation.
+  --notes-filepath TEXT    Path to .md wit release notes.
+  --max-search-depth TEXT  Max search depth in commit history.
+  --use-pip-latest         If checked, attempts to pull latest version from
+                           pip.
+  --help                   Show this message and exit.
+</code></pre>
+<p>Running pylint tests is useful and usually done in pull request to PPR. It could also be run locally for all the modules or select modules and their local dependencies to identify modules that need improvements to pass preset threshold. </p>
+<pre><code class="language-bash">paa run-pylint-tests --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa run-pylint-tests [OPTIONS] [FILES]...
+
+  Run pylint tests for a given module, file, files or files in a directory.
+
+Options:
+  --config TEXT      Path to config file for paa.
+  --label-name TEXT  Label name.
+  --module-dir TEXT  Path to a directory where .py files are stored.
+  --threshold TEXT   Pylint threshold.
+  --help             Show this message and exit.
+</code></pre>
+<p>It might be useful to know what is the last version a given module that was published from the PPR, mostly within ci/cd workflows.</p>
+<pre><code class="language-bash">paa extract-tracking-version --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa extract-tracking-version [OPTIONS] MODULE_NAME
+
+  Get latest package version.
+
+Options:
+  --config TEXT  Path to config file for paa.
+  --help         Show this message and exit.
+</code></pre>
+<p>Some pieces of documentation within PPR may come from drawio files. One of the steps in packaging process is to convert <code>.drawio</code> file for a package into <code>.png</code> files. 
+For this functionality to work, first some dependencies would need to be installed.</p>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y wget xvfb libnotify4 libxml2-utils
+wget https://github.com/jgraph/drawio-desktop/releases/download/v24.6.4/drawio-amd64-24.6.4.deb
+sudo dpkg -i drawio-amd64-24.6.4.deb
+sudo apt-get install -f
+</code></pre>
+<pre><code class="language-bash">paa convert-drawio-to-png --help
+</code></pre>
+<pre><code class="language-bash">Usage: paa convert-drawio-to-png [OPTIONS]
+
+  Converts drawio file to .png
+
+Options:
+  --config TEXT      Path to config file for paa.
+  --label-name TEXT  Label name.
+  --drawio-dir TEXT  Path to a directory where drawio files are stored.
+  --docs-dir TEXT    Path to the output directory for .png file.
+  --help             Show this message and exit.
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      
+    
+  </body>
+</html>
