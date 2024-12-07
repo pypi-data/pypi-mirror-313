@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcio_remote"
+dynamic = ["version"]
+description = "Python interface to connect to the MCio Minecraft mod"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [
+    {name = "TwoTurtles"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "pyzmq>=26.2.0",
+    "cbor2>=5.6.5",
+    "glfw>=2.7.0",
+    "PyOpenGL>=3.1.7",
+    "gymnasium>=1.0.0",
+    "pillow>=11.0.0"
+]
+
+[project.urls]
+Source = "https://github.com/twoturtles/mcio_remote"
+Issues = "https://github.com/twoturtles/mcio_remote/issues"
+
+[tool.hatch.envs.dev]
+dependencies = [
+    "pre-commit>=4.0.1",
+    "mypy>=1.13.0",
+    "ruff>=0.8.1",
+    "black>=24.10.0",
+    "pytest>=8.3.4"
+]
+scripts.check = [
+    "ruff check --diff .",
+    "black --check --diff .",
+    "mypy --strict ."
+]
+scripts.test = "pytest"
+
+[tool.hatch.version]
+path = "mcio_remote/__about__.py"
