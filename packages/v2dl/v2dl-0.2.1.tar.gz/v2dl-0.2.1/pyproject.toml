@@ -1,0 +1,195 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "v2dl"
+dynamic = ["version"]
+description = "V2PH downloader"
+authors = [{ name = "ZhenShuo2021", email = "leo01412123@gmail.com" }]
+urls.repository = "https://github.com/ZhenShuo2021/V2PH-Downloader"
+urls.homepage = "https://github.com/ZhenShuo2021/V2PH-Downloader"
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = [
+    "v2ph",
+    "v2ph.com",
+    "v2ph-downloader",
+    "image-downloader",
+]
+classifiers = [
+    "Topic :: Multimedia",
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+dependencies = [
+    "colorama>=0.4.6",
+    "DrissionPage>=4.1.0.9",
+    "python-dotenv>=1.0.1",
+    "selenium>=4.25.0",
+    "lxml>=5.3.0",
+    "PyYAML>=6.0.2",
+    "pynacl>=1.5.0",
+    "questionary>=2.0.1",
+    "httpx>=0.27.2",
+    "pathvalidate>=3.2.1",
+]
+
+[tool.hatch.version]
+path = "v2dl/version.py"
+pattern = "__version__ = \"(?P<version>[^\"]+)\""
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github",
+    "/.vscode",
+    ".gitignore",
+    ".pre-commit-config.yaml",
+    "tests",
+    "uv.lock",
+]
+
+[tool.uv]
+default-groups = ["dev", "test"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7.1",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+    "isort>=5.13.2",
+]
+test = [
+    "pytest>=8.3.3",
+    "pytest-cov>=6.0.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[project.scripts]
+v2dl = "v2dl:main"
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+follow_imports = "silent"
+disable_error_code = [
+    "import-untyped",
+    "import-not-found",
+    "no-untyped-call",
+    "no-any-return",
+    "unused-ignore",
+]
+enable_error_code = ["attr-defined", "name-defined"]
+# enable_error_code = [
+#   "ignore-without-code",
+#   "redundant-expr",
+#   "truthy-bool",
+# ]
+
+
+[tool.ruff]
+line-length = 100
+exclude = [".git", "build", ".tox", ".eggs", "safe_house"]
+preview = true
+target-version = "py310"
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+
+[tool.ruff.lint.per-file-ignores]
+"v2dl/cli/account_cli.py" = ["T201"]
+"v2dl/utils/security.py" = ["T201"]
+
+[tool.ruff.lint]
+explicit-preview-rules = true
+allowed-confusables = ["，", "。", "（", "）"]
+ignore = [
+    "COM812",  # flake8-commas "Trailing comma missing"
+    "ISC001",  # flake8-single-line-implicit-string-concatenation
+    "E402",    # module-import-not-at-top-of-file
+    "E501",    # line-too-long
+    "E731",    # lambda-assignment
+    "E741",    # ambiguous-variable-name
+    "UP036",   # outdated-version-block
+    "B006",    # mutable-argument-default
+    "B008",    # function-call-in-default-argument
+    "B011",    # assert-false
+    "B017",    # assert-raises-exception
+    "B023",    # function-uses-loop-variable (false positives)
+    "B028",    # no-explicit-stacklevel
+    "B904",    # raise-without-from-inside-except
+    "C401",    # unnecessary-generator-set
+    "C402",    # unnecessary-generator-dict
+    "PIE790",  # unnecessary-placeholder
+    "SIM102",  # collapsible-if
+    "SIM108",  # if-else-block-instead-of-if-exp
+    "SIM112",  # uncapitalized-environment-variables
+    "SIM113",  # enumerate-for-loop
+    "SIM114",  # if-with-same-arms
+    "SIM115",  # open-file-with-context-handler
+    "SIM117",  # multiple-with-statements
+    "SIM223",  # expr-and-false
+    "SIM300",  # yoda-conditions
+    "TD001",   # invalid-todo-tag
+    "TD002",   # missing-todo-author
+    "TD003",   # missing-todo-link
+    "PLE0604", # invalid-all-object (false positives)
+    "PLE0643", # potential-index-error (false positives)
+    "PLW0603", # global-statement
+    "PLW1510", # subprocess-run-without-check
+    "PLW2901", # redefined-loop-name
+    "RUF001",  # ambiguous-unicode-character-string
+    "RUF012",  # mutable-class-default
+    "RUF100",  # unused-noqa (flake8 has slightly different behavior)
+]
+select = [
+    "E",      # pycodestyle Error
+    "W",      # pycodestyle Warning
+    "F",      # Pyflakes
+    "I",      # isort
+    "Q",      # flake8-quotes
+    "N803",   # invalid-argument-name
+    "N804",   # invalid-first-argument-name-for-class-method
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "A",      # flake8-builtins
+    "COM",    # flake8-commas
+    "C4",     # flake8-comprehensions
+    "FA",     # flake8-future-annotations
+    "ISC",    # flake8-implicit-str-concat
+    "ICN003", # banned-import-from
+    "PIE",    # flake8-pie
+    "T20",    # flake8-print
+    "RSE",    # flake8-raise
+    "RET504", # unnecessary-assign
+    "SIM",    # flake8-simplify
+    "TID251", # banned-api
+    "TD",     # flake8-todos
+    "PLC",    # Pylint Convention
+    "PLE",    # Pylint Error
+    "PLW",    # Pylint Warning
+    "RUF",    # Ruff-specific rules
+]
+
+[tool.ruff.lint.isort]
+force-single-line = false
+combine-as-imports = true
+length-sort-straight = true
+relative-imports-order = "closest-to-furthest"
