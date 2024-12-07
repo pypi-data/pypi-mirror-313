@@ -1,0 +1,170 @@
+"""Factories for API object."""
+
+import random
+
+import factory
+import factory.fuzzy
+
+from cyberfusion.ClusterSupport.certificates import Certificate
+from cyberfusion.ClusterSupport.tests_factories import BaseBackendFactory
+
+
+class _CertificateFactory(BaseBackendFactory):
+    """Factory for specific object."""
+
+    class Meta:
+        """Settings."""
+
+        model = Certificate
+
+        exclude = ("cluster",)
+
+    ca_chain = """-----BEGIN CERTIFICATE-----
+MIIEkjCCA3qgAwIBAgIQCgFBQgAAAVOFc2oLheynCDANBgkqhkiG9w0BAQsFADA/
+MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT
+DkRTVCBSb290IENBIFgzMB4XDTE2MDMxNzE2NDA0NloXDTIxMDMxNzE2NDA0Nlow
+SjELMAkGA1UEBhMCVVMxFjAUBgNVBAoTDUxldCdzIEVuY3J5cHQxIzAhBgNVBAMT
+GkxldCdzIEVuY3J5cHQgQXV0aG9yaXR5IFgzMIIBIjANBgkqhkiG9w0BAQEFAAOC
+AQ8AMIIBCgKCAQEAnNMM8FrlLke3cl03g7NoYzDq1zUmGSXhvb418XCSL7e4S0EF
+q6meNQhY7LEqxGiHC6PjdeTm86dicbp5gWAf15Gan/PQeGdxyGkOlZHP/uaZ6WA8
+SMx+yk13EiSdRxta67nsHjcAHJyse6cF6s5K671B5TaYucv9bTyWaN8jKkKQDIZ0
+Z8h/pZq4UmEUEz9l6YKHy9v6Dlb2honzhT+Xhq+w3Brvaw2VFn3EK6BlspkENnWA
+a6xK8xuQSXgvopZPKiAlKQTGdMDQMc2PMTiVFrqoM7hD8bEfwzB/onkxEz0tNvjj
+/PIzark5McWvxI0NHWQWM6r6hCm21AvA2H3DkwIDAQABo4IBfTCCAXkwEgYDVR0T
+AQH/BAgwBgEB/wIBADAOBgNVHQ8BAf8EBAMCAYYwfwYIKwYBBQUHAQEEczBxMDIG
+CCsGAQUFBzABhiZodHRwOi8vaXNyZy50cnVzdGlkLm9jc3AuaWRlbnRydXN0LmNv
+bTA7BggrBgEFBQcwAoYvaHR0cDovL2FwcHMuaWRlbnRydXN0LmNvbS9yb290cy9k
+c3Ryb290Y2F4My5wN2MwHwYDVR0jBBgwFoAUxKexpHsscfrb4UuQdf/EFWCFiRAw
+VAYDVR0gBE0wSzAIBgZngQwBAgEwPwYLKwYBBAGC3xMBAQEwMDAuBggrBgEFBQcC
+ARYiaHR0cDovL2Nwcy5yb290LXgxLmxldHNlbmNyeXB0Lm9yZzA8BgNVHR8ENTAz
+MDGgL6AthitodHRwOi8vY3JsLmlkZW50cnVzdC5jb20vRFNUUk9PVENBWDNDUkwu
+Y3JsMB0GA1UdDgQWBBSoSmpjBH3duubRObemRWXv86jsoTANBgkqhkiG9w0BAQsF
+AAOCAQEA3TPXEfNjWDjdGBX7CVW+dla5cEilaUcne8IkCJLxWh9KEik3JHRRHGJo
+uM2VcGfl96S8TihRzZvoroed6ti6WqEBmtzw3Wodatg+VyOeph4EYpr/1wXKtx8/
+wApIvJSwtmVi4MFU5aMqrSDE6ea73Mj2tcMyo5jMd6jmeWUHK8so/joWUoHOUgwu
+X4Po1QYz+3dszkDqMp4fklxBwXRsW10KXzPMTZ+sOPAveyxindmjkW8lGy+QsRlG
+PfZ+G6Z6h7mjem0Y+iWlkYcV4PIWL1iwBi8saCbGS5jN2p8M+X+Q7UNKEkROb3N6
+KOqkqm57TH2H3eDJAkSnh6/DNFu0Qg==
+-----END CERTIFICATE-----\n"""
+    cluster = factory.SubFactory(
+        f"cyberfusion.ClusterSupport.tests_factories.clusters.{random.choice(['ClusterWebFactory','ClusterRedirectFactory','ClusterMailFactory'])}",
+    )
+    cluster_id = factory.SelfAttribute("cluster.id")
+
+
+class CertificateWildcardFactory(_CertificateFactory):
+    """Factory for specific object."""
+
+    certificate = """-----BEGIN CERTIFICATE-----
+MIIDnTCCAoWgAwIBAgIJAILk6fY0bITbMA0GCSqGSIb3DQEBCwUAMG4xCzAJBgNV
+BAYTAlVTMQswCQYDVQQIDAJWQTERMA8GA1UEBwwIU29tZUNpdHkxEjAQBgNVBAoM
+CU15Q29tcGFueTETMBEGA1UECwwKTXlEaXZpc2lvbjEWMBQGA1UEAwwNKi5leGFt
+cGxlLmNvbTAeFw0yMzAyMDYxNTQ4MjVaFw0yNTAyMDUxNTQ4MjVaMG4xCzAJBgNV
+BAYTAlVTMQswCQYDVQQIDAJWQTERMA8GA1UEBwwIU29tZUNpdHkxEjAQBgNVBAoM
+CU15Q29tcGFueTETMBEGA1UECwwKTXlEaXZpc2lvbjEWMBQGA1UEAwwNKi5leGFt
+cGxlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANvYdXEWJo7U
+NMrzdrmbNwGlUL7wwlmkD1UlSdiL6+NDkmv2ddGEf2sD3KzqZzesTilFQm53wd9u
+PJDx67eo+qnW7FKLmTGAfIgLTBrSkZpIzGUwPR7X1Gr7GyTg+W24bIO6/hQ6nVC5
+EtjMiER8xfazFflT2RqGCo7umFUzKnV+TLWrcxjHEWN7oMSvxBb2IKJh6GukGcT9
+/7Y7/gC4/8eEgUhX+RlUiGtYeOj2qZvoZuUoWRe6sIYKODErGtkk8gflartCjVAC
+Gq/ToNAIh63H1FnWMLPTCsi6UqNH7huxqp1MyHmcIj9ASzlxBZwzXrTXl4y3dcU1
+cJ037NwpOSUCAwEAAaM+MDwwCwYDVR0PBAQDAgQwMBMGA1UdJQQMMAoGCCsGAQUF
+BwMBMBgGA1UdEQQRMA+CDSouZXhhbXBsZS5jb20wDQYJKoZIhvcNAQELBQADggEB
+ACdhUkajByN4JYLMTj3Y3A18/+3PRSG71U5ZF+2PK7U1fi7JjMMhzep9ghEwf5u3
+dotw5xMB5d/B7Ywxix+QMjNdW1QMxWeYgQFQE17YS3fElzj6UScvsPUvF5Z58Yp8
+X/Vtq3RIHqG7bt/x0yBH/NYrqombNDhkXpLNV6LirUItejAO2SHgsLf40gvCis+s
+HkEeD772Av7p1+fQaV9LfnNC2HHALl951oMiH595w6XDGjDRBiMt2tbynEEDzaxj
+573+YYG5GlPyrrdLhgsYNL6oGVyVbfKkFM9Dv/ZEnLy3bYCfD0BfN3HkQMkyvxqd
+qfNTP0mcLQmEVWQM6ODZ8gQ=
+-----END CERTIFICATE-----\n"""
+    private_key = """-----BEGIN PRIVATE KEY-----
+MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDb2HVxFiaO1DTK
+83a5mzcBpVC+8MJZpA9VJUnYi+vjQ5Jr9nXRhH9rA9ys6mc3rE4pRUJud8HfbjyQ
+8eu3qPqp1uxSi5kxgHyIC0wa0pGaSMxlMD0e19Rq+xsk4PltuGyDuv4UOp1QuRLY
+zIhEfMX2sxX5U9kahgqO7phVMyp1fky1q3MYxxFje6DEr8QW9iCiYehrpBnE/f+2
+O/4AuP/HhIFIV/kZVIhrWHjo9qmb6GblKFkXurCGCjgxKxrZJPIH5Wq7Qo1QAhqv
+06DQCIetx9RZ1jCz0wrIulKjR+4bsaqdTMh5nCI/QEs5cQWcM16015eMt3XFNXCd
+N+zcKTklAgMBAAECggEAc2i6nlcmfqxf2nrcxKr6wV5reREitbQuaGBe19L8Th3W
+695CE28fBKrOWefjr5JApeG58gvkNsrD+MNHHu8SR76P6PVnwljVBwYHOb14uiml
+QymDrIFY/aA8q6t+xV6feLfdUflDRHEjt7QHhQyLT+rLiku+GPJs8IPIbFGj5HEj
+V1MdDF8WgAuL/g9PwaiTmH2lfm7UMhUZKpt6ppBeUceiAfcxfSLq3Q29gjKp3+U+
+MFLQNu2+fkpK40hRL9Sz8h+4IIG8ueBirNEqdGP/YNCa9G0SqBcLTy3Rjjrx/pEK
+22QnNO4Y9G+vKwh8ip56OtDX7epHONHHtHQIx89PgQKBgQD+qXN4d/CHzGVsXUdd
+XiJtu/nS5SJbtjxeAFeeBfQw79DOcJXlmmNKeutdkAIuYsWupgRP+v0HEtaQCKXJ
+LoGVtDf80PzsI+XJkSasghAEqSCyTJ+XeTd8YPURuIx0Z9niMpE0lSAsNFqFhuL7
+QYiioQWc1ZqlnPingu7Y3S/0SQKBgQDdACz+SwcICLXbwT2d7Uxh53+kc5MTQ+Ad
+lyQeuMJzNouUDhGFMRtEyPwDr4HjtJpqOT1zNTjYLeAo/q20ipkX/1vMvdIL/4QR
+7AS71KoOP38SiXKrSXobJIZ500ZK/dfkLvlZMJxcLHdwq9xLCbdZKX7MYcrk6M2N
+vJcjzURl/QKBgQDEBJByAPguvwCuiZod3xBnINKqJ17r8vjCbkcCxphwdpdl37kx
+k0WsFbNHQEq9g5+fz//vxESxBioLkexyT47FOYQC4KZd6T+9iDGZhT9pJvmY5GvP
+PymbXlIkwsWx8CIA/2VPcR3jiKTItMvQFGBktcbJMo2nvoyS+7B3UsHPqQKBgQDU
+kty0ZPqIcchrbn6UL7Ku4XvXdQvdFga2r7CglFsFc0vix312vftauHAgI2su2YNF
+9XT0IhdhaQ8an436AO6tNITadSNbQxWIH5uWCELinZTfAbJ4q552CTYIbH5Kl8xX
+wg86CRX9WxAwIj8tNlVTwCQk91Ovx3YghWxjlYfbCQKBgQCODlCM6blusq0uYB0l
+bCEDxWa9HT3YSJx/OphOJi/NHBUtSbLHSvE9SpvNxYO9CAr9L/oyV0kW5fM2UgLW
+Hj5KGvJJEAJ5ssTAcLa9k0YHFzMjTtKHNkLe2hYovFUMxT8hPrdjULFK7CTi15/S
+U+znxdNa6qtJJWqwY8X081PW+A==
+-----END PRIVATE KEY-----\n"""
+    cluster = factory.SubFactory(
+        f"cyberfusion.ClusterSupport.tests_factories.clusters.{random.choice(['ClusterWebFactory','ClusterRedirectFactory','ClusterMailFactory'])}",
+    )
+    cluster_id = factory.SelfAttribute("cluster.id")
+
+
+class CertificateSingleFactory(_CertificateFactory):
+    """Factory for specific object."""
+
+    certificate = """-----BEGIN CERTIFICATE-----
+MIIDnTCCAoWgAwIBAgIJAM39WkrH/PQRMA0GCSqGSIb3DQEBCwUAMG4xCzAJBgNV
+BAYTAlVTMQswCQYDVQQIDAJWQTERMA8GA1UEBwwIU29tZUNpdHkxEjAQBgNVBAoM
+CU15Q29tcGFueTETMBEGA1UECwwKTXlEaXZpc2lvbjEWMBQGA1UEAwwNYS5leGFt
+cGxlLmNvbTAeFw0yMzAyMDYxNTQ4MzZaFw0yNTAyMDUxNTQ4MzZaMG4xCzAJBgNV
+BAYTAlVTMQswCQYDVQQIDAJWQTERMA8GA1UEBwwIU29tZUNpdHkxEjAQBgNVBAoM
+CU15Q29tcGFueTETMBEGA1UECwwKTXlEaXZpc2lvbjEWMBQGA1UEAwwNYS5leGFt
+cGxlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALnqYGZszvkc
+Oq+kRwHeXZCN816AHHvvrIom2vxN+TGFGsdmHkLkLrRLIARF64tV7D57gQZaAf5w
+Tuu+MuwzPY85HSVMCsPRt2uWh0HKCpZZ+KZsVKiLiy/byNc1CqsjpXuJ0fCSjg6l
+EvkriCYh/k29ArVOZfzyEZYzGH+iu0YN4VYYaiPP+WVWfVzaSrvFZPg2VBsh4KG9
+h9qN448bZ+MLazpEVjlMDG1SSnwbzeorQt56ztfDXdmqMiJKo9bUb234943JJqYP
++eJhY6R86W8SlZwDLOge6pLMSQd5fM3o0Fruu3s6sRfTGPaheAC8fTa/5G5iuI4F
+pTrTe9dYk8kCAwEAAaM+MDwwCwYDVR0PBAQDAgQwMBMGA1UdJQQMMAoGCCsGAQUF
+BwMBMBgGA1UdEQQRMA+CDWEuZXhhbXBsZS5jb20wDQYJKoZIhvcNAQELBQADggEB
+AF8shXeTAa9PGQX0ohlwocPv9vo14MzKftpi0sJ5xQx6n8/ZPvFUiIuigR/h5/c2
+ne2Ww7axncxcIl/5yUWDJUugqDYF/1SglActn7IYi2Tjm78cnfw+XsDzIVxKkQfx
+1EVWE3wg3P3McpbjIM4mwky6UWKgo5h86v8zYmV3WZIK/9FAzxehIXX5CdW/pXJO
+Ozx7ezTdsRopNFJH6y1A67Sbw1+PJy6yWO4uQ08chIa45c45R64Fa67lh3XTBkC/
+T1hNkmmCzMd97Nk4uAb6VphE+qKUl5vI5c0XwNhHgmIVojtUJ23pd5jJWcaH2v9e
+KzeqL/RVDaqiFDiqiRLb8XM=
+-----END CERTIFICATE-----\n"""
+    private_key = """-----BEGIN PRIVATE KEY-----
+MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQC56mBmbM75HDqv
+pEcB3l2QjfNegBx776yKJtr8TfkxhRrHZh5C5C60SyAEReuLVew+e4EGWgH+cE7r
+vjLsMz2POR0lTArD0bdrlodBygqWWfimbFSoi4sv28jXNQqrI6V7idHwko4OpRL5
+K4gmIf5NvQK1TmX88hGWMxh/ortGDeFWGGojz/llVn1c2kq7xWT4NlQbIeChvYfa
+jeOPG2fjC2s6RFY5TAxtUkp8G83qK0Lees7Xw13ZqjIiSqPW1G9t+PeNySamD/ni
+YWOkfOlvEpWcAyzoHuqSzEkHeXzN6NBa7rt7OrEX0xj2oXgAvH02v+RuYriOBaU6
+03vXWJPJAgMBAAECggEBALcuTI9+9CuU+ennpiMcMvpkMv/QoMAotctlX20rcrWt
+HWaMopJr++ye/MvZDK08Gsqxq75TXxWRGOHEhK4gCq6cqq/+DblFYEE8jsZuySG9
+QnbP1FZBMAIWvvv0gi9/ruRbNiSgciHR2jDyCHLyGXwFGK8FsQ2agWOJssDH2Ve6
+UlWbK9Un8gPw5u0IF+A+ldZr6vBhNfleKz6esUjTd0kJRGyWUcQ24nPX0h9gZjNi
+BnenUOExOAnquF2Ptm9oqolN8IrW9h/JLNWab9Mkk54p8fO2qp6y1Ju5gOKTgVJ9
+fEf+17LkUJ85bhUmiCzYRqgoGWl31Z/VO1sLmvatdYECgYEA9jbgubM1XIs9ihCR
+rqYWxtjEH562VJ97vhCYW7nlxwaWzcybNbJAQlYjngLl0+ZiDoKE5dGeAV978zJQ
+WpzlM7FXiaY4kgUYbD8HaDrKcXZEV+cqN/zmn4t7lGs/jesTyyNGf9uvpIs6pHns
+kTrbcfVD0ym6TSFAytYVj3OcHDkCgYEAwU38G+BseBn3Sc3CpT3KByaGEt2nKObd
+m1Jfv30NQN7dHxeQg5Yk7wJU9450XiKhAEZa2jTmImeXj9L4FfPv0f/oBp9EHAB0
+c9qUdvrxcRk1kkpezRH0jehXEvUNr4qNH/7oozNwYLSg/1BacSoXkNmYgrHEnWUT
+DV43amZ4VBECgYEAmqm+YOiCDLAq6B+gY+VRSXfBO1unjWDhinNCQdx0yqEI+h4d
+IY3nb8RMe2W2mXWPAy5Z7UPPzWz9n7drYoBMOjyckIsp3g/1V4oATSkhIkT4iX9c
+te7XsEEeUA1OzwdsV57BGnAV1XbgT5GHWXNvhhZblLoRnYHWAZSZ1pL47YECgYBy
+jTlKd8svvQt7VBD2BVDUvfKT+YBWz8Ehi0YsXvncqHVXOIquP+qxLKuXbHbvVgwc
+8pRiXRjH6KW7WGUl9UH4K3OfgQBGq8pW4YA7pegwgqTphWL6mZpYAgiftlKe5TdO
+b6wDEreUx1XlFwQRrcT7VMd5I8mFEGGi+WNTjVffUQKBgQCfcIPCWGgJQao5ioT8
+rMF3NgeCNA3UCCN1CUsbP2LKfJbwaWVY3frCYAdZ9JFj7K49POsX8bSIC1I7a3ci
+iF7Gqv0A+ENavGFIOk0EyKNR5Syf+RitDiFKM5pbLyQV0Uw4yHa1+wnhAtr+pFqE
+P1kF+5pzRdzV1O3W/z/+e4rrHg==
+-----END PRIVATE KEY-----\n"""
+    cluster = factory.SubFactory(
+        f"cyberfusion.ClusterSupport.tests_factories.clusters.{random.choice(['ClusterWebFactory','ClusterRedirectFactory','ClusterMailFactory'])}",
+    )
+    cluster_id = factory.SelfAttribute("cluster.id")
