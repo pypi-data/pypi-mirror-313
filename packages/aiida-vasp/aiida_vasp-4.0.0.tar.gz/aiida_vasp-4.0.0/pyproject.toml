@@ -1,0 +1,203 @@
+[build-system]
+# build the package with [flit](https://flit.readtheocs.io)
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+# See https://www.python.org/dev/peps/pep-0621/
+name = "aiida-vasp"
+dynamic = ["version"] # read from aiida_vasp/__init__.py
+description = "AiiDA plugin for running VASP calculations and workflows."
+authors = [
+    { name = "Espen Flage-Larsen", email = "espen.flage-larsen@sigma2.no" },
+]
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+classifiers = [
+    "Programming Language :: Python",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Framework :: AiiDA",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Plugins",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Framework :: AiiDA",
+]
+keywords = ["aiida", "plugin"]
+requires-python = ">=3.10"
+dependencies = [
+    "aiida-core>=2.3",
+    "ase",
+    "lxml",
+    "seekpath",
+    "packaging",
+    "pydantic",
+    "parsevasp>=3.2",
+]
+
+[project.urls]
+Source = "https://github.com/aiida-vasp/aiida-vasp"
+
+[project.optional-dependencies]
+tests = ["aiida-core>=2.6", "pytest", "PyCifRW"]
+pre-commit = ["pre-commit"]
+docs = [
+    "aiida-core[docs]~=2.4",
+    "sphinx-autodoc2",
+    "sphinx-autobuild",
+    "sphinx-lint",
+    "sphinx-rtd-theme",
+    "sphinx_copybutton",
+    "sphinx_design",
+    "sphinx_togglebutton",
+    "sphinxext.remoteliteralinclude",
+]
+graphs = ["matplotlib"]
+
+[project.entry-points."aiida.cmdline.data"]
+"vasp.potcar" = "aiida_vasp.commands.potcar:potcar"
+"vasp.tools" = "aiida_vasp.commands.tools:tools"
+
+[project.entry-points."aiida.calculations"]
+"vasp.vasp" = "aiida_vasp.calcs.vasp:VaspCalculation"
+"vasp.neb" = "aiida_vasp.calcs.neb:VaspNEBCalculation"
+"vasp.vasp2w90" = "aiida_vasp.calcs.vasp2w90:Vasp2w90Calculation"
+"vasp.immigrant" = "aiida_vasp.calcs.immigrant:VaspImmigrant"
+
+[project.entry-points."aiida.data"]
+"vasp.archive" = "aiida_vasp.data.archive:ArchiveData"
+"vasp.chargedensity" = "aiida_vasp.data.chargedensity:ChargedensityData"
+"vasp.wavefun" = "aiida_vasp.data.wavefun:WavefunData"
+"vasp.potcar" = "aiida_vasp.data.potcar:PotcarData"
+"vasp.potcar_file" = "aiida_vasp.data.potcar:PotcarFileData"
+
+[project.entry-points."aiida.parsers"]
+"vasp.vasp" = "aiida_vasp.parsers.vasp:VaspParser"
+"vasp.neb" = "aiida_vasp.parsers.neb:NebParser"
+
+[project.entry-points."aiida.workflows"]
+"vasp.vasp" = "aiida_vasp.workchains.v2.vasp:VaspWorkChain"
+"vasp.converge" = "aiida_vasp.workchains.v2.converge:VaspConvergenceWorkChain"
+"vasp.bands" = "aiida_vasp.workchains.v2.bands:VaspBandsWorkChain"
+"vasp.hybrid_bands" = "aiida_vasp.workchains.v2.bands:VaspHybridBandsWorkChain"
+"vasp.relax" = "aiida_vasp.workchains.v2.relax:VaspRelaxWorkChain"
+"vasp.neb" = "aiida_vasp.workchains.neb:VaspNEBWorkChain"
+"vasp.v2.vasp" = "aiida_vasp.workchains.v2.vasp:VaspWorkChain"
+"vasp.v2.converge" = "aiida_vasp.workchains.v2.converge:VaspConvergenceWorkChain"
+"vasp.v2.bands" = "aiida_vasp.workchains.v2.bands:VaspBandsWorkChain"
+"vasp.v2.hybrid_bands" = "aiida_vasp.workchains.v2.bands:VaspHybridBandsWorkChain"
+"vasp.v2.relax" = "aiida_vasp.workchains.v2.relax:VaspRelaxWorkChain"
+
+[project.entry-points."aiida.groups"]
+"vasp.potcar" = "aiida_vasp.data.potcar:PotcarGroup"
+
+[project.scripts]
+"mock-vasp" = "aiida_vasp.commands.mock_vasp:mock_vasp"
+"dryrun-vasp" = "aiida_vasp.commands.dryrun_vasp:cmd_dryrun_vasp"
+"mock-vasp-loose" = "aiida_vasp.commands.mock_vasp:mock_vasp_loose"
+
+[tool.flit.module]
+name = "aiida_vasp"
+
+[tool.pytest.ini_options]
+# Configuration for [pytest](https://docs.pytest.org)
+python_files = "test_*.py example_*.py"
+filterwarnings = [
+    "ignore:POTCAR data with symbol .* does not match any VASP",
+    "ignore:Using or importing the ABCs from 'collections' instead of from 'collections.abc' in deprecated",
+    "ignore::DeprecationWarning:babel:",
+    "ignore::DeprecationWarning:django:",
+    "ignore::DeprecationWarning:frozendict:",
+    "ignore::DeprecationWarning:sqlalchemy:",
+    "ignore::DeprecationWarning:yaml:",
+    "ignore::DeprecationWarning:pymatgen:",
+    "ignore::DeprecationWarning:jsonbackend:",
+    "ignore::DeprecationWarning:reentry:",
+    "ignore::DeprecationWarning:past:",
+    "ignore::DeprecationWarning:pkg_resources:",
+    "ignore::pytest.PytestCollectionWarning",
+    "ignore::DeprecationWarning:numpy:",
+    "ignore::DeprecationWarning:pandas:",
+    "ignore::DeprecationWarning:scipy:",
+    "ignore::DeprecationWarning:networkx:",
+    "ignore::DeprecationWarning:ase:",
+    "ignore::DeprecationWarning:aiida:",
+    "ignore::DeprecationWarning:plumpy:",
+]
+
+[tool.coverage.run]
+# Configuration of [coverage.py](https://coverage.readthedocs.io)
+# reporting which lines of your plugin are covered by tests
+source = ["aiida_vasp"]
+
+[tool.ruff]
+exclude = [
+    "cookiecutters",
+    "tutorials",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+line-length = 120
+
+[tool.ruff.format]
+quote-style = 'single'
+
+[tool.ruff.lint]
+ignore = [
+    'F403',    # Star imports unable to detect undefined names
+    'F405',    # Import may be undefined or defined from star imports
+    'PLR0911', # Too many return statements
+    'PLR0912', # Too many branches
+    'PLR0913', # Too many arguments in function definition
+    'PLR0915', # Too many statements
+    'PLR2004', # Magic value used in comparison
+    'RUF005',  # Consider iterable unpacking instead of concatenation
+    'RUF012',  # Mutable class attributes should be annotated with `typing.ClassVar`
+]
+select = [
+    'E',   # pydocstyle
+    'W',   # pydocstyle
+    'F',   # pyflakes
+    'I',   # isort
+    'N',   # pep8-naming
+    'PLC', # pylint-convention
+    'PLE', # pylint-error
+    'PLR', # pylint-refactor
+    'PLW', # pylint-warning
+    'RUF', # ruff
+]
+
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F403"]
