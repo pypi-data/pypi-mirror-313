@@ -1,0 +1,45 @@
+Metadata-Version: 2.1
+Name: armcrop
+Version: 0.2.0
+Summary: A machine learning model that crops CT scans to a bone of interest in the arm
+Author: Gregory Spangenberg
+Author-email: gspangen@westerneng.ca
+Requires-Python: >=3.12,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: huggingface-hub (>=0.25.1,<0.26.0)
+Requires-Dist: networkx (>=3.3,<4.0)
+Requires-Dist: numpy (==1.*)
+Requires-Dist: onnxruntime (==1.18)
+Requires-Dist: pandas (>=2.2.3,<3.0.0)
+Requires-Dist: simpleitk (>=2.4.0,<3.0.0)
+Description-Content-Type: text/markdown
+
+# *armcrop*
+
+[![PyPI Latest Release](https://img.shields.io/pypi/v/armcrop.svg)](https://pypi.org/project/armcrop)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+This package contains a machine learning model that can crop a CT scan to any of the following classes:
+- clavicle
+- scapula
+- humerus
+- radius_ulna
+- hand
+
+It can do both axis aligned cropping and oriented bounding box (obb) cropping. The obb cropping allows for rigid registration of CT scans.
+
+This model was trained on arm only scans and proximal half chest scans. A limitation of this model is that when using a full chest CT where the spine is present the model will struggle to differentiate between it and the scapula.
+
+## Installation
+To use CPU execution install with:
+```
+pip install armcrop
+```
+To use CUDA execution you will need to also install torch and onnxruntime-gpu.
+
+
+
+
+
