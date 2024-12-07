@@ -1,0 +1,360 @@
+[project]
+name = "cs-hashindex"
+description = "A command and utility functions for making listings of file content hashcodes and manipulating directory trees based on such a hash index."
+authors = [
+    { name = "Cameron Simpson", email = "cs@cskk.id.au" },
+]
+keywords = [
+    "python3",
+]
+dependencies = [
+    "blake3",
+    "cs.cmdutils>=20240211",
+    "cs.context>=20240630",
+    "cs.deco>=20241206",
+    "cs.fs>=20241122",
+    "cs.fstags>=20241122",
+    "cs.hashutils>=20241207",
+    "cs.lex>=20241207",
+    "cs.logutils>=20241109",
+    "cs.pfx>=20240630",
+    "cs.psutils>=20241206",
+    "cs.resources>=20241005",
+    "cs.upd>=20240630",
+    "icontract",
+    "typeguard",
+]
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+]
+version = "20241207"
+
+[project.license]
+text = "GNU General Public License v3 or later (GPLv3+)"
+
+[project.urls]
+"Monorepo Hg/Mercurial Mirror" = "https://hg.sr.ht/~cameron-simpson/css"
+"Monorepo Git Mirror" = "https://github.com/cameron-simpson/css"
+"MonoRepo Commits" = "https://bitbucket.org/cameron_simpson/css/commits/branch/main"
+Source = "https://github.com/cameron-simpson/css/blob/main/lib/python/cs/hashindex.py"
+
+[project.scripts]
+hashindex = "cs.hashindex:main"
+
+[project.readme]
+text = """
+A command and utility functions for making listings of file content hashcodes
+and manipulating directory trees based on such a hash index.
+
+*Latest release 20241207*:
+Mostly CLI usage improvements.
+
+This largely exists to solve my \"what has changed remotely?\" or
+\"what has been filed where?\" problems by comparing file trees
+using the files' content hashcodes.
+
+This does require reading every file once to compute its hashcode,
+but the hashcodes (and file sizes and mtimes when read) are
+stored beside the file in `.fstags` files (see the `cs.fstags`
+module), so that a file does not need to be reread on subsequent
+comparisons.
+
+`hashindex` knows how to invoke itself remotely using `ssh`
+(this does require `hashindex` to be installed on the remote host)
+and can thus be used to compare a local and remote tree, for example:
+
+    hashindex comm -1 localtree remotehost:remotetree
+
+When you point `hashindex` at a remote tree, it uses `ssh` to
+run `hashindex` on the remote host, so all the content hashing
+is done locally to the remote host instead of copying files
+over the network.
+
+You can also use it to rearrange a tree based on the locations
+of corresponding files in another tree. Consider a media tree
+replicated between 2 hosts. If the source tree gets rearranged,
+the destination can be equivalently rearranged without copying
+the files, for example:
+
+    hashindex rearrange sourcehost:sourcetree localtree
+
+If `fstags mv` was used to do the original rearrangement then
+the hashcodes will be copied to the new locations, saving a
+rescan of the source file. I keep a shell alias `mv=\"fstags mv\"`
+so this is routine for me.
+
+I have a backup script [`histbackup`](https://hg.sr.ht/~cameron-simpson/css/browse/bin/histbackup)
+which works by making a hard link tree of the previous backup
+and `rsync`ing into it.  It has long been subject to huge
+transfers if the source tree gets rearranged. Now it has a
+`--hashindex` option to get it to run a `hashindex rearrange`
+between the hard linking to the new backup tree and the `rsync`
+from the source to the new tree.
+
+If network bandwith is limited or quotaed, you can use the
+comparison function to prepare a list of files missing from the
+remote location and copy them to a transfer drive for carrying
+to the remote site when opportune. Example:
+
+    hashindex comm -1 -o '{fspath}' src rhost:dst \\
+    | rsync -a --files-from=- src/ xferdir/
+
+I've got a script [`pref-xfer`](https://hg.sr.ht/~cameron-simpson/css/browse/bin-cs/prep-xfer)
+which does this with some conveniences and sanity checks.
+
+## <a name=\"dir_filepaths\"></a>`dir_filepaths(dirpath: str, *, fstags: Optional[cs.fstags.FSTags] = <function <lambda> at 0x10e944e00>)`
+
+Generator yielding the filesystem paths of the files in `dirpath`.
+
+## <a name=\"dir_remap\"></a>`dir_remap(srcdirpath: str, fspaths_by_hashcode: Mapping[cs.hashutils.BaseHashCode, List[str]], *, hashname: str)`
+
+Generator yielding `(srcpath,[remapped_paths])` 2-tuples
+based on the hashcodes keying `fspaths_by_hashcode`.
+
+## <a name=\"file_checksum\"></a>`file_checksum(fspath: str, hashname: str = 'blake3', *, fstags: Optional[cs.fstags.FSTags] = <function <lambda> at 0x10e944e00>) -> Optional[cs.hashutils.BaseHashCode]`
+
+Return the hashcode for the contents of the file at `fspath`.
+Warn and return `None` on `OSError`.
+
+## <a name=\"hashindex\"></a>`hashindex(fspath: Union[str, io.TextIOBase, Tuple[Optional[str], str]], *, hashname: str, relative: bool = False, **kw) -> Iterable[Tuple[Optional[cs.hashutils.BaseHashCode], Optional[str]]]`
+
+Generator yielding `(hashcode,filepath)` 2-tuples
+for the files in `fspath`, which may be a file or directory path.
+Note that it yields `(None,filepath)` for files which cannot be accessed.
+
+## <a name=\"HashIndexCommand\"></a>Class `HashIndexCommand(cs.cmdutils.BaseCommand)`
+
+A tool to generate indices of file content hashcodes
+and to link or otherwise rearrange files to destinations based
+on their hashcode.
+
+Usage summary:
+
+    Usage: hashindex [common-options...] subcommand...
+      Generate or process file content hash listings.
+      Subcommands:
+        comm [common-options...] {-1|-2|-3|-r} {path1|-} {path2|-}
+          Compare the filepaths in path1 and path2 by content.
+          Options:
+            -1  List hashes and paths only present in path1.
+            -2  List hashes and paths only present in path2.
+            -3  List hashes and paths present in path1 and path2.
+            -r  Emit relative paths in the listing.
+        help [common-options...] [-l] [-s] [subcommand-names...]
+          Print help for subcommands.
+          This outputs the full help for the named subcommands,
+          or the short help for all subcommands if no names are specified.
+          Options:
+            -l  Long listing.
+            -r  Recurse into subcommands.
+            -s  Short listing.
+        info [common-options...] [field-names...]
+          Recite general information.
+          Explicit field names may be provided to override the default listing.
+        ls [common-options...] [options...] [[host:]path...]
+          Walk filesystem paths and emit a listing.
+          The default path is the current directory.
+          Options:
+            -r  Emit relative paths in the listing.
+                This requires each path to be a directory.
+        rearrange [common-options...] [options...] {[[user@]host:]refdir|-} [[user@]rhost:]targetdir [dstdir]
+          Rearrange files from targetdir into dstdir based on their positions in refdir.
+          Other arguments:
+            refdir      The reference directory, which may be local or remote
+                        or \"-\" indicating that a hash index will be read from
+                        standard input.
+            targetdir   The directory containing the files to be rearranged,
+                        which may be local or remote.
+            dstdir      Optional destination directory for the rearranged files.
+                        Default is the targetdir.
+                        It is taken to be on the same host as targetdir.
+          Options:
+            --mv  Move mode.
+            -s    Synmlink mode.
+        shell [common-options...]
+          Run a command prompt via cmd.Cmd using this command's subcommands.
+
+*`HashIndexCommand.Options`*
+
+*`HashIndexCommand.cmd_comm(self, argv, *, runstate: Optional[cs.resources.RunState] = <function uses_runstate.<locals>.<lambda> at 0x10e974cc0>)`*:
+Usage: {cmd} {{-1|-2|-3|-r}} {{path1|-}} {{path2|-}}
+Compare the filepaths in path1 and path2 by content.
+Options:
+  -1  List hashes and paths only present in path1.
+  -2  List hashes and paths only present in path2.
+  -3  List hashes and paths present in path1 and path2.
+  -r  Emit relative paths in the listing.
+
+*`HashIndexCommand.cmd_ls(self, argv, *, runstate: Optional[cs.resources.RunState] = <function uses_runstate.<locals>.<lambda> at 0x10e975120>)`*:
+Usage: {cmd} [options...] [[host:]path...]
+Walk filesystem paths and emit a listing.
+The default path is the current directory.
+Options:
+  -r  Emit relative paths in the listing.
+      This requires each path to be a directory.
+
+*`HashIndexCommand.cmd_rearrange(self, argv)`*:
+Usage: {cmd} [options...] {{[[user@]host:]refdir|-}} [[user@]rhost:]targetdir [dstdir]
+Rearrange files from targetdir into dstdir based on their positions in refdir.
+Other arguments:
+  refdir      The reference directory, which may be local or remote
+              or \"-\" indicating that a hash index will be read from
+              standard input.
+  targetdir   The directory containing the files to be rearranged,
+              which may be local or remote.
+  dstdir      Optional destination directory for the rearranged files.
+              Default is the targetdir.
+              It is taken to be on the same host as targetdir.
+Options:
+  --mv  Move mode.
+  -s    Synmlink mode.
+
+## <a name=\"localpath\"></a>`localpath(fspath: str) -> str`
+
+Return a filesystem path modified so that it connot be
+misinterpreted as a remote path such as `user@host:path`.
+
+If `fspath` contains no colon (`:`) or is an absolute path
+or starts with `./` then it is returned unchanged.
+Otherwise a leading `./` is prepended.
+
+## <a name=\"main\"></a>`main(argv=None)`
+
+Commandline implementation.
+
+## <a name=\"merge\"></a>`merge(srcpath: str, dstpath: str, *, opname=None, hashname: str, move_mode: bool = False, symlink_mode=False, doit=False, fstags: Optional[cs.fstags.FSTags] = <function <lambda> at 0x10e944e00>, verbose: bool)`
+
+Merge `srcpath` to `dstpath`.
+
+If `dstpath` does not exist, move/link/symlink `srcpath` to `dstpath`.
+Otherwise checksum their contents and raise `FileExistsError` if they differ.
+
+## <a name=\"paths_remap\"></a>`paths_remap(srcpaths: Iterable[str], fspaths_by_hashcode: Mapping[cs.hashutils.BaseHashCode, List[str]], *, hashname: str)`
+
+Generator yielding `(srcpath,fspaths)` 2-tuples.
+
+## <a name=\"read_hashindex\"></a>`read_hashindex(f, start=1, *, hashname: str) -> Iterable[Tuple[Optional[cs.hashutils.BaseHashCode], Optional[str]]]`
+
+A generator which reads line from the file `f`
+and yields `(hashcode,fspath)` 2-tuples for each line.
+If there are parse errors the `hashcode` or `fspath` may be `None`.
+
+## <a name=\"read_remote_hashindex\"></a>`read_remote_hashindex(rhost: str, rdirpath: str, *, hashname: str, quiet=True, ssh_exe: str, hashindex_exe: str, relative: bool = False) -> Iterable[Tuple[Optional[cs.hashutils.BaseHashCode], Optional[str]]]`
+
+A generator which reads a hashindex of a remote directory,
+This runs: `hashindex ls -h hashname -r rdirpath` on the remote host.
+It yields `(hashcode,fspath)` 2-tuples.
+
+Parameters:
+* `rhost`: the remote host, or `user@host`
+* `rdirpath`: the remote directory path
+* `hashname`: the file content hash algorithm name
+* `ssh_exe`: optional `ssh` command
+* `hashindex_exe`: the remote `hashindex` executable
+* `relative`: optional flag, default `False`;
+  if true pass `'-r'` to the remote `hashindex ls` command
+* `check`: whether to check that the remote command has a `0` return code,
+  default `True`
+
+## <a name=\"rearrange\"></a>`rearrange(srcdirpath: str, rfspaths_by_hashcode, dstdirpath=None, *, hashname: str, move_mode: bool = False, symlink_mode=False, doit: bool, fstags: cs.fstags.FSTags, runstate: Optional[cs.resources.RunState] = <function uses_runstate.<locals>.<lambda> at 0x10e976160>)`
+
+Rearrange the files in `dirpath` according to the
+hashcode->[relpaths] `fspaths_by_hashcode`.
+
+Parameters:
+* `srcdirpath`: the directory whose files are to be rearranged
+* `rfspaths_by_hashcode`: a mapping of hashcode to relative
+  pathname to which the original file is to be moved
+* `dstdirpath`: optional target directory for the rearranged files;
+  defaults to `srcdirpath`, rearranging the files in place
+* `hashname`: the file content hash algorithm name
+* `move_move`: move files instead of linking them
+* `symlink_mode`: symlink files instead of linking them
+* `doit`: if true do the link/move/symlink, otherwise just print
+
+## <a name=\"run_remote_hashindex\"></a>`run_remote_hashindex(rhost: str, argv, *, hashindex_exe: str, **subp_options)`
+
+Run a remote `hashindex` command.
+Return the `CompletedProcess` result or `None` if `doit` is false.
+Note that as with `cs.psutils.run`, the arguments are resolved
+via `cs.psutils.prep_argv`.
+
+Parameters:
+* `rhost`: the remote host, or `user@host`
+* `argv`: the command line arguments to be passed to the
+  remote `hashindex` command
+* `check`: whether to check that the remote command has a `0` return code,
+  default `True`
+Other keyword parameters are passed therough to `cs.psutils.run`.
+
+# Release Log
+
+
+
+*Release 20241207*:
+Mostly CLI usage improvements.
+
+*Release 20241007*:
+Small internal changes.
+
+*Release 20240709*:
+* Require `blake3` and use it as the default hash algorithm.
+* Some internal improvements.
+
+*Release 20240623*:
+hashindex: plumb hashname to file_checksum.
+
+*Release 20240412*:
+* file_checksum: skip any nonregular file, only use run_task when checksumming more than 1MiB.
+* HashIndexCommand.cmd_rearrange: run the refdir index in relative mode.
+* Small fixes.
+
+*Release 20240317*:
+* HashIndexCommand.cmd_ls: default to listing the current directory.
+* HashIndexCommand: new -o output_format to allow outputting only hashcodes or fspaths.
+* HashIndexCommand.cmd_comm: new -r (relative) option.
+
+*Release 20240316*:
+Fixed release upload artifacts.
+
+*Release 20240305*:
+* HashIndexCommand.cmd_ls: support rhost:rpath paths, honour intterupts in the remote mode.
+* HashIndexCommand.cmd_rearrange: new optional dstdir command line argument, passed to rearrange.
+* merge: symlink_mode: leave identical symlinks alone, just merge tags.
+* rearrange: new optional dstdirpath parameter, default srcdirpath.
+
+*Release 20240216*:
+* HashIndexCommand.cmdlinkto,cmd_rearrange: run the link/mv stuff with sys.stdout in line buffered mode.
+* DO not get hashcodes from symlinks.
+* HashIndexCommand.cmd_ls: ignore None hashcodes, do not set xit=1.
+* New run_remote_hashindex() and read_remote_hashindex() functions.
+* dir_filepaths: skip dot files, the fstags .fstags file and nonregular files.
+
+*Release 20240211.1*:
+Better module docstring.
+
+*Release 20240211*:
+Initial PyPI release: \"hashindex\" command and utility functions for listing file hashcodes and rearranging trees based on a hash index."""
+content-type = "text/markdown"
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools >= 61.2",
+    "trove-classifiers",
+    "wheel",
+]
+
+[tool.setuptools]
+py-modules = [
+    "cs.hashindex",
+]
+
+[tool.setuptools.package-dir]
+"" = "lib/python"
