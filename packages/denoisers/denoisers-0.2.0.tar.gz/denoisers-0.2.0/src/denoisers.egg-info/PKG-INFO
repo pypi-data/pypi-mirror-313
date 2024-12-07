@@ -1,0 +1,95 @@
+Metadata-Version: 2.1
+Name: denoisers
+Version: 0.2.0
+Summary: A package for training audio denoisers
+Author-email: Will Rice <wrice20@gmail.com>
+Project-URL: Homepage, https://github.com/will-rice/denoisers
+Project-URL: Bug Tracker, https://github.com/will-rice/denoisers/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: mypy>=1.13.0
+Requires-Dist: pydocstyle>=6.3.0
+Requires-Dist: pytest>=8.3.3
+Requires-Dist: pytorch-lightning>=2.4.0
+Requires-Dist: ruff>=0.7.4
+Requires-Dist: torch>=2.5.1
+Requires-Dist: torchaudio>=2.5.1
+Requires-Dist: torchvision>=0.20.1
+Requires-Dist: wandb>=0.18.7
+Requires-Dist: matplotlib>=3.9.2
+Requires-Dist: pedalboard>=0.9.16
+Requires-Dist: pydub>=0.25.1
+Requires-Dist: pyroomacoustics>=0.8.2
+Requires-Dist: pre-commit>=4.0.1
+Requires-Dist: librosa>=0.10.2.post1
+Requires-Dist: transformers>=4.46.3
+Requires-Dist: audiomentations>=0.37.0
+Requires-Dist: onnxruntime>=1.20.1
+Requires-Dist: pesq>=0.0.4
+
+# Denoisers
+
+Denoisers is a denoising library for audio with a focus on simplicity and ease of use. There are two major architectures available for waveforms: WaveUNet which follows the [paper](https://arxiv.org/abs/1806.03185) and a custom UNet1D architecture similar to what you would see in diffusion models.
+
+## Demo
+
+[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/wrice/denoisers)
+
+## Usage/Examples
+
+```sh
+pip install denoisers
+```
+
+### Inference
+
+```python
+import torch
+import torchaudio
+from denoisers import WaveUNetModel
+from tqdm import tqdm
+
+model = WaveUNetModel.from_pretrained("wrice/waveunet-vctk-24khz")
+
+audio, sr = torchaudio.load("noisy_audio.wav")
+
+if sr != model.config.sample_rate:
+    audio = torchaudio.functional.resample(audio, sr, model.config.sample_rate)
+
+if audio.size(0) > 1:
+    audio = audio.mean(0, keepdim=True)
+
+chunk_size = model.config.max_length
+
+padding = abs(audio.size(-1) % chunk_size - chunk_size)
+padded = torch.nn.functional.pad(audio, (0, padding))
+
+clean = []
+for i in tqdm(range(0, padded.shape[-1], chunk_size)):
+    audio_chunk = padded[:, i:i + chunk_size]
+    with torch.no_grad():
+        clean_chunk = model(audio_chunk[None]).audio
+    clean.append(clean_chunk.squeeze(0))
+
+denoised = torch.concat(clean, 1)[:, :audio.shape[-1]]
+```
+
+### Train
+
+```sh
+
+train unet1d unet1d-24khz /data_root/
+
+```
+
+### Publish
+
+```sh
+
+publish model model_name /path/to/model
+
+```
