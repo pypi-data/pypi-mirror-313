@@ -1,0 +1,98 @@
+AgentDescription: Hi there! I am an Assistant class generative AI agent.
+AgentFlow:
+    Description:
+        Use this flow when you want the agent to decide whether to use the
+        google tool or not
+    Id: 00000000-0000-0000-0000-000000000001
+    Name: Composite Google Flow
+    StateDiagram:
+        "\n                stateDiagram-v2\n                INIT --> TOOL_CHOICE:\
+        \ next / on_TOOL_CHOICE\n\n                TOOL_CHOICE --> CRAFT_TEXT_PROMPT:\
+        \ next / on_CRAFT_PROMPT / use_text\n                    CRAFT_TEXT_PROMPT -->\
+        \ GENERATE: next / on_GENERATE\n                    GENERATE --> PROCESS: next\
+        \ / on_PROCESS / use_text\n                    PROCESS --> END : next\n\n    \
+        \            TOOL_CHOICE --> CRAFT_TOOL_PROMPT: next / on_CRAFT_PROMPT / use_google\n\
+        \                    TOOL_CALL --> GOOGLE: next / on_GOOGLE / use_google\n   \
+        \                 GOOGLE --> GENERATE: next / on_GENERATE\n\n                TOOL_CHOICE\
+        \ --> CRAFT_TOOL_PROMPT: next / on_CRAFT_PROMPT / use_retrieval\n            \
+        \        TOOL_CALL --> RETRIEVAL: next / on_RETRIEVAL / use_retrieval\n      \
+        \              RETRIEVAL --> GENERATE: next / on_GENERATE\n\n                CRAFT_TOOL_PROMPT\
+        \ --> TOOL_CALL: next / on_TOOL_CALL\n            "
+AgentImageStyles: []
+AgentSkills: []
+AgentTools:
+    - CreatorId: 00000000-0000-0000-0000-000000000000
+      Id: 00000000-0000-0000-0000-000000000000
+      ToolApiKey: null
+      ToolApiUrl: null
+      ToolDesc:
+          "\n        The 'text' function is the default catch-all function returned\
+          \ when none of the other tools are applicable.\n        "
+      ToolName: text
+      ToolParameters:
+          - Id: 00000000-0000-0000-0000-000000000000
+            ParamDescription:
+                The most effective search query for semantic search that will
+                return the most precise result.
+            ParamName: search_query
+            ParamOrder: 0
+            ParamType: string
+            ToolId: 00000000-0000-0000-0000-000000000000
+      ToolPrompt: ""
+      UsageType: public
+    - CreatorId: 00000000-0000-0000-0000-000000000000
+      Id: 00000000-0000-0000-0000-000000000001
+      ToolApiKey: null
+      ToolApiUrl: null
+      ToolDesc:
+          "\n        The 'google' function is a powerful tool that allows the AI\
+          \ to gather external information from the internet using Google search. It can\
+          \ be invoked when the AI needs to answer a question or provide information that\
+          \ requires up-to-date, comprehensive, and diverse sources which are not inherently\
+          \ known by the AI. For instance, it can be used to find current news, weather\
+          \ updates, latest sports scores, trending topics, specific facts, or even the\
+          \ current date and time. The usage of this tool should be considered when the\
+          \ user's query implies or explicitly requests recent or wide-ranging data, or\
+          \ when the AI's inherent knowledge base may not have the required or most current\
+          \ information. The 'search_query' parameter should be a concise and accurate representation\
+          \ of the information needed.\n        "
+      ToolName: google
+      ToolParameters:
+          - Id: 00000000-0000-0000-0000-000000000001
+            ParamDescription:
+                The search query to search google with. For example, to find
+                the current date or time, use 'current date' or 'current time' respectively.
+            ParamName: search_query
+            ParamOrder: 0
+            ParamType: string
+            ToolId: 00000000-0000-0000-0000-000000000001
+      ToolPrompt: ""
+      UsageType: public
+AgentTraits: []
+ClassName: Assistant
+CustomPrompt:
+    AgentClassTypeId: 00000000-0000-0000-0000-000000000000
+    Content:
+        "You are a web analyst and your primary job is to support the team by enriching the conversation using information found on the web. \
+        \ Your secondary role is a fact checker and is tasked to verify the team''s claims via Google search."
+    CreatorId: 00000000-0000-0000-0000-000000000000
+    Desc:
+        This is a standard prompt for assistant class AI agents. Make a copy of this
+        prompt and customize it for use with your own assistant agent.
+    Id: 00000000-0000-0000-0000-000000000001
+    Name: Fact Checker Prompt
+    UsageType: public
+ImageDataUrl: null
+Name: George
+TTT:
+    stop_conditions:
+        - "<|im_end|>"
+        - "<|im_start|>"
+        - "[/INST]"
+        - "</s>"
+    temperature: 0.2
+    top_k: 50
+    timeout: 60.0
+    type: ttt
+    url: http://gai-ttt-svr:12031/gen/v1/chat/completions
+UsageType: private

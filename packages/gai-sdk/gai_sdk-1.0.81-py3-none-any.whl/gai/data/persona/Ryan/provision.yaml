@@ -1,0 +1,102 @@
+AgentDescription: Hi there! I am an Assistant class generative AI agent.
+AgentFlow:
+    Description:
+        Use this flow when you want the agent to decide whether to use the
+        retrieval tool or not
+    Id: 33acdc57-1486-4423-b32f-4c12b122ffae
+    Name: Composite Retrieval Flow
+    StateDiagram:
+        "stateDiagram-v2\n INIT --> TOOL_CHOICE: next / on_TOOL_CHOICE\n\n\
+        \ TOOL_CHOICE --> CRAFT_TEXT_PROMPT: next / on_CRAFT_PROMPT / use_text\n CRAFT_TEXT_PROMPT\
+        \ --> GENERATE: next / on_GENERATE\n GENERATE --> PROCESS: next / on_PROCESS /\
+        \ use_text\n PROCESS --> END : next\n\n TOOL_CHOICE --> CRAFT_TOOL_PROMPT: next\
+        \ / on_CRAFT_PROMPT / use_google\n TOOL_CALL --> GOOGLE: next / on_GOOGLE / use_google\n\
+        \ GOOGLE --> GENERATE: next / on_GENERATE\n\n TOOL_CHOICE --> CRAFT_TOOL_PROMPT:\
+        \ next / on_CRAFT_PROMPT / use_retrieval\n TOOL_CALL --> RETRIEVAL: next / on_RETRIEVAL\
+        \ / use_retrieval\n RETRIEVAL --> GENERATE: next / on_GENERATE\n\n CRAFT_TOOL_PROMPT\
+        \ --> TOOL_CALL: next / on_TOOL_CALL\n "
+AgentImageStyles: []
+AgentSkills: []
+AgentTools:
+    - CreatorId: 00000000-0000-0000-0000-000000000000
+      Id: 00000000-0000-0000-0000-000000000000
+      ToolApiKey: null
+      ToolApiUrl: null
+      ToolDesc:
+          "\nThe 'text' function is the default catch-all function returned when\
+          \ none of the other tools are applicable.\n        "
+      ToolName: text
+      ToolParameters:
+          - Id: 00000000-0000-0000-0000-000000000000
+            ParamDescription: Text response.
+            ParamName: text_string
+            ParamOrder: 0
+            ParamType: string
+            ToolId: 00000000-0000-0000-0000-000000000000
+      ToolPrompt: ""
+      UsageType: public
+    - CreatorId: 00000000-0000-0000-0000-000000000000
+      Id: 94cc3ccb-48f1-41a9-adc8-0b4bc882c6e8
+      ToolApiKey: null
+      ToolApiUrl: null
+      ToolDesc:
+          "\n                        The `retrieval` function is a powerful tool\
+          \ that allows the AI to access articles outside of its knowledge domain from external\
+          \ sources. \n                        The external articles are stored in an archive\
+          \ and organised by <titles>:\n{ titles: [['REACT: SYNERGIZING REASONING AND ACTING\
+          \ IN LANGUAGE MODELS']] }\n                        and <keywords>:\n         \
+          \               { keywords: [['Large Language Models', 'LLM', 'Prompt Engineering',\
+          \ 'AI', 'Generative AI']] }\n                        **IMPORTANT**: Use this tool\
+          \ when any of the <titles> or <keywords> may be relevant to user's question.\n\
+          \                        The 'search_query' parameter should be crafted in a way\
+          \ that it returns the most precise result based on the conversation context.\n\
+          \                    "
+      ToolName: retrieval
+      ToolParameters:
+          - Id: f707b242-2091-423f-9bfb-86134ad3bd6b
+            ParamDescription:
+                The most effective search query for semantic search that will
+                return the most precise result.
+            ParamName: search_query
+            ParamOrder: 0
+            ParamType: string
+            ToolId: 94cc3ccb-48f1-41a9-adc8-0b4bc882c6e8
+      ToolPrompt:
+          "\U0001F469\u200D\U0001F52C, use only the information provided to you\
+          \ by the user to answer the user''s question. \n            If the information\
+          \ is insufficient for \U0001F469\u200D\U0001F52C to derive an answer, just say\
+          \ ''I cannot find relevant information in my document store to answer the question\
+          \ correctly.'' \n            \U0001F469\u200D\U0001F52C is to provide an in-depth\
+          \ analysis to the question based only on the information provided by the user\
+          \ and nothing more.\n            \U0001F469\u200D\U0001F52C will give a real-life\
+          \ example to support illustrating your point and contrasting it with a counter-example.\
+          \ \n            \U0001F469\u200D\U0001F52C will also proofread and edit the content\
+          \ before responding. \n            \U0001F469\u200D\U0001F52C will provide your\
+          \ own reasoned subjective perspective, noting where your view differs from or\
+          \ expands on the contents.\n            Rules:\n                - Consolidate\
+          \ the materials provided by the user and then organise them point by point.\n\
+          \                - Provide as much details as you can extract from the materials\
+          \ provided by the user.\n                - Begin your report by saying `According\
+          \ to my document store,...`\n                - Always provide your answers in\
+          \ point form."
+      UsageType: private
+AgentTraits: []
+ClassName: Assistant
+CustomPrompt: null
+ImageDataUrl: null
+Name: Ryan
+RAG:
+    type: rag
+    url: http://gai-rag-svr:12036/gen/v1/rag
+    ws_url: ws://gai-rag-svr:12036/gen/v1/rag/index-file/ws
+TTT:
+    stop_conditions:
+        - "<|im_end|>"
+        - "<|im_start|>"
+        - "[/INST]"
+        - "</s>"
+    temperature: 0.7
+    timeout: 60.0
+    type: ttt
+    url: http://gai-ttt-svr:12031/gen/v1/chat/completions
+UsageType: private

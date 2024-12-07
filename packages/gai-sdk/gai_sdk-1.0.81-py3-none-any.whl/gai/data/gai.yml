@@ -1,0 +1,269 @@
+gai_url: "http://localhost:12033"
+logging:
+    level: "INFO"
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+    filename: ""
+    filemode: "a"
+    stream: "stdout"
+    loggers:
+        gai.ttt: "DEBUG"
+        gai.common.http_utils: "DEBUG"
+clients:
+    default:
+        ttt: "gai-ttt"
+        rag: "gai-rag"
+        tti: "gai-tti"
+        tts: "gai-tts"
+    gai-ttt:
+        type: ttt
+        url: "http://localhost:12031/gen/v1/chat/completions"
+        whitelist:
+            - temperature
+            - top_p
+            - min_p
+            - top_k
+            - max_tokens
+            - typical
+            - n
+            - token_repetition_penalty_max
+            - token_repetition_penalty_sustain
+            - token_repetition_penalty_decay
+            - beams
+            - beam_length
+        env:
+            GAI_API_KEY: ${GAI_API_KEY}
+    openai-ttt:
+        type: ttt
+        whitelist:
+            - max_tokens
+            - temperature
+            - top_p
+            - presence_penalty
+            - frequency_penalty
+            - stop
+            - logit_bias
+            - n
+            - stream
+            - openai_api_key
+        default:
+            temperature: 1.2
+            top_p: 0.15
+            top_k: 50
+            max_tokens: 1000
+        env:
+            OPENAI_API_KEY: ${OPENAI_API_KEY}
+    gai-rag:
+        type: rag
+        url: http://localhost:12036/gen/v1/rag
+        ws_url: ws://localhost:12036/gen/v1/rag/index-file/ws
+        env:
+            GAI_API_KEY: ${GAI_API_KEY}
+    gai-tti:
+        type: tti
+        url: "http://localhost:12035/sdapi/v1/txt2img"
+        env:
+            GAI_API_KEY: ${GAI_API_KEY}
+    gai-tts:
+        type: tts
+        url: "http://localhost:12032/gen/v1/audio/speech"
+        env:
+            GAI_API_KEY: ${GAI_API_KEY}
+    gai-stt:
+        type: stt
+        url: "http://localhost:12033/gen/v1/audio/transcriptions"
+        env:
+            GAI_API_KEY: ${GAI_API_KEY}
+    gai-itt:
+        type: itt
+        url: "http://localhost:12034/gen/v1/vision/completions"
+        env:
+            GAI_API_KEY: ${GAI_API_KEY}
+
+gen:
+    default:
+        ttt: "ttt-exllamav2-mistral7b"
+        rag: "rag-instructor-sentencepiece"
+        tts: "tts-xttsv2-coqui"
+        stt: "stt-whisperv3-huggingface"
+        itt: "itt-llava-v1.6-vicuna-7b"
+        ttc: "ttc-exllamav2-deepseek"
+    ttt-exllamav2-mistral7b:
+        type: "ttt"
+        generator_name: "exllamav2-mistral7b"
+        engine: "gai.ttt.server.GaiExLlamaV2"
+        model_path: "models/exllamav2-mistral7b"
+        model_basename: "model"
+        max_seq_len: 8192
+        prompt_format: "mistral"
+        hyperparameters:
+            {
+                "temperature": 0.85,
+                "top_p": 0.8,
+                "top_k": 50,
+                "max_tokens": 1000,
+            }
+        tool_choice: "auto"
+        max_retries: 5
+        stop_conditions: ["<|im_end|>", "</s>", "[/INST]"]
+        no_flash_attn: true
+        seed: null
+        decode_special_tokens: false
+        module_name: "gai.ttt.server.gai_exllamav2"
+        class_name: "GaiExLlamav2"
+        init_args: []
+        init_kwargs: {}
+    ttt-llamacpp-mistral7b:
+        type: "ttt"
+        generator_name: "llamacpp-mistral7b"
+        model_filepath: "models/llamacpp-mistral7b/Mistral-7B-Instruct-v0.3-Q4_K_M.gguf"
+        max_seq_len: 4096
+        prompt_format: "mistral"
+        hyperparameters:
+            {
+                "temperature": 1.31,
+                "top_p": 0.14,
+                "top_k": 49,
+                "max_tokens": 1000,
+            }
+        tool_choice: "auto"
+        max_retries: 5
+        stop: ["<|eot_id|>"]
+        module_name: "gai.ttt.server.gai_llamacpp"
+        class_name: "GaiLlamaCpp"
+        init_args: []
+        init_kwargs: {}
+    ttt-exllamav2-dolphin:
+        type: "ttt"
+        generator_name: "exllamav2-dolphin"
+        engine: "gai.ttt.server.GaiExLlamaV2"
+        model_path: "models/exllamav2-dolphin"
+        model_basename: "model"
+        max_seq_len: 8192
+        prompt_format: "mistral"
+        hyperparameters:
+            {
+                "temperature": 0.85,
+                "top_p": 0.8,
+                "top_k": 50,
+                "max_tokens": 1000,
+            }
+        tool_choice: "auto"
+        max_retries: 5
+        stop_conditions: ["<|im_end|>", "</s>", "[/INST]"]
+        no_flash_attn: true
+        seed: null
+        decode_special_tokens: false
+        module_name: "gai.ttt.server.gai_exllamav2"
+        class_name: "GaiExLlamav2"
+        init_args: []
+        init_kwargs: {}
+    ttt-llamacpp-dolphin:
+        type: "ttt"
+        generator_name: "llamacpp-dolphin"
+        model_path: "models/llamacpp-dolphin"
+        model_filepath: "models/llamacpp-dolphin/dolphin-2.9.3-mistral-7B-32k-Q4_K_M.gguf"
+        max_seq_len: 4096
+        prompt_format: "mistral"
+        hyperparameters:
+            {
+                "temperature": 0.85,
+                "top_p": 0.8,
+                "top_k": 50,
+                "max_tokens": 1000,
+            }
+        tool_choice: "auto"
+        max_retries: 5
+        stop_conditions: ["<|im_end|>", "</s>", "[/INST]"]
+        module_name: "gai.ttt.server.gai_llamacpp"
+        class_name: "GaiLlamaCpp"
+        init_args: []
+        init_kwargs: {}
+    rag-instructor-sentencepiece:
+        type: "rag"
+        generator_name: "instructor-sentencepiece"
+        chromadb:
+            path: "rag/chromadb"
+            n_results: 3
+        sqlite:
+            path: "rag/gai-rag.db"
+        model_path: "models/instructor-large"
+        device: "cuda"
+        chunks:
+            size: 1000
+            overlap: 100
+            path: "chunks"
+        module_name: "gai.rag.server.gai_rag"
+        class_name: "RAG"
+        init_args: []
+        init_kwargs: {}
+    tts-xttsv2-coqui:
+        type: "tts"
+        generator_name: "xttsv2-coqui"
+        model_name: "Coqui TTS v2"
+        model_path: "models/xttsv2-coqui/tts/tts_models--multilingual--multi-dataset--xtts_v2"
+        model_basename: ""
+        max_seq_len: 128
+        stopping_words: []
+        module_name: "gai.tts.server.gai_xtts"
+        class_name: "GaiXTTS"
+        init_args: []
+        init_kwargs: {}
+    stt-whisperv3-huggingface:
+        type: "stt"
+        generator_name: "whisperv3-huggingface"
+        model_name: "OpenAI Whisper v3"
+        model_path: "models/whisper-large-v3"
+        model_basename: ""
+        max_seq_len: 128
+        stopping_words: []
+        hyperparameters:
+            chunk_length_s: 30
+            batch_size: 16
+            max_new_tokens: 128
+        module_name: "gai.stt.server.gai_stt"
+        class_name: "GaiSTT"
+        init_args: []
+        init_kwargs: {}
+    itt-llava-v1.6-vicuna-7b:
+        type: "itt"
+        generator_name: "llava-v1.6-vicuna-7b"
+        model_name: "llava-v1.6-vicuna-7b"
+        model_path: "models/llava-v1.6-vicuna-7b"
+        max_seq_len: 512
+        stopping_words: []
+        load_8bit: false
+        load_4bit: true
+        image_aspect_ratio: "pad"
+        hyperparameters:
+            temperature: 0.2
+            max_new_tokens: 512
+        module_name: "gai.itt.server.Llava_ITT"
+        class_name: "Llava_ITT"
+        init_args: []
+        init_kwargs: {}
+    ttc-exllamav2-deepseek:
+        type: "ttc"
+        generator_name: "exllamav2-deepseek"
+        model_path: "models/exllamav2-deepseek"
+        model_basename: "model"
+        max_seq_len: 8192
+        prompt_format: "mistral"
+        hyperparameters:
+            {
+                "temperature": 0.85,
+                "top_p": 0.8,
+                "top_k": 50,
+                "max_new_tokens": 1000,
+                "max_tokens": 2000,
+            }
+        tool_choice: "auto"
+        max_retries: 5
+        stop_conditions: ["<|im_end|>", "</s>", "[/INST]"]
+        no_flash_attn: true
+        seed: null
+        decode_special_tokens: false
+        module_name: "gai.ttc.server.gai_exllamav2"
+        class_name: "GaiExLlamav2"
+        init_args: []
+        init_kwargs: {}
