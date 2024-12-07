@@ -1,0 +1,71 @@
+
+[project]
+name = "lbg_tools"
+license = {file = "LICENSE"}
+readme = "README.md"
+authors = [
+    { name = "John Franklin Crenshaw", email = "jfcrenshaw@gmail.com" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+]
+dynamic = ["version"]
+requires-python = ">=3.11"
+dependencies = [
+    "astropy",
+    "numpy",
+    "pandas",
+    "scipy",
+]
+
+[project.urls]
+"Source Code" = "https://github.com/jfcrenshaw/lbg_tools"
+
+# On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
+[project.optional-dependencies]
+dev = [
+    "black", # Used for static linting of files
+    "flake8", # Linting
+    "jupyter", # Clears output from Jupyter notebooks
+    "jupyterlab",
+    "matplotlib",
+    "mypy", # Used for static type checking of files
+    "pre-commit", # Used to run checks before finalizing a git commit
+    "pytest",
+    "pytest-cov", # Used to report total code coverage
+]
+
+[build-system]
+requires = [
+    "setuptools>=62", # Used to build and package the Python project
+    "setuptools_scm>=6.2", # Gets release version from git. Makes it available programmatically
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "src/lbg_tools/_version.py"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[tool.black]
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.setuptools.package-data]
+lbg_tools = ["py.typed", "data/*"]
+
+[tool.coverage.run]
+omit=["src/lbg_tools/_version.py"]
