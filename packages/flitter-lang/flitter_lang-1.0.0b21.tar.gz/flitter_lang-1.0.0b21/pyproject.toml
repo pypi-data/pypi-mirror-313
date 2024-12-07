@@ -1,0 +1,127 @@
+[build-system]
+requires = ["setuptools", "cython"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flitter-lang"
+dynamic = ["version"]
+description = "Flitter is a functional programming language and declarative system for describing 2D and 3D visuals"
+authors = [
+  {name = "Jonathan Hogg", email = "me@jonathanhogg.com"},
+]
+maintainers = [
+  {name = "Jonathan Hogg", email = "me@jonathanhogg.com"},
+]
+readme = "README.md"
+license = {file="LICENSE"}
+keywords = ["language", "opengl", "live-coding", "live-visuals"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: BSD License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Environment :: Console",
+  "Environment :: GPU",
+  "Environment :: MacOS X",
+  "Environment :: X11 Applications",
+  "Topic :: Artistic Software",
+  "Topic :: Multimedia :: Graphics",
+  "Topic :: Multimedia :: Graphics :: 3D Rendering",
+]
+requires-python = ">= 3.10"
+dependencies = [
+    "av",
+    "glfw",
+    "lark",
+    "loguru",
+    "mako",
+    "manifold3d",
+    "moderngl",
+    "networkx",
+    "numpy",
+    "pillow>=10.1.0",
+    "pyserial",
+    "pyusb",
+    "regex",
+    "rtmidi2",
+    "scipy",
+    "skia-python>=117.0b3",
+    "trimesh",
+]
+
+[project.optional-dependencies]
+macos = [
+    "pyobjc-core",
+    "pyobjc-framework-Cocoa",
+]
+
+[project.urls]
+Documentation = "https://flitter.readthedocs.io/"
+Repository = "https://github.com/jonathanhogg/flitter.git"
+Issues = "https://github.com/jonathanhogg/flitter/issues"
+
+[project.scripts]
+flitter = "flitter.engine.__main__:main"
+
+[project.entry-points."flitter.render"]
+controller = "flitter.render.controller:Controller"
+counter = "flitter.render.counter:Counter"
+dmx = "flitter.render.dmx:DMX"
+laser = "flitter.render.laser:Laser"
+offscreen = "flitter.render.window:Offscreen"
+physics = "flitter.render.physics:PhysicsSystem"
+window = "flitter.render.window:Window"
+
+[project.entry-points."flitter.render.window"]
+adjust = "flitter.render.window.shaders:Adjust"
+bloom = "flitter.render.window.shaders:Bloom"
+blur = "flitter.render.window.shaders:Blur"
+canvas = "flitter.render.window.canvas:Canvas"
+canvas3d = "flitter.render.window.canvas3d:Canvas3D"
+edges = "flitter.render.window.shaders:Edges"
+feedback = "flitter.render.window.shaders:Feedback"
+flare = "flitter.render.window.shaders:Flare"
+image = "flitter.render.window.image:Image"
+noise = "flitter.render.window.shaders:Noise"
+record = "flitter.render.window.record:Record"
+reference = "flitter.render.window:Reference"
+shader = "flitter.render.window.shaders:Shader"
+transform = "flitter.render.window.shaders:Transform"
+video = "flitter.render.window.video:Video"
+vignette = "flitter.render.window.shaders:Vignette"
+
+[project.entry-points."flitter.render.controller"]
+push2 = "flitter.render.controller.push2:Push2Driver"
+xtouch_mini = "flitter.render.controller.xtouch_mini:XTouchMiniDriver"
+
+[project.entry-points."flitter.render.dmx"]
+entec = "flitter.render.dmx:EntecDMXDriver"
+outputarts = "flitter.render.dmx:OutputArtsDMXDriver"
+
+[tool.setuptools.dynamic]
+version = {attr = "flitter.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["*.lark", "*.pxd", "*.glsl", "*.frag", "*.vert"]
+
+[tool.cython-lint]
+max-line-length = 160
+
+[tool.cibuildwheel]
+skip = ["pp*", "*_i686", "*-win32"]
+
+[tool.coverage.run]
+plugins = ["Cython.Coverage"]
+source = ["src"]
+
+[tool.coverage.report]
+ignore_errors = true
+skip_empty = true
+exclude_also = ["raise NotImplementedError", "raise MemoryError", "raise AssertionError"]
