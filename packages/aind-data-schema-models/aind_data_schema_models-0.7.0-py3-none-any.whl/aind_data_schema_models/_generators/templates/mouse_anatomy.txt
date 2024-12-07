@@ -1,0 +1,65 @@
+"""Mouse anatomy"""
+{% raw -%}
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Literal, Union
+from typing_extensions import Annotated
+from aind_data_schema_models.registries import Registry
+{% endraw %}
+
+class _MouseAnatomicalStructureModel(BaseModel):
+    """Base model for mouse anatomy"""
+    model_config = ConfigDict(frozen=True)
+    name: str
+    registry: Registry.ONE_OF
+    registry_identifier: str
+
+{% for _, row in data.iterrows() %}
+class {{ row['name'] | to_class_name_underscored }}(_MouseAnatomicalStructureModel):
+    """Model {{row['name']}}"""
+    name: Literal["{{ row['name'] }}"] = "{{ row['name'] }}"
+    registry: Registry.ONE_OF = Registry.EMAPA
+    registry_identifier: Literal["{{ row['registry_identifier'] }}"] = "{{ row['registry_identifier'] }}"
+
+{% endfor %}
+class MouseAnatomicalStructure:
+    """MouseAnatomicalStructure"""
+{% for _, row in data.iterrows() %}
+    {{ row['name'] | to_class_name | upper }} = {{ row['name'] | to_class_name_underscored }}()
+{%- endfor %}
+
+    ALL = tuple(_MouseAnatomicalStructureModel.__subclasses__())
+
+    ONE_OF = Annotated[Union[tuple(_MouseAnatomicalStructureModel.__subclasses__())], Field(discriminator="registry_identifier")]
+
+
+MouseAnatomicalStructure.EMG_MUSCLES = Annotated[Union[
+    _Deltoid,
+    _Pectoralis_Major,
+    _Triceps_Brachii,
+    _Lateral_Head_Of_Triceps_Brachii,
+    _Long_Head_Of_Triceps_Brachii,
+    _Medial_Head_Of_Triceps_Brachii,
+    _Biceps_Brachii,
+    _Long_Head_Of_Biceps_Brachii,
+    _Short_Head_Of_Biceps_Brachii,
+    _Tendon_Of_Biceps_Brachii,
+    _Pars_Scapularis_Of_Deltoid,
+    _Extensor_Carpi_Radialis_Longus,
+    _Extensor_Digitorum_Communis,
+    _Extensor_Digitorum_Lateralis,
+    _Extensor_Carpi_Ulnaris,
+    _Flexor_Carpi_Radialis,
+    _Flexor_Carpi_Ulnaris,
+    _Flexor_Digitorum_Profundus,
+], Field(discriminator="registry_identifier")]
+
+MouseAnatomicalStructure.BODY_PARTS = Annotated[Union[
+    _Forelimb,
+    _Head,
+    _Hindlimb,
+    _Neck,
+    _Tail,
+    _Trunk,
+], Field(discriminator="registry_identifier")]
+
+

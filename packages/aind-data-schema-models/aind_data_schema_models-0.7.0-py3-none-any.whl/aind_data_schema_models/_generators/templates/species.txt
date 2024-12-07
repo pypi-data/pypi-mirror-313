@@ -1,0 +1,33 @@
+"""Species"""
+{% raw -%}
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Literal, Union
+from typing_extensions import Annotated
+from aind_data_schema_models.registries import Registry
+{% endraw %}
+
+class _SpeciesModel(BaseModel):
+    """Base model for platform"""
+    model_config = ConfigDict(frozen=True)
+    name: str
+    registry: Registry.ONE_OF
+    registry_identifier: str
+
+{% for _, row in data.iterrows() %}
+class {{ row['name'] | to_class_name_underscored }}(_SpeciesModel):
+    """Model {{row['name']}}"""
+    name: Literal["{{ row['name'] }}"] = "{{ row['name'] }}"
+    registry: Registry.ONE_OF = Registry.{{ row['registry_abbreviation'] | upper }}
+    registry_identifier: Literal["{{ row['registry_identifier'] }}"] = "{{ row['registry_identifier'] }}"
+
+{% endfor %}
+class Species:
+    """Species"""
+{% for _, row in data.iterrows() %}
+    {{ row['name'] | to_class_name | upper }} = {{ row['name'] | to_class_name_underscored }}()
+{%- endfor %}
+
+    ALL = tuple(_SpeciesModel.__subclasses__())
+
+    ONE_OF = Annotated[Union[tuple(_SpeciesModel.__subclasses__())], Field(discriminator="name")]
+

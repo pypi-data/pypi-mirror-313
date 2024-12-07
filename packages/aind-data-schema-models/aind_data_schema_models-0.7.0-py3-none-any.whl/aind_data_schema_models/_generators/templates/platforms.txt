@@ -1,0 +1,36 @@
+"""Platforms"""
+{% raw -%}
+from pydantic import BaseModel, Field, ConfigDict
+from typing import Literal, Union
+from typing_extensions import Annotated
+{% endraw %}
+
+class _PlatformModel(BaseModel):
+    """Base model for platform"""
+    model_config = ConfigDict(frozen=True)
+    name: str
+    abbreviation: str
+
+{% for _, row in data.iterrows() %}
+class {{ row['abbreviation'] | to_class_name_underscored }}(_PlatformModel):
+    """Model {{row['abbreviation']}}"""
+    name: Literal["{{ row['name'] }}"] = "{{ row['name'] }}"
+    abbreviation: Literal["{{ row['abbreviation'] }}"] = "{{ row['abbreviation'] }}"
+
+{% endfor %}
+class Platform:
+    """Platforms"""
+{% for _, row in data.iterrows() %}
+    {{ row['abbreviation'] | to_class_name | upper }} = {{ row['abbreviation'] | to_class_name_underscored }}()
+{%- endfor %}
+
+    ALL = tuple(_PlatformModel.__subclasses__())
+
+    ONE_OF = Annotated[Union[tuple(_PlatformModel.__subclasses__())], Field(discriminator="name")]
+
+    abbreviation_map = {m().abbreviation: m() for m in ALL}
+
+    @classmethod
+    def from_abbreviation(cls, abbreviation: str):
+        """Get platform from abbreviation"""
+        return cls.abbreviation_map.get(abbreviation, None)
