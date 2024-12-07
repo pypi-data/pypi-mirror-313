@@ -1,0 +1,45 @@
+Metadata-Version: 2.1
+Name: gnetclisdk
+Version: 1.0.46
+Summary: Client for Gnetcli GRPC-server
+Home-page: https://github.com/annetutil/gnetcli
+Author: Alexander Balezin
+Author-email: gescheit12@gmail.com
+License: MIT
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Description-Content-Type: text/markdown
+Requires-Dist: protobuf>=4.24.4
+Requires-Dist: grpcio>=1.59.2
+Requires-Dist: googleapis-common-protos>=1.61.0
+
+## Python client for Gnetcli GRPC server
+
+Gnetcli provides a universal way to execute arbitrary commands using a CLI,
+eliminating the need for screen scraping with expect.
+
+See documentation on [gnetcli server](https://annetutil.github.io/gnetcli/).
+
+Example:
+
+```python
+from gnetclisdk.client import Credentials, Gnetcli
+import os, asyncio
+
+async def example():
+    api = Gnetcli(insecure_grpc=True)
+    dev_creds = Credentials(os.environ.get("LOGIN"), os.environ.get("PASSWORD"))
+    res = await api.cmd(hostname="myhost", device="huawei", cmd="dis clock", credentials=dev_creds)
+    print("err=%s status=%s out=%s" % (res.error, res.status, res.out))
+
+asyncio.run(example())
+```
+
+Output:
+```
+err=b'' status=0 out=b'2023-11-10 09:31:58\nFriday\nTime Zone(UTC) : UTC'
+```
