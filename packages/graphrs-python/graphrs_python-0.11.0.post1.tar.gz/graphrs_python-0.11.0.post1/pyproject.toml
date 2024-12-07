@@ -1,0 +1,47 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools", "setuptools-rust"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "graphrs_python"
+version = "0.11.0-post1"
+description = "A Python module that wraps the high-performance `graphrs` Rust library."
+readme = "README.md"
+authors = [
+  {name = "Malcolm van Raalte", email = "malcolm@van.raalte.ca"},
+]
+license = {file = "LICENSE"}
+keywords = ["graph", "network", "graph theory", "network theory", "graph algorithms", "network algorithms"]
+classifiers = ["Development Status :: 5 - Production/Stable",
+              "Intended Audience :: Developers",
+              "License :: OSI Approved :: MIT License",
+              "Programming Language :: Python :: 3",
+              "Programming Language :: Rust",
+              "Topic :: Scientific/Engineering :: Information Analysis",
+              "Topic :: Scientific/Engineering :: Mathematics",
+              "Topic :: Software Development :: Libraries",
+              "Topic :: Software Development :: Libraries :: Python Modules",
+              "Typing :: Typed"]
+
+[project.urls]
+Repository = "https://github.com/malcolmvr/graphrs_python"
+
+[tool.setuptools.packages]
+# Pure Python packages/modules
+find = { where = ["python"] }
+
+[[tool.setuptools-rust.ext-modules]]
+# Private Rust extension module to be nested into the Python package
+target = "graphrs_python._lib"  # The last part of the name (e.g. "_lib") has to match lib.name in Cargo.toml,
+                             # but you can add a prefix to nest it inside of a Python package.
+path = "Cargo.toml"          # Default value, can be omitted
+binding = "PyO3"             # Default value, can be omitted
+
+[tool.distutils.bdist_wheel]
+py_limited_api = "cp39"
+
+[tool.cibuildwheel.macos]
+skip = "cp36-* cp37-*"
+before-all = "brew install homebrew/core/hdf5"
+repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
