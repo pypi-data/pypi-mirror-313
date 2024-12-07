@@ -1,0 +1,31 @@
+Metadata-Version: 2.3
+Name: gurlon
+Version: 0.1.0
+Summary: Transform unstructured DynamoDB data into local SQL tables.
+Author-email: Zach Fuller <zach.fuller1222@gmail.com>
+License: MIT
+Requires-Python: >=3.12
+Requires-Dist: boto3>=1.35.68
+Requires-Dist: duckdb>=1.1.3
+Requires-Dist: dynamodb-json>=1.4.2
+Requires-Dist: orjson>=3.10.12
+Requires-Dist: pydantic>=2.10.1
+Requires-Dist: sqlmodel>=0.0.22
+Requires-Dist: structlog>=24.4.0
+Description-Content-Type: text/markdown
+
+# gurlon
+
+## Overview
+
+`gurlon` is a library designed to make the process of exporting data from Dynamo to your local filesystem easier.
+
+There are 3 main steps to the `gurlon` export process:
+
+1. Instantiate a new `DataExporter` and invoke `export_data` to begin a DynamoDB PointInTimeExport to S3
+2. Call the `DataExporter` function `download_data` once the DynamoDB export is complete to combine the exported data into a single json file on your local filesystem
+3. Transform your local copy of the exported table data into another storage format: `csv`, `parquet`
+
+## Comprehensive Documentation
+
+Full docs are available here: [https://fullerzz.github.io/gurlon/](https://fullerzz.github.io/gurlon/)
