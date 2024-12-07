@@ -1,0 +1,120 @@
+Metadata-Version: 2.1
+Name: isimplify
+Version: 0.1.8
+Summary: simplifies word counting
+Author: sunny kumar
+Author-email: sunnykumar1516@gmail.com
+Requires-Python: >=3.12,<4.0
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: gradio (>=5.7.1,<6.0.0)
+Requires-Dist: huggingface (>=0.0.1,<0.0.2)
+Requires-Dist: matplotlib (>=3.9.3,<4.0.0)
+Requires-Dist: nltk (>=3.9.1,<4.0.0)
+Requires-Dist: pandas (>=2.2.3,<3.0.0)
+Requires-Dist: pypdf2 (>=3.0.1,<4.0.0)
+Requires-Dist: spacy (>=3.8.2,<4.0.0)
+Requires-Dist: torch (>=2.5.1,<3.0.0)
+Requires-Dist: transformers (>=4.46.3,<5.0.0)
+Description-Content-Type: text/markdown
+
+Word Frequency and Sentiment Analysis Package
+Overview
+This Python package allows you to analyze word frequencies from text or PDF files, visualize the results using bar plots, and perform sentiment analysis on the text. It includes functionalities to remove stop words, customize the list of stop words, and generate plots for the most frequent words.
+
+The package also provides an interactive Gradio interface to upload PDFs, perform analysis, and view the results.
+
+Features
+PDF Reading: Extract text from PDF files.
+Word Frequency Analysis: Count word occurrences and filter results.
+Sentiment Analysis: Analyze the sentiment (positive, negative, neutral) of the text.
+Stop Words Removal: Remove common stop words and custom stop words from the text.
+Visualization: Generate bar plots for the top N frequent words.
+Gradio Interface: Upload PDFs and perform analysis using an intuitive web interface.
+Installation
+Clone the repository or install the package from PyPI:
+
+bash
+Copy code
+pip install word-freq-analysis
+Install additional dependencies if needed:
+
+bash
+Copy code
+pip install gradio matplotlib PyPDF2
+Usage
+1. Gradio Interface
+Launch the Gradio app to interact with the package:
+
+python
+Copy code
+from word_freq_app import showWindow
+
+# Launch the interface
+showWindow()
+2. Word Frequency Functions
+Analyze a PDF File
+Analyze word frequency and sentiment from a PDF:
+
+python
+Copy code
+from word_freq_app import getWord_freq_file_removingStopWords
+
+word_freq = getWord_freq_file_removingStopWords("example.pdf")
+print(word_freq)
+Analyze Text
+Analyze word frequency from raw text:
+
+python
+Copy code
+from word_freq_app import getWord_freq_text_removing_StopWords
+
+text = "This is an example text to analyze."
+word_freq = getWord_freq_text_removing_StopWords(text)
+print(word_freq)
+Plot Word Frequency
+Generate a plot for the top N words:
+
+python
+Copy code
+from word_freq_app import plot_top_n_words_text
+
+text = "This is an example text to analyze."
+plot_path = plot_top_n_words_text(text, top_n=5)
+print(f"Plot saved at: {plot_path}")
+API Methods
+1. Gradio Analysis
+python
+Copy code
+analyse(file, top_n)
+Inputs:
+file: A PDF file to analyze.
+top_n: Number of top frequent words to display.
+Outputs:
+Sentiment (text)
+Word frequency (text)
+Word frequency bar plot (image)
+2. Word Frequency Analysis
+getWord_freq_file_removingStopWords(file): Analyze word frequency from a file while removing stop words.
+getWord_freq_text_removing_StopWords(text): Analyze word frequency from text while removing stop words.
+getWord_freq_file_without_Removing_StopWords(file): Analyze word frequency from a file without removing stop words.
+getWord_freq_text_without_Removing_StopWords(text): Analyze word frequency from text without removing stop words.
+3. Custom Stop Words
+add_custom_stop_words(wordsList): Add custom stop words to exclude from analysis.
+4. Plot Word Frequency
+plot_top_n_words_text(text, top_n): Plot the top N frequent words from text.
+plot_top_n_words_file(file, top_n): Plot the top N frequent words from a file.
+Example
+python
+Copy code
+from word_freq_app import plot_top_n_words_file
+
+# Plot top 10 words from a PDF file
+plot_path = plot_top_n_words_file("example.pdf", top_n=10)
+print(f"Word frequency plot saved at: {plot_path}")
+Dependencies
+gradio
+matplotlib
+PyPDF2
+nltk
