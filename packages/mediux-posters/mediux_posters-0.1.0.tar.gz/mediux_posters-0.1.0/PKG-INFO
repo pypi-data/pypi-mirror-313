@@ -1,0 +1,132 @@
+Metadata-Version: 2.3
+Name: mediux-posters
+Version: 0.1.0
+Project-URL: Homepage, https://pypi.org/project/Mediux-Posters
+Project-URL: Issues, https://github.com/Buried-In-Code/Mediux-Posters/issues
+Project-URL: Source, https://github.com/Buried-In-Code/Mediux-Posters
+Author-email: BuriedInCode <BuriedInCode@tuta.io>
+License: MIT
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: English
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Typing :: Typed
+Requires-Python: >=3.10
+Requires-Dist: beautifulsoup4>=4.12.3
+Requires-Dist: plexapi>=4.16.0
+Requires-Dist: pydantic>=2.10.3
+Requires-Dist: requests>=2.32.3
+Requires-Dist: rich>=13.9.4
+Requires-Dist: tomli-w>=1.1.0
+Requires-Dist: tomli>=2.0.1; python_version < '3.11'
+Requires-Dist: typer>=0.15.1
+Description-Content-Type: text/markdown
+
+# Mediux Posters
+
+[![PyPI - Python](https://img.shields.io/pypi/pyversions/Mediux-Posters.svg?logo=PyPI&label=Python&style=flat-square)](https://pypi.python.org/pypi/Mediux-Posters/)
+[![PyPI - Status](https://img.shields.io/pypi/status/Mediux-Posters.svg?logo=PyPI&label=Status&style=flat-square)](https://pypi.python.org/pypi/Mediux-Posters/)
+[![PyPI - Version](https://img.shields.io/pypi/v/Mediux-Posters.svg?logo=PyPI&label=Version&style=flat-square)](https://pypi.python.org/pypi/Mediux-Posters/)
+[![PyPI - License](https://img.shields.io/pypi/l/Mediux-Posters.svg?logo=PyPI&label=License&style=flat-square)](https://opensource.org/licenses/MIT)
+
+[![Pre-Commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&style=flat-square)](https://github.com/pre-commit/pre-commit)
+[![Ruff](https://img.shields.io/badge/ruff-enabled-brightgreen?logo=ruff&style=flat-square)](https://github.com/astral-sh/ruff)
+
+[![Github - Contributors](https://img.shields.io/github/contributors/Buried-In-Code/Mediux-Posters.svg?logo=Github&label=Contributors&style=flat-square)](https://github.com/Buried-In-Code/Mediux-Posters/graphs/contributors)
+
+Pull Shows, Movies and Collections from Mediux and updates Plex/Jellyfin.
+Pulls Posters, Backdrops and Title Cards.
+
+**_Uses TMDB Id to match shows/movies/collections_**
+
+## Installation
+
+### Pipx
+
+1. Ensure you have [Pipx](https://pipx.pypa.io/stable/) installed: `pipx --version`
+2. Install the project: `pipx install Mediux-Posters`
+
+## Usage
+
+<details><summary>Mediux-Posters Commands</summary>
+
+  <!-- RICH-CODEX hide_command: true -->
+  ![`uv run Mediux-Posters --help`](docs/img/mp-commands.svg)
+
+</details>
+<details><summary>Mediux-Posters sync</summary>
+
+  <!-- RICH-CODEX hide_command: true -->
+  ![`uv run Mediux-Posters sync --help`](docs/img/mp-sync.svg)
+
+</details>
+<details><summary>Mediux-Posters set</summary>
+
+  <!-- RICH-CODEX hide_command: true -->
+  ![`uv run Mediux-Posters set --help`](docs/img/mp-set.svg)
+
+</details>
+
+### Mediux-Posters settings Commands
+
+<details><summary>Mediux-Posters settings view</summary>
+
+  <!-- RICH-CODEX hide_command: true -->
+  ![`uv run Mediux-Posters settings view --help`](docs/img/mp-settings-view.svg)
+
+</details>
+<details><summary>Mediux-Posters settings locate</summary>
+
+  <!-- RICH-CODEX hide_command: true -->
+  ![`uv run Mediux-Posters settings locate --help`](docs/img/mp-settings-locate.svg)
+
+</details>
+
+## Settings
+
+To set Plex and/or Jellyfin details, update the file: `~/.config/mediux-posters/settings.toml`.
+File will be created on first run.
+
+### Example File
+
+```toml
+exclude_usernames = []
+only_priority_usernames = false
+priority_usernames = []
+
+[jellyfin]
+base_url = "http://127.0.0.1:8096"
+token = "<Token>"
+
+[plex]
+base_url = "http://127.0.0.1:32400"
+token = "<Token>"
+```
+
+### Details
+
+- `exclude_usernames`
+
+  A list of usernames whose sets should be ignored when running a sync.
+
+- `only_priority_usernames`
+
+  A boolean flag that limits downloading sets to ones created by the users specified in `priority_usernames`.
+  If set to `false`, all sets will be considered unless explicitly excluded in `exclude_usernames`.
+
+- `priority_usernames`
+
+  A list of usernames whose sets should take priority when running a sync.
+  If `only_priority_usernames` is set to `true`, only sets from these users will be used.
+
+## Socials
+
+[![Social - Fosstodon](https://img.shields.io/badge/%40BuriedInCode-teal?label=Fosstodon&logo=mastodon&style=for-the-badge)](https://fosstodon.org/@BuriedInCode)\
+[![Social - Matrix](https://img.shields.io/matrix/The-Dev-Environment:matrix.org?label=The-Dev-Environment&logo=matrix&style=for-the-badge)](https://matrix.to/#/#The-Dev-Environment:matrix.org)
