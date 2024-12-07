@@ -1,0 +1,25 @@
+[package]
+name = "key_manager"
+version = "0.1.4"
+edition = "2021"
+authors = ["Malaa Technologies <engineeering@malaa.tech>"]
+description = "A Python-wrapped Rust package for secure validation"
+license = "MIT"
+
+
+[dependencies]
+base64 = "0.22.1"
+jsonwebtoken = "9.3.0"
+pyo3 = { version = "0.23.3", features = ["extension-module"] }
+rsa = { version = "0.9.7", features = ["pkcs5"] }
+serde = "1.0.215"
+serde_json = "1.0.133"
+sha2 = "0.10.8"
+
+
+[lib]
+name = "key_manager"
+crate-type = ["cdylib"]  # Required for Python bindings
+
+[tool.maturin]
+include = ["src", "key_manager.pyi"]
