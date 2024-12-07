@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "mediaflow-proxy"
+version = "1.9.5"
+description = "A high-performance proxy server for streaming media, supporting HTTP(S), HLS, and MPEG-DASH with real-time DRM decryption."
+authors = ["mhdzumair <mhdzumair@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/mhdzumair/mediaflow-proxy"
+repository = "https://github.com/mhdzumair/mediaflow-proxy"
+documentation = "https://github.com/mhdzumair/mediaflow-proxy#readme"
+keywords = ["proxy", "media", "streaming", "hls", "dash", "drm"]
+license = "MIT"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+include = ["LICENSE", "README.md", "mediaflow_proxy/static/*"]
+
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+fastapi = "0.115.6"
+httpx = {extras = ["socks", "zstd"], version = "^0.28.1"}
+tenacity = "^9.0.0"
+xmltodict = "^0.14.2"
+pydantic-settings = "^2.6.1"
+gunicorn = "^23.0.0"
+pycryptodome = "^3.20.0"
+uvicorn = "^0.32.1"
+tqdm = "^4.67.1"
+aiofiles = "^24.1.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+mediaflow-proxy = "mediaflow_proxy.main:run"
+
+[tool.black]
+line-length = 120
