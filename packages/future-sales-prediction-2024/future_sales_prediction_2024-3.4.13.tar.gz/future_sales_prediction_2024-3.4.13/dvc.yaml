@@ -1,0 +1,18 @@
+stages:
+  data_handling:
+    cmd: >
+      python future_sales_prediction_2024/data_handling.py --data_source gcs
+    deps:
+      - future_sales_prediction_2024/data_handling.py
+      - gs://my-dvc-bucket_future_prections/raw_data/items.csv
+      - gs://my-dvc-bucket_future_prections/raw_data/item_categories.csv
+      - gs://my-dvc-bucket_future_prections/raw_data/sales_train.csv
+      - gs://my-dvc-bucket_future_prections/raw_data/shops.csv
+      - gs://my-dvc-bucket_future_prections/raw_data/test.csv
+    outs:
+      - gs://my-dvc-bucket_future_prections/preprocessed_data/full_data.csv:
+          cache: false
+      - gs://my-dvc-bucket_future_prections/preprocessed_data/train.csv:
+          cache: false
+      - gs://my-dvc-bucket_future_prections/preprocessed_data/full_featured_data.csv:
+          cache: false

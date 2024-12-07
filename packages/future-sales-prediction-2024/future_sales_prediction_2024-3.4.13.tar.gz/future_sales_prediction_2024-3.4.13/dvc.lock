@@ -1,0 +1,75 @@
+schema: '2.0'
+stages:
+  data_handling:
+    cmd: "python future_sales_prediction_2024/data_handling.py --data_source gcs\n"
+    deps:
+    - path: future_sales_prediction_2024/data_handling.py
+      hash: md5
+      md5: 94fb924d5f99a67f47cbc676b54234b9
+      size: 23263
+    - path: gs://my-dvc-bucket_future_prections/raw_data/item_categories.csv
+      hash: md5
+      etag: 08fca9dbf3ab818a031001
+      size: 3573
+      version_id: '1732876470506748'
+    - path: gs://my-dvc-bucket_future_prections/raw_data/items.csv
+      hash: md5
+      etag: 08d383bdf3ab818a031001
+      size: 1568417
+      version_id: '1732876470010323'
+    - path: gs://my-dvc-bucket_future_prections/raw_data/sales_train.csv
+      hash: md5
+      etag: 08caf887f9ab818a031001
+      size: 94603866
+      version_id: '1732876481723466'
+    - path: gs://my-dvc-bucket_future_prections/raw_data/shops.csv
+      hash: md5
+      etag: 08f6b5a6f9ab818a031001
+      size: 2977
+      version_id: '1732876482222838'
+    - path: gs://my-dvc-bucket_future_prections/raw_data/test.csv
+      hash: md5
+      etag: 08ec8b86faab818a031001
+      size: 3182735
+      version_id: '1732876483790316'
+    outs:
+    - path: gs://my-dvc-bucket_future_prections/preprocessed_data/full_data.csv
+      hash: md5
+      etag: 0898a4aee3e6908a031001
+      size: 384927448
+      version_id: '1733407669981720'
+    - path: gs://my-dvc-bucket_future_prections/preprocessed_data/full_featured_data.csv
+      hash: md5
+      etag: 08e090d79be9908a031001
+      size: 1906872595
+      version_id: '1733408324962400'
+    - path: gs://my-dvc-bucket_future_prections/preprocessed_data/train.csv
+      hash: md5
+      etag: 08e7ec89f4e6908a031001
+      size: 135765036
+      version_id: '1733407705036391'
+  feature_extraction:
+    cmd: "python future_sales_prediction_2024/feature_extraction.py --full_data gs://my-dvc-bucket_future_prections/preprocessed_data/full_data.csv
+      --train gs://my-dvc-bucket_future_prections/preprocessed_data/train.csv --outdir
+      gs://my-dvc-bucket_future_prections/preprocessed_data\n"
+    deps:
+    - path: future_sales_prediction_2024/feature_extraction.py
+      hash: md5
+      md5: bc69da43e2e3a250b1e0ab830d1edeca
+      size: 19181
+    - path: gs://my-dvc-bucket_future_prections/preprocessed_data/full_data.csv
+      hash: md5
+      etag: 08a2f995f3808e8a031001
+      size: 384927448
+      version_id: '1733311603244194'
+    - path: gs://my-dvc-bucket_future_prections/preprocessed_data/train.csv
+      hash: md5
+      etag: 0893cced84818e8a031001
+      size: 135765036
+      version_id: '1733311640331795'
+    outs:
+    - path: gs://my-dvc-bucket_future_prections/preprocessed_data/full_featured_data.csv
+      hash: md5
+      etag: 08f3defad5888e8a031001
+      size: 1906787351
+      version_id: '1733313689464691'

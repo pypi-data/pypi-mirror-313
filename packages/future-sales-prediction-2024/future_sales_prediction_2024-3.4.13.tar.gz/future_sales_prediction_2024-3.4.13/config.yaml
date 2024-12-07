@@ -1,0 +1,85 @@
+repository:
+  url: "https://github.com/YPolina/Trainee.git"
+  branch: "DS-4.1"
+
+
+gcs_paths:
+  items: gs://my-dvc-bucket_future_prections/raw_data/items.csv
+  categories: gs://my-dvc-bucket_future_prections/raw_data/item_categories.csv
+  sales_train: gs://my-dvc-bucket_future_prections/raw_data/sales_train.csv
+  shops: gs://my-dvc-bucket_future_prections/raw_data/shops.csv
+  test: gs://my-dvc-bucket_future_prections/raw_data/test.csv
+  full_data: gs://my-dvc-bucket_future_prections/preprocessed_data/full_data.csv
+  full_featured_data: gs://my-dvc-bucket_future_prections/preprocessed_data/full_featured_data.csv
+  train: gs://my-dvc-bucket_future_prections/preprocessed_data/train.csv
+local_paths:
+  items: data/raw_data/items.csv
+  categories: data/raw_data/item_categories.csv
+  sales_train: data/raw_data/sales_train.csv
+  shops: data/raw_data/shops.csv
+  test: data/raw_data/test.csv
+  full_data: data/preprocessed_data/full_data.csv
+  full_featured_data: data/preprocessed_data/full_featured_data.csv
+  train: data/preprocessed_data/train.csv
+
+
+validation:
+
+  column_types:
+    date_block_num: int8
+    shop_id: int8
+    city_id: int8
+    item_id: int16
+    item_cnt_month: float16
+    item_category_id: int8
+    main_category_id: int8
+    minor_category_id: int8
+
+  values_ranges:
+    date_block_num: [0, 34]
+    shop_id: [0, 59]
+    item_id: [0, 22169]
+    item_cnt_month: [0, 669]
+    city_id: [0, 31]
+    item_category_id: [0, 83]
+    main_category_id: [0, 11]
+    minor_category_id: [0, 66]
+  check_duplicates: true
+  check_missing: true
+  negative_columns: ['months_from_last_sale', 'delta_revenue_lag_1', 'delta_price_lag_1']
+
+
+models:
+  LightGBM:
+    param_space:
+      learning_rate: {type: "uniform", low: 0.1, high: 1}
+      max_depth: {type: "choice", options: [2, 3, 4, 5, 10, 20]}
+      min_child_weight: {type: "choice", options: [1, 2, 3, 4, 5]}
+      colsample_bytree: {type: "uniform", low: 0.4, high: 1}
+      subsample: {type: "uniform", low: 0.6, high: 1}
+      num_leaves: {type: "choice", options: [31, 63, 127]}
+      min_split_gain: {type: "uniform", low: 0, high: 1}
+      reg_alpha: {type: "uniform", low: 0, high: 1}
+      reg_lambda: {type: "uniform", low: 0, high: 1}
+      n_estimators: {type: "fixed", value: 50}
+  XGBRegressor:
+    param_space:
+      eta: {type: "uniform", low: 0.01, high: 0.3}
+      max_depth: {type: "randint", low: 3, high: 11}
+      subsample: {type: "uniform", low: 0.5, high: 1}
+      colsample_bytree: {type: "uniform", low: 0.5, high: 1}
+      gamma: {type: "uniform", low: 0, high: 5}
+      min_child_weight: {type: "randint", low: 1, high: 11}
+      lambda: {type: "uniform", low: 0, high: 1}
+      alpha: {type: "uniform", low: 0, high: 1}
+  RandomForestRegressor:
+    param_grid:
+      n_estimators: [25, 50, 100, 150]
+      max_features: ["sqrt", "log2", null]
+      max_depth: [3, 6, 9]
+      max_leaf_nodes: [3, 6, 9]
+  LinearRegression:
+    param_grid:
+      fit_intercept: [true, false]
+      normalize: [true, false]
+      n_jobs: [1, -1]
