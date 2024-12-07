@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "internetmonitor-client-python"
+version = "1.0"
+readme = "README.md"
+dependencies = [
+   "boto3 ~= 1.35.60",
+]
+requires-python = ">=3.11"
+description = "A high-level client representing Amazon CloudWatch Internet Monitor."
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "mypy",
+  "ruff",
+  "bandit"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/internetmonitor_client"]
+
+[tool.hatch.version]
+[tool.mypy]
+python_version = "3.11"
+show_error_codes = true
+pretty = true
+ignore_missing_imports = true
+files = [ "src/**/*.py" ]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "ARG",
+  "B",
+  "C",
+  "DTZ",
+  "E",
+  "EM",
+  "F",
+  "FBT",
+  "I",
+  "ICN",
+  "ISC",
+  "N",
+  "PLC",
+  "PLE",
+  "PLR",
+  "PLW",
+  "Q",
+  "RUF",
+  "S",
+  "T",
+  "TID",
+  "UP",
+  "W",
+  "YTT",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
