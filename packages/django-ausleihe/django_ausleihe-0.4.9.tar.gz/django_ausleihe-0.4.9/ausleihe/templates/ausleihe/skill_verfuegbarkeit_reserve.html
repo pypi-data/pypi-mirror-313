@@ -1,0 +1,96 @@
+{% extends "ausleihe/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block css %}
+<style type="text/css" media="screen">
+  .asteriskField {
+    display: none;
+  }
+  .requiredField {
+    font-weight: bold;
+  }
+</style>
+{% endblock css %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-list' %}">Skills</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-detail' skill.id %}">{{ skill.name }}</a></li>
+      <li class="breadcrumb-item" aria-current="page">{{ verfuegbarkeit }}</li>
+      <li class="breadcrumb-item" aria-current="page">reservieren</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <div class="col">
+      {% crispy form %}
+    </div>
+    <div class="col">
+      <h6>Auslastung</h6>
+      <table class="table table-sm table-bordered">
+        <tbody>
+          <tr>
+            <td colspan="{{ auslastung.items|length }}">
+              <small class="text-muted">{{ n_skillsets }} Sets vorhanden, davon sind schon reserviert:</small>
+            </td>
+          </tr>
+          <tr>
+            {% for dt, a in auslastung.items %}
+            <td class="text-center
+              {% if a.belegte_skillsets == n_skillsets %}
+              table-danger
+              {% elif a.belegte_skillsets == n_skillsets_1 %}
+              table-warning
+              {% else %}
+              table-success
+              {% endif %}
+            ">
+              {{ a.belegte_skillsets }}
+            </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            {% for dt, n in auslastung.items %}
+            {% if dt.minute == verfuegbarkeit.beginn.minute %}
+            <td colspan="4">{{ dt|date:"H:i" }}</td>
+            {% endif %}
+            {% endfor %}
+          </tr>
+          <tr>
+            <td colspan="{{ auslastung.items|length }}">
+              <small class="text-muted">{{ skill.anzahl_plaetze }} Plätze werden benötigt;
+                der Raum hat {{ verfuegbarkeit.raum.anzahl_plaetze }} Plätze, davon sind schon reserviert:</small>
+            </td>
+          </tr>
+          <tr>
+            {% for dt, a in auslastung.items %}
+            <td class="text-center
+              {% if a.freie_plaetze < skill.anzahl_plaetze %}
+              table-danger
+              {% elif a.freie_plaetze == skill.anzahl_plaetze %}
+              table-warning
+              {% else %}
+              table-success
+              {% endif %}
+            ">
+              {{ a.belegte_plaetze }}
+            </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            {% for dt, n in auslastung.items %}
+            {% if dt.minute == verfuegbarkeit.beginn.minute %}
+            <td colspan="4">{{ dt|date:"H:i" }}</td>
+            {% endif %}
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% endblock content %}
