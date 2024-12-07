@@ -1,0 +1,82 @@
+Metadata-Version: 2.3
+Name: optseq-trial
+Version: 0.1.0
+Summary: Optseq trial version.
+Author-email: Mikio Kubo <kubo@kaiyodai.ac.jp>, Saito Tsutomu <tsutomu7@hotmail.co.jp>
+Requires-Python: >=3.10
+Provides-Extra: all
+Requires-Dist: pandas; extra == 'all'
+Requires-Dist: plotly; extra == 'all'
+Description-Content-Type: text/markdown
+
+# OptSeq Trial 
+> Scheduling Optimization Solver Trial 
+
+
+## How to Install to Jupyter Notebook (Labo) and/or Google Colaboratory
+
+## Install
+
+```
+pip install "optseq-trial[all]"
+```
+
+## How to use
+
+See https://mikiokubo.github.io/optseqtrial/  and  https://www.logopt.com/optseq/ 
+
+Here is an example. 
+
+```python
+from optseq_trial import Mode, Model
+
+"""
+Example 1
+PERT
+file name: Example1.py
+Copyright Log Opt Co., Ltd.
+
+Consider a 5-activity problem with precedence constraints between the activities.
+Such a problem is called PERT (Program Evaluation and Review Technique).
+The processing times (durations) of the activities are kept in the dictionary
+ duration ={1:13, 2:25, 3:15, 4:27, 5:22 }.
+Precedence constraints are given by:
+ Activity 1 -> Activity 3; Activity 2 -> Activity 4;
+ Activity 3 -> Activity 4; and Activity 3 -> Activity 5.
+The objective is to find the maximum completion time (makespan) for all 5 activities.
+"""
+
+model = Model()
+durations = {1: 13, 2: 25, 3: 15, 4: 27, 5: 22}
+act = {}
+mode = {}
+for i, duration in durations.items():
+    act[i] = model.addActivity(f"Act[{i}]")
+    mode[i] = Mode(f"Mode[{i}]", duration)
+    act[i].addModes(mode[i])
+
+# temporal (precedent) constraints
+model.addTemporal(act[1], act[3])
+model.addTemporal(act[2], act[4])
+model.addTemporal(act[2], act[5])
+model.addTemporal(act[3], act[4])
+
+model.Params.TimeLimit = 1
+model.Params.Makespan = True
+model.Params.TimeLimit = 1
+model.Params.Makespan = True
+model.optimize()
+```
+
+    
+     ================ Now solving the problem ================ 
+    
+    
+    Solutions:
+        source   ---     0     0
+          sink   ---    55    55
+        Act[1]   ---     0    13
+        Act[2]   ---     0    25
+        Act[3]   ---    13    28
+        Act[4]   ---    28    55
+        Act[5]   ---    25    47
