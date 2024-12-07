@@ -1,0 +1,92 @@
+[build-system]
+# setuptools version 42 or later is required for PEP 517/518 support which
+# describes the pyproject.toml file format. However version 61 introduces
+# more metadata field support and is recommended.
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antimatter"
+version = "2.0.4"
+description = "Library for interacting with capsules in various formats"
+readme = "README.md"
+authors = [
+    {name = "Antimatter Team", email = "support@antimatter.io"}
+]
+requires-python = ">=3.8"
+
+dependencies = [
+    "antimatter-engine==2.0.4",  # Will be replaced by the build system with the appropriate version
+    "annotated_types>=0.6",
+    "packaging>=21.1",
+    "pydantic>=2.0",
+    "python-dateutil>=2.7.0",
+    "pyyaml",
+    "cbor2~=5.5",
+    "urllib3>=2.0.2",
+    "google-auth>=2.29.0",
+    "requests>=2.31.0",
+    "safer>=4.0",
+    "tomli>=2.0.1",
+    "antimatter_api==2.0.10"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0"
+]
+
+langchain = [
+    "langchain>=0.0.341",
+    "faiss-cpu>=1.7.3",
+    "numpy>=1.26",
+    "langchain_community>=0.2.0"
+]
+
+langchain-huggingface = [
+    "langchain>=0.0.341",
+    "faiss-cpu>=1.7.3",
+    "transformers>=4.23",
+    "torch>=2.0",
+    "numpy>=1.26"
+]
+
+numpy = [
+    "numpy>=1.23.3"
+]
+
+pandas = [
+    "pandas[performance]>=1.5"
+]
+
+pyarrow = [
+    "pandas[performance]>=2.0",
+    "pyarrow>=2.0"
+]
+
+pytorch = [
+    "torch>=2.0"
+]
+
+all = [
+    "langchain>=0.0.341",
+    "faiss-cpu>=1.7.3",
+    "transformers>=4.23",
+    "torch>=2.0",
+    "numpy>=1.23.3",
+    "pandas[performance]>=2.0",
+    "pyarrow>=2.0",
+    "langchain_community>=0.2.0"
+]
+
+[tool.setuptools]
+include-package-data = true 
+
+[tool.setuptools.package-data]
+"antimatter" = [
+    "filetype/tests/fixtures/*", "dependencies/data/pyproject.toml"
+]
+
+[project.urls]
+Docs =   "https://antimatter-python-client.readthedocs-hosted.com/"
