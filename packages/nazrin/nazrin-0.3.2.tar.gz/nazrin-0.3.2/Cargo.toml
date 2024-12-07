@@ -1,0 +1,28 @@
+[package]
+name = "nazrin"
+version = "0.3.2"
+authors = ["MelodyYuuka <melody@yunmengdu.cn>"]
+edition = "2021"
+description = "rust-participle"
+
+[lib]
+name = "nazrin"
+crate-type = ["cdylib"]
+
+[dependencies]
+jieba-rs = { version = "0.7.0", features = ["tfidf"]}
+pyo3 = { version = "0.23", features = ["extension-module"] }
+ordered-float = "4.5.0"
+ahash = "0.8"
+
+[profile.release]
+opt-level = 3
+debug = false
+# split-debuginfo = '...'  # 平台指定。
+debug-assertions = false
+overflow-checks = false
+lto = true
+panic = 'unwind'
+incremental = false
+codegen-units = 16
+rpath = false
