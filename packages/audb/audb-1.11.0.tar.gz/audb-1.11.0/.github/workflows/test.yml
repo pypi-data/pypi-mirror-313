@@ -1,0 +1,98 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Different platforms
+          - os: ubuntu-latest
+            python-version: '3.10'
+          - os: macOS-latest
+            python-version: '3.10'
+          - os: windows-latest
+            python-version: '3.10'
+          # Other Python versions
+          - os: ubuntu-latest
+            python-version: '3.9'
+          - os: ubuntu-latest
+            python-version: '3.11'
+          - os: ubuntu-latest
+            python-version: '3.12'
+          - os: ubuntu-latest
+            python-version: '3.13'
+          # Other pandas versions
+          - os: ubuntu-latest
+            python-version: '3.10'
+            pandas: 'pandas==2.1.4'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Cache emodb
+      uses: actions/cache@v4
+      with:
+        path: ~/audb
+        key: emodb-1.4.1
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Ubuntu - install libsndfile
+      run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends --yes libsndfile1
+      if: matrix.os == 'ubuntu-latest'
+
+    - name: Install package
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install numpy<2.0.0 for pandas==2.0.3
+      run: |
+        pip install "numpy<2.0.0"
+      if: matrix.pandas == 'pandas==2.0.3'
+
+    - name: Install requested pandas version
+      run: |
+        pip install "${{ matrix.pandas }}"
+      if: matrix.pandas
+
+    # TESTS
+    - name: Ubuntu - install ffmpeg/mediainfo
+      run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends --yes ffmpeg mediainfo
+      if: matrix.os == 'ubuntu-latest'
+
+    - name: OSX - install ffmpeg/mediainfo
+      run: brew install ffmpeg mediainfo
+      if: matrix.os == 'macOS-latest'
+
+    - name: Windows - install ffmpeg/mediainfo
+      run: choco install ffmpeg mediainfo-cli
+      if: matrix.os == 'windows-latest'
+
+    - name: Install tests requirements
+      run: pip install -r tests/requirements.txt
+
+    - name: Test with pytest
+      run: python -m pytest
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+      if: matrix.os == 'ubuntu-latest'
