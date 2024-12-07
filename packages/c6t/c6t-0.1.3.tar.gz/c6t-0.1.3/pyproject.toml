@@ -1,0 +1,67 @@
+[project]
+name = "c6t"
+version = "0.1.3"
+description = "Unofficial Administrative Command Line Interface for Contrast Security"
+authors = [
+    { name = "Jonathan Harper", email = "39912347+jharper-sec@users.noreply.github.com" },
+]
+dependencies = [
+    "rich>=13.7.1",
+    "typer>=0.12.3",
+    "jinja2>=3.1.4",
+    "pyyaml>=6.0.1",
+    "gitpython>=3.1.43",
+    "questionary>=2.0.1",
+    "lxml>=5.2.2",
+    "types-pyyaml>=6.0.12.20240311",
+    "httpx>=0.27.0",
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">= 3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/jharper-sec/c6t"
+Issues = "https://github.com/jharper-sec/c6t/issues"
+Documentation = "https://github.com/jharper-sec/c6t/blob/main/README.md"
+
+[project.scripts]
+c6t = "c6t.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "mypy>=1.10.0",
+    "pytest>=8.2.1",
+    "black>=24.4.2",
+    "ruff>=0.4.4",
+    "types-pyyaml>=6.0.12.20240311",
+    "types-requests>=2.31.0.20240406",
+    "types-lxml>=2024.4.14",
+    "pip>=24.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/c6t"]
+
+[tool.mypy]
+python_version = "3.8"
+strict = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
