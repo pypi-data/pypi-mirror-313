@@ -1,0 +1,99 @@
+name: Release a release candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release candidate tag to release'
+        required: true
+
+jobs:
+  rename_and_update_release:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WORKFLOW_PAT }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Verify input tag follows desired format
+        run: |
+          CURRENT_TAG="${{ github.event.inputs.tag }}"
+          if echo "$CURRENT_TAG" | grep -Pq '^\d+\.\d+\.\d+-rc\.\d+$'; then
+            echo "The tag name '$CURRENT_TAG' follows the correct format."
+          else
+            echo "The tag name '$CURRENT_TAG' does not follow the correct format."
+            exit 1
+          fi
+
+      - name: Trim suffix
+        run: |
+          CURRENT_TAG="${{ github.event.inputs.tag }}"
+          NEW_RELEASE=$(echo $CURRENT_TAG | sed 's/-rc\.[0-9]*$//')
+          echo "Will be releasing ${NEW_RELEASE}"
+          echo "new_release_name=${NEW_RELEASE}" >> $GITHUB_ENV
+
+      - name: Fetch and list all tags
+        run: git fetch --all --tags && git tag --sort=version:refname
+
+      - name: Add a release tag that points to release candidate's ref
+        run: |
+          git checkout ${{ github.event.inputs.tag }}
+          git tag ${{ env.new_release_name }}
+          git push origin ${{ env.new_release_name }}
+
+      - name: Rename and update release
+        uses: softprops/action-gh-release@v2
+        env:
+          # We use private token here to ensure follow-up release workflows are actually kicked off.
+          # https://github.com/orgs/community/discussions/25281#discussioncomment-3247262
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_PAT }}
+        with:
+          make_latest: true
+          name: ${{ env.new_release_name }}
+          prerelease: false
+          tag_name: ${{ github.event.inputs.tag }}
+
+      - name: Update tag that the release points to
+        run: |
+          gh release edit ${{ github.event.inputs.tag }} --tag ${{ env.new_release_name }}
+        env:
+          GH_TOKEN: ${{ secrets.WORKFLOW_PAT }}
+
+      - name: Download release assets, rename, and re-upload
+        env:
+          GH_TOKEN: ${{ secrets.WORKFLOW_PAT }}
+        run: |
+            gh release download ${{ env.new_release_name }} --dir dist -p 'epx-*'
+            for file in dist/epx-*; do
+              # delete the asset from the release
+              asset_name=$(basename $file)
+              gh release delete-asset --yes ${{ env.new_release_name }} $asset_name
+              # delete the file in the dist directory
+              rm $file
+            done
+
+      - name: Substitute the release candidate version number in __init__.py with the actual version number
+        run: |
+          sed -i "s/0.0.0+unknown/${{ env.new_release_name }}/g" ./src/epx/__init__.py
+
+      - name: Install build dependencies and build artifacts
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+          python -m build
+          echo "TAR_GZ_NAME=$(ls dist/*.tar.gz)" >> $GITHUB_ENV
+          echo "WHL_NAME=$(ls dist/*.whl)" >> $GITHUB_ENV
+
+      - name: Upload new assets back to release
+        env:
+          GH_TOKEN: ${{ secrets.WORKFLOW_PAT }}
+        run: |
+          gh release upload ${{ env.new_release_name }} ${{ env.TAR_GZ_NAME }} ${{ env.WHL_NAME }}
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
