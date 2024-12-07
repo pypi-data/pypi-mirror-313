@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fintech_webserver"
+version = "1.0.1"
+requires-python = ">= 3.10"
+dependencies = [
+    "Flask==3.0.3", 
+    "python-dotenv==1.0.1",
+    "Flask-WTF==1.2.2",
+    "pandas==2.2.3",
+    "matplotlib==3.9.3",
+    "mpld3==0.5.10"
+]
+authors = [
+  {name = "Soham Jobanputra", email = "sohamjobanputra7@gmail.com"},
+]
+description = "A webapp with different stock market analysis features made with Flask."
+readme = "README.md"
+
+[project.urls]
+Repository = "https://github.com/Soham7777777/Fintech.git"
+
+[project.scripts]
+fintech = "fintech:cli"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+fintech = ["**/static/**", "**/templates/**", "database/**"]
+
+[tool.mypy]
+plugins = "pydantic.mypy"
+strict = true
+disallow_untyped_defs = true
