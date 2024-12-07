@@ -1,0 +1,140 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "django_components"
+version = "0.116"
+requires-python = ">=3.8, <4.0"
+description = "A way to create simple reusable template components in Django."
+keywords = ["django", "components", "css", "js", "html"]
+readme = "README.md"
+authors = [
+    {name = "Emil Stenström", email = "emil@emilstenstrom.se"},
+]
+classifiers = [
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    'Django>=4.2',
+    'selectolax>=0.3.24',
+]
+license = {text = "MIT"}
+
+[project.urls]
+Homepage = "https://github.com/EmilStenstrom/django-components/"
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["django_components*"]
+exclude = ["django_components.tests*"]
+namespaces = false
+
+[tool.black]
+line-length = 119
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | activate
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 119
+multi_line_output = 3
+include_trailing_comma = "True"
+known_first_party = "django_components"
+
+[tool.flake8]
+ignore = ['E302', 'W503']
+max-line-length = 119
+exclude = [
+  'migrations',
+  '__pycache__',
+  'manage.py',
+  'settings.py',
+  'env',
+  '.env',
+  '.venv',
+  '.tox',
+  'build',
+]
+per-file-ignores = [
+  'tests/test_component_media.py:E501',
+  'tests/test_dependency_rendering.py:E501',
+]
+
+[tool.mypy]
+check_untyped_defs = true
+ignore_missing_imports = true
+exclude = [
+    'test_structures',
+    'build',
+]
+
+[[tool.mypy.overrides]]
+module = "django_components.*"
+disallow_untyped_defs = true
+
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests"
+]
+
+[tool.hatch.env]
+requires = [
+    "hatch-mkdocs",
+    "hatch-pip-compile"
+]
+
+[tool.hatch.envs.default]
+dependencies = [
+    "django",
+    "tox",
+    "pytest",
+    "flake8",
+    "flake8-pyproject",
+    "isort",
+    "pre-commit",
+    "black",
+    "mypy",
+    ]
+type = "pip-compile"
+lock-filename = "requirements-dev.txt"
+
+[tool.hatch.envs.docs]
+type = "pip-compile"
+lock-filename = "requirements-docs.txt"
+detached = false
+# Dependencies are fetched automatically from the mkdocs.yml file with hatch-mkdocs
+# We only add black for formatting code in the docs
+dependencies = [
+    "black",
+]
+
+[tool.hatch.env.collectors.mkdocs.docs]
+path = "mkdocs.yml"
