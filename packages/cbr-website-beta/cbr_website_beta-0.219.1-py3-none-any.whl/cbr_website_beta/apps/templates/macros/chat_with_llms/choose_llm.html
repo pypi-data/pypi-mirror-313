@@ -1,0 +1,128 @@
+{% macro choose_llm(model_options={}, languages={}, current_language='en', current_platform=None, current_provider=None, current_model=None ) %}
+    <style>
+        .select-language { background-color: dodgerblue; border: 1px solid dodgerblue ; color: whitesmoke}
+    </style>
+    <div class="row align-items-center">
+        <!-- Platform Selection -->
+        <div class="col-md-4">
+            <div class="d-flex align-items-center">
+                <label for="platform-select" class="form-label mb-0 me-2">Platform:</label>
+                <select id="platform-select" class="form-select">
+                    {% for platform in model_options.keys() %}
+                        <option value="{{ platform }}" {% if platform == current_platform %}selected{% endif %}>{{ platform }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <!-- Provider Selection -->
+        <div class="col-md-4">
+            <div class="d-flex align-items-center">
+                <label for="provider-select" class="form-label mb-0 me-2">Provider:</label>
+                <select id="provider-select" class="form-select" {% if not current_platform %}disabled{% endif %}>
+                    {% if current_platform %}
+                        {% for provider in model_options[current_platform].keys() %}
+                            <option value="{{ provider }}" {% if provider == current_provider %}selected{% endif %}>{{ provider }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+        <!-- Model Selection -->
+        <div class="col-md-4">
+            <div class="d-flex align-items-center">
+                <label for="model-select" class="form-label mb-0 me-2">Model:</label>
+                <select id="model-select" class="form-select" {% if not current_provider %}disabled{% endif %}>
+                    {% if current_platform and current_provider %}
+                        {% for model, model_value in model_options[current_platform][current_provider].items() %}
+                            <option value="{{ model_value }}" {% if model_value == current_model %}selected{% endif %}>{{ model }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+        <!-- Language Selection Section -->
+{#        <div class="col-md-3 text-end">#}
+{#            <div class="d-flex align-items-center justify-content-center select-language">#}
+{#                <label for="language-select" class="form-label mb-0 me-2">Language:</label>#}
+{#                <select id="language-select" class="form-select w-auto select-language">#}
+{#                    {% for lang_code, lang_name in languages.items() %}#}
+{#                        <option value="{{ lang_code }}" {% if lang_code == current_language %}selected{% endif %}>{{ lang_name }}</option>#}
+{#                    {% endfor %}#}
+{#                </select>#}
+{#            </div>#}
+{#        </div>#}
+
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            function updateProviders() {
+                var platform = $('#platform-select').val();
+                var providers = platform ? model_options[platform] : {};
+                var providerSelect = $('#provider-select');
+                providerSelect.empty();
+                $.each(providers, function(provider, models) {
+                    providerSelect.append($('<option>', {
+                        value: provider,
+                        text: provider
+                    }));
+                });
+                providerSelect.prop('disabled', !platform);
+                updateModels();
+            }
+
+            function updateModels() {
+                var platform = $('#platform-select').val();
+                var provider = $('#provider-select').val();
+                var models = (platform && provider) ? model_options[platform][provider] : {};
+                var modelSelect = $('#model-select');
+                modelSelect.empty();
+                $.each(models, function(model, modelValue) {
+                    modelSelect.append($('<option>', {
+                        value: modelValue,
+                        text: model
+                    }));
+                });
+                modelSelect.prop('disabled', !provider);
+                raise_model_select()
+            }
+
+            function raise_model_select() {
+                var platform = $('#platform-select').val();
+                var provider = $('#provider-select').val();
+                var model    = $('#model-select').val();
+                event_data = {platform: platform, provider:provider, model: model}
+                event_name = 'select_model'
+
+                this.dispatchEvent(new CustomEvent(event_name, {'detail' : event_data}))
+            }
+
+            $('#platform-select').change(function() {
+                updateProviders();
+            });
+
+            $('#provider-select').change(function() {
+                updateModels();
+            });
+
+            $('#model-select').change(function() {
+                raise_model_select()
+            });
+
+            var model_options = {{ model_options|tojson }};
+            updateProviders();
+
+            var urlParams = new URLSearchParams(window.location.search);
+            var currentLang = '{{ current_language }}'
+            $('#language-select').val(currentLang);
+
+            // handle language change
+            $('#language-select').change(function() {
+                var selectedLang = $('#language-select').val();
+                urlParams.set('lang', selectedLang);
+                window.location.search = urlParams.toString();
+            });
+
+        });
+    </script>
+{% endmacro %}

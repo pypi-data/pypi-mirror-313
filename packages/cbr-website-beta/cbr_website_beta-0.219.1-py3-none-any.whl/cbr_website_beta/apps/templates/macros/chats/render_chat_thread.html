@@ -1,0 +1,33 @@
+{% macro render_chat_thread(thread_id, thread_data) %}
+    <style>
+        .call-prompt { width:20%}
+        .cell-no-wrap {white-space: nowrap;}
+    </style>
+    <b>Thread ID</b> <a href="./chat/{{ thread_id }}"> {{ thread_id }}</a>
+
+    <div class="container mt-5">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Prompt</th>
+                    <th>Answer</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Size</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in thread_data %}
+                    <tr>
+                        <td class="call-prompt" >{{ entry.get('prompt')       }}</td>
+                        <td                     >{{entry.get('answer') | safe }}</td>
+                        <td class="cell-no-wrap">{{ entry.get('prompt_date')  }}</td>
+                        <td class="cell-no-wrap">{{ entry.get('prompt_time')  }}</td>
+                        <td                     >{{ entry.get('answer_size')  }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{%  endmacro %}

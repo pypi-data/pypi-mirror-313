@@ -1,0 +1,134 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+        <div class="page-breadcrumb">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-8 align-self-center">
+                    <h3 class="page-title mb-0 p-0">Profile</h3>
+                    <div class="d-flex align-items-center">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Profile</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                {%  include 'includes/component/button__support.html' %}
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-4 col-xlg-3 col-md-5">
+                    <div class="card">
+                        <div class="card-body profile-card">
+                            <center class="mt-4">
+                                <img src="{{ config.ASSETS_ROOT }}/cbr/generic-user-pic.png"
+                                    class="rounded-circle" width="150" />
+                                <h4 class="card-title mt-2">{{  'username' | current_user }}</h4>
+                                <h6 class="card-subtitle">{{ user_title}}</h6>
+{#                                <div class="row text-center justify-content-center">#}
+{#                                    <div class="col-4">#}
+{#                                        <a href="javascript:void(0)" class="link">#}
+{#                                            <i class="icon-people" aria-hidden="true"></i>#}
+{#                                            <span class="value-digit">254</span>#}
+{#                                        </a></div>#}
+{#                                    <div class="col-4">#}
+{#                                        <a href="javascript:void(0)" class="link">#}
+{#                                            <i class="icon-picture" aria-hidden="true"></i>#}
+{#                                            <span class="value-digit">54</span>#}
+{#                                        </a></div>#}
+{#                                </div>#}
+                            </center>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-xlg-9 col-md-7">
+                    <div class="card">
+                        <div class="card-body">
+                            <form class="form-horizontal form-material mx-2" method="POST">
+                                {% for field in form_fields %}
+                                    <div class="form-group">
+                                        <label class="col-md-12 mb-0"><b>{{ field.name_for_ui }}</b></label>
+                                        <div class="col-md-12">
+                                            {% if field.type == 'text' or field.type == 'email' %}
+                                                <input type="{{ field.type }}"        id="{{ field.id }}"
+                                                       name="{{ field.name }}"        value="{{ field.value }}"
+                                                       class="{{ field.html_class }} input-with-border" placeholder="Enter your details here"
+                                                       style="background-color: #EEFFEE; padding:20px">
+                                            {% elif field.type == 'textarea' %}
+                                                <p>
+                                                    <small>
+                                                    This is additional information about yourself to assist Athena in providing you a personalised experience. NB. Anything goes!
+                                                    </small>
+                                                </p>
+                                                <textarea id="{{ field.id }}" name="{{ field.name }}"
+                                                          class="{{ field.html_class }}"
+                                                          rows="5" placeholder="Enter your data here"
+                                                          style="background-color: #EEFFEE; padding:20px">{{ field.value }}</textarea>
+                                                <small class="form-text text-muted">Some examples:
+                                                    <ul>
+                                                        <li>I would like my answers to have a sarcastic sense of humour</li>
+                                                        <li>I would like my answers to have lots of sports references</li>
+                                                        <li>I want all my answers to be in Portuguese</li>
+                                                        <li>I have an MBA and want all answers to be in bullet points</li>
+                                                    </ul>
+                                                </small>
+                                            {% elif field.type == 'select' %}
+                                                <!-- Assume field.options is a list of options for the dropdown -->
+                                                <select id="{{ field.id }}" name="{{ field.name }}" class="{{ field.html_class }}">
+                                                    {% for option in field.options %}
+                                                        <option value="{{ option }}">{{ option }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% elif field.type == 'checkbox' %}
+                                                <input type="checkbox" id="{{ field.id }}" name="{{ field.name }}" {% if field.value %} checked {% endif %} class="{{ field.html_class }}">
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                <div class="form-group">
+                                    <div class="col-sm-12 d-flex">
+                                        <button class="btn btn-success mx-auto mx-md-0 text-white" type="submit">Update
+                                            Profile</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+{% endblock content %}
+
+{% block javascripts %}{% endblock javascripts %}
+
+
+
+{#<!doctype html>#}
+{#<html>#}
+{#<head>#}
+{#    <title>Profile Page</title>#}
+{#</head>#}
+{#<body>#}
+{#    <h1>User Profile: {{ user_id }}</h1>#}
+{#    <form method="post">#}
+{#        <label for="name">user_id:</label>#}
+{#        <input type="text" id="user-id" name="user_id" value="{{ user_id }}">#}
+{#        <br>#}
+{#        <label for="name">Name:</label>#}
+{#        <input type="text" id="name" name="name" value="{{ profile_data.name }}">#}
+{#        <br>#}
+{#        <label for="email">Email:</label>#}
+{#        <input type="text" id="email" name="email" value="{{ profile_data.email }}">#}
+{#        <br>#}
+{#        <button type="submit">Save</button>#}
+{#    </form>#}
+{#</body>#}
+{#</html>#}

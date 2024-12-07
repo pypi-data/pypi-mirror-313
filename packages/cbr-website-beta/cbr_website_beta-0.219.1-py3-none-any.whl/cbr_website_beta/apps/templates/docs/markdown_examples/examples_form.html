@@ -1,0 +1,131 @@
+<style>
+    .debug_view {
+        /*border: 1px dotted;
+        background-color: #f0f6fc;
+        height: 100%;*/
+    }
+    .col-4 {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    select, textarea, .button-container {
+        flex: 1;
+        margin-bottom: 10px;
+    }
+    .button-container {
+        display: flex;
+        justify-content: space-between;
+    }
+    .button-container button {
+        flex: 1;
+        margin: 0 5px;
+    }
+    #markdown-example {
+        border: 1px dashed
+    }
+</style>
+
+<form onsubmit="submit_debug_view_form(event);">
+    <div class="row debug_view">
+        <div class="row">
+            <!-- Column 1 -->
+            <div class="col-4">
+                Area
+                <select id="area_selector" name="area_selector" size="5" onchange="updateTopics()">
+                    {% for area, topics in markdown_examples.items() %}
+                        <option value="{{ area }}" class="form-control">
+                            {{ area }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Column 2 -->
+            <div class="col-4">
+                Example
+                <select id="topic_selector" name="topic_selector" size="5" onchange="updateContent()">
+                </select>
+            </div>
+            <!-- Column 3 -->
+            <div class="col-4">
+                Code Sample
+                <textarea id="markdown-example" class="form-control" rows="10"></textarea>
+                <div class="button-container">
+                    <button class="btn btn-cyan" type="button" onclick="replace_markdown_example()">Replace Markdown edit</button>
+                    <button class="btn btn-primary" type="button" onclick="insert_markdown_example()">Insert to Markdown edit</button>
+                    <button class="btn btn-primary" type="button" onclick="append_markdown_example()">Append to Markdown edit</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+var markdown_examples = {{ markdown_examples|safe }};
+
+function updateTopics() {
+    var areaSelector = document.getElementById('area_selector');
+    var topicSelector = document.getElementById('topic_selector');
+    var selectedArea = areaSelector.value;
+
+    topicSelector.innerHTML = '';
+
+    if (markdown_examples[selectedArea]) {
+        for (var topic in markdown_examples[selectedArea]) {
+            var option = document.createElement('option');
+            option.value = topic;
+            option.text = topic;
+            option.classList.add("form-control")
+            topicSelector.add(option);
+        }
+        topicSelector.selectedIndex = 0; // Automatically select the first item
+        updateContent();
+    }
+}
+
+function updateContent() {
+    var areaSelector = document.getElementById('area_selector');
+    var topicSelector = document.getElementById('topic_selector');
+    var markdown_example = document.getElementById('markdown-example');
+    var selectedArea = areaSelector.value;
+    var selectedTopic = topicSelector.value;
+
+    if (markdown_examples[selectedArea] && markdown_examples[selectedArea][selectedTopic]) {
+        markdown_example.value = markdown_examples[selectedArea][selectedTopic];
+    } else {
+        markdown_example.value = '';
+    }
+}
+
+function append_markdown_example() {
+    var markdown_example = document.getElementById('markdown-example');
+    var markdown_input   = document.getElementById('markdown-input'  );
+    var example_code = markdown_example.value;
+    markdown_input.value += example_code;
+    renderMarkdown()
+}
+function insert_markdown_example() {
+    var markdown_example = document.getElementById('markdown-example');
+    var markdown_input   = document.getElementById('markdown-input'  );
+    var example_code = markdown_example.value;
+    markdown_input.value = example_code + markdown_input.value;
+    renderMarkdown()
+}
+
+function replace_markdown_example() {
+    var markdown_example = document.getElementById('markdown-example');
+    var markdown_input   = document.getElementById('markdown-input'  );
+    markdown_input.value = markdown_example.value;
+    renderMarkdown()
+}
+
+// Initialize topics for the first area and select the first item
+document.addEventListener('DOMContentLoaded', function() {
+    var areaSelector = document.getElementById('area_selector');
+    if (areaSelector.options.length > 0) {
+        areaSelector.selectedIndex = 0; // Automatically select the first item
+        updateTopics();
+    }
+});
+</script>

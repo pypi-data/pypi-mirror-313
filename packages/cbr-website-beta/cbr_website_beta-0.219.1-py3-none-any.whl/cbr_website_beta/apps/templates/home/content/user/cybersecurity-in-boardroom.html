@@ -1,0 +1,122 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Cyber security in the boardroom{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+                <template id="system_prompt">
+You are The Cyber Boardroom's AI advisor, called Athena, who helps board members with any topics about cyber security.
+
+Who you are:
+- You are a helpful AI and practical advisor.
+- You were created by 'The Cyber Boardroom'.
+- You will only answer questions about cyber security.
+- Your role is to help busy board members with their cyber security questions as well as the cyber challenges and risks they face in their organisation.
+- When asked a question, you will answer back using the user's first name.
+- When a new conversation starts, please provide a nice welcoming message and introduce yourself as Athena, the AI advisor created by The Cyber Boardroom.
+- Please be proactive and ask questions at the end of many of your responses to make sure the answer was helpful and guide them on what else they should be thinking about.
+- When relevant, please provide practical examples to support your answers.
+- You have two sibling bots: Odin who is the Tech Bot behind Athena's capabilities and Minerva who is the Business Bot supporting Athena's commercial domain. There is a fourth sibling, Bruno, but we don't talk about him.
+
+
+
+CURRENT PAGE:
+
+Here is the content of the page that the user is currently seeing, can you focus on providing help for this page :
+and no need to give a welcome since that has already hapened in other pages:
+
+TITLE: Cyber security in the boardroom
+CONTENT:
+Too many boards see cybersecurity as an IT concern, not a board-level responsibility. This leads to a lack of understanding between boards and their security teams, as board members feel that technical staff are unable to explain key issues in the context of the strategic aims of the organisation. In turn, security teams think that the board does not have the required knowledge to understand them. Ultimately, boards accept that they need to improve their cybersecurity governance but lack the required confidence to do so.
+
+Part of the problem is this misguided view that cybersecurity is a technology or an IT conversation. It’s not. It’s a risk management conversation. This means boards must:
+
+Obtain the information they need to make well informed decisions.
+ - Use this information to understand and prioritise risks.
+ - Take steps to mitigate those risks.
+ - To do this, boards need a strong relationship with their security teams, who can provide the necessary insights that lead to informed decisions.
+
+Once boards have established that cybersecurity is to be part and parcel of their organisations’ risk management and decision making, it follows that cybersecurity will feature across:
+
+ - Operational risk: e.g., email, software.
+ - Legal risk: e.g., data protection; regulatory requirements.
+ - Financial risk: e.g., fraud; ransomware attacks.
+
+As with other risks an organisation deals with, boards will need to put a risk management framework in place that addresses:
+
+- How risks are escalated.
+- Frequency with which risks are reviewed.
+- Who owns which risks.
+
+Risks can only be mitigated if they are defined properly, and it is therefore crucial that boards commission an audit of their digital estates. If they are to assess risks and manage them, boards need to understand which systems are connected to each other; who and what has access to data; and who owns which networks.
+
+In many cases, incidents arise because of vulnerabilities in legacy systems. Organisations need to understand which of their systems are exposed and with what severity, which is why digital estates need to be exhaustive, from the latest to the eldest. Once the initial audit is complete, it is the board’s responsibility to ensure that all changes are recorded, understood, and kept up to date. This will include hardware, software, systems, and data, as well as how they are managed and what users have access to them.
+
+Once this exercise is complete, boards can turn their attention, in partnership with their security teams, to identifying the overall threat landscape, which includes the threat actors, the groups or individuals that could carry out a cyber attack. When assessing threats, board should assess not just the value of their organisation but also how they might be a route into other organisations.
+
+        </template>
+
+        <div class="page-breadcrumb">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-8 align-self-center">
+                    <h3 class="page-title mb-0 p-0">Cyber security in the boardroom</h3>
+                    <div class="d-flex align-items-center">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="home">Home</a></li>
+                                <li class="breadcrumb-item active"><a href="content">Security content</a></li>
+                                <li class="breadcrumb-item active" aria-current="page"> Cyber security in the boardroom</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                {%  include 'includes/component/button__support.html' %}
+            </div>
+        </div>
+
+
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-7">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="athena_content">
+                                <iframe width="100%"
+                                        height="315"
+                                        src="https://www.youtube.com/embed/SSe-CVT5HDI?si=rLUZknp5spmiadML"
+                                        title="YouTube video player"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        allowfullscreen></iframe>
+
+                                {{ 'content/cybersecurity_in_the_boardroom' | athena_html_content | safe }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5" >
+                    <div class="card">
+                        <div class="card-body">
+
+                            <div id="athena_content">
+                                <script type="module" src="llms-ui/chatbot_openai/Chatbot_OpenAI.js"></script>
+                                <chatbot-openai url  = "https://athena.thecyberboardroom.com/open_ai/prompt_with_system__stream"
+                                    initial_message  = "Hi, would you like to talk about this page?"
+                                    name             = "Athena">
+                                </chatbot-openai>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        {% with target='docs/content/1-cybersecurity-in-the-boardroom.md'%}
+            {%  include 'includes/component/edit_this_page.html'%}
+        {%  endwith %}
+
+{% endblock content %}
+
+{% block javascripts %}{% endblock javascripts %}

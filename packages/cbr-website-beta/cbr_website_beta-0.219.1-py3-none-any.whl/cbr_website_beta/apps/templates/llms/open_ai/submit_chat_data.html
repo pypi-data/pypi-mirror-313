@@ -1,0 +1,62 @@
+<script>
+    let index        = 0
+    let thread_id    = random_uuid()
+    let llm_response = ""
+    let disable_save_to_odin = false
+
+    if (disable_save_to_odin){
+        console.log('****** save to odin is disabled ****') }
+
+    function random_uuid() {
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }
+
+    /*send_data_to_odin = function (thread_id, data_type, thread_data) {
+        index +=1
+        let post_data = JSON.stringify({ 'thread_id': thread_id, 'index': index, 'data_type': data_type, 'thread_data': thread_data})
+
+        if (disable_save_to_odin) {
+            console.log('!!!!!! save to odin is disabled !!!!!!')
+            console.log(`[${index}]  ${data_type} sent to odin | thread = "${thread_id}"`)
+            console.log(thread_data)
+            return
+        }
+
+        $.ajax({     url: '/user/save-chat',
+                            type: 'POST',
+                            contentType : 'application/json',
+                            data: post_data,
+                            dataType: 'json',
+                            success: function(data) {
+                                console.log(`[${index}]  ${data_type} sent ok to odin | thread = "${thread_id}"`)
+                                //console.log(data)
+                            },
+                            error: function(jqXHR, textStatus, errorThrown) {
+                                console.log('Error!!!')
+                                console.log(errorThrown)
+                            }})
+    }*/
+
+
+    window.addEventListener('streamStart', (e)=>{
+        llm_response = ""
+    });
+
+    window.addEventListener('streamData', (e)=>{
+        llm_response += e.detail;
+    });
+
+    window.addEventListener('streamComplete', (e)=>{
+        let data_type   = 'prompt_answer'
+        let thread_data = {'answer':llm_response }
+        //send_data_to_odin(thread_id, data_type, thread_data)
+    });
+
+    window.addEventListener('promptSent', (e)=>{
+        let data_type = 'prompt_sent'
+        let thread_data = e.detail;
+        //send_data_to_odin(thread_id, data_type, thread_data)
+    });
+</script>
