@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/papermc_updater/__about__.py"
+
+[project]
+name = "PMCU"
+readme = {"file" = "README.md", "content-type" = "text/markdown"}
+requires-python = ">=3.11.1"
+license = "GPL-3.0-or-later"
+authors = [{ name = "Hazel Viswanath", email = "viswanath.hazel@gmail.com" }]
+dynamic = ["version"]
+dependencies = [
+    "requests",
+]
+
+[project.urls]
+Documentation = "https://papermc-updater.readthedocs.io/"
+"Source code" = "https://github.com/transdryad/PaperMC-Updater"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/testing area",
+    "/docs",
+    "todo",
+    "server.json1",
+    ".gitignore",
+    ".readthedocs.yaml",
+    "/tests"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/papermc_updater"]
+
+[project.scripts]
+pmcu = "papermc_updater.main:main"
