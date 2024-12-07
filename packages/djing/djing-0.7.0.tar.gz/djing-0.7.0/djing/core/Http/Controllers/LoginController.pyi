@@ -1,0 +1,16 @@
+from Illuminate.Routing.Controllers.HasMiddleware import HasMiddleware, Middleware
+from _typeshed import Incomplete
+from djing.core.Facades.Djing import Djing as Djing
+from djing.core.Http.Requests.DjingRequest import DjingRequest as DjingRequest
+from djing.core.Rules.Exists import Exists as Exists
+from typing import Any
+
+class LoginController(HasMiddleware):
+    djing_path: Incomplete
+    djing_login_path: Incomplete
+    def __init__(self) -> None: ...
+    @classmethod
+    def middleware(cls) -> list[str | Middleware]: ...
+    def login(self, request: DjingRequest) -> Any: ...
+    def process_login(self, request: DjingRequest) -> Any: ...
+    def process_logout(self, request: DjingRequest) -> Any: ...

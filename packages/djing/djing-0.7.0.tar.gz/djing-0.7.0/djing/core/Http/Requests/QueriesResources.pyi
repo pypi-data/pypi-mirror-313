@@ -1,0 +1,6 @@
+from djing.core.Http.Requests.DecodesFilters import DecodesFilters as DecodesFilters
+from djing.core.Util import Util as Util
+
+class QueriesResources(DecodesFilters):
+    def new_query(self): ...
+    def orderings(self): ...

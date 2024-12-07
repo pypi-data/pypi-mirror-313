@@ -1,0 +1,6 @@
+from djing.core.Http.Requests.ResourceCreateOrAttachRequest import ResourceCreateOrAttachRequest as ResourceCreateOrAttachRequest
+from djing.core.Http.Resources.Resource import Resource as Resource
+
+class CreateViewResource(Resource):
+    def json(self, request: ResourceCreateOrAttachRequest): ...
+    def new_resource_with(self, request: ResourceCreateOrAttachRequest): ...
