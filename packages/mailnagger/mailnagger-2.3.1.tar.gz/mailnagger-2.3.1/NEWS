@@ -1,0 +1,306 @@
+Mailnagger news
+===============
+
+Version 2.3.1 (2024-12-06)
+==========================
+
+Fixes
+-----
+
+* Fixed compatibility with Python 3.10. Using importlib.resources.abc package
+  requires importlib-resources, which contains backport for that.
+
+* Fixed compatibility with Python 3.9. Too new type hints are now replaced
+  with Optional and Union types.
+
+* Added missing package metadata and classifiers.
+
+
+Version 2.3.0 (2024-11-29)
+==========================
+
+Fixes
+-----
+
+* Replaced deprecated distutils with setuptools.
+
+* Fixed subject header truncation.
+  https://github.com/pulb/mailnag/issues/252
+
+* Fixed some translatable texts.
+
+
+New features
+------------
+
+* Added support to build source and wheel packages.
+
+* Added support to install Mailnagger to virtual env.
+  Mailnagger can now be installed with pipx.
+
+* Added man pages to data files, so they are installed also.
+
+* Added Finnish translation.
+
+
+Version 2.2.1 (2024-10-16)
+==========================
+
+* Mailnag is forked. The name is changed to Mailnagger.
+  (https://github.com/tikank/mailnagger/issues/1)
+
+* setup.py updated. Hacked it to support system wide installation.
+
+* Fixed unit tests (https://github.com/pulb/mailnag/pull/250)
+
+* Fixed maildir bug about missing method
+  (https://github.com/pulb/mailnag/pull/249 which fixes
+  https://github.com/pulb/mailnag/issues/224)
+
+* Merged Python 3.12 related issues
+  (https://github.com/pulb/mailnag/pull/232 which fixes IMAP issues
+  https://github.com/pulb/mailnag/issues/244 and 
+  https://github.com/pulb/mailnag/issues/245)
+
+* Translation files updated. Not much actually changed but newest
+  gettext tools seems to reorder entries.
+
+
+Mailnag news
+============
+
+Version 2.2.x (Not released):
+=============================
+* Fixed Glib exception handling in conntest
+  (https://github.com/pulb/mailnag/issues/220)
+
+
+Version 2.2 (2021-02-14):
+=========================
+* Massive robustness improvements. Especially long running IMAP IDLE 
+  connections do survive peer resets and system hibernation now
+* New default connectivity test based on glib NetworkMonitor 
+  (likely to improve VPN issues as well)
+* Configuration UI hints for Gmail
+* Updated translations
+
+NOTES FOR PACKAGERS:
+The networkmanager dependency may be removed 
+since Mailnag now uses the NetworkMonitor API (of glib),
+which in turn optionally depends on networkmanager.
+
+
+Version 2.1 (2020-12-30):
+=========================
+* Mark-as-read also marks e-mails read on the server 
+  if supported (thanks Andreas Angerer!)
+* libnotify plugin: close associated notification when the e-mail 
+  has been read (single-notification-mode only,
+  thanks Dan Christensen!)
+* libnofify plugin: correctly identify 
+  desktop environment (thanks Denis Anuschewski!)
+* Misc other fixes and improvements
+* Updated translations
+
+
+Version 2.0 (2020-03-28):
+===========================
+* Ported to Python3
+* Migrated from Gnome keyring to libsecret
+* Moved functionality of dbus plugin to mailnag core
+* Added support for CRAM-MD5 auth
+* Added STARTTLS support for pop3 accounts
+* Cosmetic UI fixes
+* Misc other fixes and improvements
+
+IMPORTANT NOTES FOR PACKAGERS:
+Please note that mailnag now requires python >= 3.5 and 
+that the GNOME-Keyring dependency has been replaced by libsecret.
+
+
+Version 1.3 (2019-03-24):
+===========================
+* UI modernization including headerbars
+* Ported to GtkApplication
+* Support for mbox and maildir backends (thanks tikank!)
+* Massive refactoring (thanks tikank!)
+* Support for UTF-7 folder decoding (thanks cheshire-mouse!)
+* Improved folder parsing in config UI
+* Misc other fixes and improvements
+* Updated translations
+
+
+Version 1.2.1 (2016-05-28):
+===========================
+* Improved GNOME-Software integration
+* Fixed missing plugin config dialogs in Ubuntu 14.04 
+* Fixed IMAP idle folders issue
+* Fixed GTK warnings
+* Misc other fixes and improvements
+* Updated translations
+
+
+Version 1.2.0 (2016-03-23):
+===========================
+* Added support for notification settings in GNOME-Control-Center
+* Improved account dialog featuring a new IMAP folder chooser
+* libnotify plugin: added new 'Short Summary' notification mode
+  (new default notification mode; recommended for GNOME 3)
+* userscript plugin: accountnames are now passed to the specified userscript
+* Non-SSL accounts are now utilizing STARTTLS if available (thanks todi!)
+* Mailnag now logs a warning if an unencrypted connection is detected
+* Acountnames are now exported via the DBUS-API
+* The config window is resizable now
+* Misc other fixes and improvements
+* Updated translations / removed badly maintained translations
+
+NOTES: 
+If you're using the userscript plugin, please note that Mailnag now passes 
+(accountname, sender, subject) sequences to the script as opposed to (sender, subject)
+sequences in previous releases.
+
+
+Version 1.1.0 (2015-02-08):
+===========================
+* GNOME Online Accounts integration 
+  (via a plugin -> https://github.com/pulb/mailnag-goa-plugin)
+* Added support for platform-specific credential (login password) backends
+  (Configurable in the config file.
+  Supported options are currently "AUTO", "GNOME" and "NONE".)
+* The GNOME-Keyring dependency is optional now
+* Improved connectivity tests
+  (Configurable in the config file.
+  Supported options are "AUTO", "NETWORKMANAGER" and "PING".)
+* Shorter notification strings
+* Added appdata file for GNOME Software app
+* Removed bash wrapper scripts
+* Misc other fixes and improvements
+* Updated translations
+
+IMPORTANT NOTES FOR PACKAGERS:
+Please note that GNOME-Keyring and Networkmanager 
+are now optional dependencies and the httplib2 dependency 
+is not required anymore.
+
+
+Version 1.0.0 (2014-06-28):
+===========================
+* Mailnag is desktop-independent now (was GNOME3-only)
+* Added plugin system to allow easy extensibility
+* Cut down the core daemon functionality to mail checking only and 
+  moved everything else to plugins
+* Released GNOME 3/Ubuntu Unity extension/plugin for a tighter desktop integration
+* Added account assistants for popular email providers like Gmail
+* Added DBUS service (for remote control/integration in other apps)
+* Redesigned and simplified config UI
+* Added propper logging (log messages are sent to stdout and the system log now)
+* Heavy code cleanup & refactoring
+* Reduced disk write access, other performance improvements
+* Fixes for various major and minor bugs
+* New icon by Reda Lazri
+
+IMPORTANT NOTES: 
+The fileformat of the config file has changed. 
+It's highly recommended to rename/backup your 
+current config file (~/.config/mailnag/mailnag.cfg).
+
+
+Version 0.5.2 (2013-01-06):
+===========================
+* Fixed path of the autstart file
+* Minor other fixes
+
+
+Version 0.5.1 (2012-12-23):
+===========================
+* Restored translated strings (previously available in mailnag <= 0.4.3)
+  that were removed due to a bug in the gen_po_template script
+* Fixed a race condition that can lead to mutliple mailnag instances
+
+
+Version 0.5.0 (2012-12-05):
+===========================
+* Bugfix: (really) don't crash on session start 
+  if the notification DBUS interface isn't available yet
+* Migrated to the new keyring gir binding
+* Removed evolution account import (not working anymore)
+* Minor other fixes
+* Updated translations
+
+IMPORTANT NOTES:
+  - Packagers should incorporate the new dependecy list.
+  - The new keyring binding stores credentials in ~/.local/share/keyrings 
+    instead of in ~/.gnome2/keyrings. So you probably have to fire up 
+    mailnag_config and re-enter your mail account password(s).
+
+
+Version 0.4.4 (2012-10-20):
+===========================
+* Bugfix: don't crash on session start 
+  if the notification DBUS interface isn't available yet
+* Bugfix: fix notification sound playback in GNOME 3.6
+* Removed messagetray-label configuration since gnome-shell 
+  no longer shows labels in the messagetray
+
+
+Version 0.4.3 (2012-09-22):
+===========================
+* Added installation script (setup.py)
+* IMAP related bugfixes
+* Updated translations
+
+
+Version 0.4.2 (2012-07-10):
+===========================
+* Bugfix: enable gettext fallback language
+* Updated translations
+
+
+Version 0.4.1 (2012-05-21):
+===========================
+* Fixed some crashes and connection issues
+* Use unicode for translated strings
+* Don't play notification sounds when GNOME Shell notifications are disabled
+* Updated translations
+
+
+Version 0.4 (2012-01-15):
+=========================
+* Much improved IMAP IDLE support
+* Reconnect if a connection has been lost (e.g. after standby)
+* Use GNOMEs default mail client
+* Enable SSL by default
+* Use a meaningful messagetray label by default 
+* Added version info to the about tab
+* Refactoring, removed unused code
+* Updated translations
+* Bugfixes
+
+
+Version 0.3 (2011-11-27):
+=========================
+* Support for IMAP-Push notifications (thanks tony747!)
+* Single/summary notification modes
+* Support for GNOME 3.2 notification counters (single mode only)
+* Mails can be marked as read
+* Explicit SSL encryption
+* Autostart in GNOME sessions only
+* Detection of default email client
+* Notification sound playback via GStreamer (ogg)
+* Removed GTK2 workaround code
+* Lots of bugfixes, rewritten code and refactoring
+* New translations
+
+Please note that this release breaks existing config files (for the first and last time),
+so make sure to delete ~/.config/mailnag/mailnag.cfg before upgrading.
+
+
+Version 0.2 (2011-10-17):
+=========================
+* Added many new translations
+* Bugfixes
+
+
+Version 0.1 (2011-07-06):
+=========================
+* Initial release
