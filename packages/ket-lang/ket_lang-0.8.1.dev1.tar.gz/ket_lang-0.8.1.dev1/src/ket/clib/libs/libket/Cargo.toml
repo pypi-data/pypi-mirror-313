@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2020 Evandro Chagas Ribeiro da Rosa <evandro@quantuloop.com>
+# SPDX-FileCopyrightText: 2020 Rafael de Santiago <r.santiago@ufsc.br>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "libket"
+version = "0.5.0"
+authors = ["Evandro Chagas Ribeiro da Rosa <evandro@quantuloop.com>"]
+description = "Runtime library for the Ket programming language"
+repository = "https://gitlab.com/quantum-ket/libket"
+documentation = "https://quantumket.org"
+license = "Apache-2.0"
+readme = "README.md"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bimap = "0.6.3"
+serde = { version = "1.0.213", features = ["derive"] }
+serde_json = "1.0.132"
+num = "0.4"
+log = "0.4.20"
+env_logger = "0.11.5"
+thiserror = "1.0.65"
+itertools = "0.13.0"
+colored = "2.1.0"
+#rayon = "1.5.3"
+genawaiter = "0.99.1"
+indexmap = "2.6.0"
+plotly = { version = "0.10.0", optional = true }
+build-info = { version = "0.0.39", default-features = false, features = [] }
+
+[build-dependencies]
+build-info-build = "0.0.39"
+
+[lib]
+name = "ket"
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+strip = true
+
+[features]
+default = ["c_api"]
+c_api = []
+plot = ["dep:plotly"]
