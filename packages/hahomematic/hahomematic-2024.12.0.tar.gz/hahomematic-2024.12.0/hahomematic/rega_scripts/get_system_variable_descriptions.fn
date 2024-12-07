@@ -1,0 +1,36 @@
+!# get_system_variable_descriptions.fn
+!# Erstellt in Ergänzung zu https://github.com/eq-3/occu/blob/45b38865f6b60f16f825b75f0bdc8a9738831ee0/WebUI/www/api/methods/sysvar/getall.tcl
+!# Erweitert das Script um "description"
+!#
+
+var svList = dom.GetObject(ID_SYSTEM_VARIABLES);
+string id;
+
+boolean dpFirst = true;
+Write("[");
+foreach(id, svList.EnumIDs())
+{
+    var sv = dom.GetObject(id);
+    string description;
+    if (sv)
+    {
+      var desc = sv.DPInfo();
+      if (desc) {
+        description = desc;
+      } else {
+        description = "";
+      }
+
+      if (dpFirst) {
+        dpFirst = false;
+      } else {
+        WriteLine(',');
+      }
+
+      Write("{");
+      Write("\"id\": \"" # sv.ID() # "\",");
+      Write("\"description\": \"" # description # "\"");
+      Write("}");
+    }
+}
+Write("]");
