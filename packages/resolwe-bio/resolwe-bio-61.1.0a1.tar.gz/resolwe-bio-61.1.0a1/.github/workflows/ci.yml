@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+*"
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: arc-runner
+
+    env:
+      RESOLWE_POSTGRESQL_PORT: 55433
+      RESOLWE_REDIS_PORT: 56380
+      RESOLWE_TEST_ONLY_CHANGES_TO: "origin/master"
+    strategy:
+      matrix:
+        toxenv: ["py312"]
+
+    services:
+      postgres:
+        image: public.ecr.aws/docker/library/postgres:16
+        ports:
+          - 55433:5432
+        env:
+          POSTGRES_USER: resolwe
+          POSTGRES_DB: resolwe-bio
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: public.ecr.aws/docker/library/redis:7-alpine
+        ports:
+          - 56380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      # NOTE: If we are building the "master" branch or a pull request against the
+      # "master" branch, we allow installing pre-releases with the pip command.
+      - name: Allow pre-releases for master branch
+        if: github.ref == 'refs/heads/master'
+        run: echo "PIP_PRE=1" >> $GITHUB_ENV
+
+      - name: Assert PR is up-to-date
+        if: github.event_name == 'pull_request'
+        run: |
+          git_change_target_merge_base=$(git merge-base HEAD origin/${{ github.base_ref }})
+          git_change_target_sha=$(git rev-parse origin/${{ github.base_ref }})
+
+          if [[ "${git_change_target_merge_base}" != "${git_change_target_sha}" ]]; then
+            echo "Pull request is not up-to-date!"
+            echo "Please, rebase your pull request on top of '${{ github.base_ref }}' (commit: ${git_change_target_sha})."
+            exit 1
+          fi
+
+      - name: Documentation
+        run: |
+          tox -e docs
+
+      - name: Linters
+        run: |
+          tox -e linters
+
+      - name: Packaging
+        run: |
+          tox -e packaging
+
+      - name: Extras
+        run: |
+          tox -e extra
+
+      - name: Migrations
+        run: |
+          tox -e migrations
+      
+      - name: Run entire test suite
+        if: github.event_name != 'pull_request'
+        timeout-minutes: 120
+        run: |
+          tox -e ${{ matrix.toxenv }}
+
+      - name: Unit partial test suite on pull request
+        if: github.event_name == 'pull_request'
+        timeout-minutes: 120
+        run: |
+          tox -e ${{ matrix.toxenv }}-partial
+
+  build:
+    runs-on: arc-runner
+    needs: test
+    if: startsWith(github.ref, 'refs/tags')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build
+        run: python3.12 -m pip install --user build
+
+      - name: Build a binary wheel and a source tarball
+        run: python3.12 -m build --sdist --wheel --outdir dist/ .
+
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.pypi_password }}
