@@ -1,0 +1,113 @@
+# Giới thiệu
+
+tatools là một thư viện các nhiệm vụ hàng ngày sử dụng, hay dùng nhưng không khó, mất thời gian code cho các dự án lẻ tẻ.
+
+# Cài đặt bằng các cách sau:
+
+```bash
+pip install tatools
+pip install --upgrade --force-reinstall tatools
+pip install --upgrade tatools --no-deps
+
+```
+
+Cài trực tiếp trong code:
+
+```python
+
+try:
+    os.system("python -m pip install --upgrade --force-reinstall tatools --no-deps")
+except Exception as e:
+    print('tatools:', e)
+import tatools
+```
+
+# Cách dùng:
+
+```python
+from pprint import pprint
+from tatools.ParamsBase import tactParametters
+import tatools
+
+print(tatools.__version__)
+mParams = tactParametters()
+
+fns = mParams.fnFIS(r"../", exts=(".py"))
+pprint(fns)
+```
+
+Kết quả:
+
+``` 
+['../tact/setup.py',
+ '../tact/__init__.py',
+ '../tact/tatools/__init__.py']
+```
+
+Ví dụ 2: tạo file tham số:
+
+```python
+
+from pprint import pprint
+from tatools.ParamsBase import tactParametters
+
+class Parameters(tactParametters):
+    def __init__(self, ModuleName="TACT"):
+        super().__init__()
+        self.thamso1 = "thamso1"
+        self.thamso2 = " xâu tiếng việt"
+        self.api_url = "https://200.168.90.38:6699/avi/collect_data"
+        self.testpath = "D:/test_debug_fii"
+        self.test_real = 0.8
+        self.test_int = 12
+        self.test_dict = {
+            1: 2,
+            3: 4.5,
+            "6": "bảy nhá",
+            -1: "Tám",
+            9: [10, 11.2, "22", (33, 44, "55")],
+            10: {101: 12, 102: "mười ba"},
+        }
+        self.test_list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+        self.load_then_save_to_yaml(file_path="configs_test.yml", ModuleName=ModuleName)
+        self.privateVar1 = 2
+        self.privateVar2 = "Not in param file"
+
+
+mParams = Parameters(ModuleName="test")
+
+pprint(mParams.__dict__)
+```
+
+Kết quả:
+
+```json
+{'ModuleName': 'test',
+ 'api_url': 'https://200.168.90.38:6699/avi/collect_data',
+ 'fn': 'configs_test.yml',
+ 'logdir': '',
+ 'privateVar1': 2,
+ 'privateVar2': 'Not in param file',
+ 'test_dict': {-1: 'Tám',
+               1: 2,
+               3: 4.5,
+               9: [10, 11.2, '22', (33, 44, '55')],
+               10: {101: 12, 102: 'mười ba'},
+               '6': 'bảy nhá'},
+ 'test_int': 12,
+ 'test_list': [1, 2, 3, 4, 5, 6, 7, 8, 9],
+ 'test_real': 0.8,
+ 'testpath': 'D:/test_debug_fii',
+ 'thamso1': 'thamso1',
+ 'thamso2': ' xâu tiếng việt'
+ }
+```
+
+## Console Running
+ 
+
+# Version changed 
+     
+-   Version 0.1:
+    -   Test & upload.
