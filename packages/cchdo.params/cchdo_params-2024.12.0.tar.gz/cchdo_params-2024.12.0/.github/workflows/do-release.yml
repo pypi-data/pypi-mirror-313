@@ -1,0 +1,33 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    - name: Install Bundling dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install twine build
+    - name: Build Dists
+      run: |
+        python -m build --sdist --wheel . --outdir dist
+    - name: Test Wheel
+      run: |
+        cd dist && pip install $(ls *.whl)'[selftest]' && python -m pytest --pyargs cchdo.params && twine check *
+    - name: Publish Python distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1 
