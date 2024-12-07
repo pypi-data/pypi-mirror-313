@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+
+#--------------------------------
+display_help()
+{
+    echo "Usage: Used to update tarball with virtual environment and optionally upload it to the grid"
+    echo ""
+    echo "-h: Help"
+    echo "-v: Version of tarball, optional, if not passed, wont upload it"
+}
+#--------------------------------
+get_args()
+{
+    while getopts :hf:v: option; do 
+        case "${option}" in
+            h)  
+                display_help
+                exit 0
+                ;;  
+            \?)  echo "Invalid option: -${OPTARG}"
+                display_help
+                exit 1
+                ;;  
+            :)  echo "$0: Arguments needed"
+                display_help
+                exit 1
+                ;;  
+            v)  VENV_VERS=${OPTARG};;
+        esac
+    done
+}
+#--------------------------------
+check()
+{
+    if [[ $? -ne 0 ]];then
+        echo "Failed: $1"
+        exit 1
+    fi
+}
+#--------------------------------
+upload()
+{
+    if [[ -z $VENV_VERS ]];then
+        echo "Version of tarball not passed, won't upload it"
+        exit 0
+    fi
+
+    SOURCE=$VENVS/dcheck.tar 
+    TARGET=LFN:/lhcb/user/${LXNAME:0:1}/$LXNAME/run3/venv/$VENV_VERS/dcheck.tar
+
+    echo "Uploading tarball for $TARGET"
+    dirac-dms-add-file $TARGET $SOURCE CERN-USER
+}
+#--------------------------------
+initialize()
+{
+    which lb-conda-dev        > /dev/null 2>&1
+    check "No lb-conda-dev found"
+
+    dirac-proxy-info          > /dev/null 2>&1
+    check "Invalid grid proxy"
+
+    if [[ -z $VENVS ]];then
+        echo "VENVS environment variable not set"
+        exit 1
+    fi
+}
+#--------------------------------
+make_tarball()
+{
+    mkdir -p $VENVS
+    cd $VENVS
+
+    rm -rf dchecks.tar
+
+    if [[ ! -f $VENVS/dcheck/run ]];then
+        echo "Environment not found, creating it"
+        lb-conda-dev virtual-env default dcheck
+    else
+        echo "Environment found, updating tarball"
+    fi
+
+    source dcheck/bin/activate
+    install_pkg data_manipulation_utilities
+    install_pkg post_ap 
+
+    tar -czf dcheck.tar dcheck
+    echo "Running: tar -czf dcheck.tar dcheck"
+    check "Tar post_ap"
+
+    cd - > /dev/null 2>&1
+}
+#--------------------------------
+install_pkg()
+{
+    NAME=$1
+
+    pip install $NAME > /dev/null 2>&1
+    check "Could not install $NAME"
+
+    VERSION=$(pip show $NAME | grep Version)
+    echo "Installed $NAME: $VERSION"
+}
+#--------------------------------
+get_args "$@"
+initialize
+make_tarball
+upload
