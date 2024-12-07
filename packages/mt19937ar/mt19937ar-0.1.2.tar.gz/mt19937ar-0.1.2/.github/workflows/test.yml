@@ -1,0 +1,55 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc
+
+      - name: Build C shared library
+        run: |
+          gcc -shared -o tests/c/mt19937ar.so -fPIC tests/c/mt19937ar.c
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pipenv'
+
+      - name: Install pipenv
+        run: |
+          pip install --upgrade pip
+          pip install pipenv
+
+      - name: Install pipenv dependencies
+        run: pipenv install --dev
+
+      - name: Run test
+        run: pipenv run test
+
+      - name: Run typecheck
+        run: pipenv run typecheck
+
+      - name: Run lint
+        run: pipenv run lint
+
+      - name: Run format
+        run: pipenv run format --diff
