@@ -1,0 +1,565 @@
+{
+    "$schema": "http://json-schema.org/draft/2020-12/schema",
+    "$id": "http://www.spdx.org/license#",
+    "properties": {
+        "SPDXLicenseCollection": {"$ref": "#/$defs/SPDXLicenseCollectionType"},
+        "p": {"$ref": "#/$defs/formattedAltTextType"},
+        "bullet": {"type": "string"},
+        "list": {"$ref": "#/$defs/listType"},
+        "br": {"$ref": "#/$defs/emptyType"},
+        "titleText": {"$ref": "#/$defs/formattedAltTextType"},
+        "copyrightText": {"$ref": "#/$defs/formattedAltTextType"},
+        "optional": {"$ref": "#/$defs/optionalType"},
+        "alt": {"$ref": "#/$defs/altType"},
+        "standardLicenseHeader": {"$ref": "#/$defs/formattedAltTextType"},
+        "obsoletedBys": {"$ref": "#/$defs/obsoletedBysType"},
+        "crossRefs": {"$ref": "#/$defs/crossRefsType"},
+        "notes": {"$ref": "#/$defs/formattedFixedTextType"},
+        "text": {"$ref": "#/$defs/formattedAltTextType"}
+    },
+    "$defs": {
+        "obsoletedByType": {
+            "type": "object",
+            "properties": {
+                "Content": {"type": "string"},
+                "expression": {"type": "string"}
+            }
+        },
+        "obsoletedBysType": {
+            "type": "object",
+            "required": ["obsoletedBy"],
+            "properties": {
+                "obsoletedBy": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/obsoletedByType"},
+                    "minItems": 1
+                }
+            }
+        },
+        "crossRefsType": {
+            "type": "object",
+            "required": ["crossRef"],
+            "properties": {
+                "crossRef": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "minItems": 1
+                }
+            }
+        },
+        "emptyType": {
+            "type": "object",
+            "properties": {}
+        },
+        "altType": {
+            "type": "object",
+            "required": [
+                "name",
+                "match"
+            ],
+            "properties": {
+                "Content": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "p": {"$ref": "#/$defs/formattedFixedTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "bullet": {"type": "string"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "list": {"$ref": "#/$defs/listType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "br": {"$ref": "#/$defs/emptyType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "titleText": {"$ref": "#/$defs/formattedFixedTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "copyrightText": {"$ref": "#/$defs/formattedFixedTextType"}
+                                }
+                            }
+                        ]
+                    }
+                },
+                "name": {"type": "string"},
+                "match": {"type": "string"},
+                "spacing": {
+                    "type": "string",
+                    "default": "before"
+                }
+            }
+        },
+        "optionalType": {
+            "type": "object",
+            "properties": {
+                "Content": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "p": {"$ref": "#/$defs/formattedAltTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "bullet": {"type": "string"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "list": {"$ref": "#/$defs/listType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "optional": {"$ref": "#/$defs/optionalType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "alt": {"$ref": "#/$defs/altType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "br": {"$ref": "#/$defs/emptyType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "titleText": {"$ref": "#/$defs/formattedAltTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "copyrightText": {"$ref": "#/$defs/formattedAltTextType"}
+                                }
+                            }
+                        ]
+                    }
+                },
+                "spacing": {
+                    "type": "string",
+                    "default": "before"
+                }
+            }
+        },
+        "formattedAltTextType": {
+            "type": "object",
+            "properties": {
+                "Content": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "p": {"$ref": "#/$defs/formattedAltTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "bullet": {"type": "string"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "list": {"$ref": "#/$defs/listType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "optional": {"$ref": "#/$defs/optionalType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "alt": {"$ref": "#/$defs/altType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "br": {"$ref": "#/$defs/emptyType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "titleText": {"$ref": "#/$defs/formattedAltTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "copyrightText": {"$ref": "#/$defs/formattedAltTextType"}
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "listType": {
+            "type": "object",
+            "required": ["item"],
+            "properties": {
+                "item": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/formattedAltTextType"},
+                    "minItems": 1
+                }
+            }
+        },
+        "formattedFixedTextType": {
+            "type": "object",
+            "properties": {
+                "Content": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "p": {"$ref": "#/$defs/formattedFixedTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "bullet": {"type": "string"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "list": {"$ref": "#/$defs/listType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "br": {"$ref": "#/$defs/emptyType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "titleText": {"$ref": "#/$defs/formattedFixedTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "copyrightText": {"$ref": "#/$defs/formattedFixedTextType"}
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "listStandardLicenseHeaderType": {
+            "type": "object",
+            "required": ["item"],
+            "properties": {
+                "item": {
+                    "type": "array",
+                    "items": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"},
+                    "minItems": 1
+                }
+            }
+        },
+        "optionalStandardLicenseHeaderType": {
+            "type": "object",
+            "properties": {
+                "Content": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "p": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "bullet": {"type": "string"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "list": {"$ref": "#/$defs/listStandardLicenseHeaderType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "optional": {"$ref": "#/$defs/optionalStandardLicenseHeaderType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "alt": {"$ref": "#/$defs/altType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "br": {"$ref": "#/$defs/emptyType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "titleText": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "copyrightText": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "standardLicenseHeader": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            }
+                        ]
+                    }
+                },
+                "spacing": {
+                    "type": "string",
+                    "default": "before"
+                }
+            }
+        },
+        "formattedAltStandardLicenseHeaderTextType": {
+            "type": "object",
+            "properties": {
+                "Content": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "p": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "bullet": {"type": "string"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "list": {"$ref": "#/$defs/listStandardLicenseHeaderType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "optional": {"$ref": "#/$defs/optionalStandardLicenseHeaderType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "alt": {"$ref": "#/$defs/altType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "br": {"$ref": "#/$defs/emptyType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "titleText": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "copyrightText": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "standardLicenseHeader": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "LicenseType": {
+            "type": "object",
+            "required": [
+                "licenseId",
+                "name"
+            ],
+            "properties": {
+                "Content": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "obsoletedBys": {"$ref": "#/$defs/obsoletedBysType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "crossRefs": {"$ref": "#/$defs/crossRefsType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "notes": {"$ref": "#/$defs/formattedFixedTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "standardLicenseHeader": {"$ref": "#/$defs/formattedAltTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "text": {"$ref": "#/$defs/formattedAltStandardLicenseHeaderTextType"}
+                                }
+                            }
+                        ]
+                    }
+                },
+                "licenseId": {"type": "string"},
+                "isOsiApproved": {"type": "boolean"},
+                "name": {"type": "string"},
+                "listVersionAdded": {"type": "string"},
+                "deprecatedVersion": {"type": "string"}
+            }
+        },
+        "ExceptionType": {
+            "type": "object",
+            "required": [
+                "licenseId",
+                "name"
+            ],
+            "properties": {
+                "Content": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"type": "string"},
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "obsoletedBys": {"$ref": "#/$defs/obsoletedBysType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "crossRefs": {"$ref": "#/$defs/crossRefsType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "notes": {"$ref": "#/$defs/formattedFixedTextType"}
+                                }
+                            },
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "text": {"$ref": "#/$defs/formattedAltTextType"}
+                                }
+                            }
+                        ]
+                    }
+                },
+                "licenseId": {"type": "string"},
+                "name": {"type": "string"},
+                "listVersionAdded": {"type": "string"},
+                "deprecatedVersion": {"type": "string"}
+            }
+        },
+        "SPDXLicenseCollectionType": {
+            "type": "object",
+            "required": ["licenseOrexception"],
+            "properties": {
+                "licenseOrexception": {
+                    "type": "array",
+                    "items": {
+                        "anyOf": [
+                            {"$ref": "#/$defs/LicenseType"},
+                            {"$ref": "#/$defs/ExceptionType"}
+                        ]
+                    },
+                    "minItems": 1
+                }
+            }
+        }
+    }
+}
