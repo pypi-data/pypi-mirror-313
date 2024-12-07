@@ -1,0 +1,2 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[1668],{93587:function(a,b,c){(window.__NEXT_P=window.__NEXT_P||[]).push(["/admin/roles",function(){return c(69606)}])},69606:function(a,b,c){"use strict";c.r(b);var d=c(85893);c(67294);var e=c(41912),f=function(){return(0,d.jsx)(d.Fragment,{children:(0,d.jsx)(e.Z,{})})};b.default=f}},function(a){a.O(0,[9562,9774,2888,179],function(){var b;return a(a.s=93587)}),_N_E=a.O()}])
+//# sourceMappingURL=roles-54866a847a0a981b.js.map
