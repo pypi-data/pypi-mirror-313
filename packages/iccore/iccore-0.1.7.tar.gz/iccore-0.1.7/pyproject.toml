@@ -1,0 +1,102 @@
+[project]
+name = "iccore"
+version = "0.1.7"
+authors = [
+  { name="James Grogan, Irish Centre for High End Computing", email="james.grogan@ichec.ie" },
+]
+description = "A collection of common data structures and utilities used in other ICHEC tools"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+    "Topic :: System :: Distributed Computing"
+]
+keywords = ["HPC"]
+dependencies = ["PyYAML", "pydantic"]
+
+[project.urls]
+Repository = "https://git.ichec.ie/performance/toolshed/iccore"
+Homepage = "https://git.ichec.ie/performance/toolshed/iccore"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-sugar",
+    "black",
+    "mypy",
+    "flake8",
+    "pylint"
+]
+
+types = ["types-PyYAML"]
+
+[project.scripts]
+iccore = "iccore.main_cli:main_cli"
+
+[tool.setuptools.package-data]
+"iccore" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["test",]
+log_cli = 1
+log_cli_level = "debug"
+addopts = "--cov=iccore --cov-report term --cov-report xml:coverage.xml --cov-report html"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+requires =
+    tox>=4
+env_list = lint, type, style, py{311}, docs
+skip_missing_interpreters = true
+
+[testenv]
+description = run unit tests
+deps =
+    pytest>=7
+    pytest-cov
+    pytest-sugar
+commands =
+    pytest {posargs:test}
+
+[testenv:lint]
+description = run linters
+skip_install = true
+deps =
+    black
+commands = black {posargs:src test}
+
+[testenv:style]
+description = run style check
+skip_install = true
+deps =
+    flake8
+commands = flake8 {posargs:src}
+
+[testenv:type]
+description = run type checks
+deps =
+    mypy
+    .[types]
+commands =
+    mypy {posargs:src test}
+
+[testenv:docs]
+changedir = docs
+deps = sphinx
+commands = sphinx-build -W -b html -d {envtmpdir}/doctrees . {envtmpdir}/html
+"""
