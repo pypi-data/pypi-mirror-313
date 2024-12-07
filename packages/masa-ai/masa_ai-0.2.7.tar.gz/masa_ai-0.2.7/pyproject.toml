@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "masa-ai"
+version = "0.2.7"
+description = "MASA SDK - Masa's AI Software Architecture"
+authors = ["Masa AI <engineering@masa.ai>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://github.com/masa-finance/masa"
+repository = "https://github.com/masa-finance/masa"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+include = [
+    "masa_ai/*.json",
+    "masa_ai/*.yaml",
+    "masa_ai/*.txt",
+    "masa_ai/configs/*.yaml",
+    "masa_ai/request_list.json",
+    "docs/**",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<4"
+pyyaml = ">=5.4"
+requests = "*"
+numpy = ">=2.0.1"
+pandas = "*"
+python-dotenv = "*"
+tqdm = "*"
+colorlog = "*"
+dynaconf = "*"
+jupyter = "*"
+notebook = "*"
+ipykernel = "*"
+sphinx = "<8.0.0"
+sphinx_rtd_theme = "*"
+recommonmark = "*"
+myst-parser = "*"
+psycopg = {extras = ["binary"], version = "*"}
+feedparser = "*"
+click = "^8.1.7"
+argparse = "^1.4.0"
+loguru = "^0.7.2"
+uuid = "^1.30"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+flake8 = "*"
+black = "*"
+python-semantic-release = "^9.9.0"
+pytest-cov = "^5.0.0"
+
+
+[tool.poetry.scripts]
+masa-ai-cli = "masa_ai.cli:main"
+
+[[tool.poetry.source]]
+name = "pypi"
+
+[tool.semantic_release]
+version_variable = "src/masa_ai/__init__.py:__version__"
+changelog_file = "CHANGELOG.md"
+upload_to_pypi = true
+semantic_release_branch = "main"
