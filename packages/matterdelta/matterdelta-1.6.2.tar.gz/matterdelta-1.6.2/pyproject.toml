@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "matterdelta"
+description = "Matterbridge API plugin for Delta Chat"
+dynamic = ["version"]
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["deltachat", "bot", "matterbridge", "bridge"]
+authors = [
+  {name = "adbenitez", email = "adb@merlinux.eu"},
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+]
+dependencies = [
+    "deltabot-cli>=6.1.0,<7.0",
+    "requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/deltachat-bot/matterdelta"
+
+[project.optional-dependencies]
+fast = [
+    "cchardet>=2.1.7",
+]
+dev = [
+  "black",
+  "mypy",
+  "isort",
+  "pylint",
+  "pylama",
+  "pytest",
+  "types-requests",
+]
+
+[project.scripts]
+matterdelta = "matterdelta:main"
+
+[tool.setuptools_scm]
+# can be empty if no extra settings are needed, presence enables setuptools_scm
+version_file = "matterdelta/_version.py"
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = "True"
