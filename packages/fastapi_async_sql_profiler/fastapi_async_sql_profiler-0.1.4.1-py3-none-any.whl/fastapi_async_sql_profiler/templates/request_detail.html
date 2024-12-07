@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block style %}
+<style>
+    #request-summary {
+        margin: auto;
+        text-align: center;
+        width: 100%;
+    }
+
+    .item {
+        border: 0;
+    }
+
+    .item:hover {
+        background-color: initial;
+        color: initial;
+        cursor: initial;
+    }
+
+    /**/
+    #request-info {
+        width: 960px;
+        margin: auto auto 20px;
+    }
+
+    .heading {
+        width: 100%;
+        background-color: transparent;
+        height: 30px;
+        display: table;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    pre {
+        white-space: pre-wrap;
+        /* css-3 */
+        white-space: -moz-pre-wrap;
+        /* Mozilla, since 1999 */
+        /*noinspection CssInvalidElement*/
+        white-space: -pre-wrap;
+        /* Opera 4-6 */
+        white-space: -o-pre-wrap;
+        /* Opera 7 */
+        word-wrap: break-word;
+        /* Internet Explorer 5.5+ */
+    }
+
+    code {
+        font-family: Fantasque;
+        background-color: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 14px;
+    }
+
+    .headers {
+        font-size: 14px;
+        font-family: Fantasque;
+        background-color: white;
+        width: 100%;
+    }
+
+    .headers td {
+        padding-bottom: 5px;
+        padding-left: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block menu %}
+{% include 'inclusion/request_detail_menu.html' %}
+{% endblock %}
+
+{% block content %}
+<div id="content">
+
+    <div id="request-summary">
+        <div class="item">
+            <div class="start_time">{{ request_query.start_time.strftime('%d.%m.%Y, %H:%M:%S') }}.{{ '%03d' %
+                (request_query.start_time.microsecond // 1000) }} </div>
+            <div class="method"> {{response_info.status_code}} {{request_query.method}} </div>
+            <div class="path"> {{request_query.path}} </div>
+            <div id="time-taken-div"> <span class="numeric">{{request_query.time_taken}}</span> ms overall </div>
+            <div id="time-taken-queries-div"> <span class="numeric">{{request_query.time_spent_queries}}</span> ms on queries </div>
+            <div id="num-queries-div"> <span class="numeric">{{request_query.total_queries}}</span> queries</div>
+        </div>
+    </div>
+
+
+    <div id="request-info">
+
+        <div class="heading">
+            <div class="inner-heading">
+                Query Parameters
+            </div>
+        </div>
+
+        <!-- <pre><code class=" hljs json">{
+"<span class="hljs-attribute">client_order_id</span>": <span class="hljs-value"><span class="hljs-string">"22733"</span>
+</span>}</code></pre> -->
+
+        <pre>
+            {{request_query.query_params}}
+        </pre>
+
+        <div class="heading">
+            <div class="inner-heading">
+                Request Headers
+            </div>
+        </div>
+
+        <table class="headers">
+            <!-- {{request_query.headers}} -->
+            <tbody>
+                {% if request_query.headers %}
+                {% for key, val in request_query.headers.items() %}
+                <tr>
+                    <td class="key">{{ key|upper }}</td>
+                    <td class="value">{{ val }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="2">No headers found.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+
+
+        <div class="heading">
+            <div class="inner-heading">
+                Response Headers
+            </div>
+        </div>
+        <!-- {{response_info.body}} -->
+        <table class="headers">
+            <tbody>
+                {% if response_info.headers %}
+                {% for key, val in response_info.headers.items() %}
+                <tr>
+                    <td class="key">{{ key|upper }}</td>
+                    <td class="value">{{ val }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="2">No headers found.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+
+        <div class="heading">
+            <div class="inner-heading">
+                Raw Response Body
+            </div>
+        </div>
+
+
+
+        <pre>
+            {{response_info.raw_body}}
+        </pre>
+
+
+
+
+        <div class="heading">
+            <div class="inner-heading">
+                Response Body
+            </div>
+        </div>
+
+        <pre>
+            <code  id="jsonResponseBody" class555=" hljs json" class="language-json hljs3 json3">
+                {{response_info.body}}
+            </code>
+        </pre>
+
+        <!-- <div class="description">
+            This is the body of the HTTP response represented as JSON for easier reading.
+        </div>
+
+        The response body is <b>8402</b> characters long
+        and hence is <b>too big</b> to show here.
+        Click <a
+            href="/api/request/19b43c23-968c-4ac3-8f80-88863e58ad4f/raw/?typ=response&amp;subtyp=processed">here</a>
+        to view the response body. -->
+
+
+
+        <!-- <div class="heading">
+            <div class="inner-heading">
+                Curl
+            </div>
+        </div>
+
+        <div class="description">
+            Curl is a command-line utility for transferring data from servers. Paste the following into
+            a terminal to repeat this request via command line.
+        </div>
+        <pre id="pre-curl2">
+            <code class=" hljs ">curl -X GET   http://l.test/api/</code>
+        </pre>
+        <pre id="pre-curl">
+            <code class=" hljs ">curl -X GET   {{request_query.headers['referer']}}?{{request_query.query_params}}</code>
+        </pre> -->
+
+
+    </div>
+
+    <script>
+
+        function formatAndHighlight(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const jsonObj = JSON.parse(codeElement.textContent);
+            const formattedJson = JSON.stringify(jsonObj, null, 2);
+            codeElement.textContent = formattedJson;
+            hljs.highlightElement(codeElement);
+        }
+        // Форматируем и подсвечиваем все JSON-блоки
+        formatAndHighlight('jsonResponseBody');
+
+        hljs.highlightAll();
+    </script>
+</div>
+{% endblock %}
