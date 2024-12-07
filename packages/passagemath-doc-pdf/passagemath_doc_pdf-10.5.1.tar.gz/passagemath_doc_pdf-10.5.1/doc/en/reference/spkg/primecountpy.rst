@@ -1,0 +1,81 @@
+.. _spkg_primecountpy:
+
+primecountpy: Cython interface for C++ primecount library
+===================================================================
+
+Description
+-----------
+
+Cython interface for C++ primecount library
+
+License
+-------
+
+GPLv3
+
+Upstream Contact
+----------------
+
+https://pypi.org/project/primecountpy/
+
+
+Type
+----
+
+standard
+
+
+Dependencies
+------------
+
+- $(PYTHON)
+- $(PYTHON_TOOLCHAIN)
+- :ref:`spkg_cysignals`
+- :ref:`spkg_cython`
+- :ref:`spkg_primecount`
+
+Version Information
+-------------------
+
+package-version.txt::
+
+    0.1.0
+
+src/pyproject.toml::
+
+    primecountpy
+
+version_requirements.txt::
+
+    primecountpy
+
+
+Equivalent System Packages
+--------------------------
+
+.. tab:: conda-forge
+
+   .. CODE-BLOCK:: bash
+
+       $ conda install primecountpy 
+
+
+.. tab:: Fedora/Redhat/CentOS
+
+   .. CODE-BLOCK:: bash
+
+       $ sudo yum install python3-primecountpy 
+
+
+.. tab:: Gentoo Linux
+
+   .. CODE-BLOCK:: bash
+
+       $ sudo emerge dev-python/primecountpy 
+
+
+
+If the system package is installed and if the (experimental) option
+``--enable-system-site-packages`` is passed to ``./configure``, then ``./configure``
+will check if the system package can be used.
+

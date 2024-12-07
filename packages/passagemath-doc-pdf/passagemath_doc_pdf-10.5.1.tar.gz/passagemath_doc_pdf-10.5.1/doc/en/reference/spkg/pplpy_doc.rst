@@ -1,0 +1,46 @@
+.. _spkg_pplpy_doc:
+
+pplpy_doc: Python interface to the Parma Polyhedra Library (documentation)
+====================================================================================
+
+Description
+-----------
+
+PPL Python wrapper (documentation)
+
+License
+-------
+
+GPL version 3
+
+
+Upstream Contact
+----------------
+
+-  https://github.com/sagemath/pplpy
+
+Type
+----
+
+standard
+
+
+Dependencies
+------------
+
+- :ref:`spkg_pplpy`
+- :ref:`spkg_sphinx`
+
+Version Information
+-------------------
+
+package-version.txt::
+
+    0.8.9
+
+
+Equivalent System Packages
+--------------------------
+
+(none known)
+

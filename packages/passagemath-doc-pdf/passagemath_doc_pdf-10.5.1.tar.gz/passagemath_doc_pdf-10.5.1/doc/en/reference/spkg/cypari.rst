@@ -1,0 +1,76 @@
+.. _spkg_cypari:
+
+cypari2: Python interface to the number theory library libpari
+========================================================================
+
+Description
+-----------
+
+A Python interface to the number theory library libpari.
+
+License
+-------
+
+GPL version 2 or later
+
+
+Upstream Contact
+----------------
+
+https://github.com/defeo/cypari2
+
+Type
+----
+
+standard
+
+
+Dependencies
+------------
+
+- $(PYTHON)
+- $(PYTHON_TOOLCHAIN)
+- :ref:`spkg_cysignals`
+- :ref:`spkg_cython`
+- :ref:`spkg_pari`
+
+Version Information
+-------------------
+
+package-version.txt::
+
+    2.2.0
+
+src/pyproject.toml::
+
+    cypari2 >=2.1.1
+
+version_requirements.txt::
+
+    cypari2
+
+
+Equivalent System Packages
+--------------------------
+
+.. tab:: conda-forge
+
+   .. CODE-BLOCK:: bash
+
+       $ conda install cypari2 
+
+
+.. tab:: Gentoo Linux
+
+   .. CODE-BLOCK:: bash
+
+       $ sudo emerge dev-python/cypari2 
+
+
+
+See https://repology.org/project/python:cypari2/versions
+
+If the system package is installed and if the (experimental) option
+``--enable-system-site-packages`` is passed to ``./configure``, then ``./configure``
+will check if the system package can be used.
+
