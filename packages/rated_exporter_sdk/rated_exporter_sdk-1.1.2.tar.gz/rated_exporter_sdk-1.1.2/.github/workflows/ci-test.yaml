@@ -1,0 +1,97 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    name: Test / Lint
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Set up Docker
+      run: |
+        # First remove all old Docker packages
+        sudo apt-get remove -y docker docker-engine docker.io containerd runc containerd.io || true
+        sudo apt-get autoremove -y
+
+        # Clean up any old Docker files
+        sudo rm -rf /var/lib/docker
+        sudo rm -rf /var/lib/containerd
+
+        # Update package lists
+        sudo apt-get update
+
+        # Install dependencies
+        sudo apt-get install -y \
+          ca-certificates \
+          curl \
+          gnupg \
+          lsb-release
+
+        # Add Docker's official GPG key
+        sudo mkdir -p /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+        # Set up Docker repository
+        echo \
+          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+          $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+        # Update package list again with new repo
+        sudo apt-get update
+
+        # Install Docker Engine
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+        # Start Docker service
+        sudo systemctl start docker
+
+        # Create docker network
+        docker network create rated-exporter-sdk-test-network || true
+
+        # Set permissions
+        sudo chmod 666 /var/run/docker.sock
+
+        # Verify installation
+        docker version
+        docker info
+        docker network ls
+
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.8'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Install dependencies
+      run: uv sync --all-extras --frozen
+
+    - name: Run linting
+      run: |
+        source .venv/bin/activate
+        black --check src tests
+        mypy --config-file pyproject.toml src --ignore-missing-imports
+        ruff check
+
+    - name: Run unit tests
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+      run: |
+        source .venv/bin/activate
+        # Verify Docker connectivity before tests
+        python -c "import docker; client=docker.from_env(); print(f'Docker version: {client.version()}')"
+        # Run tests with detailed output
+        pytest tests/ -v --capture=no
