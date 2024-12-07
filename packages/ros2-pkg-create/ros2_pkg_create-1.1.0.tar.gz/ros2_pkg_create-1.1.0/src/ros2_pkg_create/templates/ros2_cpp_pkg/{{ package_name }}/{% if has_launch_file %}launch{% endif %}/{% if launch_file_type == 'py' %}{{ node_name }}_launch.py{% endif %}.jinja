@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+
+import os
+
+from ament_index_python import get_package_share_directory
+from launch import LaunchDescription
+{% if is_lifecycle %}
+from launch.actions import DeclareLaunchArgument, GroupAction
+from launch.conditions import LaunchConfigurationNotEquals
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import LifecycleNode, SetParameter
+{% else %}
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node, SetParameter
+{% endif %}
+
+
+def generate_launch_description():
+
+    remappable_topics = [
+{% if has_subscriber %}
+        DeclareLaunchArgument("input_topic", default_value="~/input"),
+{% endif %}
+{% if has_publisher %}
+        DeclareLaunchArgument("output_topic", default_value="~/output"),
+{% endif %}
+    ]
+
+    args = [
+        DeclareLaunchArgument("name", default_value="{{ node_name }}", description="node name"),
+        DeclareLaunchArgument("namespace", default_value="", description="node namespace"),
+        DeclareLaunchArgument("params", default_value=os.path.join(get_package_share_directory("{{ package_name }}"), "config", "params.yml"), description="path to parameter file"),
+        DeclareLaunchArgument("log_level", default_value="info", description="ROS logging level (debug, info, warn, error, fatal)"),
+{% if is_lifecycle %}
+        DeclareLaunchArgument("startup_state", default_value="None", description="initial lifecycle state"),
+{% endif %}
+        DeclareLaunchArgument("use_sim_time", default_value="false", description="use simulation clock"),
+        *remappable_topics,
+    ]
+
+{% if is_lifecycle %}
+    nodes = [
+        GroupAction(
+            actions=[
+                SetParameter(
+                    name="startup_state",
+                    value=LaunchConfiguration("startup_state"),
+                    condition=LaunchConfigurationNotEquals("startup_state", "None")
+                ),
+                LifecycleNode(
+                    package="{{ package_name }}",
+                    executable="{{ node_name }}",
+                    namespace=LaunchConfiguration("namespace"),
+                    name=LaunchConfiguration("name"),
+{% if has_params %}
+                    parameters=[LaunchConfiguration("params")],
+{% else %}
+                    parameters=[],
+{% endif %}
+                    arguments=["--ros-args", "--log-level", LaunchConfiguration("log_level")],
+                    remappings=[(la.default_value[0].text, LaunchConfiguration(la.name)) for la in remappable_topics],
+                    output="screen",
+                    emulate_tty=True,
+                )
+            ]
+        )
+    ]
+{% else %}
+    nodes = [
+        Node(
+            package="{{ package_name }}",
+            executable="{{ node_name }}",
+            namespace=LaunchConfiguration("namespace"),
+            name=LaunchConfiguration("name"),
+{% if has_params %}
+            parameters=[LaunchConfiguration("params")],
+{% else %}
+            parameters=[],
+{% endif %}
+            arguments=["--ros-args", "--log-level", LaunchConfiguration("log_level")],
+            remappings=[(la.default_value[0].text, LaunchConfiguration(la.name)) for la in remappable_topics],
+            output="screen",
+            emulate_tty=True,
+        )
+    ]
+{% endif %}
+
+    return LaunchDescription([
+        *args,
+        SetParameter("use_sim_time", LaunchConfiguration("use_sim_time")),
+        *nodes,
+    ])
