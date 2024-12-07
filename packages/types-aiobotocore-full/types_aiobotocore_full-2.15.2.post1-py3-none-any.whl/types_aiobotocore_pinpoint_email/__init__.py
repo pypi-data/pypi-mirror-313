@@ -1,0 +1,54 @@
+"""
+Main interface for pinpoint-email service.
+
+Usage::
+
+    ```python
+    from aiobotocore.session import get_session
+    from types_aiobotocore_pinpoint_email import (
+        Client,
+        GetDedicatedIpsPaginator,
+        ListConfigurationSetsPaginator,
+        ListDedicatedIpPoolsPaginator,
+        ListDeliverabilityTestReportsPaginator,
+        ListEmailIdentitiesPaginator,
+        PinpointEmailClient,
+    )
+
+    session = get_session()
+    async with session.create_client("pinpoint-email") as client:
+        client: PinpointEmailClient
+        ...
+
+
+    get_dedicated_ips_paginator: GetDedicatedIpsPaginator = client.get_paginator("get_dedicated_ips")
+    list_configuration_sets_paginator: ListConfigurationSetsPaginator = client.get_paginator("list_configuration_sets")
+    list_dedicated_ip_pools_paginator: ListDedicatedIpPoolsPaginator = client.get_paginator("list_dedicated_ip_pools")
+    list_deliverability_test_reports_paginator: ListDeliverabilityTestReportsPaginator = client.get_paginator("list_deliverability_test_reports")
+    list_email_identities_paginator: ListEmailIdentitiesPaginator = client.get_paginator("list_email_identities")
+    ```
+
+Copyright 2024 Vlad Emelianov
+"""
+
+from .client import PinpointEmailClient
+from .paginator import (
+    GetDedicatedIpsPaginator,
+    ListConfigurationSetsPaginator,
+    ListDedicatedIpPoolsPaginator,
+    ListDeliverabilityTestReportsPaginator,
+    ListEmailIdentitiesPaginator,
+)
+
+Client = PinpointEmailClient
+
+
+__all__ = (
+    "Client",
+    "GetDedicatedIpsPaginator",
+    "ListConfigurationSetsPaginator",
+    "ListDedicatedIpPoolsPaginator",
+    "ListDeliverabilityTestReportsPaginator",
+    "ListEmailIdentitiesPaginator",
+    "PinpointEmailClient",
+)
