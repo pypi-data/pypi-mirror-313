@@ -1,0 +1,174 @@
+use std::{env, fs::File, hint::black_box, io::Read, vec};
+
+use llguidance::{
+    api::{ParserLimits, TopLevelGrammar},
+    lark_to_llguidance,
+    toktrie::{InferenceCapabilities, TokEnv},
+    Constraint, JsonCompileOptions, TokenParser,
+};
+
+fn dump_tokenizer(name: &str) {
+    let btok = toktrie_hf_tokenizers::ByteTokenizer::from_name(name).unwrap();
+    let vecs = btok.token_bytes();
+    for (_i, v) in vecs.iter().enumerate() {
+        let v: String = v
+            .iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<Vec<_>>()
+            .join("");
+        println!("{}", v);
+    }
+}
+
+fn main() {
+    if false {
+        dump_tokenizer("microsoft/Phi-3.5-mini-instruct");
+    }
+
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 3 {
+        eprintln!("Usage: {} <schema.ll.json> <sample.json>", args[0]);
+        std::process::exit(1);
+    }
+
+    let schema_file = read_file_to_string(&args[1]);
+    let schema: TopLevelGrammar = if args[1].ends_with(".ll.json") {
+        serde_json::from_str(&schema_file).expect("Invalid JSON in schema")
+    } else if args[1].ends_with(".schema.json") {
+        let opts = JsonCompileOptions::default();
+        let val = serde_json::from_str(&schema_file).expect("Invalid JSON in schema");
+        opts.json_to_llg(val)
+            .expect("Failed to convert JSON to LLG")
+    } else if args[1].ends_with(".lark") {
+        lark_to_llguidance(&schema_file).expect("Failed to convert lark to LLG")
+    } else {
+        panic!("Unknown schema file extension")
+    };
+    let obj_str = read_file_to_string(&args[2]);
+
+    // you can implement TokEnv yourself, if you have the tokenizer
+    // see the ByteTokenizerEnv for an example
+    let tok_env: TokEnv =
+        toktrie_hf_tokenizers::ByteTokenizerEnv::from_name("microsoft/Phi-3.5-mini-instruct", None)
+            .unwrap()
+            .to_env();
+
+    let tokens = tok_env.tokenize(&obj_str);
+
+    // set to 2 for more output; 1 is warnings only
+    let stderr_log_level = 1;
+
+    // typically set to 2, to send info-level output to the user
+    let buffer_log_level = 2;
+
+    let parser = TokenParser::from_llguidance_json(
+        tok_env.clone(),
+        schema,
+        llguidance::Logger::new(buffer_log_level, stderr_log_level),
+        InferenceCapabilities {
+            ff_tokens: true,  // can the engine append multiple tokens?
+            backtrack: false, // can the engine remove generated tokens?
+
+            conditional_ff_tokens: false, // not used
+            fork: false,                  // not used
+        },
+        ParserLimits::default(),
+        vec![],
+    )
+    .unwrap();
+    let mut constraint = Constraint::new(parser);
+
+    // enable sending parser results back via the logs (constraint.flush_logs())
+    constraint.log_json_progress = true;
+
+    let trie = tok_env.tok_trie();
+
+    eprintln!("Parsing tokens: {}", trie.tokens_dbg(&tokens));
+
+    // constraint.parser.start_without_prompt();
+    // constraint.parser.consume_token(tokens[0]).unwrap();
+
+    let mut idx = 0;
+    while idx < tokens.len() {
+        let res = constraint.compute_mask().unwrap();
+
+        if res.is_stop() {
+            // stop sequence
+            break;
+        }
+
+        let sampled_token = if let Some(mask) = &res.sample_mask {
+            // Simulate sampling - it should use the mask and temperature
+            black_box(mask);
+            black_box(constraint.temperature);
+            let sampled_token = tokens[idx];
+
+            let p_stats = constraint.parser.last_step_stats();
+            println!(
+                "SAMPLE {}: {} {}; stats: {} lex, {} items, {} us",
+                idx,
+                sampled_token,
+                tok_env.tok_trie().token_dbg(sampled_token),
+                p_stats.lexer_cost,
+                p_stats.all_items,
+                p_stats.compute_time_us,
+            );
+            Some(sampled_token)
+        } else {
+            // sampling not required
+            println!("NO SAMPLE");
+            None
+        };
+
+        let splice = constraint.commit_token(sampled_token).unwrap();
+        if splice.stop {
+            // stop sequence
+            break;
+        }
+
+        assert!(splice.backtrack == 0); // we didn't allow backtracking in InferenceCaps
+
+        // The splice contains the tokens (possibly more than one since we enabled ff_tokens
+        // in InferenceCaps) that the parser wants to append to the output.
+
+        // if this fails, our test data is broken
+        if tokens[idx..idx + splice.ff_tokens.len()] != splice.ff_tokens {
+            panic!(
+                "BAD TEST: ff_tokens mismatch:\n{}\n{}",
+                trie.tokens_dbg(&tokens[idx..idx + splice.ff_tokens.len()]),
+                trie.tokens_dbg(&splice.ff_tokens)
+            );
+        }
+
+        if splice.ff_tokens.len() > 1 {
+            println!("FF: {}", trie.tokens_dbg(&splice.ff_tokens));
+        }
+
+        idx += splice.ff_tokens.len();
+
+        // send output to the user
+        send_output(&constraint.flush_logs());
+    }
+
+    // flush any output
+    send_output(&constraint.flush_logs());
+    // the stop reason should be likely also sent to the user
+    println!("Stop reason: {:?}", constraint.parser.stop_reason());
+
+    println!("Max step stats: {:?}", constraint.parser.max_step_stats());
+}
+
+fn read_file_to_string(filename: &str) -> String {
+    let mut file = File::open(filename).expect("Unable to open file");
+    let mut content = String::new();
+    file.read_to_string(&mut content)
+        .expect("Unable to read file");
+    content
+}
+
+fn send_output(user_output: &str) {
+    // enable if you want to see the output
+    if false {
+        println!("{}", user_output);
+    }
+}
