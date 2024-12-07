@@ -1,0 +1,31 @@
+name: Publish to AUR
+
+on:
+  # workflow_run:
+  #   workflows: ["Check SemVer compliance"]
+  #   types:
+  #     - completed
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  aur-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish source AUR package
+        uses: aksh1618/update-aur-package@v1.0.5
+        with:
+          tag_version_prefix: v
+          package_name: topgrade
+          commit_username: "Thomas Schönauer"
+          commit_email: t.schoenauer@hgs-wt.at
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+      - name: Publish binary AUR package
+        uses: aksh1618/update-aur-package@v1.0.5
+        with:
+          tag_version_prefix: v
+          package_name: topgrade-bin
+          commit_username: "Thomas Schönauer"
+          commit_email: t.schoenauer@hgs-wt.at
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}

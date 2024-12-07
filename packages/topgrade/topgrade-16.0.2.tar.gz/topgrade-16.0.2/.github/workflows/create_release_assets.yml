@@ -1,0 +1,88 @@
+name: Publish release files for CD native environments
+
+on:
+  # workflow_run:
+  #   workflows: ["Check SemVer compliance"]
+  #   types:
+  #     - completed
+  release:
+    types: [ created ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ ubuntu-latest, macos-latest, macos-13, windows-latest ]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cargo-deb
+        run: cargo install cargo-deb
+        if: ${{ matrix.platform == 'ubuntu-latest' }}
+        shell: bash
+
+      - name: Check format
+        run: cargo fmt --all -- --check
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Run clippy (All features)
+        run: cargo clippy --all-targets --locked --all-features -- -D warnings
+
+      - name: Run tests
+        run: cargo test
+
+      - name: Build in Release profile with all features enabled
+        run: cargo build --release --all-features
+
+      - name: Rename Release (Unix)
+        run: |
+          cargo install default-target
+          mkdir -p assets
+          FILENAME=topgrade-${{github.event.release.tag_name}}-$(default-target)
+          mv target/release/topgrade assets
+          cd assets
+          tar --format=ustar -czf $FILENAME.tar.gz topgrade
+          rm topgrade
+          ls .
+        if: ${{ matrix.platform != 'windows-latest' }}
+        shell: bash
+
+      - name: Build Debian-based system binary and create package
+        # First remove the binary built by previous steps
+        # because we don't want the auto-update feature,
+        # then build the new binary without auto-updating.
+        run: |
+          rm -rf target/release
+          cargo build --release
+          cargo deb --no-build --no-strip
+        if: ${{ matrix.platform == 'ubuntu-latest' }}
+        shell: bash
+
+      - name: Move Debian-based system package
+        run: |
+          mkdir -p assets
+          mv target/debian/*.deb assets
+        if: ${{ matrix.platform == 'ubuntu-latest' }}
+        shell: bash
+
+      - name: Rename Release (Windows)
+        run: |
+          cargo install default-target
+          mkdir assets
+          FILENAME=topgrade-${{github.event.release.tag_name}}-$(default-target)
+          mv target/release/topgrade.exe assets/topgrade.exe
+          cd assets
+          powershell Compress-Archive -Path * -Destination ${FILENAME}.zip
+          rm topgrade.exe
+          ls .
+        if: ${{ matrix.platform == 'windows-latest' }}
+        shell: bash
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: assets/*
