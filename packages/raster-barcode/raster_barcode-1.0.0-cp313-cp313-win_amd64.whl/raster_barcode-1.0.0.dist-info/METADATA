@@ -1,0 +1,39 @@
+Metadata-Version: 2.1
+Name: raster_barcode
+Version: 1.0.0
+Summary: Python wrapper for the Barcode library.
+Home-page: https://github.com/Noremos/Barcode
+Author: Art A
+Author-email: your.email@example.com
+License: MIT
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Operating System :: OS Independent
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS
+Requires-Python: ==3.13
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+
+# A library to process raster images using persistence homology
+
+
+Example:
+
+	import raster_barcode as bc
+	import raster_barcode.barcode as bcc
+	import cv2
+
+	img = cv2.imread('/Users/sam/Edu/bar/12/1.png', cv2.IMREAD_GRAYSCALE)
+
+	cont = bc.barstruct()
+	barc =  bcc.create_barcode(img, cont)
+
+	cmp = barc.get_largest_component()
+	img = bcc.combine_components_into_matrix(cmp, img.shape, img.dtype)
+	cv2.imshow("source",img)
+	cv2.waitKey(0)
+
+	exit(0)
