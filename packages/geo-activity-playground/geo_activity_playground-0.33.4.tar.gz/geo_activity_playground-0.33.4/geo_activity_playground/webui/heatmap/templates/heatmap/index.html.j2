@@ -1,0 +1,56 @@
+{% extends "page.html.j2" %}
+
+{% block container %}
+<div class="row mb-3">
+    <div class="col">
+        <h1>Heatmap</h1>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <form action="" method="GET">
+            {% for kind in available_kinds %}
+            <div class="form-check form-check-inline form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="{{ kind }}" name="kind"
+                    value="{{ kind }}" {{ 'checked' if kind in kinds else '' }} />
+                <label class="form-check-label" for="{{ kind }}">{{ kind }}</label>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Show selected kinds</button>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <div id="heatmap" style="height: 800px;"></div>
+        <p><a href="#" onclick="downloadAs()">Download heatmap in visible area</a></p>
+
+        <script>
+            let map = L.map('heatmap', {
+                fullscreenControl: true,
+                center: [{{ center.latitude }}, {{ center.longitude }}],
+            zoom: 12
+            });
+            L.tileLayer('/heatmap/tile/{z}/{x}/{y}/{{ kinds_str }}.png', {
+                maxZoom: 19,
+                attribution: '{{ map_tile_attribution|safe }}'
+            }).addTo(map)
+
+            let bbox = {{ center.bbox| safe }}
+            if (bbox) {
+                map.fitBounds(L.geoJSON(bbox).getBounds())
+            }
+
+
+            function downloadAs() {
+                bounds = map.getBounds()
+                window.location.href =
+                    `/heatmap/download/${bounds.getNorth()}/${bounds.getEast()}/${bounds.getSouth()}/${bounds.getWest()}/{{ kinds_str }}`
+            }
+        </script>
+    </div>
+</div>
+
+{% endblock %}

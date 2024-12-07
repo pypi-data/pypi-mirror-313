@@ -1,0 +1,148 @@
+{% extends "page.html.j2" %}
+
+{% block container %}
+
+
+<h1>Summary Statistics</h1>
+
+<h2>Distances</h2>
+
+<p>This is your weekly distance for the past rolling year, split by activity kind.</p>
+
+<div class="row mb-3">
+    <div class="col">
+        {{ vega_direct("plot_weekly_distance", plot_weekly_distance) }}
+    </div>
+</div>
+
+<p>Similarly, you find the same data but aggregated by whole months for the past two years. Also split by activity kind.
+</p>
+
+<div class="row mb-3">
+    <div class="col">
+        {{ vega_direct("plot_monthly_distance", plot_monthly_distance) }}
+    </div>
+</div>
+
+
+<p>How much distance have you covered in each year up to that time of the year? The first plot gives you each year as
+    one line. The second plot shows you how distance you have covered in each year and with which activity kinds.</p>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        {{ vega_direct("plot_year_cumulative", plot_year_cumulative) }}
+    </div>
+    <div class="col-md-6">
+        {{ vega_direct("plot_yearly_distance", plot_yearly_distance) }}
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <p>What's the average distance per activity? This naturally differs per activity and perhaps also varies with
+            the years. This table gives you all the mean values.</p>
+    </div>
+
+    <div class="col-md-8">
+        <table class="table table-sort table-arrows">
+            <thead>
+                <tr>
+                    <th style="text-align: right;">Year</th>
+                    {% for col in tabulate_year_kind_mean['columns'][1:] %}
+                    <th style="text-align: right;">{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in tabulate_year_kind_mean['data'] %}
+                <tr>
+                    {% for value in row %}
+                    <td align="right">
+                        {% if value == value %}
+                        {{ value | round(2) }}
+                        {% if not loop.first %}
+                        km
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<p>Next we take one row per month, each column is a day-of-month. The brighter a box, the more distance you have covered
+    on that day. This makes it easy to spot those days where you really covered a lot of distance!</p>
+
+
+<ul class="nav nav-pills mb-3" id="myTab" role="tablist">
+    {% for year, plot in plot_distance_heatmaps.items() %}
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if loop.last %} active {% endif %}" id="heatmap-{{ year }}" data-bs-toggle="tab"
+            data-bs-target="#heatmap-{{ year }}-pane" type="button" role="tab" aria-controls="heatmap-{{ year }}-pane"
+            aria-selected="{{ loop.last }}">{{ year }}</button>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="tab-content mb-3" id="myTabContent">
+    {% for year, plot in plot_distance_heatmaps.items() %}
+    <div class="tab-pane fade {% if loop.last %} show active {% endif %}" id="heatmap-{{ year }}-pane" role="tabpanel"
+        aria-labelledby="heatmap-{{ year }}" tabindex="0">
+        {{ vega_direct("plot_distance_heatmap_%d"|format(year), plot) }}
+    </div>
+    {% endfor %}
+</div>
+
+<h2>Hall of Fame</h2>
+
+<script>
+    function add_map(id, geojson) {
+        let map = L.map(`map-${id}`, {
+            fullscreenControl: true
+        })
+        L.tileLayer('/tile/color/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '{{ map_tile_attribution|safe }}'
+        }).addTo(map)
+
+        let geojson_layer = L.geoJSON(geojson).addTo(map)
+        map.fitBounds(geojson_layer.getBounds())
+        return map
+    }
+</script>
+
+{% for activity_batch in nominations|batch(3) %}
+<div class="row row-cols-1 row-cols-md-3 g-4 mb-3">
+    {% for activity, reasons, line_geojson in activity_batch %}
+    <div class="col">
+        <div class="card">
+            <div class="card-img-top" id="map-{{ activity.id }}" style="height: 200px; width: 100%;"></div>
+            <script>
+                let map{{ activity.id }} = add_map("{{ activity.id }}", {{ line_geojson | safe }})
+            </script>
+            <div class="card-body">
+                <a href="{{ url_for('activity.show', id=activity.id) }}">
+                    <h5 class="card-title">{{ activity["name"] }}</h5>
+                </a>
+                <p class="card-text">
+                <ul style='list-style-type: "🏆 "'>
+                    {% for reason in reasons %}
+                    <li>{{ reason }}</li>
+                    {% endfor %}
+                </ul>
+                </p>
+                <p class="card-text"><small class="text-body-secondary"></small>{{ activity.kind }} with {{
+                    (activity.distance_km)|round(1) }} km in {{
+                    activity.elapsed_time|td }} on {{ activity.start|dt }}</small></p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
+
+{% endblock %}
