@@ -1,0 +1,123 @@
+Metadata-Version: 2.1
+Name: passagemath-plot
+Version: 10.5.1
+Summary: passagemath: Plotting and graphics with Matplotlib, Three.JS, etc.
+Author-email: The Sage Developers <sage-support@googlegroups.com>
+Maintainer: Matthias Köppe, passagemath contributors
+License: GNU General Public License (GPL) v2 or later
+Project-URL: release notes, https://github.com/passagemath/passagemath/releases
+Project-URL: repo (upstream), https://github.com/sagemath/sage
+Project-URL: repo, https://github.com/passagemath/passagemath
+Project-URL: documentation, https://doc.sagemath.org
+Project-URL: homepage (upstream), https://www.sagemath.org
+Project-URL: discourse, https://passagemath.discourse.group
+Project-URL: tracker (upstream), https://github.com/sagemath/sage/issues
+Project-URL: tracker, https://github.com/passagemath/passagemath/issues
+Classifier: Development Status :: 6 - Mature
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Requires-Python: <3.13,>=3.9
+Description-Content-Type: text/x-rst
+Requires-Dist: passagemath-conf~=10.5.1.0
+Requires-Dist: gmpy2~=2.1.b999
+Requires-Dist: cysignals>=1.10.2
+Requires-Dist: cysignals<1.12,>=1.10.2
+Requires-Dist: memory_allocator
+Requires-Dist: passagemath-categories~=10.5.1.0
+Requires-Dist: passagemath-modules~=10.5.1.0
+Requires-Dist: numpy>=1.19
+Requires-Dist: numpy>=1.22.4
+Requires-Dist: scipy>=1.5
+Requires-Dist: pillow>=7.2.0
+Requires-Dist: matplotlib>=3.5.1
+Requires-Dist: jupyter-threejs-sage
+Provides-Extra: test
+Requires-Dist: passagemath-repl; extra == "test"
+Provides-Extra: jsmol
+Requires-Dist: jupyter-jsmol; extra == "jsmol"
+Provides-Extra: matplotlib
+Provides-Extra: threejs
+Provides-Extra: polyhedra
+Requires-Dist: passagemath-polyhedra; extra == "polyhedra"
+
+===============================================================================================
+ passagemath: Plotting and graphics with Matplotlib, Three.JS, etc.
+===============================================================================================
+
+About SageMath
+--------------
+
+   "Creating a Viable Open Source Alternative to
+    Magma, Maple, Mathematica, and MATLAB"
+
+   Copyright (C) 2005-2024 The Sage Development Team
+
+   https://www.sagemath.org
+
+SageMath fully supports all major Linux distributions, recent versions of
+macOS, and Windows (Windows Subsystem for Linux).
+
+See https://doc.sagemath.org/html/en/installation/index.html
+for general installation instructions.
+
+
+About this pip-installable distribution
+---------------------------------------
+
+This pip-installable distribution ``passagemath-plot`` is a distribution of a part of the Sage Library.
+
+It provides the namespace packages ``sage.plot`` and ``sage.plot.plot3d``, which provide functions for plotting that are very similar to Mathematica's plotting functions.  This is analogous to how matplotlib's ``pyplot`` package provides a UI on top of the core ``matplotlib`` library that is similar to matlab's plotting UI.
+
+What is included
+----------------
+
+* `2D Graphics <https://doc.sagemath.org/html/en/reference/plotting/index.html>`_
+
+* Backend for 2D graphics: `matplotlib <https://doc.sagemath.org/html/en/reference/spkg/matplotlib.html>`_
+
+* `3D Graphics <https://doc.sagemath.org/html/en/reference/plot3d/index.html>`_
+
+* Backend for 3D graphics: `three.js <https://doc.sagemath.org/html/en/reference/spkg/threejs.html>`_
+
+* Interfaces: `Gnuplot <https://doc.sagemath.org/html/en/reference/interfaces/sage/interfaces/gnuplot.html>`_, `Jmol <https://doc.sagemath.org/html/en/reference/interfaces/sage/interfaces/jmoldata.html>`_, `POV-Ray <https://doc.sagemath.org/html/en/reference/interfaces/sage/interfaces/povray.html>`_, `Tachyon <https://doc.sagemath.org/html/en/reference/interfaces/sage/interfaces/tachyon.html>`_
+
+Examples
+--------
+
+::
+
+   $ pipx run --pip-args="--prefer-binary" --spec "passagemath-plot[test]" ipython
+
+   In [1]: from sage.all__sagemath_plot import *
+
+   In [2]: scatter_plot([[0,1],[2,2],[4.3,1.1]], marker='s').save('output.png')
+
+   In [3]: G = tetrahedron((0,-3.5,0), color='blue') + cube((0,-2,0), color=(.25,0,.5))
+
+   In [4]: G.show(aspect_ratio=[1,1,1])
+   Graphics3d Object
+
+Available as extras, from other distributions
+---------------------------------------------
+
+`pip install "passagemath-plot[jsmol]"`
+ Alternative backend for 3D graphics: `jupyter-jsmol <https://doc.sagemath.org/html/en/reference/spkg/jupyter_jsmol.html>`_
+
+`pip install "passagemath-plot[polyhedra]"`
+ Polyhedra in arbitrary dimension, plotting in dimensions 2, 3, 4: `passagemath-polyhedra <https://pypi.org/project/passagemath-polyhedra/>`_
+
+`pip install "passagemath-plot[graphs]"`
+ Graphs and networks: `sagemath-graphs <https://pypi.org/project/passagemath-graphs/>`_
+
+`pip install "passagemath-plot[symbolics]"`
+ Defining and plotting symbolic functions and manifolds: `passagemath-symbolics <https://pypi.org/project/passagemath-symbolics/>`_
