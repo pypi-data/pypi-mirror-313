@@ -1,0 +1,302 @@
+{
+  "manifest_version": "2",
+  "task_list": [
+    {
+      "name": "Convert Lif Plate to OME-Zarr",
+      "category": "Conversion",
+      "modality": "HCS",
+      "tags": [
+        "Leica",
+        "Plate converter"
+      ],
+      "executable_non_parallel": "convert_lif_plate_init_task.py",
+      "executable_parallel": "convert_lif_compute_task.py",
+      "meta_non_parallel": {
+        "cpus_per_task": 1,
+        "mem": 4000
+      },
+      "meta_parallel": {
+        "cpus_per_task": 1,
+        "mem": 12000
+      },
+      "args_schema_non_parallel": {
+        "additionalProperties": false,
+        "properties": {
+          "zarr_urls": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Zarr Urls",
+            "type": "array",
+            "description": "List of zarr urls."
+          },
+          "zarr_dir": {
+            "title": "Zarr Dir",
+            "type": "string",
+            "description": "Output path to save the OME-Zarr file."
+          },
+          "lif_files_path": {
+            "title": "Lif Files Path",
+            "type": "string",
+            "description": "Input path to the LIF file, or a folder containing LIF files."
+          },
+          "swap_xy_axes": {
+            "default": false,
+            "title": "Swap Xy Axes",
+            "type": "boolean",
+            "description": "If True, the xy axes will be swapped. Defaults to False."
+          },
+          "num_levels": {
+            "default": 5,
+            "minimum": 0,
+            "title": "Num Levels",
+            "type": "integer",
+            "description": "The number of resolution levels. Defaults to 5."
+          },
+          "coarsening_xy": {
+            "default": 2,
+            "minimum": 1,
+            "title": "Coarsening Xy",
+            "type": "integer",
+            "description": "The scaling factor for the xy axes. Defaults to 2.0."
+          },
+          "overwrite": {
+            "default": false,
+            "title": "Overwrite",
+            "type": "boolean",
+            "description": "If True, the zarr store will be overwritten."
+          }
+        },
+        "required": [
+          "zarr_urls",
+          "zarr_dir",
+          "lif_files_path"
+        ],
+        "type": "object",
+        "title": "ConvertLifPlateInitTask"
+      },
+      "args_schema_parallel": {
+        "$defs": {
+          "ComputeInputModel": {
+            "description": "Input model for the lif_converter_compute_task.",
+            "properties": {
+              "lif_path": {
+                "title": "Lif Path",
+                "type": "string"
+              },
+              "scene_name": {
+                "title": "Scene Name",
+                "type": "string"
+              },
+              "num_levels": {
+                "default": 5,
+                "minimum": 0,
+                "title": "Num Levels",
+                "type": "integer"
+              },
+              "coarsening_xy": {
+                "default": 2,
+                "minimum": 1,
+                "title": "Coarsening Xy",
+                "type": "integer"
+              },
+              "overwrite": {
+                "default": false,
+                "title": "Overwrite",
+                "type": "boolean"
+              },
+              "plate_mode": {
+                "default": true,
+                "title": "Plate Mode",
+                "type": "boolean"
+              },
+              "swap_xy_axes": {
+                "default": false,
+                "title": "Swap Xy Axes",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "lif_path",
+              "scene_name"
+            ],
+            "title": "ComputeInputModel",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "zarr_url": {
+            "title": "Zarr Url",
+            "type": "string",
+            "description": "The path to the zarr store."
+          },
+          "init_args": {
+            "$ref": "#/$defs/ComputeInputModel",
+            "title": "Init Args",
+            "description": "The input parameters for the conversion."
+          }
+        },
+        "required": [
+          "zarr_url",
+          "init_args"
+        ],
+        "type": "object",
+        "title": "ConvertLifComputeTask"
+      },
+      "docs_info": "## convert_lif_plate_init_task\nInitialize the conversion of LIF files to an OME-Zarr - Plate.\n## convert_lif_compute_task\nExport a single scene or plate acquisition from a LIF file to OME-Zarr.\n"
+    },
+    {
+      "name": "Convert Lif Scene to OME-Zarr",
+      "category": "Conversion",
+      "tags": [
+        "Leica",
+        "Single Image Converter"
+      ],
+      "executable_non_parallel": "convert_lif_scene_init_task.py",
+      "executable_parallel": "convert_lif_compute_task.py",
+      "meta_non_parallel": {
+        "cpus_per_task": 1,
+        "mem": 4000
+      },
+      "meta_parallel": {
+        "cpus_per_task": 1,
+        "mem": 12000
+      },
+      "args_schema_non_parallel": {
+        "additionalProperties": false,
+        "properties": {
+          "zarr_urls": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Zarr Urls",
+            "type": "array",
+            "description": "List of zarr urls."
+          },
+          "zarr_dir": {
+            "title": "Zarr Dir",
+            "type": "string",
+            "description": "Output path to save the OME-Zarr file."
+          },
+          "lif_files_path": {
+            "title": "Lif Files Path",
+            "type": "string",
+            "description": "Input path to the LIF file, or a folder containing LIF files."
+          },
+          "scene_name": {
+            "title": "Scene Name",
+            "type": "string",
+            "description": "Name of the scene to convert. If None all scenes in the lif file will will converted. If a folder of lif files is provided, the scene_nane will be converted from each file."
+          },
+          "swap_xy_axes": {
+            "default": false,
+            "title": "Swap Xy Axes",
+            "type": "boolean",
+            "description": "If True, the xy axes will be swapped. Defaults to False."
+          },
+          "num_levels": {
+            "default": 5,
+            "minimum": 0,
+            "title": "Num Levels",
+            "type": "integer",
+            "description": "The number of resolution levels. Defaults to 5."
+          },
+          "coarsening_xy": {
+            "default": 2,
+            "minimum": 1,
+            "title": "Coarsening Xy",
+            "type": "integer",
+            "description": "The scaling factor for the xy axes. Defaults to 2.0."
+          },
+          "overwrite": {
+            "default": false,
+            "title": "Overwrite",
+            "type": "boolean",
+            "description": "If True, the zarr store will be overwritten."
+          }
+        },
+        "required": [
+          "zarr_urls",
+          "zarr_dir",
+          "lif_files_path"
+        ],
+        "type": "object",
+        "title": "ConvertLifSceneInitTask"
+      },
+      "args_schema_parallel": {
+        "$defs": {
+          "ComputeInputModel": {
+            "description": "Input model for the lif_converter_compute_task.",
+            "properties": {
+              "lif_path": {
+                "title": "Lif Path",
+                "type": "string"
+              },
+              "scene_name": {
+                "title": "Scene Name",
+                "type": "string"
+              },
+              "num_levels": {
+                "default": 5,
+                "minimum": 0,
+                "title": "Num Levels",
+                "type": "integer"
+              },
+              "coarsening_xy": {
+                "default": 2,
+                "minimum": 1,
+                "title": "Coarsening Xy",
+                "type": "integer"
+              },
+              "overwrite": {
+                "default": false,
+                "title": "Overwrite",
+                "type": "boolean"
+              },
+              "plate_mode": {
+                "default": true,
+                "title": "Plate Mode",
+                "type": "boolean"
+              },
+              "swap_xy_axes": {
+                "default": false,
+                "title": "Swap Xy Axes",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "lif_path",
+              "scene_name"
+            ],
+            "title": "ComputeInputModel",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "zarr_url": {
+            "title": "Zarr Url",
+            "type": "string",
+            "description": "The path to the zarr store."
+          },
+          "init_args": {
+            "$ref": "#/$defs/ComputeInputModel",
+            "title": "Init Args",
+            "description": "The input parameters for the conversion."
+          }
+        },
+        "required": [
+          "zarr_url",
+          "init_args"
+        ],
+        "type": "object",
+        "title": "ConvertLifComputeTask"
+      },
+      "docs_info": "## convert_lif_scene_init_task\nInitialize the conversion of LIF files to OME-Zarr - NgffImages.\n## convert_lif_compute_task\nExport a single scene or plate acquisition from a LIF file to OME-Zarr.\n"
+    }
+  ],
+  "has_args_schemas": true,
+  "args_schema_version": "pydantic_v2",
+  "authors": "Lorenzo Cerrone"
+}
