@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "quackinter"
+version = "0.2.1.1"
+description = "A sophisticated interpreter for DuckyScript 1.0 and flipper specific commands."
+authors = ["Dragon of Shuu <68718280+DragonOfShuu@users.noreply.github.com>"]
+readme = "README.md"
+repository = "https://github.com/DragonOfShuu/quackinter"
+documentation = "https://ducklingscript.dragonofshuu.dev/"
+keywords = [
+    "duckyscript",
+    "flipper",
+    "ducky",
+    "key injection"
+]
+exclude = ["quackinter/tasks.py"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pyautogui = "^0.9.54"
+screen-brightness-control = "^0.24.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+poethepoet = "^0.29.0"
+ruff = "^0.6.9"
+pytest = "^8.3.3"
+
+[tool.poe.tasks]
+format = "black ."
+lint = "ruff check"
+polish = ["format", "lint"]
+
+[tool.poe.tasks.main]
+script = "quackinter.quackinter:main"
+
+[tool.poe.tasks.test]
+script = "tests.custom_test:run_test"
+
+[tool.poe.tasks.gen_tests]
+script = "tests.custom_test:generate_tests"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "N", "ANN0", "Q002"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
