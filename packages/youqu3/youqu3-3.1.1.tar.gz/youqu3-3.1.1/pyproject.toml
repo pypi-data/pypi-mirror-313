@@ -1,0 +1,76 @@
+[project]
+name = "youqu3"
+description = "Next-Gen Linux Autotest Framework"
+authors = [
+    { name = "mikigo", email = "huangmingqiang@uniontech.com" },
+]
+dependencies = [
+    "pytest-timeout",
+    "pytest-rerunfailures",
+    "allure-pytest",
+    "funnylog2",
+    "click",
+    "pexpect",
+    "nocmd",
+]
+dynamic = ["version"]
+
+requires-python = ">=3.6"
+readme = "README.md"
+license = { text = "GPL2.0" }
+
+[project.optional-dependencies]
+gui = [
+    "pylinuxauto",
+    "youqu-html-rpc",
+    "pytest-record-video",
+]
+webui = [
+    "playwright",
+    "youqu-html-rpc",
+    "pytest-record-video",
+]
+http = [
+    "requests",
+    "youqu-html-rpc",
+]
+html-rpc = [
+    "youqu-html-rpc",
+]
+html = [
+    "youqu-html",
+]
+
+[project.scripts]
+youqu3 = "youqu3.cli:cli"
+
+[project.entry-points.pytest11]
+youqu3 = "youqu3.plugin"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.hatch]
+version = { path = "youqu3/__version__.py" }
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "/youqu3",
+]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "/.github",
+  "/.venv",
+  "/.env",
+  "/.gitignore",
+  "/dist",
+  "/docs",
+  "/node_modules",
+  "/tests",
+  "/package.json",
+  "/Pipfile",
+  "/publish.sh",
+]
