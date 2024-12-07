@@ -1,0 +1,40 @@
+name: "Install Patcherex2"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python 3
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-15 lld-15 \
+          qemu-user \
+          gcc-multilib \
+          libc6-dev-armhf-cross libc6-dev-arm64-cross \
+          libc6-dev-mips-cross libc6-dev-mips64-cross \
+          libc6-dev-powerpc-cross libc6-dev-ppc64-cross \
+          libc6-dev-mipsel-cross libc6-dev-mips64el-cross \
+          libc6-dev-ppc64el-cross \
+    - name: Install clang-19 lld-19
+      shell: bash
+      run: |
+        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+        echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-19 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+        sudo apt-get update
+        sudo apt-get install -y clang-19 lld-19
+    - name: Install Ghidra
+      shell: bash
+      run: |
+        cd $HOME
+        wget https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.0.3_build/ghidra_11.0.3_PUBLIC_20240410.zip
+        unzip ghidra_11.0.3_PUBLIC_20240410.zip
+        echo GHIDRA_INSTALL_DIR=$PWD/ghidra_11.0.3_PUBLIC >> $GITHUB_ENV
+    - name: Install Patcherex2
+      shell: bash
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install -e .[all]
