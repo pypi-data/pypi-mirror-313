@@ -1,0 +1,135 @@
+[tool.poetry]
+name = "nominal"
+version = "1.17.0"
+description = "Automate Nominal workflows in Python"
+authors = [
+    "Alexander Reynolds <alex.reynolds@nominal.io>",
+    "Alexander Hill <alex.hill@nominal.io>",
+    "JP <jack@nominal.io>",
+    "Michael Bauer <michael@nominal.io>",
+]
+readme = "README.md"
+license = "MIT"
+homepage = "https://nominal.io"
+repository = "https://github.com/nominal-io/nominal-client"
+include = ["README.md", "LICENSE", "CHANGELOG.md"]
+
+[tool.poetry.scripts]
+nom = 'nominal.cli:nom'
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "*"
+python-dateutil = "*"
+polars = "*"
+conjure-python-client = ">=2.8.0,<3"
+pandas = "*"
+typing-extensions = ">=4,<5"
+click = ">=8,<9"
+pyyaml = "*"
+tabulate = "^0.9.0"
+types-tabulate = "^0.9.0.20240106"
+nptdms = "^1.9.0"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.4.2"
+mypy = "^1.11.2"
+jupyter = "^1.1.1"
+types-requests = "^2.32.0.20240712"
+pandas-stubs = "~2.0"
+pytest = "^8.3.2"
+types-pyyaml = "^6.0.12.20240808"
+mkdocs = "^1.6.1"
+mkdocs-material = "^9.5.34"
+mkdocstrings = "^0.26.1"
+mkdocstrings-python = "^1.11.1"
+black = "^24.8.0"
+mkdocs-click = { git = "https://github.com/alkasm/mkdocs-click", rev = "alkasm/keep-context-settings" }
+jupyterlab = "^4.2.5"
+pytest-cov = "^5.0.0"
+
+# hdf5 extras
+h5py = { version = ">=3.0", optional = true }
+tables = { version = ">=3.7", optional = true}
+
+[tool.poetry.extras]
+hdf5 = ["h5py", "tables"]
+
+[tool.distutils.bdist_wheel]
+universal = true
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+exclude = ["nominal/_api/*"]
+include = ["nominal/**/*.py", "tests/**/*.py"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pylint]
+max-args = 10
+
+[tool.ruff.lint]
+# See rules and codes: https://docs.astral.sh/ruff/rules/
+select = [
+    "F",    # pyFlakes
+    "E",    # pycodestyle (Err)
+    "W",    # pycodestyle (Warn)
+    "D",    # pyDocstyle
+    "I001", # Isort
+    "FIX",  # Flake8-FIXme
+    "PL",   # PyLinT
+    "NPY",  # NumPY
+    "T100"  # debugger
+]
+
+extend-select = [
+    "D417"  # no missing arguments
+]  
+ignore = [
+    "FIX002",  # Ignore TODOs
+    "D203",    # one-blank-line-before-class
+    "D205",    # 1 blank line between summary and description
+    "D213",    # multiline-summary-docs
+    "D103",    # missing-class-docstring
+    "D102",    # missing-public-method-docstring
+    "D101",    # missing-public-class-docstring
+    "D100",    # missing-module-docstring 
+    "D104",    # missing-package-docstring
+    "D400",    # doc line ends in period
+    "D415",    # doc line ends in punctuation
+    "D401",    # imperative mood
+    "PLW0603", # globals
+    "PLR2004",  # magic values
+]
+
+[tool.mypy]
+strict = true
+packages = ["nominal"]
+
+[[tool.mypy.overrides]]
+module = "nominal._api.*"
+implicit_reexport = true
+no_implicit_optional = false
+disable_error_code = ["no-any-return", "no-untyped-def"]
+
+[[tool.mypy.overrides]]
+module = "nptdms"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error", # transform all warnings into errors, except ignore: ones.
+    # DeprecationWarning: The 'strict' parameter is no longer needed on Python 3+. This will raise an error in urllib3 v2.1.0.
+    # from conjure-python-client, in conjure_python_client/_http/requests_client.py,
+    # TransportAdapter.init_poolmanager() uses urllib3.poolmanager.PoolManager(..., strict=True) which is deprecated.
+    "ignore:The 'strict' parameter is no longer needed on Python 3+.",
+]
+testpaths = ["tests"]
+# make tests/e2e opt-in (they require a Nominal instance)
+norecursedirs = ["tests/e2e"]
+addopts = "--cov=nominal --cov-branch --cov-report=html --cov-report=term"
