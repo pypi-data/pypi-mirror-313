@@ -1,0 +1,1 @@
+from ovos_workshop.permissions import FallbackMode, ConverseMode, ConverseActivationMode
