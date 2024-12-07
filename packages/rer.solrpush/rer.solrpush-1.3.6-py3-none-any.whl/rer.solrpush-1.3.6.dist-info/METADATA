@@ -1,0 +1,521 @@
+Metadata-Version: 2.1
+Name: rer.solrpush
+Version: 1.3.6
+Summary: Prodotto per Regione Emilia-Romagna relativo all'indicizzazione dei contenuti con solr
+Home-page: https://github.com/collective/rer.solrpush
+Author: RedTurtle
+Author-email: sviluppoplone@redturtle.it
+License: GPL version 2
+Project-URL: PyPI, https://pypi.python.org/pypi/rer.solrpush
+Project-URL: Source, https://github.com/collective/rer.solrpush
+Project-URL: Tracker, https://github.com/collective/rer.solrpush/issues
+Keywords: Python Plone
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Plone
+Classifier: Framework :: Plone :: Addon
+Classifier: Framework :: Plone :: 5.1
+Classifier: Framework :: Plone :: 5.2
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: GNU General Public License v2 (GPLv2)
+Requires-Python: ==2.7
+License-File: LICENSE.GPL
+License-File: LICENSE.rst
+Requires-Dist: setuptools
+Requires-Dist: collective.z3cform.jsonwidget
+Requires-Dist: plone.api >=1.8.4
+Requires-Dist: pysolr
+Requires-Dist: plone.restapi
+Requires-Dist: ftfy ==4.4.3 ; python_version <= "2.7"
+Provides-Extra: test
+Requires-Dist: plone.app.testing ; extra == 'test'
+Requires-Dist: plone.testing >=5.0.0 ; extra == 'test'
+Requires-Dist: plone.app.contenttypes ; extra == 'test'
+Requires-Dist: plone.app.robotframework[debug] ; extra == 'test'
+Requires-Dist: collective.MockMailHost ; extra == 'test'
+
+============
+rer.solrpush
+============
+
+.. image:: https://github.com/RegioneER/rer.solrpush/workflows/Tests/badge.svg
+
+Product that allows SOLR indexing/searching of a Plone website.
+
+SOLR schema configuration
+=========================
+
+This product works with some assumptions and SOLR schema need to have some particular configuration.
+
+You can see an example in config folder of this product.
+
+By default we mapped all base Plone indexes/metadata into SOLR, plus some additional fields::
+
+    <field name="searchwords" type="string" indexed="true" stored="true" required="false" multiValued="true" termVectors="false" termPositions="false" termOffsets="false"/>
+    <field name="showinsearch" type="boolean" indexed="true" stored="false" required="false" multiValued="false" termVectors="false" termPositions="false" termOffsets="false"/>
+    <field name="url" type="string" indexed="false" stored="true" required="false" multiValued="false" termVectors="false" termPositions="false" termOffsets="false"/>
+    <field name="site_name" type="string" indexed="true" stored="true" required="false" multiValued="false" termVectors="false" termPositions="false" termOffsets="false"/>
+    <field name="path_depth" type="pint" indexed="false" stored="true" required="false" multiValued="false" termVectors="false" termPositions="false" termOffsets="false"/>
+    <field name="path_parents" type="string" indexed="true" stored="true" multiValued="true"/>
+    <field name="view_name" type="string" indexed="true" stored="true" required="false" multiValued="false" termVectors="false" termPositions="false" termOffsets="false"/>
+    <field name="@id" type="string" indexed="false" stored="true" required="false" multiValued="false" termVectors="false" termPositions="false" termOffsets="false"/>
+    <field name="@type" type="string" indexed="false" stored="true" required="false" multiValued="false" termVectors="false" termPositions="false" termOffsets="false"/>
+    <field name="title" type="text_it" indexed="false" stored="true" required="false" multiValued="false" termVectors="false" termPositions="false" termOffsets="false"/>
+
+- `searchwords`, `view_name`, `path_parents`, `path_depth`, `site_name` are needed for query filter and boost (see below)
+- `showinsearch` is needed to allow/disallow single content indexing
+- `url` is an index where we store frontend url
+- `@id`, `@type` and `title` are needed for plone.restapi-like responses
+
+plone.restapi related metadata are not indexed from Plone, but they are copied in SOLR::
+
+    <copyField source="Title" dest="title"/>
+    <copyField source="portal_type" dest="@type"/>
+    <copyField source="url" dest="@id"/>
+
+
+Control Panel
+=============
+
+- Active: flag to enable/disable SOLR integration
+- Solr URL: SOLR core url
+- Portal types to index in SOLR
+- Public frontend url
+
+
+Hidden registry fields
+----------------------
+
+There are some "service" registry fields hidden to disallow users to edit them.
+
+- ready: a flag that specifies if the product is ready/initialized.
+  It basically indicates that schema.xml has been loaded.
+- index_fields: is the list of SOLR fields loaded from schema.xml file.
+
+
+schema.xml load
+---------------
+
+SOLR fields are directly read from `schema.xml` file exposed by SOLR.
+
+This schema is stored in Plone registry for performance reasons
+and is always synced when you save `solr-controlpanel` form
+or click on `Reload schema.xml` button.
+
+File indexing
+-------------
+
+If Tika is configured on SOLR, you can send attachments to it and they will be indexed as SearchableText in the content.
+
+To allow attachments indexing, you need to register an adapter for each content-type that you need to index.
+
+`File` content-type is already registered, so you can copy from that::
+
+    <adapter
+      for="plone.app.contenttypes.interfaces.IFile"
+      provides="rer.solrpush.interfaces.adapter.IExtractFileFromTika"
+      factory=".file.FileExtractor"
+      />
+
+::
+
+    from rer.solrpush.interfaces.adapter import IExtractFileFromTika
+    from zope.interface import implementer
+
+
+    @implementer(IExtractFileFromTika)
+    class FileExtractor(object):
+        def __init__(self, context):
+            self.context = context
+
+        def get_file_to_index(self):
+            """
+            """
+            here you need to return the file that need to be indexed
+
+N.B.: `SearchableText` index should be **multivalued**.
+
+
+Search configuration
+--------------------
+
+In solr controlpanel (*/@@solrpush-settings*) there are some field that allows admins to setup some query parameters.
+
+'qf' specifies a list of fields, each of which is assigned a boost factor to increase
+or decrease that particular field’s relevance in the query.
+
+For example if you want to give more relevance to results that contains searched
+text into their title than in the text, you could set something like this::
+
+    title^1000.0 SearchableText^1.0 description^500.0
+
+You can also elevate by *searchwords*.
+
+`bq` specifies an additional, optional, query clause that will be added to the user’s main query to influence the score.
+For example if we want to boost results that have a specific `searchwords` term::
+
+    searchwords:something^1000
+  
+Solr will improve ranking for results that have "*something*" in their searchwords field.
+
+`bf` specifies functions (with optional boosts) that will be used to construct FunctionQueries
+which will be added to the user’s main query as optional clauses that will influence the score.
+Any `function supported natively <https://lucene.apache.org/solr/guide/6_6/function-queries.html>`_ by Solr can be used, along with a boost value.
+For example if we want to give less relevance to items deeper in the tree we can set something like this::
+
+    recip(path_depth,10,100,1)
+
+*path_depth* is an index that counts tree level of an object.
+
+Collections
+===========
+
+There are two new Collection's criteria that allows to search on SOLR also in Collections:
+
+- *Search with SOLR*: if checked, searches will be redirected to SOLR (the default is always on local Plone Site).
+- *Sites*: a list of indexes plone sites on SOLR. The user can select on which sites perform the query.
+  If no sites are set (or this criteria not selected), the default search will be made only in the current site.
+
+There is also a customized querybuilder that perform queries to SOLR or to Plone catalog.
+
+Results from SOLR are wrapped into some brain-like objects to be fully compatible with Collection views.
+
+
+Development buildout
+====================
+
+In the buildout there is a solr configuration (in `conf` folder) and a recipe that builds a solr instance locally.
+
+To use it, simply run::
+
+    > ./bin/solr-foreground
+
+
+Installation
+============
+
+Add rer.solrpush to buildout::
+
+    [buildout]
+
+    ...
+
+    eggs =
+        rer.solrpush
+
+
+and run ``bin/buildout`` command.
+
+
+Contribute
+==========
+
+- Issue Tracker: https://github.com/RegioneER/rer.solrpush/issues
+- Source Code: https://github.com/RegioneER/rer.solrpush
+
+Compatibility
+=============
+
+This product has been tested on Plone 5.1 and 5.2
+
+
+Credits
+=======
+
+Developed with the support of `Regione Emilia Romagna`__;
+
+Regione Emilia Romagna supports the `PloneGov initiative`__.
+
+__ http://www.regione.emilia-romagna.it/
+__ http://www.plonegov.it/
+
+Authors
+=======
+
+This product was developed by RedTurtle Technology team.
+
+.. image:: http://www.redturtle.net/redturtle_banner.png
+   :alt: RedTurtle Technology Site
+   :target: http://www.redturtle.net/
+
+
+Contributors
+============
+
+- RedTurtle, sviluppoplone@redturtle.it
+
+
+Changelog
+=========
+
+
+1.3.6 (2024-12-06)
+------------------
+
+- Fix handle attachements when indexing a new content.
+  [cekk]
+
+
+1.3.5 (2024-12-05)
+------------------
+
+- Reload schema from solr with upgrade-step.
+  [cekk]
+
+
+1.3.4 (2024-12-05)
+------------------
+
+- Handle also boolean indexes.
+  [cekk]
+
+1.3.3 (2023-11-08)
+------------------
+
+- Fix RSS Feed.
+  [cekk]
+
+1.3.2 (2023-11-08)
+------------------
+
+- Update translation for content_remove_error.
+  [cekk]
+
+1.3.1 (2023-08-01)
+------------------
+
+- Update translation.
+  [cekk]
+
+
+1.3.0 (2022-09-29)
+------------------
+
+- Add ``search_enabled`` flag to temporary disable search on SOLR.
+  [cekk]
+
+
+1.2.0 (2022-01-20)
+------------------
+
+- Custom scales view to get images from remote contents (to handle also direction).
+  [cekk]
+
+
+1.1.0 (2021-12-22)
+------------------
+
+- Add indexers for path infos.
+  [cekk]
+
+
+1.0.0 (2021-12-20)
+------------------
+
+- Fix elevate logic.
+  [cekk]
+- Add invariant validation for elevate.
+  [cekk]
+
+
+0.8.0 (2021-11-18)
+------------------
+
+- SolrBrains now can return img tags if the original content has an image.
+  [cekk]
+
+
+0.7.1 (2021-10-14)
+------------------
+
+- Removed unused view.
+  [cekk]
+
+0.7.0 (2021-10-14)
+------------------
+
+- Add new criteria: solr_portal_types to select a list of portal_types indexed on SOLR.
+  [cekk]
+- Add link to Elevate control panel also in user actions.
+  [cekk]
+- Fix remote elevate conditions.
+  [cekk]
+
+0.6.4 (2021-09-27)
+------------------
+
+- Fix how querybuilder create queries.
+  [cekk]
+
+
+0.6.3 (2021-09-21)
+------------------
+
+- Add new feature: if "Query debug" flag is enabled in settings, the SOLR query will be shown to managers.
+  [cekk]
+- In example schema.xml files (dev and test), set "searchwords" as **lowercase** type, to be case insensitive.
+  [cekk]
+- Disable facet.limit default value (100) to get all facets.
+  [cekk]
+- Use swallow_duplicates in Keywords vocabulary to avoid duplicated tokens by truncated strings by SimpleTerm init.
+  [cekk]
+
+0.6.2 (2021-07-15)
+------------------
+
+- Do not escape queries in querybuilder because solr_search already manage them.
+  [cekk]
+
+
+0.6.1 (2021-06-10)
+------------------
+
+- [fix] now sort_on is not ignored on querybuilder customization.
+  [cekk]
+- [fix] remove / from frontend_url when not needed in indexing.
+  [cekk]
+
+
+0.6.0 (2021-05-20)
+------------------
+
+- Add criteria for search by Subject stored in SOLR.
+  [cekk]
+- Now solr brains also return right content-type icon.
+  [cekk]  
+
+0.5.1 (2021-04-29)
+------------------
+
+- Fix release.
+  [cekk]
+
+
+0.5.0 (2021-04-20)
+------------------
+
+- Handle all possible exceptions on search call.
+  [cekk]
+- Fix encodings (again) for attachement in POST calls.
+  [cekk]
+- Handle multilanguage paths in querybuilder for collections (use navigation root path instead portal path).
+  [cekk]
+
+0.4.1 (2021-03-26)
+------------------
+
+- Fix encodings for attachement in POST calls.
+  [cekk]
+
+
+0.4.0 (2021-03-25)
+------------------
+
+- Handle encodings for attachement POST calls.
+  [cekk]
+
+
+0.3.4 (2021-03-18)
+------------------
+
+- Fix logs.
+  [cekk]
+
+
+0.3.3 (2021-03-15)
+------------------
+
+- Make immediate commits optional from control panel.
+  [cekk]
+
+
+0.3.2 (2021-02-15)
+------------------
+
+- Handle simple datetmie dates.
+  [cekk]
+
+
+0.3.1 (2021-02-11)
+------------------
+
+- Fix tika indexing parameters: now modified and created dates are correctly indexed.
+  [cekk]
+
+
+0.3.0 (2021-02-09)
+------------------
+
+- Refactor elevate control panel and use collective.z3cform.jsonwidget.
+  [cekk]
+- Some improvements in indexing.
+  [cekk]
+
+
+0.2.4 (2021-01-28)
+------------------
+
+- Fix logic in maintenance view.
+  [cekk]
+
+
+0.2.3 (2021-01-27)
+------------------
+
+- Fix maintenance sync view.
+  [cekk]
+
+0.2.2 (2020-12-14)
+------------------
+
+- Fix encoding problems in `escape_special_characters` method for python2.
+  [cekk]
+- Remove collective.z3cform.datagrifield dependency and temporary disable elevate control panel.
+  [cekk]
+
+0.2.1 (2020-12-03)
+------------------
+
+- Fix date indexes in query when they already are in "solr syntax".
+  [cekk]
+
+
+0.2.0 (2020-12-03)
+------------------
+
+- Add styles for elevate widget
+  [nzambello]
+- Refactor indexer logic.
+  [mamico]
+- Add support for *bq* and *qf* in search.
+  [mamico]
+- Index files with tika.
+  [cekk]
+- Add support for collections.
+  [cekk]
+- Mute noisy solr logs in maintenance.
+  [cekk]
+
+0.1.2 (2019-12-12)
+------------------
+
+- Remove noisy logger for queries.
+  [cekk]
+
+
+0.1.1 (2019-12-12)
+------------------
+
+- Add new index: path_depth
+  [cekk]
+- Fix unicode errors when there is a site name with accents.
+  [cekk]
+
+0.1.0 (2019-12-05)
+------------------
+
+- Initial release.
+  [cekk]
