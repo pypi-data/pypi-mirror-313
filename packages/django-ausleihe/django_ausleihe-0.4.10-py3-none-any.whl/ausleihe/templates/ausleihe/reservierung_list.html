@@ -1,0 +1,77 @@
+{% extends "ausleihe/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-list' %}">Skills</a></li>
+      {% if perms.ausleihe.change_skillset %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillset-list' %}">Skill Sets</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_skillsetitem %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillsetitem-list' %}">Skill Set Items</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_raum %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:raum-list' %}">Räume</a></li>
+      {% endif %}
+      {% if perms.ausleihe.change_reservierung %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:reservierung-list' %}"><strong>Reservierungen</strong></a></li>
+      {% endif %}
+    </ol>
+  </nav>
+
+  {% if messages %}
+  {% for message in messages %}
+  <div class="row">
+    <div class="col">
+      <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <div class="row">
+    <div class="col">
+      <h5 class="text-primary">Reservierungen ab heute</h5>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nutzer</th>
+            <th>Skill</th>
+            <th>Medium</th>
+            <th>Raum</th>
+            <th>Zeit</th>
+            <th>Verleihen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reservierung_list %}
+          <tr {% if r.leihe.zurueckgebracht %}class="text-muted"{% endif %}>
+            <td>{{ r.nutzer }} ({{ r.nutzer.user }})</td>
+            <td>{{ r.skill }}</td>
+            <td>{{ r.medium }}</td>
+            <td>{{ r.raum }}</td>
+            <td>{{ r.zeit|date:"d.m.Y H:i" }} – {{ r.ende|date:"H:i" }} Uhr</td>
+            <td>
+              {% if not r.leihe %}
+              <a role="button" class="btn btn-primary" href="{% url 'ausleihe:reservierung-verleihen' r.id %}">ausgeben</a>
+              {% elif r.leihe and not r.leihe.zurueckgebracht %}
+              <a role="button" class="btn btn-warning" href="{% url 'ausleihe:zuruecknehmen' r.leihe.id %}?next=reservierungen">zurücknehmen</a>
+              {% else %}
+              erledigt
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+{% endblock content %}

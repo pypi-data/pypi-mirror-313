@@ -1,0 +1,39 @@
+{% extends "ausleihe/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:home' %}">Start</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-list' %}">Skills</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillset-list' %}">Skill Sets</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skillsetitem-list' %}"><strong>Skill Set Items</strong></a></li>
+      <li class="breadcrumb-item" aria-current="page">hinzufügen</li>
+    </ol>
+  </nav>
+  <div class="row">
+    <div class="col">
+      <form action="{% url 'ausleihe:skillsetitem-create' %}" method="post" accept-charset="utf-8">
+        {% csrf_token %}
+        <div class="form-group">
+          <textarea class="form-control" id="items" name="items" rows="10" placeholder="Ein neues Item pro Zeile"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Speichern</button>
+      </form>
+    </div>
+  </div>
+  {% if new_items %}
+  <div class="row">
+    <div class="col">
+      <h3>Neue Skill Set Items</h3>
+      <ul>
+        {% for item in new_items %}
+        <li>{{ item.name }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock content %}
