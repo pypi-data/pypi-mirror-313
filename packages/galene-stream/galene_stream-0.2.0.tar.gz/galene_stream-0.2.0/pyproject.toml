@@ -1,0 +1,44 @@
+# Copyright (C) 2024 A. Iooss
+# SPDX-License-Identifier: CC0-1.0
+
+[build-system]
+requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "galene_stream/version.py"
+
+[tool.interrogate]
+ignore-private = true
+fail-under = 90
+exclude = ["setup.py", "build", "galene_stream/version.py"]
+verbose = 2
+
+[tool.check-manifest]
+ignore = ["galene_stream/version.py"]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist =
+    linters
+    tests
+[testenv]
+sitepackages = true
+[testenv:tests]
+changedir = tests
+deps = pytest
+commands = pytest --basetemp="{envtmpdir}" {posargs}
+[testenv:linters]
+skip_install = true
+deps =
+    black
+    isort
+    interrogate
+    check-manifest
+commands =
+    black --check --diff galene_stream tests setup.py
+    isort --check-only --diff --profile black galene_stream tests
+    interrogate
+    check-manifest
+"""
