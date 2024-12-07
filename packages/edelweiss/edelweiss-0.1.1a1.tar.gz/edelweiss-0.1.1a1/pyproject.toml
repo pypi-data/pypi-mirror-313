@@ -1,0 +1,94 @@
+[build-system]
+requires = ["setuptools>=61.2", "wheel", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "edelweiss"
+license = {text = "MIT License"}
+description = "emulator for various applications"
+authors = [{name = "Silvan Fischbacher", email = "silvanf@phys.ethz.ch"}]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+urls = {Source = "https://cosmo-docs.phys.ethz.ch/edelweiss"}
+requires-python = ">=3.9"
+dependencies = [
+    "catboost",
+    "cosmic_toolbox",
+    "esub-epipe>=1.11.1",
+    "h5py",
+    "lightgbm",
+    "matplotlib",
+    "numpy<2",
+    "pandas",
+    "pzflow",
+    "scikit-learn",
+    "tensorflow",
+    "trianglechain",
+    "xgboost",
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[tool.uv]
+dev-dependencies = [
+    "black",
+    "build",
+    "flake8",
+    "hatchling",
+    "isort",
+    "myst-parser",
+    "pre-commit",
+    "pytest < 7.2.0",
+    "pytest",
+    "pytest-cov",
+    "pytest-regtest",
+    "ruff",
+    "sphinx",
+    "sphinx-copybutton",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-pynpoint-theme",
+    "tox",
+    "twine",
+    "uv",
+    "wheel",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+zip-safe = false
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+
+[tool.setuptools.dynamic]
+version = {attr = "edelweiss.__version__"}
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+]
