@@ -1,0 +1,113 @@
+{% extends "ausleihe/base.html" %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'ausleihe:home' %}"><strong>Start</strong></a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:medium-list' %}">Medien</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:buch-list' %}">Bücher</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:skill-list' %}">Skills</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:nutzungsordnung-list' %}">Nutzungsordnung</a></li>
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:verliehen' %}">aktuell verliehen</a></li>
+      {% if perms.ausleihe.add_leihe %}
+      <li class="breadcrumb-item" aria-current="page"><a href="{% url 'ausleihe:verleihen' %}">verleihen</a></li>
+      {% endif %}
+      {% if perms.ausleihe.view_leihe %}
+      <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'ausleihe:verliehen-an-suche' %}">nach Nutzer suchen</a></li>
+      {% endif %}
+    </ol>
+  </nav>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      {% if aktuelle_nutzungsordnung and aktuelle_nutzungsordnung not in request.user.akzeptierte_nutzungsordnungen.all %}
+      <div class="alert alert-warning" role="alert">
+        Die Nutzungsbedingungen wurden aktualisiert,
+        du <a class="alert-link" href="{% url 'ausleihe:nutzungsordnung-akzeptieren' %}">kannst sie hier akzeptieren</a>.
+      </div>
+      {% endif %}
+
+      <h4>aktuell für dich reserviert</h4>
+      {% if aktuell_reserviert %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Datum</th>
+            <th>Raum</th>
+            <th>Stornieren</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in aktuell_reserviert %}
+          <tr>
+            <td><a href="{% url 'ausleihe:skill-detail' r.skill.id %}">{{ r.skill }}</a></td>
+            <td><a href="{% url 'ausleihe:reservierung-detail' r.id %}">{{ r.zeit }} – {{ r.ende|date:"H:i" }} Uhr</a></td>
+            <td>{{ r.raum }}</td>
+            <td>
+              <a class="btn btn-sm btn-danger" href="{% url 'ausleihe:reservierung-delete' r.id %}" role="button">Stornieren</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Aktuell hast du nichts reserviert.</p>
+      {% endif %}
+
+      <h4>aktuell entliehen</h4>
+      {% if aktuell_verliehen %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mediatheknr.</th>
+            <th>enthält</th>
+            <th>Anfang</th>
+            <th>Ende</th>
+            <th>Δ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for leihe in aktuell_verliehen %}
+          <tr>
+            <td>
+              <a href="{% url 'ausleihe:medium-detail' leihe.medium.id %}">{{ leihe.medium }}</a>
+            </td>
+            <td>
+              {% include "ausleihe/medium_enthaelt.html" with medium=leihe.medium %}
+            </td>
+            <td>{{ leihe.anfang }} Uhr</td>
+            <td>{{ leihe.ende|date:"l" }}, {{ leihe.ende }} Uhr</td>
+            <td>
+              {% if leihe.ist_ueberfaellig %}
+              {% with leihe.differenz_heute as d %}
+              {{ d }} Tag{% if d != 1 %}e{% endif %} überfällig
+              {% endwith %}
+              {% else %}
+              {% with leihe.differenz_heute as d %}
+              noch {{ d }} Tag{% if d != 1 %}e{% endif %}
+              {% endwith %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>Aktuell hast du nichts entliehen.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      {% include "ausleihe/verliehen_historisch_table.html" %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
