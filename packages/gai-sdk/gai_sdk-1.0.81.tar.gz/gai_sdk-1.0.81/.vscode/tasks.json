@@ -1,0 +1,258 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Pypi: [gai-sdk] publish",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                //"source ${workspaceFolder}/.venv/bin/activate"
+                "source ${userHome}/.venv/bin/activate && gai publish sdk ${workspaceFolder}"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py publish-package devops ${workspaceFolder}/"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Task: install",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "python ${workspaceFolder}/.vscode/install.py"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Task: docker-compose-up",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "docker-compose -f ${workspaceFolder}/gai/docker-compose.yml up"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Task: docker-compose-down",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "docker-compose -f ${workspaceFolder}/gai/docker-compose.yml down"
+            ],
+            "problemMatcher": []
+        },
+        // TTT -----------------------------------------------------------------------------------------------------------------------------------------------
+        {
+            // Do not use docker-compose to build or devops_cli.py to build.
+            // Use this task to build so that the version is updated and the image is tagged with the version
+            "label": "Docker: [gai-ttt-svr] build",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker build ${workspaceFolder}/gai-ttt-svr/pyproject.toml gai-ttt"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-ttt-svr] push",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker push ${workspaceFolder}/gai-ttt-svr/pyproject.toml gai-ttt"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-push gai-ttt"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-ttt-svr] run",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "python ${workspaceFolder}/gai-ttt-svr/.vscode/docker_run.py"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-ttt-svr] stop",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker stop gai-ttt"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-stop gai-ttt"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-ttt-svr] idle",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "python ${workspaceFolder}/gai-ttt-svr/.vscode/docker_idle.py"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-idle gai-ttt"
+            ],
+            "problemMatcher": []
+        },
+        // RAG -----------------------------------------------------------------------------------------------------------------------------------------------
+        {
+            "label": "Docker: [gai-rag-svr] build",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker build ${workspaceFolder}/gai-rag-svr/pyproject.toml gai-rag"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-build gai-rag"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-rag-svr] push",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker push ${workspaceFolder}/gai-rag-svr/pyproject.toml gai-rag"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-push gai-rag"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-rag-svr] run",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-run gai-rag"
+                "docker-compose -f ${workspaceFolder}/gai/docker-compose.yml up gai-rag"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-rag-svr] stop",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker stop gai-rag"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-stop gai-rag"
+            ],
+            "problemMatcher": []
+        },
+        // TTI -----------------------------------------------------------------------------------------------------------------------------------------------
+        {
+            "label": "Docker: [gai-tti-svr] build",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker build ${workspaceFolder}/gai-tti-svr/pyproject.toml gai-tti"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-build gai-tti"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-tti-svr] push",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker push ${workspaceFolder}/gai-tti-svr/pyproject.toml gai-tti"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-push gai-tti"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-tti-svr] run",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "python ${workspaceFolder}/.vscode/devops_cli.py docker-run gai-tti"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-tti-svr] stop",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker stop gai-tti"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-stop gai-tti"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-tti-svr] idle",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "python ${workspaceFolder}/.vscode/devops_cli.py docker-idle gai-tti"
+            ],
+            "problemMatcher": []
+        },
+        // ITT -----------------------------------------------------------------------------------------------------------------------------------------------
+        {
+            "label": "Docker: [gai-itt-svr] build",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker build ${workspaceFolder}/gai-itt-svr/pyproject.toml gai-itt"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-build gai-itt"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-itt-svr] push",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker push ${workspaceFolder}/gai-itt-svr/pyproject.toml gai-itt"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-push gai-itt"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-itt-svr] run",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "python ${workspaceFolder}/.vscode/devops_cli.py docker-run gai-itt"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker: [gai-itt-svr] stop",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker stop gai-itt"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-stop gai-itt"
+            ],
+            "problemMatcher": []
+        },
+        // gaimace -----------------------------------------------------------------------------------------------------------------------------------------------
+        {
+            "label": "Docker: [gaimace-node] build",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "gai docker build ${workspaceFolder}/gai-mace/src/gai/mace/server/pyproject.toml --dockercontext-path=../../../../.. --image-name='gaimace-node'"
+                //"python ${workspaceFolder}/.vscode/devops_cli.py docker-build gai-itt"
+            ],
+            "problemMatcher": []
+        },
+    ]
+}
