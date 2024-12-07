@@ -1,0 +1,44 @@
+[tool.poetry]
+name = "graphlin"
+version = "0.1.0"
+description = "An ORM for gremlin-based graph databases (e.g. AWS Neptune)."
+authors = ["Michael Statt <michael.statt@modelyst.io>"]
+readme = "README.md"
+packages = [{ include = "graphlin", from = "src" }]
+
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+pydantic = "^2.4.2"
+pydantic-settings = "^2.0.3"
+rich = "^13.6.0"
+docker = "^6.1.3"
+boto3 = "^1.28.74"
+gremlinpython = "^3.7.0"
+aiohttp = "^3.8.6"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.9.1"
+isort = "^5.12.0"
+pytest = "^7.4.3"
+pytest-sugar = "^0.9.7"
+mypy = "^1.6.1"
+ruff = "^0.8.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["graphlin"]
+
+[tool.black]
+line-length = 110
