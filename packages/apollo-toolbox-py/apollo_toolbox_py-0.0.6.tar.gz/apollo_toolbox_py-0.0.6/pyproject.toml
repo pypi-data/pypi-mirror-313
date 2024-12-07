@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "apollo-toolbox-py"
+version = "0.0.6"
+description = ""
+authors = ["Danny Rakita <daniel.rakita@yale.edu>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^2.0.1"
+scipy = "^1.14.0"
+torch = { version = "^2.3.1", optional = true }
+jax = { version = "^0.4.30", optional = true }
+bpy = { version = "^4.2.0", optional = true, markers = "python_version >= '3.11' and python_version < '3.12'" }
+mathutils = { version = "^3.3.0", optional = true }
+# easybpy = { git = "https://github.com/djrakita/EasyBPY", branch = "master", optional= true }
+easybpy = {version = "0.0.1", optional=true, markers = "python_version >= '3.11' and python_version < '3.12'"}
+numba = "^0.60.0"
+
+[tool.poetry.extras]
+all = ["torch", "jax", "bpy", "mathutils", "easybpy"]
+torch = ["torch"]
+jax = ["jax"]
+bpy = ["bpy", "easybpy"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
