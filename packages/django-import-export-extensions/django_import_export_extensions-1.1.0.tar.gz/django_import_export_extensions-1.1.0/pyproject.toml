@@ -1,0 +1,439 @@
+[tool.poetry]
+name = "django-import-export-extensions"
+version = "1.1.0"
+description = "Extend functionality of `django-import-export`"
+license = "MIT"
+authors = ["Saritasa <pypi@saritasa.com>"]
+maintainers = [
+  "Nikita Azanov <nikita.azanov@saritasa.com>",
+  "Andrey Otto <andrey.otto@saritasa.com>",
+  "Stanislav Khlud <stanislav.khlud@saritasa.com>",
+  "Egor Toryshak <egor.toryshak@saritasa.com",
+]
+readme = "README.md"
+repository = "https://github.com/saritasa-nest/django-import-export-extensions"
+documentation = "https://django-import-export-extensions.readthedocs.io"
+keywords = [
+  "python",
+  "json",
+  "django",
+  "csv",
+  "xlsx",
+  "celery",
+  "import_export",
+  "django_import_export_extensions",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development",
+  "Framework :: Django",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "Framework :: Django :: 5.1",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3 :: Only",
+]
+packages = [{ include = "import_export_extensions" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = ">=4.2"
+django-import-export = { extras = ["xls", "xlsx"], version = ">=4.2" }
+# Django REST Framework
+# https://www.django-rest-framework.org/
+djangorestframework = "^3.15.2"
+# OpenApi auto specs generator
+# https://drf-spectacular.readthedocs.io/en/latest/
+drf-spectacular = ">=0.27.1,<0.29.0"
+# Filter querysets dynamically
+# https://django-filter.readthedocs.io/en/stable/
+django-filter = "^24.3"
+# Different useful Django utils
+# https://django-extensions.readthedocs.io/en/latest/
+django-extensions = "^3.2.3"
+# Implementation of a pickled object field in django
+# https://github.com/gintas/django-picklefield
+django-picklefield = "^3.2"
+# Celery
+# https://docs.celeryproject.org/en/stable/
+celery = { extras = ["redis"], version = "^5.4.0" }
+# HTTP library for Python
+# https://requests.readthedocs.io/en/latest/
+requests = "^2.32.3"
+
+[tool.poetry.group.dev.dependencies]
+ipdb = "^0.13.13"
+ipython = "^8.27.0"
+# The Django Debug Toolbar is a configurable set of panels that display various debug information
+# about the current request/response and when clicked, display more details about the panel's content.
+# https://django-debug-toolbar.readthedocs.io/en/latest/
+django-debug-toolbar = "^4.4.6"
+
+[tool.poetry.group.linters.dependencies]
+# Mypy is a static type checker for Python.
+# https://mypy.readthedocs.io/en/stable/
+mypy = "^1.11.2"
+# This is a PEP 561 type stub package for the `requests` package
+# https://pypi.org/project/types-requests/
+types-requests = "^2.32.0.20240905"
+
+[tool.poetry.group.test.dependencies]
+# Provides a Django management command to check whether the primary database is ready to accept connections.
+# https://pypi.org/project/django-probes/
+django-probes = "^1.7.0"
+# Plugin for pytest that provides a set of useful tools for testing Django applications and projects
+# https://pytest-django.readthedocs.io/en/latest/
+pytest-django = "^4.9.0"
+# This plugin provides a mocker fixture for pytest
+# https://pypi.org/project/pytest-mock/
+pytest-mock = "^3.14.0"
+# Allows you to use fixtures in @pytest.mark.parametrize.
+# https://pypi.org/project/pytest-lazy-fixtures/
+pytest-lazy-fixtures = "^1.1.1"
+# Package for generating test data
+# https://factoryboy.readthedocs.io/en/stable/
+factory-boy = "^3.3.1"
+# Werkzeug is a comprehensive WSGI web application library
+# https://werkzeug.palletsprojects.com/en/3.0.x/
+werkzeug = "^3.0.4"
+# This plugin produces coverage reports.
+# https://pytest-cov.readthedocs.io/en/latest/index.html
+pytest-cov = ">=5,<7"
+# Psycopg is a PostgreSQL adapter for the Python
+# https://www.psycopg.org/docs/install.html
+psycopg2-binary = "^2.9.9"
+
+[tool.poetry.group.docs.dependencies]
+# Package for documnation generation
+# https://www.sphinx-doc.org/en/master/
+sphinx = "<9"
+# Theme for documentation
+# https://github.com/pradyunsg/furo
+furo = "^2024.8.6"
+
+[tool.poetry.group.local.dependencies]
+# A Python library for parsing and creating TOML
+# https://pypi.org/project/toml/
+toml = "^0.10.2"
+# A framework for managing and maintaining multi-language pre-commit hooks.
+# https://pre-commit.com/
+pre-commit = ">=3.8,<5.0"
+# Collection of invoke commands which used in Saritasa organization
+# https://github.com/saritasa-nest/saritasa-python-invocations/
+saritasa-invocations = "^1.2.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 79
+indent-width = 4
+target-version = "py310"
+
+[tool.ruff.lint]
+extend-select = [
+  # https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+  "W",
+  "E",
+  # https://docs.astral.sh/ruff/rules/#mccabe-c90
+  "C90",
+  # https://docs.astral.sh/ruff/rules/#isort-i
+  "I",
+  # https://docs.astral.sh/ruff/rules/#pep8-naming-n
+  "N",
+  # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+  "D",
+  # https://docs.astral.sh/ruff/rules/#pyupgrade-up
+  "UP",
+  # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+  "ANN",
+  # https://docs.astral.sh/ruff/rules/#flake8-bandit-s
+  "S",
+  # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+  "B",
+  # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+  "A",
+  # https://docs.astral.sh/ruff/rules/#flake8-commas-com
+  "COM",
+  # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+  "C4",
+  # https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
+  "DTZ",
+  # https://docs.astral.sh/ruff/rules/#flake8-debugger-t10
+  "T10",
+  # https://docs.astral.sh/ruff/rules/#flake8-django-dj
+  "DJ",
+  # https://docs.astral.sh/ruff/rules/#flake8-print-t20
+  "T20",
+  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  "PT",
+  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  "SIM",
+  # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+  "PTH",
+  # https://docs.astral.sh/ruff/rules/#flake8-todos-td
+  "TD",
+  # https://docs.astral.sh/ruff/rules/#eradicate-era
+  "ERA",
+  # https://docs.astral.sh/ruff/rules/#tryceratops-try
+  "TRY",
+  # https://docs.astral.sh/ruff/rules/#flynt-fly
+  "FLY",
+  # https://docs.astral.sh/ruff/rules/#perflint-perf
+  "PERF",
+  # https://docs.astral.sh/ruff/rules/#refurb-furb
+  "FURB",
+  # https://docs.astral.sh/ruff/rules/#flake8-pie-pie
+  "PIE",
+  # https://docs.astral.sh/ruff/rules/#flake8-async-async
+  "ASYNC",
+  # https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+  "RUF",
+]
+ignore = [
+  # https://docs.astral.sh/ruff/rules/missing-type-args
+  "ANN002",
+  # https://docs.astral.sh/ruff/rules/missing-type-self
+  "ANN101",
+  # https://docs.astral.sh/ruff/rules/missing-type-cls
+  "ANN102",
+  # https://docs.astral.sh/ruff/rules/missing-type-kwargs
+  "ANN003",
+  # https://docs.astral.sh/ruff/rules/any-type
+  "ANN401",
+  # https://docs.astral.sh/ruff/rules/undocumented-public-module
+  "D100",
+  # https://docs.astral.sh/ruff/rules/undocumented-public-package
+  "D104",
+  # https://docs.astral.sh/ruff/rules/undocumented-magic-method
+  "D105",
+  # https://docs.astral.sh/ruff/rules/undocumented-public-nested-class
+  "D106",
+  # https://docs.astral.sh/ruff/rules/undocumented-public-init
+  "D107",
+  # https://docs.astral.sh/ruff/rules/one-blank-line-before-class
+  "D203",
+  # https://docs.astral.sh/ruff/rules/multi-line-summary-second-line
+  "D213",
+  # https://docs.astral.sh/ruff/rules/escape-sequence-in-docstring/
+  "D301",
+  # https://docs.astral.sh/ruff/rules/dashed-underline-after-section
+  "D407",
+  # https://docs.astral.sh/ruff/rules/undocumented-param/
+  "D417",
+  # https://docs.astral.sh/ruff/rules/error-suffix-on-exception-name
+  "N818",
+  # https://docs.astral.sh/ruff/rules/invalid-module-name
+  "N999",
+  # https://docs.astral.sh/ruff/rules/unnecessary-collection-call
+  "C408",
+  # https://docs.astral.sh/ruff/rules/mutable-class-default
+  "RUF012",
+  # https://docs.astral.sh/ruff/rules/raise-vanilla-args
+  "TRY003",
+  # https://docs.astral.sh/ruff/rules/try-consider-else
+  "TRY300",
+  # https://docs.astral.sh/ruff/rules/missing-trailing-comma
+  "COM812", # ruff formatter suggested to exclude it
+  # https://docs.astral.sh/ruff/rules/try-except-in-loop/
+  "PERF203",
+
+  # TODO: remove after fix:
+  # https://docs.astral.sh/ruff/rules/missing-type-function-argument/
+  "ANN001",
+  # https://docs.astral.sh/ruff/rules/missing-return-type-undocumented-public-function/
+  "ANN201",
+  # https://docs.astral.sh/ruff/rules/missing-return-type-private-function/
+  "ANN202",
+  # https://docs.astral.sh/ruff/rules/missing-return-type-special-method/
+  "ANN204",
+]
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+  # https://docs.astral.sh/ruff/rules/unused-import
+  "F401",
+]
+"**/settings.py" = [
+  # https://docs.astral.sh/ruff/rules/line-too-long
+  "E501",
+]
+"**/test_project/*" = [
+  # https://docs.astral.sh/ruff/rules/assert
+  "S101",
+  # https://docs.astral.sh/ruff/rules/hardcoded-password-func-arg
+  "S106",
+  # https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage
+  "S311",
+]
+"**/test_*" = [
+  # https://docs.astral.sh/ruff/rules/missing-return-type-undocumented-public-function
+  "ANN201",
+]
+"**/migrations/*" = [
+  # https://docs.astral.sh/ruff/rules/undocumented-public-class
+  "D101",
+  # https://docs.astral.sh/ruff/rules/line-too-long
+  "E501",
+]
+"**/views**" = [
+  # https://docs.astral.sh/ruff/rules/ANN201
+  "ANN001",
+  # https://docs.astral.sh/ruff/rules/ANN201
+  "ANN201",
+]
+"**/admin**" = [
+  # https://docs.astral.sh/ruff/rules/missing-type-function-argument
+  "ANN001",
+  # https://docs.astral.sh/ruff/rules/missing-return-type-undocumented-public-function
+  "ANN201",
+]
+"**/api**" = [
+  # https://docs.astral.sh/ruff/rules/missing-type-function-argument
+  "ANN001",
+  # https://docs.astral.sh/ruff/rules/missing-return-type-undocumented-public-function
+  "ANN201",
+  # https://docs.astral.sh/ruff/rules/missing-return-type-private-function
+  "ANN202",
+]
+"tasks.py" = [
+  # https://docs.astral.sh/ruff/rules/hardcoded-password-func-arg
+  "S106",
+]
+"**/apps.py" = [
+  # https://docs.astral.sh/ruff/rules/undocumented-public-method
+  "D102",
+]
+"**/docs**" = [
+  # https://docs.astral.sh/ruff/rules/builtin-variable-shadowing/
+  "A001",
+]
+
+[tool.ruff.lint.isort]
+force-wrap-aliases = true
+split-on-trailing-comma = true
+section-order = [
+  "future",
+  "standard-library",
+  "django",
+  "drf",
+  "third-party",
+  "first-party",
+  "apps",
+  "local-folder",
+]
+[tool.ruff.lint.isort.sections]
+django = ["django"]
+drf = ["rest_framework"]
+apps = [
+  "apps",
+  "config",
+  "libs",
+]
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+parametrize-names-type = "list"
+parametrize-values-type = "list"
+parametrize-values-row-type = "list"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+exclude = [
+  # Disabling for admin since it's just configs and black/ruff format one item
+  # tuples as one line
+  "**/admin.py",
+  "**/views.py",
+  "**/admin/*",
+  "**/views/*",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+implicit_optional = false
+
+warn_no_return = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_configs = true
+allow_redefinition = false
+disallow_any_generics = true
+strict_equality = true
+strict_optional = true
+
+ignore_errors = false
+local_partial_types = true
+
+enable_error_code = [
+  "truthy-bool",
+  "redundant-expr",
+]
+
+disable_error_code = [
+  "attr-defined",
+  "index",
+  "annotation-unchecked",
+]
+
+exclude = [
+  "settings.py",
+  "docs/",
+]
+
+[[tool.mypy.overrides]]
+module = "test_project.*"
+warn_unreachable = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "test_project.settings"
+python_files = [
+  "tests.py",
+  "test_*.py",
+  "*_tests.py",
+]
+addopts = [
+    "--ff",
+    "--capture=no",
+    "--verbose",
+    "--cov-config=pyproject.toml",
+    "--cov-report=lcov:coverage.lcov",
+    "--cov-report=term-missing:skip-covered",
+]
+
+[tool.coverage.run]
+source = [
+  "import_export_extensions",
+]
+omit = [
+  "**/invocations/**",
+  "**/migrations/**",
+  "**/__init__.py",
+  "test_project/**",
+  "tasks.py",
+]
+
+[tool.coverage.report]
+exclude_also = [
+  "def __repr__",
+  "def __str__",
+  "pass",
+  "if self.debug:",
+  "if settings.DEBUG",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "class .*\\bProtocol\\):",
+  "@(abc\\.)?abstractmethod",
+]
