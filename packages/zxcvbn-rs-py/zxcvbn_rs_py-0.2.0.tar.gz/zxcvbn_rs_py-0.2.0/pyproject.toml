@@ -1,0 +1,62 @@
+[build-system]
+requires = ["maturin>=1.4.0,<2.0.0"]
+build-backend = "maturin"
+
+[project]
+name = "zxcvbn-rs-py"
+authors = [
+  { name = "François Voron", email = "contact@fief.dev" }
+]
+description = "Python bindings for zxcvbn-rs, the Rust implementation of zxcvbn"
+readme = "README.md"
+requires-python = ">=3.9,<3.14"
+dynamic = ["version"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Security",
+]
+
+[project.urls]
+Documentation = "https://fief-dev.github.io/zxcvbn-rs-py/"
+Source = "https://github.com/fief-dev/zxcvbn-rs-py"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+
+[tool.ruff]
+target-version = "py39"
+
+[tool.ruff.lint]
+extend-select = ["I", "TRY", "UP"]
+
+[tool.hatch]
+
+[tool.hatch.envs.default]
+installer = "uv"
+python = "3.9"
+dependencies = [
+    "maturin",
+    "mkdocs-material",
+    "mkdocstrings[python]>=0.18",
+    "black",
+    "mypy",
+    "ruff",
+    "pip",
+    "pytest",
+]
+
+[tool.hatch.envs.default.scripts]
+lint = [
+  "cargo fmt",
+  "ruff format .",
+  "ruff check --fix .",
+]
+lint-check = [
+  "ruff format --check .",
+  "ruff check .",
+]
+docs-serve = "mkdocs serve"
+docs-build = "mkdocs build"
+test = "pytest"
