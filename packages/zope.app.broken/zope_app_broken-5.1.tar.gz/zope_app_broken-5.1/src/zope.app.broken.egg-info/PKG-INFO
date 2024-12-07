@@ -1,0 +1,133 @@
+Metadata-Version: 2.1
+Name: zope.app.broken
+Version: 5.1
+Summary: Zope Broken (ZODB) Object Support
+Home-page: http://github.com/zopefoundation/zope.app.broken
+Author: Zope Corporation and Contributors
+Author-email: zope-dev@zope.dev
+License: ZPL 2.1
+Keywords: zope3 content provider
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Web Environment
+Classifier: Framework :: Zope :: 3
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Zope Public License
+Classifier: Natural Language :: English
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Programming Language :: Python
+Classifier: Topic :: Internet :: WWW/HTTP
+Requires-Python: >=3.8
+License-File: LICENSE.txt
+Requires-Dist: setuptools
+Requires-Dist: zope.deferredimport
+Requires-Dist: zope.interface
+Requires-Dist: zope.location
+Requires-Dist: zope.security
+Requires-Dist: zope.annotation
+Requires-Dist: zope.processlifetime
+Requires-Dist: ZODB>=3.10.0a1
+Provides-Extra: test
+Requires-Dist: zope.browsermenu; extra == "test"
+Requires-Dist: zope.browserpage; extra == "test"
+Requires-Dist: zope.browserresource; extra == "test"
+Requires-Dist: zope.configuration; extra == "test"
+Requires-Dist: zope.testing; extra == "test"
+Requires-Dist: zope.testrunner; extra == "test"
+Provides-Extra: browser
+Requires-Dist: zope.browsermenu; extra == "browser"
+Requires-Dist: zope.browserpage; extra == "browser"
+Requires-Dist: zope.browserresource; extra == "browser"
+
+.. image:: https://github.com/zopefoundation/zope.app.broken/workflows/tests/badge.svg
+        :target: https://github.com/zopefoundation/zope.app.broken/actions?query=workflow%3Atests
+
+When an object cannot be correctly loaded from the ZODB, this package allows
+this object still to be instantiated, but as a "Broken" object. This allows
+for gracefully updating the database without interruption.
+
+
+=========
+ CHANGES
+=========
+
+5.1 (2024-12-06)
+================
+
+- Add support for Python 3.12, 3.13.
+
+- Drop support for Python 3.7.
+
+
+5.0 (2023-02-08)
+================
+
+- Add support for Python 3.10, 3.11.
+
+- Drop support for Python 2.7, 3.5, 3.6.
+
+- Remove ``zope.app.broken.interfaces.IBroken``. It had been moved to
+  ``ZODB.interfaces`` long ago.
+
+
+4.2 (2020-11-18)
+================
+
+- Deprecate ``zope.app.broken.interfaces.IBroken``. Please import it directly
+  from ``ZODB.interfaces``.
+
+- Add support for Python 3.9.
+
+4.1 (2020-03-31)
+================
+
+- Drop dependency on ``zope.broken``, because the correct imports have
+  moved into ZODB.
+
+- Add support for Python 3.7 and 3.8.
+
+
+4.0.0 (2017-05-16)
+==================
+
+- Add support for Python 3.4, 3.5, 3.6 and PyPy.
+
+- Change dependency on ``ZODB3`` to ``ZODB``.
+
+- The ``browser.zcml`` will only be loaded if ``zope.browserpage`` is
+  installed.
+
+- Accessing the ``__parent__`` and ``__name__`` attributes of broken
+  objects will no longer raise ``AttributeError`` if the state is an
+  unexpected type, instead returning ``None``.
+
+
+3.6.0 (2010-09-25)
+==================
+
+- Depend on new ``zope.processlifetime`` interfaces and implementations
+  instead of using BBB imports from ``zope.app.appsetup``.
+
+- Added test extra to declare test dependency on ``zope.testing``.
+
+- Using Python's ``doctest`` module instead of depreacted
+  ``zope.testing.doctest``.
+
+
+3.5.0 (2009-02-05)
+==================
+
+- Depend on new ``zope.broken`` package for the ``IBroken`` interface.
+
+3.4.0 (2007-10-11)
+==================
+
+- Initial release independent of the main Zope tree.

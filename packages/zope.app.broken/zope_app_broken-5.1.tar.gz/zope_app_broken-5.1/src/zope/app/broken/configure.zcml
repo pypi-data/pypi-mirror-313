@@ -1,0 +1,21 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml">
+
+  <include package="zope.component" file="meta.zcml" />
+  <include package="zope.security" file="meta.zcml" />
+
+  <class class=".broken.Broken">
+    <allow interface="zope.annotation.interfaces.IAnnotations" />
+    <allow attributes="__module__" />
+  </class>
+
+  <subscriber
+      handler=".broken.installBroken"
+      for="zope.processlifetime.IDatabaseOpened"
+      />
+
+  <include file="browser.zcml"
+           zcml:condition="installed zope.browserpage" />
+
+</configure>
