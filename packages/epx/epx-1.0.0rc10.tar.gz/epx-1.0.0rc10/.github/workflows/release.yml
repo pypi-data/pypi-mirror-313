@@ -1,0 +1,216 @@
+on:
+  push:
+    branches: ['release/*']
+
+jobs:
+  on_push_to_release_branch_job:
+    runs-on: ubuntu-latest
+    env:
+      MAJOR_KEYWORDS: 'BREAKING CHANGE'
+      MINOR_KEYWORDS: 'minor,feat'
+      PATCH_KEYWORDS: 'patch,fix,build,chore,ci,docs,style,refactor,perf,test'
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.WORKFLOW_PAT }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Extract major version number from branch name
+        run: |
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          echo "Current Branch: $BRANCH_NAME"
+          PREFIX="release/"
+          PREFIX_LENGTH=${#PREFIX}
+          MAJOR_RELEASE_NUMBER=${BRANCH_NAME:$PREFIX_LENGTH}
+          echo "Found major release number: $MAJOR_RELEASE_NUMBER"
+
+          # Use grep to check if the variable contains only digits
+          if ! echo "$MAJOR_RELEASE_NUMBER" | grep -qE '^[0-9]+$'; then
+            echo "MAJOR_RELEASE_NUMBER is not a valid number"
+            exit 1
+          fi
+          echo "MAJOR_RELEASE_NUMBER=${MAJOR_RELEASE_NUMBER}" >> $GITHUB_ENV
+
+      - name: Fetch and list all tags
+        run: git fetch --all --tags && git tag --sort=version:refname
+
+      - name: Determine previous release
+        run: |
+          PREVIOUS_RELEASE=$(git tag --sort=version:refname | grep -P "^${MAJOR_RELEASE_NUMBER}\.\d+\.\d+$" | tail -n 1)
+          if [ -z "$PREVIOUS_RELEASE" ]; then
+            PREVIOUS_MAJOR_RELEASE_NUMBER=$((MAJOR_RELEASE_NUMBER - 1))
+            PREVIOUS_RELEASE=$(git tag --sort=version:refname | grep -P "^${PREVIOUS_MAJOR_RELEASE_NUMBER}\.\d+\.\d+$" | tail -n 1)
+          fi
+          echo "Previous release is: $PREVIOUS_RELEASE"
+          echo "PREVIOUS_RELEASE=${PREVIOUS_RELEASE}" >> $GITHUB_ENV
+
+      - name: Get git reference to diff
+        run: |
+          if [ -z "$PREVIOUS_RELEASE" ]; then
+            echo "Previous release is empty!"
+            REF_TO_DIFF=$(git rev-list --max-parents=0 HEAD)
+          else
+            REF_TO_DIFF=$PREVIOUS_RELEASE
+          fi
+          echo "Will be looking for changes since ref: $REF_TO_DIFF"
+          echo "REF_TO_DIFF=${REF_TO_DIFF}" >> $GITHUB_ENV
+
+      - name: Generate changelog body
+        run: |
+          # Get all of the hashes sorted by commit message tile first, exclude
+          # merge commits, and then display their FULL commit messages on one
+          # line each.
+          CURRENT_HEAD=$(git rev-parse HEAD)
+          git log --pretty=format:"%s (%h)" ${REF_TO_DIFF}..${CURRENT_HEAD} |\
+            sort |\
+            grep -v "^Merge"|\
+            grep -o "(.......)$" |\
+            sed 's/[()]//g' |\
+            xargs -n 1 -I {} sh -c 'git show -s --pretty=format:"%s %b (%h)" {} | tr "\n" " "; echo' |\
+            sed 's/  */ /g' >> changelog_body.txt
+          echo "CURRENT_HEAD=${CURRENT_HEAD}" >> $GITHUB_ENV
+
+
+      - name: Extract and remove major/minor changes from changelog
+        run: |
+          set +e # Gracefully handle failures to find match
+
+          # Remove breaking changes and store in temp file
+          grep "BREAKING CHANGE" changelog_body.txt > breaking_changes.txt
+          sed -i '/BREAKING CHANGE/d' changelog_body.txt
+
+          # Remove all features and store in temp file
+          grep 'feat:' changelog_body.txt > features.txt
+          sed -i '/^feat:/d' changelog_body.txt
+          set -e
+
+      - name: Generate changelog
+        run: |
+          if [ -s breaking_changes.txt ]; then
+            echo "## Breaking Changes" >> changelog.txt
+            cat breaking_changes.txt >> changelog.txt
+          fi
+
+          if [ -s features.txt ]; then
+            echo "## New Features" >> changelog.txt
+            cat features.txt >> changelog.txt
+          fi
+
+          if [ -s changelog_body.txt ]; then
+            echo "## Patched Changes" >> changelog.txt
+            cat changelog_body.txt >> changelog.txt
+          fi
+
+          # Add separator and full changelog link.
+          echo "" >> changelog.txt
+          echo "---" >> changelog.txt
+          echo "**Full Changelog**: https://github.com/${GITHUB_REPOSITORY}/compare/${REF_TO_DIFF}...${CURRENT_HEAD}" >> changelog.txt
+
+      - name: Determine next version number
+        run: |
+          if [ -z "$PREVIOUS_RELEASE" ]; then
+            echo "No previous version found!"
+            NEXT_VERSION="0.0.0"
+          else
+            # Extract individual version numbers from previous version string
+            PREVIOUS_MAJOR_VERSION=$(echo $PREVIOUS_RELEASE | grep -Po "^\d+")
+            PREVIOUS_MINOR_VERSION=$(echo $PREVIOUS_RELEASE | grep -Po "\.\d+\." | grep -Po "\d+")
+            PREVIOUS_PATCH_VERSION=$(echo $PREVIOUS_RELEASE | grep -Po "\d+$")
+
+            echo "PREVIOUS_MAJOR_VERSION=$PREVIOUS_MAJOR_VERSION"
+            echo "PREVIOUS_MINOR_VERSION=$PREVIOUS_MINOR_VERSION"
+            echo "PREVIOUS_PATCH_VERSION=$PREVIOUS_PATCH_VERSION"
+
+            # Ensure that  major version number defined in branch name is
+            # correct depending on presence of breaking changes.
+            #
+            # These conditionals have a stupid hack. Basically if you format
+            # the messages echoed to $GITHUB_OUTPUT properly and then exit 1,
+            # you won't actually see the output in the GitHub workflow. If you
+            # print the message to GITHUB_OUTPUT improperly (i.e. without the
+            # "message" prefix), you'll get an error that includes the message
+            # itself, which is honestly preferable. FIXME if GitHub ever
+            # updates this behavior.
+            if [ -s breaking_changes.txt ]; then
+              if [[ $((PREVIOUS_MAJOR_VERSION + 1)) -eq "$MAJOR_RELEASE_NUMBER" ]]; then
+                echo "Previous major version is $PREVIOUS_MAJOR_VERSION and the next major version is $MAJOR_RELEASE_NUMBER. There are breaking changes."
+              else
+                echo "Previous major version $PREVIOUS_MAJOR_VERSION (+ 1) is NOT the same as the next major version $MAJOR_RELEASE_NUMBER, but there are breaking changes!" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+            else
+              if [[ "$PREVIOUS_MAJOR_VERSION" -eq "$MAJOR_RELEASE_NUMBER" ]]; then
+                echo "Previous major version $PREVIOUS_MAJOR_VERSION is the same as the next major version $MAJOR_RELEASE_NUMBER and there are no breaking changes."
+              else
+                echo -n "Previous major version $PREVIOUS_MAJOR_VERSION is not the same as the next major version $MAJOR_RELEASE_NUMBER, but there are no breaking changes!" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+            fi
+
+            # Determine minor/patch version numbers by looking at presence of
+            # breaking changes/features.
+            if [ -s breaking_changes.txt ]; then
+              MINOR_VERSION=0
+              PATCH_VERSION=0
+            elif [ -s features.txt ]; then
+              MINOR_VERSION=$((PREVIOUS_MINOR_VERSION + 1))
+              PATCH_VERSION=0
+            else
+              MINOR_VERSION=$PREVIOUS_MINOR_VERSION
+              PATCH_VERSION=$((PREVIOUS_PATCH_VERSION + 1))
+            fi
+            NEXT_VERSION="$MAJOR_RELEASE_NUMBER.$MINOR_VERSION.$PATCH_VERSION"
+          fi
+
+          echo "Next version is: ${NEXT_VERSION}"
+          echo $NEXT_VERSION > VERSION
+          echo "NEXT_VERSION=${NEXT_VERSION}" >> $GITHUB_ENV
+
+      - name: Tag, push, and checkout next release candidate
+        run: |
+          echo "Tagging new release candidate for ${NEXT_VERSION}"
+          # Find out if there are existing release candidates
+          LAST_RELEASE_CANDIDATE=$(git tag --sort=version:refname | grep "${NEXT_VERSION}-rc\.*" | tail -n 1)
+          if [ -z "$LAST_RELEASE_CANDIDATE" ]; then
+            NEW_TAG="${NEXT_VERSION}-rc.1"
+          else
+            NEXT_RELEASE_CANDIDATE=$(echo $LAST_RELEASE_CANDIDATE | grep -Po "\d$")
+            NEW_TAG="${NEXT_VERSION}-rc.$((NEXT_RELEASE_CANDIDATE + 1))"
+          fi
+          echo "New release candidate will be ${NEW_TAG}"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+          echo "release_tag=${NEW_TAG}" >> $GITHUB_ENV
+
+      - name: Substitute version number in __init__.py with actual version number
+        run: |
+          sed -i "s/0.0.0+unknown/${release_tag}/g" ./src/epx/__init__.py
+
+      - name: Install build dependencies and build artifacts
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+          python -m build
+          echo "TAR_GZ_NAME=$(ls dist/*.tar.gz)" >> $GITHUB_ENV
+          echo "WHL_NAME=$(ls dist/*.whl)" >> $GITHUB_ENV
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        env:
+          # We use private token here to ensure follow-up release workflows are actually kicked off.
+          # https://github.com/orgs/community/discussions/25281#discussioncomment-3247262
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_PAT }}
+        with:
+          tag_name: ${{ env.release_tag }}
+          body_path: changelog.txt
+          files: |
+            ${{ env.TAR_GZ_NAME }}
+            ${{ env.WHL_NAME }}
+          prerelease: false
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
