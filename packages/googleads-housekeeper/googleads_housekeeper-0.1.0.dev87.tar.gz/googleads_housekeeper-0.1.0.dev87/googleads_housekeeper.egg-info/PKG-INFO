@@ -1,0 +1,79 @@
+Metadata-Version: 2.1
+Name: googleads-housekeeper
+Version: 0.1.0.dev87
+Author: Google Inc. (gTech gPS CSE team)
+Author-email: no-reply@google.com
+License: Apache 2.0
+Requires-Python: >3.8
+Description-Content-Type: text/markdown
+Requires-Dist: google-ads-api-report-fetcher[pandas]>=1.15.3
+Requires-Dist: SQLAlchemy==1.4.46
+Requires-Dist: beautifulsoup4
+Requires-Dist: google-api-python-client
+Requires-Dist: psycopg2-binary
+Requires-Dist: croniter
+Requires-Dist: aiohttp
+Requires-Dist: slack_sdk
+Requires-Dist: numpy
+Provides-Extra: gcp
+Requires-Dist: google-cloud-firestore; extra == "gcp"
+Requires-Dist: google-cloud-pubsub; extra == "gcp"
+Requires-Dist: appengine-python-standard>=1.0.0; extra == "gcp"
+Provides-Extra: full
+Requires-Dist: google-cloud-firestore; extra == "full"
+Requires-Dist: appengine-python-standard>=1.0.0; extra == "full"
+Requires-Dist: google-cloud-pubsub; extra == "full"
+
+# Google Ads Housekeeper
+
+## Problem statement
+
+Managing Google Ads entities that can be excluded is a complex task which requires
+implementing many moving parts: parsing the rules, applying them, saving, updating,
+scheduling tasks and many more.
+
+## Solution
+
+Ads Housekeeper simplifies tasks related to managing excludable entities
+(placements, keywords, search terms, ads, etc) based on a set of custom rules.
+
+## Deliverable (implementation)
+
+The library provides `googleads_housekeeper` module you can using in your projects
+which abstracts the following aspects:
+* Applying rules that identify entities for modification
+* Creating and managing tasks with aforementioned with built-in persistence mechanism
+* Sending notifications to a channel of your choice
+* Sending message to message broker of your choice
+
+## Deployment
+
+### Prerequisites
+
+1. Python 3.9+
+1. Google Ads API access and [google-ads.yaml](https://github.com/google/ads-api-report-fetcher/blob/main/docs/how-to-authenticate-ads-api.md#setting-up-using-google-adsyaml) file - follow documentation on [API authentication](https://github.com/google/ads-api-report-fetcher/blob/main/docs/how-to-authenticate-ads-api.md).
+
+### Installation
+
+```
+pip install google-ads-housekeeper
+```
+
+### Usage
+
+```
+from googleads_housekeeper import bootstrap
+from googleads_housekeeper.domain import commands
+
+# initialiaze message bus
+bus = bootstrap.bootstrap()
+
+# execute command
+task_id = 1
+cmd = commands.RunTask(task_id)
+bus.handle(cmd)
+```
+
+
+## Disclaimer
+This is not an officially supported Google product.
