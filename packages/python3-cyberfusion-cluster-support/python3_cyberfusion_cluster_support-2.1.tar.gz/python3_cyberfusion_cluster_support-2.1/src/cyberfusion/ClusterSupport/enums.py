@@ -1,0 +1,56 @@
+"""Enums."""
+
+from enum import Enum
+
+
+class IPAddressFamily(str, Enum):
+    """IP address families."""
+
+    IPV6: str = "IPv6"
+    IPV4: str = "IPv4"
+
+
+class ObjectModelName(str, Enum):
+    """Object model names."""
+
+    BORG_ARCHIVE: str = "BorgArchive"
+    BORG_REPOSITORY: str = "BorgRepository"
+    CLUSTER: str = "Cluster"
+    CMS: str = "CMS"
+    CUSTOM_CONFIG: str = "CustomConfig"
+    FPM_POOL: str = "FPMPool"
+    VIRTUAL_HOST: str = "VirtualHost"
+    PASSENGER_APP: str = "PassengerApp"
+    SERVICE_ACCOUNT_TO_CLUSTER: str = "ServiceAccountToCluster"
+    SERVICE_ACCOUNT_TO_CUSTOMER: str = "ServiceAccountToCustomer"
+    DATABASE: str = "Database"
+    CERTIFICATE_MANAGER: str = "CertificateManager"
+    BASIC_AUTHENTICATION_REALM: str = "BasicAuthenticationRealm"
+    CRON: str = "Cron"
+    MARIADB_ENCRYPTION_KEY: str = "MariaDBEncryptionKey"
+    HOSTS_ENTRY: str = "HostsEntry"
+    DATABASE_USER: str = "DatabaseUser"
+    DATABASE_USER_GRANT: str = "DatabaseUserGrant"
+    HTPASSWD_FILE: str = "HtpasswdFile"
+    HTPASSWD_USER: str = "HtpasswdUser"
+    MAIL_ACCOUNT: str = "MailAccount"
+    MAIL_ALIASES: str = "MailAlias"
+    MAIL_DOMAIN: str = "MailDomain"
+    NODE: str = "Node"
+    NODE_ADD_ON: str = "NodeAddOn"
+    REDIS_INSTANCE: str = "RedisInstance"
+    DOMAIN_ROUTER: str = "DomainRouter"
+    MAIL_HOSTNAME: str = "MailHostname"
+    CERTIFICATE: str = "Certificate"
+    ROOT_SSH_KEY: str = "RootSSHKey"
+    SSH_KEY: str = "SSHKey"
+    UNIX_USER: str = "UNIXUser"
+    UNIX_USER_RABBITMQ_CREDENTIALS: str = "UNIXUserRabbitMQCredentials"
+    HAPROXY_LISTEN: str = "HAProxyListen"
+    HAPROXY_LISTEN_TO_NODE: str = "HAProxyListenToNode"
+    URL_REDIRECT: str = "URLRedirect"
+    CUSTOMER: str = "Customer"
+    IP_ADDRESS: str = "IPAddress"
+    SITE: str = "Site"
+    SITE_TO_CUSTOMER: str = "SiteToCustomer"
+    DAEMON: str = "Daemon"
