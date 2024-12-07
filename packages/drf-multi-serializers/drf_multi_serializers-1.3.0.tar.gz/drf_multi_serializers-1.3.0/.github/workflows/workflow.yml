@@ -1,0 +1,36 @@
+name: CI/CD Pipeline
+on:
+  push:
+  pull_request:
+  release:
+    types:
+      - published
+permissions:
+  contents: read
+jobs:
+  publish-to-pypi:
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+    strategy:
+      matrix:
+        python-version:
+          - 3.12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: pyproject.toml
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: 0.5.6
+          enable-cache: true
+      - name: Build package
+        run: uv build
+      - name: Publish package
+        run: uv publish
