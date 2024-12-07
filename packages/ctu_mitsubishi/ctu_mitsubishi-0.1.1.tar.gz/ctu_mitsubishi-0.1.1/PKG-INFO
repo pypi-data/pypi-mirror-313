@@ -1,0 +1,38 @@
+Metadata-Version: 2.1
+Name: ctu_mitsubishi
+Version: 0.1.1
+Summary: Package to control CTU/CIIRC robots Mitsubishi.
+Author-Email: Vladimir Petrik <vladimir.petrik@cvut.cz>
+License: BSD 3-Clause
+Requires-Python: >=3.10
+Requires-Dist: pyserial>=3.5
+Requires-Dist: numpy>=2.1.3
+Description-Content-Type: text/markdown
+
+# Control of Mitsubishi RV6S robot at CIIRC CTU
+
+
+## How to start the robot
+- Turn the robot power using the white switch on the front panel of the control unit.
+- Make sure robot is set to Automatic mode (or Ext. Automatic mode) - modes are controlled by key switch on the front panel.
+
+## Quick example
+```python
+from ctu_mitsubishi import Rv6s, Rv6sGripper
+
+gripper = Rv6sGripper()
+gripper.open()
+gripper.close()
+
+robot = Rv6s()
+robot.initialize()
+
+q = robot.get_q()
+q[0] += 0.1
+robot.move_to_q(q)
+
+robot.stop_robot()
+robot.close_connection()
+```
+
+See more examples in the `examples` folder.
