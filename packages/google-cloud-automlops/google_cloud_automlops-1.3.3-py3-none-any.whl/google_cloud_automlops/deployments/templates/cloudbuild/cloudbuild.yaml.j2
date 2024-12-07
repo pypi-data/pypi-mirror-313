@@ -1,0 +1,54 @@
+{{generated_license}}
+steps:
+# ==============================================================================
+# BUILD CUSTOM IMAGES
+# ==============================================================================
+
+  # build the component_base image
+  - name: "gcr.io/cloud-builders/docker"
+    args: [ "build", "-t", "{{artifact_repo_location}}-docker.pkg.dev/{{project_id}}/{{artifact_repo_name}}/{{naming_prefix}}/components/component_base:latest",
+            "--cache-from", "{{artifact_repo_location}}-docker.pkg.dev/{{project_id}}/{{artifact_repo_name}}/{{naming_prefix}}/components/component_base:latest", "." ]
+    dir: "{{component_base_relative_path}}"
+    id: "build_component_base"
+    waitFor: ["-"]
+{% if use_ci %}
+# ==============================================================================
+# PUSH CUSTOM IMAGES
+# ==============================================================================
+
+  # push the component_base image
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "{{artifact_repo_location}}-docker.pkg.dev/{{project_id}}/{{artifact_repo_name}}/{{naming_prefix}}/components/component_base:latest"]
+    dir: "{{component_base_relative_path}}"
+    id: "push_component_base"
+    waitFor: ["build_component_base"]
+
+  # Install dependencies
+  - name: python:3.10
+    entrypoint: pip
+    args: ["install", "-r", "pipelines/requirements.txt", "--user"]
+    id: "install_pipelines_deps"
+    waitFor: ["push_component_base"]
+
+  # Build pipeline spec
+  - name: python:3.10
+    entrypoint: python
+    args: ["-m", "pipelines.pipeline", "--config", "configs/defaults.yaml"]
+    id: "build_pipeline_spec"
+    waitFor: ["install_pipelines_deps"]
+
+  # Publish PipelineJob to topic
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+          gcloud pubsub topics publish {{pubsub_topic_name}} --message \
+          "$(cat {{generated_parameter_values_path}})"
+    id: "publish_to_topic"
+    waitFor: ["build_pipeline_spec"]
+{% endif %}
+images:
+  # custom component images
+  - "{{artifact_repo_location}}-docker.pkg.dev/{{project_id}}/{{artifact_repo_name}}/{{naming_prefix}}/components/component_base:latest"
+
