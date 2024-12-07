@@ -1,0 +1,37 @@
+{% extends base %}
+
+{% block init_vars_block %}
+    {% init show_right = False %}
+{% end %}
+
+{% block body %}
+
+<div class="card">
+    {% set title = "sha1" %}
+    {% include "tools/base_title.html" %}
+</div>
+
+<div class="card">
+{% import hashlib %}
+{% set input_text = xutils.get_argument("input", "") %}
+<form>
+<div class="col-md-6">
+<label>Input</label>
+<textarea id="input" name="input" class="col-md-12" rows=10>{{input_text}}</textarea>
+</div>
+
+<div class="col-md-6">
+<label>Output</label>
+<textarea id="output" class="col-md-12" rows=10>
+    {{hashlib.sha1(input_text.encode('utf-8')).hexdigest() if input_text != "" else ""}}
+</textarea>
+</div>
+
+<div class="col-md-12">
+    <button>Encode</button>
+</div>
+</form>
+
+</div>
+
+{% end %}

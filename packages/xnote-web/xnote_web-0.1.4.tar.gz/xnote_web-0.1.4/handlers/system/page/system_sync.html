@@ -1,0 +1,139 @@
+{% extends base.html %}
+
+{% block body_left %}
+
+{% import web %}
+
+<div class="col-md-12 card">
+    <h3 class="card-title btn-line-height">
+        <span>{{T("集群管理")}}</span>
+        <div class="float-right">
+             {% include common/button/back_button.html %}
+        </div>
+    </h3>
+</div>
+
+<div class="card">
+    <div class="list">
+        <div class="list-item">
+            <span>当前节点类型</span>
+            <div class="float-right">
+                <span>{{node_role}}</span>
+                <!-- <i class="fa fa-chevron-right"></i> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="list">
+        {% if not is_leader %}
+            {% include system/component/system_sync_follower_view.html %}
+        {% end %}
+
+        {% if is_leader %}
+
+            <div class="list-item">
+                <span>授权token</span>
+                <div class="float-right">
+                    <a class="btn btn-default config-btn" 
+                        data-title="更新token"
+                        data-key="leader.token"
+                        data-default="{{leader_token}}">设置</a>
+                </div>
+            </div>
+
+            <div class="list-item">
+                <span>子节点IP白名单</span>
+                <div class="float-right">
+                    <a class="btn btn-default config-btn" 
+                        data-title="更新白名单"
+                        data-key="follower.whitelist"
+                        data-default="{{whitelist}}">设置</a>
+                </div>
+            </div>
+
+
+            <div class="list-item">
+                <span>文件索引数</span>
+                <div class="float-right">
+                    <span>{{fs_index_count}}</span>
+                </div>
+            </div>
+
+        {% end %}
+
+    </div>
+</div>
+
+{% include system/component/system_sync_cluster_info.html %}
+
+<script type="text/javascript">
+$(function () {
+    $(".config-btn").click(function (e) {
+        var configKey = $(e.target).attr("data-key");
+        var promptTitle = $(e.target).attr("data-title");
+        var defaultValue = $(e.target).attr("data-default");
+        xnote.prompt(promptTitle, defaultValue, function (inputValue) {
+            var params = {};
+            params.p = "set_config";
+            params.key = configKey;
+            params.value = inputValue;
+
+            xnote.http.post("/system/sync", params, function (resp) {
+                if (resp.code == "success") {
+                    window.location.reload();
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        });
+    });
+
+    $(".confirm-btn").click(function(e) {
+        var configKey = $(e.target).attr("data-key");
+        var promptTitle = $(e.target).attr("data-title");
+        var defaultValue = $(e.target).attr("data-default");
+
+        xnote.confirm(promptTitle, function (inputValue) {
+            var params = {};
+            params.p = "set_config";
+            params.key = configKey;
+            params.value = inputValue;
+
+            xnote.http.post("/system/sync", params, function (resp) {
+                if (resp.code == "success") {
+                    window.location.reload();
+                } else {
+                    xnote.alert(resp.message);
+                }
+            });
+        });
+    });
+
+    $(".refresh-btn").click(function(e) {
+        xnote.http.get("/system/sync?p=ping", function (resp) {
+            window.location.reload();
+        });
+    });
+
+    $(".view-btn").click(function (e) {
+        var value = $(e.target).attr("data-value");
+        xnote.alert(value);
+    });
+
+    $(".view-ajax-btn").click(function (e) {
+        var dataType = $(e.target).attr("data-type");
+        var dataKey  = $(e.target).attr("data-key");
+        var params = {type: dataType, key: dataKey};
+        xnote.http.get("/system/sync?p=get_detail", params, function (resp) {
+            xnote.showTextDialog("详情", resp.text);
+        });
+    });
+});
+</script>
+{% end %}
+
+{% block body_right %}
+    {% include system/component/admin_nav.html %}
+{% end %}

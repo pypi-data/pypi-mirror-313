@@ -1,0 +1,85 @@
+{% extends base %}
+
+{% block head %}
+
+<style>
+    .td-no {
+        width: 50px;
+    }
+
+    .label {
+        width: 150px;
+        text-align: right;
+        display: table-cell;
+    }
+</style>
+
+{% end %}
+
+{% block body_left %}
+
+<div class="card">
+
+    <h3 class="card-title btn-line-height">
+        <a class="link2" href="{{_server_home}}/system/user/list">用户管理</a>&nbsp;/&nbsp;<span>用户信息</span>
+        {% include common/back.html %}
+    </h3>
+
+</div>
+
+<div class="card">
+    <input type="hidden" name="name" value="{{user_info.name}}">
+    <table class="table col-md-12">
+        <tr>
+            <td class="label">用户名</td>
+            <td>{{user_info.name}}</td>
+        </tr>
+        <tr>
+            <td class="label">salt</td>
+            <td>{{user_info.salt}}</td>
+        </tr>
+        <tr>
+            <td class="label">token</td>
+            <td>{{user_info.token}}</td>
+        </tr>
+        <tr>
+            <td class="label">最近更新</td>
+            <td>{{user_info.mtime}}</td>
+        </tr>
+        <tr>
+            <td class="label">上次登录</td>
+            <td>{{user_info.login_time}}</td>
+        </tr>
+    </table>
+
+    {% if user_info.name != "admin" %}
+        <input class="btn danger" type="button" 
+            data-name="{{user_info.name}}" data-id="{{user_info.id}}"
+            onclick="xnoteDeleteUser(this)"
+            value="删除用户">
+        
+        <input class="btn danger" type="button" 
+            data-name="{{user_info.name}}" data-id="{{user_info.id}}"
+            onclick="xnoteResetUserPassword(this)"
+            value="重置用户密码">
+    {% end %}
+</div>
+
+<div class="card">
+    <div class="card-title">
+        <span>用户操作日志</span>    
+    </div>
+    {% include common/table/table.html %}
+    <div class="top-offset-1 bottom-offset-1">
+        {% include common/pagination.html %}
+    </div>
+</div>
+
+{% include user/component/user_script.html %}
+
+{% end %}
+
+
+{% block body_right %}
+    {% include common/sidebar/default.html %}
+{% end %}
