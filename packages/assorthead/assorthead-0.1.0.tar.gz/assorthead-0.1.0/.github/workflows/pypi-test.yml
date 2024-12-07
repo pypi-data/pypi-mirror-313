@@ -1,0 +1,90 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Test the library
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - "*"
+  pull_request:
+
+jobs:
+  test:
+    name: Running tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest tox
+
+      - name: Cache sources
+        uses: actions/cache@v4
+        with:
+          path: extern/sources
+          key: ${{ runner.os }}-${{ hashFiles('extern/fetch.py') }}
+
+      - name: Fetch C++ dependencies
+        run: | 
+          cd extern
+          ./fetch.py
+
+      - name: Test with tox
+        run: |
+          tox
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache sources
+        id: cache-sources
+        uses: actions/cache@v4
+        with:
+          path: extern/sources
+          key: ${{ runner.os }}-${{ hashFiles('extern/fetch.py') }}
+
+      - name: Fetch C++ dependencies
+        run: | 
+          cd extern
+          ./fetch.py
+
+      - name: Build source
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          path: dist/*.tar.gz
+
+  upload_pypi:
+    needs: [test, build_sdist]
+    runs-on: ubuntu-latest
+    # upload to PyPI on every tag starting with 'v'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    # alternatively, to publish when a GitHub Release is created, use the following rule:
+    # if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          # unpacks default artifact into dist/
+          # if `name: artifact` is omitted, the action will create extra parent dir
+          name: artifact
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@v1.12.2
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_PASSWORD }}
