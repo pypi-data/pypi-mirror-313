@@ -1,0 +1,63 @@
+[project]
+name = "obsidian-workflow"
+version = "0.0.1"
+description = "Obsidian workflow tools for automating my obsidian workflow"
+readme = "README.md"
+authors = [{name = "Brandt Beal"}]
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+
+classifiers = [
+    "License :: OSI Approved :: MIT License"
+]
+dependencies = [
+    "click",
+]
+
+[build-system]
+requires = ["setuptools>=66.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+license-files = []
+
+[project.urls]
+Homepage = "https://github.com/babeal/obsidian-workflow"
+Changelog = "https://github.com/babeal/obsidian-workflow/releases"
+Issues = "https://github.com/babeal/obsidian-workflow/issues"
+CI = "https://github.com/babeal/obsidian-workflow/actions"
+
+[project.scripts]
+obsidian-workflow = "obsidian_workflow.cli:cli"
+
+[dependency-groups]
+dev = [
+    "freezegun>=1.5.1",
+    "pytest",
+]
+
+# exclude the plugins directory from being considered a package
+# as it's copied to the obsidian vault
+[tool.setuptools.packages.find]
+exclude = ["plugins"]
+
+# Ruff Config
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+lines-between-types = 1
+section-order = [   
+    "future",
+    "standard_library",
+    "first_party",
+    "third_party",
+    "local_folder",
+]
