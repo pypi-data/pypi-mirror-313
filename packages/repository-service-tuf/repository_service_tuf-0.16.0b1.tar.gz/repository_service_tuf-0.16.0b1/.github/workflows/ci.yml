@@ -1,0 +1,57 @@
+name: Tests and Lint
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-versions: [ "3.10", "3.11", "3.12" ]
+
+    steps:
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+    - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+      with:
+        python-version: ${{ matrix.python-versions }}
+
+    - name: Install tox and coverage
+      run: pip install tox tox-gh-actions build
+
+    - name: Install build dependency
+      run: python3 -m pip install --upgrade pip build
+
+    - name: Test Build binary wheel and source tarball
+      run: python3 -m build --sdist --wheel --outdir dist/ .
+
+    - name: Restore mypy cache
+      id: cache-mypy-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          .mypy_cache
+        key: ${{ runner.os }}-py${{ matrix.python-versions }}-mypy-${{ hashFiles('**/.mypy_cache') }}
+
+    - name: Run Python tests
+      run: |
+        make tests
+
+    - name: Save mypy cache
+      id: cache-mypy-save
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          .mypy_cache
+        key: ${{ runner.os }}-py${{ matrix.python-versions }}-mypy-${{ hashFiles('**/.mypy_cache') }}
+
+    - name: Codecov
+      uses: codecov/codecov-action@015f24e6818733317a2da2edd6290ab26238649a
+      with:
+        files: coverage.xml
+        fail_ci_if_error: false
+        verbose: true
