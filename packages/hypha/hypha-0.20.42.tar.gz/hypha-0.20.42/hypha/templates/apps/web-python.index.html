@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hypha App (web-python)</title>
+    <meta name="description" content="Template for Hypha app">
+    <meta name="author" content="ImJoy-Team">
+</head>
+
+<body>
+<ul id="console">
+
+</ul>
+<script id="worker" type="javascript/worker">
+const window = self;
+const src = `
+import sys
+import asyncio
+import json
+from types import ModuleType
+import inspect
+from js import console
+import traceback
+from hypha_rpc.utils import ObjectProxy
+from hypha_rpc import connect_to_server
+
+async def export_service(plugin_api, config, hypha_rpc):
+    try:
+        wm = await connect_to_server(config)
+        hypha_rpc.api.update(wm) # make the api available to the plugin
+        rpc = wm.rpc
+        if not isinstance(plugin_api, dict) and inspect.isclass(type(plugin_api)):
+            plugin_api = {a: getattr(plugin_api, a) for a in dir(plugin_api)}
+        # Copy the plugin name as the default name
+        plugin_api["id"] = "default"
+        plugin_api["name"] = config.get("name", "default")
+        await rpc.register_service(plugin_api, {"overwrite": True})
+        console.log("Application initialized successfully.")
+    except Exception as exp:
+        console.error("Failed to export service: ", traceback.format_exc())
+        print(traceback.format_exc())
+
+
+async def patch_hypha_rpc(default_config):
+    import hypha_rpc
+    def export(api, config=None):
+        default_config.update(config or {})
+        hypha_rpc.ready = asyncio.ensure_future(
+            export_service(api, default_config, hypha_rpc)
+        )
+
+    # create a fake hypha_rpc to patch hypha rpc
+    hypha_rpc.api = ObjectProxy(export=export)
+    return hypha_rpc
+
+
+async def run():
+    from js import config, script_src
+    config = config.to_py()
+    try:
+        hypha_rpc = await patch_hypha_rpc(config)
+        exec(script_src, globals())
+    except Exception as exp:
+        console.error("Failed to run script: ", traceback.format_exc())
+        print(traceback.format_exc())
+
+asyncio.ensure_future(run())
+`
+
+self.script_src = `
+{{ script | safe }}
+`
+
+const startupScript = `
+import js
+import micropip
+import sys
+import traceback
+import asyncio
+
+# patch ssl module for fastapi etc.
+from types import ModuleType
+m = ModuleType("ssl")
+m.SSLObject = None
+m.MemoryBIO = None
+m.SSLContext = None
+sys.modules["ssl"] = m
+del m
+
+async def run():
+    try:
+        await micropip.install(["numpy", "pydantic", "hypha-rpc=={{ hypha_main_version }}", {% for req in requirements %}"{{req}}", {% endfor %}])
+        js.__resolve()
+    except Exception as e:
+        console.error("Failed to install packages: ", traceback.format_exc())
+        js.__reject(traceback.format_exc())
+
+asyncio.get_event_loop().run_until_complete(run())
+`
+
+function installPackage(){
+    return new Promise((resolve, reject)=>{
+        self.__resolve = resolve
+        self.__reject = reject
+        self.pyodide.runPython(startupScript)
+    })
+}
+
+const toObject = (x) => {
+    if(x===undefined || x===null) return x;
+    if(self.pyodide.isPyProxy(x)){
+        return x.toJs({dict_converter : Object.fromEntries})
+    }
+    else if (x instanceof Array) {
+        return x.map(toObject);
+    } else {
+        return x;
+    }
+}
+
+async function setupPyodide() {
+    if(self.pyodide) return;
+    importScripts('https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js');
+    self.pyodide = await loadPyodide({
+        indexURL : 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/',
+        stdout: (text) => {
+            self.postMessage({"type": "stdout", "content": text})
+        },
+        stderr: (text) => {
+            self.postMessage({"type": "stderr", "content": text})
+        },
+    });
+    self.pyodide.setStdout({ batched: (msg) => console.log(msg) });
+    self.pyodide.setStderr({ batched: (msg) => console.error(msg) });
+    await self.pyodide.loadPackage(['micropip']);
+    await installPackage()
+}
+
+self.onmessage = async function(e) {
+    const config = e.data
+    self.config = config
+    try {
+        await setupPyodide()
+        self.pyodide.runPython(src);
+    } catch (err) {
+        console.error("Failed to start the script", err);
+        self.postMessage({type: "stderr", "content": err})
+    }
+}
+    
+</script>
+<script>
+window.onload = function() {
+    const consoleElem = document.getElementById('console');
+    const blob = new Blob([
+        document.querySelector('#worker').textContent
+    ], { type: "text/javascript" })
+    const worker = new Worker(window.URL.createObjectURL(blob));
+    worker.onerror = console.error
+    worker.onmessage = (e)=>{
+        if(e.data.type === 'title'){
+            document.title = e.data.content;
+            return
+        }
+        if(e.data.type === 'stdout'){
+            const li = document.createElement('li')
+            li.innerHTML = e.data.content;
+            li.style.color ="blue";
+            consoleElem.appendChild(li)
+        }
+        else if(e.data.type === 'stderr'){
+            const li = document.createElement('li')
+            li.innerHTML = e.data.content;
+            li.style.color ="red";
+            consoleElem.appendChild(li)
+        }
+        // make sure we don't have too many elements in the dom
+        if(consoleElem.children.length>1024){
+            consoleElem.removeChild(consoleElem.firstChild)
+        }
+    }
+    const config = {{ config | tojson(indent=2) }}
+    const cfg = Object.assign(config, Object.fromEntries(new URLSearchParams(window.location.search)));
+    if(!cfg.server_url) cfg.server_url = window.location.origin;
+    worker.postMessage(cfg); 
+}
+</script>
+</body>
+</html>
