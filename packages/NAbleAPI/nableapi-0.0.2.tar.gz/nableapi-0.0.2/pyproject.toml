@@ -1,0 +1,39 @@
+[project]
+dynamic = ["dependencies"] #OPTIONAL - See "tool.setuptools.dynamic" below
+keywords = ['NAble', 'NSight', 'N-Able', 'N-Sight', 'Solarwinds', 'Solar Winds'] # OPTIONAL - List of search keywords
+name = "NAbleAPI"
+version = "0.0.2"
+authors = [{ name="Fryan O", email="FryanO@proton.me" },]
+description = "NAble Data Extraction API library/wrapper"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Affero General Public License v3", # Make sure the license is correct
+    "Operating System :: OS Independent",
+    "Development Status :: 2 - Pre-Alpha",
+]
+
+[project.urls]
+Homepage = "https://github.com/ItsJustAGitHubMichealWhosGonnaSeeIt5Ppl/Python-NAbleAPI"
+Issues = "https://github.com/ItsJustAGitHubMichealWhosGonnaSeeIt5Ppl/Python-NAbleAPI/issues"
+Documentation = "https://test.com"
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]} # MAKE SURE YOU CREATE THIS FILE
+
+[tool.bumpver]
+current_version = "0.0.2" # VERSION
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message  = "Bump version {old_version} -> {new_version}"
+commit          = true
+tag             = true
+push            = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
+"NAbleAPI/client.py" = ['self.version = "{version}"', 'version = "{version}"'] # MUST MARK ALL FILES WHERE VERSION IS PRESENT
