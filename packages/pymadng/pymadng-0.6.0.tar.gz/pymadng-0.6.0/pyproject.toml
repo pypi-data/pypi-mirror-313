@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+# requires = ["hatchling"]
+# build-backend = "hatchling.build"
+
+[project]
+name = "pymadng"
+dynamic = ["version"]
+authors = [
+  { name="Joshua Gray" },
+]
+description = "A python interface to MAD-NG running as subprocess"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: Unix",
+    "Development Status :: 4 - Beta", 
+    "Natural Language :: English", 
+    "Topic :: Scientific/Engineering :: Physics"
+]
+dependencies = [
+  'numpy >= 1.11.0', #for dtype in numpy.random.randint (for tests), otherwise 1.9.0 is minimum for numpy.ndarray.tobytes
+]
+
+[project.urls]
+"Repository" = "https://github.com/MethodicalAcceleratorDesign/MADpy"
+"Bug Tracker" = "https://github.com/MethodicalAcceleratorDesign/MADpy/issues"
+"MAD Source" = "https://github.com/MethodicalAcceleratorDesign/MAD"
+"Documentation" = "https://pymadng.readthedocs.io/en/latest/"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {attr = "pymadng.__version__"}
+
+[project.optional-dependencies]
+tfs = ["tfs-pandas>3.0.0"]
