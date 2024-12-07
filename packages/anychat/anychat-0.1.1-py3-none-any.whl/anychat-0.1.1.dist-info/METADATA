@@ -1,0 +1,38 @@
+Metadata-Version: 2.3
+Name: anychat
+Version: 0.1.1
+Summary: 自定义ChatModel
+Project-URL: Repository, https://gitee.com/kin9-0rz/anychat
+Author-email: kin9-0rz <kin9-0rz@outlook.com>
+Requires-Python: >=3.12
+Requires-Dist: httpx==0.27.2
+Requires-Dist: langchain-core>=0.3.21
+Requires-Dist: langchain>=0.0.27
+Description-Content-Type: text/markdown
+
+# anychat
+
+自定义任意 ChatModel。
+
+## 用法
+
+```python
+from anychat import ChatModeCenter, AnyChat
+from langchain_core.messages import HumanMessage, SystemMessage
+
+# 方式一
+model = AnyChat(model_name="ai-model-name", api_key="your-ai-api-key", base_url="your-ai-base-url")
+messages = [SystemMessage(content="你好"), HumanMessage(content="你好")]
+model.invoke(messages)
+
+# 方式二
+cmc = ChatModeCenter(api_key="your-ai-api-key", base_url="your-ai-base-url")
+model = cmc.get_chat_model("ai-model-name")
+model.invoke(messages)
+
+```
+
+## 参考
+
+- [langchain_community/chat_models](https://github.com/langchain-ai/langchain/tree/master/libs/community/langchain_community/chat_models)
+- [langchain_community/llms](https://github.com/langchain-ai/langchain/tree/master/libs/community/langchain_community/llms)
