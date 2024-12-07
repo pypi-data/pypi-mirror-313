@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "biliarchiver"
+version = "0.1.17"
+description = "Archiving tool for Bilibili based on bilix"
+authors = ["yzqzss <yzqzss@yandex.com>"]
+readme = "README.md"
+packages = [{ include = "biliarchiver" }]
+include = ["biliarchiver/locales/**/*.mo"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+bilix = "0.18.8"
+internetarchive = "^4.1.0"
+danmakuc = "^0.3.6"
+browser-cookie3 = "^0.19.1"
+click = "^8.1.7"
+click-option-group = "^0.5.6"
+
+[tool.poetry.scripts]
+biliarchiver = "biliarchiver.cli_tools.biliarchiver:biliarchiver"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.4.0"
+fastapi = "^0.111.0"
+uvicorn = {extras = ["standard"], version = "^0.30.1"}
+hypercorn = "^0.17.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+# Enable the pycodestyle (`E`) and Pyflakes (`F`) rules by default.
+select = ["E9", "F63", "F7", "F82"]
+ignore = []
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Exclude a variety of commonly ignored directories.
+exclude = []
+per-file-ignores = {}
+
+# Same as Black.
+line-length = 127
+
+# Assume Python 3.9
+target-version = "py39"
+
+[tool.ruff.mccabe]
+# McCabe complexity (`C901`) by default.
+# Flag errors whenever the complexity level exceeds 10.
+max-complexity = 10
