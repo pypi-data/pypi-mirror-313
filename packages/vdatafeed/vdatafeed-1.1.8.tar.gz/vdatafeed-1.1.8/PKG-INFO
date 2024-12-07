@@ -1,0 +1,150 @@
+Metadata-Version: 2.1
+Name: vdatafeed
+Version: 1.1.8
+Summary: vDatafeed: A Python wrapper for Viet Nam Datafeed API
+Home-page: https://quant.vn
+License: MIT
+Author: thync
+Author-email: thync@outlook.com
+Requires-Python: >=3.9,<4.0
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: OS Independent
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Typing :: Typed
+Requires-Dist: pydantic (>=2.9.1,<3.0.0)
+Requires-Dist: pyjwt (>=2.9.0,<3.0.0)
+Requires-Dist: requests (>=2.32.3,<3.0.0)
+Requires-Dist: websockets (>=13.0.1,<14.0.0)
+Project-URL: Repository, https://github.com/quant-vn/vdatafeed
+Description-Content-Type: text/markdown
+
+
+# vDatafeed
+vDatafeed: A Python wrapper for Viet Nam Datafeed API
+
+![PyPI - Version](https://img.shields.io/pypi/v/vdatafeed)
+![Python Version](https://img.shields.io/pypi/pyversions/vdatafeed)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/vdatafeed)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
+## Installation
+```bash
+pip install vdatafeed
+```
+
+## Usage
+
+### Financial data
+
+```python
+from vdatafeed import Datafeed, Config, EnumDatafeed
+
+
+datafeed = Datafeed(
+    datafeed=EnumDatafeed.SSI.value,
+    config=Config(
+        ssi_datafeed_id="<SSI_DATAFEED_ID>",
+        ssi_datafeed_secret="<SSI_DATAFEED_SECRET>"
+    )
+)
+
+# Get list of instruments
+datafeed.api.get_instruments()
+# Get instrument details
+datafeed.api.get_instrument_details("SSI")
+# Get list of indices
+datafeed.api.get_indices()
+# Get list of instruments in an index
+datafeed.api.get_indices_instruments("VN30")
+# Get daily instruments info
+datafeed.api.get_daily_instruments_info(instrument="SSI", from_date="2024-09-01", to_date="2024-09-10")
+# Get daily all instruments info
+datafeed.api.get_daily_instruments_info(from_date="2024-09-10", to_date="2024-09-10")
+# Get daily indices info
+datafeed.api.get_daily_indices_info(index="VN30", from_date="2024-09-01", to_date="2024-09-10")
+# Get end of day OHLCV
+datafeed.api.get_endofday_ohlcv(instrument="SSI", from_date="2024-09-01", to_date="2024-09-10")
+# Get intraday OHLCV
+datafeed.api.get_intraday_ohlcv(instrument="SSI", from_date="2024-09-01", to_date="2024-09-10")
+```
+
+### Streaming data
+
+```python
+import asyncio
+from vdatafeed import Datafeed, Config, EnumDatafeed
+
+
+datafeed = Datafeed(
+    datafeed=EnumDatafeed.SSI.value,
+    config=Config(
+        ssi_datafeed_id="<SSI_DATAFEED_ID>",
+        ssi_datafeed_secret="<SSI_DATAFEED_SECRET>"
+    )
+)
+
+
+
+def on_trade_message(msg):
+    """
+    Handle the incoming trade message.
+    Args:
+        msg (str): The message received.
+    Returns:
+        None
+    """
+    print(f"TRADE: {msg}")
+
+
+def on_quote_message(msg):
+    """
+    Handle the incoming quote message.
+    Args:
+        msg (str): The message received.
+    Returns:
+        None
+    """
+    print(f"QUOTE: {msg}")
+
+
+asyncio.run(
+    datafeed.hub.listen(
+        input("Please select Symbol(SSI)/Index(VNINDEX/VN30) or list(SSI,VCB): "),
+        on_trade_message,
+        on_quote_message
+    )
+)
+
+```
+MIT License
+
+Copyright (c) 2024 Quant.vn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
