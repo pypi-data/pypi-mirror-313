@@ -1,0 +1,26 @@
+# Expected not to type check
+description: Hello world with type specification
+text:
+- def: GEN
+  text: "What is the meaning of life"
+- def: translate
+  function:
+    sentence: str
+    language: str
+  spec: int
+  return:
+    lastOf:
+    - "\nTranslate the sentence '${ sentence }' to ${ language }.\n"
+    - model: replicate/ibm-granite/granite-3.0-8b-instruct
+      parameters:
+        stop_sequences: "\n"
+- call: translate
+  spec: str
+  args:
+    sentence: ${ GEN }
+    language: French
+- call: translate
+  args:
+    sentence: ${ GEN }
+    language: Spanish
+

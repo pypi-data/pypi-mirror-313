@@ -1,0 +1,20 @@
+description: Granite Multi-Round Chat
+text:
+- include: ../granite/granite_defs.pdl
+- read: ../granite/multi-prompts.json
+  parser: json
+  def: prompts
+  spec: {prompts: [str]}
+  contribute: []
+- for:
+    prompt: ${ prompts.prompts }
+  repeat:
+    text:
+    - |
+    
+      ${ prompt }
+    - model: replicate/ibm-granite/granite-3.0-8b-instruct
+      parameters:
+        decoding_method: sample
+        max_new_tokens: 512
+role: user

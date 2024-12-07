@@ -1,0 +1,14 @@
+description: Hello world showing model chaining
+text:
+- "Hello\n"
+- model: replicate/ibm-granite/granite-3.0-8b-instruct
+  parameters:
+    decoding_method: greedy
+    stop_sequences: '!'
+  def: GEN
+- "\nDid you say ${ GEN }?\n"
+- model: replicate/ibm-granite/granite-3.0-8b-instruct
+  parameters:
+    decoding_method: greedy
+    stop_sequences: '.'
+  

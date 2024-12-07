@@ -1,0 +1,21 @@
+description: function def and call
+defs:
+  translate:
+    function:
+      sentence: str
+      language: str
+    return:
+      text:
+      - text: "\nTranslate the sentence '${ sentence }' to ${ language }.\n"
+        contribute: [context]
+      - model: replicate/ibm-granite/granite-3.0-8b-instruct
+        parameters:
+          stop_sequences: "\n"
+text:
+- call: translate
+  contribute: []
+  def: FRENCH
+  args:
+    sentence: I love Paris!
+    language: French
+- "The french sentence was: ${ FRENCH }"

@@ -1,0 +1,15 @@
+description: PDL program
+text:
+- "What is APR?\n"
+- model: replicate/ibm-granite/granite-3.0-8b-instruct
+- repeat:
+    text:
+    - read:
+      message: "\nLanguage please: "
+      def: language
+    - if: ${ language != 'stop' }
+      then:
+        text:
+        - "\n\nTranslate the above to ${ language }\n"
+        - model: replicate/ibm-granite/granite-3.0-8b-instruct
+  until: ${ language == 'stop' }
