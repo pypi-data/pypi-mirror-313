@@ -1,0 +1,82 @@
+Metadata-Version: 2.1
+Name: PaperlogicSDK
+Version: 1.0.20
+Summary: A Python SDK for digital document signing
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: asn1crypto==1.5.1
+Requires-Dist: uritools==4.0.3
+Requires-Dist: oscrypto==1.3.0
+Requires-Dist: tzlocal==5.2
+Requires-Dist: pycryptodome==3.15.0
+Requires-Dist: click==8.1.3
+Requires-Dist: requests==2.32.3
+Requires-Dist: cryptography>=41.0.2
+Requires-Dist: pytz==2023.3
+Requires-Dist: python-pkcs11==0.7.0
+
+# Python SDK for Document Signing
+
+This Python SDK provides a CLI tool to sign PDF documents securely using various authentication mechanisms and environments. 
+
+## Installation
+
+You can install the SDK using `pip`:
+
+```bash
+pip install PaperlogicSDK
+```
+PaperlogicSDK requires Python 3.8 or later
+
+## Features
+
+- Digital document signing with multiple certificate types (PKI).
+- Local digital signature processing - no need to upload files to server.
+- Support for password-protected PDF files.
+- Multiple environment support (Development, Staging, Production).
+- AWS CloudHSM integration for secure key management and signing operations.
+
+## Quick Start
+
+Once installed, you can use the CLI tool as follows:
+
+```bash
+pplg sign -i test_file.pdf -o test-signed.pdf -tk YOUR_API_TOKEN -t YOUR_TENANT_ID
+```
+
+### CLI Options
+
+| Option            | Description                                         | Required | Default |
+|-------------------|-----------------------------------------------------|----------|---------|
+| `-i`, `--input_file`  | Input file path                                  | Yes      | -       |
+| `-o`, `--output_file` | Output file path                                 | Yes      | -       |
+| `-tk`, `--api_token`  | API token for authentication                     | Yes      | -       |
+| `-t`, `--tenant_id`   | Tenant ID                                        | Yes      | -       |
+| `-pki`, `--pki`       | Certificate type (0, 1, 2, 3, 4)                 | No       | 0       |
+| `-env`, `--environment` | Environment to run the SDK (`dev`, `stg`, `prod`) | No       | `stg`   |
+| `-uid`, `--user_id`   | User ID                                          | No       | -       |
+| `-e`, `--email`       | Email address                                    | No       | -       |
+| `-pwd`, `--pdf_password` | Password for encrypted PDF files              | No       | -       |
+
+### Example
+
+To sign a document, provide the required options:
+
+```bash
+pplg sign -i input.pdf -o signed.pdf -tk YOUR_API_TOKEN -t YOUR_TENANT_ID -pki CERT_TYPE
+```
+
+If the PDF is password-protected, include the password:
+
+```bash
+pplg sign -i input.pdf -o signed.pdf -tk YOUR_API_TOKEN -t YOUR_TENANT_ID -pki CERT_TYPE -pwd PDF_PASSWORD
+```
+
+### Error Handling
+
+The SDK provides detailed error messages for various scenarios:
+
+- **Password Required**: If the PDF file is encrypted but no password is provided.
+- **User ID Required**: When signing with a company seal and no `user_id` is provided.
+- **Other Errors**: Displays specific error codes for troubleshooting.
+
