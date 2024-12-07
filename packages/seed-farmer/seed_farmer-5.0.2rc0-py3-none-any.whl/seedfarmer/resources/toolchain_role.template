@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS CloudFormation for the SeedFarmer Toolchain Role
+Outputs:
+  ToolchainRoleName:
+    Value:
+      Ref: ToolchainRole
+Resources:
+  ToolchainRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        -   Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+                AWS: []
+      Path: /
+      Policies:
+        - PolicyName: InlineToolchain
+          PolicyDocument:
+            Statement:
+            - Action:
+              - sts:AssumeRole
+              - sts:TagSession
+              - sts:GetSessionToken
+              Effect: Allow
+              Resource:
+                Fn::Sub: "arn:${AWS::Partition}:iam::*:role/seedfarmer-{{ project_name }}*"
+              Sid: ToolChainSTS
+            - Action:
+              - ssm:Put*
+              - ssm:Delete*
+              - ssm:Remove*
+              - ssm:Add*
+              - ssm:Describe*
+              - ssm:Get*
+              Effect: Allow
+              Resource:
+                Fn::Sub: "arn:${AWS::Partition}:ssm:*:${AWS::AccountId}:parameter/{{ project_name }}/*"
+              Sid: ToolChainSSM
+            - Action:
+              - ssm:Describe*
+              Effect: Allow
+              Resource:
+                Fn::Sub: "arn:${AWS::Partition}:ssm:*:${AWS::AccountId}:*"
+            - Effect: Allow
+              Sid: ToolChainSecretsManager
+              Action:
+                - secretsmanager:GetSecretValue
+                - secretsmanager:DescribeSecret
+              Resource:
+                - Fn::Sub: "arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:*-archive-credentials*"
+            - Effect: Allow
+              Sid: ToolChainS3
+              Action:
+                - s3:GetObject*
+              Resource:
+                - Fn::Sub: "arn:${AWS::Partition}:s3:::{{ project_name }}-*/*"
+      RoleName: "{{ role_name }}"
+      Tags:
+        - Key: "SeedFarmer"
+          Value: "{{ seedfarmer_version }}"
+    Type: AWS::IAM::Role
