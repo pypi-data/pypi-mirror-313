@@ -1,0 +1,86 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+# Use a slightly different name to avoid conflict with pre-existing package in pypi
+name = "ingredient_parser_nlp"
+dynamic = ["version"]
+description = "A Python package to parse structured information from recipe ingredient sentences"
+readme = "README.md"
+license = { file="LICENSE"}
+requires-python = ">=3.10, <3.14"
+keywords = ["recipe", "ingredient", "ingredients", "nlp", "parsing" ]
+authors = [
+    { name="Tom Strange", email="tpstrange@gmail.com"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = [
+    "nltk>=3.9.1",
+    "python-crfsuite",
+    "pint>=0.24.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/strangetom/ingredient-parser/"
+Documentation = "https://ingredient-parser.readthedocs.io/en/latest/"
+Source = "https://github.com/strangetom/ingredient-parser"
+Changelog = "https://github.com/strangetom/ingredient-parser/blob/master/CHANGELOG.md"
+
+[tool.setuptools]
+packages = ["ingredient_parser", "ingredient_parser.en"]
+
+[tool.setuptools.dynamic]
+version =  {attr = "ingredient_parser.__version__"}
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "-q",
+    "--import-mode=importlib",
+]
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "tests/*"
+]
+
+[tool.ruff]
+exclude = [
+    "**/__pycache__",
+    ".git",
+    "venv"
+]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E402"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.pyright]
+include = ["ingredient_parser", "train"]
+exclude = ["**/__pycache__"]
+reportUnusedImport = true
+reportUnusedClass = true
+reportUnuedFunction = true
+reportUnusedVariable = true
+reportWildcardImportFromLibrary = true
+reportPrivateUsage = true
