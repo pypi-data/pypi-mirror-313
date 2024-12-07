@@ -1,0 +1,1 @@
+from .Alcohol_Total_Game import total_game
