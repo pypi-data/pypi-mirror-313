@@ -1,0 +1,171 @@
+Metadata-Version: 2.1
+Name: fw-curate-bids
+Version: 2.2.11
+Summary: Use this gear to initialize BIDS filenames and attributes on all files within a given project.
+Home-page: https://gitlab.com/flywheel-io/flywheel-apps/templates/skeleton
+License: MIT
+Keywords: Flywheel,Gears
+Author: Flywheel
+Author-email: support@flywheel.io
+Requires-Python: >=3.11,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering
+Requires-Dist: flywheel-bids (>=1.2.24,<2.0.0)
+Requires-Dist: numpy (<2.0.0)
+Requires-Dist: pandas (>=1.3.3,<2.0.0)
+Project-URL: Repository, https://gitlab.com/flywheel-io/flywheel-apps/templates/skeleton
+Description-Content-Type: text/markdown
+
+# BIDS Curation (curate-bids)
+
+## Overview
+
+This is a Flywheel Gear that curates a Flywheel project according to the [BIDS Specification](https://bids-specification.readthedocs.io/en/stable/).  
+
+This gear uses a "project curation template" to detect acquisition files and map them to the BIDS Specification. The base curation template is chosen as a configuration option.  The "ReproIn" template is recommended and it is the default.  This template assumes you used the [ReproIn naming convention](https://dbic-handbook.readthedocs.io/en/latest/mri/reproin.html) when setting up your protocol.  
+
+Using the ReproIn template for projects containing subjects, sessions, and acquisitions named according to the ReproIn spec means that BIDS curation in Flywheel can proceed very close to automatically. The best place to start this is at the scanner console by setting the proper value for the `SeriesDescription` DICOM tag. 
+> See this [Siemens Prisma 3T walkthrough](https://github.com/ReproNim/reproin/blob/master/docs/walkthrough-1.md) as an example of how to use the ReproIn naming convention.
+
+The version number of this gear has the form of major.minor.patch_major.minor.patch where the first triplet of numbers (before the underscore) refers to this gear and the second refers to the version of the [bids-client](https://gitlab.com/flywheel-io/public/bids-client).  Most of the functionality of this gear is provided by the bids-client.
+
+BIDS curation is not difficult once a project is set up properly, however, setting everything up can take time. Proper setup requires attention to detail and some information about the project's scan protocol.  
+> See [Flywheel + BIDS: Getting Started](https://docs.flywheel.io/user/bids/user_bids_getting_started/) for complete details on setting up and running BIDS curation.  
+
+*[Usage](#usage)*
+
+*[FAQ](#faq)*
+
+### Summary
+
+Use this gear to set the BIDS paths and filenames on all files within a given project.
+
+
+### License 
+
+MIT
+
+### Classification
+
+*Category:* Analysis
+
+*Gear Level:*
+
+- [x] Project
+- [x] Subject
+- [x] Session
+- [ ] Acquisition
+- [ ] Analysis
+
+----
+
+[[_TOC_]]
+
+----
+
+### Inputs
+
+- Optional
+  - __Name__: template
+  - __Type__: json
+  - __Optional__: True
+  - __Classification__: source code
+  - __Description__: If provided, this JSON file will either extend a base template, or it can completely override all other templates.  If there is a top-level attribute of "extends", the value must be either "bids-v1", "reproin", or "default" and that base template will be extended.  If it does not have "extends", then the file must be a complete BIDS specification template, and it will be used all by itself.  The base templates are in the [BIDS Client repository](https://gitlab.com/flywheel-io/public/bids-client/-/tree/master/flywheel_bids/templates).
+  - __Notes__: If a template is provided here as an input, the base_template configuration parameter is ignored.
+
+### Config
+
+- base_template
+  - __Name__: base_template
+  - __Type__: either ReproIn or BIDS-v1 (for backwards compatibility).
+  - __Description__: Which base project curation template to use.
+  - __Default__: ReproIn
+
+- intendedfor_regexes
+  - __Name__: intendedfor_regexes
+  - __Type__: space-separated strings.
+  - __Description__: A list of pairs of regular expressions.  The first regex matches the field map acquisition label and the second matches the IntendedFor BIDS path.  Initial processing sets the list of IntendedFor paths to all files in the different 'anat', 'func', and 'dwi' BIDS folders.  These regex pairs should be used to filter that list so that only the appropriate IntendedFor paths remain.  Multiple pairs of regexes can be included.  All regexes should be separated by a single space.
+  - __Default__: None
+
+- reset
+  - __Name__: reset
+  - __Type__: boolean
+  - __Description__: Remove all BIDS info from files before curating. 
+  - __Default__: (unchecked) do *not* reset the curation
+  - __Warning__: If you have manually selected any container or file to be ignored by checking the "bids ignore" flag in the BIDS Custom Information metadata, reset will remove that also, so you will need to do that again if it is important to you.  A more permanent way of ignoring files is to add "_ignore-BIDS" at the end of an acquisition container's label (the acquisition that contains the files to be ignored).  Note that this functionality depends on the project curation template: it must implement this feature by setting the ignore flag on the container (session or acquisition) to be ignored.
+
+- save_sidecar_as_metadata
+  - __Name__: save_sidecar_as_metadata
+  - __Type__: boolean
+  - __Description__: Instead of assuming sidecar data is in actual json sidecar, put it in file.info metadata (a.k.a. "Custom Information").  This is the old behavior for this gear and BIDS Curation on Flywheel.  
+  - __Default__: False: the new behavior is to assume that the dcm2niix gear created a real json sidecar and did not add that information as metadata on the NIfTI file.
+
+- use_or_save_config
+  - __Name__: use_or_save_config
+  - __Type__: either leave blank or choose 'Save Config', 'Use Config', or 'Stop Using Config'.
+  - __Description__: Use previously saved inputs and configuration.  If you choose 'Save Config', the current configuration will be saved at the current run level (on the session, subject, or project container) in a file called 'curate-bids-[level]-config.json', and it will be used by default on subsequent runs of this gear to set the configuration.  If you choose 'Use Config', that file will be ignored if present, and the currently set configuration will be used.  The default is to do neither, which will use the saved curate-bids-config.json file if it is present and to use the current configuration if not.  For example, using the 'Save Config' option one time while providing an input template, that template will be used by default for future runs.  If you choose 'Stop Using Config', the gear will disable the curation file and then quit without curating.
+  - __Default__: blank -- use saved config file if present
+
+- verbosity
+  - __Name__: verbosity
+  - __Type__: either INFO or DEBUG
+  - __Description__: Set this to DEBUG to see exactly what is happening to help with figuring out BIDS curation.
+  - __Default__: INFO
+
+### Outputs
+
+#### BIDS Metadata
+
+The main "outputs" of this gear are Custom Information *metadata* written to the "BIDS" namespace in all containers and files.  The gear does not actually create BIDS formatted data directly. That happens when exporting data in BIDS format using the CLI and also as the first step in running a BIDS Application gear.  The BIDS metadata controls if and how NIfTI files and json sidecars are created following the BIDS Specification.  Because of this, any changes you make by manually editing BIDS metadata will override what this gear has done.  See the note above about the "reset" option: if you re-run this gear with reset on, manual changes will need to be made again.
+
+#### 5 CSV Files
+
+- CSV Files
+  - __Names__: 
+    - [group]_[project]_acquisitions.csv
+    - [group]_[project]_acquisitions_details_1.csv
+    - [group]_[project]_acquisitions_details_2.csv
+    - [group]_[project]_intendedfors.csv
+    - [group]_[project]_niftis.csv
+  - __Type__: comma separated values
+  - __Description__: This gear will save a "report" on the state of BIDS curation in the form of a collection of .csv files.  Note that the gear may include a log message saying it was run successfully even though the BIDS curation might not have been properly completed.  The only way to know if curation was successful is to examine the .csv files in detail. See [BIDS Curation Tutorial Part 4: Interpreting the Curation Report](https://docs.flywheel.io/Developer_Guides/dev_bids_curation_4_curation_report/) to understand the information provided by the .csv files.
+
+### Pre-requisites
+
+#### Prerequisite Gear Runs
+
+Before running this BIDS curation gear, you must first prepare your data with the following steps:
+1. Run the [SciTran: DICOM MR Classifier](https://github.com/flywheel-apps/dicom-mr-classifier) gear on all the acquisitions in your dataset. This step extracts the DICOM header information and stores it as Flywheel Metadata.
+1. Run the [DCM2NIIX: dcm2nii DICOM to NIfTI converter](https://github.com/flywheel-apps/dcm2niix) gear on all the acquisitions in your project.  This step generates the NIfTI files that BIDS Applications need from the DICOMS.  It also copies all Flywheel metadata from the DICOM to the NIfTI file (the DICOM header information we extracted in step 1).
+1. Only then can you run this gear on the project.  
+
+> More information about BIDS Curation on Flywheel can be found [here](https://docs.flywheel.io/user/bids/user_bids_getting_started/).  If you need to rename acquisitions, sessions or subjects before curation, use this gear: [relabel-container](https://gitlab.com/flywheel-io/scientific-solutions/gears/relabel-container).
+
+## Usage
+
+To run this gear, select a subject, session, or even the project.  To do this, find the "Run Analysis Gear" or "Run Gear" button for the desired level of the hierarchy.  If you run at the project level, it will curate the entire project.  Running at the subject level will curate all containers and files in that subject.  Running on an individual session will only curate that session.  If running at the subject or project level and some subjects or sessions have already been curated, see the description and warning about the "reset" configuration parameter below.  Detailed instructions on running this gear at a specific level are in "[Running the BIDS Curation Gear](https://docs.flywheel.io/Developer_Guides/dev_bids_curation_3_curation_gear_v2/#step-1-run-the-bids-curation-gear)"
+
+This gear is an analysis gear so if you run this gear on a session by starting with the "Run Gear" button, be sure to select the "Analysis Gear" type, not "Utility Gear".  
+
+### Workflow
+
+This gear does two "template processing" passes through the Flywheel hierarchy.  The first time it steps through each container starting at the project level and then through each subject, session, and acquisition.  It sets BIDS metadata on all files as determined by the project curation template.  The second pass (after all file paths and names have been set) resolves the IntendedFor lists as determined by the field map definition in the project curation template.
+
+Finally, the report csv files are generated.  For IntendedFors, the lists produced by the two template processing passes is generated and then the intendedfor_regexes are applied and the remaining IntendedFor lists are generated.
+
+### Logging
+
+The gear log describes each step of the gear run.  It lists each container and describes the rules that match.  Finally, it reports the number of containers and files that were curated and lists any duplicated BIDS path/names.
+
+## FAQ
+
+[FAQ.md](FAQ.md)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+<!-- markdownlint-disable-file -->
+
