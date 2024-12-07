@@ -1,0 +1,232 @@
+Metadata-Version: 2.1
+Name: agentdesk
+Version: 0.2.111
+Summary: A desktop for AI agents
+License: MIT
+Author: Patrick Barker
+Author-email: patrickbarkerco@gmail.com
+Requires-Python: >=3.10,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Dist: boto3 (>=1.34.28,<2.0.0)
+Requires-Dist: boto3-stubs[ec2] (>=1.34.28,<2.0.0)
+Requires-Dist: devicebay (>=0.1.28,<0.2.0)
+Requires-Dist: docker (>=7.0.0,<8.0.0)
+Requires-Dist: fastapi[all] (>=0.109.0,<0.110.0)
+Requires-Dist: google-cloud-compute (>=1.15.0,<2.0.0)
+Requires-Dist: google-cloud-container (>=2.38.0,<3.0.0)
+Requires-Dist: google-cloud-storage (>=2.14.0,<3.0.0)
+Requires-Dist: kubernetes (>=31.0.0,<32.0.0)
+Requires-Dist: mypy-boto3-ec2 (>=1.34.52,<2.0.0)
+Requires-Dist: namesgenerator (>=0.3,<0.4)
+Requires-Dist: paramiko (>=3.4.0,<4.0.0)
+Requires-Dist: pillow (>=10.2.0,<11.0.0)
+Requires-Dist: psutil (>=5.9.8,<6.0.0)
+Requires-Dist: psycopg2-binary (>=2.9.9,<3.0.0)
+Requires-Dist: pycdlib (>=1.14.0,<2.0.0)
+Requires-Dist: requests (>=2.31.0,<3.0.0)
+Requires-Dist: shortuuid (>=1.0.13,<2.0.0)
+Requires-Dist: sqlalchemy (>=2.0.25,<3.0.0)
+Requires-Dist: tabulate (>=0.9.0,<0.10.0)
+Requires-Dist: tenacity (>=8.2.3,<9.0.0)
+Requires-Dist: toolfuse (>=0.1.13,<0.2.0)
+Requires-Dist: tqdm (>=4.66.2,<5.0.0)
+Requires-Dist: typer (>=0.9.0,<0.10.0)
+Description-Content-Type: text/markdown
+
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <!-- <a href="https://github.com/agentsea/skillpacks">
+    <img src="https://project-logo.png" alt="Logo" width="80">
+  </a> -->
+
+  <h1 align="center">AgentDesk</h1>
+
+  <p align="center">
+    Desktops for AI agents &nbsp; :computer:
+    <br />
+    <a href="https://docs.hub.agentsea.ai/agentdesk/intro"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://youtu.be/exoOUUwFRB8">View Demo</a>
+    ·
+    <a href="https://github.com/agentsea/agentdesk/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/agentsea/agentdesk/issues">Request Feature</a>
+  </p>
+  <br>
+</p>
+
+AgentDesk provides full-featured desktop environments which can be programatically controlled by AI agents. 
+Spin them up locally or in the cloud.
+
+▶ Built on [agentd](https://github.com/agentsea/agentd) a runtime daemon which exposes a REST API for interacting with the desktop.
+
+▶ Implements the [DeviceBay Protocol](https://github.com/agentsea/devicebay).
+
+## Installation
+
+```
+pip install agentdesk
+```
+
+## Quick Start
+
+```python
+from agentdesk import Desktop
+
+# Create a desktop container
+desktop = Desktop.docker()
+
+# Launch the UI for it
+desktop.view(background=True)
+
+# Open a browser to Google
+desktop.open_url("https://google.com")
+
+# Take actions on the desktop
+desktop.move_mouse(500, 500)
+desktop.click()
+img = desktop.take_screenshot()
+```
+
+## Usage
+
+### Create a local desktop
+
+```python
+from agentdesk import Desktop
+
+desktop = Desktop.docker()
+```
+
+```bash
+$ agentdesk create --provider docker
+```
+
+_\*requires [docker](https://www.docker.com/)_
+
+
+### Create a remote desktop on Kubernetes
+
+```python
+desktop = Desktop.kube()
+```
+
+```bash
+$ agentdesk create --provider kube
+```
+
+### Create a remote desktop on GCE
+
+```python
+desktop = Desktop.gce()
+```
+
+```bash
+$ agentdesk create --provider gce
+```
+
+### Create a remote desktop on EC2
+
+```python
+desktop = Desktop.ec2()
+```
+
+```bash
+$ agentdesk create --provider ec2
+```
+
+### View the desktop in the UI
+
+```python
+desktop.view()
+```
+
+```bash
+$ agentdesk view old_mckinny
+```
+
+_\*requires docker_
+
+### List desktops
+
+```python
+Desktop.find()
+```
+
+```bash
+$ agentdesk get
+```
+
+### Delete a desktop
+
+```python
+Desktop.delete("old_mckinny")
+```
+
+```bash
+$ agentdesk delete old_mckinny
+```
+
+### Use the desktop
+
+```python
+desktop.open_url("https://google.com")
+
+coords = desktop.mouse_coordinates()
+
+desktop.move_mouse(500, 500)
+
+desktop.click()
+
+desktop.type_text("What kind of ducks are in Canada?")
+
+desktop.press_key('Enter')
+
+desktop.scroll()
+
+img = desktop.take_screenshot()
+```
+
+### Processors
+
+Process images to make them more accessible to LMMs.
+
+#### Grid
+
+Add a coordinate grid on top of the image
+
+```python
+from agentdesk.processors import GridProcessor
+
+img = desktop.take_screenshot()
+
+processor = GridProcessor()
+grid_img = processor.process_b64(img)
+```
+
+## Examples
+
+### Drawing Bot
+
+See how to use a web-based drawing app with AgentDesk in our [notebook](./examples/drawing/demo.ipynb).
+
+### GPT-4V
+
+See how to use GPT-4V with AgentDesk in our [notebook](./examples/gpt4v/note.ipynb) or [agent](./examples/gpt4v/main.py).
+
+## Community
+
+Come join us on [Discord](https://discord.gg/hhaq7XYPS6).
+
+## Developing
+
+Please open an issue before creating a PR.
+
+Changes to the VM happen in [agentd](https://github.com/agentsea/agentd).
+
