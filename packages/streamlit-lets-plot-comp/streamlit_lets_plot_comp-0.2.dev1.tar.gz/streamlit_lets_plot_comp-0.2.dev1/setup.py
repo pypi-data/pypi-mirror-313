@@ -1,0 +1,40 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="streamlit-lets-plot-comp",
+    version="0.2.dev1",
+    license="MIT",
+    maintainer='JetBrains',
+    maintainer_email='lets-plot@jetbrains.com',
+    author='JetBrains',
+    author_email='lets-plot@jetbrains.com',
+    description="A Streamlit component for displaying Lets-Plot charts",
+    # long_description=open("README.md").read(),
+    long_description="Under construction",
+    long_description_content_type="text/markdown",
+    url="https://github.com/alshan/streamlit-lets-plot",
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=[
+        "streamlit>=0.84.0",
+        "lets-plot>=4.5.2a2",
+    ],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Topic :: Scientific/Engineering :: Visualization",
+    ],
+    python_requires='>=3.8',
+    project_urls={
+        "Bug Reports": "https://github.com/alshan/streamlit-lets-plot/issues",
+        "Source": "https://github.com/alshan/streamlit-lets-plot",
+    },
+)
