@@ -1,0 +1,59 @@
+# pyproject.toml, for more information about configuration options, see
+# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+
+[project]
+name = "svgdatagrabber"
+authors = [
+  { name="WANG Hailin", email="hailin.wang@connect.polyu.hk" },
+]
+description = "Get svg data points"
+readme = "README.md"
+dynamic = ["version"]
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "shapely",
+    "svgpathtools",
+    "typing_extensions",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/haiiliin/svgdatagrabber/"
+"Documentation" = "https://svgdatagrabber.readthedocs.io/"
+
+[project.scripts]
+svgdatagrabber-graphics = "svgdatagrabber.graphics.__main__:main"
+
+[project.optional-dependencies]
+graphics = ["qtpy", "PyQt5"]
+io = ["matplotlib", "pandas"]
+dev = ["pytest", "pytest-cov"]
+
+[tool.setuptools_scm]
+root = "."
+write_to = "svgdatagrabber/_version.py"
+
+[tool.black]
+line-length = 120
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '(svgdatagrabber/.*\.py)|(tests/.*\.py)|(setup\.py)'
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+addopts = "--cov=svgdatagrabber --cov-report=xml --cov-report=term-missing --doctest-modules"
