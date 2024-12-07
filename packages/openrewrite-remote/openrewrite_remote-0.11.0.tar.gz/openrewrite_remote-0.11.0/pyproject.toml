@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "openrewrite-remote"
+version = "0.11.0"  # This will be replaced by the GitHub Actions workflow
+description = "Remoting functionality for the OpenRewrite library."
+authors = ["Moderne Inc. <support@moderne.io>"]
+license = "Moderne, Inc. Commercial License"
+packages = [
+    { include = "rewrite" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+cbor2 = "^5.6.4"
+openrewrite = "*"
+#rewrite = { path = "../../../../openrewrite/rewrite-python/rewrite", develop = true }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+mypy = "^1.11.1"
+poethepoet = "^0.27.0"
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+strict = true
+
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+
+[tool.poe.tasks]
+check-types = "mypy src"
+test = "pytest"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
