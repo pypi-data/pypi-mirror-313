@@ -1,0 +1,63 @@
+Metadata-Version: 2.1
+Name: aws-cdk.asset-awscli-v2
+Version: 2.0.130
+Summary: An Asset construct that contains the AWS CLI, for use in Lambda Layers
+Home-page: https://github.com/cdklabs/awscdk-asset-awscli#readme
+Author: Amazon Web Services<aws-cdk-dev@amazon.com>
+License: Apache-2.0
+Project-URL: Source, https://github.com/cdklabs/awscdk-asset-awscli.git
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: JavaScript
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Typing :: Typed
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: License :: OSI Approved
+Requires-Python: ~=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+License-File: NOTICE
+Requires-Dist: aws-cdk-lib<3.0.0,>=2.0.0
+Requires-Dist: constructs<11.0.0,>=10.0.5
+Requires-Dist: jsii<2.0.0,>=1.103.1
+Requires-Dist: publication>=0.0.3
+Requires-Dist: typeguard<5.0.0,>=2.13.3
+
+# Asset with AWS CLI v2
+
+<!--BEGIN STABILITY BANNER-->---
+
+
+![cdk-constructs: Experimental](https://img.shields.io/badge/cdk--constructs-experimental-important.svg?style=for-the-badge)
+
+---
+
+
+> This library is currently under development. Do not use!
+
+<!--END STABILITY BANNER-->
+
+This module exports a single class called `AwsCliAsset` which is an `s3_assets.Asset` that bundles the AWS CLI v2.
+
+Usage:
+
+```python
+# AwsCliLayer bundles the AWS CLI in a lambda layer
+from aws_cdk.asset_awscli_v2 import AwsCliAsset
+import aws_cdk.aws_lambda as lambda_
+import aws_cdk.aws_s3_assets as s3_assets
+from aws_cdk import FileSystem
+
+# fn: lambda.Function
+
+awscli = AwsCliAsset(self, "AwsCliCode")
+fn.add_layers(lambda_.LayerVersion(self, "AwsCliLayer",
+    code=lambda_.Code.from_bucket(awscli.bucket, awscli.s3_object_key)
+))
+```
+
+The CLI will be installed under `/opt/awscli/aws`.
