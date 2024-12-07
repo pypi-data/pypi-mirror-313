@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>haot.aerodynamics &mdash; haot 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            haot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Submodules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../submodules/aerodynamics.html">Aerodynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../submodules/quantum_mechanics.html">Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../submodules/optics.html">Optics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../submodules/constants_tables.html">Constants</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">haot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">haot.aerodynamics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for haot.aerodynamics</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Date:   08/27/2023</span>
+<span class="sd">    Author: Martin E. Liza</span>
+<span class="sd">    File:   aerodynamics.py</span>
+<span class="sd">    Def:    Contains aerodynamics helper functions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">molmass</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.constants</span> <span class="k">as</span> <span class="nn">s_consts</span>
+<span class="kn">from</span> <span class="nn">haot</span> <span class="kn">import</span> <span class="n">constants_tables</span>
+
+
+<div class="viewcode-block" id="sutherland_law_viscosity">
+<a class="viewcode-back" href="../../submodules/aerodynamics.html#haot.sutherland_law_viscosity">[docs]</a>
+<span class="k">def</span> <span class="nf">sutherland_law_viscosity</span><span class="p">(</span><span class="n">temperature_K</span><span class="p">,</span> <span class="n">molecule</span><span class="o">=</span><span class="s2">&quot;Air&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the Sutherland&#39;s law of viscosity</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        temperature_K (float): reference temperature</span>
+<span class="sd">        molecule (str): Air (default), Argon, N2, O2</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dynamic_viscosity (float): [kg/ms]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="n">constants_tables</span><span class="o">.</span><span class="n">sutherland_constants</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+
+    <span class="n">dynamic_viscosity</span> <span class="o">=</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;temperature_ref&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;sutherland_visc&quot;</span><span class="p">]</span>
+    <span class="n">dynamic_viscosity</span> <span class="o">/=</span> <span class="n">temperature_K</span> <span class="o">+</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;sutherland_visc&quot;</span><span class="p">]</span>
+    <span class="n">dynamic_viscosity</span> <span class="o">*=</span> <span class="p">(</span><span class="n">temperature_K</span> <span class="o">/</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;temperature_ref&quot;</span><span class="p">])</span> <span class="o">**</span> <span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;viscosity_ref&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">dynamic_viscosity</span>  <span class="c1"># [kg/ms]</span></div>
+
+
+
+<div class="viewcode-block" id="sutherland_law_conductivity">
+<a class="viewcode-back" href="../../submodules/aerodynamics.html#haot.sutherland_law_conductivity">[docs]</a>
+<span class="k">def</span> <span class="nf">sutherland_law_conductivity</span><span class="p">(</span><span class="n">temperature_K</span><span class="p">,</span> <span class="n">molecule</span><span class="o">=</span><span class="s2">&quot;Air&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the Sutherland&#39;s law of thermal conductivity</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        temperature_K (float): reference temperature</span>
+<span class="sd">        molecule (str): Air (default), Argon, N2, O2</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        thermal_conductivity (float): [W/mK]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">const</span> <span class="o">=</span> <span class="n">constants_tables</span><span class="o">.</span><span class="n">sutherland_constants</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
+    <span class="n">thermal_conductivity</span> <span class="o">=</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;sutherland_cond&quot;</span><span class="p">]</span>
+    <span class="n">thermal_conductivity</span> <span class="o">+=</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;temperature_ref&quot;</span><span class="p">]</span>
+    <span class="n">thermal_conductivity</span> <span class="o">/=</span> <span class="n">temperature_K</span> <span class="o">+</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;sutherland_cond&quot;</span><span class="p">]</span>
+    <span class="n">thermal_conductivity</span> <span class="o">*=</span> <span class="n">temperature_K</span> <span class="o">/</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;temperature_ref&quot;</span><span class="p">]</span>
+    <span class="n">thermal_conductivity</span> <span class="o">**=</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">const</span><span class="p">[</span><span class="s2">&quot;conductivity_ref&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">thermal_conductivity</span>  <span class="c1"># [W/mK]</span></div>
+
+
+
+<div class="viewcode-block" id="air_atomic_molar_mass">
+<a class="viewcode-back" href="../../submodules/aerodynamics.html#haot.air_atomic_molar_mass">[docs]</a>
+<span class="k">def</span> <span class="nf">air_atomic_molar_mass</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the atomic molar mass of an 11-species air in [g/mol]&quot;&quot;&quot;</span>
+    <span class="n">molecules</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;N+&quot;</span><span class="p">,</span> <span class="s2">&quot;O+&quot;</span><span class="p">,</span> <span class="s2">&quot;NO+&quot;</span><span class="p">,</span> <span class="s2">&quot;N2+&quot;</span><span class="p">,</span> <span class="s2">&quot;O2+&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;NO&quot;</span><span class="p">,</span> <span class="s2">&quot;N2&quot;</span><span class="p">,</span> <span class="s2">&quot;O2&quot;</span><span class="p">]</span>
+    <span class="n">air_atomic_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">:</span>
+        <span class="n">air_atomic_dict</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">molmass</span><span class="o">.</span><span class="n">Formula</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">mass</span>
+
+    <span class="k">return</span> <span class="n">air_atomic_dict</span>  <span class="c1"># [g/mol]</span></div>
+
+
+
+<div class="viewcode-block" id="speed_of_sound">
+<a class="viewcode-back" href="../../submodules/aerodynamics.html#haot.speed_of_sound">[docs]</a>
+<span class="k">def</span> <span class="nf">speed_of_sound</span><span class="p">(</span><span class="n">temperature_K</span><span class="p">,</span> <span class="n">adiabatic_indx</span><span class="o">=</span><span class="mf">1.4</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the speed of sound</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        temperature_K (float): reference temperature</span>
+<span class="sd">        adiabatic_indx (double): adiabatic index, 1.4 (default)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        spd_of_sound (float): speed of sound in [m/s]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gas_const</span> <span class="o">=</span> <span class="n">s_consts</span><span class="o">.</span><span class="n">R</span>  <span class="c1"># [J/mol*K]</span>
+    <span class="n">air_atomic_mass</span> <span class="o">=</span> <span class="n">air_atomic_molar_mass</span><span class="p">()</span>  <span class="c1"># [g/mol]</span>
+    <span class="n">air_molecular_mass</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">0.7803</span> <span class="o">*</span> <span class="n">air_atomic_mass</span><span class="p">[</span><span class="s2">&quot;N2&quot;</span><span class="p">]</span>  <span class="c1"># [kg/mol]</span>
+        <span class="o">+</span> <span class="mf">0.2099</span> <span class="o">*</span> <span class="n">air_atomic_mass</span><span class="p">[</span><span class="s2">&quot;O2&quot;</span><span class="p">]</span>
+        <span class="o">+</span> <span class="mf">0.0003</span> <span class="o">*</span> <span class="n">air_atomic_mass</span><span class="p">[</span><span class="s2">&quot;CO2&quot;</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+    <span class="n">spd_of_sound</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="n">adiabatic_indx</span> <span class="o">*</span> <span class="n">temperature_K</span> <span class="o">*</span> <span class="n">gas_const</span> <span class="o">/</span> <span class="n">air_molecular_mass</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">spd_of_sound</span>  <span class="c1"># [m/s]</span></div>
+
+
+
+<div class="viewcode-block" id="normal_shock_relations">
+<a class="viewcode-back" href="../../submodules/aerodynamics.html#haot.normal_shock_relations">[docs]</a>
+<span class="k">def</span> <span class="nf">normal_shock_relations</span><span class="p">(</span><span class="n">mach_1</span><span class="p">,</span> <span class="n">adiabatic_indx</span><span class="o">=</span><span class="mf">1.4</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates normal shock relations</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">        https://www.grc.nasa.gov/www/k-12/airplane/normal.html</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        mach_1 (float): pre-shock mach number</span>
+<span class="sd">        adiabatic_indx (double): adiabatic index, 1.4 (default)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        normal_shock_dic: dictionary with normal shock properties</span>
+<span class="sd">            mach_2 (float): post-shock mach number [ ]</span>
+<span class="sd">            pressure_r (float): pressure ratio (post-shock / pre-shock) [ ]</span>
+<span class="sd">            temperature_r (float): temperature ratio (post-shock / pre-shock) [ ]</span>
+<span class="sd">            density_r (float): density ratio (post-shock / pre-shock) [ ]</span>
+<span class="sd">            pressure_tr (float): stagnation pressure ratio (post-shock / pre-shock) [ ]</span>
+<span class="sd">            temperature_tr (float): stagnation temperature ratio (post-shock / pre-shock) [ ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gamma_minus</span> <span class="o">=</span> <span class="n">adiabatic_indx</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">gamma_plus</span> <span class="o">=</span> <span class="n">adiabatic_indx</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">mach_11</span> <span class="o">=</span> <span class="n">mach_1</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">mach_2</span> <span class="o">=</span> <span class="n">gamma_minus</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="n">mach_2</span> <span class="o">/=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">adiabatic_indx</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">-</span> <span class="n">gamma_minus</span>
+    <span class="n">mach_2</span> <span class="o">**=</span> <span class="mf">0.5</span>
+
+    <span class="n">pressure_r</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">adiabatic_indx</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">-</span> <span class="n">gamma_minus</span><span class="p">)</span> <span class="o">/</span> <span class="n">gamma_plus</span>
+
+    <span class="n">temperature_r</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">adiabatic_indx</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">-</span> <span class="n">gamma_minus</span>
+    <span class="n">temperature_r</span> <span class="o">*=</span> <span class="n">gamma_minus</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="n">temperature_r</span> <span class="o">/=</span> <span class="n">gamma_plus</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mach_11</span>
+
+    <span class="n">density_r</span> <span class="o">=</span> <span class="n">gamma_plus</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma_minus</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">pressure_tr1</span> <span class="o">=</span> <span class="n">gamma_plus</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">adiabatic_indx</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">-</span> <span class="n">gamma_minus</span><span class="p">)</span>
+    <span class="n">pressure_tr1</span> <span class="o">**=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">gamma_minus</span>
+    <span class="n">pressure_tr2</span> <span class="o">=</span> <span class="n">gamma_plus</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma_minus</span> <span class="o">*</span> <span class="n">mach_11</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">pressure_tr2</span> <span class="o">**=</span> <span class="n">adiabatic_indx</span> <span class="o">/</span> <span class="n">gamma_minus</span>
+    <span class="n">pressure_tr</span> <span class="o">=</span> <span class="n">pressure_tr1</span> <span class="o">*</span> <span class="n">pressure_tr2</span>
+
+    <span class="c1"># Return Dictionary</span>
+    <span class="n">normal_shock_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;mach_2&quot;</span><span class="p">:</span> <span class="n">mach_2</span><span class="p">,</span>
+        <span class="s2">&quot;pressure_r&quot;</span><span class="p">:</span> <span class="n">pressure_r</span><span class="p">,</span>
+        <span class="s2">&quot;temperature_r&quot;</span><span class="p">:</span> <span class="n">temperature_r</span><span class="p">,</span>
+        <span class="s2">&quot;density_r&quot;</span><span class="p">:</span> <span class="n">density_r</span><span class="p">,</span>
+        <span class="s2">&quot;pressure_tr&quot;</span><span class="p">:</span> <span class="n">pressure_tr</span><span class="p">,</span>
+        <span class="s2">&quot;temperature_tr&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">normal_shock_dict</span>  <span class="c1"># [ ]</span></div>
+
+
+
+<span class="c1"># Oblique shock relations</span>
+<span class="c1"># TODO: Update this doc string on this</span>
+<div class="viewcode-block" id="oblique_shock_relations">
+<a class="viewcode-back" href="../../submodules/aerodynamics.html#haot.oblique_shock_relations">[docs]</a>
+<span class="k">def</span> <span class="nf">oblique_shock_relations</span><span class="p">(</span><span class="n">mach_1</span><span class="p">,</span> <span class="n">shock_angle_deg</span><span class="p">,</span> <span class="n">adiabatic_indx</span><span class="o">=</span><span class="mf">1.4</span><span class="p">):</span>
+    <span class="c1"># REF : Modern Compressible Flows With Historical Ref., eq 4.7 - 4.11</span>
+    <span class="c1"># NOTE: Equations only work for weak shocks</span>
+    <span class="c1"># Note ratio = var_1 / var_2</span>
+    <span class="n">shock_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">shock_angle_deg</span><span class="p">)</span>  <span class="c1"># radians</span>
+    <span class="n">mach_n1</span> <span class="o">=</span> <span class="n">mach_1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">shock_angle</span><span class="p">)</span>  <span class="c1"># normal mach number</span>
+    <span class="n">mach_n11</span> <span class="o">=</span> <span class="n">mach_n1</span><span class="o">**</span><span class="mi">2</span>  <span class="c1"># normal mach number square</span>
+    <span class="c1"># Calculates Deflection angle (Eq. 4.17)</span>
+    <span class="n">tan_deflection_ang</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">shock_angle</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">mach_n11</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">mach_1</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">adiabatic_indx</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">shock_angle</span><span class="p">))</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">deflection_angle_deg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">tan_deflection_ang</span><span class="p">))</span>
+    <span class="c1"># Calculates properties downstream the shock</span>
+    <span class="n">density_r</span> <span class="o">=</span> <span class="p">((</span><span class="n">adiabatic_indx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">mach_n1</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">adiabatic_indx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">mach_n1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">pressure_r</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">adiabatic_indx</span> <span class="o">*</span> <span class="p">(</span><span class="n">mach_n1</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">adiabatic_indx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">temperature_r</span> <span class="o">=</span> <span class="n">pressure_r</span> <span class="o">*</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">density_r</span>
+    <span class="c1"># Calculates mach 2</span>
+    <span class="n">mach_n2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">mach_n1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">adiabatic_indx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="o">/</span> <span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">adiabatic_indx</span> <span class="o">/</span> <span class="p">(</span><span class="n">adiabatic_indx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">*</span> <span class="n">mach_n1</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">mach_2</span> <span class="o">=</span> <span class="n">mach_n2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">shock_angle_deg</span> <span class="o">-</span> <span class="n">deflection_angle_deg</span><span class="p">))</span>
+    <span class="c1"># Dictionary</span>
+    <span class="n">oblique_shock_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;mach_2&quot;</span><span class="p">:</span> <span class="n">mach_2</span><span class="p">,</span>
+        <span class="s2">&quot;pressure_r&quot;</span><span class="p">:</span> <span class="n">pressure_r</span><span class="p">,</span>
+        <span class="s2">&quot;temperature_r&quot;</span><span class="p">:</span> <span class="n">temperature_r</span><span class="p">,</span>
+        <span class="s2">&quot;density_r&quot;</span><span class="p">:</span> <span class="n">density_r</span><span class="p">,</span>
+        <span class="s2">&quot;deflection_angle_degs&quot;</span><span class="p">:</span> <span class="n">deflection_angle_deg</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">oblique_shock_dict</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Martin E. Liza.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
