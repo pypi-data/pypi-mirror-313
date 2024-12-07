@@ -1,0 +1,39 @@
+#! /usr/bin/python3
+
+# Trosnoth (UberTweak Platform Game)
+# Copyright (C) 2006-2009 Joshua D Bartlett
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301, USA.
+
+# Workaround for pyinstaller app to avoid ReactorAlreadyInstalledError
+# See https://github.com/kivy/kivy/issues/4182#issuecomment-253159955
+import sys
+if 'twisted.internet.reactor' in sys.modules:
+    del sys.modules['twisted.internet.reactor']
+
+# Install the asyncio reactor as early as possible
+from trosnoth import qtreactor
+qtreactor.declare_this_module_requires_asyncio_reactor()
+
+# Init django environment for writing to database
+import os
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'trosnoth.server.settings')
+django.setup()
+
+# Import trosnoth.
+from trosnoth.run.authserver import main
+
+main()
