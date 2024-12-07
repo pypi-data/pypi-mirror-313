@@ -1,0 +1,54 @@
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "8.1.2"
+tag_format = "$version"
+version_files = [
+    "pyproject.toml",
+]
+
+[tool.ruff.lint]
+ignore = [
+    "E701",
+    "E731",
+    "E741",
+]
+
+[project]
+name = "PyExpUtils-andnp"
+version = "8.1.2"
+description = "A small set of utilities for RL and ML experiments"
+authors = [
+    { name = "Andy Patterson", email = "andnpatterson@gmail.com" },
+]
+dependencies = [
+    "numba>=0.57.0",
+    "numpy>=1.21.5",
+    "filelock>=3.0.0",
+    "pandas",
+    "connectorx",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+
+[project.license]
+text = "MIT"
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "commitizen",
+    "pre-commit",
+    "types-filelock",
+    "build",
+    "twine",
+    "pyright>=1.1.324",
+]
+
+[project.scripts]
+run-parallel = "PyExpUtils.parallel_runner:main"
+
+[build-system]
+requires = [
+    "pdm-pep517>=1.0.0",
+]
+build-backend = "pdm.pep517.api"
