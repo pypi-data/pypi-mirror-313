@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "c3p"
+version = "0.1.0"
+description = "CHEBI Classification Programs"
+authors = ["Chris Mungall <cjm@berkeleybop.org>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+typer = "^0.14.0"
+rdkit = "^2024.3.5"
+oaklib = { version="*", optional = true }
+llm = { version="*", optional = true }
+jupyter = { version="*", optional = true }
+matplotlib = { version="*", optional = true }
+plotly = { version="*", optional = true }
+seaborn = { version="*", optional = true }
+
+[tool.poetry.group.dev.dependencies]
+pytest = {version = ">=7.1.2"}
+tox = {version = ">=3.25.1"}
+
+[tool.poetry.extras]
+eval = ["pandas", "matplotlib", "plotly", "seaborn", "jupyter"]
+learn = ["llm"]
+oaklib = ["oaklib"]
+
+[tool.poetry.scripts]
+c3p = "c3p.cli:app"
+c3p-eval = "c3p.eval_cli:app"
+
+[tool.poetry-dynamic-versioning]
+enable = false
+vcs = "git"
+style = "pep440"
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
