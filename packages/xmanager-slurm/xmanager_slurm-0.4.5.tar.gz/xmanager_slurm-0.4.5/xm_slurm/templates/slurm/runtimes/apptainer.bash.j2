@@ -1,0 +1,104 @@
+{% macro env(env_vars) -%}
+{% for key, value in env_vars.items() %}
+{% if key.startswith("SINGULARITY") or key.startswith("APPTAINER") or key.startswith("_") %}
+{% set key = key.lstrip('_') %}
+export {{ key }}="{{ value }}"
+{% else %}
+export APPTAINERENV_{{ key }}="{{ value }}"
+export SINGULARITYENV_{{ key }}="{{ value }}"
+export {{ key }}="{{ value }}"
+{% endif %}
+{% endfor %}
+{%- endmacro %}
+
+{% macro export(job, mode=None) -%}
+    {%- set combined_envs = operator.or_(job.env_vars, job.executable.env_vars) -%}
+    {%- if job.executable.credentials -%}
+      {%- set combined_envs = operator.or_(combined_envs, {
+          "APPTAINER_DOCKER_USERNAME": job.executable.credentials.username,
+          "APPTAINER_DOCKER_PASSWORD": job.executable.credentials.password,
+          "SINGULARITY_DOCKER_USERNAME": job.executable.credentials.username,
+          "SINGULARITY_DOCKER_PASSWORD": job.executable.credentials.password,
+        })
+      -%}
+    {%- endif %}
+
+    {%- set env_strings = [] -%}
+    {%- for key, value in combined_envs.items() -%}
+        {%- if key.startswith("SINGULARITY") or key.startswith("APPTAINER") -%}
+            {%- set _ = env_strings.append('{0}="{1}"'.format(key, value)) -%}
+        {%- else -%}
+            {%- set _ = env_strings.append('APPTAINERENV_{0}="{1}",SINGULARITYENV_{0}="{1}"'.format(key, value)) -%}
+        {%- endif -%}
+    {%- endfor -%}
+
+     {%- if mode is not none -%}
+      {{- mode -}}{{- "," if combined_envs -}}
+    {%- endif -%}
+
+    {{- env_strings | join(",") -}}
+{% endmacro %}
+
+{% macro run(job, cluster) -%}
+# Determine which binary to use or if an error should be raised
+if [[ $(command -v apptainer) ]]; then
+    readonly CONTAINER_RUNTIME="apptainer"
+elif [[ $(command -v singularity) ]]; then
+    readonly CONTAINER_RUNTIME="singularity"
+else
+    echo "Error: Neither singularity nor apptainer binaries found" >&2
+    exit 1
+fi
+
+# Bundle will be where our built sandbox image is stored
+# container-workdir will be our container's scratch directory
+mkdir -p "$SLURM_TMPDIR"/{container,container-workdir,container-overlay}
+
+time ${CONTAINER_RUNTIME} build \
+  --force \
+  --sandbox \
+  --fix-perms \
+  "$SLURM_TMPDIR"/container \
+  docker://{{ job.executable.image }}
+
+{% if (cluster.runtime | string) == "singularity" and cluster.mounts %}
+{% for source, dest in cluster.mounts.items() %}
+mkdir -p "$SLURM_TMPDIR"/container/{{ dest | trim('/') }}
+{% endfor %}
+{% endif %}
+
+exec ${CONTAINER_RUNTIME} run \
+{% if job.executor.requirements.accelerator %}
+  --nv \
+{% endif %}
+  --no-init \
+  --no-umask \
+  --no-home \
+  --cleanenv \
+  --containall \
+{% if cluster.mounts %}
+{% for source, dest in cluster.mounts.items() %}
+  --bind {{ source }}:{{ dest }} \
+{% endfor %}
+{% endif %}
+  --workdir "$SLURM_TMPDIR"/container-workdir \
+{% if (cluster.runtime | string) == "apptainer" %}
+  --overlay "$SLURM_TMPDIR"/container-overlay \
+{% else %}
+  --writable \
+{% endif %}
+{% if job.executable.workdir %}
+  --pwd {{ job.executable.workdir }} \
+{% endif %}
+  "$SLURM_TMPDIR"/container \
+{% for arg in job.executable.args.to_list() %}
+  {{ arg }} \
+{% endfor %}
+{% for arg in job.args.to_list() %}
+  {{ arg }} \
+{% endfor %}
+{% if caller %}
+  {{- caller() -}}
+{% endif %}
+  "$@"
+{%- endmacro %}

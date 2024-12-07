@@ -1,0 +1,31 @@
+{% macro proxy(host) -%}
+__xm_slurm_proxy() {
+    local -r GATEWAY="$1"
+    local PORT
+
+    # Find an open port
+    while
+        PORT="$(shuf -n 1 -i 1024-65535)"
+        netstat -atun | grep -q "$PORT"
+    do
+        sleep 0.25
+        continue
+    done
+
+    # Reverse proxy through the gateway
+    ssh -D "$PORT" "$GATEWAY" -N -f
+
+    # Export all env vars for applications to pick up on proxy
+    export ALL_PROXY="socks5://127.0.0.1:$PORT"
+    export all_proxy="socks5://127.0.0.1:$PORT"
+
+    export HTTP_PROXY="socks5://127.0.0.1:$PORT"
+    export http_proxy="socks5://127.0.0.1:$PORT"
+
+    export HTTPS_PROXY="socks5://127.0.0.1:$PORT"
+    export https_proxy="socks5://127.0.0.1:$PORT"
+
+    export JAVA_OPTS="-DsocksProxyHost=127.0.0.1 -DsocksProxyPort=$PORT"
+}
+__xm_slurm_proxy "{{ host }}"
+{%- endmacro %}

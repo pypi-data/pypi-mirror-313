@@ -1,0 +1,38 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.241.1/containers/python-3-miniconda
+{
+  "name": "xm-slurm",
+  "image": "mcr.microsoft.com/vscode/devcontainers/python:3.10",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    // TODO(jfarebro): add uv feature when available
+    "ghcr.io/devcontainers-contrib/features/pre-commit:2": {},
+    "ghcr.io/devcontainers-contrib/features/direnv:1": {}
+  },
+  "remoteEnv": {
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+  },
+  // docker-from-docker suggests using --init in the run args to clean up zombie processes?
+  "runArgs": [
+    "--init",
+    "--network=host"
+  ],
+  // Mount the local docker socket to the container
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind,consistency=cached"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "mkhl.direnv"
+      ]
+    }
+  },
+  "postCreateCommand": {
+    // TODO(jfarebro): uv sync when available
+    "pre-commit": "pre-commit install -t commit-msg --install-hooks"
+  }
+}

@@ -1,0 +1,71 @@
+version: '3.8'
+services:
+  mysql:
+      image: mariadb:11.2
+      hostname: mysql
+      container_name: mysql
+      environment:
+        MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+        MYSQL_DATABASE: slurm_acct_db
+        MYSQL_USER: slurm
+        MYSQL_PASSWORD: password
+      expose:
+        - 3306
+
+  slurmdbd:
+    image: slurm-docker-cluster:latest-db
+    build:
+      context: .
+      target: slurm-db
+    command: ["slurmdbd"]
+    restart: always
+    hostname: slurmdbd
+    container_name: slurm-db
+    expose:
+      - 6819
+    depends_on:
+      - mysql
+
+  slurmctld:
+    image: slurm-docker-cluster:latest-controller
+    build:
+      context: .
+      target: slurm-base
+    command: ["slurmctld"]
+    # restart: always
+    depends_on:
+      - slurmdbd
+    hostname: slurmctld
+    container_name: slurm-controller
+    expose:
+      - 6817
+
+  slurm-login:
+    image: slurm-docker-cluster:latest
+    build:
+      context: .
+      target: slurm-login
+    command: ["slurm-login"]
+    depends_on:
+      - slurmctld
+    hostname: xm-slurm
+    container_name: slurm-login
+    ports:
+      - 2222:2222
+    expose:
+      - 2222
+
+  slurm-node-0:
+    image: slurm-docker-cluster:latest-compute
+    build:
+      context: .
+      target: slurm-base
+    command: ["slurmd"]
+    # restart: always
+    depends_on:
+      - slurmctld
+    hostname: slurm-node-0
+    container_name: slurm-node-0
+    expose:
+      - 6818
+      - 6820
