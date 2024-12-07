@@ -1,0 +1,166 @@
+_subdirectory: "templates/{{ template }}"
+
+_envops:
+  lstrip_blocks: true
+  trim_blocks: true
+
+_jinja_extensions:
+  - jinja2_strcase.StrcaseExtension
+
+
+template:
+  help: Template
+  type: str
+  default: ros2_cpp_pkg
+  choices: [ros2_cpp_pkg, ros2_interfaces_pkg, ros2_python_pkg]
+
+package_name:
+  help: Package name
+  type: str
+  placeholder: "{{ template }}"
+  validator: "{% if not package_name %}Package name is required{% endif %}"
+
+description:
+  help: Description
+  type: str
+  default: TODO
+
+maintainer:
+  help: Maintainer
+  type: str
+  default: TODO
+
+maintainer_email:
+  help: Maintainer email
+  type: str
+  default: "{{ maintainer | lower | replace(' ', '.') }}@TODO.com"
+
+author:
+  help: Author
+  type: str
+  default: "{{ maintainer }}"
+
+author_email:
+  help: Author email
+  type: str
+  default: "{{ author | lower | replace(' ', '.') }}@TODO.com"
+
+license:
+  help: License
+  type: str
+  default: TODO
+  choices: [TODO, Apache-2.0, BSL-1.0, BSD-2.0, BSD-2-Clause, BSD-3-Clause, GPL-3.0-only, LGPL-2.1-only, LGPL-3.0-only, MIT, MIT-0]
+
+node_name:
+  help: Node name
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: str
+  default: "{{ package_name }}"
+
+node_class_name:
+  help: Class name of node
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: str
+  default: "{{ node_name | to_camel }}"
+
+is_component:
+  help: Make it a component?
+  when: "{{ template == 'ros2_cpp_pkg' }}"
+  type: bool
+  default: false
+
+is_lifecycle:
+  help: Make it a lifecycle node?
+  when: "{{ template == 'ros2_cpp_pkg' }}"
+  type: bool
+  default: false
+
+has_launch_file:
+  help: Add a launch file?
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: bool
+  default: true
+
+launch_file_type:
+  help: Type of launch file
+  when: "{{ (template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg') and has_launch_file }}"
+  type: str
+  default: py
+  choices: [py, xml, yml]
+
+has_params:
+  help: Add parameter loading?
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: bool
+  default: true
+
+has_subscriber:
+  help: Add a subscriber?
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: bool
+  default: true
+
+has_publisher:
+  help: Add a publisher?
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: bool
+  default: true
+
+has_service_server:
+  help: Add a service server?
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: bool
+  default: false
+
+has_action_server:
+  help: Add an action server?
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: bool
+  default: false
+
+has_timer:
+  help: Add a timer callback?
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  type: bool
+  default: false
+
+auto_shutdown:
+  help: Automatically shutdown the node after launch (useful in CI/CD)?
+  when: "{{ template == 'ros2_cpp_pkg' or template == 'ros2_python_pkg' }}"
+  when: false
+  type: bool
+  default: false
+
+interface_types:
+  help: Interfaces types
+  when: "{{ template == 'ros2_interfaces_pkg' }}"
+  type: str
+  default: [msg, srv, action]
+  choices:
+    Message: msg
+    Service: srv
+    Action: action
+  multiselect: true
+
+msg_name:
+  help: Message name
+  when: "{{ template == 'ros2_interfaces_pkg' and 'msg' in interface_types }}"
+  type: str
+  default: Message
+
+srv_name:
+  help: Service name
+  when: "{{ template == 'ros2_interfaces_pkg' and 'srv' in interface_types }}"
+  type: str
+  default: Service
+
+action_name:
+  help: Action name
+  when: "{{ template == 'ros2_interfaces_pkg' and 'action' in interface_types }}"
+  type: str
+  default: Action
+
+has_docker_ros:
+  help: Add the docker-ros CI integration?
+  type: bool
+  default: false
