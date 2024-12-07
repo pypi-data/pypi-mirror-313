@@ -1,0 +1,31 @@
+# colorich
+Python module - Use ANSI formatting to color output text by hexadecimal values, RGB values or by color specific name or decorate it
+
+Use ANSI formatting to color output text by hexadecimal values, RGB values or by color specific name or decorate
+it.\
+The color names and values is inspired by https://www.w3schools.com/colors/colors_names.asp and
+https://github.com/jonathantneal
+
+Functions:\
+expand - Expands the colors list, extra colors will be available if this function will be executed.
+
+enrich - Return colored and decorated font for rgb values or for hex.\
+e.g. print(enrich("SeaGreen", (45, 140, 85)), "\n")
+This example will color and print the text "SeaGreen" in the rgb color of (45, 140, 85) (Green) and start a new line
+
+dye - Only determine the foreground color of the font but can accept a dictionary of strings with their different colors values.\
+e.g. print(dye({"Periwinkle ": "periwinkle ", "Iceberg ": "Ice berg", "and ": "", "Forest green\n": "Forest green"}))\
+This example will color and print the text "Periwinkle Iceberg and Forest green" with several colors - every word will be colored with the color that is writen next to it, notice that the word "and" won't be colored because no color has been writen next to it.
+
+printr - Prints the decorated colorized text that have sent as argument.\
+e.g. printr("Bold Turquoise on MediumSlateBlue", (64, 224, 208), "#7B68EE", "B", "\n")\
+This example will color, decorate and print the text "Bold Turquoise on MediumSlateBlue" as it says.\
+(64, 224, 208) is the text color, #7B68EE is the background color, "B" makes it bold, and \n will start a new line.
+
+printd - Prints text that have sent as an argument in multiple colors.
+e.g. printd("Red ; red", "Slate Blue ; slateBlue", "default color ", "and; Orange Red\n; OrangeRed")
+This example will color and print the text "Red Slate Blue default color and Orange Red" with several colors and eventualy will start a new line.
+
+show - prints all the colors and decorations name available and how it looks like.
+
+Examples are in the bottom of the main file.
