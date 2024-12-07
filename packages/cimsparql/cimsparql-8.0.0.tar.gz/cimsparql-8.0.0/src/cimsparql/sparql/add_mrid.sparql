@@ -1,0 +1,8 @@
+# Name: Add MRID
+PREFIX cim: <${cim}>
+insert {graph ${g} {?s cim:IdentifiedObject.mRID ?mrid}}
+where {
+  graph ${g} {?s a ${rdf_type}}
+  filter (not exists {?s cim:IdentifiedObject.mRID ?mrid})
+  bind(str(?s) as ?mrid)
+}

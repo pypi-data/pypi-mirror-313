@@ -1,0 +1,22 @@
+# Name: Full model
+PREFIX md:<${md}>
+
+select ?model ?time ?profile ?version ?description
+where
+{
+   ?model md:Model.profile ?profile;
+          md:Model.scenarioTime ?time;
+          md:Model.version ?version;
+          md:Model.description ?description .
+    {
+        select ?model (min(?dependency_exists) as ?all_dependencies_exist) {
+            ?_eq_subject <http://entsoe.eu/CIM/EquipmentCore/3/1> ?eq_repo .
+            ?model md:Model.DependentOn ?depend_on .
+
+            # Extract created time from both tp/sv/ssh profile and eq.
+            optional{{?depend_on md:Model.created ?created} union {service ?eq_repo {?depend_on md:Model.created ?created}}}
+            bind(bound(?created) as ?dependency_exists)
+        } group by ?model
+    }
+    filter(?all_dependencies_exist)
+}
