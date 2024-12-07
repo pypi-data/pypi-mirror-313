@@ -1,0 +1,84 @@
+[tool.poetry]
+name = "aiohttp-things"
+packages = [{include = "aiohttp_things", from = "src" }]
+version = "1.1.0"
+description = "Modest utility collection for development with AIOHTTP framework."
+license = "MIT"
+
+authors = [
+    "Ruslan Ilyasovich Gilfanov <ri.gilfanov@yandex.ru>",
+]
+maintainers = [
+    "Ruslan Ilyasovich Gilfanov <ri.gilfanov@yandex.ru>",
+]
+
+readme = "README.rst"
+homepage = "https://github.com/ri-gilfanov/aiohttp-things"
+repository = "https://github.com/ri-gilfanov/aiohttp-things"
+documentation = "https://aiohttp-things.readthedocs.io/"
+
+keywords = ["aiohttp", "asyncio"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: aiohttp",
+    "Framework :: AsyncIO",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+aiohttp = "^3.11.9"
+
+[tool.poetry.dev-dependencies]
+aiohttp_jinja2 = "^1.6"
+mypy = ">=1.13.0"
+pytest = ">=8.3.4"
+pytest-cov = ">=6.0.0"
+ruff = '>=0.8.2'
+sphinx = ">=7.4.7"
+sphinx_rtd_theme = ">=3.0.2"
+tomli = { version = "^2.2.1", optional = true, python = "~3.9 || ~3.10" }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+files = ["src", "tests"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN401", "ARG002", "COM812", "D", "FA102", "ISC001", "N803", "N806", "PGH003",
+    "PLR2004", "RUF001", "RUF002", "RUF003", "RUF012", "Q000",
+]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"docs/*.py" = ["A001", "ERA001", "INP001"]
+"example.py" = ["ANN"]
+"tests/*.py" = ["PLR2004", "S101"]
+
+[tool.ruff.lint.isort]
+order-by-type = true
+
+[tool.ruff.lint.mccabe]
+max-complexity = 5
+
+[tool.ruff.lint.pylint]
+max-args = 5
