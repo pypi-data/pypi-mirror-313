@@ -1,0 +1,46 @@
+{% load request_static %}
+{% load cache %}
+<!DOCTYPE html>
+<html lang="{% block html_language %}{{ request.language.code }}{% endblock %}">
+{% block head %}
+<head>
+    {% block meta %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NONE,NOARCHIVE" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+    {% endblock %}
+
+
+    {% block title %}<title>{% if name %}{{ name }} – {% endif %}{{ project_gui_name }}</title>{% endblock %}
+
+    {% block flavicon %}
+        <link rel="shortcut icon" href="{% static_path '/img/logo/favicon.ico' %}">
+    {% endblock %}
+    {% block pwa_block %}
+            <!-- PWA Manifest -->
+            <link rel="manifest" href="/manifest.json">
+            <!-- Theme color for PWA -->
+            <meta name="theme-color" content="{{ manifest_object.data.theme_color }}">
+
+           {% block pwa_icons %}
+                <!-- Icons for PWA -->
+                {% cache block_timeout pwa_icons_block gui_named_version %}
+                {% for icon in manifest_object.icons %}
+                    <link rel="icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
+                    <link rel="apple-touch-icon" type="{{ icon.type }}" sizes="{{ icon.sizes }}" href="{{ icon.src }}">
+                {% endfor %}
+                {% endcache %}
+            {% endblock %}
+    {% endblock %}
+</head>
+{% endblock %}
+
+{% block body %}
+    <body>
+    {% block body_content %}
+    {% endblock %}
+    </body>
+{% endblock %}
+</html>
