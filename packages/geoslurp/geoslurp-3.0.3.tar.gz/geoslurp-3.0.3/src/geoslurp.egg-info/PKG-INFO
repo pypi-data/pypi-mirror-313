@@ -1,0 +1,65 @@
+Metadata-Version: 2.1
+Name: geoslurp
+Version: 3.0.3
+Summary: Python postgreSQL-PostGIS client for managing earth science datasets
+Author-email: Roelof Rietbroek <r.rietbroek@utwente.nl>
+Project-URL: Homepage, https://github.com/strawpants/geoslurp/
+Project-URL: Bug Tracker, https://github.com/strawpants/geoslurp/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering
+Classifier: Development Status :: 5 - Production/Stable
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pandas>=2.0
+Requires-Dist: pyaml>=23.9.0
+Requires-Dist: scipy
+Requires-Dist: xarray>=2023.1.0
+Requires-Dist: numpy
+Requires-Dist: importlib_metadata
+Requires-Dist: requests
+Requires-Dist: SQLALchemy>=2.0
+Requires-Dist: pycurl
+Requires-Dist: keyring
+Requires-Dist: psycopg2
+Requires-Dist: GeoAlchemy2
+Requires-Dist: gdal
+Requires-Dist: geopandas
+Requires-Dist: rasterio
+Requires-Dist: netCDF4
+Requires-Dist: lxml
+Provides-Extra: dset
+Requires-Dist: xarray>=2023.1.0; extra == "dset"
+Requires-Dist: Shapely; extra == "dset"
+Requires-Dist: motuclient==3.0.0; extra == "dset"
+Requires-Dist: cdsapi==0.6.1; extra == "dset"
+Requires-Dist: paramiko==2.11.1; extra == "dset"
+
+# Download and manage datasets in a PostGreSQL database with the PostGIS
+
+[![Build and Publish](https://github.com/strawpants/geoslurp/actions/workflows/python-publish.yml/badge.svg)](https://github.com/strawpants/geoslurp/actions/workflows/python-publish.yml)
+[![PyPI version](https://badge.fury.io/py/geoslurp.svg)](https://badge.fury.io/py/geoslurp)
+[![Documentation Status](https://readthedocs.org/projects/geoslurp/badge/?version=latest)](https://geoslurp.wobbly.earth/latest/?badge=latest)
+The idea is that this tool contains script to download (i.e. **slurp**) commonly used datasets and to register them in a postgresql+postgis database. This database can then be queried allowing the retrieval of the relevant data or datafiles. 
+
+The main documentation lives at [geoslurp.wobbly.earth](https://geoslurp.wobbly.earth)
+
+## Workings
+
+The geoslurp module itself is a pure python module, which acts as a client. For this to work one needs to [set up a running PostGreSQL database](https://github.com/strawpants/docker-geoslurp).
+
+![Image of geoslurp clients versus database server](docs/source/_static/geoslurp_network.svg)
+
+## Change log V3
+* Use python entry points to register datasets, views and functions (removes registration of user plugin directories)
+* Move documentation to [https://readthedocs.org](https://geoslurp.wobbly.earth)
+* Change github actions to pusblish and then release
+* Work with SQAlchemy 2
+* more (see commit messages)
+
+## TODO's
+* Move remaining 'orphaned' datasets to suitable python packages modules or include in the main package
+* Improve this README
