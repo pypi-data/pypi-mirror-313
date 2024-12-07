@@ -1,0 +1,77 @@
+<header>
+    <menu id="mainmenu">
+        <ul>
+            {% if props._prev() != '' and False %}
+                <li class=""><a href="{{ props._prev() }}">&larr;</a></li>
+            {% endif %}
+
+            {% if props._is() %}
+            <li class="{{ 'actief'|safe if menuitem == 'home' }}"><a href="/home">home</a></li>
+            {% endif %}
+
+            {% if props.magda(['beheer', 'docent', 'administratie', 'admin']) %}
+            <li class="{{ 'actief'|safe if menuitem == 'studenten' }}"><a href="/studenten">students</a></li>
+            {% endif %}
+
+            {% if props.magda(['docent', 'beheer', 'admin']) %}
+            <li class="{{ 'actief'|safe if menuitem == 'groepen' }}"><a href="/groepen">groups</a></li>
+            {% endif %}
+
+            {% if props.magda(['docent', 'beheer', 'admin']) %}
+            <li class="{{ 'actief'|safe if menuitem == 'views' }}"><a href="/views">views</a></li>
+            {% endif %}
+
+            <li class="spacer">&nbsp;</li>
+
+            {% if props.magda(['docent', 'beheer', 'admin']) %}
+            <li class="{{ 'actief'|safe if menuitem == 'editviews' }}"><a href="/editviews">Edit Views</a></li>
+            {% endif %}
+
+            {% if props.magda(['admin']) %}
+            <li class="{{ 'actief'|safe if menuitem == 'emails' }}"><a href="/emails">emails</a></li>
+            {% endif %}
+
+            {% if props.magda(['beheer', 'admin']) %}
+                <li class="{{ 'actief'|safe if menuitem == 'beheer' }}"><a href="/beheer">manage</a></li>
+            {% endif %}
+
+            {% if props.magda(['beheer', 'admin']) %}
+                <li class="{{ 'actief'|safe if menuitem == 'website' }}"><a href="/website">cpnits.com</a></li>
+            {% endif %}
+
+        </ul>
+        {% if menuitem in ['home', 'studenten', 'groepen'] %}
+            <form name="menu-zoek" style="margin-left: 0.25em;" action="/studenten/zoek" method="get">
+                {% if comesfrom and comesfrom is not none %}
+                    <input type="hidden" name="comes-from" value="{{ comesfrom }}">
+                {% else %}
+                    <input type="hidden" name="comes-from" value="{{ url_for(request.endpoint, **request.view_args) }}">
+                {% endif %}
+                <input style="height: 2.1em; padding: 0 0.5em;" type="text" name="s" value="{{ zoekterm if zoekterm is not none }}" placeholder="Search by name" list="searchterms">
+                    <datalist id="searchterms">
+                        {% for ss in props.get_searchterms() %}
+                            <option value="{{ ss }}">{{ ss }}</option>
+                        {% endfor %}
+                    </datalist>
+                <input style="height: 2.4em;" type="submit" name="go" value="Search">
+            </form>
+        {% endif %}
+        <script>
+        $(function(){
+            $('form[name="menu-zoek"]')
+                .on('keyup', function(e){
+                    if (e.keyCode === 13) {
+                        this.submit();
+                    }
+                })
+                .on('submit', function(e) {
+                    let zoekvak = $(this).find('input[name="s"]');
+                    if (zoekvak.val().trim() === ''){
+                        e.preventDefault();
+                        zoekvak.val('');
+                        zoekvak.css('background-color', 'var(--signaal)').css('color', 'white');
+                    }
+                })
+        });
+        </script>
+    </menu>

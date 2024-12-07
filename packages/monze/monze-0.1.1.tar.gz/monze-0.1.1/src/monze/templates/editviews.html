@@ -1,0 +1,371 @@
+{% include '_head.html' %}
+<link rel="stylesheet" href="/static/views.css" />
+{% set viewname = single._try('name') %}
+{% set viewkey = single._try('created_ts') %}
+{% set minfields = ['id', 'assessment', 'firstname', 'lastname'] %}
+{% set canedit = props.magda(['docent'], alias=single._try('alias')) and viewname != 'default' and props.alias() == single._try('alias') %}
+</head>
+<body>
+    {% include '_menu.html' %}
+    </header>
+    <main>
+        <div class="two-columns">
+            <div>
+                <div class="single-form">
+                    <h2 style="margin-bottom: 1em;">Views Sortable</h2>
+                    <table class="view-links">
+                        <tbody>
+                            <tr>
+                                <td style="background-color: #ddd;"><a class="asbutton kopieknop" style="background-color: var(--menu)" href="/editviews/{{ default._try('created_ts') }}/copy">copy</a></td>
+                                <td style="background-color: #ddd;"><a style="{{ 'color: #888;' if default._try('status') < 1 }}" class="asbutton" href="/editviews/{{ default._try('created_ts') }}">default</a></td>
+                                <td style="background-color: #ddd;">&nbsp;</td>
+                                <td style="background-color: #ddd;">&nbsp;</td>
+                            </tr>
+                        </tbody>
+                        <tbody class="sort sorted-views">
+                            <form name="form-sorted-views" method="post" action="/editviews/sort-views">
+                                <input type="hidden" name="viewids" value="">
+                            </form>
+                            {% for status in [2, 1, 0] %}
+                                {% for a, aa in all.items() %}
+                                    {% if a in mijnviews and aa._try('status', default=0) == status %}
+                                        <tr id="view-{{ a }}">
+                                            <td><a class="asbutton kopieknop" style="background-color: var(--menu)" href="/editviews/{{ a }}/copy">copy</a></td>
+                                            <td><a style="{{ 'color: #888;' if aa._try('status') < 1 }}; border-color: {{ aa._try('color') }}; border-width: 2px;" class="asbutton" href="/editviews/{{ a }}">{{ aa._try('name') }}</a></td>
+                                            <td>{{ aa._try('alias') }} {{ aa._try('created_ts')|date }}</td>
+                                            <td style="background-color: #ddd;"><a class="asbutton" href="/views/{{ a }}">&rarr;</a></td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                        <tbody>
+                            {% for a, aa in all.items() %}
+                                {% if a != 'default' and a not in mijnviews %}
+                                    <tr>
+                                        <td style="background-color: #ddd;"><a class="asbutton kopieknop" style="background-color: var(--menu)" href="/editviews/{{ a }}/copy">copy</a></td>
+                                        <td style="background-color: #ddd;"><a style="{{ 'color: #888;' if aa._try('status') < 1 }}; border-color: {{ aa._try('color') }}; border-width: 2px;" class="asbutton" href="/editviews/{{ a }}">{{ aa._try('name') }}</a></td>
+                                        <td style="background-color: #ddd;">{{ aa._try('alias') }} {{ aa._try('created_ts')|date }}</td>
+                                        <td style="background-color: #ddd;"><a class="asbutton" href="/views/{{ a }}">&rarr;</a></td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- rechterkolom -->
+            <div class="two-columns">
+                {% if not kopie %}
+                    <!-- tabel MIDDEN KOLOM -->
+                    <div style=" display: block; width: 150px; border: 1px solid {{ single._try('color') }}; background-color: {{ single._try('color') }}; padding: 0.25em; border-radius: 3px; margin: 1em 1em 0 0;">
+                        <form name="deletefield" method="post" action="/editviews/edit/{{ viewkey }}" class="fields-fixed">
+                            <input type="hidden" name="delete-field" value="1">
+                            <input type="hidden" name="fieldname" value="">
+                            <input type="hidden" name="fieldnamelist" value="{{ single._try('fields')|join(',') }}">
+                            <table style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>{{ viewname }}</th>
+                                        {% if canedit %}
+                                            <th style="text-align: right;">erase</th>
+                                        {% endif %}
+                                    </tr>
+                                    {% for field in minfields %}
+                                    <tr style="border-color: white;">
+                                        <td class="minfield">{{ field }}</td>
+                                        {% if canedit %}
+                                            <td class="minfield">&nbsp;</td>
+                                        {% endif %}
+                                    </tr>
+                                    {% endfor %}
+                                </thead>
+                                <tbody class="sort sorted-fields">
+                                    {% for field in single._try('fields') %}
+                                    {% if not field in minfields %}
+                                        <tr>
+                                            <td class="id-cell {{ 'fixedfield' if field in fixedfields }} {{ 'cirfield' if field.startswith('c_') }}" data-field="{{ field }}">{{ fields[field].replace('c_', '').replace('t_', '') }}</td>
+                                            {% if canedit %}
+                                                <td class="{{ 'fixedfield' if field in fixedfields }} {{ 'cirfield' if field.startswith('c_') }}" style="text-align:right;">
+                                                    <input style="font-size: 0.8em;" type="submit" name="{{ field }}" value="&#x274c;" >
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </form>
+
+                        {% if viewname != 'default' %}
+                            <form action="/editviews/group/{{ viewkey }}" method="post" style="margin-top: 1em; display: block;">
+                                <input type="hidden" name="delete-group" value="1">
+                                <table style="width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                group
+                                            </th>
+                                            {% if canedit %}
+                                                <th style="text-align: right;">
+                                                    erase
+                                                </th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for g in single._try('groups') %}
+                                            <tr>
+                                                <td>
+                                                    {{ groepen[g]['name'] }}
+                                                </td>
+                                                {% if canedit %}
+                                                    <td style="text-align: right;">
+                                                        <input style="font-size: 0.8em;" type="submit" name="{{ g }}" value="&#x274c;" >
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </form>
+                        {% endif %}
+
+                        {% if viewname != 'default' and props.magda(['beheer']) %}
+                            <form name="deleteemailbutton" action="/editviews/emailbutton/{{ viewkey }}" method="post" style="margin-top: 1em; display: block;">
+                                <input type="hidden" name="delete-emb" value="1">
+                                <table style="width: 100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                emailbuttons
+                                            </th>
+                                            {% if canedit %}
+                                                <th style="text-align: right;">
+                                                    erase
+                                                </th>
+                                            {% endif %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for eb in single._try('emailbuttons', default=[]) %}
+                                            <tr>
+                                                <td>
+                                                    {{ eb }}
+                                                </td>
+                                                {% if canedit %}
+                                                    <td style="text-align: right;">
+                                                        <input style="font-size: 0.8em;" type="submit" name="{{ eb }}" value="&#x274c;" >
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- breed velden en zo -->
+                    <div style="width: calc(100% - 140px);">
+                        {% if not canedit %}
+                            <h2>You cannot edit the view [{{ viewname }}], but you can copy it</h2>
+                        {% elif canedit %}
+                            <h2>View {{ viewname }} by: {{ single._try('alias') }} | {{ viewkey }}</h2>
+                            <form method="post" class="single-form" action="/editviews/{{ viewkey }}">
+                                <input type="text"  pattern=".{3,}" name="changename" value="{{ single._try('name') }}">
+                                <input style="height: 1.5em;" type="color" name="color" value="{{ single._try('color') }}">
+                                <span style="background-color: #eee; border: 1px solid #ddd; border-radius: 3px; padding: 0.25em 0.5em; margin: 0 0.5em 0.25em 0;">
+                                    <input {{ 'checked' if single._try('status') >= 1 }} type="radio" name="status" value="1"> Active
+                                </span>
+                                <span style="background-color: #eee; border: 1px solid #ddd; border-radius: 3px; padding: 0.25em 0.5em; margin: 0 0.5em 0.25em 0;">
+                                    <input {{ 'checked' if single._try('status') < 1 }} type="radio" name="status" value="0"> Passive
+                                </span>
+                                <input type="submit" name="save" value="Opslaan" style="margin: 0 0.5em 0.25em 0;">
+                            </form>
+
+                            <h2>Link Fields:</h2>
+                            <form name="addfield" style="display: block" method="post" action="/editviews/edit/{{ viewkey }}">
+                                <input type="hidden" name="fieldname" value="">
+                                <input type="hidden" name="add-field" value="1">
+                                <input type="hidden" name="fieldnamelist" value="{{ single._try('fields')|join(',') }}">
+                                {% for s in fields %}
+                                    {% if not s in single._try('fields', []) %}
+                                        <input type="submit" style="margin-bottom: 0.25em;" name="{{ s }}" value="{{ fields[s] }}">
+                                    {% endif %}
+                                {% endfor %}
+                            </form>
+
+                            <h2>Make Color Field</h2>
+                            <form class="single-form" name="circularfield" style="display: block" method="post" action="/editviews/edit/{{ viewkey }}">
+                                <input type="hidden" name="fieldnamelist" value="{{ single._try('fields')|join(',') }}">
+                                <input type="text" class="custom-field" name="fieldname" value="" style="width: 6em;" pattern=".{2,}" required >
+                                <input type="submit" name="new-cycle-field" value="Make">
+                            </form>
+
+                            <h2>Make Text Field</h2>
+                            <form class="single-form" name="customfield" style="display: block" method="post" action="/editviews/edit/{{ viewkey }}">
+                                <input type="hidden" name="fieldnamelist" value="{{ single._try('fields')|join(',') }}">
+                                <input type="text" class="custom-field" name="fieldname" value="" style="width: 6em;" pattern=".{2,}" required >
+                                <input type="submit" name="new-text-field" value="Make">
+                            </form>
+
+                            {% if props.magda(['beheer']) %}
+                                <h2>Link Email buttons</h2>
+                                <form name="addemailbutton" style="display: block" method="post" action="/editviews/emailbutton/{{ viewkey }}">
+                                    {% for eb in emailbuttons %}
+                                        <input type="submit" style="margin-bottom: 0.25em;" name="add-emb" value="{{ eb }}">
+                                    {% endfor %}
+                                </form>
+                            </form>
+                            {% endif %}
+
+                            <h2>Link Groups</h2>
+                            <form name="addgroup" style="display: block" method="post" action="/editviews/group/{{ viewkey }}">
+                                <input type="hidden" name="add-group" value="1">
+                                {% for k, v in groepen.items() %}
+                                    {% if not k in single._try('groups', []) and v['status'] == 1 %}
+                                        <input type="submit" style="margin-bottom: 0.25em;" name="{{ k }}" value="{{ v['name'] }}">
+                                    {% endif %}
+                                {% endfor %}
+                            </form>
+
+                            <h2>Handle with care</h2>
+                            <form style="display: block;" method="post" action="/editviews/delete/{{ viewkey }}">
+                                <input type="submit" name="delete" value="Delete" style="background-color: red; color: white;">
+                            </form>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div style="text-align: left;">
+                        <h2>Make a copy of: {{ viewname }}</h2>
+                        <form class="single-form" name="kopie" method="post" action="/editviews/kopie/{{ viewkey }}">
+                            <input pattern=".{3,}" required type="text" name="newname" placeholder="Name of the copy">
+                            <!-- <span style="background-color: #eee; border: 1px solid #ddd; border-radius: 3px; padding: 0.25em 0.5em; margin: 0 0.5em 0.25em 0;">
+                                <input type="radio" name="copy-contents" value="0" checked> skeleton only
+                            </span>
+                            <span style="background-color: #eee; border: 1px solid #ddd; border-radius: 3px; padding: 0.25em 0.5em; margin: 0 0.5em 0.25em 0;">
+                                <input type="radio" name="copy-contents" value="1"> copy contents
+                            </span> -->
+                            <input type="submit" name="kopieer" value="Copy">
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+<script>
+    let alleviews = {{ all.keys()|list|safe }};
+    {% if kopie is none %}
+        let allfields = {{ fields|list|safe }};
+    {% endif %}
+
+    let make_veldnamen = function(asstring=true){
+        if(asstring) {
+            var lijst = 'id,assessment,firstname,lastname,'
+            var komma = ''
+        }else{
+            var lijst = [];
+        }
+        $.each($('td.id-cell'), function (){
+            let val = $(this).attr('data-field');
+            if(asstring){
+                lijst += komma + val;
+                komma = ','
+            }else{
+                lijst.push(val);
+            }
+        });
+        return lijst
+    }
+
+    let order_and_send_fields = function() {
+        let lijst = make_veldnamen(true);
+        $('input[name="fieldname"]').val('');
+        $('input[name="fieldnamelist"]').val(lijst);
+        $('form[name="deletefield"]').submit();
+    }
+
+    let order_and_send_views = function() {
+        var rijen = [];
+        $.each($('.sorted-views tr'), function(){
+            let id = $(this).attr('id').replace('view-', '') * 1;
+            rijen.push(id)
+        });
+        $('input[name="viewids"]').val(rijen)
+        $('form[name="form-sorted-views"]').submit()
+    }
+
+    let name_safe = function(erin, maxlen){
+        if(erin.startsWith('-')){
+            return '';
+        }
+        erin = erin.replaceAll(/[^a-z0-9_-]/g, '').substring(0,maxlen);
+        return erin;
+    }
+
+    $(function(){
+        // alleen een naam met kleine letters, cijfers en _
+        $('input[name="newname"]').on('keyup', function(){
+            var t = $(this).val();
+            t = name_safe(t, 10);
+            $(this).val(t);
+        });
+
+        $('form[name="addfield"] input[type="submit"]').on('click', function(e){
+            let btn_data = $(this).attr('name');
+            $('input[name="fieldname"]').val(btn_data);
+        });
+
+        $('form[name="deletefield"] input[type="submit"]').on('click', function(e){
+            let btn_data = $(this).attr('name');
+            $('form[name="deletefield"] input[name="fieldname"]').val(btn_data);
+        });
+
+        $('form[name="deleteemailbutton"] input[type="submit"]').on('click', function(e){
+            let btn_data = $(this).attr('name');
+            $('form[name="deleteemailbutton"] input[name="delete-emb"]').val(btn_data);
+        });
+
+        $('input.custom-field').on('keyup', function(){
+            var t = $(this).val();
+            t = name_safe(t, 10);
+            $(this).val(t);
+        });
+
+        $('form[name="customfield"]').on('submit', function(e){
+            let vn = name_safe($('input.custom-field').val(), 10);
+            if(allfields.includes(vn)){
+                e.preventDefault();
+                $('input.custom-field').val('').addClass('valop');
+            }
+        });
+
+        $('form[name="kopie"]').on('submit', function(e){
+            let nn = $('input[name="newname"]');
+            if(alleviews.includes(nn.val().trim())){
+                e.preventDefault();
+                nn.addClass('valop');
+                return;
+            }
+        })
+    })
+
+    $('.sort').sortable({
+        cursor: 'move',
+        axis: 'y',
+        update: function(e, ui) {
+            $(this).sortable('refresh');
+            if($(this).hasClass('sorted-fields')){
+                order_and_send_fields();
+            }else if($(this).hasClass('sorted-views')){
+                order_and_send_views();
+            }
+        }
+    });
+
+    // $('form[name="circularfield"] input[name="fieldname"]').focus();
+    </script>
+</body>
+</html>
