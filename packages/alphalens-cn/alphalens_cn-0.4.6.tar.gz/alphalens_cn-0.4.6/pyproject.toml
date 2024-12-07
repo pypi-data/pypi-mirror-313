@@ -1,0 +1,180 @@
+[project]
+name = "alphalens-cn"
+version = "0.4.6"
+description = "Performance analysis of predictive (alpha) stock factors"
+requires-python = '>=3.8'
+readme = "README.md"
+authors = [
+    { name = 'gquant' },
+]
+maintainers = [
+    { name = 'gquant' },
+]
+license = { file = "LICENSE" }
+
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'License :: OSI Approved :: Apache Software License',
+    'Natural Language :: English',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Operating System :: OS Independent',
+    'Intended Audience :: Science/Research',
+    'Topic :: Office/Business :: Financial :: Investment',
+    'Topic :: Scientific/Engineering :: Information Analysis',
+]
+
+dependencies = [
+    # following pandas
+    "numpy>=1.20.0; python_version=='3.8'",
+    "numpy>=1.23.5; python_version<'3.12'",
+    "numpy>=1.26.0; python_version>='3.12'",
+    "pandas >=1.3.0,<3.0",
+    "matplotlib >=1.4.0",
+    "scipy >=0.14.0",
+    "seaborn >=0.6.0",
+    "statsmodels >=0.6.1",
+    "IPython >=3.2.3",
+    "empyrical-reloaded>=0.5.7"
+]
+
+[project.urls]
+repository = 'https://gitee.com/goldenquant/alphalens-reloaded'
+
+[build-system]
+requires = [
+    'setuptools>=54.0.0',
+    "setuptools_scm[toml]>=6.2",
+]
+
+build-backend = 'setuptools.build_meta'
+
+
+[project.optional-dependencies]
+test = [
+    "tox >=2.3.1",
+    "coverage >=4.0.3",
+    "coveralls ==3.0.1",
+    "pytest >=6.2",
+    'pytest-xdist >=2.5.0',
+    "pytest-cov >=2.12",
+    "parameterized >=0.6.1",
+    "flake8 >=3.9.1",
+    "black",
+]
+dev = [
+    "flake8 >=3.9.1",
+    "black",
+    "pre-commit >=2.12.1",
+]
+docs = [
+    'Cython',
+    'Sphinx >=1.3.2',
+    'numpydoc >=0.5.0',
+    'sphinx-autobuild >=0.6.0',
+    'pydata-sphinx-theme',
+    'sphinx-markdown-tables',
+    "sphinx_copybutton",
+    'm2r2'
+]
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ['src']
+exclude = ['tests*']
+
+[tool.setuptools_scm]
+write_to = "src/alphalens/_version.py"
+version_scheme = 'guess-next-dev'
+local_scheme = 'dirty-tag'
+
+
+[tool.pytest.ini_options]
+pythonpath = ['src']
+minversion = "6.0"
+testpaths = 'tests'
+addopts = '-v'
+
+[tool.cibuildwheel]
+test-extras = "test"
+test-command = "pytest -n 2 {package}/tests"
+build-verbosity = 3
+
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64", "universal2"]
+test-skip = ["*universal2:arm64"]
+
+
+[tool.cibuildwheel.linux]
+archs = ["auto64"]
+skip = "*musllinux*"
+
+
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+\(
+  docs/source/conf.py
+\)
+'''
+
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+
+envlist =
+    py38-pandas{13,14,15}-numpy1
+    py39-pandas{13,14,15}-numpy1
+    py310-pandas{13,14,15,20,21,22}-numpy1
+    py311-pandas{13,14,15,20,21,22}-numpy1
+    py312-pandas{13,14,15,20,21,22}-numpy1
+    py39-pandas222-numpy2
+    py310-pandas222-numpy2
+    py311-pandas222-numpy2
+    py312-pandas222-numpy2
+
+isolated_build = True
+skip_missing_interpreters = True
+minversion = 3.23.0
+
+[gh-actions]
+python =
+    3.8: py38
+    3.9: py39
+    3.10: py310
+    3.11: py311
+    3.12: py312
+
+[testenv]
+usedevelop = True
+setenv =
+    MPLBACKEND = Agg
+
+changedir = tmp
+extras = test
+deps =
+    pandas13: pandas>=1.3.0,<1.4
+    pandas14: pandas>=1.4.0,<1.5
+    pandas15: pandas>=1.5.0,<1.6
+    pandas20: pandas>=2.0,<2.1
+    pandas21: pandas>=2.1,<2.2
+    pandas22: pandas>=2.2,<2.3
+    pandas222: pandas>=2.2.2,<2.3
+    numpy1: numpy>=1.23.5,<2.0
+    numpy2: numpy>=2.0,<2.1
+
+
+commands =
+    pytest -n 2 --cov={toxinidir}/src --cov-report term  --cov-report=xml --cov-report=html:htmlcov {toxinidir}/tests
+"""
