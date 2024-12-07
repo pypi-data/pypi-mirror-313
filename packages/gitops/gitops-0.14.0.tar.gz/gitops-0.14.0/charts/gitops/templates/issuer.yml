@@ -1,0 +1,16 @@
+{{- if .Values.certificate.install }}
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: gitops-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: "info@uptickhq.com"
+    privateKeySecretRef:
+      name: gitops-issuer-key
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+{{- end }}
