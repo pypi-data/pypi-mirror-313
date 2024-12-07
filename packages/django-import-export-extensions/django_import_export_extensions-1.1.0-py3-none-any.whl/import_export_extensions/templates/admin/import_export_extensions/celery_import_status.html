@@ -1,0 +1,47 @@
+{% extends "admin/import_export/base.html" %}
+{% load i18n %}
+{% load static admin_urls %}
+
+{% comment %}
+  Template to show status of import job.
+{% endcomment %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static "import_export_extensions/css/admin/admin.css" %}"/>
+  <link rel="stylesheet" type="text/css" href="{% static "import_export_extensions/css/widgets/progress_bar.css" %}"/>
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+  <script type="text/javascript" src="{% static 'admin/js/jquery.init.js' %}"></script>
+  <script type="text/javascript" src="{% static 'import_export_extensions/js/admin/admin.js' %}"></script>
+  <script type="text/javascript" src="{% static 'import_export_extensions/js/widgets/progress_bar.js' %}"></script>
+{% endblock %}
+
+
+{% block breadcrumbs_last %}
+  <a href="{% url opts|admin_urlname:'import' %}?{{ request.GET.urlencode }}">
+    {% trans "Import" %}
+  </a>
+  &rsaquo; {% trans "Importing..." %}
+{% endblock %}
+
+{% block content %}
+  <div>
+
+    <fieldset class="module aligned collapse">
+      <div class="form-row">
+        <label>{% trans "Status" %}</label><p id="current-job-status">{{ import_job.import_status|title }}</p>
+      </div>
+
+      {% if import_job.import_status not in import_job.results_statuses %}
+        <div class="form-row">
+          <label>{% trans "Progress" %}</label>
+          {% include "admin/import_export_extensions/progress_bar.html" with job_url=import_job_url %}
+        </div>
+      {% endif %}
+    </fieldset>
+  </div>
+{% endblock %}
