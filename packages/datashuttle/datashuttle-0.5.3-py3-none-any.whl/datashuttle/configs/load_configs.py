@@ -1,0 +1,61 @@
+import warnings
+from pathlib import Path
+from typing import Optional
+
+from datashuttle.configs.config_class import Configs
+from datashuttle.utils import utils
+from datashuttle.utils.custom_exceptions import ConfigError
+
+# -----------------------------------------------------------------------------
+# Load Supplied Config
+# -----------------------------------------------------------------------------
+
+
+def attempt_load_configs(
+    project_name: str,
+    config_path: Path,
+    verbose: bool = True,
+) -> Optional[Configs]:
+    """
+    Try to load an existing config file, that was previously
+    saved by Datashuttle. This should always work, unless
+    not already initialised (prompt) or these have been
+    changed manually.
+
+    Parameters
+    ----------
+    project_name : name of project
+
+    config_path : path to datashuttle config .yaml file
+
+    verbose : warnings and error messages will be printed.
+    """
+    exists = config_path.is_file()
+
+    if not exists:
+        if verbose:
+            warnings.warn(
+                "Configuration file has not been initialized. "
+                "Use make_config_file() to setup before continuing."
+            )
+        return None
+
+    new_cfg: Optional[Configs]
+
+    new_cfg = Configs(project_name, config_path, None)
+
+    try:
+        new_cfg.load_from_file()
+
+    except BaseException:
+        new_cfg = None
+
+        utils.log_and_raise_error(
+            f"Config file failed to load. Check file "
+            f"formatting at {config_path.as_posix()}. If "
+            f"cannot load, re-initialise configs with "
+            f"make_config_file()",
+            ConfigError,
+        )
+
+    return new_cfg
