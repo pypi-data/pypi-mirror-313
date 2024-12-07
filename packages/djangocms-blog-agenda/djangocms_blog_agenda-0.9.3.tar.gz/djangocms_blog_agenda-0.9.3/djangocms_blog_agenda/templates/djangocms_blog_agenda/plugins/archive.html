@@ -1,0 +1,35 @@
+{% load i18n %}
+{% load apphooks_config_tags %}
+
+{% spaceless %}
+  <div class="plugin plugin-blog">
+    <h3>
+      {% if only_past_events %}
+        {% trans "Past events" %}
+      {% else %}
+        {% trans "All events" %}
+      {% endif %}
+    </h3>
+
+    {% regroup dates by date.year as years %}
+    {% with current_year=year current_month=month %}
+      <ul class="ul__archive">
+        {% for year in years %}
+          <li{% if year.grouper == current_year %} class="active"{% endif %}>
+            <a href="{% namespace_url "agenda-archive" year=year.grouper only_past_events=only_past_events|default:False %}" class="year">{{ year.grouper }}</a>
+            <ul>
+              {% for month in year.list %}
+                <li{% if year.grouper == current_year and month.date.month == current_month %} class="active"{% else %} class="month"{% endif %}>
+                  {% namespace_url "agenda-archive" year=year.grouper month=month.date|date:"n" only_past_events=only_past_events|default:False as url %}
+                  {% include "djangocms_blog_agenda/includes/item_with_counter.html" with url=url label=month.date|date:"F" counter=month.count %}
+                </li>
+              {% endfor %}
+            </ul>
+          </li>
+        {% empty %}
+          <li class="agenda-empty"><p>{% trans "No event found." %}</p></li>
+        {% endfor %}
+      </ul>
+    {% endwith %}
+  </div>
+{% endspaceless %}
