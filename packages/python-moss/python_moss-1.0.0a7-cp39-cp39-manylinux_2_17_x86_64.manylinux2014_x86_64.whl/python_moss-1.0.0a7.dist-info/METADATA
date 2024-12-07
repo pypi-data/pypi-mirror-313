@@ -1,0 +1,104 @@
+Metadata-Version: 2.1
+Name: python-moss
+Version: 1.0.0a7
+Summary: MObility Simulation System
+Author-email: Jun Zhang <zhangjun990222@gmail.com>, Wenxuan Ao <aowx21@outlook.com>
+License: MIT License
+        
+        Copyright (c) 2024 FIB LAB, Tsinghua University
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://moss.fiblab.net
+Project-URL: Repository, https://github.com/tsinghua-fib-lab/moss.git
+Project-URL: Issues, https://github.com/tsinghua-fib-lab/moss/issues
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: shapely>=2
+Requires-Dist: protobuf<5,>=3.20
+Requires-Dist: numpy<2,>=1.20
+Requires-Dist: pycityproto<3,>=2
+Requires-Dist: tqdm
+Requires-Dist: psycopg2-binary<3,>=2.5
+Requires-Dist: pymongo
+Requires-Dist: pyproj
+Requires-Dist: stringcase
+
+# MOSS: MObility Simulation System
+
+A GPU-accelerated Large-scale Open Microscopic Traffic Simulation System
+
+Website: https://moss.fiblab.net
+
+## Features
+
+- **Efficient**: MOSS adopts GPU as the computational engine, which accelerates 100 times compared to existing microscopic traffic simulators, allowing rapid simulation of large-scale urban road networks.
+- **Realistic**: MOSS provides the cutting-edge AIGC method to generate globally available realistic OD matrices for travel demand generation and allows the user to quickly calibrate the simulation parameters to obtain realistic simulation results.
+- **Open**: The simulator, toolchain, and sample programs will be open-sourced on Github for community access, and we hope that more people will join in the development and application of MOSS.
+
+## Related Repositories
+
+- `mosstool`: The toolchain for MOSS, [URL](https://github.com/tsinghua-fib-lab/mosstool).
+- sample programs: The sample programs for MOSS, [URL](https://github.com/tsinghua-fib-lab/moss-opt-showcases).
+
+## Installation
+
+### Prerequisites
+
+- Linux
+- CUDA 11.8
+- Python >= 3.8
+
+### Install
+
+```bash
+pip install python-moss
+```
+
+## FAQ
+
+Q1: How to resolve the error `ImportError: /.../libstdc++.so.6: version 'GLIBCXX_3.4.30' not found`?
+
+A1: Run `conda install -c conda-forge libstdcxx-ng=12` in the current conda environment.
+
+## Development
+
+#### Build
+
+1. Install Boost
+```bash
+wget -O boost_1_86_0.tar.gz https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.gz
+tar -zxvf boost_1_86_0.tar.gz
+cd boost_1_86_0
+./bootstrap.sh --with-libraries=filesystem,iostreams,program_options,regex,system --prefix=/usr/local  # avro dependency
+./b2 install
+cd ..
+rm -r boost_1_86_0
+rm boost_1_86_0.tar.gz
+```
+
+## From v0.4 to v1.0
+
+That is what we change and why we change it.
+- Focus on the microscopic traffic simulation only (vehicle and pedestrian), no crowd in AOI, no bus for more clear code to support community contribution.
+- No overlap in junction to avoid deadlock following CBLab's design.
+- Can output files with widely-used data format for visualization (visualization is the first for the user to understand the simulation). We choose AVRO as the output format.
+- AOI is just as a marker of the starting/ending point of vehicles/pedestrians, no other functions for more clear code.
+- clear code structure and documentation written in English.
