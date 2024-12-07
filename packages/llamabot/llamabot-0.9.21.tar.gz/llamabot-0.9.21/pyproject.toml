@@ -1,0 +1,175 @@
+# https://setuptools.pypa.io/en/latest/userguide/quickstart.html
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+  | foo.py           # also separately exclude a file named foo.py in
+                     # the root of the project
+)
+'''
+
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+fail-under = 100
+exclude = ["setup.py", "docs", "build", "examples"]
+ignore-regex = ["^get$", "^mock_.*", ".*BaseClass.*"]
+verbose = 2
+quiet = false
+whitelist-regex = []
+color = true
+
+[tool.pytest.ini_options]
+addopts = "-v --cov --cov-report term-missing -m 'not llm_eval' --durations=10"
+testpaths = [
+    "tests",
+]
+norecursedirs = ["archive/*"]
+
+[tool.isort]
+profile = "black"
+float-to-top = true
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+namespaces = false
+
+[project]
+name = "llamabot"
+version = "0.9.21"
+# Runtime dependencies below
+dependencies = [
+    "openai",
+    "panel",
+    "jupyter_bokeh",
+    "bokeh",
+    "loguru",
+    "pyperclip",
+    "astor",
+    "python-dotenv",
+    "typer",
+    "gitpython",
+    "pyprojroot",
+    "frozenlist",
+    "beautifulsoup4",
+    "rich",
+    "pyzotero",
+    "case-converter",
+    "prompt-toolkit",
+    "sh",
+    "pre-commit",
+    "beartype",
+    "litellm",
+    "python-slugify",
+    "pydantic>=2.0",
+    "pdfminer.six",
+    "rank-bm25",
+    "lancedb",
+    "chromadb",
+    "tantivy",
+    "numpy<2", # https://github.com/ericmjl/llamabot/issues/56
+    "python-frontmatter",
+    "diskcache",
+    "nbformat",
+    "alembic",
+    "jinja2",
+    "fastapi",
+    "uvicorn",
+    "sentence-transformers",
+    "tenacity",
+    "python-multipart",
+    "httpx",
+]
+requires-python = "<3.13"
+description = "A Pythonic interface to LLMs."
+readme = "README.md"
+
+[project.urls]
+"Documentation" = "https://ericmjl.github.io/llamabot"
+"Source Code" = "https://github.com/ericmjl/llamabot"
+
+[project.scripts]
+llamabot = "llamabot.cli:app"
+
+[project.optional-dependencies]
+notebooks = ["ics", "tzlocal"]
+
+[tool.pixi.project]
+name = "llamabot"
+description = "A Pythonic interface to LLMs"
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "osx-64", "linux-aarch64"]
+
+[tool.pixi.pypi-dependencies]
+llamabot = { path = ".", editable = true }
+
+[tool.pixi.feature.tests.dependencies]
+pytest = "*"
+hypothesis = "*"
+pytest-cov = "*"
+pytest-mock = "*"
+tuna = "*"
+
+[tool.pixi.feature.devtools.dependencies]
+pre-commit = "*"
+
+[tool.pixi.feature.docs.dependencies]
+mkdocs = "*"
+mkdocs-material = "*"
+mknotebooks = "*"
+
+# Stuff that is referenced _only_ in notebooks go here.
+[tool.pixi.feature.notebooks.dependencies]
+jupyter = "*"
+ipykernel = "*"
+jupyterlab = "*"
+pixi-kernel = "*"
+
+# TASKS BELOW!
+[tool.pixi.tasks]
+llamabot-cli = "llamabot --help"
+
+[tool.pixi.feature.notebooks.tasks]
+jlab = "jupyter lab"
+
+[tool.pixi.feature.tests.tasks]
+test = "pytest"
+
+[tool.pixi.feature.docs.tasks]
+docs = "mkdocs serve"
+build-docs = "mkdocs build"
+
+[tool.pixi.environments]
+default = ["tests", "devtools", "docs", "notebooks"]
+docs = ["docs"]
+notebooks = ["notebooks"] # for those who just want to run notebooks
+
+[tool.pixi.dependencies]
+python-multipart = ">=0.0.16,<0.0.17"
