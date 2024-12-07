@@ -1,0 +1,81 @@
+Metadata-Version: 2.1
+Name: parameterizable
+Version: 0.1.9
+Summary: Library for work with parameterizable classes.
+Home-page: https://github.com/pythagoras-dev/parameterizable
+Author: Vlad (Volodymyr) Pavlov
+Author-email: vlpavlov@ieee.org
+Keywords: parameters
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pytest
+
+# parameterizable
+
+Parameter manipulation for Python classes.
+
+## What Is It?
+
+`parameterizable` provides the functionality for work with parameterizable 
+classes: those that have (hyper) parameters which define object's configuration,
+but not its internal contents or data. Such parameters are typically
+passed to the .__init__() method.
+
+`parameterizable` allows to:
+* Get parameters of an object as a dictionary.
+* Get default parameters of a class dictionary.
+* Serialize object's parameters to an 'exportable' dictionary, that only 
+contains basic (builtin) types and exportable sub-dictionaries. 
+* Recreate an object from its parameters, stored in an 'exportable' dictionary.
+
+## Usage
+Inherit from `ParameterizableClass` class and define method `.get_params()`. 
+
+## Key Classes, Functions, and Constants
+
+* `ParameterizableClass` - a base class for parameterizable objects. 
+You should derive your class from it if you want to 
+use the functionality of this package.
+* `ParameterizableClass.get_params()` - a method to be defined in a subclass,
+returns the current parameters of an object as a dictionary.
+* `ParameterizableClass.get_default_params()` - returns the default parameters
+of the class as a dictionary.
+* `ParameterizableClass.__get_exportable_params()` - returns an 'exportable'
+dictionary of the object's parameters.
+* `ParameterizableClass.__get_default_exportable_params()` - returns 
+an 'exportable' dictionary of the class's default parameters.
+* `is_parameterizable(obj)` - checks if an object or a class is parameterizable.
+* `register_parameterizable_class(cls)` - registers a class as parameterizable.
+This is required for `get_object_from_exportable_dict()` to work 
+with objects of the class.
+* `get_object_from_exportable_dict(exportable_dict)` - recreates an object from
+an 'exportable' dictionary. Only works for classes that were previously 
+registered with `register_parameterizable_class()`.
+
+## How To Get It?
+
+The source code is hosted on GitHub at:
+[https://github.com/pythagoras-dev/parameterizable](https://github.com/pythagoras-dev/parameterizable) 
+
+Binary installers for the latest released version are available at the Python package index at:
+[https://pypi.org/project/parameterizable](https://pypi.org/project/parameterizable)
+
+        pip install parameterizable
+
+## Dependencies
+
+* [pytest](https://pytest.org)
+
+## Key Contacts
+
+* [Vlad (Volodymyr) Pavlov](https://www.linkedin.com/in/vlpavlov/)
