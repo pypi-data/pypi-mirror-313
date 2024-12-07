@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "montty"
+version = "1.0.1"
+authors = [
+  {name="Gwyn Davies", email="gwynmdavies@cox.net"},
+]
+maintainers = [
+  {name = "Gwyn Davies", email = "gwynmdavies@cox.net"}
+]
+description = "MonTTY (Monitoring TTY), create system/security checks for Linux hosts, and monitor their results."
+requires-python = ">= 3.9"
+dependencies = [
+  "psutil", 
+  "build",
+  "keyrings.alt"
+]
+readme = "README.rst"
+license = {file = "LICENSE"}
+keywords = ["monitoring", "system", "cybersecurity", "checks", "linux", "bash", "python", "devops", "secops"]
+
+[project.optional-dependencies]
+dev = [
+  "pylint",
+  "pylint-pytest",
+  "pytest",
+  "pytest-cov",
+  "autopep8",
+  "bandit",
+  "twine",
+]
+
+[project.scripts]
+montty-deployer  = "montty.montty_deployer:main"
+montty-monitor   = "montty.montty_monitor:main"
+montty-manager   = "montty.montty_manager:main"
+montty-checker   = "montty.montty_checker:main"
+
+[project.urls]
+Homepage = "https://github.com/GwynDavies/montty"
+Issues = "https://github.com/GwynDavies/montty/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"*" = ["_", "*.txt", "*.sh", "*.csv", "*.py"]
+
