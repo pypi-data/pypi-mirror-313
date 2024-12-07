@@ -1,0 +1,37 @@
+{% macro monitor(requeue_max_attempts, requeue_exit_code) -%}
+__xm_slurm_wait_for_children() {
+  if [[ -n "${SLURM_ARRAY_JOB_ID:-}" ]]; then
+    local -r JOB_ID="${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
+  else
+    local -r JOB_ID="${SLURM_JOB_ID}"
+  fi
+
+  # If there are no child jobs we should error out
+  if [ -z "$(jobs -p)" ]; then
+    echo "ERROR: no child jobs exist..." >&2
+    exit -1
+  fi
+
+  # Loop through all job IDs in the background job list and wait for them to finish
+  for job in "$(jobs -p)"; do
+    echo "INFO: Waiting for job ${job} to finish..."
+    set +e
+    wait "${job}"
+    local -r JOB_EXIT_CODE="${?}"
+    set -e
+
+    if [ "${JOB_EXIT_CODE}" -eq "{{ requeue_exit_code }}" ] && [ "${SLURM_RESTART_COUNT-0}" -le "{{ requeue_max_attempts }}" ]; then
+      echo "INFO: Received requeue exit code {{ requeue_exit_code }} from job ${job}. Requeing Slurm job ${JOB_ID} after ${SLURM_RESTART_COUNT-0} restarts." >&2
+      scontrol requeue "${JOB_ID}"
+      exit {{ requeue_exit_code }}
+    elif [ "${JOB_EXIT_CODE}" -ne 0 ]; then
+      echo "ERROR: Job ${job} exited with code ${JOB_EXIT_CODE}." >&2
+      exit "${JOB_EXIT_CODE}"
+    else
+      echo "INFO: Job ${job} exited successfully." >&2
+    fi
+  done
+}
+
+__xm_slurm_wait_for_children
+{%- endmacro %}

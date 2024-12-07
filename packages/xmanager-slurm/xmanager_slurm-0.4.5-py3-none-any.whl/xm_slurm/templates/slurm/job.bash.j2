@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+{% block directives %}
+#SBATCH --open-mode=append
+#SBATCH --export=NONE
+#SBATCH --output=slurm-%j.out
+#SBATCH --comment="{'xid': {{ experiment_id }}}"
+{% if cluster.account and not job.executor.account %}
+#SBATCH --account={{ cluster.account }}
+{% endif %}
+{% if cluster.partition and not job.executor.partition %}
+#SBATCH --partition={{ cluster.partition }}
+{% endif %}
+{% if cluster.qos and not job.executor.qos %}
+#SBATCH --qos={{ cluster.qos }}
+{% endif %}
+{% if identity %}
+#SBATCH --job-name=xm[{{ experiment_id }}.{{ identity }}]
+{% else %}
+{% if dependency %}
+#SBATCH {{ dependency.to_directive() }}
+{% endif %}
+#SBATCH --job-name=xm[{{ experiment_id }}]
+{% endif %}
+{% for directive in job.executor.to_directives() %}
+#SBATCH {{ directive }}
+{% endfor %}
+{% endblock directives %}
+set -Eeuxo pipefail
+
+{% block prolog %}
+{% if cluster.prolog %}
+{{- cluster.prolog -}}
+{% endif %}
+{%- endblock prolog %}
+
+
+{% block environment -%}
+{{ env(cluster.environment) }}
+{%- endblock environment %}
+
+{% block proxy -%}
+{%- if cluster.proxy %}
+{% from 'fragments/proxy.bash.j2' import proxy %}
+{% if cluster.proxy == "submission-host" %}
+{{ proxy("$SLURM_SUBMIT_HOST") }}
+{% else %}
+{{ proxy(cluster.proxy) }}
+{% endif %}
+{% endif %}
+{%- endblock proxy %}
+
+{% block bootstrap %}
+srun \
+  --unbuffered \
+  --kill-on-bad-exit=0 \
+  --overlap \
+  --export={{ export(job, "ALL") }} \
+  bash <<'SRUN_EOF' &
+set -Eeuxo pipefail
+{{ run(job, cluster) }}
+SRUN_EOF
+{%- endblock bootstrap %}
+
+echo "[INFO] Start timestamp: $(date)"
+
+{%- block epilog -%}
+{% if cluster.epilog %}
+{{ cluster.epilog }}
+{% endif %}
+{%- endblock epilog %}
+
+
+{% block monitor -%}
+{% from 'fragments/monitor.bash.j2' import monitor %}
+{{ monitor(job.executor.requeue_max_attempts, job.executor.requeue_on_exit_code) }}
+{%- endblock monitor %}
+
+
+echo "[INFO] End timestamp: $(date)"

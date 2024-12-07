@@ -1,0 +1,28 @@
+{% extends "job.bash.j2" %}
+{% block directives %}
+{{ super() -}}
+#SBATCH --array=0-{{ args | length - 1 }}
+#SBATCH --output=slurm-%A_%a.out
+{% endblock directives %}
+
+{% block bootstrap %}
+srun \
+  --unbuffered \
+  --kill-on-bad-exit=0 \
+  --overlap \
+  --export={{ export(job, "ALL") }} \
+  bash <<'SRUN_EOF' &
+set -Eeuxo pipefail
+
+readonly __XM_SLURM_TRIALS=(
+{% for trial in args %}
+  "{{ trial.to_list() | join(" ") }}"
+{% endfor %}
+)
+
+{% call run(job, cluster) %}
+  ${__XM_SLURM_TRIALS[$SLURM_ARRAY_TASK_ID]} \
+{% endcall %}
+
+SRUN_EOF
+{%- endblock bootstrap %}

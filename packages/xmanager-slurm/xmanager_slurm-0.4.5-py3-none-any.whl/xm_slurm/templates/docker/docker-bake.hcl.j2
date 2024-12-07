@@ -1,0 +1,54 @@
+{% for executable, executors in executables.items() %}
+target "{{ hash(executable) }}" {
+    dockerfile-inline = <<EOF
+{{ executable.dockerfile.read_text() }}
+EOF
+    context = "{{ executable.context }}"
+    {% if executable.ssh %}
+    ssh = [
+        {% for ssh_val in executable.ssh %}
+        "{{ ssh_val }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+    {% endif %}
+    {% if executable.target %}
+    target = "{{ executable.target }}"
+    {% endif %}
+    pull = false
+    tags = [
+        {% for executor in executors %}
+        "{{ executor.tag }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+    output = [
+        "type=registry"
+    ]
+    {% if executable.cache_from %}
+    cache-from = [
+        {% for cache_from in executable.cache_from %}
+        "{{ cache_from }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+    {% endif %}
+    cache-to = [
+        "type=inline"
+    ]
+    platforms = [
+        {% for platform in executable.platforms %}
+        "{{ platform }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+    labels = {
+        {% for key, value in executable.labels.items() %}
+        "{{ key }}" = "{{ value }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    }
+    {% if executable.build_args %}
+    args = {
+        {% for key, value in executable.build_args.items() %}
+        "{{ key }}" = "{{ value }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+    }
+    {% endif %}
+}
+{% endfor %}

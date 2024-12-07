@@ -1,0 +1,56 @@
+{% macro env(env_vars) -%}
+{% for key, value in env_vars.items() %}
+export PODMANENV_{{ key }}="{{ value }}"
+{% endfor %}
+{%- endmacro %}
+
+{% macro export(job, mode=None) -%}
+    {%- set combined_envs = operator.or_(job.env_vars, job.executable.env_vars) -%}
+
+    {%- set env_strings = [] -%}
+    {%- for key, value in combined_envs.items() -%}
+        {%- set _ = env_strings.append('PODMANENV_{0}="{1}"'.format(key, value)) -%}
+    {%- endfor -%}
+
+    {%- if mode is not none -%}
+        {{- mode -}}{{- "," if combined_envs -}}
+    {%- endif -%}
+
+    {{- env_strings | join(",") -}}
+{% endmacro %}
+
+{% macro run(job, cluster) -%}
+podman pull \
+{% if job.executable.credentials %}
+  --creds {{ job.executable.credentials.username }}:{{ job.executable.credentials.password }} \
+{% endif %}
+  {{ job.executable.image }}
+
+exec podman run \
+  --env PODMANENV* \
+  --pull never \
+  --restart no \
+  --rm \
+{% if job.executor.requirements.accelerator %}
+  --device nvidia.com/gpu=all \
+{% endif %}
+{% if cluster.mounts %}
+{% for source, dest in cluster.mounts.items() %}
+  --mount type=bind,src={{ source }},dst={{ dest }} \
+{% endfor %}
+{% endif %}
+{% if job.executable.workdir %}
+  --workdir {{ job.executable.workdir }} \
+{% endif %}
+  {{ job.executable.image }} \
+{% for arg in job.executable.args.to_list() %}
+  {{ arg }} \
+{% endfor %}
+{% for arg in job.args.to_list() %}
+  {{ arg }} \
+{% endfor %}
+{% if caller %}
+  {{- caller() -}}
+{% endif %}
+  "$@"
+{% endmacro %}
