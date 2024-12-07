@@ -1,0 +1,12 @@
+SELECT DISTINCT ?person_id ?wiki_idLabel ?alias
+WHERE
+{    
+    ?wiki_id wdt:P31 wd:Q5;
+             wdt:P12192 ?person_id.
+    OPTIONAL { ?wiki_id skos:altLabel ?alias. filter(lang(?alias)="sv") }.
+    {
+    PLACEHOLDER
+    }
+  
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "sv". }
+}
