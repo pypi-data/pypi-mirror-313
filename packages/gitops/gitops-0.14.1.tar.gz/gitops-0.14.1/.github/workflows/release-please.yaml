@@ -1,0 +1,81 @@
+name: Release Please
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  actions: read # Read the metrics
+  contents: write # to be able to publish a GitHub release
+  issues: write # to be able to comment on released issues
+  pull-requests: write # to be able to comment on released pull requests
+  id-token: write # to enable use of OIDC for npm provenance / AWS
+
+env:
+  MISE_PYTHON_COMPILE: false
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      cli-release-created: ${{ steps.release.outputs['release_created'] }}
+      server-release-created: ${{ steps.release.outputs['gitops_server--release_created'] }}
+      helm-release-created: ${{ steps.release.outputs['charts/gitops--release_created'] }}
+      cli-version: ${{ steps.release.outputs['tag_name'] }}
+      server-version: ${{ steps.release.outputs['gitops_server--tag_name'] }}
+      helm-version: ${{ steps.release.outputs['charts/gitops--tag_name'] }}
+      sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with: {}
+
+  publish_helm_chart:
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: ${{ needs.release-please.outputs.server-version }} || ${{ needs.release-please.outputs.helm-version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish Helm charts
+        uses: stefanprodan/helm-gh-pages@master
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_to_pypi:
+    name: Publishes tag to pypi
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: ${{ needs.release-please.outputs.cli-release-created}}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+          experimental: true
+
+      - run: |
+          mise run build
+        shell: bash
+
+      - name: Publish Pypi Package
+        uses: pypa/gh-action-pypi-publish@release/v1
+  publish_docker_image:
+    name: Build and Push Docker Image
+    uses: uptick/actions/.github/workflows/ci.yaml@main
+    needs: release-please
+    if: ${{ needs.release-please.outputs.server-version }}
+    secrets:
+      SECRET_ENV: "${{ secrets.CLUSTER_KEY }}"
+    #https://github.com/uptick/actions/blob/main/.github/workflows/ci.yaml
+    with:
+      aws-iam-role-arn: "arn:aws:iam::610829907584:role/default-github-actions-ci-role"
+      docker-enabled: true
+      docker-context: "."
+      docker-tag: "${{ needs.release-please.outputs.server-version }}"
+      docker-tag-latest: true
+      docker-image-platforms: linux/amd64
+      docker-repository: "610829907584.dkr.ecr.ap-southeast-2.amazonaws.com/gitops"
+      command: echo $SECRET_ENV | base64 -d > cluster.key

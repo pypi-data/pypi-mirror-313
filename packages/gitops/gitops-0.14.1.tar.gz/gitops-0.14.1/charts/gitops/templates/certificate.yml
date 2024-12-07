@@ -1,0 +1,13 @@
+{{- if .Values.certificate.install }}
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name:  {{ .Release.Name }}-cert
+spec:
+  secretName: gitops-cert-key
+  issuerRef:
+    name: gitops-issuer
+    kind: Issuer
+  dnsNames:
+  - gitops.{{ .Values.domain }}
+{{- end }}

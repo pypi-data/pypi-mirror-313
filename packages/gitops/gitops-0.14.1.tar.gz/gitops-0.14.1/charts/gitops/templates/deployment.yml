@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{ .Release.Name }}
+  labels:
+    app:  {{ .Release.Name }}
+    service: {{ .Release.Name }}-gitops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app:  {{ .Release.Name }}
+        app.kubernetes.io/name: gitops-server
+        app.kubernetes.io/instance: gitops-server-{{ .Release.Name }}
+      annotations:
+        checksum/environment: {{ include (print $.Template.BasePath "/environment.yml") . | sha256sum }}
+        checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "uptick.serviceAccountName" . }}
+      priorityClassName: system-node-critical
+      containers:
+      - name: gitops
+        image: {{ .Values.image }}
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: 8000
+          initialDelaySeconds: 5
+          failureThreshold: 5
+          timeoutSeconds: 10
+          periodSeconds: 30
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "750Mi"
+          limits:
+            memory: "1500Mi"
+
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-environment
+        env:
+          - name: SLACK_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-secret
+                key: SLACK_TOKEN
+          - name: SENTRY_DSN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-secret
+                key: SENTRY_DSN
+          - name: ACCOUNT_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-secret
+                key: ACCOUNT_ID
+          - name: GITHUB_OAUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-secret
+                key: GITHUB_OAUTH_TOKEN
+          - name: GITHUB_WEBHOOK_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-secret
+                key: GITHUB_WEBHOOK_KEY
+        volumeMounts:
+        - name: git-crypt-key
+          mountPath: "/etc/gitops"
+          readOnly: true
+      volumes:
+      - name: git-crypt-key
+        secret:
+          secretName: {{ .Release.Name }}-secret
+          items:
+          - key: GIT_CRYPT_KEY
+            path: git_crypt_key
+      restartPolicy: Always
+
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+    {{- end }}
+    {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 6 }}
+    {{- end }}
