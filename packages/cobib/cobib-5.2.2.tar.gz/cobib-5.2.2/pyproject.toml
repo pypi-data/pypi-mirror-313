@@ -1,0 +1,176 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cobib"
+authors = [
+    {name = "Max Rossmannek", email = "max@rossmannek.de"},
+]
+description = "Console Bibliography"
+requires-python = ">=3.9"
+license = {text = "MIT License"}
+keywords = [
+    "reference-manager", "citation-manager", "bibliography", "cli", "tui",
+    "command-line", "terminal", "console", "bibtex", "doi", "arxiv", "isbn"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Unix",
+    "Environment :: Console",
+    "Typing :: Typed",
+]
+dynamic = ["dependencies", "readme", "version"]
+
+[project.entry-points."cobib.commands"]
+add = "cobib.commands.add:AddCommand"
+delete = "cobib.commands.delete:DeleteCommand"
+edit = "cobib.commands.edit:EditCommand"
+export = "cobib.commands.export:ExportCommand"
+git = "cobib.commands.git:GitCommand"
+import = "cobib.commands.import_:ImportCommand"
+init = "cobib.commands.init:InitCommand"
+lint = "cobib.commands.lint:LintCommand"
+list = "cobib.commands.list_:ListCommand"
+modify = "cobib.commands.modify:ModifyCommand"
+note = "cobib.commands.note:NoteCommand"
+open = "cobib.commands.open:OpenCommand"
+redo = "cobib.commands.redo:RedoCommand"
+review = "cobib.commands.review:ReviewCommand"
+search = "cobib.commands.search:SearchCommand"
+show = "cobib.commands.show:ShowCommand"
+undo = "cobib.commands.undo:UndoCommand"
+unify_labels = "cobib.commands.unify_labels:UnifyLabelsCommand"
+_example_config = "cobib.config.command:ExampleConfigCommand"
+
+[project.entry-points."cobib.importers"]
+zotero = "cobib.importers.zotero:ZoteroImporter"
+
+[project.entry-points."cobib.parsers"]
+arxiv = "cobib.parsers.arxiv:ArxivParser"
+bibtex = "cobib.parsers.bibtex:BibtexParser"
+doi = "cobib.parsers.doi:DOIParser"
+isbn = "cobib.parsers.isbn:ISBNParser"
+url = "cobib.parsers.url:URLParser"
+yaml = "cobib.parsers.yaml:YAMLParser"
+
+[project.scripts]
+cobib = "cobib.__main__:_main"
+
+[project.optional-dependencies]
+all = ["cobib[fuzzy]"]
+fuzzy = ["regex"]
+
+[project.urls]
+Homepage = "https://gitlab.com/cobib/cobib"
+Documentation = "https://cobib.gitlab.io/cobib/cobib.html"
+Repository = "https://gitlab.com/cobib/cobib"
+Issues = "https://gitlab.com/cobib/cobib/-/issues"
+Changelog = "https://gitlab.com/cobib/cobib/-/blob/master/CHANGELOG.md"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+dependencies = {file = "requirements.txt"}
+readme = {file = ["README.md", "CHANGELOG.md"], content-type = "text/markdown"}
+version = {attr = "cobib.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src/"]
+
+[tool.setuptools.package-data]
+cobib = ["py.typed"]
+
+[tool.pytest.ini_options]
+log_level = "DEBUG"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+source = ["src/cobib/"]
+parallel = true
+branch = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "parser.print_usage\\(sys.stderr\\)",
+    "sys.exit\\(1\\)",
+]
+show_missing = true
+
+[tool.mypy]
+python_version = 3.9
+show_error_codes = true
+check_untyped_defs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+enable_error_code = [
+    "ignore-without-code",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "bibtexparser",
+    "pylatexenc.*",
+    "requests_oauthlib",
+    "text_unidecode",
+]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    "I",   # isort
+    "E",   # pycodestyle
+    "W",   # pycodestyle
+    "D",   # pydocstyle
+    "F",   # pyflakes
+    "PL",  # pylint
+    "RUF", # ruff
+]
+
+[tool.ruff.lint.extend-per-file-ignores]
+# we explicitly rename imported modules in the __init__ files by design
+"__init__.py" = ["PLC0414"]
+"tests/*" = [
+    "PLR2004",  # allow magic values in the tests
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+ignore-decorators = ["typing.overload", "typing_extensions.override"]
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-branches = 20
+max-returns = 10
+max-statements = 100
+
+[tool.typos.default.extend-words]
+# Do not fix an old typo which has to be documented until its removal.
+captial = "captial"
+# Do not fix this substring which occurs as part of a regex. This can be removed
+# once typos supports inline-overrides.
+earch = "earch"
