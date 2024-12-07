@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "spiderexpress"
+version = "0.2.0a0"
+description = "A multipurpose spidery crawler for social media platforms"
+authors = ["Philipp Kessling <p.kessling@leibniz-hbi.de>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pandas = "*"
+SQLAlchemy = "*"
+loguru = "*"
+numpy = "*"
+click = "*"
+psycopg2-binary = "*"
+PyYAML = "*"
+transitions = "*"
+pydantic = "^2.9.2"
+
+[tool.poetry.dev-dependencies]
+ipykernel = "*"
+pytest = "*"
+pytest-cov = "*"
+black = "*"
+coverage = "*"
+pdoc3 = "*"
+pre-commit = "*"
+isort = "*"
+pylint = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+spiderexpress = 'spiderexpress.cli:cli'
+
+[tool.poetry.plugins."spiderexpress.connectors"]
+csv = "spiderexpress.connectors.csv:csv"
+
+[tool.poetry.plugins."spiderexpress.strategies"]
+spikyball = "spiderexpress.strategies.spikyball:spikyball"
+random = "spiderexpress.strategies.random:random"
+snowball = "spiderexpress.strategies.snowball:snowball"
+
+[tool.pytest.ini_options]
+addopts = "--cov-report html:tests/coverage --cov=spiderexpress --capture=sys"
+
+[tool.isort]
+profile = "black"
