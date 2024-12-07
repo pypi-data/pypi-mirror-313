@@ -1,0 +1,150 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+
+[tool.poetry]
+authors = ["Martin Hjelmare <marhje52@gmail.com>"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries",
+]
+description = "Use the Remember the Milk API with aiohttp."
+license = "Apache-2.0"
+name = "aiortm"
+packages = [
+  {include = "aiortm", from = "src"},
+]
+readme = "README.md"
+repository = "https://github.com/MartinHjelmare/aiortm"
+version = "0.9.42"
+
+[tool.poetry.scripts]
+aiortm = 'aiortm.cli:cli'
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/MartinHjelmare/aiortm/issues"
+"Changelog" = "https://github.com/MartinHjelmare/aiortm/blob/main/CHANGELOG.md"
+
+[tool.poetry.dependencies]
+aiohttp = "^3.8"
+ciso8601 = "^2.3"
+mashumaro = "^3.10"
+python = "^3.12"
+typer = "^0.15.0"
+yarl = "^1.7"
+
+[tool.poetry.extras]
+cli = ["typer"]
+
+[tool.poetry.group.dev.dependencies]
+aioresponses = "^0.7.3"
+codespell = "^2.3.0"
+copier = "^9.4.1"
+mypy = "^1.0"
+pre-commit = "^4.0.0"
+pytest = "^8.0.0"
+pytest-aiohttp = "^1.0.4"
+pytest-cov = "^6.0.0"
+python-semantic-release = "^9.14.0"
+ruff = "^0.8.0"
+
+[tool.ruff]
+line-length = 88
+lint.ignore = [
+  "ANN101", # missing-type-self
+  "ANN102", # missing-type-cls
+  "D203", # 1 blank line required before class docstring
+  "D213", # Multi-line docstring summary should start at the second line
+  "EM101", # raw-string-in-exception
+  "EM102", # f-string-in-exception
+  "PLR0913", # too-many-arguments
+  "PLR2004", # magic-value-comparison
+  "TCH001", # typing-only-first-party-import
+  "TCH002", # typing-only-third-party-import
+  "TCH003", # typing-only-stdlib-import
+  "TRY003", # raise-vanilla-args
+]
+lint.isort.force-sort-within-sections = true
+lint.isort.known-first-party = ["aiortm", "tests"]
+lint.per-file-ignores."setup.py" = ["D100"]
+lint.per-file-ignores."tests/**/*" = [
+  "PT004", # pytest-missing-fixture-name-underscore
+  "S101",
+  "S106", # hardcoded-password-func-arg
+  "SLF001", # private-member-access
+]
+lint.select = [
+  "ALL", # all rules
+]
+target-version = "py312"
+
+[tool.pytest.ini_options]
+addopts = """\
+    -Wdefault
+    --cov=aiortm
+    --cov-report=term-missing
+    --cov-report=xml
+    """
+asyncio_mode = "auto"
+pythonpath = ["src"]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "@overload",
+  "if TYPE_CHECKING",
+  "raise NotImplementedError",
+  'if __name__ == "__main__":',
+]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+exclude = [
+  'setup.py',
+]
+mypy_path = "src/"
+no_implicit_optional = true
+show_error_codes = true
+warn_incomplete_stub = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+allow_untyped_defs = true
+module = "tests.*"
+
+[tool.semantic_release]
+build_command = "pip install poetry && poetry build"
+major_on_zero = false
+version_toml = ["pyproject.toml:tool.poetry.version"]
+version_variables = [
+  "src/aiortm/__init__.py:__version__",
+]
+
+[tool.semantic_release.changelog]
+exclude_commit_patterns = [
+  "Merge pull request .*",
+]
+
+[tool.semantic_release.changelog.environment]
+keep_trailing_newline = true
+
+[tool.semantic_release.branches.main]
+match = "main"
+
+[tool.semantic_release.branches.noop]
+match = "(?!main$)"
+prerelease = true
