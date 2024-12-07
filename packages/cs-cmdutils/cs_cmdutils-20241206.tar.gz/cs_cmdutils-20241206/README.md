@@ -1,0 +1,1038 @@
+Convenience functions for working with the cmd stdlib module,
+the BaseCommand class for constructing command line programmes,
+and other command line related stuff.
+
+*Latest release 20241206*:
+* New @popopts decorator to run self.options.popopts and fill out the usage message.
+* Add "-e ssh-command" and the .ssh_exe attribute to BaseCommandOptions.
+
+## <a name="BaseCommand"></a>Class `BaseCommand`
+
+A base class for handling nestable command lines.
+
+This class provides the basic parse and dispatch mechanisms
+for command lines.
+To implement a command line
+one instantiates a subclass of `BaseCommand`:
+
+    class MyCommand(BaseCommand):
+        GETOPT_SPEC = 'ab:c'
+        USAGE_FORMAT = r"""and provides either a `main` method if the command has no subcommands
+or a suite of `cmd_`*subcommand* methods, one per subcommand.
+
+Running a command is done by:
+
+    MyCommand(argv).run()
+
+Modules which implement a command line mode generally look like this:
+
+    ... imports etc ...
+    def main(argv=None, **run_kw):
+        """ The command line mode.
+        """
+        return MyCommand(argv).run(**run_kw)
+    ... other code ...
+    class MyCommand(BaseCommand):
+    ... other code ...
+    if __name__ == '__main__':
+        sys.exit(main(sys.argv))
+
+Instances have a `self.options` attribute on which optional
+modes are set,
+avoiding conflict with the attributes of `self`.
+
+Subclasses with no subcommands
+generally just implement a `main(argv)` method.
+
+Subclasses with subcommands
+should implement a `cmd_`*subcommand*`(argv)` instance method
+for each subcommand.
+If a subcommand is itself implemented using `BaseCommand`
+then it can be a simple attribute:
+
+    cmd_subthing = SubThingCommand
+
+Returning to methods, if there is a paragraph in the method docstring
+commencing with `Usage:` then that paragraph is incorporated
+into the main usage message automatically.
+Example:
+
+    def cmd_ls(self, argv):
+        """ Usage: {cmd} [paths...]
+              Emit a listing for the named paths.
+
+            Further docstring non-usage information here.
+        """
+        ... do the "ls" subcommand ...
+
+The subclass is customised by overriding the following methods:
+* `apply_opt(opt,val)`:
+  apply an individual getopt global command line option
+  to `self.options`.
+* `apply_opts(opts)`:
+  apply the `opts` to `self.options`.
+  `opts` is an `(option,value)` sequence
+  as returned by `getopot.getopt`.
+  The default implementation iterates over these and calls `apply_opt`.
+* `run_context()`:
+  a context manager to provide setup or teardown actions
+  to occur before and after the command implementation respectively,
+  such as to open and close a database.
+* `cmd_`*subcmd*`(argv)`:
+  if the command line options are followed by an argument
+  whose value is *subcmd*,
+  then the method `cmd_`*subcmd*`(subcmd_argv)`
+  will be called where `subcmd_argv` contains the command line arguments
+  following *subcmd*.
+* `main(argv)`:
+  if there are no `cmd_`*subcmd*` methods then method `main(argv)`
+  will be called where `argv` contains the command line arguments.
+
+Editorial: why not arparse?
+Primarily because when incorrectly invoked
+an argparse command line prints the help/usage messgae
+and aborts the whole programme with `SystemExit`.
+But also, I find the whole argparse `add_argument` thing cumbersome.
+
+Usage summary:
+
+    Usage: base [common-options...] [-a] [-b bvalue] [-c] [--] arguments...
+        -a    Do it all.
+        -b    But using bvalue.
+        -c    The 'c' option!
+      """
+      ...
+      Subcommands:
+        help [common-options...] [-l] [-s] [subcommand-names...]
+          Print help for subcommands.
+          This outputs the full help for the named subcommands,
+          or the short help for all subcommands if no names are specified.
+          Options:
+            -l  Long listing.
+            -r  Recurse into subcommands.
+            -s  Short listing.
+        info [common-options...] [field-names...]
+          Recite general information.
+          Explicit field names may be provided to override the default listing.
+        shell [common-options...]
+          Run a command prompt via cmd.Cmd using this command's subcommands.
+
+*`BaseCommand.__init__(self, argv=None, *, cmd=None, options=None, **kw_options)`*:
+Initialise the command line.
+Raises `GetoptError` for unrecognised options.
+
+Parameters:
+* `argv`:
+  optional command line arguments
+  including the main command name if `cmd` is not specified.
+  The default is `sys.argv`.
+  The contents of `argv` are copied,
+  permitting desctructive parsing of `argv`.
+* `cmd`:
+  optional keyword specifying the command name for context;
+  if this is not specified it is taken from `argv.pop(0)`.
+* `options`:
+  an optional keyword providing object for command state and context.
+  If not specified a new `self.Options` instance
+  is allocated for use as `options`.
+  The default `Options` class is `BaseCommandOptions`,
+  a dataclass with some prefilled attributes and properties
+  to aid use later.
+Other keyword arguments are applied to `self.options`
+as attributes.
+
+The `cmd` and `argv` parameters have some fiddly semantics for convenience.
+There are 3 basic ways to initialise:
+* `BaseCommand()`: `argv` comes from `sys.argv`
+  and the value for `cmd` is derived from `argv[0]`
+* `BaseCommand(argv)`: `argv` is the complete command line
+  including the command name and the value for `cmd` is
+  derived from `argv[0]`
+* `BaseCommand(argv, cmd=foo)`: `argv` is the command
+  arguments _after_ the command name and `cmd` is set to
+  `foo`
+
+The command line arguments are parsed according to
+the optional `GETOPT_SPEC` class attribute (default `''`).
+If `getopt_spec` is not empty
+then `apply_opts(opts)` is called
+to apply the supplied options to the state
+where `opts` is the return from `getopt.getopt(argv,getopt_spec)`.
+
+After the option parse,
+if the first command line argument *foo*
+has a corresponding method `cmd_`*foo*
+then that argument is removed from the start of `argv`
+and `self.cmd_`*foo*`(argv,options,cmd=`*foo*`)` is called
+and its value returned.
+Otherwise `self.main(argv,options)` is called
+and its value returned.
+
+If the command implementation requires some setup or teardown
+then this may be provided by the `run_context`
+context manager method,
+called with `cmd=`*subcmd* for subcommands
+and with `cmd=None` for `main`.
+
+*`BaseCommand.Options`*
+
+*`BaseCommand.SubCommandClass`*
+
+*`BaseCommand.apply_opt(self, opt, val)`*:
+Handle an individual global command line option.
+
+This default implementation raises a `NotImplementedError`.
+It only fires if `getopt` actually gathered arguments
+and would imply that a `GETOPT_SPEC` was supplied
+without an `apply_opt` or `apply_opts` method to implement the options.
+
+*`BaseCommand.apply_opts(self, opts)`*:
+Apply command line options.
+
+Subclasses can override this
+but it is usually easier to override `apply_opt(opt,val)`.
+
+*`BaseCommand.apply_preargv(self, argv)`*:
+Do any preparsing of `argv` before the subcommand/main-args.
+Return the remaining arguments.
+
+This default implementation applies the default options
+supported by `self.options` (an instance of `self.Options`
+class).
+
+*`BaseCommand.cmd_help(self, argv)`*:
+Usage: {cmd} [-l] [-s] [subcommand-names...]
+Print help for subcommands.
+This outputs the full help for the named subcommands,
+or the short help for all subcommands if no names are specified.
+Options:
+  -l  Long listing.
+  -r  Recurse into subcommands.
+  -s  Short listing.
+
+*`BaseCommand.cmd_info(self, argv, *, field_names=None, skip_names=None)`*:
+Usage: {cmd} [field-names...]
+  Recite general information.
+  Explicit field names may be provided to override the default listing.
+
+This default method recites the values from `self.options`,
+excluding the basic fields from `BaseCommandOptions` other
+than `cmd` and `dry_run`.
+
+This base method provides two optional parameters to allow
+subclasses to tune its behaviour:
+- `field_namees`: an explicit list of options attributes to print
+- `skip_names`: a list of option attributes to not print
+  if `field_names` is not specified; the default is the
+  field names of `BaseCommandOptions` excepting `cmd` and
+  `dry_run`
+
+*`BaseCommand.cmd_shell(*a, upd: Optional[cs.upd.Upd] = <function uses_upd.<locals>.<lambda> at 0x10b8b5c60>, **kw)`*:
+Usage: {cmd}
+Run a command prompt via cmd.Cmd using this command's subcommands.
+
+*`BaseCommand.cmdloop(self, intro=None)`*:
+Use `cmd.Cmd` to run a command loop which calls the `cmd_`* methods.
+
+*`BaseCommand.extract_usage(cmd=None)`*:
+Extract the `Usage:` paragraph from `cls__doc__` if present.
+Return a 2-tuple of `(doc_without_usage,usage_text)`
+being the remaining docstring and a full usage message.
+
+*Note*: this actually sets `cls.USAGE_FORMAT` if that does
+not already exist.
+
+*`BaseCommand.getopt_error_handler(cmd, options, e, usage, subcmd=None)`*:
+The `getopt_error_handler` method
+is used to control the handling of `GetoptError`s raised
+during the command line parse
+or during the `main` or `cmd_`*subcmd*` calls.
+
+This default handler issues a warning containing the exception text,
+prints the usage message to standard error,
+and returns `True` to indicate that the error has been handled.
+
+The handler is called with these parameters:
+* `cmd`: the command name
+* `options`: the `options` object
+* `e`: the `GetoptError` exception
+* `usage`: the command usage or `None` if this was not provided
+* `subcmd`: optional subcommand name;
+  if not `None`, is the name of the subcommand which caused the error
+
+It returns a true value if the exception is considered handled,
+in which case the main `run` method returns 2.
+It returns a false value if the exception is considered unhandled,
+in which case the main `run` method reraises the `GetoptError`.
+
+To let the exceptions out unhandled
+this can be overridden with a method which just returns `False`.
+
+Otherwise,
+the handler may perform any suitable action
+and return `True` to contain the exception
+or `False` to cause the exception to be reraised.
+
+*`BaseCommand.handle_signal(self, sig, frame, *, runstate: Optional[cs.resources.RunState] = <function uses_runstate.<locals>.<lambda> at 0x10b8b56c0>)`*:
+The default signal handler, which cancels the default `RunState`.
+
+*`BaseCommand.has_subcommands()`*:
+Test whether the class defines additional subcommands.
+
+*`BaseCommand.method_cmdname(method_name: str)`*:
+The `cmd` value from a method name.
+
+*`BaseCommand.poparg(argv: List[str], *specs, unpop_on_error: bool = False, opt_spec_class=None)`*:
+Pop the leading argument off `argv` and parse it.
+Return the parsed argument.
+Raises `getopt.GetoptError` on a missing or invalid argument.
+
+This is expected to be used inside a `main` or `cmd_*`
+command handler method or inside `apply_preargv`.
+
+You can just use:
+
+    value = argv.pop(0)
+
+but this method provides conversion and valuation
+and a richer failure mode.
+
+Parameters:
+* `argv`: the argument list, which is modified in place with `argv.pop(0)`
+* the argument list `argv` may be followed by some help text
+  and/or an argument parser function.
+* `validate`: an optional function to validate the parsed value;
+  this should return a true value if valid,
+  or return a false value or raise a `ValueError` if invalid
+* `unvalidated_message`: an optional message after `validate`
+  for values failing the validation
+* `unpop_on_error`: optional keyword parameter, default `False`;
+  if true then push the argument back onto the front of `argv`
+  if it fails to parse; `GetoptError` is still raised
+
+Typical use inside a `main` or `cmd_*` method might look like:
+
+    self.options.word = self.poparg(argv, int, "a count value")
+    self.options.word = self.poparg(
+        argv, int, "a count value",
+       lambda count: count > 0, "count should be positive")
+
+Because it raises `GetoptError` on a bad argument
+the normal usage message failure mode follows automatically.
+
+Demonstration:
+
+    >>> argv = ['word', '3', 'nine', '4']
+    >>> BaseCommand.poparg(argv, "word to process")
+    'word'
+    >>> BaseCommand.poparg(argv, int, "count value")
+    3
+    >>> BaseCommand.poparg(argv, float, "length")
+    Traceback (most recent call last):
+      ...
+    getopt.GetoptError: length 'nine': float('nine'): could not convert string to float: 'nine'
+    >>> BaseCommand.poparg(argv, float, "width", lambda width: width > 5)
+    Traceback (most recent call last):
+      ...
+    getopt.GetoptError: width '4': invalid value
+    >>> BaseCommand.poparg(argv, float, "length")
+    Traceback (most recent call last):
+      ...
+    getopt.GetoptError: length: missing argument
+    >>> argv = ['-5', 'zz']
+    >>> BaseCommand.poparg(argv, float, "size", lambda size: size > 0, "size should be >0")
+    Traceback (most recent call last):
+      ...
+    getopt.GetoptError: size '-5': size should be >0
+    >>> argv  # -5 was still consumed
+    ['zz']
+    >>> BaseCommand.poparg(argv, float, "size2", unpop_on_error=True)
+    Traceback (most recent call last):
+      ...
+    getopt.GetoptError: size2 'zz': float('zz'): could not convert string to float: 'zz'
+    >>> argv  # zz was pushed back
+    ['zz']
+
+*`BaseCommand.popopts(self, argv, options, **opt_specs)`*:
+OBSOLETE popopts
+
+A convenience shim which returns `self.options.popopts(argv,**opt_specs)`.
+
+*`BaseCommand.repl(self, *argv, banner=None, local=None)`*:
+Run an interactive Python prompt with some predefined local names.
+Aka REPL (Read Evaluate Print Loop).
+
+Parameters:
+* `argv`: any notional command line arguments
+* `banner`: optional banner string
+* `local`: optional local names mapping
+
+The default `local` mapping is a `dict` containing:
+* `argv`: from `argv`
+* `options`: from `self.options`
+* `self`: from `self`
+* the attributes of `options`
+* the attributes of `self`
+
+This is not presented automatically as a subcommand, but
+commands wishing such a command should provide something
+like this:
+
+    def cmd_repl(self, argv):
+        """ Usage: {cmd}
+              Run an interactive Python prompt with some predefined local names.
+        """
+        return self.repl(*argv)
+
+*`BaseCommand.run(self, **kw_options)`*:
+Run a command.
+Returns the exit status of the command.
+May raise `GetoptError` from subcommands.
+
+Any keyword arguments are used to override `self.options` attributes
+for the duration of the run,
+for example to presupply a shared `Upd` from an outer context.
+
+If the first command line argument *foo*
+has a corresponding method `cmd_`*foo*
+then that argument is removed from the start of `argv`
+and `self.cmd_`*foo*`(cmd=`*foo*`)` is called
+and its value returned.
+Otherwise `self.main(argv)` is called
+and its value returned.
+
+If the command implementation requires some setup or teardown
+then this may be provided by the `run_context()`
+context manager method.
+
+*`BaseCommand.run_context(*a, upd: Optional[cs.upd.Upd] = <function uses_upd.<locals>.<lambda> at 0x10b8b54e0>, **kw)`*:
+The context manager which surrounds `main` or `cmd_`*subcmd*.
+Normally this will have a bare `yield`, but you can yield
+a not `None` value to exit before the command, for example
+if the run setup fails.
+
+This default does several things, and subclasses should
+override it like this:
+
+    @contextmanager
+    def run_context(self):
+      with super().run_context():
+        try:
+          ... subclass context setup ...
+            yield
+        finally:
+          ... any unconditional cleanup ...
+
+This base implementation does the following things:
+- provides a `self.options` which is a copy of the original
+  `self.options` so that it may freely be modified during the
+  command
+- provides a prevailing `RunState` as `self.options.runstate`
+  if one is not already present
+- provides a `cs.upd.Upd` context for status lines
+- catches `self.options.runstate_signals` and handles them
+  with `self.handle_signal`
+
+*`BaseCommand.subcommand`*
+
+*`BaseCommand.subcommand_usage_text(self, subcmd, usage_format_mapping=None, short=False)`*:
+Return the usage text for a subcommand.
+
+*`BaseCommand.subcommands`*
+
+*`BaseCommand.usage_text(self, **subcommand_kw)`*:
+Compute the "Usage:" message for this class.
+Parameters are as for `SubCommand.usage_text`.
+
+## <a name="BaseCommandCmd"></a>Class `BaseCommandCmd(cmd.Cmd)`
+
+A `cmd.Cmd` subclass used to provide interactive use of a
+command's subcommands.
+
+The `BaseCommand.cmdloop()` class method instantiates an
+instance of this and calls its `.cmdloop()` method
+i.e. `cmd.Cmd.cmdloop`.
+
+## <a name="BaseCommandOptions"></a>Class `BaseCommandOptions(cs.threads.HasThreadState)`
+
+A base class for the `BaseCommand` `options` object.
+
+This is the default class for the `self.options` object
+available during `BaseCommand.run()`,
+and available as the `BaseCommand.Options` attribute.
+
+Any keyword arguments are applied as field updates to the instance.
+
+It comes prefilled with:
+* `.dry_run=False`
+* `.force=False`
+* `.quiet=False`
+* `.ssh_exe='ssh'`
+* `.verbose=False`
+and a `.doit` property which is the inverse of `.dry_run`.
+
+It is recommended that if `BaseCommand` subclasses use a
+different type for their `Options` that it should be a
+subclass of `BaseCommandOptions`.
+Since `BaseCommandOptions` is a data class, this typically looks like:
+
+    @dataclass
+    class Options(BaseCommand.Options):
+        ... optional extra fields etc ...
+
+*`BaseCommandOptions.__call__(self, **updates)`*:
+Calling the options object returns a context manager whose
+value is a shallow copy of the options with any `suboptions` applied.
+
+Example showing the semantics:
+
+    >>> from cs.cmdutils import BaseCommandOptions
+    >>> @dataclass
+    ... class DemoOptions(BaseCommandOptions):
+    ...   x: int = 0
+    ...
+    >>> options = DemoOptions(x=1)
+    >>> assert options.x == 1
+    >>> assert not options.verbose
+    >>> with options(verbose=True) as subopts:
+    ...     assert options is not subopts
+    ...     assert options.x == 1
+    ...     assert not options.verbose
+    ...     assert subopts.x == 1
+    ...     assert subopts.verbose
+    ...
+    >>> assert options.x == 1
+    >>> assert not options.verbose
+
+*`BaseCommandOptions.as_dict(self)`*:
+Return the options as a `dict`.
+This contains all the public attributes of `self`.
+
+*`BaseCommandOptions.copy(self, **updates)`*:
+Return a new instance of `BaseCommandOptions` (well, `type(self)`)
+which is a shallow copy of the public attributes from `self.__dict__`.
+
+Any keyword arguments are applied as attribute updates to the copy.
+
+*`BaseCommandOptions.doit`*:
+I usually use a `doit` flag, the inverse of `dry_run`.
+
+*`BaseCommandOptions.fields_as_dict(self)`*:
+Return the options' fields as a `dict`.
+This contains all the field values of `self`.
+
+*`BaseCommandOptions.getopt_spec_map(opt_specs_kw: Mapping, common_opt_specs=None)`*:
+Return a 3-tuple of (shortopts,longopts,getopt_spec_map)` being:
+- `shortopts`: the `getopt()` short options specification string
+- `longopts`: the `getopts()` long option specification list
+- `getopt_spec_map`: a mapping of `opt`->`OptionSpec`
+  where `opt` is as from `opt,val` from `getopt()`
+  and `opt_spec` is the associated `OptionSpec` instance
+
+*`BaseCommandOptions.opt_spec_class`*
+
+*`BaseCommandOptions.perthread_state`*
+
+*`BaseCommandOptions.popopts(self, argv, **opt_specs_kw)`*:
+Parse option switches from `argv`, a list of command line strings
+with leading option switches and apply them to `self`.
+Modify `argv` in place.
+
+Example use in a `BaseCommand` `cmd_foo` method:
+
+    def cmd_foo(self, argv):
+        options = self.options
+        options.popopts(
+            c_='config',
+            l='long',
+            x='trace',
+        )
+        if self.options.dry_run:
+            print("dry run!")
+
+The expected options are specified by the keyword parameters
+in `opt_specs`.
+Each keyword name has the following semantics:
+* options not starting with a letter may be preceeded by an underscore
+  to allow use in the parameter list, for example `_1='once'`
+  for a `-1` option setting the `once` option name
+* a single letter name specifies a short option
+  and a multiletter name specifies a long option
+* options requiring an argument have a trailing underscore
+* options not requiring an argument normally imply a value
+  of `True`; if their synonym commences with a dash they will
+  imply a value of `False`, for example `n='dry_run',y='-dry_run'`.
+
+The `BaseCommand` class provides a `popopts` method
+which is a shim for this method applied to its `.options`.
+So common use in a command method usually looks like this:
+
+    class SomeCommand(BaseCommand):
+
+        def cmd_foo(self, argv):
+            # accept a -j or --jobs options
+            self.popopts(argv, jobs=1, j='jobs')
+            print("jobs =", self.options.jobs)
+
+The `self.options` object is preprovided as an instance of
+the `self.Options` class, which is `BaseCommandOptions` by
+default. There is presupplies support for some basic options
+like `-v` for "verbose" and so forth, and a subcommand
+need not describe these in a call to `self.options.popopts()`.
+
+Example:
+
+    >>> import os.path
+    >>> from typing import Optional
+    >>> @dataclass
+    ... class DemoOptions(BaseCommandOptions):
+    ...   all: bool = False
+    ...   jobs: int = 1
+    ...   number: int = 0
+    ...   once: bool = False
+    ...   path: Optional[str] = None
+    ...   trace_exec: bool = False
+    ...
+    >>> options = DemoOptions()
+    >>> argv = ['-1', '-v', '-y', '-j4', '--path=/foo', 'bah', '-x']
+    >>> opt_dict = options.popopts(
+    ...   argv,
+    ...   _1='once',
+    ...   a='all',
+    ...   j_=('jobs',int),
+    ...   x='-trace_exec',
+    ...   y='-dry_run',
+    ...   dry_run=None,
+    ...   path_=(str, os.path.isabs, 'not an absolute path'),
+    ...   verbose=None,
+    ... )
+    >>> opt_dict
+    {'once': True, 'verbose': True, 'dry_run': False, 'jobs': 4, 'path': '/foo'}
+    >>> options # doctest: +ELLIPSIS
+    DemoOptions(cmd=None, dry_run=False, force=False, quiet=False, runstate_signals=(...), verbose=True, all=False, jobs=4, number=0, once=True, path='/foo', trace_exec=False)
+
+*`BaseCommandOptions.update(self, **updates)`*:
+Modify the options in place with the mapping `updates`.
+It would be more normal to call the options in a `with` statement
+as shown for `__call__`.
+
+*`BaseCommandOptions.usage_options_format(headline='Options:', *, _common_opt_specs=None, **opt_specs_kw)`*:
+Return an options paragraph describing `opt_specs_kw`.
+or `''` if `opt_specs_kw` is empty.
+
+## <a name="docmd"></a>`docmd(dofunc)`
+
+Decorator for `cmd.Cmd` subclass methods
+to supply some basic quality of service.
+
+This decorator:
+- wraps the function call in a `cs.pfx.Pfx` for context
+- intercepts `getopt.GetoptError`s, issues a `warning`
+  and runs `self.do_help` with the method name,
+  then returns `None`
+- intercepts other `Exception`s,
+  issues an `exception` log message
+  and returns `None`
+
+The intended use is to decorate `cmd.Cmd` `do_`* methods:
+
+    from cmd import Cmd
+    from cs.cmdutils import docmd
+    ...
+    class MyCmd(Cmd):
+        @docmd
+        def do_something(...):
+            ... do something ...
+
+## <a name="OptionSpec"></a>Class `OptionSpec`
+
+A class to support parsing an option value.
+
+*`OptionSpec.__post_init__(self)`*:
+Infer `field_name` and `help_text` if unspecified.
+
+*`OptionSpec.add_argument(self, parser, options=None)`*:
+Add this option to an `argparser`-style option parser.
+The optional `options` parameter may be used to supply an
+`Options` instance to provide a default value.
+
+*`OptionSpec.from_opt_kw(opt_k: str, specs: Union[str, List, Tuple, NoneType])`*:
+Factory to produce an `OptionSpec` from a `(key,specs)` 2-tuple
+as from the `items()` from a `popopts()` call.
+
+The `specs` is normally a list or tuple, but a bare string
+will be promoted to a 1-element list containing the string.
+
+The elements of `specs` are considered in order for:
+- an identifier specifying the `arg_name`,
+  optionally prepended with a dash to indicate an inverted option
+- a help text about the option
+- a callable to parse the option string value to obtain the actual value
+- a callable to validate the option value
+- a message for use when validation fails
+
+*`OptionSpec.getopt_long`*:
+The option specification for a getopt long option.
+Return `None` if `self.opt_name` is only 1 character.
+
+*`OptionSpec.getopt_opt`*:
+The `opt` we expect from `opt,val=getopt(argv,...)`.
+
+*`OptionSpec.getopt_short`*:
+The option specification for a getopt short option.
+Return `''` if `self.opt_name` is longer than 1 character.
+
+*`OptionSpec.help_text_from_field_name(field_name)`*:
+Compute an inferred `help_text` from an option `field_name`.
+
+*`OptionSpec.needs_arg`*:
+Whether we expect an argument: we have a `self.arg_name`.
+
+*`OptionSpec.option_terse(self)`*:
+Return the `"-x"` or `"--name"` option string (with the arg name if expected).
+
+*`OptionSpec.option_usage(self)`*:
+A 2 line usage entry for this option.
+Example:
+
+    -j jobs
+      Job limit.
+
+*`OptionSpec.parse_value(self, value)`*:
+Parse `value` according to the spec.
+Raises `GetoptError` for invalid values.
+
+## <a name="popopts"></a>`popopts(*da, **dkw)`
+
+A decorator to parse command line options from a `cmd_`*method*'s `argv`
+and update `self.options`. This also updates the method's usage message.
+
+Example:
+
+    @popopts(x=('trace', 'Trace execution.'))
+    def cmd_do_something(self, argv):
+        """ Usage: {cmd} [-x] blah blah
+              Do some thing to blah.
+        """
+
+This arranges for cmd_do_something to call `self.options.popopts(argv)`,
+and updates the usage message with an "Options:" paragraph.
+
+This avoids needing to manually enumerate the options in the
+docstring usage and avoids explicitly calling `self.options.popopts`
+inside the method.
+
+## <a name="qvprint"></a>`qvprint(*print_a, quiet, verbose, **print_kw)`
+
+Call `print()` if `options.verbose` and not `options.quiet`.
+
+## <a name="split_usage"></a>`split_usage(doc: Optional[str], usage_marker='Usage:') -> Tuple[str, str, str]`
+
+Extract a `"Usage:"`paragraph from a docstring
+and return a 3-tuple of `(preusage,usage,postusage)`.
+
+If the usage paragraph is not present `''` is returned as
+the middle comonpent, otherwise it is the unindented usage
+without the leading `"Usage:"`.
+
+## <a name="SubCommand"></a>Class `SubCommand`
+
+An implementation for a subcommand.
+
+*`SubCommand.__call__(self, argv: List[str])`*:
+Run the subcommand.
+
+Parameters:
+* `argv`: the command line arguments after the subcommand name
+
+*`SubCommand.get_cmd(self) -> str`*:
+Return the `cmd` string for this `SubCommand`,
+derived from the subcommand's method name or class name
+if `self.cmd` is not set.
+
+*`SubCommand.get_subcmds(self)`*:
+Return the names of `self.method`'s subcommands in lexical order.
+
+*`SubCommand.get_subcommands(self)`*:
+Return `self.method`'s mapping of subcommand name to `SubCommand`.
+
+*`SubCommand.get_usage_format(self, show_common=False) -> str`*:
+Return the usage format string for this subcommand.
+*Note*: no leading "Usage:" prefix.
+If `show_common` is true, include the `Common options:` paragraph.
+
+*`SubCommand.get_usage_keywords(self, *, cmd: Optional[str] = None, usage_mapping: Optional[Mapping] = None) -> str`*:
+Return a mapping to be used when formatting the usage format string.
+
+This is an elaborate `ChainMap` of:
+- the optional `cmd` or `self.get_cmd()`
+- the optional `usage_mapping`
+- `self.usage_mapping`
+- `self.method.USAGE_KEYWORDS` if present
+- the attributes of `self.command`
+- the attributes of `type(self.command)`
+- the attributes of the module for `type(self.command)`
+
+*`SubCommand.has_subcommands`*:
+Whether this `SubCommand`'s `.method` has subcommands.
+
+*`SubCommand.instance`*:
+An instance of the class for `self.method`.
+
+*`SubCommand.short_subusages(self, subcmds: List[str])`*:
+Return a list of tabulated one line subcommand summaries.
+
+*`SubCommand.usage_text(self, *, cmd=None, short: bool, recurse: bool = False, show_common: bool = False, show_subcmds: Union[bool, str, List[str], NoneType] = None, usage_mapping: Optional[Mapping] = None, seen_subcommands: Optional[Mapping] = None) -> str`*:
+Return the filled out usage text for this subcommand.
+
+## <a name="vprint"></a>`vprint(*print_a, **qvprint_kw)`
+
+Call `print()` if `options.verbose`.
+This is a compatibility shim for `qvprint()` with `quiet=False`.
+
+# Release Log
+
+
+
+*Release 20241206*:
+* New @popopts decorator to run self.options.popopts and fill out the usage message.
+* Add "-e ssh-command" and the .ssh_exe attribute to BaseCommandOptions.
+
+*Release 20241122.2*:
+* OptionSpec.getopt_long: fix construction of getopt long option specifications, lost during the recent refactor.
+* Two other minor fixes.
+
+*Release 20241122.1*:
+* SubCommand.usage_format_parts: backport type annotation for older Pythons.
+* BaseCommand.extract_usage: update parameters for usage_text().
+
+*Release 20241122*:
+* BaseCommand.cmd_help: new -l (long), -r (recurse) and -s (short, not long) options.
+* A big rework of the help/usage output; still one rough edge left.
+* BaseCommandOptions.popopts: infill with False instead of None for missing boolean options.
+* SubCommand: a few new methods and properties to expose various operations.
+* BaseCommand._prerun_setup: revert SUBCOMMAND_ARGV_DEFAULT to None, make a missing subcommand run "help -s" when there's no SUBCOMMAND_ARGV_DEFAULT.
+
+*Release 20241119*:
+* SubCommand.usage_text: small improvements and a fix.
+* New BaseCommand.SubCommandClass attribute for the SubCommand subclass, supports using additional SubCommand subclasses for eg cs.djutils.
+
+*Release 20241117*:
+* _COMMON_OPT_SPECS: include a --dry-run option, alter for -n.
+* SubCommand.usage_text: one line listing for common subcommands.
+
+*Release 20241110*:
+* Various fixes and enhancements to the usage text generation.
+* BaseCommandOptions.COMMON_OPT_SPECS stuff, including inheritance and presentation in usage.
+* BaseCommand.run: if self.run_context() yields not None, exit immediately with that value.
+* Rationalise and improve OptionSpec.
+* Supplant vprint with qvprint which honours quiet and verbose, provide vprint as a shim with a hardwired quiet=False.
+* Make cmd_info the default subcommand and make some improvements.
+* BaseCommandOptions: new fields_as_dict method, update copy() to start with fields_as_dict, overlay as_dict, overlay updates.
+* OptionSpec: new add_argument(parser[,options]) method to add this option to an argparse style option parser (again, for the upcoming cs.djutils module).
+* A heap of small things.
+
+*Release 20241007*:
+* BaseCommand: drop __init_subclass__, was doing too much to early.
+* BaseCommand.__init__: no cmd and argv[0] ends with ".py" infer cmd from the class name.
+* Other minor updates.
+
+*Release 20241005*:
+* BaseCommand: provide an options.runstate to allow the command to override the default (almost never happens).
+* BaseCommand.popopts: fix reference to OptionSpec class.
+* BaseCommand.run: put the try/except:CancellationError outside the self.run_context context manager call, as it can directly raise CancellationError.
+* New vprint() function calling print() if options.verbose.
+
+*Release 20240709*:
+BaseCommand: support putting the top level Usage in the class docstring instead of as .USAGE_FORMAT, append full usage to the class docstring in `BaseCommand.__init_subclass__`.
+
+*Release 20240630*:
+* BaseCommand: make SUBCOMMAND_ARGV_DEFAULT be 'shell' for an interactive prompt, still a little unsure how sensible this is, aiming at the very cool submode stuff from the Cisco switch config command line.
+* BaseCommandOptions: new as_dict() method.
+* New SubCommand.usage_text() to compose the full usage text for this SubCommand.
+* Many small improvements and internal refactors.
+
+*Release 20240519*:
+BaseCommand.run_context: attach the runstate to the options.
+
+*Release 20240422*:
+* BaseCommandOptions.popopts: return the dict from BaseCommand.popopts().
+* BaseCommand.apply_preargv: apply the default options supported by self.options.
+* BaseCommandOptions.update(mapping) method, useful for dropping subcommand-specific defaults onto the options ahead of the local popopts() call.
+
+*Release 20240412*:
+* BaseCommand.run_context: do not store .upd and .runstate on the options (it confuses options in subcommands and we have @uses_runstate and @uses_upd forthis anyway these days).
+* BaseCommand.run_context: catch SIGQUIT, present the default handler as BaseCommand.handle_signal.
+
+*Release 20240316*:
+* New @uses_cmd_options decorator to provide an "options" parameter being the prevailing BaseCommandOptions instance.
+* BaseCommandOptions.popopts: get common options from BaseCommandOptions.COMMON_OPT_SPECS.
+
+*Release 20240211*:
+* Include the first sentence of the subcommand description in the short help.
+* BaseCommandOptions: move the runstate_signals into this directly.
+* BaseCommand: move the run() options stuff into run_context() and have it work on a copy of the original options.
+* BaseCommandCmd: implement get_names(), provide docstrings for the do_* attributes, thus help.
+* BaseCommand.run_context: make runstate and upd keyword only parameters.
+
+*Release 20240201*:
+* BaseCommand.run: catch CancellationError and return 1.
+* BaseCommandCmd.__getattr__: recognise EOF, exit and quit to terminate the cmdloop.
+
+*Release 20231129*:
+BaseCommandOptions: define a runstate field.
+
+*Release 20230703*:
+Small internal changes.
+
+*Release 20230612*:
+* BaseCommand.cmdloop: fix intro parameter.
+* Other small fixes.
+
+*Release 20230407*:
+* BaseCommand: use @uses_runstate when preparing the command, store as self.options.runstate.
+* Make BaseCommandOptions a data class.
+* Drop any pretence at python 2 support, we're long past that.
+* BaseCommand: new cmdloop method to run a cmd.Cmd instance to run subcommand interactively.
+* BaseCommand: rename shell to repl, add cmd_shell to call cmdloop().
+* Drop BaseCommand.apply_defaults in favour of the Options dataclass.
+* BaseCommand: do setup_logging before initiating the Options instance.
+
+*Release 20230212*:
+* BaseCommand.run_context: update RunState support.
+* BaseCommand.run_context: always be having an self.options.upd.
+
+*Release 20230211*:
+BaseCommand: new shell() method to present an interactive Python prompt for use by subclasses cmd_shell method if desired.
+
+*Release 20221228*:
+Move a lot of the context logic from BaseCommand.run to BaseCommand.run_context, which now must be correctly overridden in subclasses.
+
+*Release 20220918*:
+* BaseCommand.run_context: expand default signals to include SIGHUP, expose as BaseCommand.DEFAULT_SIGNALS.
+* BaseCommand.run: pass in the subclass handle_signal method if present.
+
+*Release 20220626*:
+* BaseCommand.poparg: fix positional argument handling.
+* BaseCommand.poparg: new unpop_on_error=False parameter to support pushing a bad argument back onto the front of the argument list.
+
+*Release 20220606*:
+BaseCommand.run: remove the Upd bodge, too annoying, now fixed in cs.upd I believe.
+
+*Release 20220605*:
+* BaseCommand: new popopts(argv,...) compact getopt wrapper.
+* BaseCommand: new poparg(argv,...) compact validating argument consumer.
+* BaseCommand: drop run_argv, provided no utility.
+* BaseCommand.run: get the RunState signal list from self.options.runstate_signals.
+* BaseCommand.apply_opts: support multiple individual options raising GetoptError, as I hate commands which abort at the first bad option.
+* Assorted other small things.
+
+*Release 20220429*:
+* BaseCommand: fold dots in argv[0] into underscores, supports subcommands like "setup.py".
+* BaseCommand: new popargv(argv[,help_text[,parse[,validate[,unvalidated_message]]]]) helper class method.
+* BaseCommand: accept dashed-form of the underscored_form subcommand name.
+* BaseCommand: new self.options.runstate_signals=SIGINT,SIGTERM specifying singals to catch-and-cancel, shuffle run() context managers.
+
+*Release 20220318*:
+BaseCommand.__init__: handle main() method in the New Scheme.
+
+*Release 20220315*:
+_BaseSubCommand.__init__: hook in the class USAGE_KEYWORDS for methods.
+
+*Release 20220311*:
+BaseCommand: big refactor of subcommand internals and make the "cmd_foo=FooCommand" implementation work properly.
+
+*Release 20211208*:
+BaseCommand: better handle an unknown subcommand.
+
+*Release 20210927*:
+* Usage: show only the per subcommand usage for in-subcommand GetoptError.
+* Usage: show terse usage when the subcommand cannot be recognised.
+* Usage: support bare -h, -help, --help.
+
+*Release 20210913*:
+New BaseCommand.apply_preargv method to gather special arguments before subcommands.
+
+*Release 20210906*:
+* BaseCommand.cmd_help: bugfix obsolete parameter list.
+* BaseCommand.SUBCOMMAND_ARGV_DEFAULT: support a single str value, turn into list.
+
+*Release 20210809*:
+Bugfix BaseCommand.cmd_help for modern API.
+
+*Release 20210731*:
+* BaseCommand.run: apply optional keyword arguments to self.options during the run.
+* Look for self.SUBCOMMAND_ARGV_DEFAULT if no subcommand is supplied.
+* Bugfix case for "main" method and no "cmd_*" methods.
+* Bugfix BaseCommand.cmd_help.
+
+*Release 20210420*:
+* BaseCommand.getopt_error_handler: replace error print() with warning().
+* Docstring improvements.
+
+*Release 20210407.1*:
+BaseCommand: bugfix for __init_subclass__ docstring update.
+
+*Release 20210407*:
+* BaseCommand.__init_subclass__: behave sanely if the subclass has no initial __doc__.
+* BaseCommand: new .run_argv convenience method, obviates the "def main" boilerplate.
+
+*Release 20210404*:
+BaseCommand subclasses: automatically add the main usage message to the subclass docstring.
+
+*Release 20210306*:
+* BREAKING CHANGE: rework BaseCommand as a more normal class instantiated with argv and with most methods being instance methods, getting the former `options` parameter from self.options.
+* BaseCommand: provide default `apply_opt` and `apply_opts` methods; subclasses will generally just override the former.
+
+*Release 20210123*:
+BaseCommand: propagate the format mapping (cmd, USAGE_KEYWORDS) to the subusage generation.
+
+*Release 20201102*:
+* BaseCommand.cmd_help: supply usage only for "all commands", full docstring for specified commands.
+* BaseCommand: honour presupplied options.log_level.
+* BaseCommand.usage_text: handle missing USAGE_FORMAT better.
+* BaseCommand.run: provide options.upd.
+* BaseCommand subclasses may now override BaseCommand.OPTIONS_CLASS (default SimpleNamespace) in order to provide convenience methods on the options.
+* BaseCommand.run: separate variable for subcmd with dash translated to underscore to match method names.
+* Minor fixes.
+
+*Release 20200615*:
+BaseCommand.usage_text: do not mention the "help" command if it is the only subcommand (it won't be available if there are no other subcommands).
+
+*Release 20200521.1*:
+Fix DISTINFO.install_requires.
+
+*Release 20200521*:
+* BaseCommand.run: support using BaseCommand subclasses as cmd_* names to make it easy to nest BaseCommands.
+* BaseCommand: new hack_postopts_argv method called after parsing the main command line options, for inferring subcommands or the like.
+* BaseCommand: extract "Usage:" paragraphs from subcommand method docstrings to build the main usage message.
+* BaseCommand: new cmd_help default command.
+* Assorted bugfixes and small improvements.
+
+*Release 20200318*:
+* BaseCommand.run: make argv optional, get additional usage keywords from self.USAGE_KEYWORDS.
+* @BaseCommand.add_usage_to_docstring: honour cls.USAGE_KEYWORDS.
+* BaseCommand: do not require GETOPT_SPEC for commands with no defined options.
+* BaseCommand.run: call cs.logutils.setup_logging.
+
+*Release 20200229*:
+Improve subcommand selection logic, replace StackableValues with stackattrs, drop `cmd` from arguments passed to main/cmd_* methods (present in `options`).
+
+*Release 20200210*:
+* New BaseCommand.add_usage_to_docstring class method to be called after class setup, to append the usage message to the class docstring.
+* BaseCommand.run: remove spurious Pfx(cmd), as logutils does this for us already.
+
+*Release 20190729*:
+BaseCommand: support for a USAGE_FORMAT usage message format string and a getopt_error_handler method.
+
+*Release 20190619.1*:
+Another niggling docstring formatting fix.
+
+*Release 20190619*:
+Minor documentation updates.
+
+*Release 20190617.2*:
+Lint.
+
+*Release 20190617.1*:
+Initial release with @docmd decorator and alpha quality BaseCommand command line assistance class.
