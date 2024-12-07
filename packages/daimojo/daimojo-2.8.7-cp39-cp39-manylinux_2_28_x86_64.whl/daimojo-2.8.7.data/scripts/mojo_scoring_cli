@@ -1,0 +1,71 @@
+#!python
+# Copyright 2018 H2O.ai;  -*- encoding: utf-8 -*-
+import os
+import argparse
+import daimojo.model
+import datatable as dt
+import time
+
+parser = argparse.ArgumentParser(
+    description='Command line tool for mojo scoring',
+)
+
+parser.add_argument('-m', action='store',
+                    dest='mojo',
+                    help='mojo file path', required=True)
+
+parser.add_argument('-i', action='store',
+                    dest='input',
+                    help='input csv file path', required=True)
+
+parser.add_argument('-o', action='store',
+                    dest='output',
+                    help='output csv file path', required=True)
+
+parser.add_argument('-s', action='store',
+                    dest='sep',
+                    help='csv separator', required=False)
+
+parser.add_argument('-p', help='output feature contributions (SHAP values)',
+                    dest='pred_contribs',
+                    action='store_true', required=False)
+
+parser.add_argument('-orig', help='output original feature contributions (original SHAP values)',
+                    dest='pred_contribs_original',
+                    action='store_true', required=False)
+
+parser.add_argument('-interval', help='enable prediction interval',
+                    dest='interval',
+                    action='store_true', required=False)
+
+parser.add_argument('-d', help='debug mojo pipeline',
+                    dest='debug',
+                    action='store_true', required=False)
+
+args = parser.parse_args()
+
+if not os.path.isfile(args.mojo):
+    print('mojo file: {!r} doesn\'t exist.'.format(args.mojo))
+    exit(0)
+
+if not os.path.isfile(args.input):
+    print('input csv file: {!r} doesn\'t exist.'.format(args.input))
+    exit(0)
+
+print('mojo file       : {!r}'.format(os.path.abspath(args.mojo)))
+print('input csv file  : {!r}'.format(os.path.abspath(args.input)))
+print('output csv file : {!r}'.format(os.path.abspath(args.output)))
+
+m = daimojo.model(os.path.abspath(args.mojo))
+
+dt.options.fread.parse_dates = False
+dt.options.fread.parse_times = False
+pydt = dt.fread(os.path.abspath(args.input), na_strings=m.missing_values,
+                header=True, sep=args.sep)
+
+t0 = time.time()
+r = m.predict(pydt, pred_contribs=args.pred_contribs, pred_contribs_original=args.pred_contribs_original, interval=args.interval, debug=args.debug)
+t1 = time.time()
+print("latency         : %.5f milliseconds" % ((t1 - t0) / pydt.nrows * 1e3))
+
+r.to_csv(os.path.abspath(args.output))
