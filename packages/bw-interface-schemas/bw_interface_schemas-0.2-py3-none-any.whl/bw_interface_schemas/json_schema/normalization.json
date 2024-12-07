@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "JsonValue": {}
+  },
+  "additionalProperties": true,
+  "properties": {
+    "name": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Name",
+      "type": "array"
+    },
+    "node_type": {
+      "const": "normalization",
+      "default": "normalization",
+      "title": "Node Type",
+      "type": "string"
+    },
+    "comment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Comment"
+    },
+    "tags": {
+      "anyOf": [
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tags"
+    },
+    "unit": {
+      "title": "Unit",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "unit"
+  ],
+  "title": "Normalization",
+  "type": "object"
+}
