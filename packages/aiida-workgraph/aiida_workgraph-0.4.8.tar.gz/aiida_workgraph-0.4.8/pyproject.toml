@@ -1,0 +1,156 @@
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "aiida-workgraph"
+dynamic = ["version"]  # read from aiida_workgraph/__init__.py
+description = "Design flexible node-based workflow for AiiDA calculation."
+authors = [{name = "Xing Wang", email = "xingwang1991@gmail.com"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Framework :: AiiDA",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering"
+]
+keywords = ["aiida", "workflows"]
+requires-python = ">=3.9"
+dependencies = [
+    "numpy~=1.21",
+    "scipy",
+    "ase",
+    "node-graph==0.1.7",
+    "node-graph-widget",
+    "aiida-core>=2.3",
+    "cloudpickle",
+    "aiida-shell~=0.8",
+    "aiida-pythonjob==0.1.4",
+    "fastapi",
+    "uvicorn",
+    "pydantic_settings",
+]
+
+[project.urls]
+Documentation = "https://aiida-workgraph.readthedocs.io"
+Source = "https://github.com/aiidateam/aiida-workgraph"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx_rtd_theme",
+    "sphinx~=7.2",
+    "sphinx-copybutton~=0.5.0",
+    "sphinx-design~=0.5.0",
+    "sphinx-notfound-page~=1.0",
+    "sphinxext-rediraffe~=0.2.4",
+    "sphinx-intl~=2.1.0",
+    "sphinx-gallery",
+    "myst-nb~=1.0.0",
+    "nbsphinx",
+]
+pre-commit = [
+    "pre-commit~=2.2",
+    "pylint~=2.17.4",
+]
+tests = [
+    'pgtest~=1.3',
+    "pytest~=7.0",
+    "pytest-cov~=2.7,<2.11",
+    "playwright",
+    "httpx",
+]
+
+[project.scripts]
+workgraph = "aiida_workgraph.cli.cmd_workgraph:workgraph"
+
+[project.entry-points."aiida.cmdline"]
+"workgraph" = "aiida_workgraph.cli.cmd_workgraph:workgraph"
+
+[project.entry-points.'aiida.workflows']
+"workgraph.engine" = "aiida_workgraph.engine.workgraph:WorkGraphEngine"
+
+[project.entry-points."aiida.data"]
+"workgraph.pickled_data" = "aiida_workgraph.orm.pickled_data:PickledData"
+"workgraph.pickled_function" = "aiida_workgraph.orm.pickled_function:PickledFunction"
+"workgraph.pickled_local_function" = "aiida_workgraph.orm.pickled_function:PickledLocalFunction"
+
+
+[project.entry-points."aiida.node"]
+"process.workflow.workgraph" = "aiida_workgraph.orm.workgraph:WorkGraphNode"
+
+[project.entry-points."aiida_workgraph.task"]
+"workgraph.zone" = "aiida_workgraph.tasks.builtins:Zone"
+"workgraph.while" = "aiida_workgraph.tasks.builtins:While"
+"workgraph.if" = "aiida_workgraph.tasks.builtins:If"
+"workgraph.select" = "aiida_workgraph.tasks.builtins:Select"
+"workgraph.gather" = "aiida_workgraph.tasks.builtins:Gather"
+"workgraph.set_context" = "aiida_workgraph.tasks.builtins:SetContext"
+"workgraph.get_context" = "aiida_workgraph.tasks.builtins:GetContext"
+"workgraph.time_monitor" = "aiida_workgraph.tasks.monitors:TimeMonitor"
+"workgraph.file_monitor" = "aiida_workgraph.tasks.monitors:FileMonitor"
+"workgraph.task_monitor" = "aiida_workgraph.tasks.monitors:TaskMonitor"
+"workgraph.aiida_int" = "aiida_workgraph.tasks.builtins:AiiDAInt"
+"workgraph.aiida_float" = "aiida_workgraph.tasks.builtins:AiiDAFloat"
+"workgraph.aiida_string" = "aiida_workgraph.tasks.builtins:AiiDAString"
+"workgraph.aiida_list" = "aiida_workgraph.tasks.builtins:AiiDAList"
+"workgraph.aiida_dict" = "aiida_workgraph.tasks.builtins:AiiDADict"
+"workgraph.aiida_node" = "aiida_workgraph.tasks.builtins:AiiDANode"
+"workgraph.aiida_code" = "aiida_workgraph.tasks.builtins:AiiDACode"
+"workgraph.test_add" = "aiida_workgraph.tasks.test:TestAdd"
+"workgraph.test_sum_diff" = "aiida_workgraph.tasks.test:TestSumDiff"
+"workgraph.test_arithmetic_multiply_add" = "aiida_workgraph.tasks.test:TestArithmeticMultiplyAdd"
+"workgraph.pythonjob" = "aiida_workgraph.tasks.pythonjob:PythonJob"
+
+[project.entry-points."aiida_workgraph.property"]
+"workgraph.any" = "aiida_workgraph.properties.builtins:PropertyAny"
+"workgraph.int" = "aiida_workgraph.properties.builtins:PropertyInt"
+"workgraph.float" = "aiida_workgraph.properties.builtins:PropertyFloat"
+"workgraph.string" = "aiida_workgraph.properties.builtins:PropertyString"
+"workgraph.bool" = "aiida_workgraph.properties.builtins:PropertyBool"
+"workgraph.aiida_int" = "aiida_workgraph.properties.builtins:PropertyAiiDAInt"
+"workgraph.aiida_float" = "aiida_workgraph.properties.builtins:PropertyAiiDAFloat"
+"workgraph.aiida_string" = "aiida_workgraph.properties.builtins:PropertyAiiDAString"
+"workgraph.aiida_bool" = "aiida_workgraph.properties.builtins:PropertyAiiDABool"
+"workgraph.aiida_int_vector" = "aiida_workgraph.properties.builtins:PropertyAiiDAIntVector"
+"workgraph.aiida_float_vector" = "aiida_workgraph.properties.builtins:PropertyAiiDAFloatVector"
+"workgraph.aiida_list" = "aiida_workgraph.properties.builtins:PropertyAiiDAList"
+"workgraph.aiida_dict" = "aiida_workgraph.properties.builtins:PropertyAiiDADict"
+"workgraph.aiida_structuredata" = "aiida_workgraph.properties.builtins:PropertyStructureData"
+
+[project.entry-points."aiida_workgraph.socket"]
+"workgraph.any" = "aiida_workgraph.sockets.builtins:SocketAny"
+"workgraph.namespace" = "aiida_workgraph.sockets.builtins:SocketNamespace"
+"workgraph.int" = "aiida_workgraph.sockets.builtins:SocketInt"
+"workgraph.float" = "aiida_workgraph.sockets.builtins:SocketFloat"
+"workgraph.string" = "aiida_workgraph.sockets.builtins:SocketString"
+"workgraph.bool" = "aiida_workgraph.sockets.builtins:SocketBool"
+"workgraph.aiida_int" = "aiida_workgraph.sockets.builtins:SocketAiiDAInt"
+"workgraph.aiida_float" = "aiida_workgraph.sockets.builtins:SocketAiiDAFloat"
+"workgraph.aiida_string" = "aiida_workgraph.sockets.builtins:SocketAiiDAString"
+"workgraph.aiida_structure" = "aiida_workgraph.sockets.builtins:SocketStructureData"
+"workgraph.aiida_bool" = "aiida_workgraph.sockets.builtins:SocketAiiDABool"
+"workgraph.aiida_int_vector" = "aiida_workgraph.sockets.builtins:SocketAiiDAIntVector"
+"workgraph.aiida_float_vector" = "aiida_workgraph.sockets.builtins:SocketAiiDAFloatVector"
+"workgraph.aiida_list" = "aiida_workgraph.sockets.builtins:SocketAiiDAList"
+"workgraph.aiida_dict" = "aiida_workgraph.sockets.builtins:SocketAiiDADict"
+"workgraph.aiida_structuredata" = "aiida_workgraph.sockets.builtins:SocketStructureData"
+
+
+
+[tool.flit.sdist]
+exclude = [
+    "docs/",
+    "tests/",
+]
+
+
+[tool.pylint.format]
+max-line-length = 120

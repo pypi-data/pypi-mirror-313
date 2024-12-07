@@ -1,0 +1,155 @@
+Metadata-Version: 2.3
+Name: aiida-workgraph
+Version: 0.4.8
+Summary: Design flexible node-based workflow for AiiDA calculation.
+Keywords: aiida,workflows
+Author-email: Xing Wang <xingwang1991@gmail.com>
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Classifier: Development Status :: 1 - Planning
+Classifier: Framework :: AiiDA
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering
+Requires-Dist: numpy~=1.21
+Requires-Dist: scipy
+Requires-Dist: ase
+Requires-Dist: node-graph==0.1.7
+Requires-Dist: node-graph-widget
+Requires-Dist: aiida-core>=2.3
+Requires-Dist: cloudpickle
+Requires-Dist: aiida-shell~=0.8
+Requires-Dist: aiida-pythonjob==0.1.4
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: pydantic_settings
+Requires-Dist: sphinx_rtd_theme ; extra == "docs"
+Requires-Dist: sphinx~=7.2 ; extra == "docs"
+Requires-Dist: sphinx-copybutton~=0.5.0 ; extra == "docs"
+Requires-Dist: sphinx-design~=0.5.0 ; extra == "docs"
+Requires-Dist: sphinx-notfound-page~=1.0 ; extra == "docs"
+Requires-Dist: sphinxext-rediraffe~=0.2.4 ; extra == "docs"
+Requires-Dist: sphinx-intl~=2.1.0 ; extra == "docs"
+Requires-Dist: sphinx-gallery ; extra == "docs"
+Requires-Dist: myst-nb~=1.0.0 ; extra == "docs"
+Requires-Dist: nbsphinx ; extra == "docs"
+Requires-Dist: pre-commit~=2.2 ; extra == "pre-commit"
+Requires-Dist: pylint~=2.17.4 ; extra == "pre-commit"
+Requires-Dist: pgtest~=1.3 ; extra == "tests"
+Requires-Dist: pytest~=7.0 ; extra == "tests"
+Requires-Dist: pytest-cov~=2.7,<2.11 ; extra == "tests"
+Requires-Dist: playwright ; extra == "tests"
+Requires-Dist: httpx ; extra == "tests"
+Project-URL: Documentation, https://aiida-workgraph.readthedocs.io
+Project-URL: Source, https://github.com/aiidateam/aiida-workgraph
+Provides-Extra: docs
+Provides-Extra: pre-commit
+Provides-Extra: tests
+
+# AiiDA-WorkGraph
+[![PyPI version](https://badge.fury.io/py/aiida-workgraph.svg)](https://badge.fury.io/py/aiida-workgraph)
+[![Unit test](https://github.com/aiidateam/aiida-workgraph/actions/workflows/ci.yaml/badge.svg)](https://github.com/aiidateam/aiida-workgraph/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/aiidateam/aiida-workgraph/branch/main/graph/badge.svg)](https://codecov.io/gh/aiidateam/aiida-workgraph)
+[![Docs status](https://readthedocs.org/projects/aiida-workgraph/badge)](http://aiida-workgraph.readthedocs.io/)
+
+Efficiently design and manage flexible workflows with AiiDA, featuring an interactive GUI, checkpoints, provenance tracking, error-resistant, and remote execution capabilities.
+
+
+
+## Installation
+
+```console
+    pip install aiida-workgraph
+```
+
+To install the latest version from source, first clone the repository and then install using `pip`:
+
+```console
+git clone https://github.com/aiidateam/aiida-workgraph
+cd aiida-workgraph
+pip install -e .
+```
+
+
+## Documentation
+Explore the comprehensive [documentation](https://aiida-workgraph.readthedocs.io/en/latest/) to discover all the features and capabilities of AiiDA Workgraph.
+
+## Demo
+Visit the [Workgraph Collections repository](https://github.com/superstar54/workgraph-collections) to see demonstrations of how to utilize AiiDA Workgraph for different computational codes.
+
+## Examples
+Suppose we want to calculate ```(x + y) * z ``` in two steps. First, add `x` and `y`, then multiply the result with `z`.
+
+```python
+from aiida_workgraph import WorkGraph, task
+
+# define add task
+@task.calcfunction
+def add(x, y):
+    return x + y
+
+# define multiply task
+@task.calcfunction
+def multiply(x, y):
+    return x*y
+
+# Create a workgraph to link the tasks.
+wg = WorkGraph("test_add_multiply")
+wg.add_task(add, name="add1")
+wg.add_task(multiply, name="multiply1")
+wg.add_link(wg.tasks["add1"].outputs["result"], wg.tasks["multiply1"].inputs["x"])
+
+```
+
+Prepare inputs and submit the workflow:
+
+```python
+from aiida import load_profile
+
+load_profile()
+
+wg.submit(inputs = {"add1": {"x": 2, "y": 3}, "multiply1": {"y": 4}}, wait=True)
+print("Result of multiply1 is", wg.tasks["multiply1"].outputs[0].value)
+```
+## Web ui
+To use the web ui, first install the web ui package:
+```console
+pip install aiida-workgraph-web-ui
+```
+Then, start the web app with the following command:
+```console
+
+workgraph web start
+```
+
+Then visit the page http://127.0.0.1:8000/workgraph, you should find a `first_workflow` WorkGraph, click the pk and view the WorkGraph.
+
+<img src="docs/source/_static/images/first-workflow.png" />
+
+
+One can also generate the node graph from the process:
+```console
+verdi node generate pk
+```
+
+<img src="docs/source/_static/images/add_multiply.png"/>
+
+
+## Development
+
+### Pre-commit and Tests
+To contribute to this repository, please enable pre-commit so the code in commits are conform to the standards.
+```console
+pip install -e .[tests,pre-commit]
+pre-commit install
+```
+
+## License
+[MIT](http://opensource.org/licenses/MIT)
+
