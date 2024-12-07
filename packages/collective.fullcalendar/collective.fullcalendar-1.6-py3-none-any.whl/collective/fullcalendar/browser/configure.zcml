@@ -1,0 +1,59 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="collective.fullcalendar">
+
+  <!-- Set overrides folder for Just-a-Bunch-Of-Templates product -->
+  <include package="z3c.jbot" file="meta.zcml" />
+  <browser:jbot
+      directory="overrides"
+      layer="collective.fullcalendar.interfaces.ICollectiveFullcalendarLayer"
+      />
+
+  <!-- Publish static files -->
+  <plone:static
+      name="collective.fullcalendar"
+      type="plone"
+      directory="static"
+      />
+
+  <!-- Fullcalendar Settings -->
+  <adapter factory=".fullcalendar.IFullcalendarSettings"
+           for="plone.app.contenttypes.behaviors.collection.ISyndicatableCollection" />
+
+  <adapter factory=".fullcalendar.IFullcalendarSettings"
+           for="plone.dexterity.interfaces.IDexterityContainer" />
+
+  <browser:page
+      for="plone.dexterity.interfaces.IDexterityContainer"
+      name="fullcalendar_settings"
+      class=".fullcalendar.FullcalendarSettingsFormView"
+      allowed_attributes="enable
+                          disable"
+      permission="cmf.AddPortalContent"
+      layer="..interfaces.ICollectiveFullcalendarLayer"
+      />
+
+  <browser:page
+      for="plone.app.contenttypes.behaviors.collection.ISyndicatableCollection"
+      name="fullcalendar_settings"
+      class=".fullcalendar.FullcalendarSettingsFormView"
+      allowed_attributes="enable
+                          disable"
+      permission="cmf.AddPortalContent"
+      layer="..interfaces.ICollectiveFullcalendarLayer"
+      />
+
+  <browser:page
+      for="*"
+      name="fullcalendar_tool"
+      class=".fullcalendar.IFullcalendarTool"
+      allowed_attributes="enabled
+                          available
+                          available_disabled"
+      permission="zope2.View"
+      layer="..interfaces.ICollectiveFullcalendarLayer"
+      />
+
+</configure>
