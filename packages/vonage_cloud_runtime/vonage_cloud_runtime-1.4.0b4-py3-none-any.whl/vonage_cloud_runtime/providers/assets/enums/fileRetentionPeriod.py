@@ -1,0 +1,12 @@
+from dataclasses import dataclass, field, asdict
+from typing import Dict, List, Generic, TypeVar
+from abc import ABC, abstractmethod
+
+
+class FILE_RETENTION_PERIOD:
+    ONE_DAY = "one_day"
+    SEVEN_DAYS = "seven_days"
+    ONE_MONTH = "one_month"
+    THREE_MONTHS = "three_months"
+    SIX_MONTHS = "six_months"
+    ONE_YEAR = "one_year"
