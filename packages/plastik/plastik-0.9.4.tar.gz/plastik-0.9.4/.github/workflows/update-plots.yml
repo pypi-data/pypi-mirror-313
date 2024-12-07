@@ -1,0 +1,52 @@
+name: Update Plots
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensures history is checked out
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - name: Set up Python
+        run: uv python install "3.10"
+      - name: Setup TeX Live
+        uses: teatimeguest/setup-texlive-action@v3
+        with:
+          packages: |
+            scheme-basic
+            type1cm
+            siunitx
+            type1ec
+            underscore
+            times
+            dvipng
+      - name: Install dependencies with Uv
+        run: |
+          uv sync --no-dev --extra=extra
+      - name: Generate plots
+        run: |
+          uv run python ./examples/example.py
+      - name: Commit and push plots
+        run: |
+          git config --global user.name 'han-eirik'
+          git config --global user.email '157013696+han-eirik@users.noreply.github.com'
+          git add -f ./examples/figures/*.png                 # Force add the plots even if ignored
+          git commit -m "chore(main): update plots" || exit 0 # Exit gracefully if no changes
+          git push -u origin HEAD:refs/heads/temporary-branch-for-plots --force
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.BOT_TOKEN }}
+          committer: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          branch: temporary-branch-for-plots
+          title: "[bot] Update generated plots"
+          body: ":robot: This PR updates the generated plots."
+          delete-branch: true # Deletes the temporary branch after merge
+          draft: true
