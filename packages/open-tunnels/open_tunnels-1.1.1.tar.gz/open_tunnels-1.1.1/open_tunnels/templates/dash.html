@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Tunnel Manager</title>
+    <!-- Include Bootstrap CSS via CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+        h1, h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .btn-custom {
+            background-color: #4B79A1;
+            color: #fff;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #283E51;
+            color: #fff;
+        }
+        .navbar {
+            margin-bottom: 20px;
+            background-color: #4B79A1;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .chart-container {
+            position: relative;
+            height: 50vh;
+            margin-bottom: 20px;
+        }
+        /* Chart label styles */
+        .chart-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .chart-label h3 {
+            margin-right: 10px;
+            margin-bottom: 0;
+        }
+        .info-icon {
+            cursor: pointer;
+            color: #4B79A1;
+        }
+        .tooltip-custom {
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        /* Custom notification styles */
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: none;
+            border-radius: 5px;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="/">Tunnel Manager</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Hamburger Menu -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/tunnels">Tunnels</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid">
+        <h1 class="text-center">Dashboard</h1>
+        <!-- Start Tunnel Form -->
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <strong>Create a New Tunnel</strong>
+            </div>
+            <div class="card-body">
+                <form id="start-tunnel-form">
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="tunnel_name">Tunnel Name</label>
+                            <input type="text" class="form-control" id="tunnel_name" placeholder="Unique Tunnel Name" required>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="host">Host</label>
+                            <input type="text" class="form-control" id="host" placeholder="localhost or ip..." required>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="port">Port</label>
+                            <input type="number" class="form-control" id="port" placeholder="8080" required>
+                        </div>
+                        <div class="form-group col-md-2 align-self-end">
+                            <button type="submit" class="btn btn-custom btn-block" id="start-button">
+                                <span id="start-button-text">Start Tunnel</span>
+                                <span id="start-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Charts -->
+        <h2>Tunnel Statistics</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-label">
+                    <h3>Tunnels Started Over Time</h3>
+                    <i class="material-icons info-icon" data-toggle="tooltip" title="Shows the number of tunnels initiated across different days">info</i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="tunnel-chart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-label">
+                    <h3>Active Tunnels Timeline</h3>
+                    <i class="material-icons info-icon" data-toggle="tooltip" title="Displays the count of simultaneous active tunnels at different time points">info</i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="active-tunnels-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-label">
+                    <h3>Tunnel Session Durations</h3>
+                    <i class="material-icons info-icon" data-toggle="tooltip" title="Visualizes the duration of each tunnel session in minutes">info</i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="duration-chart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-label">
+                    <h3>Tunnel Usage by Host</h3>
+                    <i class="material-icons info-icon" data-toggle="tooltip" title="Pie chart showing the distribution of tunnels across different hosts">info</i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="host-usage-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Pie Chart for Port Usage -->
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="chart-label">
+                    <h3>Tunnel Usage by Port</h3>
+                    <i class="material-icons info-icon" data-toggle="tooltip" title="Doughnut chart illustrating the distribution of tunnels across different ports">info</i>
+                </div>
+                <div class="chart-container">
+                    <canvas id="port-usage-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Notification -->
+    <div id="notification" class="alert" role="alert"></div>
+
+    <!-- Include jQuery and Bootstrap JS via CDN -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Include Popper.js for Bootstrap 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <!-- Embedded JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip({
+                placement: 'right',
+                template: '<div class="tooltip tooltip-custom" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
+            });
+
+            // Load chart data
+            loadChartData();
+
+            // Start Tunnel Form Submission
+            $('#start-tunnel-form').on('submit', function(e) {
+                e.preventDefault();
+                var tunnel_name = $('#tunnel_name').val();
+                var host = $('#host').val();
+                var port = $('#port').val();
+
+                // Disable button and show spinner
+                $('#start-button').prop('disabled', true);
+                $('#start-button-text').hide();
+                $('#start-spinner').show();
+
+                $.ajax({
+                    url: '/start_tunnel',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ tunnel_name: tunnel_name, host: host, port: port }),
+                    success: function(response) {
+                        if (response.error) {
+                            showNotification('Error: ' + response.error, 'danger');
+                        } else if (response.success) {
+                            showNotification('Tunnel "' + tunnel_name + '" started successfully!', 'success');
+                            $('#start-tunnel-form')[0].reset();
+                            loadChartData();
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 401) {
+                            showNotification('Session expired. Please refresh the page.', 'danger');
+                        } else {
+                            showNotification('Failed to start tunnel.', 'danger');
+                        }
+                    },
+                    complete: function() {
+                        // Re-enable button and hide spinner
+                        $('#start-button').prop('disabled', false);
+                        $('#start-button-text').show();
+                        $('#start-spinner').hide();
+                    }
+                });
+            });
+
+            // Function to load chart data
+            function loadChartData() {
+                $.ajax({
+                    url: '/chart_data',
+                    method: 'GET',
+                    success: function(data) {
+                        renderTunnelChart(data.chart1_data);
+                        renderActiveTunnelsChart(data.active_tunnels_data);
+                        renderDurationChart(data.durations);
+                        renderHostUsageChart(data.host_port_data);
+                        renderPortUsageChart(data.host_port_data);
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 401) {
+                            showNotification('Session expired. Please refresh the page.', 'danger');
+                        } else {
+                            showNotification('Failed to load chart data.', 'danger');
+                        }
+                    }
+                });
+            }
+
+            // Function to render Tunnels Started Over Time Chart
+            function renderTunnelChart(chartData) {
+                var ctx = document.getElementById('tunnel-chart').getContext('2d');
+                if (window.tunnelChart) {
+                    window.tunnelChart.destroy();
+                }
+                window.tunnelChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Tunnels Started',
+                            data: chartData.values,
+                            backgroundColor: 'rgba(75, 123, 161, 0.2)',
+                            borderColor: 'rgba(75, 123, 161, 1)',
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                type: 'time',
+                                time: {
+                                    unit: 'day',
+                                    tooltipFormat: 'll',
+                                    displayFormats: {
+                                        day: 'MMM D'
+                                    }
+                                },
+                                distribution: 'linear',
+                                ticks: {
+                                    source: 'auto'
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    stepSize: 1
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            // Function to render Active Tunnels Over Time Chart
+            function renderActiveTunnelsChart(activeData) {
+                var ctx = document.getElementById('active-tunnels-chart').getContext('2d');
+                if (window.activeTunnelsChart) {
+                    window.activeTunnelsChart.destroy();
+                }
+                window.activeTunnelsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: activeData.times,
+                        datasets: [{
+                            label: 'Active Tunnels',
+                            data: activeData.active_counts,
+                            backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                            borderColor: 'rgba(76, 175, 80, 1)',
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                type: 'time',
+                                time: {
+                                    tooltipFormat: 'MMM D, h:mm a',
+                                    displayFormats: {
+                                        minute: 'h:mm a',
+                                        hour: 'MMM D, h a',
+                                        day: 'MMM D'
+                                    }
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    stepSize: 1
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            // Function to render Tunnel Durations Chart
+            function renderDurationChart(durations) {
+                var ctx = document.getElementById('duration-chart').getContext('2d');
+                if (window.durationChart) {
+                    window.durationChart.destroy();
+                }
+                window.durationChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: durations.map((_, index) => 'Tunnel ' + (index + 1)),
+                        datasets: [{
+                            label: 'Duration (minutes)',
+                            data: durations,
+                            backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                display: false  // Hide X-axis labels for clarity
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+
+            // Function to render Host Usage Chart
+            function renderHostUsageChart(hostPortData) {
+                var ctx = document.getElementById('host-usage-chart').getContext('2d');
+                if (window.hostUsageChart) {
+                    window.hostUsageChart.destroy();
+                }
+                window.hostUsageChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: hostPortData.hosts,
+                        datasets: [{
+                            data: hostPortData.host_counts,
+                            backgroundColor: [
+                                '#FF6384',
+                                '#36A2EB',
+                                '#FFCE56',
+                                '#4BC0C0',
+                                '#9966FF',
+                                '#FF9F40'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Tunnel Usage by Host'
+                        }
+                    }
+                });
+            }
+
+            // Function to render Port Usage Chart
+            function renderPortUsageChart(hostPortData) {
+                var ctx = document.getElementById('port-usage-chart').getContext('2d');
+                if (window.portUsageChart) {
+                    window.portUsageChart.destroy();
+                }
+                window.portUsageChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: hostPortData.ports,
+                        datasets: [{
+                            data: hostPortData.port_counts,
+                            backgroundColor: [
+                                '#FF6384',
+                                '#36A2EB',
+                                '#FFCE56',
+                                '#4BC0C0',
+                                '#9966FF',
+                                '#FF9F40'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        title: {
+                            display: true,
+                            text: 'Tunnel Usage by Port'
+                        }
+                    }
+                });
+            }
+
+            // Function to show custom notifications
+            function showNotification(message, type) {
+                var notification = $('#notification');
+                notification.removeClass().addClass('alert alert-' + type);
+                notification.text(message);
+                notification.fadeIn();
+
+                setTimeout(function() {
+                    notification.fadeOut();
+                }, 3000);
+            }
+
+            // Periodically update charts
+            setInterval(function() {
+                loadChartData();
+            }, 60000);  // Update every 60 seconds
+        });
+    </script>
+</body>
+</html>

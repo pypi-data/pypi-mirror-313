@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tunnel Details - Tunnel Manager</title>
+    <!-- Include Bootstrap CSS via CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        /* Embedded CSS Styles */
+        body {
+            background-color: #f0f2f5;
+        }
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+        .card {
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .btn-back {
+            margin-top: 20px;
+        }
+        .spinner {
+            margin-top: 50px;
+            text-align: center;
+        }
+        /* Custom notification styles */
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: none;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .btn-custom {
+            background-color: #4B79A1;
+            color: #fff;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #283E51;
+            color: #fff;
+        }
+        /* Tooltip styling */
+        .tooltip-inner {
+            max-width: 200px;
+            padding: 8px 10px;
+            color: #fff;
+            text-align: center;
+            background-color: #4B79A1;
+            border-radius: 5px;
+        }
+        .tooltip.bs-tooltip-auto[x-placement^=top] .arrow::before, .tooltip.bs-tooltip-top .arrow::before {
+            border-top-color: #4B79A1;
+        }
+        /* Copy and Print Icons */
+        .action-icons {
+            float: right;
+            margin-top: -50px;
+        }
+        .action-icons i {
+            font-size: 20px;
+            margin-left: 15px;
+            color: #4B79A1;
+            cursor: pointer;
+        }
+        .action-icons i:hover {
+            color: #283E51;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="container">
+        <h1 class="text-center">Tunnel Details</h1>
+        <div id="tunnel-details">
+            <!-- Copy and Print Icons -->
+            <div class="action-icons">
+                <i class="fas fa-copy" id="copy-details" data-toggle="tooltip" data-placement="top" title="Copy Details"></i>
+                <i class="fas fa-print" id="print-details" data-toggle="tooltip" data-placement="top" title="Print Details"></i>
+            </div>
+            <!-- Tunnel Details Content -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <strong>Details for Tunnel: <span id="tunnel-name"></span></strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Hex Code:</strong> <span id="hex-code"></span></p>
+                    <p><strong>URL:</strong> <a id="url" href="#" target="_blank"></a></p>
+                    <p><strong>Host:</strong> <span id="host"></span></p>
+                    <p><strong>Port:</strong> <span id="port"></span></p>
+                    <p><strong>Status:</strong> <span id="status"></span></p>
+                    <p><strong>Start Time:</strong> <span id="start-time"></span></p>
+                    <p><strong>End Time:</strong> <span id="end-time"></span></p>
+                    <p><strong>Duration:</strong> <span id="duration"></span></p>
+                    <button class="btn btn-danger" id="stop-tunnel-btn" style="display: none;"><i class="fas fa-stop-circle"></i> Stop Tunnel</button>
+                    <a href="/tunnels" class="btn btn-secondary btn-back"><i class="fas fa-arrow-left"></i> Back to Tunnels</a>
+                </div>
+            </div>
+        </div>
+        <div class="spinner" id="loading" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <p>Loading details...</p>
+        </div>
+    </div>
+
+    <!-- Custom Notification -->
+    <div id="notification" class="alert" role="alert"></div>
+
+    <!-- Include jQuery and Bootstrap JS via CDN -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Include Popper.js for Bootstrap 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <!-- Embedded JavaScript -->
+    <script>
+        const hexCode = "{{ hex_code }}";  // Pass the hex_code to the script
+
+        function fetchTunnelDetails() {
+            $.ajax({
+                url: `/tunnel_details/${hexCode}`,
+                method: 'GET',
+                beforeSend: function() {
+                    $('#tunnel-details').hide();
+                    $('#loading').show();
+                },
+                success: function(response) {
+                    if (response.error) {
+                        showNotification(response.error, 'danger');
+                        window.location.href = '/tunnels';
+                    } else {
+                        $('#tunnel-name').text(response.tunnel_name);
+                        $('#hex-code').text(response.hex_code);
+                        $('#url').attr('href', response.url).text(response.url);
+                        $('#host').text(response.host);
+                        $('#port').text(response.port);
+                        $('#status').text(response.status);
+                        $('#start-time').text(response.start_time);
+                        $('#end-time').text(response.end_time);
+                        $('#duration').text(response.duration);
+                        if (response.status === 'Active') {
+                            $('#stop-tunnel-btn').show();
+                        } else {
+                            $('#stop-tunnel-btn').hide();
+                        }
+                        $('#loading').hide();
+                        $('#tunnel-details').show();
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        showNotification('Session expired. Please refresh the page.', 'danger');
+                    } else {
+                        showNotification('Failed to fetch tunnel details.', 'danger');
+                    }
+                    $('#loading').hide();
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            fetchTunnelDetails();  // Fetch data on page load
+            setInterval(fetchTunnelDetails, 8000);  // Fetch data every 8 seconds
+
+            $('#stop-tunnel-btn').on('click', function() {
+                $.ajax({
+                    url: '/stop_tunnel',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ hex_code: hexCode }),
+                    success: function(response) {
+                        if (response.success) {
+                            showNotification('Tunnel stopped successfully.', 'success');
+                            fetchTunnelDetails();  // Refresh details
+                        } else {
+                            showNotification('Failed to stop tunnel.', 'danger');
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 401) {
+                            showNotification('Session expired. Please refresh the page.', 'danger');
+                        } else {
+                            showNotification('Error stopping tunnel.', 'danger');
+                        }
+                    }
+                });
+            });
+
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Copy Details Functionality
+            $('#copy-details').on('click', function() {
+                var details = `
+Tunnel Name: ${$('#tunnel-name').text()}
+Hex Code: ${$('#hex-code').text()}
+URL: ${$('#url').text()}
+Host: ${$('#host').text()}
+Port: ${$('#port').text()}
+Status: ${$('#status').text()}
+Start Time: ${$('#start-time').text()}
+End Time: ${$('#end-time').text()}
+Duration: ${$('#duration').text()}
+                `;
+                navigator.clipboard.writeText(details.trim()).then(function() {
+                    showNotification('Details copied to clipboard.', 'success');
+                }, function(err) {
+                    showNotification('Failed to copy details.', 'danger');
+                });
+            });
+
+            // Print Details Functionality
+            $('#print-details').on('click', function() {
+                var originalContents = document.body.innerHTML;
+                var printContents = $('.card').html();
+                document.body.innerHTML = '<div class="container">' + printContents + '</div>';
+                window.print();
+                document.body.innerHTML = originalContents;
+                location.reload();
+            });
+        });
+
+        // Function to show custom notifications
+        function showNotification(message, type) {
+            var notification = $('#notification');
+            notification.removeClass().addClass('alert alert-' + type);
+            notification.text(message);
+            notification.fadeIn();
+
+            setTimeout(function() {
+                notification.fadeOut();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
