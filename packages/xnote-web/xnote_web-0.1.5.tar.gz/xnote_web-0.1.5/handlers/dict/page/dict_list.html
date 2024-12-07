@@ -1,0 +1,53 @@
+{% extends base %}
+
+{% block body_left %}
+
+
+<div class="card">
+    <div class="card-title">
+        <a class="path-link" href="{{_server_home}}/note/dict">词典</a>
+
+        <div class="float-right">
+            <a class="btn btn-default" href="{{_server_home}}/dict/add">新增</a>
+            {% include common/button/back_button.html %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+
+    <div class="grid-row note-list">
+        {% if len(files) == 0 %}
+            {% include common/text/empty_text.html %}
+        {% end %}
+
+        {% for item in files %}
+            <a class="dialog-link" href="{{_server_home}}{{item.url}}">
+                <div class="book-item">
+                    <span>{{item.name}}</span>
+                    <span class="dict-list-value">{{item.value}}</span>
+                    <span class="book-size">
+                        <i class="fa fa-chevron-right"></i>
+                    </span>
+                </div>
+            </a>
+        {% end %}
+    </div>
+
+</div>
+
+
+<!-- 分页 -->
+{% if show_pagination and "page" in globals() %}
+    <div class="card">
+        {% include mod_pagenation.html %}
+    </div>
+{% end %}
+
+{% end %}
+
+{% block body_right %}
+    <div class="desktop-only">
+        {% include dict/component/dict_sidebar.html %}
+    </div>
+{% end %}

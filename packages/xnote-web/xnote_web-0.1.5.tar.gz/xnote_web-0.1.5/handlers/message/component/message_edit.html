@@ -1,0 +1,116 @@
+<script type="text/template" id="msg-edit-tpl">
+    <div class="card">
+        <!-- 编辑器 -->
+        <div class="card msg-edit-box">
+            <textarea id="messageEditContent" 
+                class="col-md-12 edit-box"
+                placeholder="请输入内容...">{{!detail.content}}</textarea>
+
+            <input type="hidden" id="messageEditId" value="{{!detail._key}}"/>
+            <input type="hidden" id="messageEditTag" value="{{!detail.tag}}"/>
+
+            <div class="msg-dialog-bottom-bar">
+                <input type="button" class="send-button btn btn-default" 
+                    onclick="xnote.action.message.showTopicDialog(this);" value="#标签">
+                <input type="button" id="filePickerBtn" class="send-button btn btn-default" 
+                    onclick="xnote.action.message.upload(this);" value="添加附件"/>
+                <input type="button" id="updateMessageBtn" class="send-button btn"
+                    onclick="xnote.action.message.saveMessage(this);" value="{{!submitBtnText}}">
+
+                <div class="float-right">
+                    <input type="button" class="send-button btn btn-default"
+                    onclick="xnote.action.message.closeEdit(this);" value="关闭">
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="msg-tag-list-tpl">
+    <div class="main-content-bg row">
+        <div class="row">
+            <input type="text" class="nav-search-input" placeholder="搜索标签" onchange="onSearchInputChange(this)"/>
+            <button class="nav-search-btn btn-default">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        
+        <div class="card top-offset-1">
+            <a class="list-item empty-item hide" onclick="xnote.action.message.selectTopic(this);">&lt;无匹配标签&gt;</a>
+            {{!if itemList.length == 0}}
+                <a onclick="xnote.action.message.selectTopic(this);" class="list-item topic-item">请输入标签</a>
+            {{!/if}}
+            {{!each itemList msg}}
+                <a onclick="xnote.action.message.selectTopic(this);" class="list-item topic-item">{{!msg.content}}</a>
+            {{!/each}}
+        </div>
+
+        <div class="msg-dialog-bottom-bar">
+            <div class="float-right">
+                <input type="button" class="send-button btn btn-default"
+                onclick="xnote.action.message.closeTopicDiloag();" value="关闭">
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+$(function () {
+    $("#updateMessageBtn").click(function () {
+        var id = $("#messageEditId").val();
+        var content = $("#messageEditContent").val();
+
+        var params = {
+            id: id,
+            content: content
+        }
+
+        xnote.http.post("/message/update", params, function (resp) {
+            if (resp.code == "success") {
+                xnote.toast("更新成功");
+
+                // 更新节点
+                var msg = {type: "message.updated"};
+                xnote.fire("message.updated", msg);
+            } else {
+                xnote.alert("更新失败:" + resp.message);
+            }
+        });
+    });
+
+    function onFileUploaded(event) {
+        var inputText = event.target;
+        var oldText = $(".input-box").val();
+        var newText = oldText + "\n" + inputText + "\n";
+        $(".input-box").val(newText);
+    }
+
+    /**
+     * @param {string} text
+     * @param {string} topic
+     */
+    function insertTopicToText(text, topic) {
+        text = text.trim();
+        topic = topic.trim();
+
+        if (text[0] == "#") {
+            // TODO 已经有标签了,调服务器parse?
+            return text + topic;
+        } else {
+            return topic + " " + text;
+        }
+    }
+
+    function onTopicSelected(event) {
+        xnote.closeAllDialog();
+        var topic = event.target;
+        var oldText = $(".input-box").val();
+        var newText = insertTopicToText(oldText, topic);
+        $(".input-box").val(newText);
+    }
+
+    xnote.on("message.upload", onFileUploaded);
+    xnote.on("message.topic.selected", onTopicSelected);
+});
+</script>
