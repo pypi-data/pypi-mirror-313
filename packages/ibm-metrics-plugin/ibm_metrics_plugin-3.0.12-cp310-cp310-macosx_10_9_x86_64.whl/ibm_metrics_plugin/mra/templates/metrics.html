@@ -1,0 +1,46 @@
+<h1>Metrics</h1>
+<article id ="metric details">
+    <h3>Metric details</h3>
+</article>
+<br>
+<h3 id ="grey">Summary</h3>
+<hr><br>
+
+{% for risk_dim, cards in risk_evaluation_results.items() %}
+<table>
+    <tr>
+        <td  style = "width:90%; font-size: 10pt;">Metric </td>
+        <td></td>
+    </tr>
+
+    <tr>
+        <td class ="metric_name">{{risk_dim.replace('-', ' ').title()}}</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td class="metric_desc">{{risks_description.get(risk_dim)}}</td>
+        <td></td>
+    </tr>
+    </table>
+    {% for card_name, metrics in cards.items() %}
+        <table class ="metric_table">
+            <tr>
+                <td class="metric_card">{{metric_card_name_translation.get(card_name)}}</td>
+                <td></td>
+            </tr>
+            {% for metric_name, metric_value in metrics.items() %}
+                <tr>
+                    <td>{{metric_name.replace('_', ' ').replace('.', ' ')}} </td>
+                    {% if metric_value is string %}
+                        <td class="metric_value">{{metric_value.replace('_', ' ').replace('.', ' ')}} </td>
+                    {% else %}
+                        <td class="metric_value">{{ metric_value }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+    {% endfor %}
+    <br><br>
+{% endfor %}
+
