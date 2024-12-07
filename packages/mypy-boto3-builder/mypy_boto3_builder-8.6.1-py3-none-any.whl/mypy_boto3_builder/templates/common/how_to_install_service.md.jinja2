@@ -1,0 +1,69 @@
+## How to install
+
+### Generate locally (recommended)
+
+You can generate type annotations for `{{ package.library_name }}` package locally with `{{ builder_prog_name }}`.
+Use [uv](https://docs.astral.sh/uv/getting-started/installation/) for build isolation.
+
+1. Run {{ builder_package_name }} in your package root directory: `uvx --with '{{ package.library_name }}=={{ package.library_version }}' {{ builder_prog_name }}`
+1. Select `{{ package.library_chat_choice }}` AWS SDK.
+1. Add `{{ service_name.class_name }}` service.
+1. Use provided commands to install generated packages.
+
+{% if package.data.is_vscode_supported %}
+### VSCode extension
+
+Add [AWS Boto3](https://marketplace.visualstudio.com/items?itemName=Boto3typed.boto3-ide)
+extension to your VSCode and run `AWS boto3: Quick Start` command.
+
+Click `Modify` and select `boto3 common` and `{{ service_name.class_name }}`.
+{% endif %}
+
+### From PyPI with pip
+
+Install `{{ package.data.pypi_stubs_name }}` for `{{ service_name.class_name }}` service.
+
+```bash
+# install with {{ package.library_name }} type annotations
+python -m pip install '{{ package.data.pypi_stubs_name }}[{{ package.service_name.extras_name }}]'
+
+{%- if package.data.pypi_lite_name %}{{ "\n\n" -}}
+# Lite version does not provide session.client/resource overloads
+# it is more RAM-friendly, but requires explicit type annotations
+python -m pip install '{{ package.data.pypi_lite_name }}[{{ package.service_name.extras_name }}]'
+{%- endif %}
+
+# standalone installation
+python -m pip install {{ package.pypi_name }}
+```
+
+{% if package.data.is_conda_forge_supported and package.service_name.is_conda_forge_available() -%}
+### From conda-forge
+
+Add `conda-forge` to your channels with:
+
+```bash
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+```
+
+Once the `conda-forge` channel has been enabled, `{{ package.pypi_name }}`
+can be installed with:
+
+```bash
+conda install {{ package.pypi_name }}
+```
+
+List all available versions of `{{ package.pypi_name }}`
+available on your platform with:
+
+```bash
+conda search {{ package.pypi_name }} --channel conda-forge
+```
+{%- endif %}
+
+## How to uninstall
+
+```bash
+python -m pip uninstall -y {{ package.pypi_name }}
+```

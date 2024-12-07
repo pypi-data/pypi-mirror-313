@@ -1,0 +1,35 @@
+"""
+Type annotations for {{ package.service_name.boto3_name }} service literal definitions.
+
+[Open documentation]({{ package.get_doc_link("literals") }})
+
+Usage::
+
+    ```python
+    from {{ package.name }}.literals import {{ package.literals[0].name }}
+
+    data: {{ package.literals[0].name }} = "{{ package.literals[0].children|min }}"
+    ```
+
+{{ copyright }}
+"""
+{% for import_record in package.get_literals_required_import_records() -%}
+    {{ import_record -}}{{ "\n" -}}
+{% endfor -%}
+
+{{ "\n\n" -}}
+
+__all__ = (
+{% for literal_name in package.get_literals_all_names() -%}
+    {{ '"' -}}
+    {{ literal_name -}}
+    {{ '"' -}}
+    {{ ",\n" if not loop.last or loop.first else "\n" }}
+{% endfor -%}
+)
+
+
+{% for literal in package.literals -%}
+    {{ literal.render_definition() -}}
+    {{ "\n" -}}
+{% endfor -%}
