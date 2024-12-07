@@ -1,0 +1,65 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="MeetingPROVHainaut">
+
+  <include package="Products.GenericSetup" file="meta.zcml" />
+
+  <genericsetup:registerProfile
+      name="default"
+      title="MeetingPROVHainaut"
+      directory="profiles/default"
+      description="Extension profile for MeetingPROVHainaut."
+      post_handler=".setuphandlers.postInstall"
+      provides="Products.GenericSetup.interfaces.EXTENSION" />
+
+  <genericsetup:registerProfile
+      name="zprovhainaut"
+      title="PloneMeeting / Demo profile for Province de Hainaut with french examples"
+      directory="profiles/zprovhainaut"
+      description="PloneMeeting for Province de Hainaut (Belgium)"
+      post_handler=".setuphandlers.post_handler_zprovhainaut"
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot" />
+
+  <genericsetup:upgradeStep
+      title="Go to MeetingPROVHainaut 4200"
+      description=""
+      source="*"
+      destination="4200"
+      handler="Products.MeetingPROVHainaut.migrations.migrate_to_4200.migrate"
+      profile="Products.MeetingPROVHainaut:default" />
+
+  <genericsetup:upgradeStep
+      title="Go to MeetingPROVHainaut 4201"
+      description=""
+      source="4200"
+      destination="4201"
+      handler="Products.MeetingPROVHainaut.migrations.migrate_to_4201.migrate"
+      profile="Products.MeetingPROVHainaut:default" />
+
+  <genericsetup:upgradeStep
+      title="Go to MeetingPROVHainaut 4202"
+      description=""
+      source="4201"
+      destination="4202"
+      handler="Products.MeetingPROVHainaut.migrations.migrate_to_4202.migrate"
+      profile="Products.MeetingPROVHainaut:default" />
+
+  <genericsetup:upgradeStep
+      title="Go to MeetingPROVHainaut 4203"
+      description=""
+      source="4202"
+      destination="4203"
+      handler="Products.MeetingPROVHainaut.migrations.migrate_to_4203.migrate"
+      profile="Products.MeetingPROVHainaut:default" />
+
+  <genericsetup:upgradeStep
+      title="Go to MeetingPROVHainaut 4204"
+      description=""
+      source="4203"
+      destination="4204"
+      handler="Products.MeetingPROVHainaut.migrations.migrate_to_4204.migrate"
+      profile="Products.MeetingPROVHainaut:default" />
+
+</configure>
