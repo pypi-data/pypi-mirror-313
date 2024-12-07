@@ -1,0 +1,62 @@
+.. _spkg_sage_docbuild:
+
+==========================================================================================
+sage_docbuild: Build system of the Sage documentation
+==========================================================================================
+
+About SageMath
+--------------
+
+   "Creating a Viable Open Source Alternative to
+    Magma, Maple, Mathematica, and MATLAB"
+
+   Copyright (C) 2005-2020 The Sage Development Team
+
+   https://www.sagemath.org
+
+SageMath fully supports all major Linux distributions, recent versions of macOS, and Windows (using Windows Subsystem for Linux).
+
+The traditional and recommended way to install SageMath is from source via Sage-the-distribution (https://www.sagemath.org/download-source.html).  Sage-the-distribution first builds a large number of open source packages from source (unless it finds suitable versions installed in the system) and then installs the Sage Library (sagelib, implemented in Python and Cython).
+
+
+About this pip-installable source distribution
+----------------------------------------------
+
+This is the build system of the Sage documentation, based on Sphinx.
+
+Type
+----
+
+standard
+
+
+Dependencies
+------------
+
+- $(PYTHON)
+- $(PYTHON_TOOLCHAIN)
+- sagelib
+- :ref:`spkg_sphinx`
+
+Version Information
+-------------------
+
+package-version.txt::
+
+    10.5.1
+
+version_requirements.txt::
+
+    passagemath-docbuild ~= 10.5.1.0
+
+
+Equivalent System Packages
+--------------------------
+
+
+See https://repology.org/project/sage-docbuild/versions, https://repology.org/project/python:sage-docbuild/versions
+
+However, these system packages will not be used for building Sage
+because ``spkg-configure.m4`` has not been written for this package;
+see :issue:`27330` for more information.
+

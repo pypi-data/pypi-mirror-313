@@ -1,0 +1,48 @@
+.. _spkg_pyproject_api:
+
+pyproject_api: API to interact with the python pyproject.toml based projects
+======================================================================================
+
+Description
+-----------
+
+API to interact with the python pyproject.toml based projects
+
+License
+-------
+
+Upstream Contact
+----------------
+
+https://pypi.org/project/pyproject-api/
+
+
+Type
+----
+
+standard
+
+
+Dependencies
+------------
+
+- $(PYTHON)
+- $(PYTHON_TOOLCHAIN)
+
+Version Information
+-------------------
+
+package-version.txt::
+
+    1.7.1
+
+version_requirements.txt::
+
+    pyproject-api
+
+
+Equivalent System Packages
+--------------------------
+
+(none known)
+
