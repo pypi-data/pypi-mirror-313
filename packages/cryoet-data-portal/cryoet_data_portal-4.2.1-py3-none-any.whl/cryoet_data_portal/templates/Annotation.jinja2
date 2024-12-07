@@ -1,0 +1,37 @@
+{% include 'Model.jinja2' %}
+
+    def download_metadata(
+        self,
+        dest_path: Optional[str] = None,
+    ):
+        """Download annotation metadata
+
+        Args:
+            dest_path (Optional[str], optional): Choose a destination directory. Defaults to $CWD.
+        """
+        download_https(self.https_metadata_path, dest_path)
+
+    def download(
+        self,
+        dest_path: Optional[str] = None,
+        format: Optional[str] = None,
+        shape: Optional[str] = None,
+    ):
+        """Download annotation files for a given format and/or shape
+
+        Args:
+            dest_path (Optional[str], optional): Choose a destination directory. Defaults to $CWD.
+            shape (Optional[str], optional): Choose a specific shape type to download (e.g.: OrientedPoint, SegmentationMask)
+            format (Optional[str], optional): Choose a specific file format to download (e.g.: mrc, ndjson)
+        """
+        download_metadata = False
+        for anno_shape in self.annotation_shapes:
+            if shape and anno_shape.shape_type != shape:
+                continue
+            for file in anno_shape.annotation_files:
+                if format and file.format != format:
+                    continue
+                file.download(dest_path)
+                download_metadata = True
+        if download_metadata:
+            self.download_metadata(dest_path)

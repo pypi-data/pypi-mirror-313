@@ -1,0 +1,46 @@
+{% include 'Model.jinja2' %}
+
+    def download_omezarr(self, dest_path: Optional[str] = None):
+        """Download the OME-Zarr version of this tomogram
+
+        Args:
+            dest_path (Optional[str], optional): Choose a destination directory. Defaults to $CWD.
+        """
+        recursive_prefix = "/".join(self.s3_omezarr_dir.split("/")[:-1]) + "/"
+        download_directory(self.s3_omezarr_dir, recursive_prefix, dest_path)
+
+    def download_mrcfile(self, dest_path: Optional[str] = None):
+        """Download an MRC file of this tomogram
+
+        Args:
+            dest_path (Optional[str], optional): Choose a destination directory. Defaults to $CWD.
+        """
+        url = self.https_mrc_file
+        download_https(url, dest_path)
+
+    def download_all_annotations(
+        self,
+        dest_path: Optional[str] = None,
+        format: Optional[str] = None,
+        shape: Optional[str] = None,
+    ):
+        """Download all annotation files for this tomogram
+
+        Args:
+            dest_path (Optional[str], optional): Choose a destination directory. Defaults to $CWD.
+            shape (Optional[str], optional): Choose a specific shape type to download (e.g.: OrientedPoint, SegmentationMask)
+            format (Optional[str], optional): Choose a specific file format to download (e.g.: mrc, ndjson)
+        """
+        filters = [AnnotationFile.tomogram_voxel_spacing_id == self.tomogram_voxel_spacing_id, AnnotationFile.alignment_id == self.alignment_id]
+        if shape:
+            filters.append(AnnotationFile.annotation_shape.shape_type == shape)
+        if format:
+            filters.append(AnnotationFile.format == format)
+        anno_files = AnnotationFile.find(self._client, filters)
+        downloaded_metadata = set([])
+        for file in anno_files:
+            file.download(dest_path)
+            annotation_id = file.annotation_shape.annotation_id
+            if annotation_id not in downloaded_metadata:
+                downloaded_metadata.add(annotation_id)
+                file.annotation_shape.annotation.download_metadata(dest_path)
