@@ -1,0 +1,2 @@
+class BinaryAnalyzer:
+    pass
