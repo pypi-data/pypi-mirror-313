@@ -1,0 +1,1 @@
+import{j as e}from"./@radix-DeK6qiuw.js";import{e as o}from"./index-FO-p0GU7.js";function a(){return e.jsx(o,{color:"yellow",rounded:!1,className:"rounded-md",children:e.jsx("span",{className:"font-semibold uppercase",children:"Pro"})})}export{a as P};
