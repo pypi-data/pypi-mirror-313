@@ -1,0 +1,407 @@
+import pathlib
+import pickle
+from enum import StrEnum
+from typing import Any, ClassVar
+from unittest.mock import Mock, patch
+
+import litellm
+import numpy as np
+import pytest
+from aviary.core import Tool, ToolRequestMessage
+from pydantic import BaseModel, Field
+
+from llmclient.exceptions import JSONSchemaValidationError
+from llmclient.llms import (
+    Chunk,
+    LiteLLMModel,
+    MultipleCompletionLLMModel,
+    validate_json_completion,
+)
+from llmclient.messages import Message
+from llmclient.types import LLMResult
+from tests.conftest import VCR_DEFAULT_MATCH_ON
+
+
+class TestLiteLLMModel:
+    @pytest.mark.vcr(match_on=[*VCR_DEFAULT_MATCH_ON, "body"])
+    @pytest.mark.parametrize(
+        "config",
+        [
+            pytest.param(
+                {
+                    "model_list": [
+                        {
+                            "model_name": "gpt-4o-mini",
+                            "litellm_params": {
+                                "model": "gpt-4o-mini",
+                                "temperature": 0,
+                                "max_tokens": 56,
+                            },
+                        }
+                    ]
+                },
+                id="with-router",
+            ),
+            pytest.param(
+                {
+                    "pass_through_router": True,
+                    "router_kwargs": {"temperature": 0, "max_tokens": 56},
+                },
+                id="without-router",
+            ),
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_run_prompt(self, config: dict[str, Any]) -> None:
+        llm = LiteLLMModel(name="gpt-4o-mini", config=config)
+
+        outputs = []
+
+        def accum(x) -> None:
+            outputs.append(x)
+
+        completion = await llm.run_prompt(
+            prompt="The {animal} says",
+            data={"animal": "duck"},
+            system_prompt=None,
+            callbacks=[accum],
+        )
+        assert completion.model == "gpt-4o-mini"
+        assert completion.seconds_to_first_token > 0
+        assert completion.prompt_count > 0
+        assert completion.completion_count > 0
+        assert str(completion) == "".join(outputs)
+        assert completion.cost > 0
+
+        completion = await llm.run_prompt(
+            prompt="The {animal} says",
+            data={"animal": "duck"},
+            system_prompt=None,
+        )
+        assert completion.seconds_to_first_token == 0
+        assert completion.seconds_to_last_token > 0
+        assert completion.cost > 0
+
+        # check with mixed callbacks
+        async def ac(x) -> None:
+            pass
+
+        completion = await llm.run_prompt(
+            prompt="The {animal} says",
+            data={"animal": "duck"},
+            system_prompt=None,
+            callbacks=[accum, ac],
+        )
+        assert completion.cost > 0
+
+    @pytest.mark.vcr
+    @pytest.mark.parametrize(
+        ("config", "bypassed_router"),
+        [
+            pytest.param(
+                {
+                    "model_list": [
+                        {
+                            "model_name": "gpt-4o-mini",
+                            "litellm_params": {"model": "gpt-4o-mini", "max_tokens": 3},
+                        }
+                    ]
+                },
+                False,
+                id="with-router",
+            ),
+            pytest.param(
+                {"pass_through_router": True, "router_kwargs": {"max_tokens": 3}},
+                True,
+                id="without-router",
+            ),
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_max_token_truncation(
+        self, config: dict[str, Any], bypassed_router: bool
+    ) -> None:
+        llm = LiteLLMModel(name="gpt-4o-mini", config=config)
+        with patch(
+            "litellm.Router.atext_completion",
+            side_effect=litellm.Router.atext_completion,
+            autospec=True,
+        ) as mock_atext_completion:
+            chunk = await llm.acomplete("Please tell me a story")  # type: ignore[call-arg]
+        if bypassed_router:
+            mock_atext_completion.assert_not_awaited()
+        else:
+            mock_atext_completion.assert_awaited_once()
+        assert isinstance(chunk, Chunk)
+        assert chunk.completion_tokens == 3
+        assert chunk.text
+        assert len(chunk.text) < 20
+
+    def test_pickling(self, tmp_path: pathlib.Path) -> None:
+        pickle_path = tmp_path / "llm_model.pickle"
+        llm = LiteLLMModel(
+            name="gpt-4o-mini",
+            config={
+                "model_list": [
+                    {
+                        "model_name": "gpt-4o-mini",
+                        "litellm_params": {
+                            "model": "gpt-4o-mini",
+                            "temperature": 0,
+                            "max_tokens": 56,
+                        },
+                    }
+                ]
+            },
+        )
+        with pickle_path.open("wb") as f:
+            pickle.dump(llm, f)
+        with pickle_path.open("rb") as f:
+            rehydrated_llm = pickle.load(f)
+        assert llm.name == rehydrated_llm.name
+        assert llm.config == rehydrated_llm.config
+        assert llm.router.deployment_names == rehydrated_llm.router.deployment_names
+
+
+class CILLMModelNames(StrEnum):
+    """Models to use for generic CI testing."""
+
+    ANTHROPIC = "claude-3-haiku-20240307"  # Cheap and not Anthropic's cutting edge
+    OPENAI = "gpt-4o-mini-2024-07-18"  # Cheap and not OpenAI's cutting edge
+
+
+class DummyOutputSchema(BaseModel):
+    name: str
+    age: int
+
+
+class TestMultipleCompletionLLMModel:
+    NUM_COMPLETIONS: ClassVar[int] = 2
+    DEFAULT_CONFIG: ClassVar[dict] = {"n": NUM_COMPLETIONS}
+    MODEL_CLS: ClassVar[type[MultipleCompletionLLMModel]] = MultipleCompletionLLMModel
+
+    async def call_model(
+        self, model: MultipleCompletionLLMModel, *args, **kwargs
+    ) -> list[LLMResult]:
+        return await model.call(*args, **kwargs)
+
+    @pytest.mark.parametrize(
+        "model_name", ["gpt-3.5-turbo", CILLMModelNames.ANTHROPIC.value]
+    )
+    @pytest.mark.asyncio
+    async def test_achat(self, model_name: str) -> None:
+        model = MultipleCompletionLLMModel(name=model_name)
+        response = await model.achat(
+            messages=[
+                Message(content="What are three things I should do today?"),
+            ]
+        )
+
+        assert len(response.choices) == 1
+
+        # Check we can iterate through the response
+        async for chunk in await model.achat_iter(
+            messages=[
+                Message(content="What are three things I should do today?"),
+            ]
+        ):
+            assert len(chunk.choices) == 1
+
+    @pytest.mark.vcr(match_on=[*VCR_DEFAULT_MATCH_ON, "body"])
+    @pytest.mark.parametrize("model_name", ["gpt-3.5-turbo"])
+    @pytest.mark.asyncio
+    async def test_model(self, model_name: str) -> None:
+        # Make model_name an arg so that TestLLMModel can parametrize it
+        # only testing OpenAI, as other APIs don't support n>1
+        model = self.MODEL_CLS(name=model_name, config=self.DEFAULT_CONFIG)
+        messages = [
+            Message(role="system", content="Respond with single words."),
+            Message(content="Hello, how are you?"),
+        ]
+        results = await self.call_model(model, messages)
+        assert len(results) == self.NUM_COMPLETIONS
+
+        for result in results:
+            assert result.prompt_count > 0
+            assert result.completion_count > 0
+            assert result.cost > 0
+            assert result.logprob is None or result.logprob <= 0
+
+    @pytest.mark.parametrize(
+        "model_name", [CILLMModelNames.ANTHROPIC.value, "gpt-3.5-turbo"]
+    )
+    @pytest.mark.asyncio
+    async def test_streaming(self, model_name: str) -> None:
+        model = self.MODEL_CLS(name=model_name, config=self.DEFAULT_CONFIG)
+        messages = [
+            Message(role="system", content="Respond with single words."),
+            Message(content="Hello, how are you?"),
+        ]
+
+        def callback(_) -> None:
+            return
+
+        with pytest.raises(
+            NotImplementedError,
+            match="Multiple completions with callbacks is not supported",
+        ):
+            await self.call_model(model, messages, [callback])
+
+    @pytest.mark.vcr
+    @pytest.mark.asyncio
+    async def test_parameterizing_tool_from_arg_union(self) -> None:
+        def play(move: int | None) -> None:
+            """Play one turn by choosing a move.
+
+            Args:
+                move: Choose an integer to lose, choose None to win.
+            """
+
+        results = await self.call_model(
+            self.MODEL_CLS(name="gpt-3.5-turbo", config=self.DEFAULT_CONFIG),
+            messages=[Message(content="Please win.")],
+            tools=[Tool.from_function(play)],
+        )
+        assert len(results) == self.NUM_COMPLETIONS
+        for result in results:
+            assert result.messages
+            assert len(result.messages) == 1
+            assert isinstance(result.messages[0], ToolRequestMessage)
+            assert result.messages[0].tool_calls
+            assert result.messages[0].tool_calls[0].function.arguments["move"] is None
+
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_output_schema(self) -> None:
+        model = self.MODEL_CLS(name="gpt-3.5-turbo", config=self.DEFAULT_CONFIG)
+        messages = [
+            Message(
+                content=(
+                    "My name is Claude and I am 1 year old. What is my name and age?"
+                )
+            ),
+        ]
+        results = await self.call_model(model, messages, output_type=DummyOutputSchema)
+        assert len(results) == self.NUM_COMPLETIONS
+        for result in results:
+            assert result.messages
+            assert len(result.messages) == 1
+            assert result.messages[0].content
+            DummyOutputSchema.model_validate_json(result.messages[0].content)
+
+    @pytest.mark.parametrize("model_name", [CILLMModelNames.OPENAI.value])
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_text_image_message(self, model_name: str) -> None:
+        model = self.MODEL_CLS(name=model_name, config=self.DEFAULT_CONFIG)
+
+        # An RGB image of a red square
+        image = np.zeros((32, 32, 3), dtype=np.uint8)
+        image[:] = [255, 0, 0]  # (255 red, 0 green, 0 blue) is maximum red in RGB
+
+        results = await self.call_model(
+            model,
+            messages=[
+                Message.create_message(
+                    text="What color is this square? Respond only with the color name.",
+                    image=image,
+                )
+            ],
+        )
+        assert len(results) == self.NUM_COMPLETIONS
+        for result in results:
+            assert (
+                result.messages is not None
+            ), "Expected messages in result, but got None"
+            assert (
+                result.messages[-1].content is not None
+            ), "Expected content in message, but got None"
+            assert "red" in result.messages[-1].content.lower()
+
+
+class TestSingleCompletionLLMModel(TestMultipleCompletionLLMModel):
+    NUM_COMPLETIONS: ClassVar[int] = 1
+    DEFAULT_CONFIG: ClassVar[dict] = {}
+    MODEL_CLS: ClassVar[type[MultipleCompletionLLMModel]] = MultipleCompletionLLMModel
+
+    @pytest.mark.parametrize(
+        "model_name", [CILLMModelNames.ANTHROPIC.value, "gpt-3.5-turbo"]
+    )
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_model(self, model_name: str) -> None:
+        await super().test_model(model_name)
+
+    @pytest.mark.vcr
+    @pytest.mark.parametrize(
+        "model_name", [CILLMModelNames.ANTHROPIC.value, "gpt-3.5-turbo"]
+    )
+    @pytest.mark.asyncio
+    async def test_streaming(self, model_name: str) -> None:
+        model = self.MODEL_CLS(name=model_name)
+        messages = [
+            Message(role="system", content="Respond with single words."),
+            Message(content="Hello, how are you?"),
+        ]
+        content = []
+
+        def callback(s):
+            content.append(s)
+
+        results = await model.call(messages, [callback])
+        for result in results:
+            assert result.completion_count > 0
+            assert content
+
+    @pytest.mark.vcr
+    @pytest.mark.asyncio
+    async def test_parameterizing_tool_from_arg_union(self) -> None:
+        await super().test_parameterizing_tool_from_arg_union()
+
+    @pytest.mark.vcr
+    @pytest.mark.asyncio
+    @pytest.mark.skip(reason="TODO: Check why this error should be raised")
+    async def test_output_type_rejected_validation(self) -> None:
+        class InstructionList(BaseModel):
+            instructions: list[str] = Field(description="list of instructions")
+
+        model = self.MODEL_CLS(name=CILLMModelNames.ANTHROPIC.value)
+        with pytest.raises(litellm.BadRequestError, match="anthropic"):
+            await model.call(
+                [Message(content="What are three things I should do today?")],
+                output_type=InstructionList,
+            )
+
+    @pytest.mark.parametrize(
+        "model_name",
+        [CILLMModelNames.ANTHROPIC.value, "gpt-4-turbo", CILLMModelNames.OPENAI.value],
+    )
+    @pytest.mark.asyncio
+    @pytest.mark.vcr
+    async def test_text_image_message(self, model_name: str) -> None:
+        await super().test_text_image_message(model_name)
+
+
+def test_json_schema_validation() -> None:
+    # Invalid JSON
+    mock_completion1 = Mock()
+    mock_completion1.choices = [Mock()]
+    mock_completion1.choices[0].message.content = "not a json"
+    # Invalid schema
+    mock_completion2 = Mock()
+    mock_completion2.choices = [Mock()]
+    mock_completion2.choices[0].message.content = '{"name": "John", "age": "nan"}'
+    # Valid schema
+    mock_completion3 = Mock()
+    mock_completion3.choices = [Mock()]
+    mock_completion3.choices[0].message.content = '{"name": "John", "age": 30}'
+
+    class DummyModel(BaseModel):
+        name: str
+        age: int
+
+    with pytest.raises(JSONSchemaValidationError):
+        validate_json_completion(mock_completion1, DummyModel)
+    with pytest.raises(JSONSchemaValidationError):
+        validate_json_completion(mock_completion2, DummyModel)
+    validate_json_completion(mock_completion3, DummyModel)
