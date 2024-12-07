@@ -1,0 +1,503 @@
+{%- macro script(script_files) %}
+    {%- for scriptfile in script_files %}
+    <script src="{{ pathto(scriptfile, 1) }}"></script>
+    {%- endfor %}
+{%- endmacro %}
+
+{%- macro css(css_files) %}
+    {%- for cssfile in css_files %}
+    <link rel="stylesheet" href="{{ pathto(cssfile, 1) }}" type="text/css" />
+    {%- endfor %}
+{%- endmacro %}
+
+{# The files that make these builds are defined in Makefile #}
+{%- set css_files = ['_static/css/dist.css'] -%}
+{%- set script_files = ['_static/js/dist.js'] -%}
+{%- set short_lang = '%.2s'|format(language) -%}
+
+<!DOCTYPE html>
+<html lang="{{ language }}">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset={{ encoding }}" />
+    {{ metatags }}
+    <title>{{ title|striptags|e }} - {{ version }}</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ pathto('_static/favicons/apple-touch-icon.png', 1) }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ pathto('_static/favicons/favicon-32x32.png', 1) }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ pathto('_static/favicons/favicon-16x16.png', 1) }}">
+    <link rel="icon" type="image/svg+xml" href="{{ pathto('_static/favicons/favicon.svg', 1) }}">
+    <link rel="icon" type="image/png" href="{{ pathto('_static/favicons/favicon.png', 1) }}">
+    <link rel="manifest" href="{{ pathto('_static/favicons/manifest.json', 1) }}">
+    <link rel="manifest" href="{{ pathto('_static/favicons/favicon.ico', 1) }}">
+    <link rel="mask-icon" href="{{ pathto('_static/favicons/safari-pinned-tab.svg', 1) }}" color="#D33C44">
+    <meta name="msapplication-config" content="{{ pathto('_static/favicons/browserconfig.xml', 1) }}" />
+    <meta name="msapplication-TileColor" content="#D33C44">
+    <meta name="theme-color" content="#D33C44">
+    <meta name="apple-mobile-web-app-title" content="CakePHP - Book">
+    <meta name="application-name" content="CakePHP - Book">
+
+    {{ css(css_files) }}
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MD3J6G9QVX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MD3J6G9QVX', { 'anonymize_ip': true });
+    </script>
+
+    {%- block scripts %}
+    {{ script(script_files) }}
+    {%- endblock %}
+
+    {% for lang in languages %}
+        {%- if lang != language -%}
+            {%- if has_lang(lang, pagename) -%}
+            <link rel="alternate" hreflang="{{ lang }}" href="{{ lang_link(lang, pagename) }}" />
+            {%- endif -%}
+        {%- endif -%}
+    {% endfor %}
+
+    <link rel="search" type="application/opensearchdescription+xml" title="Search within {{ docstitle }}" href="{{ pathto('_static/opensearch.xml', 1) }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+{%- block linktags %}
+    {%- if hasdoc('about') %}
+    <link rel="author" title="{{ _('About these documents') }}" href="{{ pathto('about') }}" />
+    {%- endif %}
+    {%- if hasdoc('genindex') %}
+    <link rel="index" title="{{ _('Index') }}" href="{{ pathto('genindex') }}" />
+    {%- endif %}
+    {%- if hasdoc('search') %}
+    <link rel="search" title="{{ _('Search') }}" href="{{ pathto('search') }}" />
+    {%- endif %}
+    {%- if hasdoc('copyright') %}
+    <link rel="copyright" title="{{ _('Copyright') }}" href="{{ pathto('copyright') }}" />
+    {%- endif %}
+    <link rel="top" title="{{ docstitle|e }}" href="{{ pathto('index') }}" />
+    {%- if parents %}
+    <link rel="up" title="{{ parents[-1].title|striptags|e }}" href="{{ parents[-1].link|e }}" />
+    {%- endif %}
+    {%- if next %}
+    <link rel="next" title="{{ next.title|striptags|e }}" href="{{ next.link|e }}" />
+    {%- endif %}
+    {%- if prev %}
+    <link rel="prev" title="{{ prev.title|striptags|e }}" href="{{ prev.link|e }}" />
+    {%- endif %}
+
+    {% for item in version_list if 'current' in item and item['current'] %}
+    <link rel="canonical" href="https://book.cakephp.org/{{ canonical_version|default(item['number']) }}/{{ language }}/{{ pagename }}.html" />
+    {% endfor %}
+{%- endblock %}
+  </head>
+  <body>
+
+{%- block header %}
+{# Outer wrapper for pushing the footer to the bottom #}
+<div id="container">
+    {# Red Mega Menu #}
+    <header class="nav-down">
+        <div class="container-fluid hidden-xs hidden-sm">
+            <div class="row">
+                <div class="col-sm-3 col-md-3">
+                    <a class="logo-cake" href="https://cakephp.org">
+                        <img src="{{ pathto('_static/logo-cake.png', 1) }}" alt="CakePHP" />
+                    </a>
+                </div>
+
+                <div class="col-sm-9 col-md-9">
+                    <nav class="navbar-right">
+                        <ul class="menu">
+                            <li class="first">
+                                <a href="#"><i class="fa fa-menu fa-chevron-down"></i>Documentation</a>
+                                <ul class="submenu">
+                                    {% include 'menu/documentation.html' %}
+                                </ul>
+                            </li>
+
+                            <li><a href="https://cakephp.org/business-solutions">Business Solutions</a></li>
+                            <li><a href="https://swag.cakephp.org">Swag</a></li>
+                            <li><a href="https://cakephp.org/pages/road_trip">Road Trip</a></li>
+                            <li><a href="https://cakephp.org/pages/team">Team</a></li>
+
+                            <li>
+                                <a href="#"><i class="fa fa-menu fa-chevron-down"></i>Community</a>
+                                <div class="megamenu full">
+                                    <div class="row">
+                                        <div class="col-6 pl30">
+                                            <ul class="megamenu-list">
+                                                {% include 'menu/community.html' %}
+                                            </ul>
+                                        </div>
+                                        <div class="col-6 pl30">
+                                            <ul class="megamenu-list">
+                                                {% include 'menu/help.html' %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        {# Mobile responsive header #}
+        <div class="container-fluid hidden-md hidden-lg">
+            <div class="row">
+                <div class="col-sm-6 col-xs-6">
+                    <a class="logo-cake" href="https://cakephp.org">
+                        <img src="{{ pathto('_static/logo-cake.png', 1) }}" alt="CakePHP" />
+                    </a>
+                </div>
+
+                <div class="col-sm-6 col-xs-6">
+                    <div class="navbar-right">
+                        <button id="btn-menu" class="btn-menu" data-toggle="modal" data-target="#modal" title="toggle button">
+                            <i class="fa fa-bars toggle-modal"></i>
+                        </button>
+                    </div>
+                    <div id="wrap">
+                        <form class="search" action="{{ pathto('search') }}" method="get" autocomplete="off">
+                            <input name="q" type="search" placeholder="What are you looking for?">
+                            <input id="search_submit" value="{{ _('Search') }}" type="submit">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Grey site bar #}
+        <section id="nav-cook" class="hidden-xs hidden-sm">
+            <div class="container-fluid ">
+                <div class="row ">
+                    <div class="col-md-12 back-book">
+                        <div class="col-md-5 text-center t-cook-nav p0 hidden-sm hidden-xs">
+                            <h2>
+                                <a href="{{ pathto(master_doc) }}">
+                                    <span class="glyph_range icon-submenu icon-submenu-cook">B</span>
+                                    {{ project }} {{ version }} {{ version_name }} <strong>Book</strong>
+                                </a>
+                            </h2>
+                        </div>
+
+                        <div class="col-md-4 hidden-sm">
+                            <form class="search" action="{{ pathto('search') }}" method="get">
+                                <input type="hidden" name="check_keywords" value="yes" />
+                                <input type="hidden" name="area" value="default" />
+
+                                <div class="col-md-10 p0">
+                                    <input class="form-control form-cook" autocomplete="off" type="search" name="q" size="18" placeholder='Book Search' />
+                                </div>
+                                <div class="col-md-2 p0 search-cook">
+                                    <button type="submit">
+                                        <span class="glyph_range icon-submenu icon-submenu-cook">A</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {# Language and version pickers #}
+                        <div class="col-md-3">
+                            <div class="col-md-6 p0">
+                                <div class="col-md-7 t-language p0">
+                                    <h6>Language:</h6>
+                                </div>
+                                <div class="col-md-5 p0">
+                                    <ul class="nav navbar-nav">
+                                        <li class="dropdown">
+                                            {% for lang in languages %}
+                                                {%- if lang == language -%}
+                                                <a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown"
+                                                    role="button" aria-haspopup="true" aria-expanded="false" href="#">
+                                                        {{ short_lang }}
+                                                        <i class="fa fa-menu-en fa-chevron-down"></i>
+                                                    </a>
+                                                {%- endif -%}
+                                            {% endfor %}
+                                            <ul class="dropdown-menu">
+                                            {% for lang in languages %}
+                                                <li>
+                                                    {%- if lang == language -%}
+                                                    {# Do nothing, we print the active one above #}
+                                                    {%- elif has_lang(lang, pagename) -%}
+                                                    <a lang="{{ lang }}" href="{{ lang_link(lang, pagename) }}">{{ '%.2s'|format(lang) }}</a>
+                                                    {%- else -%}
+                                                    <span class="disabled">{{ '%.2s'|format(lang) }}</span>
+                                                    {%- endif -%}
+                                                </li>
+                                            {% endfor %}
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 p0">
+                                <div class="col-md-7 t-language p0">
+                                    <h6>Version:</h6>
+                                </div>
+                                <div class="col-md-5 p0">
+                                    <ul class="nav navbar-nav">
+                                        <li class="dropdown">
+                                            {% for item in version_list if 'current' in item and item['current'] %}
+                                                <a href="#" class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ item['name'] }} <i class="fa fa-menu-en fa-chevron-down"></i></a>
+                                            {% endfor %}
+                                            <ul class="dropdown-menu">
+                                                {% for item in version_list %}
+                                                    <li><a href="https://book.cakephp.org/{{ item['number'] }}/{{ short_lang }}">
+                                                        {{ item['title'] }}
+                                                    </a></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </header>
+
+    {# Responsive grey bar navigation. This is outside of header so it scrolls with the page. #}
+    <section class="nav-btn visible-sm visible-xs">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6 col-xs-6 text-center">
+                    <button id="btn-nav" class="btn btn-b btn-nav" data-toggle="modal" data-target="#modal"><strong>Nav</strong></button>
+                </div>
+
+                <div class="col-sm-6 col-xs-6 text-center">
+                    <button id="btn-toc" class="btn btn-b btn-nav" data-toggle="modal" data-target="#modal"><strong>Table of Contents</strong></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# modal used in mobile responsive views #}
+    <div id="modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal-header">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title-cookbook" id="modal-header">{# header text injected via js #}</h4>
+                </div>
+                <div class="modal-body">{# body is injected via js #}</div>
+            </div>
+        </div>
+    </div>
+{% endblock -%}
+
+{%- block content %}
+  {% if 'next' in version %}
+      <p class="edge-warning">
+          This document is for CakePHP's development version, which can be significantly different
+          from previous releases.
+          <br>You may want to read
+          <a href="https://book.cakephp.org">current stable release documentation</a> instead.
+      </p>
+  {% elif is_prerelease %}
+      <p class="edge-warning">
+          This document is for a development version, which can be significantly different
+          from stable releases.
+      </p>
+  {% endif %}
+  {% if is_security %}
+      <p class="edge-warning">
+          This document is for a version of CakePHP that receives security updates only. Please upgrade to a newer release!
+      </p>
+  {% endif %}
+  {% if is_eol %}
+    <p class="edge-warning">
+        This document is for a version of CakePHP that is no longer supported. Please upgrade to a newer release!
+    </p>
+  {% endif %}
+
+<div class="container page-container {% if 'next' in version or is_eol or is_prerelease or is_security %}has-banner{% endif %}">
+
+    {%- if pagename != 'search' -%}
+    <div id="improve-slideout">
+        <i class="fa fa-pencil icon-improve"></i>
+        <a href="https://github.com/{{ repository }}/edit/{{ branch }}/{{ source_path }}{{ short_lang }}/{{ pagename }}.rst" target="_blank">
+            <div id="improve-slideout-inner"><h6>Improve This Doc <i class="fa fa-brands fa-github git-improve"></i></h6></div>
+        </a>
+    </div>
+    {%- endif -%}
+    <a id="back-to-contents" href="#page-contents"><i class="fa fa-arrow-circle-up icon-improve" title="Back to Contents"></i></a>
+
+    {# Document body #}
+    <div class="row">
+        <div class="col-sm-12 col-md-9 col-md-push-3">
+            {%- if hide_page_contents and pagename not in hide_page_contents -%}
+            <div class="page-contents col-sm-5">
+                <h3>{{ _('Page Contents') }}</h3>
+                {{ toc }}
+            </div>
+            {%- endif -%}
+
+            <div class="document-body">
+            {% block body %} {% endblock %}
+            </div>
+
+            <div class="row">
+                <nav>
+                    <ul class="pagination">
+                        <li class="previous">
+                            {%- if prev %}
+                                <a href="{{ prev.link|e }}"><span aria-hidden="true">&larr;</span> {{ prev.title }} </a>
+                            {%- endif %}
+                        </li>
+                        <li class="next">
+                            {%- if next %}
+                                <a href="{{ next.link|e }}"> {{ next.title }} <span aria-hidden="true">&rarr;</span></a>
+                            {%- endif %}
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+
+        {# TOC sidebar #}
+        <div class="col-md-3 col-md-pull-9 hidden-xs hidden-sm" lang="{{ short_lang }}">
+            {%- for sidebartemplate in sidebars %}
+            <aside class="sidebar">
+                <div class="mb30 row">
+                    {%- include sidebartemplate %}
+                </div>
+            </aside>
+            {%- endfor %}
+        </div>
+    </div>
+</div>
+{% endblock -%}
+
+{%- block footer %}
+<section id="socials" class="back-3">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-5  social text-center">
+                <div class="col-sm-3 col-xs-6">
+                    <div id="fb-root"></div>
+                        <script>(function(d, s, id) {
+                          var js, fjs = d.getElementsByTagName(s)[0];
+                          if (d.getElementById(id)) return;
+                          js = d.createElement(s); js.id = id;
+                          js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";
+                          fjs.parentNode.insertBefore(js, fjs);
+                        }(document, 'script', 'facebook-jssdk'));
+                        </script>
+                        <div id="fb-root-face" class="fb-like" data-href="https://www.facebook.com/CakePHP/" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>
+                </div>
+            </div>
+
+            <div class="col-xs-12 col-sm-12 col-lg-7 social-footer text-center ">
+                <a href="https://phpc.social/@cakephp" rel="me" aria-label="Mastodon" data-toggle="tooltip" title="Mastodon"><i class="fa-brands icon-social fa-mastodon"></i></a>
+                <a href="https://twitter.com/cakephp" aria-label="Twitter" data-toggle="tooltip" title="Twitter"><i class="fa-brands icon-social fa-twitter"></i></a>
+                <a href="https://www.facebook.com/groups/cake.community" aria-label="Facebook" data-toggle="tooltip" title="Facebook"><i class="fa-brands icon-social fa-facebook"></i></a>
+                <a href="https://www.youtube.com/user/CakePHP" aria-label="Youtube" data-toggle="tooltip" title="Youtube"><i class="fa-brands icon-social fa-youtube"></i></a>
+                <a href="https://www.linkedin.com/groups/4623165/profile" aria-label="Linkedin" data-toggle="tooltip" title="Linkedin"><i class="fa-brands icon-social fa-linkedin-in"></i></a>
+                <a href="https://github.com/cakephp" aria-label="Github" data-toggle="tooltip" title="Github"><i class="fa-brands icon-social fa-git"></i></a>
+                <a href="https://slack-invite.cakephp.org/" aria-label="Slack" target="_blank" title="Slack" data-toggle="tooltip"><i class="fa-brands fa-slack icon-social"></i></a>
+                <a href="https://stackoverflow.com/tags/cakephp" aria-label="Stack Overflow" data-toggle="tooltip" title="Stack Overflow"><i class="fa-brands icon-social fa-stack-overflow"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer id="footer" class="footer-wrapper">
+    <div class="container">
+
+        <div class="row col-p30">
+            <div class="col-sm-12 col-md-3">
+                <div class="footer-widget t-footer">
+                    <div class="col-md-12">
+                        <a href="https://www.openhub.net/p/cakephp" target="_blank">
+                            <img src="{{ pathto('_static/open-hub.svg', 1) }}" style="opacity: .5" alt="openHub">
+                        </a>
+                        <div class="mt10">
+                            <a href="https://www.pingping.io/" target="_blank">
+                                <img src="{{ pathto('_static/pingping.png', 1) }}" alt="pingping.io">
+                            </a>
+                        </div>
+                        <div class="mt10">
+                            <a href="https://www.linode.com/" target="_blank">
+                                <img src="{{ pathto('_static/linode.png', 1) }}" alt="Linode">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-12 col-md-9">
+                <div class="col-md-3 col-sm-6 business-solution">
+                    <ul class="footer-menu">
+                        {% include 'menu/business-solutions.html' %}
+                    </ul>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <ul class="footer-menu">
+                        {% include 'menu/footer-documentation.html' %}
+                    </ul>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <ul class="footer-menu">
+                        {% include 'menu/community.html' %}
+                    </ul>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <ul class="footer-menu">
+                        {% include 'menu/help.html' %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 text-center mt30">
+                <p class="copyright">
+                    {%- if show_copyright %}
+                        {%- if hasdoc('copyright') %}
+                            {% trans path=pathto('copyright'), copyright=copyright|e %}<a href="{{ path }}">Copyright</a> &copy;{{ copyright }}.{% endtrans %}
+                        {%- else %}
+                            {% trans copyright=copyright|e %}Copyright &copy;{{ copyright }}.{% endtrans %}
+                        {%- endif %}
+                    {%- endif %}
+                    {%- if last_updated %}
+                        {% trans last_updated=last_updated|e %}Last updated on {{ last_updated }}.{% endtrans %}
+                    {%- endif %}
+                    {%- if show_sphinx %}
+                        {% trans sphinx_version=sphinx_version|e %}Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> {{ sphinx_version }}.{% endtrans %}
+                    {%- endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div id="inline-search-results"></div>
+
+{# End of div[id=wrapper] #}
+</div>
+
+<script>
+    App.init({
+        lang: '{{ short_lang }}',
+        version: '{{ search_version }}',
+        search: {
+            url: '{{ search_url }}'
+        }
+    });
+</script>
+{%- endblock %}
+  </body>
+</html>
