@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["dinosaur"]
+package-data = {"dinosaur.data" = ["*"]}
+
+[project]
+name = "dinosaur-dycore"
+version = "1.1.0"  # keep sync with __init__.py
+authors = [
+    {name = "Google LLC", email = "noreply@google.com"},
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+# TODO(shoyer): thin these down
+dependencies = [
+    "jax",
+    "jaxlib",
+    "numpy",
+    "pint",
+    "scipy",
+    "scikit-learn",
+    "tree-math",
+]
+
+[project.optional-dependencies]
+tests = [
+    "absl-py",
+    "chex",
+    "pytest",
+]
+xarray-utils = [
+    "dask",
+    "fsspec",
+    "pandas",
+    "xarray",
+    # "xarray-beam",  # TODO(shoyer): figure out how to install Beam in CI
+    "xarray-tensorstore",
+]
