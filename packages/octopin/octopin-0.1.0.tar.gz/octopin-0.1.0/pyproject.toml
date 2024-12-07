@@ -1,0 +1,183 @@
+[build-system]
+requires = [
+    "pdm-backend",
+]
+build-backend = "pdm.backend"
+
+[project]
+name = "octopin"
+dynamic = []
+description = "Pin used actions and analyse transitive dependencies of GitHub workflows / actions"
+authors = [
+    { name = "Thomas Neidhart", email = "thomas.neidhart@eclipse-foundation.org" },
+]
+requires-python = ">=3.11"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python",
+    "Topic :: Security",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+]
+readme = "README.md"
+dependencies = [
+    "typer >= 0.15",
+    "PyYAML >= 6.0",
+    "semver >= 3.0",
+    "aiohttp >= 3.9",
+    "aiohttp-client-cache >= 0.10",
+    "aiosqlite >= 0.19",
+    "platformdirs >= 4",
+]
+version = "0.1.0"
+
+[project.license]
+text = "EPL-2.0"
+
+[project.urls]
+Homepage = "https://github.com/eclipse-csi/octopin"
+Documentation = "https://octopin.readthedocs.org"
+Repository = "https://github.com/eclipse-csi/octopin"
+Issues = "https://github.com/eclipse-csi/octopin/issues"
+Changelog = "https://octopin.readthedocs.org/release-notes/"
+
+[project.scripts]
+octopin = "octopin.cli:main"
+
+[dependency-groups]
+dev = [
+    "ruff >= 0.8",
+    "mypy >= 1.8",
+    "types-PyYAML >= 6.0",
+    "pre-commit >= 4",
+    "pytest >=8, <9",
+    "pytest-asyncio >= 0.24",
+    "parameterized  >= 0.9",
+    "tox >= 4.22, <5",
+]
+docs = [
+    "mkdocs >= 1.6",
+    "mkdocs-material == 9.5.47",
+    "pillow == 11.0.0",
+    "cairosvg == 2.7.1",
+]
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.version]
+source = "scm"
+write_to = "octopin/_version.py"
+write_template = "__version__ = \"{}\""
+version_format = "pdm_build:format_version"
+
+[tool.pdm.build]
+source-includes = [
+    "octopin/",
+    "tests/",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.2"
+testpaths = [
+    "tests",
+]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+exclude = [
+    "docs",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "parameterized",
+]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+extend-select = [
+    "B",
+    "C4",
+    "ERA",
+    "I",
+    "N",
+    "PIE",
+    "S",
+    "PGH",
+    "RUF",
+    "SIM",
+    "T20",
+    "TCH",
+    "TID",
+    "UP",
+]
+ignore = [
+    "E203",
+    "ERA001",
+    "PGH003",
+    "PGH004",
+    "SIM102",
+    "SIM103",
+    "N818",
+    "S102",
+    "S105",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",
+]
+
+[tool.tox]
+requires = [
+    "tox>=4.22",
+]
+env_list = [
+    "3.11",
+    "3.12",
+    "3.13",
+]
+
+[tool.tox.env_run_base]
+description = "Run tests under {base_python}"
+skip_install = true
+allowlist_externals = [
+    "uv",
+]
+commands_pre = [
+    [
+        "uv",
+        "sync",
+    ],
+]
+commands = [
+    [
+        "uv",
+        "run",
+        "pytest",
+        "tests/",
+        "--import-mode",
+        "importlib",
+    ],
+]
