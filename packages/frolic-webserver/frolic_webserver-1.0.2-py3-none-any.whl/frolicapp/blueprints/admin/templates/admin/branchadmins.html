@@ -1,0 +1,88 @@
+{% extends 'admin/__base__.html' %}
+
+{% block title %}
+Branchadmins
+{% endblock %}
+
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.css" />
+{% endblock %}
+
+
+{% block sidebar %}
+{% from 'admin/macros.html' import generate_sidebar %}
+{{ generate_sidebar('Branchadmin') }}
+{% endblock %}
+
+
+{% block main %}
+<div class="container-fluid">
+    {% if branchadmins %}
+    <div class="px-2 py-0">
+        <table id="teams" class="table datatable table-hover">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Branch</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody class="align-middle">
+                {% for branchadmin in branchadmins %}
+                <tr>
+                    <td>{{ branchadmin.fname }}</td>
+                    <td>{{ branchadmin.lname }}</td>
+                    <td>{{ branchadmin.email }}</td>
+                    <td>{{ branchadmin.branch | upper }}</td>                    
+                    <td><a href="{{ url_for('Admin.get_user', id=branchadmin.user_id) }}"><i
+                                class="bi bi-arrow-right"></i></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <h1 class="fw-bold">No branchadmins found for any branches</h1>
+    {% endif %}
+</div>
+{% endblock %}
+
+
+{% block script %}
+{% if branchadmins %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#teams').DataTable({
+            paging: false,
+            searching: true,
+            ordering: false,
+            scrollX: true,
+            scrollY: '450px',
+            padding: false,
+            layout: {
+                topStart: {
+                    features: [
+                        {
+                            search: {
+                                placeholder: "type here..."
+                            }
+                        }
+                    ]
+                },
+                topEnd: {
+
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{{ super() }}
+{% endblock %}
