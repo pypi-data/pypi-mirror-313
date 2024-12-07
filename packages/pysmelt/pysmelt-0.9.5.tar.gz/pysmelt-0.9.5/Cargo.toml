@@ -1,0 +1,134 @@
+[workspace]
+resolver = "2"
+members = ["crates/*", "py-smelt"]
+
+[workspace.package]
+version = "0.9.5"
+authors = ["James Connolly <james@silogy.io>"]
+edition = "2021"
+
+[workspace.dependencies]
+pyo3 = "0.21.1"
+prost = "0.13"
+prost-build = "0.13"
+prost-derive = "0.13"
+prost-types = "0.13"
+thiserror = "1.0.58"
+serde_yaml = "0.9.34"
+futures = "0.3.30"
+derive_more = "0.99.17"
+async-trait = "0.1.79"
+serde_json = "1.0.115"
+chrono = "0.4.38"
+hex = "0.4.3"
+anyhow = "1.0.82"
+tracing = "0.1.40"
+whoami = "1.5.1"
+libproc = "0.14.8"
+
+[profile.opt-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.debug-release]
+inherits = "release"
+debug = true
+incremental = true
+codegen-units = 16
+lto = "thin"
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+
+[workspace.dependencies.tracing-subscriber]
+version = "0.3.18"
+features = ["registry", "env-filter"]
+
+[workspace.dependencies.serde]
+version = "1.0.197"
+features = ["std", "derive"]
+
+[workspace.dependencies.regex]
+version = "1.10.5"
+
+[workspace.dependencies.dice]
+git = "https://github.com/facebook/buck2"
+rev = "2024-09-02"
+
+[workspace.dependencies.allocative]
+git = "https://github.com/facebook/buck2"
+rev = "2024-09-02"
+features = [
+  "anyhow",
+  "bumpalo",
+  "dashmap",
+  "either",
+  "futures",
+  "hashbrown",
+  "indexmap",
+  "num-bigint",
+  "once_cell",
+  "parking_lot",
+  "prost-types",
+  "relative-path",
+  "serde_json",
+  "slab",
+  "smallvec",
+  "compact_str",
+  "sorted_vector_map",
+  "tokio",
+  "triomphe",
+]
+
+[workspace.dependencies.dupe]
+git = "https://github.com/facebook/buck2"
+rev = "2024-09-02"
+
+[workspace.dependencies.static_interner]
+version = "0.1.1"
+
+[workspace.dependencies.tonic]
+version = "0.12.2"
+features = ["tls", "tls-webpki-roots"]
+
+[workspace.dependencies.tonic-build]
+version = "0.12.2"
+features = ["prost", "cleanup-markdown"]
+
+[workspace.dependencies.tokio]
+version = "1.37.0"
+features = ["full", "tracing"]
+
+[workspace.dependencies.smelt-events]
+path = "crates/smelt-events"
+default-features = false
+
+[workspace.dependencies.smelt-core]
+path = "crates/smelt-core"
+default-features = false
+
+[workspace.dependencies.smelt-graph]
+path = "crates/smelt-graph"
+
+[workspace.dependencies.smelt-rt]
+path = "crates/smelt-rt"
+
+[workspace.dependencies.smelt-data]
+path = "crates/smelt-data"
+default-features = false
+
+[workspace.dependencies.smelt-slurm]
+path = "crates/smelt-slurm"
+default-features = false
+
+[workspace.dependencies.smelt-slurm-server]
+path = "crates/smelt-slurm-server"
+default-features = false
+
+[workspace.dependencies.py-smelt]
+path = "py-smelt"
+default-features = false
+
+[workspace.dependencies.bollard]
+version = "0.16.1"

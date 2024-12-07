@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+
+import "google/protobuf/timestamp.proto";
+
+
+package executed_tests;
+
+// Taken directly from the bazel reapi, for compat
+message Digest {
+  // The hash. In the case of SHA-256, it will always be a lowercase hex string
+  // exactly 64 characters long.
+  // in expectation, this should always be the sha256
+  string hash = 1;
+
+  // The size of the blob, in bytes.
+  int64 size_bytes = 2;
+}
+
+message ArtifactPointer {
+  // Artifacts are assumed to be files
+  oneof pointer {
+    string path = 1;
+  }
+  string artifact_name = 3;
+}
+
+// We aren't using this yet -- commenting out
+//message TestMetaData {
+//  // User name of who owns the test
+//  string test_owner = 1;
+//  // name of the design under test -- useful for tracking across different
+//  // testbenches
+//  string design_under_test = 2;
+//  // Any extra data end-users might want to tag onto a test, for test
+//  // organization
+//  map<string, string> extras = 3;
+//}
+
+
+
+
+
+// The serialized record of single test execution
+//
+// This is the api that we should build tools around -- if people provide tracked tests
+message TestResult {
+  // name of the test
+  string test_name = 1;
+  TestOutputs outputs = 2;
+}
+
+
+message TestOutputs { 
+  // Files that are expected from a test
+  repeated ArtifactPointer artifacts = 1;
+  // exit code of the test
+  int32 exit_code= 2;
+}
+
+
+
+// Highest level invocation for a set of tests -- must contain one or more
+// test results any time we run any test(s), an invocation object is created
+message Invocation {
+  string invoke_id = 1; // uuid
+  google.protobuf.Timestamp rundate = 2;
+  string user = 3;
+  string repo = 4;
+  string branch = 5;
+  string hostname = 6;
+  string smelt_root = 7;
+  repeated TestResult executed_tests = 8;
+}
