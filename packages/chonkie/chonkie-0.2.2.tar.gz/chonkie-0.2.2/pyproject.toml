@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chonkie"
+version = "0.2.2"
+description = "🦛 CHONK your texts with Chonkie ✨ - The no-nonsense RAG chunking library"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+keywords = ["chunking", "rag", "nlp", "text-processing"]
+authors = [
+    {name = "Bhavnick Minhas", email = "bhavnicksm@gmail.com"}
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing :: Linguistic"
+]
+dependencies = [
+    "autotiktokenizer>=0.2.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/bhavnicksm/chonkie"
+Documentation = "https://docs.chonkie.ai"
+[project.optional-dependencies]
+model2vec = ["model2vec>=0.1.0", "numpy>=1.23.0"]
+st = ["sentence-transformers>=2.3.0", "numpy>=1.23.0"]
+openai = ["openai>=1.0.0", "numpy>=1.23.0"]
+semantic = ["model2vec>=0.1.0", "numpy>=1.23.0"]
+all = ["sentence-transformers>=2.3.0", "numpy>=1.23.0", "openai>=1.0.0", "model2vec>=0.1.0"]
+dev = [
+    "pytest>=6.2.0", 
+    "datasets>=1.14.0",
+    "transformers>=4.0.0",
+    "ruff>=0.0.265"
+]
+
+[tool.pytest.ini_options]
+pythonpath = "src"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["chonkie", 
+            "chonkie.chunker",
+            "chonkie.embeddings", 
+            "chonkie.refinery"]
+
+[tool.ruff]
+select = ["F", "I", "D", "DOC"]
