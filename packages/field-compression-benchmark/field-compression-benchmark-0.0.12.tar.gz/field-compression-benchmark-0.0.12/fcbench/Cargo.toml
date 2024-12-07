@@ -1,0 +1,47 @@
+[package]
+name = "fcbench"
+version = "0.0.12"
+edition = { workspace = true }
+authors = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+rust-version = { workspace = true }
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "fcbench"
+crate-type = ["cdylib"]
+
+[dependencies]
+codecs-build = { workspace = true }
+convert_case = { workspace = true }
+core-benchmark = { workspace = true }
+core-compressor = { workspace = true }
+core-dataset = { workspace = true }
+core-error = { workspace = true }
+core-goodness = { workspace = true }
+core-measure = { workspace = true }
+core-model = { workspace = true }
+nonempty = { workspace = true }
+numcodecs-python = { workspace = true }
+numpy = { workspace = true }
+pyo3 = { workspace = true, features = ["macros", "abi3", "extension-module"] }
+pyo3-log = { workspace = true }
+pythonize = { workspace = true }
+rand_chacha = { workspace = true }
+rand_distr = { workspace = true, features = ["serde1"] }
+serde = { workspace = true, features = ["std"] }
+serde_path_to_error = { workspace = true }
+serde-reflection = { workspace = true }
+uuid = { workspace = true, features = ["std", "v8", "serde"] }
+vecmap-rs = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+codecs-frontend = { workspace = true, features = ["pyodide"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+codecs-frontend = { workspace = true, features = ["wasmtime"] }
+
+[lints]
+workspace = true

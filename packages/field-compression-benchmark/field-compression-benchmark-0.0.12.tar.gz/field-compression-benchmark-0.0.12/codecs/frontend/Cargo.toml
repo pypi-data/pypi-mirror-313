@@ -1,0 +1,52 @@
+[package]
+name = "codecs-frontend"
+version = "0.1.0"
+edition = { workspace = true }
+authors = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+license = { workspace = true }
+rust-version = { workspace = true }
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = { workspace = true }
+codecs-wasm-host = { workspace = true }
+core-error = { workspace = true }
+indexmap = { workspace = true, features = ["std"] }
+log = { workspace = true }
+numcodecs = { workspace = true }
+numcodecs-python = { workspace = true }
+polonius-the-crab = { workspace = true }
+pyodide-webassembly-runtime-layer = { workspace = true, optional = true }
+pyo3 = { workspace = true, features = ["abi3"] }
+schemars = { workspace = true }
+semver = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+wac-graph = { workspace = true }
+wasm_component_layer = { workspace = true }
+wasm_runtime_layer = { workspace = true }
+wasmparser = { workspace = true, features = ["features"] }
+wasmtime = { workspace = true, features = ["runtime", "cranelift", "cache", "gc-null"], optional = true }
+wasmtime_runtime_layer = { workspace = true, optional = true }
+wasm-encoder = { workspace = true, features = ["wasmparser"] }
+wit-component = { workspace = true }
+wit-parser = { workspace = true }
+vecmap-rs = { workspace = true }
+virtual-wasi-build = { workspace = true }
+
+[dev-dependencies]
+codecs-build = { workspace = true }
+numpy = { workspace = true }
+simple_logger = { workspace = true, features = ["colors"] }
+
+[features]
+default = []
+wasmtime = ["dep:wasmtime", "dep:wasmtime_runtime_layer"]
+pyodide = ["dep:pyodide-webassembly-runtime-layer"]
+
+[lints]
+workspace = true
