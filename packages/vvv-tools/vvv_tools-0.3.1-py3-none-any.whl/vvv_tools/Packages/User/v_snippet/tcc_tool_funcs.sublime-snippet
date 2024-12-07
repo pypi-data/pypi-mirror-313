@@ -1,0 +1,122 @@
+<snippet>
+    <content>
+        <![CDATA[
+#include <stdio.h>
+#include <windows.h>
+#include <winternl.h>
+#include <tlhelp32.h>
+#include <string.h>
+#include <stdio.h>
+#pragma comment(lib, "Advapi32")
+#pragma comment(lib, "user32")
+NTSTATUS WINAPI NtQueryInformationProcess( HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
+typedef NTSTATUS (WINAPI *PFUN_NtQueryInformationProcess)( HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
+LPVOID v_ReadInMemory(char* FileName) { HANDLE f,h; LPVOID m; if ((f = CreateFileA( FileName, GENERIC_READ, FILE_SHARE_READ, 0,  OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL) ) == INVALID_HANDLE_VALUE){ return NULL; } if ((h = CreateFileMappingA(f,NULL,PAGE_READONLY,0,0,NULL)) == NULL){ return NULL; } if ((m = MapViewOfFile(h,FILE_MAP_READ,0,0,0)) == NULL){ return NULL; }else { return m; } }
+int v_getProcessCommandLineByHandle(HANDLE process_handle, WCHAR** result){ PROCESS_BASIC_INFORMATION pbi = {0}; HMODULE hModule = LoadLibraryA("Ntdll.dll"); PFUN_NtQueryInformationProcess pfun =  (PFUN_NtQueryInformationProcess)GetProcAddress(hModule, "NtQueryInformationProcess"); NTSTATUS status = pfun(process_handle, ProcessBasicInformation, (PVOID)&pbi, sizeof(pbi), NULL); if (!pbi.PebBaseAddress){ return 1; } PPEB peb = pbi.PebBaseAddress; HANDLE procesHandle; procesHandle = process_handle; PEB stPeb; RTL_USER_PROCESS_PARAMETERS stProParam; DWORD dwDummy; if (!ReadProcessMemory(procesHandle, pbi.PebBaseAddress, &stPeb, sizeof(stPeb), NULL)){ return 2; } if (!ReadProcessMemory(procesHandle, stPeb.ProcessParameters, &stProParam, sizeof(stProParam), NULL)) { return 3; } LPVOID lpAddress; DWORD dwSize; lpAddress = stProParam.CommandLine.Buffer; dwSize = stProParam.CommandLine.Length; WCHAR* pszCmdLineBuffer = malloc((dwSize + 1) * sizeof(WCHAR)); ZeroMemory(pszCmdLineBuffer, (dwSize + 1) * sizeof(WCHAR)); if (!ReadProcessMemory(procesHandle, lpAddress, (LPVOID)pszCmdLineBuffer, dwSize, NULL)){ return 4; } *result = pszCmdLineBuffer; return 0; }
+int v_getProcessCommandLineById(DWORD pid, WCHAR** result){ HANDLE handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid); return v_getProcessCommandLineByHandle(handle, result); }
+DWORD v_GetProcessIdFromHandle(HANDLE hProcess) {HMODULE hNtdll = LoadLibrary("ntdll.dll");if (hNtdll == NULL) {printf("[*] Failed to load ntdll.dll. Error: %d\n", GetLastError());return 0;}PFUN_NtQueryInformationProcess NtQueryInformationProcess = (PFUN_NtQueryInformationProcess)GetProcAddress(hNtdll, "NtQueryInformationProcess");if (NtQueryInformationProcess == NULL) {printf("[*] Failed to get NtQueryInformationProcess. Error: %d\n", GetLastError());FreeLibrary(hNtdll);return 0;}PROCESS_BASIC_INFORMATION pbi;ULONG len;NTSTATUS status = NtQueryInformationProcess(hProcess,ProcessBasicInformation,&pbi,sizeof(pbi),&len);if (status != 0) {printf("[*] NtQueryInformationProcess failed. Status: 0x%x\n", status);FreeLibrary(hNtdll);return 0;}DWORD processId = (DWORD)pbi.UniqueProcessId;FreeLibrary(hNtdll);return processId;}
+HWND main_window_hwnd = NULL;
+BOOL CALLBACK v_EnumWindowsProc(HWND hwnd, LPARAM lParam) {DWORD processId;GetWindowThreadProcessId(hwnd, &processId);if (processId == (DWORD)lParam) {LONG style = GetWindowLong(hwnd, GWL_STYLE);if ((style & WS_VISIBLE) && !(style & WS_CHILD)) {main_window_hwnd = hwnd;return FALSE;}}return TRUE;}
+HWND v_GetMainWindowHandleFromProcessHandle(HANDLE hProcess) {main_window_hwnd = NULL;DWORD processId = v_GetProcessIdFromHandle(hProcess);if (processId == 0) {printf("[*] Failed to get process ID. Error: %d\n", GetLastError());return NULL;}EnumWindows(v_EnumWindowsProc, (LPARAM)processId);return main_window_hwnd;}
+HANDLE v_EnumProcessAll() { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); }else{ printf("[*] %s[%d] parentID:%d ---> [getCommandLineError]\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_EnumProcessByName(char* process_name) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_EnumProcessByNameAndCommand(char* process_name, WCHAR* cmd) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ if (wcsstr(result, cmd)){ printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); } } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_EnumProcessByNameAndPosRevCommand(char* process_name, WCHAR* cmd1, WCHAR* cmd2) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ if (wcsstr(result, cmd1) && (!wcsstr(result, cmd2))){ printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); } } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_FindProcessByName(char* process_name) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } do { if(!strcmp(process_name,ps.szExeFile)) { found = 1; break; } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_FindProcessByNameAndCommand(char* process_name, WCHAR* cmd) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ if (wcsstr(result, cmd)){ printf("[*] %s[%d] %ls\n", ps.szExeFile, ps.th32ProcessID, result); found = 1; break; } } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_FindProcessByNameAndPosRevCommand(char* process_name, WCHAR* cmd1, WCHAR* cmd2) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ if (wcsstr(result, cmd1) && (!wcsstr(result, cmd2))){ printf("[*] %s[%d] %ls\n", ps.szExeFile, ps.th32ProcessID, result); found = 1; break; } } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+BOOL v_AdjustPrivileges() { HANDLE hToken = NULL; TOKEN_PRIVILEGES tp; TOKEN_PRIVILEGES oldtp; DWORD dwSize = sizeof(TOKEN_PRIVILEGES); LUID luid; OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &hToken); if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid)) { CloseHandle(hToken); return FALSE; } ZeroMemory(&tp, sizeof(tp)); tp.PrivilegeCount = 1; tp.Privileges[0].Luid = luid; tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &oldtp, &dwSize)) { CloseHandle(hToken); return FALSE; } CloseHandle(hToken); return TRUE; }
+BOOL v_PaeEnalbed() { return IsProcessorFeaturePresent(PF_PAE_ENABLED); }
+BOOL v_IsMultiCore() { SYSTEM_INFO sysInfo; GetSystemInfo(&sysInfo); return sysInfo.dwNumberOfProcessors != 1; }
+#include <stdio.h>
+#include <winsock2.h>
+#include <windows.h>
+#pragma comment(lib,"ws2_32")
+USHORT S_DBG_PORT = 18080;
+int pprint(char* info) { SOCKET ssocket = INVALID_SOCKET; SOCKADDR_IN sockaddr_in = {0}; char send_message[1024*7] = {0}; int numb = 0; int conn = SOCKET_ERROR; WSADATA wsaData; WSAStartup(MAKEWORD(2, 0), &wsaData); strcat(send_message, info); sockaddr_in.sin_family = AF_INET; sockaddr_in.sin_port = htons(S_DBG_PORT); sockaddr_in.sin_addr.s_addr = inet_addr("127.0.0.1"); ssocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); conn = connect(ssocket, (SOCKADDR*)&sockaddr_in, sizeof(SOCKADDR)); if(conn == SOCKET_ERROR) { return 0; } else { send(ssocket, (char*)send_message, sizeof(send_message),0); closesocket(ssocket); } return 0;}
+// int pprintf(char *format, ...){ char log[1024*7] = {0}; va_list args; va_start(args, format); vsprintf(log, format, args); va_end(args); pprint(log); return 0; }
+int pprintf(char *format, ...){ char log[1024*7] = {0}; va_list args; va_start(args, format); vsprintf(log, format, args); va_end(args); printf(log); return 0; }
+// void _AddLogWindow(TCHAR*);
+// int xprintf(char *format, ...){ char log[1024*7] = {0}; va_list args; va_start(args, format); vsprintf(log, format, args); va_end(args); _AddLogWindow(log); return 0; }
+int x2printf(char* name, char *format, ...);
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+#define ARG_T(T) T
+#define ARG_N(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,N,...) N
+#define ARG_N_HELP(...) ARG_T(ARG_N(__VA_ARGS__))
+#define COUNT_ARG(...) ARG_N_HELP(__VA_ARGS__,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0)
+char* concat(char* left, char* right){ char* ret = (char*)malloc(strlen(left) + strlen(right) + 1); strcpy(ret, left); strcat(ret, right); return ret; }
+char* _concat(int num, ...){ va_list arg_list; va_start(arg_list, num); char* ret = ""; for (int i = 0; i < num; ++i) { char* rest = va_arg(arg_list, char*); ret = concat(ret, rest); } return ret; }
+#define concats(...) _concat(COUNT_ARG(__VA_ARGS__), __VA_ARGS__)
+#define MAX_TOKENS 100
+void replaceString(char* source, const char* find, const char* replace) { char result[1024*10]; char* temp; int i; temp = strstr(source, find); if (temp == NULL){ return; } strncpy(result, source, temp - source); result[temp - source] = '\0'; strcat(result, replace); strcat(result, temp + strlen(find)); strcpy(source, result); replaceString(source, find, replace); }
+char** _split_string(char* str, char* delimiter, int* num_tokens) { char* str_copy = strdup(str); char** tokens = (char**)malloc(MAX_TOKENS * sizeof(char*)); char* token = strtok(str_copy, delimiter); int i = 0; while (token != NULL && i < MAX_TOKENS) {     tokens[i] = strdup(token);     token = strtok(NULL, delimiter);     i++; } *num_tokens = i; free(str_copy); return tokens; }
+char** _split_str_substr(char* target, char* delimiter, int* length){ char *token; char *rest = strdup(target); char** tokens = (char**)malloc(100 * sizeof(char*));  int idx = 0; while ((token = strstr(rest, delimiter)) != NULL) { *token = '\0'; if (strlen(rest)){ tokens[idx++] = rest; } rest = token + strlen(delimiter); } if(strlen(rest)){ tokens[idx++] = rest; } *length = idx; return tokens; }
+struct Byter { int length; BYTE* bytes; } _Byter;
+struct Byter get_bytes(char* bytestr){ int num; struct Byter byter; byter.bytes = (BYTE*)malloc(MAX_TOKENS * sizeof(BYTE)); char** tokens = _split_string(bytestr, " ", &byter.length); for (int i = 0; i < byter.length; i++) { if((strcmp("**", tokens[i])==0)||(strcmp("*", tokens[i])==0)){ byter.bytes[i] = -1; }else{ sscanf(tokens[i], "%x", &num); byter.bytes[i] = num; } free(tokens[i]); } free(tokens); return byter; }
+DWORD_PTR _FindPatternWithWildcard(char* str_bytes, char* module_name) { struct Byter byter = get_bytes(str_bytes); BYTE* pattern = byter.bytes; int patternLength = byter.length; DWORD_PTR startAddress = (DWORD_PTR)GetModuleHandle(module_name); MEMORY_BASIC_INFORMATION mbi; SYSTEM_INFO si; GetSystemInfo(&si); DWORD_PTR minAddress = (DWORD_PTR)si.lpMinimumApplicationAddress; DWORD_PTR maxAddress = (DWORD_PTR)si.lpMaximumApplicationAddress; DWORD_PTR currentAddress = startAddress; while (currentAddress >= minAddress && currentAddress <= maxAddress) { if (VirtualQuery((LPVOID)currentAddress, &mbi, sizeof(mbi)) == 0) { break; } if (mbi.State == MEM_COMMIT && mbi.Protect != PAGE_NOACCESS) { BYTE* buffer = (BYTE*)malloc(mbi.RegionSize); if (buffer != NULL) { memcpy(buffer, (LPVOID)mbi.BaseAddress, mbi.RegionSize); for (int i = 0; i < mbi.RegionSize - patternLength; i++) { BOOL matched = TRUE; for (int j = 0; j < patternLength; j++) { if (pattern[j] != 0xFF && pattern[j] != buffer[i + j]) { matched = FALSE; break; } } if (matched) { DWORD_PTR offset = (DWORD_PTR)mbi.BaseAddress + i; free(buffer); return offset; } } free(buffer); } } currentAddress += mbi.RegionSize; } return 0; }
+DWORD_PTR FindPatternWithWildcard(char* str_bytes, char* module_name){ DWORD_PTR ret = _FindPatternWithWildcard(str_bytes, module_name);
+    pprintf("[*] addr: 0x%llX module_name: %s == sign: %s", ret, module_name, str_bytes); 
+    return ret; }
+BYTE ReadMemoryByte(uintptr_t address) { return *(BYTE*)address; }
+void WriteMemoryByte(uintptr_t address, BYTE get_value){ DWORD oldProtect; VirtualProtect((void*)address, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &oldProtect); *(BYTE*)address = get_value; VirtualProtect((void*)address, sizeof(BYTE), oldProtect, &oldProtect); }
+char* ReadMemoryStrBytes(uintptr_t address, int n) { char *str = malloc((3 * n + 1) * sizeof(char)); for (int i = 0; i < n; ++i) { sprintf(str + (3 * i), "%02X ", ReadMemoryByte(address+i)); } return str; }
+void WriteMemoryStrBytes(uintptr_t address, char* str_bytes){ struct Byter byter = get_bytes(str_bytes); for (int i = 0; i < byter.length; ++i) { WriteMemoryByte(address+i, byter.bytes[i]); }}
+short ReadShort(uintptr_t address) { return *(short*)address; }
+void WriteShort(uintptr_t address, short get_value){ DWORD oldProtect; VirtualProtect((void*)address, sizeof(short), PAGE_EXECUTE_READWRITE, &oldProtect); *(short*)address = get_value; VirtualProtect((void*)address, sizeof(short), oldProtect, &oldProtect); }
+int ReadInt(uintptr_t address) { return *(int*)address; }
+void WriteInt(uintptr_t address, int get_value){ DWORD oldProtect; VirtualProtect((void*)address, sizeof(int), PAGE_EXECUTE_READWRITE, &oldProtect); *(int*)address = get_value; VirtualProtect((void*)address, sizeof(int), oldProtect, &oldProtect); }
+float ReadFloat(uintptr_t address) { return *(float*)address; }
+void WriteFloat(uintptr_t address, float get_value){ DWORD oldProtect; VirtualProtect((void*)address, sizeof(float), PAGE_EXECUTE_READWRITE, &oldProtect); *(float*)address = get_value; VirtualProtect((void*)address, sizeof(float), oldProtect, &oldProtect); }
+long ReadLong(uintptr_t address) { return *(long*)address; }
+void WriteLong(uintptr_t address, long get_value){ DWORD oldProtect; VirtualProtect((void*)address, sizeof(long), PAGE_EXECUTE_READWRITE, &oldProtect); *(long*)address = get_value; VirtualProtect((void*)address, sizeof(long), oldProtect, &oldProtect); }
+#include <windows.h>
+#include <psapi.h>
+#include <tchar.h>
+#include <stdio.h>
+#include <shlwapi.h>
+#include <dwmapi.h>
+#pragma comment(lib, "shlwapi")
+#pragma comment(lib, "psapi")
+#pragma comment(lib, "dwmapi")
+BOOL EnumProcessModulesEx(HANDLE hProcess,HMODULE *lphModule,DWORD cb,LPDWORD lpcbNeeded,DWORD dwFilterFlag);
+LPVOID v_GetDllBaseAddress(HANDLE hProcess, const TCHAR* dllName) {LPVOID baseAddress = NULL;DWORD cbNeeded;HMODULE* hMods = NULL;cbNeeded = 0x10000;hMods = (HMODULE*)malloc(cbNeeded);if (EnumProcessModulesEx(hProcess, hMods, cbNeeded, &cbNeeded, 0x03)) {for (unsigned int i = 0;i < (cbNeeded / sizeof(HMODULE));i++) {TCHAR szModName[MAX_PATH];if (GetModuleFileNameEx(hProcess, hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR))) {if (_tcscmp(PathFindFileName(szModName), dllName) == 0) {baseAddress = hMods[i];;return baseAddress;}}}};return baseAddress;}
+LPCVOID v_to32(LPCVOID addr){return (LPCVOID)(((int)addr) & 0xFFFFFFFF);}
+LPCVOID v_getAddressPointer(HANDLE handle, LPCVOID addr){ LPCVOID p; ReadProcessMemory(handle, addr, &p, sizeof(p), NULL); return v_to32(p); }
+float v_getFloatByPoint(HANDLE handle, LPCVOID addr){ float f; ReadProcessMemory(handle, addr, &f, sizeof(f), NULL); return f; }
+int v_getIntByPoint(HANDLE handle, LPCVOID addr){ int i; ReadProcessMemory(handle, addr, &i, sizeof(i), NULL); return i; }
+byte v_getByteByPoint(HANDLE handle, LPCVOID addr){ byte i; ReadProcessMemory(handle, addr, &i, sizeof(i), NULL); return i; }
+void initMatrixByPoint_4x4(HANDLE handle, LPCVOID addr, float* M){ReadProcessMemory(handle, addr, M, sizeof(float)*4*4, NULL);}
+
+int ends_with_dll(char *str, char* endstr) { size_t len = strlen(str); if (len < 4) { return 0; } char *end = str + len - 4; return _strnicmp(end, endstr, 4) == 0 ? 1 : 0; }
+struct FUNC_LIST{ struct { char* name; DWORD addr; } ls[8192]; int length; };
+void PrintExportedFunctions(HANDLE hProcess, HMODULE hModule, struct FUNC_LIST *funclist, int is_log) { IMAGE_DOS_HEADER dosHeader; if (!ReadProcessMemory(hProcess, hModule, &dosHeader, sizeof(dosHeader), NULL)) { pprintf("no DOS header: %d\n", GetLastError()); return; } if (dosHeader.e_magic != IMAGE_DOS_SIGNATURE) { pprintf("not PE file! \n"); return; } DWORD e_lfanew = dosHeader.e_lfanew; IMAGE_NT_HEADERS ntHeaders; if (!ReadProcessMemory(hProcess, (LPVOID)((DWORD_PTR)hModule + e_lfanew), &ntHeaders, sizeof(ntHeaders), NULL)) { pprintf("no NT header: %d\n", GetLastError()); return; } if (ntHeaders.Signature != IMAGE_NT_SIGNATURE) { pprintf("not PE file! \n"); return; } PIMAGE_OPTIONAL_HEADER pOptionalHeader = &ntHeaders.OptionalHeader; PIMAGE_DATA_DIRECTORY pExportDirectory = &pOptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT]; IMAGE_EXPORT_DIRECTORY exportDir; if (!ReadProcessMemory(hProcess, (LPVOID)((DWORD_PTR)hModule + pExportDirectory->VirtualAddress), &exportDir, sizeof(exportDir), NULL)) { pprintf("no outlist: %d\n", GetLastError()); return; } DWORD* pNames = (DWORD*)((BYTE*)hModule + exportDir.AddressOfNames); WORD* pOrdinals = (WORD*)((BYTE*)hModule + exportDir.AddressOfNameOrdinals); DWORD* pFunctions = (DWORD*)((BYTE*)hModule + exportDir.AddressOfFunctions); for (DWORD i = 0; i < exportDir.NumberOfNames; i++) { DWORD nameRVA; char functionName[MAX_PATH]; WORD ordinal; DWORD functionRVA; if (!ReadProcessMemory(hProcess, (LPVOID)((DWORD_PTR)pNames + i * sizeof(DWORD)), &nameRVA, sizeof(nameRVA), NULL)) { continue; } if (!ReadProcessMemory(hProcess, (LPVOID)((DWORD_PTR)hModule + nameRVA), functionName, MAX_PATH, NULL)) { continue; } if (!ReadProcessMemory(hProcess, (LPVOID)((DWORD_PTR)pOrdinals + i * sizeof(WORD)), &ordinal, sizeof(ordinal), NULL)) { continue; } if (!ReadProcessMemory(hProcess, (LPVOID)((DWORD_PTR)pFunctions + ordinal * sizeof(DWORD)), &functionRVA, sizeof(functionRVA), NULL)) { continue; } if (is_log){ pprintf("    Function Name: %s, Address: 0x%08X\n", functionName, (DWORD)((DWORD_PTR)hModule + functionRVA)); } funclist->ls[i].name = (char*)malloc(strlen(functionName) + 1); if (funclist->ls[i].name) { strcpy(funclist->ls[i].name, functionName); } funclist->ls[i].addr = (DWORD)((DWORD_PTR)hModule + functionRVA); funclist->length = i+1; } }
+void v_EnumDllBase(HANDLE hProcess, struct FUNC_LIST *funclist, char* name, int is_log, int is_log_func){ HMODULE hMods[1024]; DWORD cbNeeded; if (EnumProcessModules(hProcess, hMods, sizeof(hMods), &cbNeeded)) { for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) { TCHAR szModName[MAX_PATH]; if (GetModuleFileNameEx(hProcess, hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR))) { if (name != NULL){ if (_tcsstr(szModName, TEXT(name))){ if (is_log){ pprintf("[%d] %s ===> %s\n", i, PathFindFileName(szModName), szModName); } PrintExportedFunctions(hProcess, hMods[i], funclist, is_log_func); } }else if (ends_with_dll(szModName, ".dll")){ if (is_log){ pprintf("[%d] %s ===> %s\n", i, PathFindFileName(szModName), szModName); } PrintExportedFunctions(hProcess, hMods[i], funclist, is_log_func); } } } } }
+void v_EnumDllBaseAll(HANDLE hProcess){ struct FUNC_LIST funclist = {0}; v_EnumDllBase(hProcess, &funclist, NULL, 1, 1); for (int i = 0; i < funclist.length; ++i) { free(funclist.ls[i].name); } }
+void v_EnumDllBaseDll(HANDLE hProcess){ struct FUNC_LIST funclist = {0}; v_EnumDllBase(hProcess, &funclist, NULL, 1, 0); for (int i = 0; i < funclist.length; ++i) { free(funclist.ls[i].name); } }
+void v_EnumDllBaseFuncs(HANDLE hProcess, char* name){ struct FUNC_LIST funclist = {0}; v_EnumDllBase(hProcess, &funclist, name, 1, 1); for (int i = 0; i < funclist.length; ++i) { free(funclist.ls[i].name); } }
+DWORD_PTR v_FindDllBaseFunc(HANDLE hProcess, char* name, char* fname){ struct FUNC_LIST funclist = {0}; v_EnumDllBase(hProcess, &funclist, name, 0, 0); DWORD_PTR addr = 0; for (int i = 0; i < funclist.length; ++i) { if (strcmp(funclist.ls[i].name, fname) == 0){ addr = funclist.ls[i].addr; } } for (int i = 0; i < funclist.length; ++i) { free(funclist.ls[i].name); } return addr; }
+
+
+int main(int argc, char const *argv[]){
+    // v_EnumProcessAll();
+    // v_EnumProcessByName("svchost.exe");
+    // v_EnumProcessByNameAndCommand("svchost.exe", L"-p -s");
+    // v_EnumProcessByNameAndPosRevCommand("svchost.exe", L"", L"-p -s");
+
+    HANDLE hProcess = GetCurrentProcess();
+    // HANDLE hProcess = v_FindProcessByName("test.exe");
+    v_EnumDllBaseDll(hProcess);
+    v_EnumDllBaseFuncs(hProcess, "psapi.dll");
+    DWORD_PTR addr = v_FindDllBaseFunc(hProcess, "psapi.dll", "EmptyWorkingSet");
+    pprintf("0x%X\n", addr);
+    return 0;
+}
+]]>
+    </content>
+    <tabTrigger>ccc</tabTrigger>
+    <scope>source.c</scope>
+</snippet>

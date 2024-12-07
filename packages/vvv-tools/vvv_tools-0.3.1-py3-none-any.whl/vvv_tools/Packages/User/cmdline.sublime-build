@@ -1,0 +1,21 @@
+{
+    "shell": true,
+    "encoding": "utf8",
+    "cmd": ["start", "cmd", "/k", "$file"],
+    "selector": "source.dosbatch",
+    "working_dir": "${file_path}",
+    "variants":[
+        { "name": "powershell",
+          "shell_cmd":"start powershell",
+        },
+        { "name": "powershell admin cmd",
+          "shell_cmd":"PowerShell -Command \"Start-Process cmd -ArgumentList ('/k cd {0}' -f (Get-Location).path) -Verb RunAs\"",
+        },
+        { "name": "powershell admin powershell",
+          "shell_cmd":"PowerShell -Command \"Start-Process powershell.exe -ArgumentList ('-NoExit',('cd {0}' -f (Get-Location).path)) -Verb RunAs\"",
+        },
+        { "name": "explorer",
+          "shell_cmd":"explorer $file_path",
+        },
+    ],
+}

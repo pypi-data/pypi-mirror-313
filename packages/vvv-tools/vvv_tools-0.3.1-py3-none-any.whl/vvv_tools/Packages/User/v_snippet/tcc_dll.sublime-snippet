@@ -1,0 +1,28 @@
+<snippet>
+    <content>
+        <![CDATA[
+// inject "notepad.exe" ""
+
+#include <windows.h>
+#include <shlwapi.h>
+#pragma comment(lib, "shlwapi")
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
+    TCHAR szCurName[MAX_PATH];
+    switch (ul_reason_for_call) {
+    case DLL_PROCESS_ATTACH:
+        GetModuleFileName(NULL, szCurName, MAX_PATH);
+        char* cmd = GetCommandLineA();
+        PathStripPath(szCurName);
+        MessageBox(NULL, cmd, szCurName, MB_OK);
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
+}
+]]>
+    </content>
+    <tabTrigger>ccc</tabTrigger>
+    <scope>source.c</scope>
+</snippet>

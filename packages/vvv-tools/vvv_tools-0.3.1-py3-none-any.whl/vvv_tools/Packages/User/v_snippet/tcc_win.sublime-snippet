@@ -1,0 +1,119 @@
+<snippet>
+    <content>
+        <![CDATA[
+// >gcc <thisfile> -mwindows -lgdi32
+// >tcc <thisfile>
+
+#include <stdio.h>
+#include <windows.h>
+int xprintf(char *format, ...);
+int x2printf(char* name, char *format, ...);
+char* get_window_text_by_name(char* name);
+void set_window_text_by_name(char* name, char* text);
+int test(){
+    x2printf("1-4:", "vvvvvxxxx");
+    xprintf("%s", get_window_text_by_name("1-4:"));
+}
+int test2(){
+    static int some = 0;
+    x2printf("1-3:", "okok:%d", some++);
+}
+int timer_f(){
+    static int some = 0;
+    x2printf("2-1:", "%d", some++);
+}
+
+#if defined(__x86_64__) || defined(_M_X64) || defined(__ppc64__)
+    #define VVV_TITLE "vvv-64bit"
+#elif defined(__i386__) || defined(_M_IX86)
+    #define VVV_TITLE "vvv-32bit"
+#else
+    #define VVV_TITLE "vvv-Unknown"
+#endif
+#define STYLE_EDIT_TEXT (WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL)
+#define STYLE_EDIT_INPT (WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL)
+#define STYLE_EDIT_BUTN (WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON)
+#define SEND (-100000)
+#define WINNUM 1024
+struct {
+    struct { int islog; int wtype; char* stype; char* text; int L; int T; int W; int H; int (*f)(); } w[WINNUM];
+    struct { int t; int (*f)(); } t;
+} wins = {
+    .t = { 30, timer_f },
+    .w = {
+        {1, STYLE_EDIT_TEXT, "edit",   NULL,        0,    160,  SEND, SEND-160},
+        {0, STYLE_EDIT_BUTN, "button", "tool1", 150*0,      0,  140,   20, test},
+        {0, STYLE_EDIT_BUTN, "button", "tool2", 150*1,      0,  140,   20, test2},
+        {0, STYLE_EDIT_INPT, "edit",   "1-1:",  150*0,  20+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "1-2:",  150*1,  20+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "1-3:",  150*2,  20+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "1-4:",  150*3,  20+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "2-1:",  150*0,  40+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "2-2:",  150*1,  40+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "2-3:",  150*2,  40+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "2-4:",  150*3,  40+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "3-1:",  150*0,  60+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "3-2:",  150*1,  60+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "3-3:",  150*2,  60+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "3-4:",  150*3,  60+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "4-1:",  150*0,  80+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "4-2:",  150*1,  80+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "4-3:",  150*2,  80+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "4-4:",  150*3,  80+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "5-1:",  150*0, 100+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "5-2:",  150*1, 100+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "5-3:",  150*2, 100+20,  100,   20},
+        {0, STYLE_EDIT_INPT, "edit",   "5-4:",  150*3, 100+20,  100,   20},
+    }
+};
+void _AddLogWindow(TCHAR*);
+int xprintf(char *format, ...){ char log[1024*7] = {0}; va_list args; va_start(args, format); vsprintf(log, format, args); va_end(args); _AddLogWindow(log); return 0; }
+TCHAR outBuffer[1024*100];
+HWND outhwnd;
+void _AddLogWindow(TCHAR* addstr){ if (!outhwnd){ return; } GetWindowText(outhwnd, outBuffer, 1024*100); if (strlen(outBuffer) == 0){ sprintf(outBuffer, "%s", addstr); }else{ sprintf(outBuffer, "%s\r\n%s", outBuffer, addstr); } SetWindowText(outhwnd, outBuffer); }
+int get_wins_len(){ for (int i = 0; i < WINNUM; ++i) { if (!wins.w[i].wtype){ return i; } } return -1; }
+int get_idx_by_name(char* name){ int wlen = get_wins_len(); for (int i = 0; i < wlen; ++i) { if (wins.w[i].wtype == STYLE_EDIT_INPT && strcmp(wins.w[i].text, name) == 0){ return i; } } return 3; }
+static HWND hwndChild[WINNUM];
+int init_window(HWND hwnd, HINSTANCE hInst, int idx){ int wtype = wins.w[idx].wtype; char* stype = wins.w[idx].stype; char* text = wins.w[idx].text; switch (wtype){ case STYLE_EDIT_TEXT: case STYLE_EDIT_INPT: text = NULL; case STYLE_EDIT_BUTN: hwndChild[idx] = CreateWindow(TEXT(stype), text, wtype, 0,0,0,0, hwnd, (HMENU)idx, hInst, NULL); break; } if (wins.w[idx].islog){ outhwnd = hwndChild[idx]; } }
+int init_move_window(HWND hwnd, int idx){ RECT rect; GetClientRect(hwnd, &rect); int L = wins.w[idx].L; int T = wins.w[idx].T; int W = wins.w[idx].W; int H = wins.w[idx].H; if (wins.w[idx].wtype == STYLE_EDIT_INPT){ L += 40; } if (W <= SEND){ W = rect.right; } if (H <= SEND){ H = rect.bottom+(H- SEND); } MoveWindow(hwndChild[idx], L, T, W, H, TRUE); }
+struct V_LIST { int length; int o[WINNUM]; };
+int init_paint(HWND hwnd, struct V_LIST v){ PAINTSTRUCT ps; HDC hdc = BeginPaint(hwnd, &ps); HBRUSH hBrush = (HBRUSH)GetStockObject(NULL_BRUSH); HPEN hPen = (HPEN)GetStockObject(BLACK_PEN); SelectObject(hdc, hPen); SelectObject(hdc, hBrush); for (int i = 0; i < v.length; ++i) { int idx = v.o[i]; int L = wins.w[idx].L; int T = wins.w[idx].T; int W = wins.w[idx].W; int H = wins.w[idx].H; Rectangle(hdc, L, T, W+L, H+T); char* text = wins.w[idx].text; SetBkMode(hdc, TRANSPARENT); TextOut(hdc, L+5, T+2, text, lstrlen(text)); } DeleteObject(hBrush); DeleteObject(hPen); EndPaint(hwnd, &ps); }
+#define INPUT_TEXT_SZ 1024
+char* get_window_text(int idx){ static char szInput[INPUT_TEXT_SZ]; GetWindowText(hwndChild[idx], szInput, INPUT_TEXT_SZ); return szInput; }
+char* get_window_text_by_name(char* name){ return get_window_text(get_idx_by_name(name)); }
+void set_window_text(int idx, char* text){ SetWindowText(hwndChild[idx], text); }
+void set_window_text_by_name(char* name, char* text){ set_window_text(get_idx_by_name(name), text); }
+int logger_toggle = 1; // 快捷键 Ctrl+END 控制 x2printf 函数是否输出
+int x2printf(char* name, char *format, ...){ if (!logger_toggle){ return; }char log[1024*7] = {0}; va_list args; va_start(args, format); vsprintf(log, format, args); va_end(args); set_window_text_by_name(name, log); return 0; }
+int _WindowSwitch(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam ){ int wlen = get_wins_len(); switch(message) { case WM_CREATE: { for (int i = 0; i < wlen; ++i) { init_window(hwnd, ((LPCREATESTRUCT) lParam) -> hInstance, i); }if (wins.t.t){ SetTimer(hwnd, 1, wins.t.t, NULL); } return 0; } case WM_SIZE: { for (int i = 0; i < wlen; ++i) { init_move_window(hwnd, i); } return 0; } case WM_TIMER: { wins.t.f(); } case WM_PAINT: { struct V_LIST v = {0}; v.length = 0; for (int i = 0; i < wlen; ++i) { if (wins.w[i].text != NULL && wins.w[i].wtype == STYLE_EDIT_INPT) { v.o[v.length] = i; v.length++; }} init_paint(hwnd, v); return 0; } case WM_COMMAND: { int wpram = LOWORD(wParam);for (int i = 0; i < wlen; ++i) { if (wpram == i && wins.w[i].wtype == STYLE_EDIT_BUTN) {wins.w[i].f();return 0;} } return 0; } case WM_DESTROY: { PostQuitMessage(0); return 0; } } }
+DWORD  WINAPI _NewThread(LPARAM lParam );
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+#define MAIN_TOP 100
+#define MAIN_LEFT 100
+#define MAIN_W 607
+#define MAIN_H 600
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow ){ static TCHAR szAppName[] = TEXT("v"); static HWND hwnd; MSG msg; WNDCLASS wndclass; wndclass.lpfnWndProc = WndProc; wndclass.style = CS_HREDRAW | CS_VREDRAW; wndclass.hInstance = hInstance; wndclass.cbClsExtra = 0; wndclass.cbWndExtra = 0; wndclass.hbrBackground = CreateSolidBrush(RGB(236, 233, 216)); wndclass.hCursor = LoadCursor(NULL, IDC_ARROW); wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION); wndclass.lpszClassName = szAppName; wndclass.lpszMenuName = NULL;  if (!RegisterClass(&wndclass)) { MessageBox(NULL, TEXT("cannot create regist window."), TEXT("error"), MB_OK | MB_ICONERROR); return 0; } hwnd = CreateWindow(szAppName, TEXT(VVV_TITLE), WS_OVERLAPPEDWINDOW, MAIN_LEFT, MAIN_TOP, MAIN_W, MAIN_H, NULL, NULL, hInstance, NULL); CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)_NewThread, hwnd, 0, 0);  ShowWindow(hwnd, iCmdShow); UpdateWindow(hwnd); while (GetMessage(&msg, NULL, 0, 0)){ TranslateMessage(&msg); DispatchMessage(&msg); } return msg.wParam; }
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam ) { _WindowSwitch(hwnd, message, wParam, lParam); return DefWindowProc(hwnd, message, wParam, lParam); }
+// Ctrl + Home ::: show/hide window
+// Ctrl + End ::: open/close update input
+// Ctrl + w ::: close window
+DWORD  WINAPI _NewThread(LPARAM lParam ){
+    // CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)ser, hwnd, 0, 0);
+    // RegisterHotKey
+    MSG  msg = { 0 };
+    RegisterHotKey(NULL, 0x23, MOD_CONTROL, VK_HOME);
+    RegisterHotKey(NULL, 0x24, MOD_CONTROL, VK_END);
+    RegisterHotKey(NULL, 0x25, MOD_CONTROL, 'W');
+    while (GetMessage(&msg, 0, 0, 0)){
+        if (WM_HOTKEY == msg.message){
+            if (VK_HOME == HIWORD(msg.lParam)){ IsWindowVisible((HANDLE)lParam) ? ShowWindow((HANDLE)lParam, SW_HIDE) : ShowWindow((HANDLE)lParam, SW_RESTORE); }
+            if (VK_END == HIWORD(msg.lParam)){ logger_toggle = logger_toggle ? 0 : 1; }
+            if ('W' == HIWORD(msg.lParam)){ PostMessage((HANDLE)lParam, WM_QUIT, 0, 0); }
+        }
+    }
+}
+]]>
+    </content>
+    <tabTrigger>ccc</tabTrigger>
+    <scope>source.c</scope>
+</snippet>

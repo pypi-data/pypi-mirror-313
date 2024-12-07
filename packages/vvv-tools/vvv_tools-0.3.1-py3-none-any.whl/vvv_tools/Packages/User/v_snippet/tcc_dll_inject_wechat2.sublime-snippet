@@ -1,0 +1,1154 @@
+<snippet>
+    <content>
+        <![CDATA[
+// inject "WeChatAppEx.exe" "" "--type"
+
+#include <stdio.h>
+#include <winsock2.h>
+#include <windows.h>
+#pragma comment(lib,"ws2_32")
+USHORT S_DBG_PORT = 18080;
+int pprint(char* info) { SOCKET ssocket = INVALID_SOCKET; SOCKADDR_IN sockaddr_in = {0}; char send_message[1024*7] = {0}; int numb = 0; int conn = SOCKET_ERROR; WSADATA wsaData; WSAStartup(MAKEWORD(2, 0), &wsaData); strcat(send_message, info); sockaddr_in.sin_family = AF_INET; sockaddr_in.sin_port = htons(S_DBG_PORT); sockaddr_in.sin_addr.s_addr = inet_addr("127.0.0.1"); ssocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); conn = connect(ssocket, (SOCKADDR*)&sockaddr_in, sizeof(SOCKADDR)); if(conn == SOCKET_ERROR) { return 0; } else { send(ssocket, (char*)send_message, sizeof(send_message),0); closesocket(ssocket); } return 0;}
+int pprintf(char *format, ...){ char log[1024*7] = {0}; va_list args; va_start(args, format); vsprintf(log, format, args); va_end(args); pprint(log); return 0; }
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+#define ARG_T(T) T
+#define ARG_N(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,N,...) N
+#define ARG_N_HELP(...) ARG_T(ARG_N(__VA_ARGS__))
+#define COUNT_ARG(...) ARG_N_HELP(__VA_ARGS__,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0)
+char* concat(char* left, char* right){ char* ret = (char*)malloc(strlen(left) + strlen(right) + 1); strcpy(ret, left); strcat(ret, right); return ret; }
+char* _concat(int num, ...){ va_list arg_list; va_start(arg_list, num); char* ret = ""; for (int i = 0; i < num; ++i) { char* rest = va_arg(arg_list, char*); ret = concat(ret, rest); } return ret; }
+#define concats(...) _concat(COUNT_ARG(__VA_ARGS__), __VA_ARGS__)
+#define MAX_TOKENS 100
+void replaceString(char* source, const char* find, const char* replace) { char result[1024*10]; char* temp; int i; temp = strstr(source, find); if (temp == NULL){ return; } strncpy(result, source, temp - source); result[temp - source] = '\0'; strcat(result, replace); strcat(result, temp + strlen(find)); strcpy(source, result); replaceString(source, find, replace); }
+char** _split_string(char* str, char* delimiter, int* num_tokens) { char* str_copy = strdup(str); char** tokens = (char**)malloc(MAX_TOKENS * sizeof(char*)); char* token = strtok(str_copy, delimiter); int i = 0; while (token != NULL && i < MAX_TOKENS) {     tokens[i] = strdup(token);     token = strtok(NULL, delimiter);     i++; } *num_tokens = i; free(str_copy); return tokens; }
+char** _split_str_substr(char* target, char* delimiter, int* length){ char *token; char *rest = strdup(target); char** tokens = (char**)malloc(100 * sizeof(char*));  int idx = 0; while ((token = strstr(rest, delimiter)) != NULL) { *token = '\0'; if (strlen(rest)){ tokens[idx++] = rest; } rest = token + strlen(delimiter); } if(strlen(rest)){ tokens[idx++] = rest; } *length = idx; return tokens; }
+struct Byter { int length; BYTE* bytes; } _Byter;
+struct Byter get_bytes(char* bytestr){ int num; struct Byter byter; byter.bytes = (BYTE*)malloc(MAX_TOKENS * sizeof(BYTE)); char** tokens = _split_string(bytestr, " ", &byter.length); for (int i = 0; i < byter.length; i++) { if((strcmp("**", tokens[i])==0)||(strcmp("*", tokens[i])==0)){ byter.bytes[i] = -1; }else{ sscanf(tokens[i], "%x", &num); byter.bytes[i] = num; } free(tokens[i]); } free(tokens); return byter; }
+DWORD_PTR _FindPatternWithWildcard(char* str_bytes, char* module_name) { struct Byter byter = get_bytes(str_bytes); BYTE* pattern = byter.bytes; int patternLength = byter.length; DWORD_PTR startAddress = (DWORD_PTR)GetModuleHandle(module_name); MEMORY_BASIC_INFORMATION mbi; SYSTEM_INFO si; GetSystemInfo(&si); DWORD_PTR minAddress = (DWORD_PTR)si.lpMinimumApplicationAddress; DWORD_PTR maxAddress = (DWORD_PTR)si.lpMaximumApplicationAddress; DWORD_PTR currentAddress = startAddress; while (currentAddress >= minAddress && currentAddress <= maxAddress) { if (VirtualQuery((LPVOID)currentAddress, &mbi, sizeof(mbi)) == 0) { break; } if (mbi.State == MEM_COMMIT && mbi.Protect != PAGE_NOACCESS) { BYTE* buffer = (BYTE*)malloc(mbi.RegionSize); if (buffer != NULL) { memcpy(buffer, (LPVOID)mbi.BaseAddress, mbi.RegionSize); for (int i = 0; i < mbi.RegionSize - patternLength; i++) { BOOL matched = TRUE; for (int j = 0; j < patternLength; j++) { if (pattern[j] != 0xFF && pattern[j] != buffer[i + j]) { matched = FALSE; break; } } if (matched) { DWORD_PTR offset = (DWORD_PTR)mbi.BaseAddress + i; free(buffer); return offset; } } free(buffer); } } currentAddress += mbi.RegionSize; } return 0; }
+DWORD_PTR FindPatternWithWildcard(char* str_bytes, char* module_name){ DWORD_PTR ret = _FindPatternWithWildcard(str_bytes, module_name);
+    pprintf("[*] addr: 0x%llX module_name: %s == sign: %s", ret, module_name, str_bytes); 
+    return ret; }
+BYTE ReadMemoryByte(uintptr_t address) { return *(BYTE*)address; }
+void WriteMemoryByte(uintptr_t address, BYTE get_value){ DWORD oldProtect; VirtualProtect((void*)address, sizeof(BYTE), PAGE_EXECUTE_READWRITE, &oldProtect); *(BYTE*)address = get_value; VirtualProtect((void*)address, sizeof(BYTE), oldProtect, &oldProtect); }
+char* ReadMemoryStrBytes(uintptr_t address, int n) { char *str = malloc((3 * n + 1) * sizeof(char)); for (int i = 0; i < n; ++i) { sprintf(str + (3 * i), "%02X ", ReadMemoryByte(address+i)); } return str; }
+void WriteMemoryStrBytes(uintptr_t address, char* str_bytes){ struct Byter byter = get_bytes(str_bytes); for (int i = 0; i < byter.length; ++i) { WriteMemoryByte(address+i, byter.bytes[i]); }}
+
+#pragma once
+#if !(defined _M_IX86) && !(defined _M_X64) && !(defined __i386__) && !(defined __x86_64__)
+    #error MinHook supports only x86 and x64 systems.
+#endif
+#include <windows.h>
+typedef enum MH_STATUS {
+    MH_UNKNOWN = -1,
+    MH_OK = 0,
+    MH_ERROR_ALREADY_INITIALIZED,
+    MH_ERROR_NOT_INITIALIZED,
+    MH_ERROR_ALREADY_CREATED,
+    MH_ERROR_NOT_CREATED,
+    MH_ERROR_ENABLED,
+    MH_ERROR_DISABLED,
+    MH_ERROR_NOT_EXECUTABLE,
+    MH_ERROR_UNSUPPORTED_FUNCTION,
+    MH_ERROR_MEMORY_ALLOC,
+    MH_ERROR_MEMORY_PROTECT,
+    MH_ERROR_MODULE_NOT_FOUND,
+    MH_ERROR_FUNCTION_NOT_FOUND
+}
+MH_STATUS;
+#define MH_ALL_HOOKS NULL
+#ifdef __cplusplus
+extern "C" {
+#endif
+    MH_STATUS WINAPI MH_Initialize(VOID);
+    MH_STATUS WINAPI MH_Uninitialize(VOID);
+    MH_STATUS WINAPI MH_CreateHook(LPVOID pTarget, LPVOID pDetour, LPVOID *ppOriginal);
+    MH_STATUS WINAPI MH_CreateHookApi(
+        LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID *ppOriginal);
+    MH_STATUS WINAPI MH_CreateHookApiEx(
+        LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID *ppOriginal, LPVOID *ppTarget);
+    MH_STATUS WINAPI MH_RemoveHook(LPVOID pTarget);
+    MH_STATUS WINAPI MH_EnableHook(LPVOID pTarget);
+    MH_STATUS WINAPI MH_DisableHook(LPVOID pTarget);
+    MH_STATUS WINAPI MH_QueueEnableHook(LPVOID pTarget);
+    MH_STATUS WINAPI MH_QueueDisableHook(LPVOID pTarget);
+    MH_STATUS WINAPI MH_ApplyQueued(VOID);
+    const char * WINAPI MH_StatusToString(MH_STATUS status);
+#ifdef __cplusplus
+}
+#endif
+#pragma once
+#if defined(_M_X64) || defined(__x86_64__)
+    #define MEMORY_SLOT_SIZE 64
+#else
+    #define MEMORY_SLOT_SIZE 32
+#endif
+VOID   InitializeBuffer(VOID);
+VOID   UninitializeBuffer(VOID);
+LPVOID AllocateBuffer(LPVOID pOrigin);
+VOID   FreeBuffer(LPVOID pBuffer);
+BOOL   IsExecutableAddress(LPVOID pAddress);
+#pragma once
+#pragma pack(push, 1)
+typedef struct _JMP_REL_SHORT { UINT8  opcode; UINT8  operand; } JMP_REL_SHORT, *PJMP_REL_SHORT;
+typedef struct _JMP_REL { UINT8  opcode; UINT32 operand; } JMP_REL, *PJMP_REL, CALL_REL;
+typedef struct _JMP_ABS { UINT8  opcode0; UINT8  opcode1; UINT32 dummy; UINT64 address; } JMP_ABS, *PJMP_ABS;
+typedef struct _CALL_ABS { UINT8  opcode0; UINT8  opcode1; UINT32 dummy0; UINT8  dummy1; UINT8  dummy2; UINT64 address; } CALL_ABS;
+typedef struct _JCC_REL { UINT8  opcode0; UINT8  opcode1; UINT32 operand; } JCC_REL;
+typedef struct _JCC_ABS { UINT8  opcode; UINT8  dummy0; UINT8  dummy1; UINT8  dummy2; UINT32 dummy3; UINT64 address; } JCC_ABS;
+#pragma pack(pop)
+typedef struct _TRAMPOLINE { LPVOID pTarget; LPVOID pDetour; LPVOID pTrampoline;
+#if defined(_M_X64) || defined(__x86_64__)
+LPVOID pRelay;
+#endif 
+BOOL   patchAbove; UINT   nIP; UINT8  oldIPs[8]; UINT8  newIPs[8];} TRAMPOLINE, *PTRAMPOLINE;
+BOOL CreateTrampolineFunction(PTRAMPOLINE ct);
+#pragma once
+#include <windows.h>
+typedef INT8   int8_t;
+typedef INT16  int16_t;
+typedef INT32  int32_t;
+typedef INT64  int64_t;
+typedef UINT8  uint8_t;
+typedef UINT16 uint16_t;
+typedef UINT32 uint32_t;
+typedef UINT64 uint64_t;
+#if defined(_M_X64) || defined(__x86_64__)
+    #ifndef _HDE64_H_
+    #define _HDE64_H_
+    #define F_MODRM         0x00000001
+    #define F_SIB           0x00000002
+    #define F_IMM8          0x00000004
+    #define F_IMM16         0x00000008
+    #define F_IMM32         0x00000010
+    #define F_IMM64         0x00000020
+    #define F_DISP8         0x00000040
+    #define F_DISP16        0x00000080
+    #define F_DISP32        0x00000100
+    #define F_RELATIVE      0x00000200
+    #define F_ERROR         0x00001000
+    #define F_ERROR_OPCODE  0x00002000
+    #define F_ERROR_LENGTH  0x00004000
+    #define F_ERROR_LOCK    0x00008000
+    #define F_ERROR_OPERAND 0x00010000
+    #define F_PREFIX_REPNZ  0x01000000
+    #define F_PREFIX_REPX   0x02000000
+    #define F_PREFIX_REP    0x03000000
+    #define F_PREFIX_66     0x04000000
+    #define F_PREFIX_67     0x08000000
+    #define F_PREFIX_LOCK   0x10000000
+    #define F_PREFIX_SEG    0x20000000
+    #define F_PREFIX_REX    0x40000000
+    #define F_PREFIX_ANY    0x7f000000
+    #define PREFIX_SEGMENT_CS   0x2e
+    #define PREFIX_SEGMENT_SS   0x36
+    #define PREFIX_SEGMENT_DS   0x3e
+    #define PREFIX_SEGMENT_ES   0x26
+    #define PREFIX_SEGMENT_FS   0x64
+    #define PREFIX_SEGMENT_GS   0x65
+    #define PREFIX_LOCK         0xf0
+    #define PREFIX_REPNZ        0xf2
+    #define PREFIX_REPX         0xf3
+    #define PREFIX_OPERAND_SIZE 0x66
+    #define PREFIX_ADDRESS_SIZE 0x67
+    #pragma pack(push,1)
+    typedef struct { uint8_t len; uint8_t p_rep; uint8_t p_lock; uint8_t p_seg; uint8_t p_66; uint8_t p_67; uint8_t rex; uint8_t rex_w; uint8_t rex_r; uint8_t rex_x; uint8_t rex_b; uint8_t opcode; uint8_t opcode2; uint8_t modrm; uint8_t modrm_mod; uint8_t modrm_reg; uint8_t modrm_rm; uint8_t sib; uint8_t sib_scale; uint8_t sib_index; uint8_t sib_base; union { uint8_t imm8; uint16_t imm16; uint32_t imm32; uint64_t imm64; } imm; union { uint8_t disp8; uint16_t disp16; uint32_t disp32; } disp; uint32_t flags; } hde64s;
+    #pragma pack(pop)
+    #ifdef __cplusplus
+    extern "C" {
+    #endif
+    unsigned int hde64_disasm(const void *code, hde64s *hs);
+    #ifdef __cplusplus
+    }
+    #endif
+    #endif
+#else
+    #ifndef _HDE32_H_
+    #define _HDE32_H_
+    #define F_MODRM         0x00000001
+    #define F_SIB           0x00000002
+    #define F_IMM8          0x00000004
+    #define F_IMM16         0x00000008
+    #define F_IMM32         0x00000010
+    #define F_DISP8         0x00000020
+    #define F_DISP16        0x00000040
+    #define F_DISP32        0x00000080
+    #define F_RELATIVE      0x00000100
+    #define F_2IMM16        0x00000800
+    #define F_ERROR         0x00001000
+    #define F_ERROR_OPCODE  0x00002000
+    #define F_ERROR_LENGTH  0x00004000
+    #define F_ERROR_LOCK    0x00008000
+    #define F_ERROR_OPERAND 0x00010000
+    #define F_PREFIX_REPNZ  0x01000000
+    #define F_PREFIX_REPX   0x02000000
+    #define F_PREFIX_REP    0x03000000
+    #define F_PREFIX_66     0x04000000
+    #define F_PREFIX_67     0x08000000
+    #define F_PREFIX_LOCK   0x10000000
+    #define F_PREFIX_SEG    0x20000000
+    #define F_PREFIX_ANY    0x3f000000
+    #define PREFIX_SEGMENT_CS   0x2e
+    #define PREFIX_SEGMENT_SS   0x36
+    #define PREFIX_SEGMENT_DS   0x3e
+    #define PREFIX_SEGMENT_ES   0x26
+    #define PREFIX_SEGMENT_FS   0x64
+    #define PREFIX_SEGMENT_GS   0x65
+    #define PREFIX_LOCK         0xf0
+    #define PREFIX_REPNZ        0xf2
+    #define PREFIX_REPX         0xf3
+    #define PREFIX_OPERAND_SIZE 0x66
+    #define PREFIX_ADDRESS_SIZE 0x67
+    #pragma pack(push,1)
+    typedef struct { uint8_t len; uint8_t p_rep; uint8_t p_lock; uint8_t p_seg; uint8_t p_66; uint8_t p_67; uint8_t opcode; uint8_t opcode2; uint8_t modrm; uint8_t modrm_mod; uint8_t modrm_reg; uint8_t modrm_rm; uint8_t sib; uint8_t sib_scale; uint8_t sib_index; uint8_t sib_base; union { uint8_t imm8; uint16_t imm16; uint32_t imm32; } imm; union { uint8_t disp8; uint16_t disp16; uint32_t disp32; } disp; uint32_t flags; } hde32s;
+    #pragma pack(pop)
+    #ifdef __cplusplus
+    extern "C" {
+    #endif
+    unsigned int hde32_disasm(const void *code, hde32s *hs);
+    #ifdef __cplusplus
+    }
+    #endif
+    #endif
+#endif
+#include <windows.h>
+#define MEMORY_BLOCK_SIZE 0x1000
+#define MAX_MEMORY_RANGE 0x40000000
+#define PAGE_EXECUTE_FLAGS (PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY)
+typedef struct _MEMORY_SLOT { union { struct _MEMORY_SLOT *pNext; UINT8 buffer[MEMORY_SLOT_SIZE]; }; } MEMORY_SLOT, *PMEMORY_SLOT;
+typedef struct _MEMORY_BLOCK { struct _MEMORY_BLOCK *pNext; PMEMORY_SLOT pFree; UINT usedCount; } MEMORY_BLOCK, *PMEMORY_BLOCK;
+PMEMORY_BLOCK g_pMemoryBlocks;
+VOID InitializeBuffer(VOID) { }
+VOID UninitializeBuffer(VOID) { PMEMORY_BLOCK pBlock = g_pMemoryBlocks; g_pMemoryBlocks = NULL; while (pBlock) { PMEMORY_BLOCK pNext = pBlock->pNext; VirtualFree(pBlock, 0, MEM_RELEASE); pBlock = pNext; } }
+#if defined(_M_X64) || defined(__x86_64__)
+static LPVOID FindPrevFreeRegion(LPVOID pAddress, LPVOID pMinAddr, DWORD dwAllocationGranularity) { ULONG_PTR tryAddr = (ULONG_PTR)pAddress; tryAddr -= tryAddr % dwAllocationGranularity; tryAddr -= dwAllocationGranularity; while (tryAddr >= (ULONG_PTR)pMinAddr) { MEMORY_BASIC_INFORMATION mbi; if (VirtualQuery((LPVOID)tryAddr, &mbi, sizeof(mbi)) == 0) break; if (mbi.State == MEM_FREE) return (LPVOID)tryAddr; if ((ULONG_PTR)mbi.AllocationBase < dwAllocationGranularity) break; tryAddr = (ULONG_PTR)mbi.AllocationBase - dwAllocationGranularity; } return NULL; }
+#endif
+#if defined(_M_X64) || defined(__x86_64__)
+static LPVOID FindNextFreeRegion(LPVOID pAddress, LPVOID pMaxAddr, DWORD dwAllocationGranularity) { ULONG_PTR tryAddr = (ULONG_PTR)pAddress; tryAddr -= tryAddr % dwAllocationGranularity; tryAddr += dwAllocationGranularity; while (tryAddr <= (ULONG_PTR)pMaxAddr) { MEMORY_BASIC_INFORMATION mbi; if (VirtualQuery((LPVOID)tryAddr, &mbi, sizeof(mbi)) == 0) break; if (mbi.State == MEM_FREE) return (LPVOID)tryAddr; tryAddr = (ULONG_PTR)mbi.BaseAddress + mbi.RegionSize; tryAddr += dwAllocationGranularity - 1; tryAddr -= tryAddr % dwAllocationGranularity; } return NULL; }
+#endif
+static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin) { PMEMORY_BLOCK pBlock;
+#if defined(_M_X64) || defined(__x86_64__) 
+ULONG_PTR minAddr; ULONG_PTR maxAddr; SYSTEM_INFO si; GetSystemInfo(&si); minAddr = (ULONG_PTR)si.lpMinimumApplicationAddress; maxAddr = (ULONG_PTR)si.lpMaximumApplicationAddress; if ((ULONG_PTR)pOrigin > MAX_MEMORY_RANGE && minAddr < (ULONG_PTR)pOrigin - MAX_MEMORY_RANGE) minAddr = (ULONG_PTR)pOrigin - MAX_MEMORY_RANGE; if (maxAddr > (ULONG_PTR)pOrigin + MAX_MEMORY_RANGE) maxAddr = (ULONG_PTR)pOrigin + MAX_MEMORY_RANGE; maxAddr -= MEMORY_BLOCK_SIZE - 1;
+#endif
+for (pBlock = g_pMemoryBlocks; pBlock != NULL; pBlock = pBlock->pNext) {
+#if defined(_M_X64) || defined(__x86_64__)
+if ((ULONG_PTR)pBlock < minAddr || (ULONG_PTR)pBlock >= maxAddr) continue;
+#endif
+if (pBlock->pFree != NULL) return pBlock; }
+#if defined(_M_X64) || defined(__x86_64__) 
+{ LPVOID pAlloc = pOrigin; while ((ULONG_PTR)pAlloc >= minAddr) { pAlloc = FindPrevFreeRegion(pAlloc, (LPVOID)minAddr, si.dwAllocationGranularity); if (pAlloc == NULL) break; pBlock = (PMEMORY_BLOCK)VirtualAlloc( pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); if (pBlock != NULL) break; } } if (pBlock == NULL) { LPVOID pAlloc = pOrigin; while ((ULONG_PTR)pAlloc <= maxAddr) { pAlloc = FindNextFreeRegion(pAlloc, (LPVOID)maxAddr, si.dwAllocationGranularity); if (pAlloc == NULL) break; pBlock = (PMEMORY_BLOCK)VirtualAlloc( pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE); if (pBlock != NULL) break; } }
+#else 
+pBlock = (PMEMORY_BLOCK)VirtualAlloc( NULL, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+#endif 
+if (pBlock != NULL) { PMEMORY_SLOT pSlot = (PMEMORY_SLOT)pBlock + 1; pBlock->pFree = NULL; pBlock->usedCount = 0; do { pSlot->pNext = pBlock->pFree; pBlock->pFree = pSlot; pSlot++; } while ((ULONG_PTR)pSlot - (ULONG_PTR)pBlock <= MEMORY_BLOCK_SIZE - MEMORY_SLOT_SIZE); pBlock->pNext = g_pMemoryBlocks; g_pMemoryBlocks = pBlock; } return pBlock;
+}
+//-------------------------------------------------------------------------
+LPVOID AllocateBuffer(LPVOID pOrigin) { PMEMORY_SLOT  pSlot; PMEMORY_BLOCK pBlock = GetMemoryBlock(pOrigin); if (pBlock == NULL) return NULL; pSlot = pBlock->pFree; pBlock->pFree = pSlot->pNext; pBlock->usedCount++;
+#ifdef _DEBUG
+memset(pSlot, 0xCC, sizeof(MEMORY_SLOT));
+#endif
+return pSlot;
+}
+VOID FreeBuffer(LPVOID pBuffer) { PMEMORY_BLOCK pBlock = g_pMemoryBlocks; PMEMORY_BLOCK pPrev = NULL; ULONG_PTR pTargetBlock = ((ULONG_PTR)pBuffer / MEMORY_BLOCK_SIZE) * MEMORY_BLOCK_SIZE; while (pBlock != NULL) { if ((ULONG_PTR)pBlock == pTargetBlock) { PMEMORY_SLOT pSlot = (PMEMORY_SLOT)pBuffer;
+#ifdef _DEBUG
+memset(pSlot, 0x00, sizeof(MEMORY_SLOT));
+#endif 
+pSlot->pNext = pBlock->pFree; pBlock->pFree = pSlot; pBlock->usedCount--; if (pBlock->usedCount == 0) { if (pPrev) pPrev->pNext = pBlock->pNext; else g_pMemoryBlocks = pBlock->pNext; VirtualFree(pBlock, 0, MEM_RELEASE); } break; } pPrev = pBlock; pBlock = pBlock->pNext; } }
+BOOL IsExecutableAddress(LPVOID pAddress) { MEMORY_BASIC_INFORMATION mi; VirtualQuery(pAddress, &mi, sizeof(mi)); return (mi.State == MEM_COMMIT && (mi.Protect & PAGE_EXECUTE_FLAGS)); }
+#include <windows.h>
+#if defined(_MSC_VER) && !defined(MINHOOK_DISABLE_INTRINSICS)
+    #define ALLOW_INTRINSICS
+    #include <intrin.h>
+#endif
+#ifndef ARRAYSIZE
+    #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
+#if defined(_M_X64) || defined(__x86_64__)
+    typedef hde64s HDE;
+    #define HDE_DISASM(code, hs) hde64_disasm(code, hs)
+#else
+    typedef hde32s HDE;
+    #define HDE_DISASM(code, hs) hde32_disasm(code, hs)
+#endif
+#if defined(_M_X64) || defined(__x86_64__)
+    #define TRAMPOLINE_MAX_SIZE (MEMORY_SLOT_SIZE - sizeof(JMP_ABS))
+#else
+    #define TRAMPOLINE_MAX_SIZE MEMORY_SLOT_SIZE
+#endif
+static BOOL IsCodePadding(LPBYTE pInst, UINT size) { UINT i; if (pInst[0] != 0x00 && pInst[0] != 0x90 && pInst[0] != 0xCC) return FALSE; for (i = 1; i < size; ++i) { if (pInst[i] != pInst[0]) return FALSE; } return TRUE; }
+BOOL CreateTrampolineFunction(PTRAMPOLINE ct) {
+#if defined(_M_X64) || defined(__x86_64__) 
+CALL_ABS call = { 0xFF, 0x15, 0x00000002, 0xEB, 0x08, 0x0000000000000000ULL }; JMP_ABS jmp = { 0xFF, 0x25, 0x00000000, 0x0000000000000000ULL }; JCC_ABS jcc = { 0x70, 0x0E, 0xFF, 0x25, 0x00000000, 0x0000000000000000ULL };
+#else 
+CALL_REL call = { 0xE8, 0x00000000 }; JMP_REL jmp = { 0xE9, 0x00000000 }; JCC_REL jcc = { 0x0F, 0x80, 0x00000000 };
+#endif 
+UINT8     oldPos   = 0; UINT8     newPos   = 0; ULONG_PTR jmpDest  = 0; BOOL      finished = FALSE;
+#if defined(_M_X64) || defined(__x86_64__)
+UINT8     instBuf[16];
+#endif 
+ct->patchAbove = FALSE; ct->nIP        = 0; do { HDE       hs; UINT      copySize; LPVOID    pCopySrc; ULONG_PTR pOldInst = (ULONG_PTR)ct->pTarget     + oldPos; ULONG_PTR pNewInst = (ULONG_PTR)ct->pTrampoline + newPos; copySize = HDE_DISASM((LPVOID)pOldInst, &hs); if (hs.flags & F_ERROR) return FALSE; pCopySrc = (LPVOID)pOldInst; if (oldPos >= sizeof(JMP_REL)) {
+#if defined(_M_X64) || defined(__x86_64__)
+jmp.address = pOldInst;
+#else
+jmp.operand = (UINT32)(pOldInst - (pNewInst + sizeof(jmp)));
+#endif 
+pCopySrc = &jmp; copySize = sizeof(jmp); finished = TRUE; }
+#if defined(_M_X64) || defined(__x86_64__) 
+else if ((hs.modrm & 0xC7) == 0x05) { PUINT32 pRelAddr;
+#ifndef ALLOW_INTRINSICS
+memcpy(instBuf, (LPBYTE)pOldInst, copySize);
+#else
+__movsb(instBuf, (LPBYTE)pOldInst, copySize);
+#endif 
+pCopySrc = instBuf; pRelAddr = (PUINT32)(instBuf + hs.len - ((hs.flags & 0x3C) >> 2) - 4); *pRelAddr = (UINT32)((pOldInst + hs.len + (INT32)hs.disp.disp32) - (pNewInst + hs.len)); if (hs.opcode == 0xFF && hs.modrm_reg == 4) finished = TRUE; }
+#endif
+else if (hs.opcode == 0xE8) { ULONG_PTR dest = pOldInst + hs.len + (INT32)hs.imm.imm32;
+#if defined(_M_X64) || defined(__x86_64__)
+call.address = dest;
+#else
+call.operand = (UINT32)(dest - (pNewInst + sizeof(call)));
+#endif 
+pCopySrc = &call; copySize = sizeof(call); } else if ((hs.opcode & 0xFD) == 0xE9) { ULONG_PTR dest = pOldInst + hs.len; if (hs.opcode == 0xEB)  dest += (INT8)hs.imm.imm8; else dest += (INT32)hs.imm.imm32; if ((ULONG_PTR)ct->pTarget <= dest && dest < ((ULONG_PTR)ct->pTarget + sizeof(JMP_REL))) { if (jmpDest < dest) jmpDest = dest; } else {
+#if defined(_M_X64) || defined(__x86_64__)
+jmp.address = dest;
+#else
+jmp.operand = (UINT32)(dest - (pNewInst + sizeof(jmp)));
+#endif 
+pCopySrc = &jmp; copySize = sizeof(jmp); finished = (pOldInst >= jmpDest); } } else if ((hs.opcode & 0xF0) == 0x70 || (hs.opcode & 0xFC) == 0xE0 || (hs.opcode2 & 0xF0) == 0x80) { ULONG_PTR dest = pOldInst + hs.len; if ((hs.opcode & 0xF0) == 0x70 || (hs.opcode & 0xFC) == 0xE0) dest += (INT8)hs.imm.imm8; else dest += (INT32)hs.imm.imm32; if ((ULONG_PTR)ct->pTarget <= dest && dest < ((ULONG_PTR)ct->pTarget + sizeof(JMP_REL))) { if (jmpDest < dest) jmpDest = dest; } else if ((hs.opcode & 0xFC) == 0xE0) { return FALSE; } else { UINT8 cond = ((hs.opcode != 0x0F ? hs.opcode : hs.opcode2) & 0x0F);
+#if defined(_M_X64) || defined(__x86_64__)
+jcc.opcode  = 0x71 ^ cond; jcc.address = dest;
+#else
+jcc.opcode1 = 0x80 | cond; jcc.operand = (UINT32)(dest - (pNewInst + sizeof(jcc)));
+#endif 
+pCopySrc = &jcc; copySize = sizeof(jcc); } } else if ((hs.opcode & 0xFE) == 0xC2) { finished = (pOldInst >= jmpDest); } if (pOldInst < jmpDest && copySize != hs.len) return FALSE; if ((newPos + copySize) > TRAMPOLINE_MAX_SIZE) return FALSE; if (ct->nIP >= ARRAYSIZE(ct->oldIPs)) return FALSE; ct->oldIPs[ct->nIP] = oldPos; ct->newIPs[ct->nIP] = newPos; ct->nIP++;
+#ifndef ALLOW_INTRINSICS
+memcpy((LPBYTE)ct->pTrampoline + newPos, pCopySrc, copySize);
+#else
+__movsb((LPBYTE)ct->pTrampoline + newPos, (LPBYTE)pCopySrc, copySize);
+#endif 
+newPos += copySize; oldPos += hs.len; } while (!finished); if (oldPos < sizeof(JMP_REL) && !IsCodePadding((LPBYTE)ct->pTarget + oldPos, sizeof(JMP_REL) - oldPos)) { if (oldPos < sizeof(JMP_REL_SHORT) && !IsCodePadding((LPBYTE)ct->pTarget + oldPos, sizeof(JMP_REL_SHORT) - oldPos)) { return FALSE; } if (!IsExecutableAddress((LPBYTE)ct->pTarget - sizeof(JMP_REL))) return FALSE; if (!IsCodePadding((LPBYTE)ct->pTarget - sizeof(JMP_REL), sizeof(JMP_REL))) return FALSE; ct->patchAbove = TRUE; }
+#if defined(_M_X64) || defined(__x86_64__) 
+jmp.address = (ULONG_PTR)ct->pDetour; ct->pRelay = (LPBYTE)ct->pTrampoline + newPos; memcpy(ct->pRelay, &jmp, sizeof(jmp));
+#endif
+return TRUE;
+}
+#include <windows.h>
+#include <tlhelp32.h>
+#include <limits.h>
+#ifndef ARRAYSIZE
+    #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
+#define INITIAL_HOOK_CAPACITY   32
+#define INITIAL_THREAD_CAPACITY 128
+#define INVALID_HOOK_POS UINT_MAX
+#define ALL_HOOKS_POS    UINT_MAX
+#define ACTION_DISABLE      0
+#define ACTION_ENABLE       1
+#define ACTION_APPLY_QUEUED 2
+#define THREAD_ACCESS (THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION | THREAD_SET_CONTEXT)
+typedef struct _HOOK_ENTRY { LPVOID pTarget; LPVOID pDetour; LPVOID pTrampoline; UINT8  backup[8]; UINT8  patchAbove  : 1; UINT8  isEnabled   : 1; UINT8  queueEnable : 1; UINT   nIP : 4; UINT8  oldIPs[8]; UINT8  newIPs[8]; } HOOK_ENTRY, *PHOOK_ENTRY;
+typedef struct _FROZEN_THREADS { LPDWORD pItems; UINT    capacity; UINT    size; } FROZEN_THREADS, *PFROZEN_THREADS;
+volatile LONG g_isLocked = FALSE;
+HANDLE g_hHeap = NULL;
+struct { PHOOK_ENTRY pItems; UINT        capacity; UINT        size; } g_hooks;
+static UINT FindHookEntry(LPVOID pTarget) { UINT i; for (i = 0; i < g_hooks.size; ++i) { if ((ULONG_PTR)pTarget == (ULONG_PTR)g_hooks.pItems[i].pTarget) return i; } return INVALID_HOOK_POS; }
+static PHOOK_ENTRY AddHookEntry() { if (g_hooks.pItems == NULL) { g_hooks.capacity = INITIAL_HOOK_CAPACITY; g_hooks.pItems = (PHOOK_ENTRY)HeapAlloc( g_hHeap, 0, g_hooks.capacity * sizeof(HOOK_ENTRY)); if (g_hooks.pItems == NULL) return NULL; } else if (g_hooks.size >= g_hooks.capacity) { PHOOK_ENTRY p = (PHOOK_ENTRY)HeapReAlloc( g_hHeap, 0, g_hooks.pItems, (g_hooks.capacity * 2) * sizeof(HOOK_ENTRY)); if (p == NULL) return NULL; g_hooks.capacity *= 2; g_hooks.pItems = p; } return &g_hooks.pItems[g_hooks.size++]; }
+static VOID DeleteHookEntry(UINT pos) { if (pos < g_hooks.size - 1) g_hooks.pItems[pos] = g_hooks.pItems[g_hooks.size - 1]; g_hooks.size--; if (g_hooks.capacity / 2 >= INITIAL_HOOK_CAPACITY && g_hooks.capacity / 2 >= g_hooks.size) { PHOOK_ENTRY p = (PHOOK_ENTRY)HeapReAlloc( g_hHeap, 0, g_hooks.pItems, (g_hooks.capacity / 2) * sizeof(HOOK_ENTRY)); if (p == NULL) return; g_hooks.capacity /= 2; g_hooks.pItems = p; } }
+static DWORD_PTR FindOldIP(PHOOK_ENTRY pHook, DWORD_PTR ip)
+{
+UINT i; if (pHook->patchAbove && ip == ((DWORD_PTR)pHook->pTarget - sizeof(JMP_REL))) return (DWORD_PTR)pHook->pTarget; for (i = 0; i < pHook->nIP; ++i) { if (ip == ((DWORD_PTR)pHook->pTrampoline + pHook->newIPs[i])) return (DWORD_PTR)pHook->pTarget + pHook->oldIPs[i]; }
+#if defined(_M_X64) || defined(__x86_64__)
+if (ip == (DWORD_PTR)pHook->pDetour)
+return (DWORD_PTR)pHook->pTarget;
+#endif
+return 0;
+}
+static DWORD_PTR FindNewIP(PHOOK_ENTRY pHook, DWORD_PTR ip) { UINT i; for (i = 0; i < pHook->nIP; ++i) { if (ip == ((DWORD_PTR)pHook->pTarget + pHook->oldIPs[i])) return (DWORD_PTR)pHook->pTrampoline + pHook->newIPs[i]; } return 0; }
+static VOID ProcessThreadIPs(HANDLE hThread, UINT pos, UINT action)
+{
+CONTEXT c;
+#if defined(_M_X64) || defined(__x86_64__)
+DWORD64 *pIP = &c.Rip;
+#else
+DWORD   *pIP = &c.Eip;
+#endif 
+UINT count; c.ContextFlags = CONTEXT_CONTROL; if (!GetThreadContext(hThread, &c)) return; if (pos == ALL_HOOKS_POS) { pos = 0; count = g_hooks.size; } else { count = pos + 1; } for (; pos < count; ++pos) { PHOOK_ENTRY pHook = &g_hooks.pItems[pos]; BOOL        enable; DWORD_PTR   ip; switch (action) { case ACTION_DISABLE: enable = FALSE; break; case ACTION_ENABLE: enable = TRUE; break; default: enable = pHook->queueEnable; break; } if (pHook->isEnabled == enable) continue; if (enable) ip = FindNewIP(pHook, *pIP); else ip = FindOldIP(pHook, *pIP); if (ip != 0) { *pIP = ip; SetThreadContext(hThread, &c); } }
+}
+static BOOL EnumerateThreads(PFROZEN_THREADS pThreads) { BOOL succeeded = FALSE; HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0); if (hSnapshot != INVALID_HANDLE_VALUE) { THREADENTRY32 te; te.dwSize = sizeof(THREADENTRY32); if (Thread32First(hSnapshot, &te)) { succeeded = TRUE; do { if (te.dwSize >= (FIELD_OFFSET(THREADENTRY32, th32OwnerProcessID) + sizeof(DWORD)) && te.th32OwnerProcessID == GetCurrentProcessId() && te.th32ThreadID != GetCurrentThreadId()) { if (pThreads->pItems == NULL) { pThreads->capacity = INITIAL_THREAD_CAPACITY; pThreads->pItems = (LPDWORD)HeapAlloc(g_hHeap, 0, pThreads->capacity * sizeof(DWORD)); if (pThreads->pItems == NULL) { succeeded = FALSE; break; } } else if (pThreads->size >= pThreads->capacity) { pThreads->capacity *= 2; LPDWORD p = (LPDWORD)HeapReAlloc( g_hHeap, 0, pThreads->pItems, pThreads->capacity * sizeof(DWORD)); if (p == NULL) { succeeded = FALSE; break; } pThreads->pItems = p; } pThreads->pItems[pThreads->size++] = te.th32ThreadID; } te.dwSize = sizeof(THREADENTRY32); } while (Thread32Next(hSnapshot, &te)); if (succeeded && GetLastError() != ERROR_NO_MORE_FILES) succeeded = FALSE; if (!succeeded && pThreads->pItems != NULL) { HeapFree(g_hHeap, 0, pThreads->pItems); pThreads->pItems = NULL; } } CloseHandle(hSnapshot); } return succeeded; }
+static MH_STATUS Freeze(PFROZEN_THREADS pThreads, UINT pos, UINT action) { MH_STATUS status = MH_OK; pThreads->pItems   = NULL; pThreads->capacity = 0; pThreads->size     = 0; if (!EnumerateThreads(pThreads)) { status = MH_ERROR_MEMORY_ALLOC; } else if (pThreads->pItems != NULL) { UINT i; for (i = 0; i < pThreads->size; ++i) { HANDLE hThread = OpenThread(THREAD_ACCESS, FALSE, pThreads->pItems[i]); if (hThread != NULL) { SuspendThread(hThread); ProcessThreadIPs(hThread, pos, action); CloseHandle(hThread); } } } return status; }
+static VOID Unfreeze(PFROZEN_THREADS pThreads) { if (pThreads->pItems != NULL) { UINT i; for (i = 0; i < pThreads->size; ++i) { HANDLE hThread = OpenThread(THREAD_ACCESS, FALSE, pThreads->pItems[i]); if (hThread != NULL) { ResumeThread(hThread); CloseHandle(hThread); } } HeapFree(g_hHeap, 0, pThreads->pItems); } }
+static MH_STATUS EnableHookLL(UINT pos, BOOL enable) { PHOOK_ENTRY pHook = &g_hooks.pItems[pos]; DWORD  oldProtect; SIZE_T patchSize    = sizeof(JMP_REL); LPBYTE pPatchTarget = (LPBYTE)pHook->pTarget; if (pHook->patchAbove) { pPatchTarget -= sizeof(JMP_REL); patchSize    += sizeof(JMP_REL_SHORT); } if (!VirtualProtect(pPatchTarget, patchSize, PAGE_EXECUTE_READWRITE, &oldProtect)) return MH_ERROR_MEMORY_PROTECT; if (enable) { PJMP_REL pJmp = (PJMP_REL)pPatchTarget; pJmp->opcode = 0xE9; pJmp->operand = (UINT32)((LPBYTE)pHook->pDetour - (pPatchTarget + sizeof(JMP_REL))); if (pHook->patchAbove) { PJMP_REL_SHORT pShortJmp = (PJMP_REL_SHORT)pHook->pTarget; pShortJmp->opcode = 0xEB; pShortJmp->operand = (UINT8)(0 - (sizeof(JMP_REL_SHORT) + sizeof(JMP_REL))); } } else { if (pHook->patchAbove) memcpy(pPatchTarget, pHook->backup, sizeof(JMP_REL) + sizeof(JMP_REL_SHORT)); else memcpy(pPatchTarget, pHook->backup, sizeof(JMP_REL)); } VirtualProtect(pPatchTarget, patchSize, oldProtect, &oldProtect); FlushInstructionCache(GetCurrentProcess(), pPatchTarget, patchSize); pHook->isEnabled   = enable; pHook->queueEnable = enable; return MH_OK; }
+static MH_STATUS EnableAllHooksLL(BOOL enable) { MH_STATUS status = MH_OK; UINT i, first = INVALID_HOOK_POS; for (i = 0; i < g_hooks.size; ++i) { if (g_hooks.pItems[i].isEnabled != enable) { first = i; break; } } if (first != INVALID_HOOK_POS) { FROZEN_THREADS threads; status = Freeze(&threads, ALL_HOOKS_POS, enable ? ACTION_ENABLE : ACTION_DISABLE); if (status == MH_OK) { for (i = first; i < g_hooks.size; ++i) { if (g_hooks.pItems[i].isEnabled != enable) { status = EnableHookLL(i, enable); if (status != MH_OK) break; } } Unfreeze(&threads); } } return status; }
+static VOID EnterSpinLock(VOID) { SIZE_T spinCount = 0; while (InterlockedCompareExchange(&g_isLocked, TRUE, FALSE) != FALSE) { if (spinCount < 32) Sleep(0); else Sleep(1); spinCount++; } }
+static VOID LeaveSpinLock(VOID) { InterlockedExchange(&g_isLocked, FALSE); }
+MH_STATUS WINAPI MH_Initialize(VOID) { MH_STATUS status = MH_OK; EnterSpinLock(); if (g_hHeap == NULL) { g_hHeap = HeapCreate(0, 0, 0); if (g_hHeap != NULL) { InitializeBuffer(); } else { status = MH_ERROR_MEMORY_ALLOC; } } else { status = MH_ERROR_ALREADY_INITIALIZED; } LeaveSpinLock(); return status; }
+MH_STATUS WINAPI MH_Uninitialize(VOID) { MH_STATUS status = MH_OK; EnterSpinLock(); if (g_hHeap != NULL) { status = EnableAllHooksLL(FALSE); if (status == MH_OK) { UninitializeBuffer(); HeapFree(g_hHeap, 0, g_hooks.pItems); HeapDestroy(g_hHeap); g_hHeap = NULL; g_hooks.pItems   = NULL; g_hooks.capacity = 0; g_hooks.size     = 0; } } else { status = MH_ERROR_NOT_INITIALIZED; } LeaveSpinLock(); return status; }
+MH_STATUS WINAPI MH_CreateHook(LPVOID pTarget, LPVOID pDetour, LPVOID *ppOriginal)
+{ 
+MH_STATUS status = MH_OK; EnterSpinLock(); if (g_hHeap != NULL) { if (IsExecutableAddress(pTarget) && IsExecutableAddress(pDetour)) { UINT pos = FindHookEntry(pTarget); if (pos == INVALID_HOOK_POS) { LPVOID pBuffer = AllocateBuffer(pTarget); if (pBuffer != NULL) { TRAMPOLINE ct; ct.pTarget     = pTarget; ct.pDetour     = pDetour; ct.pTrampoline = pBuffer; if (CreateTrampolineFunction(&ct)) { PHOOK_ENTRY pHook = AddHookEntry(); if (pHook != NULL) { pHook->pTarget     = ct.pTarget;
+#if defined(_M_X64) || defined(__x86_64__)
+pHook->pDetour     = ct.pRelay;
+#else
+pHook->pDetour     = ct.pDetour;
+#endif 
+pHook->pTrampoline = ct.pTrampoline; pHook->patchAbove  = ct.patchAbove; pHook->isEnabled   = FALSE; pHook->queueEnable = FALSE; pHook->nIP         = ct.nIP; memcpy(pHook->oldIPs, ct.oldIPs, ARRAYSIZE(ct.oldIPs)); memcpy(pHook->newIPs, ct.newIPs, ARRAYSIZE(ct.newIPs)); if (ct.patchAbove) { memcpy( pHook->backup, (LPBYTE)pTarget - sizeof(JMP_REL), sizeof(JMP_REL) + sizeof(JMP_REL_SHORT)); } else { memcpy(pHook->backup, pTarget, sizeof(JMP_REL)); } if (ppOriginal != NULL) *ppOriginal = pHook->pTrampoline; } else { status = MH_ERROR_MEMORY_ALLOC; } } else { status = MH_ERROR_UNSUPPORTED_FUNCTION; } if (status != MH_OK) { FreeBuffer(pBuffer); } } else { status = MH_ERROR_MEMORY_ALLOC; } } else { status = MH_ERROR_ALREADY_CREATED; } } else { status = MH_ERROR_NOT_EXECUTABLE; } } else { status = MH_ERROR_NOT_INITIALIZED; } LeaveSpinLock(); return status; 
+}
+MH_STATUS WINAPI MH_RemoveHook(LPVOID pTarget) { MH_STATUS status = MH_OK; EnterSpinLock(); if (g_hHeap != NULL) { UINT pos = FindHookEntry(pTarget); if (pos != INVALID_HOOK_POS) { if (g_hooks.pItems[pos].isEnabled) { FROZEN_THREADS threads; status = Freeze(&threads, pos, ACTION_DISABLE); if (status == MH_OK) { status = EnableHookLL(pos, FALSE); Unfreeze(&threads); } } if (status == MH_OK) { FreeBuffer(g_hooks.pItems[pos].pTrampoline); DeleteHookEntry(pos); } } else { status = MH_ERROR_NOT_CREATED; } } else { status = MH_ERROR_NOT_INITIALIZED; } LeaveSpinLock(); return status; }
+static MH_STATUS EnableHook(LPVOID pTarget, BOOL enable) { MH_STATUS status = MH_OK; EnterSpinLock(); if (g_hHeap != NULL) { if (pTarget == MH_ALL_HOOKS) { status = EnableAllHooksLL(enable); } else { UINT pos = FindHookEntry(pTarget); if (pos != INVALID_HOOK_POS) { if (g_hooks.pItems[pos].isEnabled != enable) { FROZEN_THREADS threads; status = Freeze(&threads, pos, ACTION_ENABLE); if (status == MH_OK) { status = EnableHookLL(pos, enable); Unfreeze(&threads); } } else { status = enable ? MH_ERROR_ENABLED : MH_ERROR_DISABLED; } } else { status = MH_ERROR_NOT_CREATED; } } } else { status = MH_ERROR_NOT_INITIALIZED; } LeaveSpinLock(); return status; }
+MH_STATUS WINAPI MH_EnableHook(LPVOID pTarget) { return EnableHook(pTarget, TRUE); }
+MH_STATUS WINAPI MH_DisableHook(LPVOID pTarget) { return EnableHook(pTarget, FALSE); }
+static MH_STATUS QueueHook(LPVOID pTarget, BOOL queueEnable) { MH_STATUS status = MH_OK; EnterSpinLock(); if (g_hHeap != NULL) { if (pTarget == MH_ALL_HOOKS) { UINT i; for (i = 0; i < g_hooks.size; ++i) g_hooks.pItems[i].queueEnable = queueEnable; } else { UINT pos = FindHookEntry(pTarget); if (pos != INVALID_HOOK_POS) { g_hooks.pItems[pos].queueEnable = queueEnable; } else { status = MH_ERROR_NOT_CREATED; } } } else { status = MH_ERROR_NOT_INITIALIZED; } LeaveSpinLock(); return status; }
+MH_STATUS WINAPI MH_QueueEnableHook(LPVOID pTarget) { return QueueHook(pTarget, TRUE); }
+MH_STATUS WINAPI MH_QueueDisableHook(LPVOID pTarget) { return QueueHook(pTarget, FALSE); }
+MH_STATUS WINAPI MH_ApplyQueued(VOID) { MH_STATUS status = MH_OK; UINT i, first = INVALID_HOOK_POS; EnterSpinLock(); if (g_hHeap != NULL) { for (i = 0; i < g_hooks.size; ++i) { if (g_hooks.pItems[i].isEnabled != g_hooks.pItems[i].queueEnable) { first = i; break; } } if (first != INVALID_HOOK_POS) { FROZEN_THREADS threads; status = Freeze(&threads, ALL_HOOKS_POS, ACTION_APPLY_QUEUED); if (status == MH_OK) { for (i = first; i < g_hooks.size; ++i) { PHOOK_ENTRY pHook = &g_hooks.pItems[i]; if (pHook->isEnabled != pHook->queueEnable) { status = EnableHookLL(i, pHook->queueEnable); if (status != MH_OK) break; } } Unfreeze(&threads); } } } else { status = MH_ERROR_NOT_INITIALIZED; } LeaveSpinLock(); return status; }
+MH_STATUS WINAPI MH_CreateHookApiEx( LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID *ppOriginal, LPVOID *ppTarget) { HMODULE hModule; LPVOID  pTarget; hModule = GetModuleHandleW(pszModule); if (hModule == NULL) return MH_ERROR_MODULE_NOT_FOUND; pTarget = (LPVOID)GetProcAddress(hModule, pszProcName); if (pTarget == NULL) return MH_ERROR_FUNCTION_NOT_FOUND; if(ppTarget != NULL) *ppTarget = pTarget; return MH_CreateHook(pTarget, pDetour, ppOriginal); }
+MH_STATUS WINAPI MH_CreateHookApi( LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID *ppOriginal) { return MH_CreateHookApiEx(pszModule, pszProcName, pDetour, ppOriginal, NULL); }
+const char * WINAPI MH_StatusToString(MH_STATUS status) {
+#define MH_ST2STR(x)    \
+    case x:             \
+        return #x;
+    switch (status) {
+        MH_ST2STR(MH_UNKNOWN)
+        MH_ST2STR(MH_OK)
+        MH_ST2STR(MH_ERROR_ALREADY_INITIALIZED)
+        MH_ST2STR(MH_ERROR_NOT_INITIALIZED)
+        MH_ST2STR(MH_ERROR_ALREADY_CREATED)
+        MH_ST2STR(MH_ERROR_NOT_CREATED)
+        MH_ST2STR(MH_ERROR_ENABLED)
+        MH_ST2STR(MH_ERROR_DISABLED)
+        MH_ST2STR(MH_ERROR_NOT_EXECUTABLE)
+        MH_ST2STR(MH_ERROR_UNSUPPORTED_FUNCTION)
+        MH_ST2STR(MH_ERROR_MEMORY_ALLOC)
+        MH_ST2STR(MH_ERROR_MEMORY_PROTECT)
+        MH_ST2STR(MH_ERROR_MODULE_NOT_FOUND)
+        MH_ST2STR(MH_ERROR_FUNCTION_NOT_FOUND)
+    }
+#undef MH_ST2STR
+    return "(unknown)";
+}
+#if defined(_M_IX86) || defined(__i386__)
+#include <string.h>
+#define C_NONE    0x00
+#define C_MODRM   0x01
+#define C_IMM8    0x02
+#define C_IMM16   0x04
+#define C_IMM_P66 0x10
+#define C_REL8    0x20
+#define C_REL32   0x40
+#define C_GROUP   0x80
+#define C_ERROR   0xff
+#define PRE_ANY  0x00
+#define PRE_NONE 0x01
+#define PRE_F2   0x02
+#define PRE_F3   0x04
+#define PRE_66   0x08
+#define PRE_67   0x10
+#define PRE_LOCK 0x20
+#define PRE_SEG  0x40
+#define PRE_ALL  0xff
+#define DELTA_OPCODES      0x4a
+#define DELTA_FPU_REG      0xf1
+#define DELTA_FPU_MODRM    0xf8
+#define DELTA_PREFIXES     0x130
+#define DELTA_OP_LOCK_OK   0x1a1
+#define DELTA_OP2_LOCK_OK  0x1b9
+#define DELTA_OP_ONLY_MEM  0x1cb
+#define DELTA_OP2_ONLY_MEM 0x1da
+unsigned char hde32_table[] = { 0xa3,0xa8,0xa3,0xa8,0xa3,0xa8,0xa3,0xa8,0xa3,0xa8,0xa3,0xa8,0xa3,0xa8,0xa3, 0xa8,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xac,0xaa,0xb2,0xaa,0x9f,0x9f, 0x9f,0x9f,0xb5,0xa3,0xa3,0xa4,0xaa,0xaa,0xba,0xaa,0x96,0xaa,0xa8,0xaa,0xc3, 0xc3,0x96,0x96,0xb7,0xae,0xd6,0xbd,0xa3,0xc5,0xa3,0xa3,0x9f,0xc3,0x9c,0xaa, 0xaa,0xac,0xaa,0xbf,0x03,0x7f,0x11,0x7f,0x01,0x7f,0x01,0x3f,0x01,0x01,0x90, 0x82,0x7d,0x97,0x59,0x59,0x59,0x59,0x59,0x7f,0x59,0x59,0x60,0x7d,0x7f,0x7f, 0x59,0x59,0x59,0x59,0x59,0x59,0x59,0x59,0x59,0x59,0x59,0x59,0x9a,0x88,0x7d, 0x59,0x50,0x50,0x50,0x50,0x59,0x59,0x59,0x59,0x61,0x94,0x61,0x9e,0x59,0x59, 0x85,0x59,0x92,0xa3,0x60,0x60,0x59,0x59,0x59,0x59,0x59,0x59,0x59,0x59,0x59, 0x59,0x59,0x9f,0x01,0x03,0x01,0x04,0x03,0xd5,0x03,0xcc,0x01,0xbc,0x03,0xf0, 0x10,0x10,0x10,0x10,0x50,0x50,0x50,0x50,0x14,0x20,0x20,0x20,0x20,0x01,0x01, 0x01,0x01,0xc4,0x02,0x10,0x00,0x00,0x00,0x00,0x01,0x01,0xc0,0xc2,0x10,0x11, 0x02,0x03,0x11,0x03,0x03,0x04,0x00,0x00,0x14,0x00,0x02,0x00,0x00,0xc6,0xc8, 0x02,0x02,0x02,0x02,0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,0x00,0xff,0xca, 0x01,0x01,0x01,0x00,0x06,0x00,0x04,0x00,0xc0,0xc2,0x01,0x01,0x03,0x01,0xff, 0xff,0x01,0x00,0x03,0xc4,0xc4,0xc6,0x03,0x01,0x01,0x01,0xff,0x03,0x03,0x03, 0xc8,0x40,0x00,0x0a,0x00,0x04,0x00,0x00,0x00,0x00,0x7f,0x00,0x33,0x01,0x00, 0x00,0x00,0x00,0x00,0x00,0xff,0xbf,0xff,0xff,0x00,0x00,0x00,0x00,0x07,0x00, 0x00,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 0x00,0xff,0xff,0x00,0x00,0x00,0xbf,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 0x7f,0x00,0x00,0xff,0x4a,0x4a,0x4a,0x4a,0x4b,0x52,0x4a,0x4a,0x4a,0x4a,0x4f, 0x4c,0x4a,0x4a,0x4a,0x4a,0x4a,0x4a,0x4a,0x4a,0x55,0x45,0x40,0x4a,0x4a,0x4a, 0x45,0x59,0x4d,0x46,0x4a,0x5d,0x4a,0x4a,0x4a,0x4a,0x4a,0x4a,0x4a,0x4a,0x4a, 0x4a,0x4a,0x4a,0x4a,0x4a,0x61,0x63,0x67,0x4e,0x4a,0x4a,0x6b,0x6d,0x4a,0x4a, 0x45,0x6d,0x4a,0x4a,0x44,0x45,0x4a,0x4a,0x00,0x00,0x00,0x02,0x0d,0x06,0x06, 0x06,0x06,0x0e,0x00,0x00,0x00,0x00,0x06,0x06,0x06,0x00,0x06,0x06,0x02,0x06, 0x00,0x0a,0x0a,0x07,0x07,0x06,0x02,0x05,0x05,0x02,0x02,0x00,0x00,0x04,0x04, 0x04,0x04,0x00,0x00,0x00,0x0e,0x05,0x06,0x06,0x06,0x01,0x06,0x00,0x00,0x08, 0x00,0x10,0x00,0x18,0x00,0x20,0x00,0x28,0x00,0x30,0x00,0x80,0x01,0x82,0x01, 0x86,0x00,0xf6,0xcf,0xfe,0x3f,0xab,0x00,0xb0,0x00,0xb1,0x00,0xb3,0x00,0xba, 0xf8,0xbb,0x00,0xc0,0x00,0xc1,0x00,0xc7,0xbf,0x62,0xff,0x00,0x8d,0xff,0x00, 0xc4,0xff,0x00,0xc5,0xff,0x00,0xff,0xff,0xeb,0x01,0xff,0x0e,0x12,0x08,0x00, 0x13,0x09,0x00,0x16,0x08,0x00,0x17,0x09,0x00,0x2b,0x09,0x00,0xae,0xff,0x07, 0xb2,0xff,0x00,0xb4,0xff,0x00,0xb5,0xff,0x00,0xc3,0x01,0x00,0xc7,0xff,0xbf, 0xe7,0x08,0x00,0xf0,0x02,0x00 };
+unsigned int hde32_disasm(const void *code, hde32s *hs) { uint8_t x, c, *p = (uint8_t *)code, cflags, opcode, pref = 0; uint8_t *ht = hde32_table, m_mod, m_reg, m_rm, disp_size = 0; memset(hs, 0, sizeof(hde32s)); for (x = 16; x; x--) switch (c = *p++) { case 0xf3: hs->p_rep = c; pref |= PRE_F3; break; case 0xf2: hs->p_rep = c; pref |= PRE_F2; break; case 0xf0: hs->p_lock = c; pref |= PRE_LOCK; break; case 0x26: case 0x2e: case 0x36: case 0x3e: case 0x64: case 0x65: hs->p_seg = c; pref |= PRE_SEG; break; case 0x66: hs->p_66 = c; pref |= PRE_66; break; case 0x67: hs->p_67 = c; pref |= PRE_67; break; default: goto pref_done; } pref_done: hs->flags = (uint32_t)pref << 23; if (!pref) pref |= PRE_NONE; if ((hs->opcode = c) == 0x0f) { hs->opcode2 = c = *p++; ht += DELTA_OPCODES; } else if (c >= 0xa0 && c <= 0xa3) { if (pref & PRE_67) pref |= PRE_66; else pref &= ~PRE_66; } opcode = c; cflags = ht[ht[opcode / 4] + (opcode % 4)]; if (cflags == C_ERROR) { hs->flags |= F_ERROR | F_ERROR_OPCODE; cflags = 0; if ((opcode & -3) == 0x24) cflags++; } x = 0; if (cflags & C_GROUP) { uint16_t t; t = *(uint16_t *)(ht + (cflags & 0x7f)); cflags = (uint8_t)t; x = (uint8_t)(t >> 8); } if (hs->opcode2) { ht = hde32_table + DELTA_PREFIXES; if (ht[ht[opcode / 4] + (opcode % 4)] & pref) hs->flags |= F_ERROR | F_ERROR_OPCODE; } if (cflags & C_MODRM) { hs->flags |= F_MODRM; hs->modrm = c = *p++; hs->modrm_mod = m_mod = c >> 6; hs->modrm_rm = m_rm = c & 7; hs->modrm_reg = m_reg = (c & 0x3f) >> 3; if (x && ((x << m_reg) & 0x80)) hs->flags |= F_ERROR | F_ERROR_OPCODE; if (!hs->opcode2 && opcode >= 0xd9 && opcode <= 0xdf) { uint8_t t = opcode - 0xd9; if (m_mod == 3) { ht = hde32_table + DELTA_FPU_MODRM + t*8; t = ht[m_reg] << m_rm; } else { ht = hde32_table + DELTA_FPU_REG; t = ht[t] << m_reg; } if (t & 0x80) hs->flags |= F_ERROR | F_ERROR_OPCODE; } if (pref & PRE_LOCK) { if (m_mod == 3) { hs->flags |= F_ERROR | F_ERROR_LOCK; } else { uint8_t *table_end, op = opcode; if (hs->opcode2) { ht = hde32_table + DELTA_OP2_LOCK_OK; table_end = ht + DELTA_OP_ONLY_MEM - DELTA_OP2_LOCK_OK; } else { ht = hde32_table + DELTA_OP_LOCK_OK; table_end = ht + DELTA_OP2_LOCK_OK - DELTA_OP_LOCK_OK; op &= -2; } for (; ht != table_end; ht++) if (*ht++ == op) { if (!((*ht << m_reg) & 0x80)) goto no_lock_error; else break; } hs->flags |= F_ERROR | F_ERROR_LOCK; no_lock_error: ; } } if (hs->opcode2) { switch (opcode) { case 0x20: case 0x22: m_mod = 3; if (m_reg > 4 || m_reg == 1) goto error_operand; else goto no_error_operand; case 0x21: case 0x23: m_mod = 3; if (m_reg == 4 || m_reg == 5) goto error_operand; else goto no_error_operand; } } else { switch (opcode) { case 0x8c: if (m_reg > 5) goto error_operand; else goto no_error_operand; case 0x8e: if (m_reg == 1 || m_reg > 5) goto error_operand; else goto no_error_operand; } } if (m_mod == 3) { uint8_t *table_end; if (hs->opcode2) { ht = hde32_table + DELTA_OP2_ONLY_MEM; table_end = ht + sizeof(hde32_table) - DELTA_OP2_ONLY_MEM; } else { ht = hde32_table + DELTA_OP_ONLY_MEM; table_end = ht + DELTA_OP2_ONLY_MEM - DELTA_OP_ONLY_MEM; } for (; ht != table_end; ht += 2) if (*ht++ == opcode) { if ((*ht++ & pref) && !((*ht << m_reg) & 0x80)) goto error_operand; else break; } goto no_error_operand; } else if (hs->opcode2) { switch (opcode) { case 0x50: case 0xd7: case 0xf7: if (pref & (PRE_NONE | PRE_66)) goto error_operand; break; case 0xd6: if (pref & (PRE_F2 | PRE_F3)) goto error_operand; break; case 0xc5: goto error_operand; } goto no_error_operand; } else goto no_error_operand; error_operand: hs->flags |= F_ERROR | F_ERROR_OPERAND; no_error_operand: c = *p++; if (m_reg <= 1) { if (opcode == 0xf6) cflags |= C_IMM8; else if (opcode == 0xf7) cflags |= C_IMM_P66; } switch (m_mod) { case 0: if (pref & PRE_67) { if (m_rm == 6) disp_size = 2; } else if (m_rm == 5) disp_size = 4; break; case 1: disp_size = 1; break; case 2: disp_size = 2; if (!(pref & PRE_67)) disp_size <<= 1; break; } if (m_mod != 3 && m_rm == 4 && !(pref & PRE_67)) { hs->flags |= F_SIB; p++; hs->sib = c; hs->sib_scale = c >> 6; hs->sib_index = (c & 0x3f) >> 3; if ((hs->sib_base = c & 7) == 5 && !(m_mod & 1)) disp_size = 4; } p--; switch (disp_size) { case 1: hs->flags |= F_DISP8; hs->disp.disp8 = *p; break; case 2: hs->flags |= F_DISP16; hs->disp.disp16 = *(uint16_t *)p; break; case 4: hs->flags |= F_DISP32; hs->disp.disp32 = *(uint32_t *)p; break; } p += disp_size; } else if (pref & PRE_LOCK) hs->flags |= F_ERROR | F_ERROR_LOCK; if (cflags & C_IMM_P66) { if (cflags & C_REL32) { if (pref & PRE_66) { hs->flags |= F_IMM16 | F_RELATIVE; hs->imm.imm16 = *(uint16_t *)p; p += 2; goto disasm_done; } goto rel32_ok; } if (pref & PRE_66) { hs->flags |= F_IMM16; hs->imm.imm16 = *(uint16_t *)p; p += 2; } else { hs->flags |= F_IMM32; hs->imm.imm32 = *(uint32_t *)p; p += 4; } } if (cflags & C_IMM16) { if (hs->flags & F_IMM32) { hs->flags |= F_IMM16; hs->disp.disp16 = *(uint16_t *)p; } else if (hs->flags & F_IMM16) { hs->flags |= F_2IMM16; hs->disp.disp16 = *(uint16_t *)p; } else { hs->flags |= F_IMM16; hs->imm.imm16 = *(uint16_t *)p; } p += 2; } if (cflags & C_IMM8) { hs->flags |= F_IMM8; hs->imm.imm8 = *p++; } if (cflags & C_REL32) { rel32_ok: hs->flags |= F_IMM32 | F_RELATIVE; hs->imm.imm32 = *(uint32_t *)p; p += 4; } else if (cflags & C_REL8) { hs->flags |= F_IMM8 | F_RELATIVE; hs->imm.imm8 = *p++; } disasm_done: if ((hs->len = (uint8_t)(p-(uint8_t *)code)) > 15) { hs->flags |= F_ERROR | F_ERROR_LENGTH; hs->len = 15; } return (unsigned int)hs->len; }
+#endif // defined(_M_IX86) || defined(__i386__)
+#if defined(_M_X64) || defined(__x86_64__)
+#include <string.h>
+#define C_NONE    0x00
+#define C_MODRM   0x01
+#define C_IMM8    0x02
+#define C_IMM16   0x04
+#define C_IMM_P66 0x10
+#define C_REL8    0x20
+#define C_REL32   0x40
+#define C_GROUP   0x80
+#define C_ERROR   0xff
+#define PRE_ANY  0x00
+#define PRE_NONE 0x01
+#define PRE_F2   0x02
+#define PRE_F3   0x04
+#define PRE_66   0x08
+#define PRE_67   0x10
+#define PRE_LOCK 0x20
+#define PRE_SEG  0x40
+#define PRE_ALL  0xff
+#define DELTA_OPCODES      0x4a
+#define DELTA_FPU_REG      0xfd
+#define DELTA_FPU_MODRM    0x104
+#define DELTA_PREFIXES     0x13c
+#define DELTA_OP_LOCK_OK   0x1ae
+#define DELTA_OP2_LOCK_OK  0x1c6
+#define DELTA_OP_ONLY_MEM  0x1d8
+#define DELTA_OP2_ONLY_MEM 0x1e7
+unsigned char hde64_table[] = { 0xa5,0xaa,0xa5,0xb8,0xa5,0xaa,0xa5,0xaa,0xa5,0xb8,0xa5,0xb8,0xa5,0xb8,0xa5, 0xb8,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xc0,0xac,0xc0,0xcc,0xc0,0xa1,0xa1, 0xa1,0xa1,0xb1,0xa5,0xa5,0xa6,0xc0,0xc0,0xd7,0xda,0xe0,0xc0,0xe4,0xc0,0xea, 0xea,0xe0,0xe0,0x98,0xc8,0xee,0xf1,0xa5,0xd3,0xa5,0xa5,0xa1,0xea,0x9e,0xc0, 0xc0,0xc2,0xc0,0xe6,0x03,0x7f,0x11,0x7f,0x01,0x7f,0x01,0x3f,0x01,0x01,0xab, 0x8b,0x90,0x64,0x5b,0x5b,0x5b,0x5b,0x5b,0x92,0x5b,0x5b,0x76,0x90,0x92,0x92, 0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x6a,0x73,0x90, 0x5b,0x52,0x52,0x52,0x52,0x5b,0x5b,0x5b,0x5b,0x77,0x7c,0x77,0x85,0x5b,0x5b, 0x70,0x5b,0x7a,0xaf,0x76,0x76,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b,0x5b, 0x5b,0x5b,0x86,0x01,0x03,0x01,0x04,0x03,0xd5,0x03,0xd5,0x03,0xcc,0x01,0xbc, 0x03,0xf0,0x03,0x03,0x04,0x00,0x50,0x50,0x50,0x50,0xff,0x20,0x20,0x20,0x20, 0x01,0x01,0x01,0x01,0xc4,0x02,0x10,0xff,0xff,0xff,0x01,0x00,0x03,0x11,0xff, 0x03,0xc4,0xc6,0xc8,0x02,0x10,0x00,0xff,0xcc,0x01,0x01,0x01,0x00,0x00,0x00, 0x00,0x01,0x01,0x03,0x01,0xff,0xff,0xc0,0xc2,0x10,0x11,0x02,0x03,0x01,0x01, 0x01,0xff,0xff,0xff,0x00,0x00,0x00,0xff,0x00,0x00,0xff,0xff,0xff,0xff,0x10, 0x10,0x10,0x10,0x02,0x10,0x00,0x00,0xc6,0xc8,0x02,0x02,0x02,0x02,0x06,0x00, 0x04,0x00,0x02,0xff,0x00,0xc0,0xc2,0x01,0x01,0x03,0x03,0x03,0xca,0x40,0x00, 0x0a,0x00,0x04,0x00,0x00,0x00,0x00,0x7f,0x00,0x33,0x01,0x00,0x00,0x00,0x00, 0x00,0x00,0xff,0xbf,0xff,0xff,0x00,0x00,0x00,0x00,0x07,0x00,0x00,0xff,0x00, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff, 0x00,0x00,0x00,0xbf,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x7f,0x00,0x00, 0xff,0x40,0x40,0x40,0x40,0x41,0x49,0x40,0x40,0x40,0x40,0x4c,0x42,0x40,0x40, 0x40,0x40,0x40,0x40,0x40,0x40,0x4f,0x44,0x53,0x40,0x40,0x40,0x44,0x57,0x43, 0x5c,0x40,0x60,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40, 0x40,0x40,0x64,0x66,0x6e,0x6b,0x40,0x40,0x6a,0x46,0x40,0x40,0x44,0x46,0x40, 0x40,0x5b,0x44,0x40,0x40,0x00,0x00,0x00,0x00,0x06,0x06,0x06,0x06,0x01,0x06, 0x06,0x02,0x06,0x06,0x00,0x06,0x00,0x0a,0x0a,0x00,0x00,0x00,0x02,0x07,0x07, 0x06,0x02,0x0d,0x06,0x06,0x06,0x0e,0x05,0x05,0x02,0x02,0x00,0x00,0x04,0x04, 0x04,0x04,0x05,0x06,0x06,0x06,0x00,0x00,0x00,0x0e,0x00,0x00,0x08,0x00,0x10, 0x00,0x18,0x00,0x20,0x00,0x28,0x00,0x30,0x00,0x80,0x01,0x82,0x01,0x86,0x00, 0xf6,0xcf,0xfe,0x3f,0xab,0x00,0xb0,0x00,0xb1,0x00,0xb3,0x00,0xba,0xf8,0xbb, 0x00,0xc0,0x00,0xc1,0x00,0xc7,0xbf,0x62,0xff,0x00,0x8d,0xff,0x00,0xc4,0xff, 0x00,0xc5,0xff,0x00,0xff,0xff,0xeb,0x01,0xff,0x0e,0x12,0x08,0x00,0x13,0x09, 0x00,0x16,0x08,0x00,0x17,0x09,0x00,0x2b,0x09,0x00,0xae,0xff,0x07,0xb2,0xff, 0x00,0xb4,0xff,0x00,0xb5,0xff,0x00,0xc3,0x01,0x00,0xc7,0xff,0xbf,0xe7,0x08, 0x00,0xf0,0x02,0x00 };
+unsigned int hde64_disasm(const void *code, hde64s *hs) {
+    uint8_t x, c, *p = (uint8_t *)code, cflags, opcode, pref = 0;
+    uint8_t *ht = hde64_table, m_mod, m_reg, m_rm, disp_size = 0;
+    uint8_t op64 = 0;
+    memset(hs, 0, sizeof(hde64s));
+    for (x = 16; x; x--) switch (c = *p++) { case 0xf3: hs->p_rep = c; pref |= PRE_F3; break; case 0xf2: hs->p_rep = c; pref |= PRE_F2; break; case 0xf0: hs->p_lock = c; pref |= PRE_LOCK; break; case 0x26: case 0x2e: case 0x36: case 0x3e: case 0x64: case 0x65: hs->p_seg = c; pref |= PRE_SEG; break; case 0x66: hs->p_66 = c; pref |= PRE_66; break; case 0x67: hs->p_67 = c; pref |= PRE_67; break; default: goto pref_done; } pref_done: hs->flags = (uint32_t)pref << 23; if (!pref) pref |= PRE_NONE; if ((c & 0xf0) == 0x40) { hs->flags |= F_PREFIX_REX; if ((hs->rex_w = (c & 0xf) >> 3) && (*p & 0xf8) == 0xb8) op64++; hs->rex_r = (c & 7) >> 2; hs->rex_x = (c & 3) >> 1; hs->rex_b = c & 1; if (((c = *p++) & 0xf0) == 0x40) { opcode = c; goto error_opcode; } } if ((hs->opcode = c) == 0x0f) { hs->opcode2 = c = *p++; ht += DELTA_OPCODES; } else if (c >= 0xa0 && c <= 0xa3) { op64++; if (pref & PRE_67) pref |= PRE_66; else pref &= ~PRE_66; } opcode = c; cflags = ht[ht[opcode / 4] + (opcode % 4)]; if (cflags == C_ERROR) { error_opcode: hs->flags |= F_ERROR | F_ERROR_OPCODE; cflags = 0; if ((opcode & -3) == 0x24) cflags++; } x = 0; if (cflags & C_GROUP) { uint16_t t; t = *(uint16_t *)(ht + (cflags & 0x7f)); cflags = (uint8_t)t; x = (uint8_t)(t >> 8); } if (hs->opcode2) { ht = hde64_table + DELTA_PREFIXES; if (ht[ht[opcode / 4] + (opcode % 4)] & pref) hs->flags |= F_ERROR | F_ERROR_OPCODE; } if (cflags & C_MODRM) { hs->flags |= F_MODRM; hs->modrm = c = *p++; hs->modrm_mod = m_mod = c >> 6; hs->modrm_rm = m_rm = c & 7; hs->modrm_reg = m_reg = (c & 0x3f) >> 3; if (x && ((x << m_reg) & 0x80)) hs->flags |= F_ERROR | F_ERROR_OPCODE; if (!hs->opcode2 && opcode >= 0xd9 && opcode <= 0xdf) { uint8_t t = opcode - 0xd9; if (m_mod == 3) { ht = hde64_table + DELTA_FPU_MODRM + t*8; t = ht[m_reg] << m_rm; } else { ht = hde64_table + DELTA_FPU_REG; t = ht[t] << m_reg; } if (t & 0x80) hs->flags |= F_ERROR | F_ERROR_OPCODE; } if (pref & PRE_LOCK) { if (m_mod == 3) { hs->flags |= F_ERROR | F_ERROR_LOCK; } else { uint8_t *table_end, op = opcode; if (hs->opcode2) { ht = hde64_table + DELTA_OP2_LOCK_OK; table_end = ht + DELTA_OP_ONLY_MEM - DELTA_OP2_LOCK_OK; } else { ht = hde64_table + DELTA_OP_LOCK_OK; table_end = ht + DELTA_OP2_LOCK_OK - DELTA_OP_LOCK_OK; op &= -2; } for (; ht != table_end; ht++) if (*ht++ == op) { if (!((*ht << m_reg) & 0x80)) goto no_lock_error; else break; } hs->flags |= F_ERROR | F_ERROR_LOCK; no_lock_error: ; } } if (hs->opcode2) { switch (opcode) { case 0x20: case 0x22: m_mod = 3; if (m_reg > 4 || m_reg == 1) goto error_operand; else goto no_error_operand; case 0x21: case 0x23: m_mod = 3; if (m_reg == 4 || m_reg == 5) goto error_operand; else goto no_error_operand; } } else { switch (opcode) { case 0x8c: if (m_reg > 5) goto error_operand; else goto no_error_operand; case 0x8e: if (m_reg == 1 || m_reg > 5) goto error_operand; else goto no_error_operand; } } if (m_mod == 3) { uint8_t *table_end; if (hs->opcode2) { ht = hde64_table + DELTA_OP2_ONLY_MEM; table_end = ht + sizeof(hde64_table) - DELTA_OP2_ONLY_MEM; } else { ht = hde64_table + DELTA_OP_ONLY_MEM; table_end = ht + DELTA_OP2_ONLY_MEM - DELTA_OP_ONLY_MEM; } for (; ht != table_end; ht += 2) if (*ht++ == opcode) { if ((*ht++ & pref) && !((*ht << m_reg) & 0x80)) goto error_operand; else break; } goto no_error_operand; } else if (hs->opcode2) { switch (opcode) { case 0x50: case 0xd7: case 0xf7: if (pref & (PRE_NONE | PRE_66)) goto error_operand; break; case 0xd6: if (pref & (PRE_F2 | PRE_F3)) goto error_operand; break; case 0xc5: goto error_operand; } goto no_error_operand; } else goto no_error_operand; error_operand: hs->flags |= F_ERROR | F_ERROR_OPERAND; no_error_operand: c = *p++; if (m_reg <= 1) { if (opcode == 0xf6) cflags |= C_IMM8; else if (opcode == 0xf7) cflags |= C_IMM_P66; } switch (m_mod) { case 0: if (pref & PRE_67) { if (m_rm == 6) disp_size = 2; } else if (m_rm == 5) disp_size = 4; break; case 1: disp_size = 1; break; case 2: disp_size = 2; if (!(pref & PRE_67)) disp_size <<= 1; break; } if (m_mod != 3 && m_rm == 4) { hs->flags |= F_SIB; p++; hs->sib = c; hs->sib_scale = c >> 6; hs->sib_index = (c & 0x3f) >> 3; if ((hs->sib_base = c & 7) == 5 && !(m_mod & 1)) disp_size = 4; } p--; switch (disp_size) { case 1: hs->flags |= F_DISP8; hs->disp.disp8 = *p; break; case 2: hs->flags |= F_DISP16; hs->disp.disp16 = *(uint16_t *)p; break; case 4: hs->flags |= F_DISP32; hs->disp.disp32 = *(uint32_t *)p; break; } p += disp_size; } else if (pref & PRE_LOCK) hs->flags |= F_ERROR | F_ERROR_LOCK; if (cflags & C_IMM_P66) { if (cflags & C_REL32) { if (pref & PRE_66) { hs->flags |= F_IMM16 | F_RELATIVE; hs->imm.imm16 = *(uint16_t *)p; p += 2; goto disasm_done; } goto rel32_ok; } if (op64) { hs->flags |= F_IMM64; hs->imm.imm64 = *(uint64_t *)p; p += 8; } else if (!(pref & PRE_66)) { hs->flags |= F_IMM32; hs->imm.imm32 = *(uint32_t *)p; p += 4; } else goto imm16_ok; } if (cflags & C_IMM16) { imm16_ok: hs->flags |= F_IMM16; hs->imm.imm16 = *(uint16_t *)p; p += 2; } if (cflags & C_IMM8) { hs->flags |= F_IMM8; hs->imm.imm8 = *p++; } if (cflags & C_REL32) { rel32_ok: hs->flags |= F_IMM32 | F_RELATIVE; hs->imm.imm32 = *(uint32_t *)p; p += 4; } else if (cflags & C_REL8) { hs->flags |= F_IMM8 | F_RELATIVE; hs->imm.imm8 = *p++; } disasm_done: if ((hs->len = (uint8_t)(p-(uint8_t *)code)) > 15) { hs->flags |= F_ERROR | F_ERROR_LENGTH; hs->len = 15; } return (unsigned int)hs->len;
+}
+#endif // defined(_M_X64) || defined(__x86_64__)
+
+// MH_STATUS WINAPI MH_Initialize(VOID);
+// MH_STATUS WINAPI MH_Uninitialize(VOID);
+// MH_STATUS WINAPI MH_CreateHook(LPVOID pTarget, LPVOID pDetour, LPVOID *ppOriginal);
+// MH_STATUS WINAPI MH_CreateHookApi(
+//     LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID *ppOriginal);
+// MH_STATUS WINAPI MH_CreateHookApiEx(
+//     LPCWSTR pszModule, LPCSTR pszProcName, LPVOID pDetour, LPVOID *ppOriginal, LPVOID *ppTarget);
+// MH_STATUS WINAPI MH_RemoveHook(LPVOID pTarget);
+// MH_STATUS WINAPI MH_EnableHook(LPVOID pTarget);
+// MH_STATUS WINAPI MH_DisableHook(LPVOID pTarget);
+// MH_STATUS WINAPI MH_QueueEnableHook(LPVOID pTarget);
+// MH_STATUS WINAPI MH_QueueDisableHook(LPVOID pTarget);
+// MH_STATUS WINAPI MH_ApplyQueued(VOID);
+// const char * WINAPI MH_StatusToString(MH_STATUS status);
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <Windows.h>
+#pragma comment(lib, "user32")
+int init(){
+    int ret = MH_Initialize();
+    if (ret != MH_OK){
+        printf("[*] MH_Initialize err\n");
+        return ret;
+    }
+    return ret;
+}
+int uninit(){
+    int ret = MH_Uninitialize();
+    if (ret != MH_OK){
+        printf("[*] MH_Uninitialize err\n");
+        return ret;
+    }
+    return ret;
+}
+#define _HK_MODEL(v,a) int hook##v(){\
+    if (MH_CreateHook(a##v, &Detour##v, (LPVOID*)(&fp##v)) != MH_OK){\
+        printf("[*] MH_CreateHook "#v" err.\n");\
+        return 1;\
+    }\
+    if (MH_EnableHook(a##v) != MH_OK){\
+        printf("[*] MH_EnableHook "#v" err.\n");\
+        return 1;\
+    }\
+    printf("[*] MH_EnableHook "#v" success.\n");\
+    return 0;\
+}\
+int unhook##v(){\
+    if (MH_DisableHook(a##v) != MH_OK){\
+        printf("[*] MH_DisableHook "#v" err.\n");\
+        return 1;\
+    }\
+    return 0;\
+}
+#define HK_DEFINE(v) _HK_MODEL(v,)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <Windows.h>
+#pragma comment(lib, "user32")
+
+#pragma pack(push,1)
+typedef struct _stdstring {
+    union {
+        char _short_buf[23];
+        struct {
+            char* _long_buf;
+            int32_t _long_size;
+            int32_t _align;
+            int32_t _alloc_size;
+        };
+    };
+    int8_t _short_size : 7;
+    bool _is_long : 1;
+} stdstring;
+#pragma pack(pop)
+
+typedef struct AppletInitConf {
+    stdstring appId;                 // 0x0
+    stdstring brandName;             // 0x18
+    stdstring iconUrl;               // 0x30
+    uint32_t debugType;              // 0x48
+    char _align_0x4C[4];             // 0x4C
+    stdstring orientation;           // 0x50
+    stdstring pkgDirPath;            // 0x68
+    stdstring publicPkgDirPath;      // 0x80
+    uint32_t publicVer;              // 0x98
+    char _align_0x9C[4];             // 0x9C
+    stdstring moduleListInfo;        // 0xA0
+    stdstring dataPath;              // 0xB8
+    stdstring app_icon_path;         // 0xD0  tmpPath?
+    stdstring username;              // 0xE8
+    stdstring nickName;              // 0x100
+    stdstring signature;             // 0x118
+    stdstring logPath;               // 0x130
+    stdstring clientJsExtInfo;       // 0x148
+    stdstring operationInfo;         // 0x160
+    stdstring passThroughInfo;       // 0x178
+    stdstring shareName;             // 0x190
+    stdstring shareKey;              // 0x1A8
+    stdstring remote_debug_endpoint; // 0x1C0
+    uint32_t appVersion;             // 0x1D8
+    uint32_t versionState;           // 0x1DC
+    uint16_t width;                  // 0x1E0
+    uint16_t height;                 // 0x1E2
+    uint32_t sysBtn;                 // 0x1E4
+    uint32_t launchScene;            // 0x1E8
+    char _align_0x1EC[4];            // 0x1EC
+    stdstring appId_;                // 0x1F0
+    stdstring extraData;             // 0x208
+    stdstring privateExtraData;      // 0x220
+    stdstring messageExtraData;      // 0x238
+    stdstring url;                   // 0x250
+    stdstring agentId;               // 0x268
+    uint32_t sourceType;             // 0x280
+    char _align_0x284[4];            // 0x284
+    stdstring openapiInvokeData;     // 0x288
+    stdstring transitiveData;        // 0x2A0
+    stdstring enterPath;             // 0x2B8
+    uint32_t originalFlag;           // 0x2D0
+    char _align_0x2D4[4];            // 0x2D4
+    stdstring originalRedirectUrl;   // 0x2D8
+    bool isNativeView;               // 0x2F0
+    char _align_0x2F1[3];            // 0x2F1
+    uint32_t version_type;           // 0x2F4
+    char _align_0x2F8[0x18];         // 0x2F8
+    stdstring uin;                   // 0x310
+    stdstring deviceType;            // 0x328
+    uint32_t clientVersion;          // 0x340
+    bool isTest;                     // 0x344
+    char _align_0x345[3];            // 0x345
+    stdstring wxIconUrl;             // 0x348
+    stdstring wxNickName;            // 0x360
+    uint32_t productId;              // 0x378
+    char _align_0x37C[4];            // 0x37C
+    stdstring commonJsInfo;          // 0x380
+    bool isMiniGame;                 // 0x398
+    char _align_0x399[7];            // 0x399
+    stdstring ozone_platform;        // 0x3A0
+    stdstring pluginDir;             // 0x3B8
+    stdstring hostAppId;             // 0x3D0
+} *_AppletInitConf;
+typedef uintptr_t (*FUNC_LaunchApplet)(uintptr_t a1, uintptr_t a2, _AppletInitConf conf);
+FUNC_LaunchApplet fpLaunchApplet = NULL;
+FUNC_LaunchApplet LaunchApplet = NULL;
+uintptr_t DetourLaunchApplet(uintptr_t a1, uintptr_t a2, _AppletInitConf conf){
+    replaceString(conf->commonJsInfo._long_buf, "\"enable_vconsole\":false", "\"enable_vconsole\": true");
+    pprintf("[*] %s", conf->commonJsInfo._long_buf);
+    return fpLaunchApplet(a1, a2, conf);
+}
+HK_DEFINE(LaunchApplet)
+
+typedef int (WINAPI *FUNC_OnOperateWXData)(void*,void*,void*,void*,void*,void*,void*,void*);
+FUNC_OnOperateWXData fpOnOperateWXData = NULL;
+FUNC_OnOperateWXData OnOperateWXData = NULL;
+int WINAPI DetourOnOperateWXData(void* a,void* b,void* c,void* d,void* e,void* f,void* g,void* h){
+    unsigned long long value;
+    asm("mov %%rdx, %0" : "=r" (value));
+    uintptr_t* temp = (uintptr_t*)value;
+    uintptr_t addr = *temp;
+    char* str = (char*)addr;
+    pprintf("[*] OnOperate: %s", str);
+    return fpOnOperateWXData(a,b,c,d,e,f,g,h);
+}
+HK_DEFINE(OnOperateWXData)
+
+typedef int (WINAPI *FUNC_OperateWXData)(void*,void*,void*,void*,void*,void*,void*,void*);
+FUNC_OperateWXData fpOperateWXData = NULL;
+FUNC_OperateWXData OperateWXData = NULL;
+int WINAPI DetourOperateWXData(void* a,void* b,void* c,void* d,void* e,void* f,void* g,void* h){
+    unsigned long long value;
+    asm("mov %%r8, %0" : "=r" (value));
+    uintptr_t* temp = (uintptr_t*)(value+0x18);
+    uintptr_t addr = *temp;
+    char* str = (char*)addr;
+    pprintf("[*] Operate: %s", str);
+    return fpOperateWXData(a,b,c,d,e,f,g,h);
+}
+HK_DEFINE(OperateWXData)
+
+char* get_version(char* str){
+    int length;
+    char** tokens;
+    // 处理字符串获取子字符串
+    // "C:\Users\riversec\AppData\Roaming\Tencent\WeChat\XPlugin\Plugins\RadiumWMPF\8519\extracted\runtime\WeChatAppEx.exe";
+    char rslash[2] = {92, 0};
+    char* extracted = "extracted";
+    tokens = _split_str_substr(str, concats(rslash, extracted, rslash), &length);
+    tokens = _split_str_substr(tokens[0], rslash, &length);
+    char* version = tokens[length-1];
+    return version;
+}
+
+
+
+
+
+
+
+
+
+
+typedef int (WINAPI *FUNC_F9xxx_10)(void*,void*,void*,void*,void*,void*,void*,void*);
+FUNC_F9xxx_10 fpF9xxx_10 = NULL;
+FUNC_F9xxx_10 F9xxx_10 = NULL;
+int WINAPI DetourF9xxx_10(void* a,void* b,void* c,void* d,void* e,void* f,void* g,void* h){
+    unsigned long long value;
+    asm("mov %%r8, %0" : "=r" (value));
+    uintptr_t* temp = (uintptr_t*)(value+0x380);
+    uintptr_t addr = *temp;
+    char* str = (char*)addr;
+    replaceString(str, "\"enable_vconsole\":false", "\"enable_vconsole\": true");
+    pprintf("[*] Operate: %s", str);
+    return fpF9xxx_10(a,b,c,d,e,f,g,h);
+}
+HK_DEFINE(F9xxx_10)
+
+typedef int (WINAPI *FUNC_F9xxx_11)(void*,void*,void*,void*,void*,void*,void*,void*);
+FUNC_F9xxx_11 fpF9xxx_11 = NULL;
+FUNC_F9xxx_11 F9xxx_11 = NULL;
+int WINAPI DetourF9xxx_11(void* a,void* b,void* c,void* d,void* e,void* f,void* g,void* h){
+    unsigned long long value;
+    asm("mov %%r14, %0" : "=r" (value));
+    uintptr_t* temp = (uintptr_t*)(value-0x70);
+    uintptr_t addr = *temp;
+    char* str = (char*)addr;
+    replaceString(str, "\"enable_vconsole\":false", "\"enable_vconsole\": true");
+    replaceString(str, "\"frameset\":false", "\"frameset\": true");
+    pprintf("[*] Operate: %s", str);
+    return fpF9xxx_11(a,b,c,d,e,f,g,h);
+}
+HK_DEFINE(F9xxx_11)
+
+
+
+
+
+typedef BOOL(WINAPI* FUNC_CreateProcessW)(LPCWSTR lpApplicationName,LPWSTR lpCommandLine,LPSECURITY_ATTRIBUTES lpProcessAttributes,LPSECURITY_ATTRIBUTES lpThreadAttributes,BOOL bInheritHandles,DWORD dwCreationFlags,LPVOID lpEnvironment,LPCWSTR lpCurrentDirectory,LPSTARTUPINFOW lpStartupInfo,LPPROCESS_INFORMATION lpProcessInformation);
+FUNC_CreateProcessW fpCreateProcessW = NULL;
+BOOL WINAPI DetourCreateProcessW(LPCWSTR lpApplicationName,LPWSTR lpCommandLine,LPSECURITY_ATTRIBUTES lpProcessAttributes,LPSECURITY_ATTRIBUTES lpThreadAttributes,BOOL bInheritHandles,DWORD dwCreationFlags,LPVOID lpEnvironment,LPCWSTR lpCurrentDirectory,LPSTARTUPINFOW lpStartupInfo,LPPROCESS_INFORMATION lpProcessInformation) {
+    pprintf("CreateProcessW HOOKED: %ls\n", lpApplicationName ? lpApplicationName : lpCommandLine);
+    return fpCreateProcessW(lpApplicationName, lpCommandLine, lpProcessAttributes,lpThreadAttributes, bInheritHandles, dwCreationFlags,lpEnvironment, lpCurrentDirectory, lpStartupInfo,lpProcessInformation);
+}
+HK_DEFINE(CreateProcessW)
+
+#include <shlwapi.h>
+DWORD WINAPI ThreadProc_WeChatAppEx(LPVOID lpThreadParameter){
+    TCHAR szCurName[MAX_PATH];
+    GetModuleFileName(NULL, szCurName, MAX_PATH);
+    char* cmd = GetCommandLineA();
+    int pid = GetCurrentProcessId();
+    PathStripPath(szCurName);
+    pprintf("[*] %s", szCurName);
+    pprintf("[*] pid: %d ==> hex: 0x%x", pid, pid);
+    pprintf("[*] [cmd]:%s", cmd);
+    pprintf("[*] [version]:%s", get_version(cmd));
+    FindPatternWithWildcard("*", NULL);
+    if (atoi(get_version(cmd)) >= 9000 ){
+        DWORD_PTR addr10;
+        DWORD_PTR addr11;
+        addr11 = FindPatternWithWildcard("41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ** ** ** ** 0F 29 B4 24 ** ** ** ** 49 89 D6 48 89 CE 48 8B 05 ** ** ** ** 48 31 E0 48 89 84 24 ** ** ** ** 48 BD", NULL);
+        if (!addr11){
+            addr10 = FindPatternWithWildcard("41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ** ** ** ** 0F 29 B4 24 ** ** ** ** 4C 89 C6 48 89 D3 48 89 CD 48 8B 05 ** ** ** ** 48 31 E0 48 89 84 24 ** ** 00 00 83 3D ** ** ** ** 02 7F **", NULL);
+        }
+        DWORD_PTR addr2 = FindPatternWithWildcard("** ** ** 00 2F 64 65 76 74 6F 6F 6C 73 2F 77 65 63 68 61 74 5F 25 73 2E 68 74 6D 6C 00 2E 2E 5C", NULL); 
+        DWORD_PTR addr4 = FindPatternWithWildcard("64 65 76 54 6F 6F 6C 73 00 70 65 72 66 49 6E 66 6F 00 65 6E 67 69 6E 65 53 74 61 72 74 00 65 6E 67 69 6E 65 52 65 61 64 79 00", NULL);
+        char* change2 = "77 65 62";
+        char* cache2;
+        char* change4 = "63 65";
+        char* cache4;
+        if (!addr10 && !addr11){ pprintf("[*] not find LAppAddr2.1."); return 0; }
+        if (!addr2){ pprintf("[*] not find LAppAddr2.2."); return 0; }
+        if (addr10){
+            addr2 = addr2;
+            F9xxx_10 = (FUNC_F9xxx_10)addr10;
+            init();
+            hookF9xxx_10();
+            pprintf("[*] hook LApp2 10 success!");
+            if (addr2 && ReadMemoryByte(addr2) == 0x61){
+                cache2 = ReadMemoryStrBytes(addr2, 3);
+                WriteMemoryStrBytes(addr2, change2);
+                pprintf("[*] change devtools check. %s ==> %s", cache2, change2);
+            }
+            if (addr4 && ReadMemoryByte(addr4) == 0x64){
+                cache4 = ReadMemoryStrBytes(addr4, 2);
+                WriteMemoryStrBytes(addr4, change4);
+                pprintf("[*] change devtools check. %s ==> %s", cache4, change4);
+            }
+            for (int i = 0; i < 12; ++i) {
+                pprintf("[*] after %d sec, auto unhook.", 12-i);
+                Sleep(1000);
+            }
+            unhookF9xxx_10();
+            uninit();
+        }else if (addr11){
+            addr2 = addr2;
+            F9xxx_11 = (FUNC_F9xxx_11)addr11;
+            init();
+            hookF9xxx_11();
+            pprintf("[*] hook LApp2 11 success!");
+            if (addr2 && ReadMemoryByte(addr2) == 0x61){
+                cache2 = ReadMemoryStrBytes(addr2, 3);
+                WriteMemoryStrBytes(addr2, change2);
+                pprintf("[*] change devtools check. %s ==> %s", cache2, change2);
+            }
+            if (addr4 && ReadMemoryByte(addr4) == 0x64){
+                cache4 = ReadMemoryStrBytes(addr4, 2);
+                WriteMemoryStrBytes(addr4, change4);
+                pprintf("[*] change devtools check. %s ==> %s", cache4, change4);
+            }
+            for (int i = 0; i < 12; ++i) {
+                pprintf("[*] after %d sec, auto unhook.", 12-i);
+                Sleep(1000);
+            }
+            unhookF9xxx_11();
+            uninit();
+        }
+        if (addr2 && ReadMemoryByte(addr2) == 0x77){
+            WriteMemoryStrBytes(addr2, cache2);
+            pprintf("[*] repair web.html.");
+        }
+        if (addr4 && ReadMemoryByte(addr4) == 0x63){
+            WriteMemoryStrBytes(addr4, cache4);
+            pprintf("[*] repair devtools check.");
+        }
+    }else{
+        DWORD_PTR addr1 = FindPatternWithWildcard("41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC A8 02 00 00 0F 29 B4 24 90 02 00 00 4D 89 C5 49 89 D7 49 89 CE 48 8B 05", NULL);
+        DWORD_PTR addr2 = FindPatternWithWildcard("74 09 48 8D 15 ** ** ** ** EB 07 48 8D 15 ** ** ** ** 48 8D BC 24 ** ** ** ** 48 89 F9 E8 ** ** ** ** 0F B6 47 17 84 C0 48 8B 0F 48 0F 49 CF 48", NULL);
+        DWORD_PTR addr3 = FindPatternWithWildcard("8A 05 ** ** ** ** 48 83 C4 28 C3 48 8D 0D ** ** ** ** E8 ** ** ** ** 83 3D ** ** ** ** FF 75 E0 E8 ** ** ** ** 48 8D 15 ** ** ** ** 48 89 C1 E8 ** ** ** ** 89 C1", NULL);
+        DWORD_PTR addr4 = FindPatternWithWildcard("64 65 76 54 6F 6F 6C 73 00 70 65 72 66 49 6E 66 6F 00 65 6E 67 69 6E 65 53 74 61 72 74 00 65 6E 67 69 6E 65 52 65 61 64 79 00", NULL);
+        char* change4 = "63 65";
+        char* cache4;
+        char* change2 = "EB 00";
+        char* change3 = "B0 01 90 90 90 90";
+        char* cache2;
+        char* cache3;
+        if(!addr1){
+            pprintf("[*] not find LAppAddr.");
+            return 0;
+        }
+        if(!addr2){
+            pprintf("[*] not find config app.html/web.html addr.");
+        }
+        if(!addr3){
+            pprintf("[*] addr3 not find.");
+        }
+        if (addr2 && ReadMemoryByte(addr2) == 0x74){
+            cache2 = ReadMemoryStrBytes(addr2, 2);
+            WriteMemoryStrBytes(addr2, change2);
+            pprintf("[*] change web.html. %s ==> %s", cache2, change2);
+        }
+        if (addr3 && ReadMemoryByte(addr3) == 0x8A){
+            cache3 = ReadMemoryStrBytes(addr3, 6);
+            WriteMemoryStrBytes(addr3, change3);
+            pprintf("[*] change xweb. %s ==> %s", cache3, change3);
+        }
+        if (addr4 && ReadMemoryByte(addr4) == 0x64){
+            cache4 = ReadMemoryStrBytes(addr4, 2);
+            WriteMemoryStrBytes(addr4, change4);
+            pprintf("[*] change devtools check. %s ==> %s", cache4, change4);
+        }
+        LaunchApplet = (FUNC_LaunchApplet)addr1;
+        init();
+        hookLaunchApplet();
+        pprintf("[*] hook LApp success!");
+        for (int i = 0; i < 15; ++i) {
+            pprintf("[*] after %d sec, auto unhook.", 15-i);
+            Sleep(1000);
+        }
+        unhookLaunchApplet();
+        uninit();
+        pprintf("[*] unhook LApp success!");
+        if (addr2 && ReadMemoryByte(addr2) == 0xEB){
+            WriteMemoryStrBytes(addr2, cache2);
+            pprintf("[*] repair web.html.");
+        }
+        if (addr3 && ReadMemoryByte(addr3) == 0xB0){
+            WriteMemoryStrBytes(addr3, cache3);
+            pprintf("[*] repair xweb.");
+        }
+        if (addr4 && ReadMemoryByte(addr4) == 0x63){
+            WriteMemoryStrBytes(addr4, cache4);
+            pprintf("[*] repair devtools check.");
+        }
+    }
+    return 0;
+}
+
+DWORD WINAPI ThreadProc_WeChatAppOpApi(LPVOID lpThreadParameter){
+    TCHAR szCurName[MAX_PATH];
+    GetModuleFileName(NULL, szCurName, MAX_PATH);
+    char* cmd = GetCommandLineA();
+    int pid = GetCurrentProcessId();
+    PathStripPath(szCurName);
+    pprintf("[*] %s", szCurName);
+    pprintf("[*] pid: %d ==> hex: 0x%x", pid, pid);
+    pprintf("[*] [cmd]:%s", cmd);
+    pprintf("[*] [version]:%s", get_version(cmd));
+    DWORD_PTR addr4 = FindPatternWithWildcard("41 57 41 56 56 57 53 48 83 EC 40 49 89 D7 48 89 CB 48 8B 05 ** ** ** ** 48 31 E0 48 89 44 24 38 48 8D 71 28 48 8B 79 38 48 89 F1 E8 ** ** ** ** 84 C0 74 44 48 83 7B 30 00 74 3D 4C 8B 73 20 48 89 F1 E8 ** ** ** **", NULL);
+    DWORD_PTR addr5 = FindPatternWithWildcard("41 57 41 56 41 55 41 54 56 57 55 53 48 81 EC ** ** ** ** 4D 89 CE 4D 89 C7 49 89 D4 49 89 CD 48 8B 05 ** ** ** ** 48 31 E0 48 89 84 24 ** ** ** ** 48 89 94 24 ** ** ** ** 48 BE AA AA AA AA AA AA AA AA 48 8D 9C 24 ** ** ** ** 48 89 33 49 8D 50 18 48 89 D9", NULL);
+    if (!addr4){
+        pprintf("[*] not find api addr On.");
+        return 0;
+    }
+    if (!addr5){
+        pprintf("[*] not find api addr.");
+        return 0;
+    }
+    OnOperateWXData = (FUNC_OnOperateWXData)addr4;
+    OperateWXData = (FUNC_OperateWXData)addr5;
+    pprintf("[*] %s", "only hook 30 sec.");
+    init();
+    hookOperateWXData();
+    hookOnOperateWXData();
+    for (int i = 0; i < 30; ++i) {
+        Sleep(1000);
+    }
+    unhookOperateWXData();
+    unhookOnOperateWXData();
+    uninit();
+    pprintf("[*] %s", "unhook api.");
+    return 0;
+}
+
+#include <windows.h>
+#include <shlwapi.h>
+#pragma comment(lib, "shlwapi")
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
+    HANDLE hThread;
+    switch (ul_reason_for_call) {
+    case DLL_PROCESS_ATTACH:
+        if (hThread = CreateThread(NULL, 0, ThreadProc_WeChatAppEx, NULL, 0, NULL)){ CloseHandle(hThread); }
+        // if (hThread = CreateThread(NULL, 0, ThreadProc_WeChatAppOpApi, NULL, 0, NULL)){ CloseHandle(hThread); }
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
+}
+
+// ===== before is dll ===== // this line of comments cannot be deleted
+
+#include <stdio.h>
+#include <windows.h>
+#include <winternl.h>
+#include <tlhelp32.h>
+#include <string.h>
+#include <stdio.h>
+
+#define IS_32 1
+#define IS_64 2
+typedef struct { LPVOID base; BOOL reloc; LPVOID Get_Proc; LPVOID Load_DLL; } PE_INFO, *LPE_INFO;
+void v_AdjustPe32(LPE_INFO pe) { PIMAGE_DOS_HEADER dos; PIMAGE_NT_HEADERS nt; LPVOID base; PIMAGE_IMPORT_DESCRIPTOR import; PIMAGE_THUNK_DATA Othunk,Fthunk; PIMAGE_BASE_RELOCATION reloc; PIMAGE_TLS_DIRECTORY        tls; PIMAGE_TLS_CALLBACK*        CallBack; ULONG*                      p,delta; BOOL        (*DLL_Entry)    (LPVOID, DWORD, LPVOID); LPVOID      (*Load_DLL)     (LPSTR); LPVOID      (*Get_Proc)     (LPVOID, LPSTR); base       = pe->base; Load_DLL   = pe->Load_DLL; Get_Proc   = pe->Get_Proc; dos        = (PIMAGE_DOS_HEADER)base; nt         = (PIMAGE_NT_HEADERS)(base + dos->e_lfanew); DLL_Entry  = base+nt->OptionalHeader.AddressOfEntryPoint; if(pe->reloc){ if(nt->OptionalHeader.DataDirectory[5].VirtualAddress != 0){ delta = (ULONG)base-nt->OptionalHeader.ImageBase; reloc = (PIMAGE_BASE_RELOCATION)(base+nt->OptionalHeader.DataDirectory[5].VirtualAddress); while(reloc->VirtualAddress) { LPVOID  dest    = base+reloc->VirtualAddress; int     nEntry  = (reloc->SizeOfBlock-sizeof(IMAGE_BASE_RELOCATION))/2; PWORD   data    = (PWORD)((LPVOID)reloc+sizeof(IMAGE_BASE_RELOCATION)); int i; for(i = 0; i<nEntry; i++,data++) { if(((*data) >> 12) == 10) { p = (PULONG)(dest+((*data)&0xfff)); *p += delta; } } reloc = (PIMAGE_BASE_RELOCATION)((LPVOID)reloc+reloc->SizeOfBlock); } } } if(nt->OptionalHeader.DataDirectory[1].VirtualAddress != 0){ import = (PIMAGE_IMPORT_DESCRIPTOR)(base+nt->OptionalHeader.DataDirectory[1].VirtualAddress); while(import->Name) { LPVOID dll = (*Load_DLL)(base+import->Name); Othunk = (PIMAGE_THUNK_DATA)(base+import->OriginalFirstThunk); Fthunk = (PIMAGE_THUNK_DATA)(base+import->FirstThunk); if(!import->OriginalFirstThunk){ Othunk = Fthunk; } while(Othunk->u1.AddressOfData) { if(Othunk->u1.Ordinal & IMAGE_ORDINAL_FLAG) { *(ULONG *)Fthunk = (ULONG)(*Get_Proc)(dll,(LPSTR)IMAGE_ORDINAL(Othunk->u1.Ordinal)); } else { PIMAGE_IMPORT_BY_NAME fnm = (PIMAGE_IMPORT_BY_NAME)(base+Othunk->u1.AddressOfData); *(PULONG)Fthunk = (ULONG)(*Get_Proc)(dll,fnm->Name); } Othunk++; Fthunk++; } import++; } } if(nt->OptionalHeader.DataDirectory[9].VirtualAddress != 0){ tls = (PIMAGE_TLS_DIRECTORY)(base+nt->OptionalHeader.DataDirectory[9].VirtualAddress); if(tls->AddressOfCallBacks != 0){ CallBack = (PIMAGE_TLS_CALLBACK *)(tls->AddressOfCallBacks); while(*CallBack) { (*CallBack)(base,DLL_PROCESS_ATTACH,NULL); CallBack++; } } } (*DLL_Entry)(base,DLL_PROCESS_ATTACH,NULL); }
+void v_AdjustPe32_END(){};
+void v_AdjustPe64(LPE_INFO pe) { PIMAGE_DOS_HEADER dos; PIMAGE_NT_HEADERS nt; LPVOID base; PIMAGE_IMPORT_DESCRIPTOR import; PIMAGE_THUNK_DATA Othunk,Fthunk; PIMAGE_BASE_RELOCATION reloc; PIMAGE_TLS_DIRECTORY        tls; PIMAGE_TLS_CALLBACK*        CallBack; ULONGLONG*                  p,delta; BOOL        (*DLL_Entry)    (LPVOID, DWORD, LPVOID); LPVOID      (*Load_DLL)     (LPSTR); LPVOID      (*Get_Proc)     (LPVOID, LPSTR); base       = pe->base; Load_DLL   = pe->Load_DLL; Get_Proc   = pe->Get_Proc; dos        = (PIMAGE_DOS_HEADER)base; nt         = (PIMAGE_NT_HEADERS)(base + dos->e_lfanew); DLL_Entry  = base+nt->OptionalHeader.AddressOfEntryPoint; if(pe->reloc){ if(nt->OptionalHeader.DataDirectory[5].VirtualAddress != 0){ delta = (ULONGLONG)base-nt->OptionalHeader.ImageBase; reloc = (PIMAGE_BASE_RELOCATION)(base+nt->OptionalHeader.DataDirectory[5].VirtualAddress); while(reloc->VirtualAddress) { LPVOID  dest    = base+reloc->VirtualAddress; int     nEntry  = (reloc->SizeOfBlock-sizeof(IMAGE_BASE_RELOCATION))/2; PWORD   data    = (PWORD)((LPVOID)reloc+sizeof(IMAGE_BASE_RELOCATION)); int i; for(i = 0; i<nEntry; i++,data++) { if(((*data) >> 12) == 10) { p = (PULONGLONG)(dest+((*data)&0xfff)); *p += delta; } } reloc = (PIMAGE_BASE_RELOCATION)((LPVOID)reloc+reloc->SizeOfBlock); } } } if(nt->OptionalHeader.DataDirectory[1].VirtualAddress != 0){ import = (PIMAGE_IMPORT_DESCRIPTOR)(base+nt->OptionalHeader.DataDirectory[1].VirtualAddress); while(import->Name) { LPVOID dll = (*Load_DLL)(base+import->Name); Othunk = (PIMAGE_THUNK_DATA)(base+import->OriginalFirstThunk); Fthunk = (PIMAGE_THUNK_DATA)(base+import->FirstThunk); if(!import->OriginalFirstThunk){ Othunk = Fthunk; } while(Othunk->u1.AddressOfData) { if(Othunk->u1.Ordinal & IMAGE_ORDINAL_FLAG) { *(ULONGLONG *)Fthunk = (ULONGLONG)(*Get_Proc)(dll,(LPSTR)IMAGE_ORDINAL(Othunk->u1.Ordinal)); } else { PIMAGE_IMPORT_BY_NAME fnm = (PIMAGE_IMPORT_BY_NAME)(base+Othunk->u1.AddressOfData); *(PULONGLONG)Fthunk = (ULONGLONG)(*Get_Proc)(dll,fnm->Name); } Othunk++; Fthunk++; } import++; } } if(nt->OptionalHeader.DataDirectory[9].VirtualAddress != 0){ tls = (PIMAGE_TLS_DIRECTORY)(base+nt->OptionalHeader.DataDirectory[9].VirtualAddress); if(tls->AddressOfCallBacks != 0){ CallBack = (PIMAGE_TLS_CALLBACK *)(tls->AddressOfCallBacks); while(*CallBack) { (*CallBack)(base,DLL_PROCESS_ATTACH,NULL); CallBack++; } } } (*DLL_Entry)(base,DLL_PROCESS_ATTACH,NULL); }
+void v_AdjustPe64_END(){};
+int v_InjectDllRef(LPVOID base, HANDLE proc){ LPVOID Rbase,Adj; DWORD Func_Size; PE_INFO pe; PIMAGE_DOS_HEADER dos; PIMAGE_SECTION_HEADER sec; PIMAGE_NT_HEADERS nt; printf("[+] Opening File...\n"); if(base == NULL) { printf("[-] File I/O Error\n"); return 0; } dos = (PIMAGE_DOS_HEADER)base; if(dos->e_magic != 23117) { printf("[-] Invalid File\n"); return 0; } nt = (PIMAGE_NT_HEADERS)(base + dos->e_lfanew); sec = (PIMAGE_SECTION_HEADER)((LPVOID)nt + 24 + nt->FileHeader.SizeOfOptionalHeader); int TYPE = 0; if(nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC) { TYPE = IS_32; printf("[+] This dll is 32 bit pe\n"); } else if(nt->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) { TYPE = IS_64; printf("[+] This dll is 64 bit pe\n"); } else{ printf("[-] This dll is not 32/64 bit pe\n"); return 0; } printf("[+] Open Process.....\n"); if(proc == NULL) { printf("[-] Failed To Open Process\n"); return 0; } printf("[+] Allocating Memory Into Remote Process\n"); pe.reloc = 0; if((Rbase = VirtualAllocEx(proc,(LPVOID)nt->OptionalHeader.ImageBase,nt->OptionalHeader.SizeOfImage,MEM_COMMIT|MEM_RESERVE,PAGE_EXECUTE_READWRITE)) == NULL) { printf(" [!] Failed To Allocate Memory AT %#p\n", nt->OptionalHeader.ImageBase); printf(" [!] Trying Alternative\n"); pe.reloc = 1; if((Rbase = VirtualAllocEx(proc,NULL,nt->OptionalHeader.SizeOfImage,MEM_COMMIT|MEM_RESERVE,PAGE_EXECUTE_READWRITE)) == NULL) { printf("[-] Failed To Allocate Memory Into Remote Process\n"); return 0; } } printf("[+] Copying Headers\n"); WriteProcessMemory(proc,Rbase,base,nt->OptionalHeader.SizeOfHeaders,NULL); printf("[+] Copying Sections...\n"); for(int i = 0; i<nt->FileHeader.NumberOfSections; i++) { WriteProcessMemory(proc, Rbase+sec->VirtualAddress, base+sec->PointerToRawData, sec->SizeOfRawData, NULL); sec++; } if (TYPE == IS_32){ Func_Size = (DWORD)((ULONG)v_AdjustPe32_END-(ULONG)v_AdjustPe32); }else if (TYPE == IS_64){ Func_Size = (DWORD)((ULONGLONG)v_AdjustPe64_END-(ULONGLONG)v_AdjustPe64); } pe.base = Rbase; pe.Get_Proc = GetProcAddress(LoadLibraryA("kernel32"), "GetProcAddress"); pe.Load_DLL = GetProcAddress(LoadLibraryA("kernel32"), "LoadLibraryA"); Adj = VirtualAllocEx(proc, NULL, Func_Size+sizeof(pe), MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE); if(Adj == NULL) { printf("[-] Failed To Allocate Memory for PE adjusting\n"); VirtualFreeEx(proc, Rbase, 0, MEM_RELEASE); return 0; } WriteProcessMemory(proc, Adj, &pe, sizeof(pe), NULL); if (TYPE == IS_32){ WriteProcessMemory(proc, Adj+sizeof(pe), v_AdjustPe32, Func_Size, NULL); }else if (TYPE == IS_64){ WriteProcessMemory(proc, Adj+sizeof(pe), v_AdjustPe64, Func_Size, NULL); } if(!CreateRemoteThread(proc, NULL, 0, (LPTHREAD_START_ROUTINE)(Adj+sizeof(pe)), Adj, 0, NULL)){ printf("[-] Failed TO Adjust PE\n"); }else{ printf("[+] Adjusting PE And Executing....\n"); } return 0; }
+// @placeholder title
+#pragma comment(lib, "Advapi32")
+NTSTATUS WINAPI NtQueryInformationProcess( HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
+typedef NTSTATUS (WINAPI *PFUN_NtQueryInformationProcess)( HANDLE ProcessHandle, PROCESSINFOCLASS ProcessInformationClass, PVOID ProcessInformation, ULONG ProcessInformationLength, PULONG ReturnLength);
+LPVOID v_ReadInMemory(char* FileName) { HANDLE f,h; LPVOID m; if ((f = CreateFileA( FileName, GENERIC_READ, FILE_SHARE_READ, 0,  OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL) ) == INVALID_HANDLE_VALUE){ return NULL; } if ((h = CreateFileMappingA(f,NULL,PAGE_READONLY,0,0,NULL)) == NULL){ return NULL; } if ((m = MapViewOfFile(h,FILE_MAP_READ,0,0,0)) == NULL){ return NULL; }else { return m; } }
+int v_getProcessCommandLineByHandle(HANDLE process_handle, WCHAR** result){ PROCESS_BASIC_INFORMATION pbi = {0}; HMODULE hModule = LoadLibraryA("Ntdll.dll"); PFUN_NtQueryInformationProcess pfun =  (PFUN_NtQueryInformationProcess)GetProcAddress(hModule, "NtQueryInformationProcess"); NTSTATUS status = pfun(process_handle, ProcessBasicInformation, (PVOID)&pbi, sizeof(pbi), NULL); if (!pbi.PebBaseAddress){ return 1; } PPEB peb = pbi.PebBaseAddress; HANDLE procesHandle; procesHandle = process_handle; PEB stPeb; RTL_USER_PROCESS_PARAMETERS stProParam; DWORD dwDummy; if (!ReadProcessMemory(procesHandle, pbi.PebBaseAddress, &stPeb, sizeof(stPeb), NULL)){ return 2; } if (!ReadProcessMemory(procesHandle, stPeb.ProcessParameters, &stProParam, sizeof(stProParam), NULL)) { return 3; } LPVOID lpAddress; DWORD dwSize; lpAddress = stProParam.CommandLine.Buffer; dwSize = stProParam.CommandLine.Length; WCHAR* pszCmdLineBuffer = malloc((dwSize + 1) * sizeof(WCHAR)); ZeroMemory(pszCmdLineBuffer, (dwSize + 1) * sizeof(WCHAR)); if (!ReadProcessMemory(procesHandle, lpAddress, (LPVOID)pszCmdLineBuffer, dwSize, NULL)){ return 4; } *result = pszCmdLineBuffer; return 0; }
+int v_getProcessCommandLineById(DWORD pid, WCHAR** result){ HANDLE handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pid); return v_getProcessCommandLineByHandle(handle, result); }
+HANDLE v_EnumProcessAll() { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); }else{ printf("[*] %s[%d] parentID:%d ---> [getCommandLineError]\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_EnumProcessByName(char* process_name) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_EnumProcessByNameAndCommand(char* process_name, WCHAR* cmd) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ if (wcsstr(result, cmd)){ printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); } } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_EnumProcessByNameAndPosRevCommand(char* process_name, WCHAR* cmd1, WCHAR* cmd2) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ if (wcsstr(result, cmd1) && (!wcsstr(result, cmd2))){ printf("[*] %s[%d] parentID:%d ---> %ls\n", ps.szExeFile, ps.th32ProcessID, ps.th32ParentProcessID, result); } } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_FindProcessByName(char* process_name) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } do { if(!strcmp(process_name,ps.szExeFile)) { found = 1; break; } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_FindProcessByNameAndCommand(char* process_name, WCHAR* cmd) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ if (wcsstr(result, cmd)){ printf("[*] %s[%d] %ls\n", ps.szExeFile, ps.th32ProcessID, result); found = 1; break; } } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+HANDLE v_FindProcessByNameAndPosRevCommand(char* process_name, WCHAR* cmd1, WCHAR* cmd2) { HANDLE snap, proc; PROCESSENTRY32 ps; BOOL found = 0; ps.dwSize = sizeof(ps); if((snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) == INVALID_HANDLE_VALUE){ return NULL; } if(!Process32First(snap,&ps)){ return NULL; } WCHAR* result; do { if (!v_getProcessCommandLineById(ps.th32ProcessID, &result)){ if (!strcmp(process_name, ps.szExeFile)){ if (wcsstr(result, cmd1) && (!wcsstr(result, cmd2))){ printf("[*] %s[%d] %ls\n", ps.szExeFile, ps.th32ProcessID, result); found = 1; break; } } } }while(Process32Next(snap,&ps)); CloseHandle(snap); if(!found) return NULL; if((proc = OpenProcess(PROCESS_ALL_ACCESS,0,ps.th32ProcessID)) == NULL) { return NULL; }else{ return proc; } }
+BOOL v_AdjustPrivileges() { HANDLE hToken = NULL; TOKEN_PRIVILEGES tp; TOKEN_PRIVILEGES oldtp; DWORD dwSize = sizeof(TOKEN_PRIVILEGES); LUID luid; OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &hToken); if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &luid)) { CloseHandle(hToken); return FALSE; } ZeroMemory(&tp, sizeof(tp)); tp.PrivilegeCount = 1; tp.Privileges[0].Luid = luid; tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; if (!AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), &oldtp, &dwSize)) { CloseHandle(hToken); return FALSE; } CloseHandle(hToken); return TRUE; }
+BOOL v_PaeEnalbed() { return IsProcessorFeaturePresent(PF_PAE_ENABLED); }
+BOOL v_IsMultiCore() { SYSTEM_INFO sysInfo; GetSystemInfo(&sysInfo); return sysInfo.dwNumberOfProcessors != 1; }
+int v_inject() {
+    printf("@inject");
+}
+
+
+
+
+
+
+
+
+
+
+#include <stdio.h>
+#include <winsock2.h>
+#include <windows.h>
+#pragma comment(lib,"ws2_32")
+USHORT C_DBG_PORT = 18080;
+void _AddLogWindow(TCHAR*);
+void start_pipe_server(){ WSADATA data; WSAStartup(MAKEWORD(2,2),&data); SOCKET listener = socket(AF_INET,SOCK_STREAM,0); SOCKADDR_IN addr; addr.sin_family = AF_INET; addr.sin_port = htons(C_DBG_PORT); addr.sin_addr.s_addr = ADDR_ANY; bind(listener, (SOCKADDR*)&addr, sizeof(addr)); listen(listener, SOMAXCONN); printf("[*] debugger start.\n"); char request[1024*7]; SOCKET client; int index=0; while(TRUE){ memset(request, 0, sizeof(request)); client = accept(listener,NULL,NULL); recv(client, request, 1024*7, 0); _AddLogWindow(request); closesocket(client); } WSACleanup(); }
+
+#include <windows.h>
+#include <stdio.h>
+
+#define ID_EDITBOX 1
+#define ID_TXTINPT 2
+#define ID_PLAYBTN 3
+#define ID_PLAYBTN2 4
+static HWND hwndChild[65535];
+TCHAR outBuffer[1024*10];
+HWND outhwnd;
+int log_index = 0;
+void _AddLogWindow(TCHAR* addstr){ log_index++; GetWindowText( outhwnd, outBuffer, 1024*10 ); if (strlen(outBuffer) == 0){ sprintf(outBuffer, "%s", addstr); }else{ sprintf(outBuffer, "%s\r\n%s", outBuffer, addstr); } SetWindowText( outhwnd, outBuffer ); }
+int _WindowSwitch( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam ){
+    HDC          hdc;
+    PAINTSTRUCT  ps;
+    RECT         rect;
+    static TCHAR szInput[256];
+    static TCHAR szLineNum[32];
+    static int   iLength;
+    HINSTANCE hInst;
+    int style_editt = WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL;
+    int style_edite = WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOVSCROLL;
+    int style_btn = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON;
+    int iLineCount, iCharCount;
+    switch( message ) {
+        case WM_CREATE:
+            hInst = ((LPCREATESTRUCT) lParam) -> hInstance;
+            hwndChild[ID_EDITBOX] = CreateWindow( TEXT("edit"), NULL, style_editt, 0,0,0,0, hwnd, (HMENU)ID_EDITBOX, hInst, NULL );
+            hwndChild[ID_TXTINPT] = CreateWindow( TEXT("edit"), NULL, style_edite, 0,0,0,0, hwnd, (HMENU)ID_TXTINPT, hInst, NULL );
+            hwndChild[ID_PLAYBTN] = CreateWindow( TEXT("button"), TEXT("inject"), style_btn, 0,0,0,0, hwnd, (HMENU)ID_PLAYBTN, hInst, NULL);
+            hwndChild[ID_PLAYBTN2] = CreateWindow( TEXT("button"), TEXT("clear"), style_btn, 0,0,0,0, hwnd, (HMENU)ID_PLAYBTN2, hInst, NULL);
+            outhwnd = hwndChild[ID_EDITBOX];
+            return 0;
+        case WM_SIZE:
+            GetClientRect(hwnd, &rect);
+            MoveWindow( hwndChild[ID_EDITBOX], 0, 0, rect.right, rect.bottom-35, TRUE );
+            MoveWindow( hwndChild[ID_TXTINPT], 60,  rect.bottom-35, 200, 20, TRUE );
+            MoveWindow( hwndChild[ID_PLAYBTN], 300, rect.bottom-35, 50,  25, TRUE );
+            MoveWindow( hwndChild[ID_PLAYBTN2], 350, rect.bottom-35, 50,  25, TRUE );
+            return 0;
+        case WM_PAINT:
+            // 用于展示文本，类似 Label 功能
+            GetClientRect(hwnd, &rect);
+            hdc = BeginPaint( hwnd, &ps );
+            TextOut( hdc, 20, rect.bottom-30, "input:", lstrlen("input:") );
+            TextOut( hdc, 400, rect.bottom-30, szLineNum, lstrlen(szLineNum) );
+            EndPaint( hwnd, &ps );
+            return 0;
+        case WM_COMMAND:
+            switch(LOWORD(wParam)) {
+                case ID_PLAYBTN:
+                    v_inject();
+                    _AddLogWindow("[*] run inject.");
+                    return 0;
+                case ID_PLAYBTN2:
+                    ZeroMemory(&outBuffer, sizeof(outBuffer));
+                    SetWindowText(hwndChild[ID_EDITBOX], outBuffer );
+                    return 0;
+            }
+            return 0;
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            return 0;
+    }
+}
+
+// 简单的热键处理，这里的示例为 
+// Ctrl + Home ::: show/hide window
+// Ctrl + w ::: close window
+DWORD  WINAPI _RegistHotKey( LPARAM lParam ){
+    MSG  msg = { 0 };
+    RegisterHotKey(NULL, 0x24, MOD_CONTROL, VK_HOME);
+    RegisterHotKey(NULL, 0x25, MOD_CONTROL, 'W');
+    while (GetMessage(&msg, 0, 0, 0)){
+        if (WM_HOTKEY == msg.message){
+            if (VK_HOME == HIWORD(msg.lParam)){
+                if (IsWindowVisible((HANDLE)lParam)){
+                    ShowWindow((HANDLE)lParam, SW_HIDE);
+                }else{
+                    ShowWindow((HANDLE)lParam, SW_RESTORE);
+                }
+            }
+            if ('W' == HIWORD(msg.lParam)){
+                PostMessage((HANDLE)lParam, WM_QUIT, 0, 0);
+            }
+        }
+    }
+}
+// 后面的内容是固定不需要修改的
+LRESULT CALLBACK WndProc( HWND, UINT, WPARAM, LPARAM);
+int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow ){
+    static TCHAR szAppName[] = TEXT( "v" );
+    static HWND  hwnd;
+    MSG      msg;
+    WNDCLASS wndclass;
+    wndclass.lpfnWndProc   = WndProc;
+    wndclass.style         = CS_HREDRAW | CS_VREDRAW;
+    wndclass.hInstance     = hInstance;
+    wndclass.cbClsExtra    = 0;
+    wndclass.cbWndExtra    = 0;
+    wndclass.hbrBackground = CreateSolidBrush(RGB(236, 233, 216));
+    wndclass.hCursor       = LoadCursor( NULL, IDC_ARROW );
+    wndclass.hIcon         = LoadIcon( NULL, IDI_APPLICATION );
+    wndclass.lpszClassName = szAppName;
+    wndclass.lpszMenuName  = NULL;
+    if (!RegisterClass(&wndclass)) {
+        MessageBox( NULL, TEXT("cannot create regist window."), TEXT("error"), MB_OK | MB_ICONERROR );
+        return 0;
+    }
+    hwnd = CreateWindow( szAppName, TEXT("vvv"), WS_OVERLAPPEDWINDOW,
+        100, 100,
+        450, 600,
+        NULL, NULL, hInstance, NULL );
+    // CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)_RegistHotKey, hwnd, 0, 0);
+    CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)start_pipe_server, hwnd, 0, 0);
+    ShowWindow( hwnd, iCmdShow );
+    UpdateWindow( hwnd );
+    while (GetMessage(&msg, NULL, 0, 0)){
+        TranslateMessage( &msg );
+        DispatchMessage( &msg );
+    }
+    return msg.wParam;
+}
+LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam ) {
+    _WindowSwitch( hwnd, message, wParam, lParam );
+    return DefWindowProc( hwnd, message, wParam, lParam );
+}
+]]>
+    </content>
+    <tabTrigger>ccc</tabTrigger>
+    <scope>source.c</scope>
+</snippet>
