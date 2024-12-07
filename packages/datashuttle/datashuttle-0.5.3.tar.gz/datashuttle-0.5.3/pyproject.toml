@@ -1,0 +1,137 @@
+[project]
+name = "datashuttle"
+authors = [
+    {name = "Joe Ziminski", email = "j.ziminski@ucl.ac.uk"},
+    {name = "Adam Tyson", email = "code@adamltyson.com"},
+    {name = "Niko Sirmpilatze", email = "niko.sirbiladze@gmail.com"},
+]
+description = "DataShuttle automates the creation, validation and transfer of neuroscience project folders."
+readme = "README.md"
+requires-python = ">=3.9.0"
+dynamic = ["version"]
+license = {text = "BSD-3-Clause"}
+
+dependencies = [
+    "paramiko",
+    "PyYAML",
+    "requests",
+    "rich",
+    "fancylog>=0.4.2",
+    "simplejson",
+    "pyperclip",
+    "textual",
+    "show-in-file-manager",
+    "gitpython",
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: BSD License",
+]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/neuroinformatics-unit/datashuttle/issues"
+Documentation = "https://datashuttle.neuroinformatics.dev"
+"Source Code" = "https://github.com/neuroinformatics-unit/datashuttle"
+"User support" = "https://github.com/neuroinformatics-unit/datashuttle/discussions"
+
+[project.optional-dependencies]
+dev = [
+    "pandas",
+    "pytest",
+    "pytest-cov",
+    "coverage",
+    "tox",
+    "black",
+    "mypy",
+    "pre-commit",
+    "ruff",
+    "setuptools_scm",
+    "textual-dev",
+    "types-requests",
+    "types-PyYAML",
+    "types-appdirs",
+    "types-paramiko",
+    "types-simplejson",
+    "pandas-stubs",
+    "types-setuptools",
+    "pytest-asyncio",
+    "validators",
+]
+
+[build-system]
+requires = [
+    "setuptools>=45",
+    "wheel",
+    "setuptools_scm[toml]>=6.2",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+exclude = [
+    "tests/"
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["datashuttle*"]
+exclude = ["tests*", "docs*"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=datashuttle"
+
+[tool.black]
+target-version = ['py39', 'py310', 'py311', 'py312']
+skip-string-normalization = false
+line-length = 79
+
+[tool.ruff]
+line-length = 79
+exclude = ["__init__.py","build",".eggs"]
+fix = true
+
+[tool.ruff.lint]
+ignore = ["E203","E501","E731","C901","W291","W293","E402","E722"]
+select = ["I", "E", "F", "TCH", "TID252"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.setuptools_scm]
+
+[tool.check-manifest]
+ignore = [
+  "*.yaml",
+  ".bumpversion.cfg",
+  "tox.ini",
+  "docs/*",
+  "docs/source/*",
+  "docs/source/pages/*",
+  "tests/*",
+  "tests/tests_unit/*",
+  "tests/tests_integration/*",
+  ".flake8"
+]
+
+[project.scripts]
+datashuttle = "datashuttle.tui_launcher:main"
+
+[tool.codespell]
+skip = '.git,*.pdf,*.svg'
+#
+# ignore-words-list = ''
