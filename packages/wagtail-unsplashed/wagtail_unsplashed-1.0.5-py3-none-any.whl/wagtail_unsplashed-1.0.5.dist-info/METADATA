@@ -1,0 +1,142 @@
+Metadata-Version: 2.1
+Name: wagtail-unsplashed
+Version: 1.0.5
+Summary: Use unsplash.com images in your Wagtail site
+Author-email: Cameron Lamb <jafacakes2011@hotmail.co.uk>, Mauro Santos <mauro.goncalo@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2019  Cameron Lamb
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Project-URL: Homepage, https://mintyPT.github.io/wagtail-unsplash/
+Project-URL: Repository, https://github.com/mintyPT/wagtail-unsplash
+Project-URL: Documentation, https://mintyPT.github.io/wagtail-unsplash/
+Keywords: python
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Python: <4.0,>=3.9
+Description-Content-Type: text/markdown
+License-File: LICENCE.txt
+Requires-Dist: python-unsplash==1.2.5
+Requires-Dist: wagtail<6.1,>5.2
+Requires-Dist: queryish==0.2
+
+# [Wagtail Unsplash](https://pypi.org/project/wagtail-unsplash/) [![PyPI](https://img.shields.io/pypi/v/wagtail-unsplash.svg)](https://pypi.org/project/wagtail-unsplash/)
+
+[![Release](https://img.shields.io/github/v/release/mintyPT/wagtail-unsplash)](https://img.shields.io/github/v/release/mintyPT/wagtail-unsplash)
+[![Build status](https://img.shields.io/github/actions/workflow/status/mintyPT/wagtail-unsplash/main.yml?branch=main)](https://github.com/mintyPT/wagtail-unsplash/actions/workflows/main.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/mintyPT/wagtail-unsplash/branch/main/graph/badge.svg)](https://codecov.io/gh/mintyPT/wagtail-unsplash)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/mintyPT/wagtail-unsplash)](https://img.shields.io/github/commit-activity/m/mintyPT/wagtail-unsplash)
+[![License](https://img.shields.io/github/license/mintyPT/wagtail-unsplash)](https://img.shields.io/github/license/mintyPT/wagtail-unsplash)
+
+![Screenshot showing wagtail-unsplash search results](https://i.imgur.com/Va0kCys.png)
+
+Search for Unsplash images and upload to the Wagtail image library.
+
+This package uses the [python-unsplash](https://github.com/yakupadakli/python-unsplash) API wrapper
+
+- **Github repository**: <https://github.com/mintyPT/wagtail-unsplash/>
+- **Documentation** <https://mintyPT.github.io/wagtail-unsplash/>
+
+## Getting started
+
+Install using pip:
+
+```sh
+pip install wagtail-unsplash
+```
+
+After installing the package, add `wagtail_unsplashed` to installed apps in your settings file:
+
+```python
+# settings.py
+
+INSTALLED_APPS = [
+    ...
+    'wagtail_unsplashed',
+    ...
+]
+```
+
+and add the API credentials:
+
+```python
+# settings.py
+WAGTAIL_UNSPLASHED = {
+    "CLIENT_ID": "",
+    "CLIENT_SECRET": ""
+}
+```
+
+You can get the needed information by creating an application at https://unsplash.com/developers
+
+## Getting started (development)
+
+### Pull the repo
+
+```bash
+git clone git@github.com:mintyPT/wagtail-unsplash.git
+```
+
+### Set Up Your Development Environment
+
+Then, install the environment and the pre-commit hooks with
+
+```bash
+make install
+```
+
+This will also generate your `uv.lock` file
+
+### Run the pre-commit hooks
+
+Initially, the CI/CD pipeline might be failing due to formatting issues. To resolve those run:
+
+```bash
+uv run pre-commit run -a
+```
+
+### After pushing
+
+You are now ready to start development on your project!
+The CI/CD pipeline will be triggered when you open a pull request, merge to main, or when you create a new release.
+
+To finalize the set-up for publishing to PyPI, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/publishing/#set-up-for-pypi).
+For activating the automatic documentation with MkDocs, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/mkdocs/#enabling-the-documentation-on-github).
+To enable the code coverage reports, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/codecov/).
+
+## Releasing a new version
+
+- Create an API Token on [PyPI](https://pypi.org/).
+- Add the API Token to your projects secrets with the name `PYPI_TOKEN` by visiting [this page](https://github.com/mintyPT/wagtail-unsplash/settings/secrets/actions/new).
+- Create a [new release](https://github.com/mintyPT/wagtail-unsplash/releases/new) on Github.
+- Create a new tag in the form `*.*.*`.
+
+For more details, see [here](https://fpgmaas.github.io/cookiecutter-uv/features/cicd/#how-to-trigger-a-release).
+
+---
+
+Repository initiated with [fpgmaas/cookiecutter-uv](https://github.com/fpgmaas/cookiecutter-uv).
