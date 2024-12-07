@@ -1,0 +1,24 @@
+# Simple Python CRUD System
+
+A simple Python CRUD application using Tkinter and TKBootstrap for the GUI and SQLite for the database.
+
+## Features
+
+- Add, update, delete, and search users.
+- Stores user data in an SQLite database.
+- User interface created with Tkinter and styled using ttkbootstrap.
+- Export user data to a CSV file.
+
+## Requirements
+
+- Python 3.6 or higher
+- `ttkbootstrap` for modern GUI components
+- SQLite (built-in with Python)
+- `csv` for exporting user data
+
+## Installation
+
+To install this package, you can use `pip`. Run the following command:
+
+```bash
+pip install my-crud-app
