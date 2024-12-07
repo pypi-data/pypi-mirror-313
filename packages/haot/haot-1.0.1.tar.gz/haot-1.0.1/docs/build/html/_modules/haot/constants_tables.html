@@ -1,0 +1,381 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>haot.constants_tables &mdash; haot 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            haot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Submodules:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../submodules/aerodynamics.html">Aerodynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../submodules/quantum_mechanics.html">Quantum Mechanics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../submodules/optics.html">Optics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../submodules/constants_tables.html">Constants</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">haot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">haot.constants_tables</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for haot.constants_tables</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Date:   10/26/2024</span>
+<span class="sd">    Author: Martin E. Liza</span>
+<span class="sd">    File:   constants_tables.py</span>
+<span class="sd">    Def:    This file contains spectroscopy data used across the package</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="sutherland_constants">
+<a class="viewcode-back" href="../../submodules/constants_tables.html#haot.sutherland_constants">[docs]</a>
+<span class="k">def</span> <span class="nf">sutherland_constants</span><span class="p">(</span><span class="n">gas</span><span class="o">=</span><span class="s2">&quot;Air&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constants used for Sutherland&#39;s law of viscosity and thermal conductivity</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">        https://doc.comsol.com/5.5/doc/com.comsol.help.cfd/cfd_ug_fluidflow_high_mach.08.27.html</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        gas (str): Air (default), Argon, N2, O2</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dictionary (dict):</span>
+<span class="sd">            temperature_ref (float): reference temperature [K]</span>
+<span class="sd">            viscosity_ref (float): reference viscosity [Ns/m2]</span>
+<span class="sd">            sutherland_visc (float): Sutherland viscosity constant [K]</span>
+<span class="sd">            conductivity_ref (float): reference thermal conductivity [W/mK]</span>
+<span class="sd">            sutherland_cond (float): Sutherland thermal conductivity [K]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dict_out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">gas</span> <span class="o">==</span> <span class="s2">&quot;Air&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;temperature_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">273.0</span>  <span class="c1"># [K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;viscosity_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.716e-5</span>  <span class="c1"># [kg/ms]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;sutherland_visc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">111.0</span>  <span class="c1"># [K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;conductivity_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0241</span>  <span class="c1"># [W/mK]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;sutherland_cond&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">194.0</span>  <span class="c1"># [K]</span>
+
+    <span class="k">if</span> <span class="n">gas</span> <span class="o">==</span> <span class="s2">&quot;Argon&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;temperature_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">273.0</span>  <span class="c1"># [K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;viscosity_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.125e-5</span>  <span class="c1"># [kg/ms]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;sutherland_visc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">114.0</span>  <span class="c1"># [K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;conductivity_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0163</span>  <span class="c1"># [W/mK]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;sutherland_cond&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">170.0</span>  <span class="c1"># [K]</span>
+
+    <span class="k">if</span> <span class="n">gas</span> <span class="o">==</span> <span class="s2">&quot;N2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;temperature_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">273.0</span>  <span class="c1"># [K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;viscosity_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.663e-5</span>  <span class="c1"># [kg/ms]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;sutherland_visc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">107.0</span>  <span class="c1"># [K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;conductivity_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0242</span>  <span class="c1"># [W/mK]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;sutherland_cond&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">150.0</span>  <span class="c1"># [K]</span>
+
+    <span class="k">if</span> <span class="n">gas</span> <span class="o">==</span> <span class="s2">&quot;O2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;temperature_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">273.0</span>  <span class="c1"># [K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;viscosity_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.919e-5</span>  <span class="c1"># [kg/ms]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;sutherland_visc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">139.0</span>  <span class="c1"># [K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;conductivity_ref&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0244</span>  <span class="c1"># [W/mK]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;sutherland_cond&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">240.0</span>  <span class="c1"># [K]</span>
+
+    <span class="k">return</span> <span class="n">dict_out</span></div>
+
+
+
+<div class="viewcode-block" id="karl_2003">
+<a class="viewcode-back" href="../../submodules/constants_tables.html#haot.karl_2003">[docs]</a>
+<span class="k">def</span> <span class="nf">karl_2003</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constants used in the Karl method</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">        https://arc.aiaa.org/doi/pdf/10.2514/6.2003-4252</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       dict_out (dict):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dict_out</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="mf">0.301e-3</span><span class="p">,</span>
+        <span class="s2">&quot;O&quot;</span><span class="p">:</span> <span class="mf">0.182e-3</span><span class="p">,</span>
+        <span class="s2">&quot;NO&quot;</span><span class="p">:</span> <span class="mf">0.221e-3</span><span class="p">,</span>
+        <span class="s2">&quot;N2&quot;</span><span class="p">:</span> <span class="mf">0.238e-3</span><span class="p">,</span>
+        <span class="s2">&quot;O2&quot;</span><span class="p">:</span> <span class="mf">0.190e-3</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># [m3/kg]</span>
+    <span class="k">return</span> <span class="n">dict_out</span></div>
+
+
+
+<span class="c1"># Polarizability</span>
+<div class="viewcode-block" id="polarizability">
+<a class="viewcode-back" href="../../submodules/constants_tables.html#haot.polarizability">[docs]</a>
+<span class="k">def</span> <span class="nf">polarizability</span><span class="p">():</span>
+    <span class="n">dict_out</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;N+&quot;</span><span class="p">:</span> <span class="mf">0.559e-30</span><span class="p">,</span>
+        <span class="s2">&quot;O+&quot;</span><span class="p">:</span> <span class="mf">0.345e-30</span><span class="p">,</span>
+        <span class="s2">&quot;NO+&quot;</span><span class="p">:</span> <span class="mf">1.021e-30</span><span class="p">,</span>
+        <span class="s2">&quot;N2+&quot;</span><span class="p">:</span> <span class="mf">2.386e-30</span><span class="p">,</span>
+        <span class="s2">&quot;O2+&quot;</span><span class="p">:</span> <span class="mf">0.238e-30</span><span class="p">,</span>
+        <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="mf">1.100e-30</span><span class="p">,</span>
+        <span class="s2">&quot;O&quot;</span><span class="p">:</span> <span class="mf">0.802e-30</span><span class="p">,</span>
+        <span class="s2">&quot;NO&quot;</span><span class="p">:</span> <span class="mf">1.700e-30</span><span class="p">,</span>
+        <span class="s2">&quot;N2&quot;</span><span class="p">:</span> <span class="mf">1.7403e-30</span><span class="p">,</span>
+        <span class="s2">&quot;O2&quot;</span><span class="p">:</span> <span class="mf">1.5689e-30</span><span class="p">,</span>
+    <span class="p">}</span>  <span class="c1"># [m^3]</span>
+    <span class="k">return</span> <span class="n">dict_out</span></div>
+
+
+
+<div class="viewcode-block" id="polarizability_derivatives">
+<a class="viewcode-back" href="../../submodules/constants_tables.html#haot.polarizability_derivatives">[docs]</a>
+<span class="k">def</span> <span class="nf">polarizability_derivatives</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s2">&quot;N2&quot;</span><span class="p">):</span>
+    <span class="c1"># https://link.springer.com/content/pdf/10.1134/BF03355985.pdf</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Constants from Buldakov Paper:</span>
+<span class="sd">    &quot;Temperature Dependence of Polarizability</span>
+<span class="sd">    of Diatomic Homonuclear Molecules.&quot;</span>
+
+<span class="sd">    References:</span>
+<span class="sd">        - Each constant&#39;s reference is provided in the respective comments or documentation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dict_out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;H2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;zeroth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">0.7849e-30</span>  <span class="c1"># https://edisciplinas.usp.br/pluginfile.php/4557662/mod_resource/content/1/CRC%20Handbook%20of%20Chemistry%20and%20Physics%2095th%20Edition.pdf</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;first&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">0.90e-30</span>  <span class="c1"># https://www.tandfonline.com/doi/abs/10.1080/00268978000103191</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;second&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">0.49e-30</span>  <span class="c1"># https://www.tandfonline.com/doi/abs/10.1080/00268978000103191</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;third&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="mf">0.85e-30</span>
+        <span class="p">)</span>  <span class="c1"># https://www.tandfonline.com/doi/abs/10.1080/00268978000103191</span>
+
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;N2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;zeroth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">1.7801e-30</span>  <span class="c1"># https://edisciplinas.usp.br/pluginfile.php/4557662/mod_resource/content/1/CRC%20Handbook%20of%20Chemistry%20and%20Physics%2095th%20Edition.pdf</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;first&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">1.86e-30</span>  <span class="c1"># M. A. Buldakov, B. V. Korolev, I. I. Matrosov, and T. N. Popova, Opt. Spektrosk. 63, 775 (1987) MISSING REFERENCE</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;second&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">1.2e-30</span>  <span class="c1"># M. A. Buldakov, B. V. Korolev, I. I. Matrosov, and T. N. Popova, Opt. Spektrosk. 63, 775 (1987) MISSING REFERENCE</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;third&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="mf">4.6e-30</span>
+        <span class="p">)</span>  <span class="c1"># https://pubs.aip.org/aip/jcp/article-abstract/78/9/5287/777120/Theoretical-study-of-the-effects-of-vibrational?redirectedFrom=fulltext</span>
+
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;O2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;zeroth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">1.6180e-30</span>  <span class="c1"># https://edisciplinas.usp.br/pluginfile.php/4557662/mod_resource/content/1/CRC%20Handbook%20of%20Chemistry%20and%20Physics%2095th%20Edition.pdf</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;first&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">1.76e-30</span>  <span class="c1"># M. A. Buldakov, B. V. Korolev, I. I. Matrosov, and T. N. Popova, Opt. Spektrosk. 63, 775 (1987) MISSING REFERENCE</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;second&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">3.4e-30</span>  <span class="c1"># M. A. Buldakov, B. V. Korolev, I. I. Matrosov, and T. N. Popova, Opt. Spektrosk. 63, 775 (1987) MISSING REFERENCE</span>
+        <span class="p">)</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;third&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="mf">23.7e-30</span>
+        <span class="p">)</span>  <span class="c1"># https://pubs.aip.org/aip/jcp/article-abstract/100/2/1297/482621/Frequency-dependent-polarizabilities-of-O2-and-van?redirectedFrom=fulltext</span>
+
+    <span class="k">return</span> <span class="n">dict_out</span>  <span class="c1"># [m^3]</span></div>
+
+
+
+<div class="viewcode-block" id="kerl_interpolation">
+<a class="viewcode-back" href="../../submodules/constants_tables.html#haot.kerl_interpolation">[docs]</a>
+<span class="k">def</span> <span class="nf">kerl_interpolation</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s2">&quot;N2&quot;</span><span class="p">):</span>
+    <span class="c1"># https://onlinelibrary.wiley.com/doi/10.1002/bbpc.19920960517</span>
+    <span class="c1"># Check reference in paper</span>
+    <span class="n">dict_out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;H2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;groundPolarizability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.80320e-30</span>  <span class="c1"># [m^3]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;groundFrequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.1399e16</span>  <span class="c1"># [1/s]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">5.87e-6</span>  <span class="c1"># [1/K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">7.544e-9</span>  <span class="c1"># [1/K^2]</span>
+
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;N2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;groundPolarizability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.7406e-30</span>  <span class="c1"># [m^3]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;groundFrequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.6049e16</span>  <span class="c1"># [1/s]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.8e-6</span>  <span class="c1"># [1/K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;O2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;groundPolarizability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5658e-30</span>  <span class="c1"># [m^3]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;groundFrequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.1801e16</span>  <span class="c1"># [1/s]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.369e-6</span>  <span class="c1"># [1/K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">8.687e-9</span>  <span class="c1"># [1/K^2]</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;Air&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;groundPolarizability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.6970e-30</span>  <span class="c1"># [m^3]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;groundFrequency&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.47044e16</span>  <span class="c1"># [1/s]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;b&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.6e-6</span>  <span class="c1"># [1/K]</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">7.909e-9</span>  <span class="c1"># [1/K^2]</span>
+
+    <span class="k">return</span> <span class="n">dict_out</span></div>
+
+
+
+<div class="viewcode-block" id="spectroscopy_constants">
+<a class="viewcode-back" href="../../submodules/constants_tables.html#haot.spectroscopy_constants">[docs]</a>
+<span class="k">def</span> <span class="nf">spectroscopy_constants</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="s2">&quot;N2&quot;</span><span class="p">):</span>
+    <span class="c1"># https://doi.org/10.1063/1.2436891</span>
+    <span class="c1"># minimun electronic energy T_e [cm^-1]</span>
+    <span class="c1"># harmonic frequency (omega_e)  [cm^-1]</span>
+    <span class="c1"># first anharmonic correction (omega_e x_e) [cm^-1]</span>
+    <span class="c1"># (omega_e y_e)</span>
+    <span class="c1"># equilibrium rotational constant (B_e)</span>
+    <span class="c1"># anharmonic correction to the rotational constant (alpha_e) [cm^-1]</span>
+    <span class="c1"># centrifugal distortion constant (D_e) [cm^-1]</span>
+    <span class="c1"># binding energy (D_o) [eV]</span>
+    <span class="c1"># equilibrium internuclear distance(R_e) [\r{A}]</span>
+    <span class="c1"># ionization potential (IP) [eV]</span>
+
+    <span class="n">dict_out</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># https://webbook.nist.gov/cgi/cbook.cgi?Name=NO%2B&amp;Units=SI&amp;cDI=on</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;NO+&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2376.72</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_xe&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">16.255</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_ye&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.01562</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;B_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.997195</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;alpha_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.018790</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;D_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">6.64e-6</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;r_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.06322e-10</span>  <span class="c1"># [m]</span>
+
+    <span class="c1"># https://webbook.nist.gov/cgi/cbook.cgi?Name=N2%2B&amp;Units=SI&amp;cDI=on</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;N2+&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2207.0115</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_xe&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">16.0616</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_ye&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.04289</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;B_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.93176</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;alpha_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0181</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;D_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">6.10e-6</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;r_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.11642e-10</span>
+
+    <span class="c1"># https://webbook.nist.gov/cgi/cbook.cgi?Name=O2%2B&amp;Units=SI&amp;cDI=on</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;O2+&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1905.892</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_xe&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">16.489</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_ye&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.02057</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;B_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.689824</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;alpha_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.019363</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;D_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">5.32e-6</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;r_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.1164e-10</span>
+
+    <span class="c1"># https://webbook.nist.gov/cgi/cbook.cgi?Name=NO&amp;Units=SI&amp;cDI=on</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;NO&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1904.1346</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_xe&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">14.08836</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_ye&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01005</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;B_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.704885</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;alpha_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0175416</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;D_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.54e-6</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;r_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.15077e-10</span>
+
+    <span class="c1"># https://webbook.nist.gov/cgi/cbook.cgi?Name=N2&amp;Units=SI&amp;cDI=on</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;N2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2358.57</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_xe&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">14.324</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_ye&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.00226</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;B_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.998241</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;alpha_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.017318</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;D_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">5.9e-6</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;r_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.2126e-10</span>
+
+    <span class="c1"># https://webbook.nist.gov/cgi/cbook.cgi?Name=O2&amp;Units=SI&amp;cDI=on</span>
+    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s2">&quot;O2&quot;</span><span class="p">:</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1580.161</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_xe&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">11.95127</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;omega_ye&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0458489</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;B_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.44562</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;alpha_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0159305</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;D_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">4.839e-6</span>
+        <span class="n">dict_out</span><span class="p">[</span><span class="s2">&quot;r_e&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.20752e-10</span>
+
+    <span class="k">return</span> <span class="n">dict_out</span>  <span class="c1"># wavenumber units  #[cm^-1]</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Martin E. Liza.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
