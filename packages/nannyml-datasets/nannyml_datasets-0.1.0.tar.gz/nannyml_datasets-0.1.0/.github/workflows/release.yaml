@@ -1,0 +1,19 @@
+name: Release and publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - name: Publish docker images
+        run: |
+          NANNYML_DOCKER_USERNAME=${{vars.NANNYML_DOCKER_USERNAME}} NANNYML_DOCKER_PASSWORD=${{secrets.NANNYML_DOCKER_PASSWORD}} just docker-login
+          just docker-release
