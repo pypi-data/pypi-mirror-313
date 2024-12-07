@@ -1,0 +1,33 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: mixed-line-ending
+    -   id: end-of-file-fixer
+        exclude: &exclude_pattern '^changelog.d/'
+    -   id: debug-statements
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.2
+    hooks:
+        # Run the linter
+    -   id: ruff
+        name: "Ruff linting"
+        args: [
+          '--output-format=full',
+          '--statistics'
+        ]
+        # Run the formatter
+    -   id: ruff-format
+        name: "Ruff formatting"
+-   repo: https://github.com/djlint/djLint
+    rev: v1.36.3
+    hooks:
+      - id: djlint-reformat-django
+      - id: djlint-django
+-   repo: https://github.com/twisted/towncrier
+    rev: 24.8.0
+    hooks:
+      - id: towncrier-check
+        files: $changelog\.d/
+        args: [--compare-with origin/master]
