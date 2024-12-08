@@ -1,0 +1,103 @@
+Metadata-Version: 2.1
+Name: yt-queue
+Version: 0.11.6
+Summary: CLI to keep track of videos in Youtube playlists
+Author-email: Hendri Pretorius <pretorh@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2023 Hendri Pretorius
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Homepage, https://github.com/pretorh/yt-queue
+Project-URL: Bug Tracker, https://github.com/pretorh/yt-queue/issues
+Keywords: yt-dlp,YouTube
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: yt-dlp==2024.12.03
+Provides-Extra: dev
+Requires-Dist: pylint==3.0.2; extra == "dev"
+Requires-Dist: pytest==7.4.3; extra == "dev"
+Requires-Dist: setuptools==72.1.0; extra == "dev"
+
+# yt-queue
+CLI to keep track of videos in Youtube playlists
+
+## cli
+
+See `yt-queue -h` and `yt-queue <subcommand> -h` for details.
+
+Examples:
+
+```sh
+# create a new file
+yt-queue create example.ytq.json "https://www.youtube.com/playlist?list=PL0pg4HdU1lNMtRzycn3wbKyfQO5vQZja9"
+
+# refresh a file, only if it wasnt recently updated
+yt-queue refresh example.ytq.json --only-if-older=1day
+
+# get the "new" items
+yt-queue filter --no-status example.ytq.json
+
+# read the values of a video from the file
+yt-queue read-field example.ytq.json "BaW_jenozKc" url
+yt-queue read-field example.ytq.json "BaW_jenozKc" title
+
+# set the status
+yt-queue set-status example.ytq.json "BaW_jenozKc" some-text-status
+yt-queue filter --status=some-text-status example.ytq.json
+
+# more filter options
+yt-queue filter --title "test video" example.ytq.json
+yt-queue filter --min-duration 3 example.ytq.json
+yt-queue filter --max-duration 11 example.ytq.json
+```
+
+### output
+
+Most cli subcommands' output (`stdout`) is parsable. `stderr` is used for logging:
+
+- `filter` returns the matching video ids, 1 per line
+- `read-field` returns the value of the field for the given video id
+
+Other subcommands output should not be parsed - they contain either progress or verbose logging (including
+from `yt-dlp`)
+
+## development
+
+setup (or recreate) environment with `source dev/init.sh`
+
+or manually:
+
+```shell
+python3 -m venv .env
+source .env/bin/activate
+pip install --editable .
+pip install '.[dev]'
+```
+
+other dependencies: `shellcheck`
+
+tests: `./check.sh`
+
+test the built packages: `./dist-check.sh dist/...`
