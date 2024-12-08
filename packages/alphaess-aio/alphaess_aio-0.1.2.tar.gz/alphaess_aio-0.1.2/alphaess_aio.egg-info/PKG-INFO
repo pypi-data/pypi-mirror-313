@@ -1,0 +1,70 @@
+Metadata-Version: 2.1
+Name: alphaess-aio
+Version: 0.1.2
+Summary: Sends get and post requests to available AlphaCloud API endpoints.
+Author-email: Markus Ziegler <frage_n@web.de>
+Maintainer-email: Markus Ziegler <frage_n@web.de>
+License: MIT License
+        
+        Copyright (c) 2024 zeguramente
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        
+Project-URL: Repository, https://github.com/zeguramente/alphaess-aio
+Keywords: alphaess,api
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: aiohttp==3.9.3
+Requires-Dist: pydantic==2.6.4
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pytest-mock; extra == "test"
+Requires-Dist: pytest-asyncio; extra == "test"
+Requires-Dist: pytest-aiohttp; extra == "test"
+Provides-Extra: lint
+Requires-Dist: ruff>=0.4.2; extra == "lint"
+
+# Alphaess-aio - a Alpha Open API client
+
+## About
+
+Sends get and post requests to available AlphaCloud API endpoints and retrieves data about you AlphaESS system.
+Code generated out of API description.
+
+## Prerequisites
+
+Register account at https://open.alphaess.com/. You will recieve an AppID and AppSecret needed for authentification.
+
+## How to use
+
+```python
+import asyncio
+from alphaessaio import AlphaEssAPI, AlphaEssAuth
+
+# setup auth
+auth = AlphaEssAuth(appid="your_app_id", appsecret="your_app_secret")
+
+#init api
+alphaess_api = AlphaEssAPI(auth)
+
+ess_list = asyncio.run(alphaess_api.get_ess_list())
+```
