@@ -1,0 +1,103 @@
+[package]
+name = "embed_anything"
+version = "0.4.13"
+edition.workspace = true
+license.workspace = true
+description.workspace = true
+repository.workspace  = true
+authors.workspace = true
+readme = "README.md"
+
+[dependencies]
+# Data Serialization
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.112"
+
+# HTTP Client
+reqwest = { version = "0.12.2", features = ["json", "blocking"] }
+
+# Filesystem
+walkdir = "2.4.0"
+
+# Regular Expressions
+regex = "1.10.3"
+
+# Parallelism
+rayon = "1.8.1"
+
+# Image Processing
+image = "0.25.1"
+
+# Natural Language Processing
+tokenizers = {version="0.20.2", features=["http"]}
+text-splitter = {version="0.18.1", features=["tokenizers"]}
+
+tracing = "0.1.37"
+
+
+# Hugging Face Libraries
+hf-hub = "0.3.2"
+candle-nn = { workspace = true }
+candle-transformers = { workspace = true }
+candle-core = { workspace = true }
+
+# Error Handling
+anyhow = "1.0.89"
+
+# Asynchronous Programming
+tokio = { version = "1.40.0", features = ["macros", "rt-multi-thread"] }
+
+
+# Markdown Processing
+markdown-parser = "0.1.2"
+markdown_to_text = "1.0.0"
+
+# Web Scraping
+scraper = "0.20.0"
+
+# Text Processing
+text-cleaner = "0.1.0"
+url = "2.5.0"
+chrono = "0.4.38"
+rand = "0.8.5"
+itertools = "0.13.0"
+
+# Audio Processing
+symphonia = { version = "0.5.3", features = ["all"]}
+byteorder = "1.5.0"
+
+futures = "0.3.30"
+
+pdf-extract = {workspace = true}
+ort = {workspace = true}
+ndarray = "0.16.1"
+ndarray-linalg = {version = "0.16.0"}
+pdf2image = "0.1.2"
+strum = {workspace = true}
+strum_macros = {workspace = true}
+base64 = "0.22.1"
+rusty-tesseract = "1.1.0"
+# Optional Dependency
+intel-mkl-src = { version = "0.8.1", optional = true }
+accelerate-src = { version = "0.3.2", optional = true }
+indicatif = "0.17.8"
+statistical = "1.0.0"
+half = "2.4.1"
+candle-flash-attn = { workspace = true, optional = true }
+
+
+[dev-dependencies]
+tempdir = "0.3.7"
+lazy_static = "1.4.0"
+clap = { version = "4.5.20", features = ["derive"] }
+
+
+[features]
+default = []
+mkl = ["dep:intel-mkl-src", "candle-nn/mkl", "candle-transformers/mkl", "candle-core/mkl"]
+accelerate = ["dep:accelerate-src", "candle-core/accelerate", "candle-nn/accelerate", "candle-transformers/accelerate"]
+cuda = ["candle-core/cuda", "candle-nn/cuda", "candle-transformers/cuda"]
+cudnn = ["candle-core/cudnn"]
+load-dynamic = ["ort/load-dynamic"]
+flash-attn = ["cuda", "candle-transformers/flash-attn", "dep:candle-flash-attn"]
+metal = ["candle-core/metal", "candle-nn/metal"]
