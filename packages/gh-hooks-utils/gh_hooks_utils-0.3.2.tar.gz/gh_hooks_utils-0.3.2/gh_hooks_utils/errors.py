@@ -1,0 +1,2 @@
+class GithubWebhookError(Exception):
+    pass
