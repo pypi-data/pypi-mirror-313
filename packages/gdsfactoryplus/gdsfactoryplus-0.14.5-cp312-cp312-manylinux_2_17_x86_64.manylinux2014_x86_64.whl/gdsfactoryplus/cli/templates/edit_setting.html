@@ -1,0 +1,82 @@
+{% set id='edit-setting' %}
+
+<!--prettier-ignore-->
+<p id="{{ id }}" class="parent2">
+  {% set form_width = 200 %}
+  {% if allowed.__len__() > 0 and key not in allowed %}
+    {% set key = list(allowed)[0] %}
+  {% endif %}
+
+  {% if allowed.__len__() < 1 %}
+    <input
+      id="edit_key"
+      type="text"
+      name="k"
+      placeholder="{{ key }}"
+      style="height: 30px; width: {{ form_width }}px;"
+    />:
+    <input
+      id="edit_val"
+      type="text"
+      name="v"
+      placeholder="{{ value }}"
+      style="height: 30px; width: {{ form_width }}px;"
+    />
+  {% elif allowed.__len__() == 1 %}
+    <span id="edit_key">{{ list(allowed)[0] }}</span>:
+  {% else %}
+    <select
+      id="edit_key"
+      name="v"
+      style=" height: 30px; width: {{ form_width }}px; padding: 0px; display: inline;"
+      onchange="onChangeKey(this.value)"
+    >
+    {% for option in allowed %}
+      {% if option == key %}
+        <option style="padding: 0px" selected>{{ option }}</option>
+      {% else %}
+        <option style="padding: 0px">{{ option }}</option>
+      {% endif %}
+    {% endfor %}
+    </select>
+  {% endif %}
+
+
+  <span id="edit_val_wrapper">
+    {% for k, vs in allowed.items() %}
+      {% if isinstance(vs, list) %}
+        <select
+          id="edit_val-{{ k }}"
+          name="v"
+          style=" height: 30px; width: {{ form_width }}px; padding: 0px; {% if k == key %} display: inline; {% else %} display: none; {% endif %}"
+        >
+          {% for option in vs %}
+            {% if option == value %}
+              <option style="padding: 0px" selected>{{ option }}</option>
+            {% else %}
+              <option style="padding: 0px">{{ option }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      {% else %}
+        <input
+          id="edit_val-{{ k }}"
+          type="text"
+          name="v"
+          placeholder="{{ value }}"
+          style="height: 30px; width: {{ form_width }}px; {% if k == key %} display: inline; {% else %} display: none; {% endif %}"
+        />
+      {% endif %}
+    {% endfor %}
+  </span>
+
+{% include "accept.html" %}
+{% include "cancel.html" %}
+
+</p>
+
+{% if allowed.__len__() > 1 %}
+<script>
+  onChangeKey("{{ key }}");
+</script>
+{% endif %}
