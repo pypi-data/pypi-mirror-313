@@ -1,0 +1,22 @@
+unsound = import "unsound"
+
+unsound.pyexec("""
+def try_(p, exc=lambda _: None, els=lambda: None, fin=lambda: None):
+    __result = None
+    try:
+        __result = p()
+    except Exception as e:
+        __result = exc(e)
+    else:
+        els()
+    finally:
+        fin()
+        return __result
+""")
+.try! = unsound.pyeval("try_")
+assert .try! in |T, U|(
+    p!: () => T,
+    exc!: (exception: BaseException) => U := (exception: BaseException) => NoneType,
+    else! := () => NoneType,
+    finally! := () => NoneType,
+) => T or U
