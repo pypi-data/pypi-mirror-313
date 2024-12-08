@@ -1,0 +1,129 @@
+Metadata-Version: 2.1
+Name: passagemath-combinat
+Version: 10.5.2
+Summary: passagemath: Algebraic combinatorics, combinatorial representation theory
+Author-email: The Sage Developers <sage-support@googlegroups.com>
+Maintainer: Matthias Köppe, passagemath contributors
+License: GNU General Public License (GPL) v2 or later
+Project-URL: release notes, https://github.com/passagemath/passagemath/releases
+Project-URL: repo (upstream), https://github.com/sagemath/sage
+Project-URL: repo, https://github.com/passagemath/passagemath
+Project-URL: documentation, https://doc.sagemath.org
+Project-URL: homepage (upstream), https://www.sagemath.org
+Project-URL: discourse, https://passagemath.discourse.group
+Project-URL: tracker (upstream), https://github.com/sagemath/sage/issues
+Project-URL: tracker, https://github.com/passagemath/passagemath/issues
+Classifier: Development Status :: 6 - Mature
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Requires-Python: <3.13,>=3.9
+Description-Content-Type: text/x-rst
+Requires-Dist: gmpy2~=2.1.b999
+Requires-Dist: cysignals>=1.10.2
+Requires-Dist: cysignals<1.12,>=1.10.2
+Requires-Dist: memory_allocator
+Requires-Dist: passagemath-categories~=10.5.2.0
+Provides-Extra: test
+Requires-Dist: passagemath-repl; extra == "test"
+Provides-Extra: glucose
+Requires-Dist: passagemath-glucose; extra == "glucose"
+Provides-Extra: kissat
+Requires-Dist: passagemath-kissat; extra == "kissat"
+Provides-Extra: lrcalc
+Requires-Dist: lrcalc; extra == "lrcalc"
+Provides-Extra: symmetrica
+Provides-Extra: graphs
+Requires-Dist: passagemath-graphs; extra == "graphs"
+Provides-Extra: modules
+Requires-Dist: passagemath-modules; extra == "modules"
+Provides-Extra: findstat
+Requires-Dist: requests>=2.13.0; extra == "findstat"
+Provides-Extra: standard
+Requires-Dist: passagemath-combinat[findstat,graphs,lrcalc,modules,symmetrica]; extra == "standard"
+
+======================================================================================================
+ passagemath: Algebraic combinatorics, combinatorial representation theory
+======================================================================================================
+
+About SageMath
+--------------
+
+   "Creating a Viable Open Source Alternative to
+    Magma, Maple, Mathematica, and MATLAB"
+
+   Copyright (C) 2005-2024 The Sage Development Team
+
+   https://www.sagemath.org
+
+SageMath fully supports all major Linux distributions, recent versions of
+macOS, and Windows (Windows Subsystem for Linux).
+
+See https://doc.sagemath.org/html/en/installation/index.html
+for general installation instructions.
+
+
+About this pip-installable source distribution
+----------------------------------------------
+
+This pip-installable source distribution ``passagemath-combinat`` is a distribution of a part of the Sage library.  It provides a small subset of the modules of the Sage library ("sagelib", ``sagemath-standard``).
+
+
+What is included
+----------------
+
+* `Enumerative Combinatorics <https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/enumerated_sets.html#sage-combinat-enumerated-sets>`_: `Partitions, Tableaux <https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/catalog_partitions.html>`_
+
+* `Combinatorics on Words <https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/words/all.html#sage-combinat-words-all>`_, `Free Monoids <https://doc.sagemath.org/html/en/reference/monoids/index.html>`_, `Automatic Semigroups <https://doc.sagemath.org/html/en/reference/monoids/sage/monoids/automatic_semigroup.html>`_
+
+* `Symmetric Functions <https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/sf/all.html#sage-combinat-sf-all>`_, other `Algebras with combinatorial bases <https://doc.sagemath.org/html/en/reference/algebras/index.html>`_
+
+* see https://github.com/passagemath/passagemath/blob/main/pkgs/sagemath-combinat/MANIFEST.in
+
+
+Examples
+--------
+
+A quick way to try it out interactively::
+
+    $ pipx run --pip-args="--prefer-binary" --spec "passagemath-combinat[test]" ipython
+
+    In [1]: from sage.all__sagemath_combinat import *
+
+    In [2]: RowStandardTableaux([3,2,1]).cardinality()
+    Out[2]: 60
+
+
+Available as extras, from other distribution packages
+-----------------------------------------------------
+
+* `passagemath-graphs <https://pypi.org/project/passagemath-graphs>`_:
+  Graphs, posets, finite state machines, combinatorial designs, incidence structures, quivers
+
+* `passagemath-modules <https://pypi.org/project/passagemath-modules>`_:
+  Modules and algebras, root systems, coding theory
+
+* `passagemath-polyhedra <https://pypi.org/project/passagemath-polyhedra>`_:
+  Polyhedra, lattice points, hyperplane arrangements
+
+
+Development
+-----------
+
+::
+
+    $ git clone --origin passagemath https://github.com/passagemath/passagemath.git
+    $ cd passagemath
+    passagemath $ ./bootstrap
+    passagemath $ python3 -m venv combinat-venv
+    passagemath $ source combinat-venv/bin/activate
+    (combinat-venv) passagemath $ pip install -v -e pkgs/sagemath-combinat
