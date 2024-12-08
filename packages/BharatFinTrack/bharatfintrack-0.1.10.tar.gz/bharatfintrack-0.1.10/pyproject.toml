@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "BharatFinTrack"
+description = "Downloading and analyzing financial data, including indices, stocks, bonds, and mutual funds, from India, that is Bharat."
+authors = [
+  { name="Debasish Pal", email="bestdebasish@gmail.com" },
+]
+dependencies = [
+    "pandas",
+    "requests",
+    "openpyxl",
+    "xlsxwriter",
+    "beautifulsoup4",
+    "matplotlib",
+    "pyxirr"
+]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+	"Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.10",
+	"License :: OSI Approved :: MIT License",
+	"Operating System :: OS Independent",
+	"Intended Audience :: Education",
+	"Topic :: Office/Business :: Financial",
+	"Topic :: Scientific/Engineering :: Information Analysis"
+]
+dynamic = ["version"]
+keywords = [
+	"NSE Index",
+	"Download",
+    "CAGR",
+	"SIP",
+    "Visualization"
+]
+
+
+[project.urls]
+"Homepage" = "https://github.com/debpal/BharatFinTrack"
+"Documentation" = "http://bharatfintrack.readthedocs.io/"
+
+
+[tool.setuptools.dynamic]
+version = {attr = "BharatFinTrack.__version__"}
+
+[tool.setuptools.package-data]
+BharatFinTrack = [
+    "data/*"
+]
+
+
+[tool.pytest.ini_options]
+addopts = "-rA -Werror --cov=BharatFinTrack --cov-report=html:cov_BharatFinTrack --cov-report=term -s"
+testpaths = [
+    "tests"
+]
+
+
+[tool.mypy]
+files = [
+    "BharatFinTrack"
+]
+ignore_missing_imports = true
+strict = true
