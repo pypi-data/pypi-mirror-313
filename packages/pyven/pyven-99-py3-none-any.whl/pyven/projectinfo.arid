@@ -1,0 +1,36 @@
+fwrap = $pyref(.functions fwrap)
+neq := $fwrap$pyref(operator ne)
+requires := $list()
+pyversions := $list()
+proprietary = false
+resource types := $list(pxd pyx pyxbld arid aridt)
+build requires +=
+    setuptools
+    wheel
+licenses := $list(GPL)
+MIT path = LICENSE
+licheck
+    enabled = $¬$(proprietary)
+    exclude globs += **/*.md
+flakes exclude globs := $list()
+pypi
+    account = $(None)
+    participant = $neq($(account) $(None))
+github
+    account = $(None)
+    participant = $neq($(account) $(None))
+linktree account = $(None)
+devel
+    packages := $list()
+    scripts := $list()
+warmups := $list()
+upstream devel
+    packages := $list()
+    scripts := $list()
+test requires := $list()
+tagline = $(void)
+cython_build_version = 3.0.11
+numpy_build_version = 2.0.2
+pydoc_enabled = true
+readme_verbose = $(github participant)
+internal_module := $list()

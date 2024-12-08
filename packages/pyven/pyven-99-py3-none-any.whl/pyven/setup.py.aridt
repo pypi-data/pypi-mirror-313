@@ -1,0 +1,23 @@
+from setuptools import setup
+
+def long_description():
+    with open('README.md') as f:
+        return f.read()
+
+$readfile$./(sourceinfo.py)
+sourceinfo = SourceInfo('.')
+setup(
+    name = $"$(name),
+    version = $"$(version),
+    description = $"$(tagline),
+    long_description = $(long_description),
+    long_description_content_type = 'text/markdown',
+    url = $"$(url),
+    author = $"$(author),
+    author_email = $"$(author_email),
+    py_modules = [$join($map($(py_modules) $"$()) $.(, ))],
+    install_requires = [$join($map($(install_requires) $"$()) $.(, ))],
+    package_data = {'': [$join($map($(resource types) $"(*.$())) $.(, ))]},
+    entry_points = {'console_scripts': [$join($map($(console_scripts) $"$()) $.(, ))]},
+    **sourceinfo.setup_kwargs(),
+)
