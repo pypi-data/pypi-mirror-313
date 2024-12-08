@@ -1,0 +1,98 @@
+[build-system]
+requires = ["setuptools == 75.6.0", "setuptools_scm[toml] == 8.1.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hoyolab-rss-feeds"
+authors = [{name = "c3kay"}]
+description = "RSS feed generator for official game news from Hoyolab."
+readme = "README.md"
+license = {text = "MIT License"}
+requires-python = ">=3.9"
+keywords = [
+    "hoyolab",
+    "rss",
+    "feed",
+    "rss-generator",
+    "jsonfeed",
+    "atom",
+    "genshin-impact",
+    "honkai-impact",
+    "zenless-zone-zero"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: News/Diary"
+]
+dependencies = [
+    "aiohttp == 3.9.5",
+    "aiofiles == 24.1.0",
+    "pydantic >= 1.10.0, < 2",
+    'tomli == 2.0.1 ; python_version < "3.11"'
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "tox == 4.23.2",
+    "pytest == 8.3.4",
+    "pytest-asyncio == 0.24.0",
+    "pytest-cov == 6.0.0",
+    "pytest-mock == 3.14.0",
+    "atoma == 0.0.17",
+    "langdetect == 1.0.9"
+]
+
+[project.urls]
+"Repository" = "https://github.com/c3kay/hoyolab-rss-feeds"
+"Homepage" = "https://c3kay.de/hoyolab-rss-feeds"
+
+[project.scripts]
+hoyolab-rss-feeds = "hoyolabrssfeeds.__main__:cli"
+
+# infer version from git
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+version_scheme = "python-simplified-semver"
+
+[tool.pytest.ini_options]
+addopts = "-vv --cov --cov-append --cov-report=xml --cov-report=term-missing"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = ["hoyolabapi: marker for hoyolab api tests"]
+
+
+[tool.coverage.paths]
+# https://coverage.readthedocs.io/en/6.5.0/config.html#paths
+# https://github.com/pytest-dev/pytest-cov/blob/master/examples/src-layout/.coveragerc
+sources = [
+    "src",
+    "*/site-packages"
+]
+
+[tool.coverage.run]
+source = ["hoyolabrssfeeds"]
+omit = ["**/__main__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",  # need to re-enable the default
+    "@abstractmethod"
+]
+
+[tool.mypy]
+files = "src/,tests/"
+strict = true
+pretty = true
+plugins = [
+  "pydantic.mypy"
+]
