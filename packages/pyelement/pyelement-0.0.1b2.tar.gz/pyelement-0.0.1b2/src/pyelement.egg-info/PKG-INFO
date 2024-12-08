@@ -1,0 +1,48 @@
+Metadata-Version: 2.1
+Name: pyelement
+Version: 0.0.1b2
+Summary: Sends message to Element messanger
+Author-email: Konstantin Suspitsyn <konstantin.suspitsun@xmail.ru>
+Project-URL: Homepage, https://github.com/konstantin-suspitsyn/pyelement
+Project-URL: Issues, https://github.com/konstantin-suspitsyn/pyelement/issues
+Classifier: Development Status :: 4 - Beta
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: Microsoft :: Windows
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: requests==2.32.3
+
+# pyelement
+Send messages to element.io messanger from python
+
+### Install pyelement
+```pip install pyelement```
+
+### Usage example
+
+```
+element = Element(messanger_path="https://host.ru", email = "your_mail@mail.ru", password = "secret_password"))
+```
+OR use a token (preferred way). It'll not create additional session
+```
+element = Element(messanger_path="https://host.ru", token = "secret_token"))
+```
+
+If you don't have token get it:
+```
+element = Element(messanger_path="https://host.ru", email = "your_mail@mail.ru", password = "secret_password"))
+token = element.get_token()
+```
+
+Send message
+```
+element.send_message(room_name="RoomName", message="Hello from pyelement!")
+```
+You can find room name in settings section of the room
+
+Log out
+```
+element.logout()
+```
