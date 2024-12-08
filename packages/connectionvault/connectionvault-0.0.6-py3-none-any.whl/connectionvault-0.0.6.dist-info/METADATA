@@ -1,0 +1,93 @@
+Metadata-Version: 2.1
+Name: connectionvault
+Version: 0.0.6
+Summary: help with connection details
+License: MIT
+Author: ankit
+Author-email: ankit48365@gmail.com
+Requires-Python: >=3.11,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Dist: PyYAML (>=6.0.2,<7.0.0)
+Requires-Dist: SQLAlchemy (>=2.0.36,<3.0.0)
+Requires-Dist: pandas (>=2.2.3,<3.0.0)
+Requires-Dist: psycopg2 (>=2.9.10,<3.0.0)
+Requires-Dist: pylint (>=3.3.1,<4.0.0)
+Requires-Dist: pyodbc (>=5.2.0,<6.0.0)
+Requires-Dist: tomli (>=2.2.1,<3.0.0)
+Description-Content-Type: text/markdown
+
+[![Upload Python Package](https://github.com/ankit48365/ConnectionVault/actions/workflows/python-publish.yml/badge.svg)](https://github.com/ankit48365/ConnectionVault/actions/workflows/python-publish.yml)
+![Latest Release](https://img.shields.io/badge/release-v0.0.4-blue)
+
+# ConnectionVault
+
+## Purpose
+
+
+The purpose of this project is to centralize the database connections file (as YAML) on a user's machine. The project has two utilities:
+
+1. **Connection Manager:** Allows you to choose and load a connection string in a Python code quickly.
+
+   Python code usage example:
+
+   ```python
+   from app.src.connection_utility import load_connections, choose_connection
+   from sqlalchemy import create_engine
+   import pandas as pd
+
+   def main():
+       connections = load_connections()
+       conn = choose_connection(connections)
+
+       engine = create_engine(conn)
+       query = input("Input your query: ")
+       df = pd.read_sql_query(query, engine)
+       print(df)
+
+   if __name__ == "__main__":
+       main()```
+2. **Connection Utility:** Allows you to save new connections, and add, update, delete, or see existing connections in the saved YAML file.
+
+## Running the Project
+
+To run this project, you need to define and save a path with the name `conn_home`. This is where you’ll save the `connections.yaml` file, which stores your database credentials.
+
+## For Windows (CMD):
+
+```
+# Define and save the path
+setx conn_home "C:\path\outside\your\project\preferably"
+
+# Check the path
+echo %conn_home%
+
+# Define and save the path
+setx conn_home "C:\path\outside\your\project\preferably"
+
+# Check the path
+echo %conn_home%
+```
+## For Windows Powershell:
+
+```
+# Define and save the path
+[System.Environment]::SetEnvironmentVariable('conn_home', 'C:\path\outside\your\project\preferably', 'User')
+
+# Check the path
+$env:conn_home
+```
+
+### For Linux:
+
+```bash
+# Define and save the path in your .bashrc
+echo 'export conn_home="path/outside/your/project/preferably"' >> ~/.bashrc
+
+# Source the .bashrc to apply changes
+source ~/.bashrc
+```
+
