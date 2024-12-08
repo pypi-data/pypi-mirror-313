@@ -1,0 +1,1 @@
+from .prompt_gen import prompt_gen, cifar10_classes
