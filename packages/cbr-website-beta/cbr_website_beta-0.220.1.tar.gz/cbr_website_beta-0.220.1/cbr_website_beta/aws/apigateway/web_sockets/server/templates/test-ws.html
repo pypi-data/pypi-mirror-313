@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SocketIO Test</title>
+    <script src="/static/socket.io.min.js"></script>
+    <script type="text/javascript">
+        function add_message(message) {
+            document.querySelector('#messages').innerText += message + '\n'
+        }
+
+        function add_complete_element() {
+                const newElement = document.createElement("h1");
+                newElement.id = "complete_id";
+                newElement.textContent = "All done";
+                document.body.appendChild(newElement);
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            var socket = io.connect('http://' + document.domain + ':' + location.port);
+            socket.on('connect', function() {
+                add_message('Websocket connected!');
+                socket.send('Hello from the client!');
+            });
+
+            socket.on('message', function(msg) {
+                add_message('>>>>>> Received response: ' + msg);
+                //add_complete_element()
+            });
+
+            socket.on('after connect', function(msg) {
+                add_message(msg.data);
+            });
+            window.socket = socket
+        });
+    </script>
+</head>
+<body>
+    <h1>SocketIO Test</h1>
+
+    <p>
+        Here are the messages received
+    </p>
+    <hr>
+    <pre id="messages"></pre>
+
+</body>
+</html>

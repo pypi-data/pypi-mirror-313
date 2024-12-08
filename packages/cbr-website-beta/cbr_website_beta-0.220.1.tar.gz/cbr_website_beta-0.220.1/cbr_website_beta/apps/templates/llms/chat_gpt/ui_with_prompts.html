@@ -1,0 +1,135 @@
+
+<!-- query.html -->
+<html>
+<head>
+    <title>Query</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.0/dist/js.cookie.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
+    <script>
+        var user_history = []
+
+        $(document).ready(function() {
+            // Send the form on enter keypress and avoid if shift is pressed
+            $('#prompt').keypress(function(event) {
+                if (event.keyCode === 13 && !event.shiftKey) {
+                    event.preventDefault();
+                    $('form').submit();
+                }
+            });
+            $('form').on('submit', function(event) {
+                event.preventDefault();
+            // get the CSRF token from the cookie
+            var csrftoken = Cookies.get('csrftoken');
+
+            // set the CSRF token in the AJAX headers
+            $.ajaxSetup({
+                headers: { 'X-CSRFToken': csrftoken }
+            });
+                // Get the prompt
+                var user_question = $('#userQuestion').val();
+                var user_data     = $('#userData').val();
+                var system_prompt = $('#systemPrompt').val();
+
+                var dateTime = new Date();
+                var time = dateTime.toLocaleTimeString();
+                // Add the prompt to the response div
+                $('#response').append('<p id="GFG1"><i class="bi bi-person"></i>: ' + user_question + '</p>');
+                $('#response #GFG1').css({"color": "green", "width": "90%", "float": "left", "white-space": "pre-wrap"});
+                $('#response').scrollTop($('#response')[0].scrollHeight);
+                // Clear the prompt
+                $('#prompt').val('');
+                $('#loadingIndicator').show();
+
+
+                $.ajax({
+                    url: '/llms/chat-gpt/question-with-prompt',
+                    type: 'POST',
+                    data: { user_question: user_question, user_data: user_data, system_prompt:system_prompt, user_history: JSON.stringify(user_history)},
+                    dataType: 'json',
+                    success: function(data) {
+                        var answer = data.response;
+
+                        user_history.push({"question": user_question, "answer": answer})
+                        $('#response').append('<p id="GFG2"> <i class="bi bi-robot"></i>: ' + answer+ '</p>');
+                        $('#response #GFG2').css({"color": "blue", "width": "90%", "float": "right"});
+                        $('#response').scrollTop($('#response')[0].scrollHeight);
+                        $('#loadingIndicator').hide();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        // Handle error
+                        $('#response').append('<p id="error"> <i class="bi bi-exclamation-triangle"></i>: Error occurred: ' + textStatus + ' - ' + errorThrown + '</p>');
+                        $('#response #error').css({"color": "red", "width": "90%", "float": "right"});
+                        $('#response').scrollTop($('#response')[0].scrollHeight);
+                        $('#loadingIndicator').hide();
+                    }
+                });
+            });
+
+            // Event handler for dropdown change
+            $('#questionDropdown').change(function() {
+                var selectedQuestion = $(this).val(); // Get selected value
+                $('#userQuestion').val(selectedQuestion); // Set value of textarea
+            });
+
+            // ... rest of your existing setup ...
+        });
+    </script>
+</head>
+<body>
+    <div class="container p-3">
+        <h3>ChatGPT UI - With Prompts</h3>
+
+        <div class="mb-3">
+            <select id="questionDropdown" class="form-select" aria-label="Question dropdown">
+                <option selected>Choose a question...</option>
+                {% for question in questions %}
+                    <option value="{{ question }}">{{ question }}</option>
+                {% endfor %}
+            </select>
+            <form method="post">
+
+                <div class="container mt-4">
+                    <div class="row">
+                        <!-- User Question -->
+                        <div class="col">
+                            <label for="userQuestion" class="form-label"><strong>User Question:</strong></label>
+                            <textarea class="form-control" type="textarea" id="userQuestion" name="userQuestion" rows="6">Hi</textarea>
+                        </div>
+
+                        <!-- User Data -->
+                        <div class="col">
+                            <label for="userData" class="form-label"><strong>User Data:</strong></label>
+                            <textarea  style="font-family: 'Courier New', Courier, monospace;"
+                                    class="form-control" type="textarea" id="userData" name="userData" rows="6">{{ user_data }}</textarea>
+                        </div>
+
+                        <!-- System Prompt -->
+                        <div class="col">
+                            <label for="systemPrompt" class="form-label"><strong>System Prompt:</strong></label>
+                            <textarea class="form-control" type="textarea" id="systemPrompt" name="systemPrompt" rows="6">{{ system_prompt }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <hr/>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                    <div id="loadingIndicator" class="spinner-border text-primary" role="status" style="display:none; width: 1.5rem; height: 1.5rem; margin-left: 10px;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="mb-3">
+            <h6>Response:</h6>
+            <div class="container border overflow-auto h-50" id="response"></div>
+        </div>
+{#        <div class="mb-3">#}
+{#            <h6>Full Prompt:</h6>#}
+{#            <div class="container border overflow-auto h-50" id="full_prompt"></div>#}
+{#        </div>#}
+    </div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{% from "macros/chats/render_chat_thread.html" import render_chat_thread %}
+
+<h3>Chat Threads [all users]</h3>
+
+<hr/>
+{%  for user,chat_threads in users_threads.items() %}
+    <div class="btn btn-success"> {{ user }} </div> <div class="btn btn-outline-info"> (all chat threads) </div>
+
+    {% for  thread_id, thread_data in  chat_threads.items()%}
+        <hr/>
+            {{ render_chat_thread(thread_id, thread_data) }}
+        <hr/>
+    {%  endfor %}
+
+
+{% endfor %}

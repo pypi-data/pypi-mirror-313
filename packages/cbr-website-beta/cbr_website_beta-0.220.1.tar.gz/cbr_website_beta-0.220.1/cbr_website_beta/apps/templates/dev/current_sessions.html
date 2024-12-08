@@ -1,0 +1,64 @@
+{% from "macros/table_list.html" import table_list %}
+
+<h2>Current Sessions</h2>
+
+<hr>
+<style>
+
+</style>
+<p>
+    <span id='session-count' class="btn btn-dark text-white">
+        <b># users</b>: {{ sessions_by_user | length }}
+    </span>
+    <span id='session-count' class="btn btn-dark text-white">
+        <b># sessions</b>: {{ table_data | length }}
+    </span>
+    <span id='updated-at'>
+        <b>last updated at:</b> {{ metadata.get('timestamp_date') }} | {{ metadata.get('timestamp_time') }} | source: {{ metadata.get('source') }}
+    </span>
+</p>
+
+
+<table id="session_data_table" >
+    <thead>
+        <tr>
+            <th>username</th>
+            <th>login as user</th>
+            <th># sessions</th>
+            <th>session_date</th>
+            <th>session_time</th>
+            <th>user_role</th>
+            <th>timestamp</th>
+        </tr>
+    </thead>
+</table>
+
+<script>
+    var consolidatedData = {{  sessions_by_user | tojson}}
+    $(document).ready(function() {
+
+        render_link =  function(data, type, row) {
+                            return '<a href="dev/current-user/' + data + '">' + data + '</a>';
+                        }
+        login_as_btn = function(session_id, type, row) {
+                            return '<a class="btn btn-outline-success" href="admin/impersonate_user/' + session_id + '">login as user</a>';
+                        }
+        $('#session_data_table').DataTable({
+            "dom": '<"top"f>rt<"bottom"i><"clear">',
+            "pageLength": -1,
+            data: consolidatedData,
+            columns: [
+                { data: 'username'           , render   : render_link  },
+                { data: 'session_id'         , render   : login_as_btn },
+                { data: 'number_of_sessions' , className: 'dt-center'  },
+                { data: 'session_date'       , className: 'dt-center'  },
+                { data: 'session_time'       , className: 'dt-center'  },
+                { data: 'user_role'          , className: 'dt-center'  },
+                { data: 'latest_timestamp'   , className: 'dt-center'  }
+
+            ]
+        });
+    });
+
+</script>
+

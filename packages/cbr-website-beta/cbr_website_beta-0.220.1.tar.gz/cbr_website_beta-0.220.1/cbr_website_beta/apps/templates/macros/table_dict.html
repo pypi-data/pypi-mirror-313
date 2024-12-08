@@ -1,0 +1,29 @@
+{% macro table_dict(div_id, div_class, title, data, exclude_names=[]) %}
+    <style>
+        .break-word { word-break: break-all; }
+    </style>
+
+    <div class="{{ div_class }}">
+        <h2>{{ title }}</h2>
+        <div id="{{ div_id }}">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Header</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for name, value in data.items() %}
+                        {% if name not in exclude_names %}
+                            <tr>
+                                <td class="col-3 break-word">{{ name }}</td>
+                                <td class="col-8 break-word">{{ value }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endmacro %}

@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+{% from "macros/show_menu.html"  import show_menu  %}
+
+{% block title %}{{ title }}{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="page-breadcrumb">
+        <div class="row align-items-center">
+            {{ show_menu(menu_links('/dev')) }}
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body" id="card-body">{% block card_body %}{% endblock card_body %}</div>
+                </div>
+            </div>
+        </div>
+
+        {% set extra_section_content = self.extra_section()|trim %}
+        {% if extra_section_content %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body" id="card-body">{% block extra_section %}{% endblock extra_section %}</div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock content %}
+
+
+{% block javascripts %}{% endblock javascripts %}
+
+
+
