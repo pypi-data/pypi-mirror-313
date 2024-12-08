@@ -1,0 +1,67 @@
+Metadata-Version: 2.1
+Name: ellipsis
+Version: 3.1.51
+Summary: Package to interact with the Ellipsis API
+Home-page: https://github.com/ellipsis-drive-internal/python-package
+Author: Daniel van der Maas
+Author-email: daniel@ellipsis-drive.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: Fiona
+Requires-Dist: Pillow
+Requires-Dist: Shapely
+Requires-Dist: geopandas
+Requires-Dist: geopy
+Requires-Dist: imagecodecs
+Requires-Dist: imageio
+Requires-Dist: matplotlib
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: pygltflib
+Requires-Dist: pyproj
+Requires-Dist: rasterio
+Requires-Dist: requests
+Requires-Dist: requests-toolbelt
+Requires-Dist: scikit-image
+Requires-Dist: tifffile
+
+# Ellipsis Drive Python Package
+
+This package is meant to help you interact with the Ellipsis API.
+
+You can install this package using
+
+`pip install ellipsis`
+
+For documentation see https://ellipsis-package.readthedocs.io
+
+This package is meant to ease the use of the Ellipsis Drive API in your Python projects.
+
+# Examples
+
+Below are some code examples.
+
+    import ellipsis as el
+
+    # log in
+    token = el.account.logIn("username", "password")
+
+    # retrieve all maps in "My Drive"
+    maps = el.account.listRoot("myDrive", pathType='layer',
+    token=token)
+
+Another example
+
+    import ellipsis as el
+
+    folderId = '46e1e919-8b73-42a3-a575-25c6d45fd93b'
+
+    token = el.account.logIn("username", "password")
+
+    info = el.path.get(folderId, token)
+    layers = el.path.listPath(folderId, pathType='layer', token = token, listAll = True)
+    folders = el.path.listPath(folderId, pathType='folder', token = token, listAll = True)
