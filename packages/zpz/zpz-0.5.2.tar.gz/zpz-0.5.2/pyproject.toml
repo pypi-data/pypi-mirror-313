@@ -1,0 +1,79 @@
+[build-system]
+requires = ["flit_core >=3.7.1,<4"]
+build-backend = "flit_core.buildapi"
+
+
+[project]
+name = "zpz"
+authors = [
+    {name = "Zepu Zhang", email = "zepu.zhang@gmail.com"},
+]
+dependencies = [
+    "boltons",
+]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dynamic = ['version', 'description']
+
+
+[project.urls]
+Source = "https://github.com/zpz/zpz.py"
+
+
+[project.optional-dependencies]
+avro = [
+    "avro-python3",
+    "numpy",
+    "snappy",
+]
+datetime = [
+    "pytz",
+]
+lineprofiler = [
+    "line-profiler",
+]
+test = [
+    "coverage[toml]",
+    "mypy",
+    "pytest",
+    "ruff",
+]
+
+
+[tool.flit.module]
+name = "zpz"
+
+
+[tool.ruff]
+target-version = "py310"
+
+
+[tool.ruff.lint]
+select = ["E", "F", "I001"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+addopts = "-sv --log-cli-level info -p no:cacheprovider"
+
+
+[tool.coverage.report]
+fail_under = 60
+show_missing = true
+skip_empty = true
+
+
+[tool.coverage.run]
+source = ["zpz"]
+data_file = "/tmp/.coverage"
