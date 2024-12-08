@@ -1,0 +1,93 @@
+Metadata-Version: 2.3
+Name: CardiacModelGenerator
+Version: 0.1.8
+Summary: Generate 3D model from clinical cardiac imaging data 
+Project-URL: Homepage, https://github.com/vjaniuw/CardiacModelGenerator
+Project-URL: Documentation, https://github.com/vjaniuw/CardiacModelGenerator/wiki
+Project-URL: Repository, https://github.com/vjaniuw/CardiacModelGenerator
+Project-URL: Bug Tracker, https://github.com/vjaniuw/CardiacModelGenerator/issues
+Author-email: Vinay Jani <vjani@uw.edu>
+License: MIT License
+        
+        Copyright (c) 2024 vjaniuw
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Keywords: 3D,VTK,cardiac,medical imaging,modeling
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Topic :: Scientific/Engineering :: Medical Science Apps.
+Requires-Python: >=3.9
+Requires-Dist: matplotlib<4.0.0,>=3.4.0
+Requires-Dist: nibabel<6.0.0,>=3.0.0
+Requires-Dist: numpy<2.0.0,>=1.21.0
+Requires-Dist: opencv-python<5.0.0,>=4.5.0
+Requires-Dist: pydicom<3.0.0,>=2.2.0
+Requires-Dist: pyvista<0.50.0,>=0.32.0
+Requires-Dist: wxpython>=4.2.2
+Provides-Extra: dev
+Requires-Dist: black; extra == 'dev'
+Requires-Dist: flake8; extra == 'dev'
+Description-Content-Type: text/markdown
+
+# CardiacModelGenerator
+
+
+Overview
+
+CardiacModelGenerator.py is a Python-based application designed for viewing slice overlays, converting pixels to universal coordinates, generating point clouds, and generating/enhancing tetrahedral meshes. Specifically, this is for cardiac models and uses MRI DICOM images and nifti masks.
+
+Features
+
+Image/Mask Viewer: Allows for a user to scroll through overlays of a mask and image Point Clouds: Can generate point cloud based on user inputs Universal Coordinates: Convers Mask/Image data to universal coordinates based on Dicom metadata Mesh: Allows for tetrahedral meshes from user inputs
+
+Requirements
+
+The script requires the following Python libraries:
+
+wx numpy pydicom nibabel cv2 (OpenCV) random matplotlib pyvista Install dependencies using:
+
+pip install wxpython numpy pydicom nibabel opencv-python matplotlib pyvista How to Use
+
+Input Data: Prepare images in a folder (should be dicoms). Have masks as nifti.
+
+Run the Script: Execute the script in your Python environment: CardiacModelGenerator.py
+
+Interactive GUI: The script uses wx for GUI, allowing you to interactively select data and configure settings. Visualize Point Clouds: Choose from multiple colormaps and adjust parameters like point_size and tol. Functions
+
+generate_point_cloud Generates a 3D point cloud from input coordinates and masks.
+
+Parameters: coords1, coords2, coords3: Coordinate arrays. masks1, masks2, masks3: Corresponding mask arrays. whichmask: Mask value to extract (default: 1). tol: Tolerance for coordinate matching (default: 0.1). colormap_name: Colormap for visualization (default: "viridis"). point_size: Size of the points in the visualization (default: 5). Returns: A PyVista PolyData object representing the cleaned point cloud. Example Usage
+
+Execute GUI. The user can:
+
+Select Dicom Image Folder
+User selects mask for that folder
+User clicks view segmentation
+User selects generate Point Cloud
+User selects generate mesh
+User selects fix mesh
+User can look at quality by clicking mesh quality
+Developed by vinayjani. Contributions and suggestions are welcome!
+
+License
+
+This project is licensed under the MIT License. See LICENSE for details.
