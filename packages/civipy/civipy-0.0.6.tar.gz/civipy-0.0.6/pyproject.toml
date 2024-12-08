@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "civipy"
+description = "CiviCRM v3/v4 REST API Python wrapper"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "GPLv3"}
+authors = [ {name = "Joe Carey", email = "joecarey001@gmail.com"}, {name = "Ana Nelson", email = "ana@ananelson.com"} ]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+]
+urls = {Homepage = "https://github.com/indepndnt/civipy"}
+dynamic = ["version"]
+dependencies = [
+    "urllib3",
+]
+optional-dependencies.pyproject = [
+    "tomli>=1.1.0; python_version < '3.11'",
+]
+optional-dependencies.dev = [
+    "black",
+    "coverage[toml]",
+    "pytest",
+    "pytest-cov",
+    "ruff",
+]
+
+[tool.setuptools]
+packages = {find = {include = ["civipy*"]}}
+dynamic.version = {file = "VERSION"}
+
+[tool.cibuildwheel]
+build = ["cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+build-frontend = "build"
+test-command = "pytest {project}/tests --color yes"
+test-requires = "pytest"
+
+[tool.black]
+line-length = 120
+target-version = ["py39", "py310", "py311", "py312"]
+
+[tool.coverage]
+run.source = ["civipy"]
+report.skip_empty = true
+
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=xml -l -rN --color=yes --code-highlight=yes"
+testpaths = ["tests"]
+python_files = "*.py"
+log_auto_indent = true
+log_cli = true
+norecursedirs = ["__pycache__", "*.egg-info", ".*", "dist"]
+
+[tool.ruff]
+src = ["src"]
+line-length = 120
+target-version = "py310"
+extend-exclude = ["react"]
+
+[tool.ruff.lint]
+select = ["E", "F", "PL"]
+ignore = ["PLR2004"]
