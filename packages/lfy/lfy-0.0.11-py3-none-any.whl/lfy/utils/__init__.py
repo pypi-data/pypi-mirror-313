@@ -1,0 +1,144 @@
+'工具'
+import hashlib
+import re
+
+from lfy.utils.debug import get_logger
+
+
+# pylint: disable=E1101
+def process_text(text):
+    """文本预处理
+
+    Args:
+        text (str): _description_
+
+    Returns:
+        str: _description_
+    """
+    # 删除空行
+    s_from = re.sub(r'\n\s*\n', '\n', text)
+    # 删除多余空格
+    s_from = re.sub(r' +', ' ', s_from)
+    # 删除所有换行，除了句号后面的换行
+    s_from = re.sub(r"-[\n|\r]+", "", s_from)
+    s_from = re.sub(r"(?<!\.|-|。)[\n|\r]+", " ", s_from)
+    return s_from
+
+
+def s2ks(sk):
+    """_summary_
+
+    Args:
+        s (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    if not sk or "|" not in sk:
+        return None, None
+    if r'\s+\|\s+' in sk:
+        sk = clear_key(sk)
+
+    [app_id, secret_key] = sk.split("|")
+    return app_id, secret_key
+
+def clear_key(sk, str_new="|"):
+    """清楚设置中的空格
+
+    Args:
+        s (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    return re.sub(r'\s*\|\s*', str_new, sk.strip())
+
+
+def is_text(cf):
+    """cb.get_formats()
+
+    Args:
+        cf (GdkContentFormats): Gdk.Clipboard.get_formats
+
+    Returns:
+        _type_: _description_
+    """
+    if cf.contain_mime_type("text/plain") \
+        or cf.contain_mime_type("text/html") \
+            or cf.contain_mime_type("text/plain;charset=utf-8"):
+        return True
+    return False
+
+
+def cal_md5(file_path):
+    """md5测试
+
+    Args:
+        file_path (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    md5_hash = hashlib.md5()
+    with open(file_path, "rb") as file:
+        # 以二进制方式读取文件内容
+        # 较大的文件可以分块读取，以避免一次性加载整个文件到内存中
+        for chunk in iter(lambda: file.read(4096), b""):
+            md5_hash.update(chunk)
+    return md5_hash.hexdigest()
+
+
+def get_os_release():
+    """版本信息
+
+    Returns:
+        _type_: _description_
+    """
+    try:
+        with open("/etc/os-release", "r", encoding="utf8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return "OS release info not found"
+
+
+def gen_img(text="success"):
+    """生成图片，TODO:这里应该生成需要语言字体的文字，现在有问题
+
+    Args:
+        text (str, optional): _description_. Defaults to "success".
+    """
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ModuleNotFoundError as e:
+        print(e)
+        get_logger().error(e)
+        return None
+
+    w, h = 256, 128
+    # 创建一个白色背景的图片 (宽1024px，高1024px)
+    img = Image.new('RGB', (w, h), color='white')
+
+    # 创建一个绘图对象
+    d = ImageDraw.Draw(img)
+
+    # 使用 Pillow 自带的默认字体
+    font = ImageFont.load_default(60)
+
+    # 定义文本
+    text = "success"
+
+    # 使用 textbbox 计算文本的边界框，返回 (left, top, right, bottom)
+    text_bbox = d.textbbox((0, 0), text, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+
+    # 将文本居中
+    position = ((w - text_width) // 2, (h - text_height) // 2)
+
+    # 在图片上添加文本，设置颜色为绿色
+    d.text(position, text, fill=(0, 128, 0), font=font)
+
+    # 保存图片
+    path = "/tmp/lfy.png"
+    img.save(path)
+    return path
