@@ -1,0 +1,60 @@
+def all():
+    message = """
+SFW:
+    neko
+    foxgirl
+    wallpapers
+    mobileWallpapers
+NSFW:
+    maid
+    maids
+    mobileWallpapers
+    lewdbomb
+    ass
+    bdsm
+    bondage
+    cum
+    hentai
+    demdom
+    doujin
+    orgy
+    panties
+    wallpapers
+    netorare
+    cuckold
+    gifs
+    gif
+    blowjob
+    feet
+    pussy
+    uglyBastard
+    uniform
+    foxgirl
+    gangbang
+    cumslut
+    glasses
+    thighs
+    tentacles
+    masturbation
+    school
+    yuri
+    zettaiRyouiki
+    zettairyouiki
+    succubus
+ROLPLAYNSFW:
+    anal
+    fuck
+    happyend
+    spank
+    suck
+    kuni
+    feetjob
+ROLPLAYSFW:
+    baka
+    kiss
+    kill
+    spank
+    puch
+    poke
+    """
+    return message
