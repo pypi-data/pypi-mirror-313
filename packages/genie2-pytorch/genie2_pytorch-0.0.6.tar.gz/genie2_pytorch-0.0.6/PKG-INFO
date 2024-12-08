@@ -1,0 +1,163 @@
+Metadata-Version: 2.3
+Name: genie2-pytorch
+Version: 0.0.6
+Summary: Genie2
+Project-URL: Homepage, https://pypi.org/project/genie2-pytorch/
+Project-URL: Repository, https://github.com/lucidrains/genie2-pytorch
+Author-email: Phil Wang <lucidrains@gmail.com>
+License: MIT License
+        
+        Copyright (c) 2024 Phil Wang
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+Keywords: artificial intelligence,attention mechanism,deep learning,transformers,world models
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.9
+Requires-Dist: beartype
+Requires-Dist: einops>=0.8.0
+Requires-Dist: einx>=0.3.0
+Requires-Dist: imagen-pytorch>=2.1.0
+Requires-Dist: ring-attention-pytorch
+Requires-Dist: torch>=2.0
+Requires-Dist: vector-quantize-pytorch>=1.20.10
+Requires-Dist: x-transformers>=1.42.21
+Provides-Extra: examples
+Provides-Extra: test
+Requires-Dist: pytest; extra == 'test'
+Description-Content-Type: text/markdown
+
+<img src="./genie2.png" width="400px"></img>
+
+## Genie2 - Pytorch (wip)
+
+Implementation of a framework for <a href="https://deepmind.google/discover/blog/genie-2-a-large-scale-foundation-world-model/">Genie2</a> in Pytorch
+
+## Install
+
+```bash
+$ pip install genie2-pytorch
+```
+
+## Usage
+
+```python
+import torch
+from genie2_pytorch import Genie2
+
+genie = Genie2(
+    dim = 512,
+    depth = 12,
+    dim_latent = 768,
+    num_actions = 256,
+    latent_channel_first = True,
+    is_video_enc_dec = True
+)
+
+video = torch.randn(2, 768, 3, 2, 2)
+actions = torch.randint(0, 256, (2, 3))
+
+loss, breakdown = genie(video, actions = actions)
+loss.backward()
+
+generated_video = genie.generate(video[:, :, 0], num_frames = 16)
+
+assert generated_video.shape == (2, 768, 16 + 1, 2, 2)
+```
+
+Interactive
+
+```python
+import torch
+from genie2_pytorch import Genie2
+
+genie = Genie2(
+    dim = 512,
+    depth = 12,
+    dim_latent = 768,
+    num_actions = 256,
+    latent_channel_first = True,
+    is_video_enc_dec = True
+)
+
+video = torch.randn(1, 768, 3, 2, 2)
+actions = torch.randint(0, 256, (1, 3))
+
+loss, breakdown = genie(video, actions = actions)
+loss.backward()
+
+generated_video, actions = genie.generate(
+    video[:, :, 0],
+    num_frames = 16,
+    interactive = True,
+    init_action = 0
+)
+
+assert generated_video.shape == (1, 768, 16 + 1, 2, 2)
+```
+
+## Citations
+
+```bibtex
+@inproceedings{Valevski2024DiffusionMA,
+    title   = {Diffusion Models Are Real-Time Game Engines},
+    author  = {Dani Valevski and Yaniv Leviathan and Moab Arar and Shlomi Fruchter},
+    year    = {2024},
+    url     = {https://api.semanticscholar.org/CorpusID:271962839}
+}
+```
+
+```bibtex
+@article{Ding2024DiffusionWM,
+    title     = {Diffusion World Model},
+    author    = {Zihan Ding and Amy Zhang and Yuandong Tian and Qinqing Zheng},
+    journal   = {ArXiv},
+    year      = {2024},
+    volume    = {abs/2402.03570},
+    url       = {https://api.semanticscholar.org/CorpusID:267499902}
+}
+```
+
+```bibtex
+@inproceedings{Sadat2024EliminatingOA,
+    title   = {Eliminating Oversaturation and Artifacts of High Guidance Scales in Diffusion Models},
+    author  = {Seyedmorteza Sadat and Otmar Hilliges and Romann M. Weber},
+    year    = {2024},
+    url     = {https://api.semanticscholar.org/CorpusID:273098845}
+}
+```
+
+```bibtex
+@misc{ParkerHolder2024,
+    author  = {Jack Parker-Holder, Philip Ball, Jake Bruce, Vibhavari Dasagi, Kristian Holsheimer, Christos Kaplanis, Alexandre Moufarek, Guy Scully, Jeremy Shar, Jimmy Shi, Stephen Spencer, Jessica Yung, Michael Dennis, Sultan Kenjeyev, Shangbang Long, Vlad Mnih, Harris Chan, Maxime Gazeau, Bonnie Li, Fabio Pardo, Luyu Wang, Lei Zhang, Frederic Besse, Tim Harley, Anna Mitenkova, Jane Wang, Jeff Clune, Demis Hassabis, Raia Hadsell, Adrian Bolton, Satinder Singh, Tim Rocktäschel},
+    url     = {https://deepmind.google/discover/blog/genie-2-a-large-scale-foundation-world-model/}
+}
+```
+
+```bibtex
+@inproceedings{Nguyen2024TurningUT,
+    title   = {Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs},
+    author  = {Minh Nguyen and Andrew Baker and Clement Neo and Allen Roush and Andreas Kirsch and Ravid Shwartz-Ziv},
+    year    = {2024},
+    url     = {https://api.semanticscholar.org/CorpusID:270870613}
+}
+```
