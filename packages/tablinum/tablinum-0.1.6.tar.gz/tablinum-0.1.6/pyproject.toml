@@ -1,0 +1,95 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tablinum"
+dynamic = ["version"]
+description = 'Tablinum is a Python library to make, manipulate, and neatly print tabular output to the console.'
+long_description = '''Tablinum is an exportable module that will line up tabular material automatically,
+and so save you hours of time faffing about with format and alignment.  As a script
+it provides a filter with a simple DSL (domain-specific language) that can be used
+to make and manipulate tables in editors that support external filters (such as Vim).'''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Toby Thurston", email = "toby.thurston@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+
+[project.urls]
+Documentation = "https://github.com/unknown/tablinum#readme"
+Issues = "https://github.com/unknown/tablinum/issues"
+Source = "https://github.com/unknown/tablinum"
+
+[project.scripts]
+tablinum_filter = "tablinum.tablinum:filter"
+
+[tool.hatch.version]
+path = "src/tablinum/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report -m",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/tablinum tests}"
+
+[tool.coverage.run]
+source_pkgs = ["tablinum", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/tablinum/__about__.py",
+]
+
+[tool.coverage.paths]
+tablinum = ["src/tablinum", "*/tablinum/src/tablinum"]
+tests = ["tests", "*/tablinum/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+
+[tool.pytest.ini_options]
+ addopts = [
+     '--import-mode=importlib',
+     '--doctest-modules',
+     '--pyargs',
+ ]
