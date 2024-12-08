@@ -1,0 +1,136 @@
+: Copyright 2014, 2018, 2019, 2020 Andrzej Cichocki
+
+: This file is part of pym2149.
+:
+: pym2149 is free software: you can redistribute it and/or modify
+: it under the terms of the GNU General Public License as published by
+: the Free Software Foundation, either version 3 of the License, or
+: (at your option) any later version.
+:
+: pym2149 is distributed in the hope that it will be useful,
+: but WITHOUT ANY WARRANTY; without even the implied warranty of
+: MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+: GNU General Public License for more details.
+:
+: You should have received a copy of the GNU General Public License
+: along with pym2149.  If not, see <http://www.gnu.org/licenses/>.
+
+isvalue = $pyref(pym2149.config isvalue)
+pyattr = $pyref(pym2149.config pyattr)
+py = $pyref(pym2149.config py)
+
+prerecorded = $diref$pyref(pym2149.iface Prerecorded)
+ymfile = $diref$pyref(pym2149.iface YMFile)
+
+referencefrequency = 440
+: The frequency of referencemidinote.
+
+referencemidinote = 69
+: The MIDI note that has referencefrequency.
+
+wavrate = 44100
+: The rate for WAV output, ignored when JACK is the target.
+
+freqclamp = true
+: Whether inaudible tones are clamped to the lowest such tone. Setting this to true improves performance when very high frequency tones are used to attenuate the envelope. Quality may be degraded, particularly at lower outputrates.
+
+underclock = 8
+: The number of nominal clock ticks until the chip state can next be updated, must be a factor of 8 i.e. in {1, 2, 4, 8}. Higher numbers improve emulation performance. According to Hatari the real thing updates at 250 kHz, which would make 8 the authentic setting.
+
+oscpause = false
+: Whether an oscillator is paused when turned off in the mixer. Setting to true doesn't significantly help performance and is likely not authentic so this option is a bit useless.
+
+nominalclock = $try($pyattr($(ymfile) nominalclock) $pyref(pym2149.clock stclock))
+: You can specify your own clock here, which overrides any other value.
+
+maxtoneperiod = $py[0xfff]
+
+maxnoiseperiod = $py[0x1f]
+
+maxenvperiod = $py[0xffff]
+
+stereo = false
+: Stereo output.
+
+panlaw = 3
+: The attenuation in decibels of each channel at central pan, to compensate for acoustic summing. Common choices are {3, 4.5, 6}.
+
+maxpan = .75
+: The pan of the outermost channels when panning automatically.
+
+systemchannelcount = 2
+: The number of system output channels when using JACK.
+
+ignoreloop = $isvalue$(outpath)
+: If true playback will not loop.
+
+updaterate = $try($pyattr($(ymfile) updaterate) 50)
+: The rate at which chip params are updated.
+
+linesperbeat = 4
+: bpmtool.py uses this.
+
+pianorollheight = $pyattr($(prerecorded) pianorollheight)
+: You can override the deduced piano roll height here.
+
+pianorollenabled = true
+: Set to false to disable the piano roll.
+
+rollstream = $pyref(sys stderr)
+
+rollmincents = 10
+
+dosoundextraseconds = 3
+: When playing a Dosound script, the amount of time to continue rendering after end of script.
+
+chipchannels = 3
+: The number of chip channels to implement. Note that only the first three will have YM2149 registers wired into them.
+
+Profile = $pyref(splut.bg Profile)
+
+profile = $py[None]
+: If not None, must be a config.Profile object.
+
+trace = $py[None]
+: If not None, the number of seconds worth of trace data to collect.
+
+jackringsize = 2
+: In the YMFile case, two buffers allows us to prepare another while waiting for JACK to process the one.
+
+jackcoupling = true
+: If true, JACK overrun (i.e. waiting for it to release a buffer) is considered a normal condition. This is for when we'd like to use blocking on JACK as our timing mechanism.
+
+OSC
+    host = 127.0.0.1
+    port = 2149
+    bufsize = 4096
+
+PortAudio
+    outputrate = $(wavrate)
+    buffersize = 1024
+    ringsize = $(jackringsize)
+    coupling = $(jackcoupling)
+
+tuning = $pyref(pym2149.pitch EqualTemperament)
+: The mapping between MIDI note and frequency, other options include Meantone and FiveLimit.
+
+meantoneflats = 2
+: The number of times we descend a fifth from referencemidinote between 0 and 11 inclusive, this can be used to change the location of the wolf fifth. Use 2 for classic Pythagorean tuning or 5 for a late-medieval modification.
+
+meantonecomma = .25
+: Fraction of syntonic comma by which fifths are lowered in meantone temperament. Common values are 0 for Pythagorean tuning, 1/4 for just major thirds and 1/3 for just minor thirds. Other options include 2/7, 1/5.
+
+showperiods = false
+: If true, show periods in visualisation instead of MIDI notes.
+
+SID enabled = false
+: If true, integrate with reSID shared library.
+
+SID clock = $pyref(pym2149.resid PAL)
+: The clock to use for reSID.
+
+Lurlene lazy = false
+: If true Lurlene will lookup objects in globals at runtime, so you don't have to update sections and everything in-between for your changes to be audible. This feature is currently experimental, it's usable but there are many bugs.
+
+builtin_lha = false
+: If true, attempt to unpack LHA-compressed YM files without requiring the lha executable.
