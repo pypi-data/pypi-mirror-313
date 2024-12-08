@@ -1,0 +1,24 @@
+var _=`<div class="pglite-app-container">
+
+    <h1><tt>pglite</tt></h1>
+
+    <div>Executed commands:</div>
+    <div class="code-editor" title="code-editor"></div>
+    <div id="pglite-timestamp"></div>
+    <hr>
+    <div>Result:</div>
+    <div title="results"></div>
+    <hr>
+    <div>Raw Output:</div>
+    <div title="output"></div>
+</div>`;import{PGlite as D}from"https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js";function w(){return"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(t){let n=Math.random()*16|0;return(t==="x"?n:n&3|8).toString(16)})}var h=new window.AudioContext,S=t=>{if(t){let n=new SpeechSynthesisUtterance(t);window.speechSynthesis.speak(n)}};function b(t=440,n=1e3,i=.1,a="sine",o=null){let c=h.createOscillator(),u=h.createGain();u.gain.value=i,c.type=a,c.frequency.value=t,c.connect(u),u.connect(h.destination),c.start(),u.gain.exponentialRampToValueAtTime(1e-5,h.currentTime+n/1e3),setTimeout(()=>{c.stop(),o&&setTimeout(()=>{S(o)},100)},n)}function v(t=null){b(500,5,.05,"sine",t)}function T(t=null){b(50,400,.1,"sawtooth",t)}var P=`
+-- Optionally select statements to execute.
+
+CREATE TABLE IF NOT EXISTS test  (
+        id serial primary key,
+        title varchar not null
+      );
+
+INSERT INTO test (title) values ('dummy');
+
+`.trim();function q(t){let n=document.createElement("table"),i=n.insertRow();return t.fields.forEach(a=>{let o=document.createElement("th");o.textContent=a.name,i.appendChild(o)}),n}function M(t,n){t.rows.forEach(i=>{let a=n.insertRow();t.fields.forEach(o=>{let c=a.insertCell();c.textContent=String(i[o.name])})})}function R(t){if(t&&t.file_content&&t.file_info){let{file_content:n,file_info:i}=t,a=atob(n),o=new Array(a.length);for(let r=0;r<a.length;r++)o[r]=a.charCodeAt(r);let c=new Uint8Array(o),u=new Blob([c],{type:i.type});return new File([u],i.name,{type:i.type,lastModified:i.lastModified})}return null}function A({model:t,el:n}){function i(s){console.log(s),t.get("audio")&&T(s.message),t.set("response",{status:"error",error_message:s.message}),t.save_changes()}async function a(s){let d={},p=[{name:"fuzzystrmatch",url:"https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/contrib/fuzzystrmatch.js"},{name:"pg_trgm",url:"https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/contrib/pg_trgm.js"},{name:"vector",url:"https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/vector/index.js"}].map(async({name:e,url:g})=>{if(s.includes(e))try{let f=await import(g);d[e]=f[e]}catch(f){i(f),console.error(`Failed to load ${e}:`,f)}});return await Promise.all(p),d}async function o(s,d,y){let p=await a(y);console.log(p);try{let e=await D.create({datadir:s,options:d,extensions:p});return console.log("Database initialized successfully."),e}catch(e){throw i(e),console.error("Failed to initialize the database:",e),e}}let c=t.get("idb"),u=t.get("file_package"),l=R(u),r={};l&&(r.loadDataDir=l);let x=t.get("extensions");o(c,r,x).then(async s=>{for(let d of x)await s.exec(`CREATE EXTENSION IF NOT EXISTS ${d};`);C({model:t,el:n,db:s})}).catch(s=>{i(s)})}function C({model:t,el:n,db:i}){let a=t.get("headless"),o=document.createElement("div");o.innerHTML=_;let c=w();o.id=c,a&&(o.style="display: none; visibility: hidden;"),n.appendChild(o),t.on("change:datadump",async()=>{if(t.get("datadump")=="generate_dump"){let r=await i.dumpDataDir(),x=new FileReader;x.onload=s=>{let d={name:r.name,size:r.size,type:r.type,lastModified:r.lastModified},y=s.target.result.split(",")[1],p={file_info:d,file_content:y};t.set("file_package",p),t.set("response",{status:"datadump_ready"}),t.save_changes(),t.get("audio")&&v()},x.readAsDataURL(r)}}),t.on("change:code_content",async()=>{function l(e){if(a)return;let g=n.querySelector('div[title="code-editor"]');g.innerHTML=g.innerHTML+"<br>"+e}function r(e){if(a)return;let g=n.querySelector('div[title="output"]'),f=n.querySelector('div[title="results"]');g.innerHTML=JSON.stringify(e);let m=q(e);M(e,m),f.innerHTML="",f.append(m)}function x(e,g){a||(l(e),r(g))}let s=t.get("code_content");if(!s)return;let d=t.get("multiline"),y=t.get("multiexec"),p={rows:[],fields:[{name:"",dataTypeID:0}]};if(y)try{l(s);let e=await i.exec(s);r(e[e.length-1]),t.set("response",{status:"completed",response:e,response_type:"multi"})}catch(e){handle_error(e)}else if(d!=""){let e=s.split(d);for(let g of e){let f=g.trim();if(f!==""){l(`${f};`);try{p=await i.query(f),r(p)}catch(m){handle_error(m)}}}t.set("response",{status:"completed",response:p,response_type:"single"})}else{l(s);try{p=await i.query(s),r(p),t.set("response",{status:"completed",response:p,response_type:"single"})}catch(e){handle_error(e)}}t.save_changes(),t.get("audio")&&v()});let u;i.query("select version();").then(l=>{u=l.rows[0],t.set("about",u),t.set("response",{status:"ready"}),t.save_changes()}).catch(l=>{handle_error(l)})}var X={render:A};export{X as default};
