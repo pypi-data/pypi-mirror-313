@@ -1,0 +1,32 @@
+repos:
+-   repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+    -   id: black
+        args: [--safe, --quiet]
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: debug-statements
+-   repo: https://github.com/asottile/reorder-python-imports
+    rev: v3.14.0
+    hooks:
+    -   id: reorder-python-imports
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        files: ^(src|tests)
+        args: []
+        additional_dependencies: [attrs>=19.2.0, pytest>=7, typing-extensions]
+-   repo: local
+    hooks:
+    -   id: rst
+        name: rst
+        entry: rst-lint --encoding utf-8
+        files: ^(CHANGELOG.rst|RELEASING.rst|README.rst)$
+        language: python
+        additional_dependencies: [pygments, restructuredtext_lint]
