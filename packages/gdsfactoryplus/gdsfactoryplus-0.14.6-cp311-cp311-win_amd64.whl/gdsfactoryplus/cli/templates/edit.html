@@ -1,0 +1,26 @@
+<span
+  id="{{ id }}-editvalue"
+  class="fa child"
+  style="
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    font-style: normal;
+  "
+  hx-get="/yaml/editvalue?path={{ path }}&what={{ id }}{% if goto==id+'-editvalue' %}&added=1{% endif %}"
+  hx-trigger="click"
+  hx-target="#{{ id }}"
+  hx-swap="outerHTML"
+  ></span
+>
+
+<script>
+  document
+    .getElementById("{{ id }}-editvalue")
+    .addEventListener("htmx:configRequest", function (event) {
+      let el = document.getElementById("accept");
+      if (el) {
+        el.click();
+      }
+    });
+</script>
