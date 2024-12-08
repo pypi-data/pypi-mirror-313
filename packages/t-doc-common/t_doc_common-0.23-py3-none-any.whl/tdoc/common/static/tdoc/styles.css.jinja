@@ -1,0 +1,382 @@
+/* Copyright 2024 Remy Blank <remy@c-space.org> */
+/* SPDX-License-Identifier: MIT */
+
+:not(#_).hidden {
+    display: none;
+}
+:not(#_).line-height-normal .highlight pre {
+    line-height: normal;
+}
+
+/* Set the maximum width of sidebars instead of a fixed width. */
+div.sidebar, aside.sidebar {
+    max-width: 40%;
+    width: inherit;
+}
+
+/* Invert the even and odd row colors in tables, so that the first row below the
+   header has a different color than the header. */
+.table > tbody > tr:nth-child(even) {
+    background-color: var(--pst-color-table-row-zebra-low-bg);
+}
+.table > tbody > tr:nth-child(odd) {
+    background-color: var(--pst-color-table-row-zebra-high-bg);
+}
+.table > tbody > tr:hover {
+    background-color: var(--pst-color-table-row-hover-bg);
+}
+
+/* Make quotation attributions a bit more compact. */
+blockquote div > p:has(+ p.attribution) {
+    margin-bottom: 0;
+}
+
+/* Admonitions */
+.admonition.dropdown .admonition-title {
+    cursor: pointer;
+}
+.admonition.dropdown .admonition-title:hover {
+    box-shadow: inset 0 0 0px 20px rgb(0 0 0 / 1%);
+}
+.admonition.dropdown .admonition-title:active {
+    box-shadow: inset 0 0 0px 20px rgb(0 0 0 / 3%);
+}
+.admonition.dropdown .admonition-title button {
+    position: absolute;
+    right: 0;
+    outline: none;
+    border: none;
+    padding: 0;
+    background: none;
+}
+.admonition.dropdown .admonition-title ~ * {
+    transition: opacity 0.3s;
+}
+.admonition.dropdown:not(.expand) {
+    padding-bottom: 0;
+}
+.admonition.dropdown:not(.expand) .admonition-title {
+    margin-bottom: 0;
+}
+.admonition.dropdown:not(.expand) .admonition-title ~ * {
+    display: block;
+    margin: 0;
+    border: none;
+    padding: 0;
+    height: 0;
+    visibility: hidden;
+    overflow: hidden;
+    opacity: 0;
+}
+
+/* Iframes */
+iframe.tdoc {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16/9;
+    margin: 1rem auto;
+}
+
+/* Solutions */
+html[data-tdoc-solutions=hide] .admonition.solution:not(.always-show) {
+    display: none;
+}
+/* TODO: The icons have different widths, so the button moves when clicked. */
+button.btn-toggle-solutions::before {
+    font: var(--fa-font-solid);
+    content: '\f070';
+}
+html[data-tdoc-solutions=hide] button.btn-toggle-solutions::before {
+    content: '\f06e';
+}
+
+/* Inline code */
+a > code {
+    color: inherit;
+}
+
+/* Code blocks */
+div.literal-block-wrapper div.code-block-caption {
+    padding: 0.3rem;
+}
+div.highlight pre {
+    padding: 0.5rem;
+}
+div.highlight pre > .linenos {
+    margin-right: 8px;
+    border-right: 1px solid var(--pst-color-border);
+}
+div.highlight pre > .linenos::before {
+    content: attr(data-n);
+}
+
+/* Buttons */
+button[class^=tdoc-],
+button[class*=" tdoc-"] {
+    border: 1px solid var(--pst-color-border);
+    border-radius: 0.25rem;
+    background-color: var(--pst-color-surface);
+    transition: background-color 0.3s;
+}
+button[class^=tdoc-]:hover,
+button[class*=" tdoc-"]:hover {
+    background-color: var(--pst-color-border);
+}
+button[class^=tdoc-][class*=" fa-"],
+button[class*=" tdoc-"][class^=fa-],
+button[class*=" tdoc-"][class*=" fa-"] {
+    width: 1.8rem;
+    height: 1.8rem;
+    font: var(--fa-font-solid);
+}
+
+/* Inputs */
+input[class^=tdoc-],
+input[class*=" tdoc-"] {
+    border: 1px solid var(--pst-color-border);
+    padding-block: 1px;
+    padding-inline: 2px;
+}
+
+/* Auto-sizing text area */
+.tdoc-autosize {
+    display: grid;
+}
+.tdoc-autosize > textarea {
+    resize: none;
+    overflow: hidden;
+}
+.tdoc-autosize::after {
+    content: attr(data-text) " ";
+    white-space: pre-wrap;
+    visibility: hidden;
+}
+.tdoc-autosize > textarea,
+.tdoc-autosize::after {
+    border: 1px solid var(--pst-color-border);
+    padding-block: 1px;
+    padding-inline: 2px;
+    font: inherit;
+    grid-area: 1 / 1 / 2 / 2;
+    word-break: break-word;
+}
+
+/* Exec outputs */
+div.tdoc-exec-output {
+    position: relative;
+    margin: 1rem 0;
+}
+div.tdoc-exec-output button.tdoc-remove {
+    position: absolute;
+    top: 0.3rem;
+    right: 0.3rem;
+    user-select: none;
+    opacity: 0;
+    transition: background-color 0.3s, opacity 0.3s;
+}
+div.tdoc-exec-output:hover button.tdoc-remove {
+    opacity: 1;
+}
+div.tdoc-exec-output.tdoc-sectioned {
+    border: 1px solid var(--pst-color-border);
+    border-top: 0.25rem solid var(--pst-color-border);
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+div.tdoc-exec-output.tdoc-sectioned:empty {
+    display: none;
+}
+div.tdoc-exec-output.tdoc-sectioned > :not(:last-child) {
+    border-bottom: 1px solid var(--pst-color-border);
+}
+div.tdoc-exec-output.tdoc-sectioned div.highlight {
+    border-radius: 0;
+}
+div.tdoc-exec-output.tdoc-sectioned pre {
+    border: none;
+    border-radius: 0;
+}
+div.tdoc-exec-output pre span.err {
+    color: var(--pst-color-danger);
+}
+div.tdoc-exec-output div.tdoc-input {
+    display: flex;
+    flex-direction: row;
+    align-content: stretch;
+    align-items: baseline;
+    margin: 0;
+    padding: 0.3rem;
+    column-gap: 0.3rem;
+}
+div.tdoc-exec-output div.tdoc-input .prompt {
+    white-space: pre;
+    padding-left: 0.2rem;
+    padding-right: 0.2rem;
+}
+div.tdoc-exec-output div.tdoc-input .input {
+    width: 100%;
+}
+div.tdoc-exec-output div.tdoc-input input {
+    border: 1px solid var(--pst-color-border);
+    padding-block: 1px;
+    padding-inline: 2px;
+}
+div.tdoc-exec-output > .tdoc-navbar {
+    padding: 0.3rem;
+    display: flex;
+    flex-direction: row;
+    column-gap: 0.3rem;
+    background-color: var(--pst-color-background);
+}
+div.tdoc-exec-output > .tdoc-navbar > .tdoc-stretch {
+    width: 100%;
+}
+div.tdoc-exec-output > iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: white;
+}
+html.tdoc-fullscreen {
+    overflow: hidden;
+}
+div.tdoc-exec-output.tdoc-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    margin: 0;
+    border: none;
+}
+div.tdoc-exec-output:not(.tdoc-fullscreen) > .tdoc-navbar .tdoc-restore {
+    display: none;
+}
+div.tdoc-exec-output.tdoc-fullscreen > .tdoc-navbar .tdoc-maximize {
+    display: none;
+}
+div.tdoc-exec-output.tdoc-fullscreen > iframe {
+    height: 100% !important;  /* Override element style */
+    aspect-ratio: auto;
+}
+
+/* Editor */
+div.tdoc-exec.tdoc-editable div.highlight pre,
+div.tdoc-exec.tdoc-editable div.highlight button.copybtn {
+    display: none;
+}
+div.tdoc-exec.tdoc-editable div.cm-editor {
+    border: 1px solid var(--pst-color-border);
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+div.cm-editor.cm-focused {
+    outline: none;
+}
+div.cm-editor div.cm-scroller {
+    font-family: var(--pst-font-family-monospace);
+    font-size: 0.875em;
+}
+html[data-theme=dark] div.cm-editor {
+    background-color: var(--pst-color-surface);
+}
+
+/* Execution controls */
+div.tdoc-exec[class^=highlight-],
+div.tdoc-exec[class*=" highlight-"] {
+    flex-direction: row;
+    column-gap: 0.3rem;
+}
+div.tdoc-exec div.highlight {
+    flex-basis: 100%;
+}
+div.tdoc-exec div.tdoc-exec-controls {
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.3rem;
+}
+
+/* SQL execution results */
+.table > tbody > tr:nth-child(odd).tdoc-no-results {
+    background: repeating-linear-gradient(-45deg,
+        var(--pst-color-table-row-zebra-low-bg) 0px 2px,
+        var(--pst-color-table-row-zebra-high-bg) 2px 20px);
+}
+.tdoc-error {
+    margin-bottom: 1rem;
+    border: 1px solid var(--pst-color-danger);
+    padding: 0.5rem;
+    background: repeating-linear-gradient(-45deg,
+        var(--pst-color-table-row-zebra-low-bg) 0px 2px,
+        var(--pst-color-table-row-zebra-high-bg) 2px 20px);
+}
+
+/* Create a hanging indent for signatures. */
+.sig {
+    padding-left: 3rem;
+    text-indent: -3rem;
+}
+
+/* Hide the Read-the-Docs switcher in the sidebar added by pydata_sphinx_theme
+   if it's empty, as it causes the scrollbar to always appear. */
+.bd-sidebar-primary div#rtd-footer-container:empty {
+    display: none;
+}
+
+/* Remove the underline on hover on navbar buttons. */
+.pst-navbar-icon.pst-navbar-icon:hover::before {
+    border-bottom: none;
+}
+
+/* Fix the vertical alignment of navbar icons. */
+.article-header-buttons {
+    align-items: stretch;
+}
+.article-header-buttons > div.dropdown > button {
+    height: 100%;
+}
+.article-header-buttons button.pst-navbar-icon {
+    height: inherit;
+}
+.article-header-buttons .btn__icon-container {
+    display: flex;
+    align-items: center;
+}
+
+/* Prevent the wrapper background set by pygments from being visible if the
+   wrapper is larger than its content (visible in dark mode). */
+div.highlight.highlight.highlight {
+    background: none;
+}
+
+/* Prevent the wrapper background set by pygments from overriding code literal
+   styles. */
+code.literal.literal.literal {
+    background-color: var(--pst-color-surface);
+}
+
+/* Fix the gap left by pydata_sphinx_theme between the table and the
+   scrollbar. */
+.table {
+    margin-bottom: 0;
+}
+
+/* Reduce the bottom margin of directive definition list options. */
+dl[class]:not(.directive, .option-list, .field-list, .footnote, .glossary, .simple):not(._) {
+    margin-bottom: 1rem;
+}
+
+/* Hide the search shortcut, which is disabled. */
+.search-button-field .search-button__kbd-shortcut,
+.bd-search .search-button__kbd-shortcut {
+    display: none;
+}
+
+/* Avoid that math blocks sometimes get cut off at the top. */
+div.math, span.math {
+    overflow: visible;
+}
+div.math mjx-container {
+    padding-top: 0.2rem;
+}
