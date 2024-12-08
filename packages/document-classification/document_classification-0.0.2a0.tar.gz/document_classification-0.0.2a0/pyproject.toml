@@ -1,0 +1,64 @@
+[tool.poetry]
+name = "document-classification"
+version = "0.0.2-alpha"
+description = "Awesome document classifcation - Implementation of major techniques"
+authors = ["Amit Timalsina <amittimalsina14@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^2.7.0"
+pandas = "^2.2.3"
+loguru = "^0.7.2"
+paddleocr = "^2.9.0"
+paddlepaddle = "^2.6.2"
+albumentations = "^1.4.18"
+google = "^3.0.0"
+google-cloud-vision = "^3.7.4"
+fasttext = "^0.9.3"
+instructor = "^1.6.3"
+langsmith = "^0.1.139"
+torch = "^2.5.1"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.12.1"
+ruff = "^0.7.0"
+pytest = "^8.3.3"
+pytest-cov = "^6.0.0"
+
+
+[tool.poetry.group.exp.dependencies]
+extract-thinker = "^0.0.18"
+transformers = "^4.46.1"
+datasets = "^3.1.0"
+scikit-learn = "^1.5.2"
+ray = "^2.38.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+
+# In addition to the standard set of exclusions, exclude the following directories.
+extend-exclude = [".venv", "ipynb_experiments"]
+
+# Group violations by containing file.
+output-format = "grouped"
+
+[tool.ruff.lint]
+# Enable import rules
+select = ["ALL"]
+ignore = ["D100", "D203", "D212", "COM819", "TD", "FIX"]
+extend-select = ["I"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*.py" = ["S101", "ANN201", "D103", "D101"]
+"**/routers/**/*.py" = ["D417"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = false
