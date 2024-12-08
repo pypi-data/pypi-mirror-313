@@ -1,0 +1,238 @@
+from __future__ import annotations
+
+import asyncio
+import json
+from typing import TYPE_CHECKING
+
+import httpx
+from llmling import Config, RuntimeConfig
+import pytest
+import websockets.client
+
+from mcp_server_llmling import LLMLingServer
+from mcp_server_llmling.injection import ConfigInjectionServer  # Our new module
+
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator, Generator
+
+
+STATUS_OK = 200
+STATUS_ERROR = 400
+
+
+@pytest.fixture
+def config() -> Config:
+    """Create a basic test configuration."""
+    return Config.model_validate({
+        "resources": {"test_resource": {"type": "text", "content": "Initial content"}},
+        "tools": {"test_tool": {"import_path": "llmling.testing.tools.example_tool"}},
+    })
+
+
+@pytest.fixture
+async def runtime(config: Config) -> AsyncGenerator[RuntimeConfig, None]:
+    """Create a runtime config."""
+    async with RuntimeConfig.from_config(config) as runtime:
+        yield runtime
+
+
+@pytest.fixture
+async def injection_server(
+    runtime: RuntimeConfig,
+) -> AsyncGenerator[tuple[ConfigInjectionServer, str], None]:
+    """Create and start injection server."""
+    server = LLMLingServer(runtime)
+    injection = ConfigInjectionServer(server, port=0)  # Random port
+    await injection.start()
+    try:
+        # Get the actual port that was assigned
+        port = injection._server.servers[0].sockets[0].getsockname()[1]
+        base_url = f"http://localhost:{port}"
+        yield injection, base_url
+    finally:
+        await injection.stop()
+
+
+@pytest.fixture
+def http_client(
+    injection_server: tuple[ConfigInjectionServer, str],
+) -> Generator[httpx.AsyncClient, None, None]:
+    """Create async HTTP client."""
+    _, base_url = injection_server
+    with httpx.AsyncClient(base_url=base_url) as client:
+        yield client
+
+
+# HTTP Endpoint Tests
+
+
+@pytest.mark.asyncio
+async def test_list_components(http_client: httpx.AsyncClient) -> None:
+    """Test listing all components."""
+    response = await http_client.get("/components")
+    assert response.status_code == STATUS_OK
+    data = response.json()
+    assert "resources" in data
+    assert "tools" in data
+    assert "prompts" in data
+
+
+@pytest.mark.asyncio
+async def test_add_resource(http_client: httpx.AsyncClient) -> None:
+    """Test adding a resource."""
+    response = await http_client.post(
+        "/resources/new_resource", json={"type": "text", "content": "New content"}
+    )
+    assert response.status_code == STATUS_OK
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["component_type"] == "resource"
+    assert data["name"] == "new_resource"
+
+    # Verify resource was added
+    resources = await http_client.get("/resources")
+    assert resources.status_code == STATUS_OK
+    assert "new_resource" in resources.json()
+
+
+@pytest.mark.asyncio
+async def test_add_invalid_resource(http_client: httpx.AsyncClient) -> None:
+    """Test adding an invalid resource."""
+    response = await http_client.post(
+        "/resources/bad_resource", json={"type": "invalid_type", "content": "Bad content"}
+    )
+    assert response.status_code == STATUS_ERROR
+
+
+@pytest.mark.asyncio
+async def test_remove_resource(http_client: httpx.AsyncClient) -> None:
+    """Test removing a resource."""
+    # First add a resource
+    await http_client.post(
+        "/resources/temp_resource", json={"type": "text", "content": "Temporary"}
+    )
+
+    # Then remove it
+    response = await http_client.delete("/resources/temp_resource")
+    assert response.status_code == STATUS_OK
+    data = response.json()
+    assert data["status"] == "success"
+
+    # Verify it's gone
+    resources = await http_client.get("/resources")
+    assert "temp_resource" not in resources.json()
+
+
+@pytest.mark.asyncio
+async def test_bulk_update(http_client: httpx.AsyncClient) -> None:
+    """Test bulk component updates."""
+    response = await http_client.post(
+        "/bulk-update",
+        json={
+            "resources": {
+                "bulk_res1": {"type": "text", "content": "Bulk 1"},
+                "bulk_res2": {"type": "text", "content": "Bulk 2"},
+            },
+            "tools": {"bulk_tool": {"import_path": "llmling.testing.tools.example_tool"}},
+        },
+    )
+    assert response.status_code == STATUS_OK
+    results = response.json()
+    assert len(results) == 3
+    assert all(r["status"] == "success" for r in results)
+
+    # Verify components were added
+    components = await http_client.get("/components")
+    data = components.json()
+    assert "bulk_res1" in data["resources"]
+    assert "bulk_res2" in data["resources"]
+    assert "bulk_tool" in data["tools"]
+
+
+# WebSocket Tests
+
+
+@pytest.mark.asyncio
+async def test_websocket_updates(
+    injection_server: tuple[ConfigInjectionServer, str],
+) -> None:
+    """Test WebSocket updates."""
+    _, base_url = injection_server
+    ws_url = f"ws://{base_url.removeprefix('http://')}/ws"
+
+    async with websockets.client.connect(ws_url) as ws:
+        # Send update
+        await ws.send(
+            json.dumps({
+                "resources": {
+                    "ws_resource": {"type": "text", "content": "WebSocket content"}
+                }
+            })
+        )
+        response = await ws.recv()
+        assert "successfully" in response
+
+        # Verify update
+        async with httpx.AsyncClient(base_url=base_url) as client:
+            resources = await client.get("/resources")
+            assert "ws_resource" in resources.json()
+
+
+@pytest.mark.asyncio
+async def test_websocket_invalid_update(
+    injection_server: tuple[ConfigInjectionServer, str],
+) -> None:
+    """Test WebSocket invalid updates."""
+    _, base_url = injection_server
+    ws_url = f"ws://{base_url.removeprefix('http://')}/ws"
+
+    async with websockets.client.connect(ws_url) as ws:
+        await ws.send(
+            json.dumps({"resources": {"bad_resource": {"type": "invalid_type"}}})
+        )
+        response = await ws.recv()
+        assert "failed" in response
+
+
+# Error Handling Tests
+
+
+@pytest.mark.asyncio
+async def test_duplicate_resource_replace(http_client: httpx.AsyncClient) -> None:
+    """Test replacing existing resource."""
+    # Add initial resource
+    await http_client.post(
+        "/resources/dupe_resource", json={"type": "text", "content": "Original"}
+    )
+
+    # Replace it
+    response = await http_client.post(
+        "/resources/dupe_resource", json={"type": "text", "content": "Replaced"}
+    )
+    assert response.status_code == STATUS_OK
+
+    # Verify content was updated
+    resources = await http_client.get("/resources")
+    data = resources.json()
+    assert data["dupe_resource"]["content"] == "Replaced"
+
+
+@pytest.mark.asyncio
+async def test_concurrent_updates(http_client: httpx.AsyncClient) -> None:
+    """Test concurrent updates."""
+
+    async def add_resource(name: str) -> httpx.Response:
+        return await http_client.post(
+            f"/resources/{name}", json={"type": "text", "content": f"Content {name}"}
+        )
+
+    # Send multiple concurrent requests
+    results = await asyncio.gather(*[add_resource(f"concurrent_{i}") for i in range(5)])
+
+    assert all(r.status_code == STATUS_OK for r in results)
+
+    # Verify all resources were added
+    resources = await http_client.get("/resources")
+    data = resources.json()
+    assert all(f"concurrent_{i}" in data for i in range(5))
