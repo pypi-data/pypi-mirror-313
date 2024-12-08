@@ -1,0 +1,163 @@
+[project]
+name = "django-tailwind-cli"
+description = "Django and Tailwind integration based on the prebuilt Tailwind CSS CLI."
+authors = [{ name = "Oliver Andrich", email = "oliver@andrich.me" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["django", "tailwind", "css"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Utilities",
+    "Environment :: Web Environment",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+]
+dynamic = ["version"]
+requires-python = ">=3.9"
+dependencies = [
+    "django>=4.0",
+    "django-typer>=2.1.2",
+    "requests>=2.32.3",
+]
+
+[project.optional-dependencies]
+django-extensions = ["django-extensions>=3.2", "werkzeug>=3.0"]
+
+[project.urls]
+Home = "https://django-tailwind-cli.rtfd.io/"
+Documentation = "https://django-tailwind-cli.rtfd.io/"
+Repository = "https://github.com/django-commons/django-tailwind-cli"
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=5.0.0",
+    "pytest-django>=4.9.0",
+    "pytest-mock>=3.14.0",
+    "pytest-randomly>=3.15.0",
+    "pytest>=8.3.3",
+    "django-stubs[compatible-mypy]>=5.1.1",
+    "tox>=4.23.2",
+    "tox-uv>=1.16.0",
+]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+# Black
+[tool.black]
+target-version = ["py38"]
+line-length = 100
+skip-string-normalization = true
+exclude = '''
+/(
+    \.git
+  | \.tox
+  | \.venv
+  | _build
+  | build
+  | dist
+  | ^.*\b(migrations)\b.*$
+)/
+'''
+
+# mypy
+[tool.mypy]
+python_version = "3.9"
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "tests.settings"
+strict_settings = false
+
+# Ruff
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+
+[tool.ruff.format]
+exclude = ["**/migrations/*"]
+
+[tool.ruff.lint]
+select = [
+    "A",   # flake8-builtins
+    "ARG", # flake8-unused-arguments
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "DJ",  # flake8-django
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "FBT", # flake8-boolean-trap
+    "N",   # pep8-naming
+    "Q",   # flake8-quotes
+    "TID", # flake8-tidy-imports
+    "W",   # pycodestyle
+    "YTT", # flake8-2020
+]
+ignore = [
+    # Allow non-abstract empty methods in abstract base classes
+    "B027",
+    # Allow boolean positional values in function calls, like `dict.get(... True)`
+    "FBT003",
+    # Ignore complexity
+    "C901",
+]
+unfixable = [
+    # Don't touch unused imports
+    "F401",
+    # Don't touch unused variables
+    "F841",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["solomon"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = ["PLR2004", "S101", "TID252", "ARG001"]
+"tests/snapshots/*" = ["ALL"]
+"**/migrations/*" = ["ALL"]
+
+# Pytest
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+pythonpath = [".", "src"]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore:In Typer, only the parameter 'autocompletion' is supported.:DeprecationWarning",
+]
+
+# Coverage
+[tool.coverage.run]
+source = ["src"]
+branch = true
+parallel = true
+omit = ["*/migrations/*", "*/tests/*", "*/conftest.py"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "raise NotImplementedError",
+    "pass",
+    "if __name__ == .__main__.:",
+]
