@@ -1,0 +1,45 @@
+
+[build-system]
+requires = ["setuptools>=61.0","setuptools-git-versioning"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools-git-versioning]
+enabled = true
+
+[project]
+name = "simple-build-system"
+dynamic = ["version"] # Version based on git tag
+authors = [
+  { name="Thomas Kittelmann", email="thomas.kittelmann@ess.eu" },
+]
+description = "A very simple to use build system for projects with primarily C++/Python code, intended for usage by scientific developers without a strong SW-engineering background."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: Unix",
+]
+#To avoid interference with e.g. conda-installed dependencies, we on purpose do
+#not specify cmake and pybind11 here:
+dependencies = [
+    'tomli; python_version < "3.11"',
+]
+
+#We instead make an optional dependency list:
+[project.optional-dependencies]
+all = [
+    'pybind11 >= 2.10.4',
+    'cmake >= 3.24.2'
+]
+
+[project.urls]
+"Homepage" = "https://mctools.github.io/simplebuild/"
+"Bug Tracker" = "https://github.com/mctools/simplebuild/issues"
+
+[project.scripts]
+sb = "_simple_build_system._cli:main"
+unwrapped_simplebuild = "_simple_build_system._cli:unwrapped_main"
+sbenv = "_simple_build_system._cli:sbenv_main"
+sbrun = "_simple_build_system._cli:sbrun_main"
