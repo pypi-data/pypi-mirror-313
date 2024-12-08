@@ -1,0 +1,92 @@
+Metadata-Version: 2.1
+Name: datalayer_iam
+Version: 0.0.11
+License: Datalayer License
+        
+        Do not distribute without prior agreement from Datalayer Inc.
+        
+        (c) Datalayer Inc. license@datalayer.io
+License-File: LICENSE
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: System Administrators
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Requires-Dist: connexion==3.0.6
+Requires-Dist: cryptography
+Requires-Dist: datalayer-addons
+Requires-Dist: datalayer-common
+Requires-Dist: datalayer-solr
+Requires-Dist: httpx
+Requires-Dist: importlib-metadata
+Requires-Dist: pulsar-client==3.5.0
+Requires-Dist: pyjwt==2.8.0
+Requires-Dist: starlette
+Requires-Dist: tldextract
+Requires-Dist: werkzeug
+Provides-Extra: cli
+Requires-Dist: datalayer-core; extra == 'cli'
+Provides-Extra: server
+Requires-Dist: connexion[uvicorn]==3.0.6; extra == 'server'
+Requires-Dist: uvicorn[standard]; extra == 'server'
+Provides-Extra: swagger-ui
+Requires-Dist: connexion[swagger-ui]==3.0.6; extra == 'swagger-ui'
+Provides-Extra: test
+Requires-Dist: coverage; extra == 'test'
+Requires-Dist: jupyter-server~=2.0; extra == 'test'
+Requires-Dist: pyjwt[crypto]; extra == 'test'
+Requires-Dist: pytest; extra == 'test'
+Requires-Dist: pytest-cov; extra == 'test'
+Requires-Dist: pytest-jupyter[server]>=0.4; extra == 'test'
+Requires-Dist: ruff; extra == 'test'
+Requires-Dist: uvicorn; extra == 'test'
+Description-Content-Type: text/markdown
+
+[![Datalayer](https://assets.datalayer.tech/datalayer-25.svg)](https://datalayer.io)
+
+# Ξ 🛂 Datalayer IAM
+
+Datalayer `IAM` service delivers `Identity` and `Access` (aka `Authentication` and `Authorization`) to the Datalayer platform.
+
+```bash
+make dev
+make start
+open http://localhost:9700/api/iam/version
+```
+
+## Development
+
+### IAM as middleware
+
+The devcontainer docker compose file defines traefik as a reverse proxy behind which is added a whoami service.
+
+The proxy check for valid user authentication by adding a forwardAuth middleware that will ask datalayer IAM if the request is allowed or not.
+
+To test it, assuming you are executing this project with VS Code on dev container,
+
+1. Uncomment the services _reverse-proxy_ and _whoami_ in the dev [docker-compose](.devcontainer/docker-compose.yml). Then restart the dev container.
+
+1. Update your local file `/etc/hosts` to add:
+
+```
+127.0.1.1       whoami.example.com
+```
+
+3. Start IAM server
+
+```sh
+cd iam
+make start
+```
+
+4. Create an datalayer user and get a JWT token for it.
+
+5. With a terminal (outside of VS Code), you can now test the forwardAuth middleware
+
+   a. Forbidden case: `curl http://whoami.example.com:9080`
+   b. Allowed case: `curl -H 'Authorization: Bearer <JWT token>' http://whoami.example.com:9080`

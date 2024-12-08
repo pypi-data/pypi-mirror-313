@@ -1,0 +1,83 @@
+openapi: "3.0.2"
+info:
+  title: Datalayer test Credits addon
+  version: "1.0.0"
+  contact:
+    name: Datalayer
+servers:
+  - url: /api/iam/test/v1
+    description: Relative base URL
+
+paths:
+  /checkouts_portal:
+    get:
+      summary: Get a test checkout portal
+      operationId: checkout_portal_endpoint
+      parameters:
+        - name: uid
+          description: Account UID
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: The checkout portal
+          content:
+            text/html:
+              schema:
+                type: string
+  /credits_account:
+    post:
+      summary: Credits user account
+      operationId: credit_user_account
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                uid:
+                  title: Account uid
+                  type: string
+                credits:
+                  title: Credits
+                  type: number
+                  default: 0
+                isQuota:
+                  title: Whether the credits are a new quota for the user or additional credits
+                  type: string
+                  enum:
+                    - "on"
+                    - "off"
+                  default: "off"
+              required:
+                - uid
+      responses:
+        201:
+          description: Credits updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  client_secret:
+                    title: Client secret
+                    type: string
+                required:
+                  - client_secret
+
+components:
+  schemas:
+    baseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
