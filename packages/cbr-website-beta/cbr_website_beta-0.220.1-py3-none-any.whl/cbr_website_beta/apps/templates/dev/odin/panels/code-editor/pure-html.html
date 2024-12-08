@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integrated Dev Environment</title>
+<body>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="/assets/plugins/golden-layout/goldenlayout.min.js"></script>
+<link type="text/css" rel="stylesheet" href="/assets/plugins/golden-layout/goldenlayout-base.css" />
+<link type="text/css" rel="stylesheet" href="/assets/plugins/golden-layout/goldenlayout-dark-theme.css" />
+<style>
+h2 {
+    font: 14px Arial, sans-serif;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+</style>
+</head>
+
+<h1>....</h1>
+<div id="layout" style="widxth: 100%; height: 100vh;"></div>
+
+<script>
+    $(function() {
+        var config = {
+        content: [{
+            type: 'row',
+            content:[{
+                type: 'component',
+                componentName: 'testComponent',
+                componentState: { label: 'A' }
+            },{
+                type: 'column',
+                content:[{
+                    type: 'component',
+                    componentName: 'testComponent',
+                    componentState: { label: 'B' }
+                },{
+                    type: 'component',
+                    componentName: 'testComponent',
+                    componentState: { label: 'C' }
+                }]
+            }]
+        }]
+    };
+
+    var myLayout = new GoldenLayout( config , "#layout");
+
+    myLayout.registerComponent( 'testComponent', function( container, componentState ){
+        container.getElement().html( '<h2>' + componentState.label + '</h2>' );
+    });
+
+    myLayout.init();
+});
+</script>
+</body>
+</html>
