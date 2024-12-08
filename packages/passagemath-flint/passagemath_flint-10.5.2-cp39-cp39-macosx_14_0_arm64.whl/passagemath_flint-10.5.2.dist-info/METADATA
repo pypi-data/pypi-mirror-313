@@ -1,0 +1,98 @@
+Metadata-Version: 2.1
+Name: passagemath-flint
+Version: 10.5.2
+Summary: passagemath: Fast computations with FLINT and arb
+Author-email: The Sage Developers <sage-support@googlegroups.com>
+Maintainer: Matthias Köppe, passagemath contributors
+License: GNU General Public License (GPL) v2 or later
+Project-URL: release notes, https://github.com/passagemath/passagemath/releases
+Project-URL: repo (upstream), https://github.com/sagemath/sage
+Project-URL: repo, https://github.com/passagemath/passagemath
+Project-URL: documentation, https://doc.sagemath.org
+Project-URL: homepage (upstream), https://www.sagemath.org
+Project-URL: discourse, https://passagemath.discourse.group
+Project-URL: tracker (upstream), https://github.com/sagemath/sage/issues
+Project-URL: tracker, https://github.com/passagemath/passagemath/issues
+Classifier: Development Status :: 6 - Mature
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Requires-Python: <3.13,>=3.9
+Description-Content-Type: text/x-rst
+Requires-Dist: passagemath-categories~=10.5.2.0
+Requires-Dist: passagemath-ntl~=10.5.2.0
+Requires-Dist: cypari2>=2.1.1
+Requires-Dist: numpy>=1.19
+Requires-Dist: numpy>=1.22.4
+Provides-Extra: test
+Requires-Dist: passagemath-repl; extra == "test"
+Requires-Dist: passagemath-modules; extra == "test"
+
+====================================================================================
+ passagemath: Fast computations with MPFI and FLINT
+====================================================================================
+
+About SageMath
+--------------
+
+   "Creating a Viable Open Source Alternative to
+    Magma, Maple, Mathematica, and MATLAB"
+
+   Copyright (C) 2005-2024 The Sage Development Team
+
+   https://www.sagemath.org
+
+SageMath fully supports all major Linux distributions, recent versions of
+macOS, and Windows (Windows Subsystem for Linux).
+
+See https://doc.sagemath.org/html/en/installation/index.html
+for general installation instructions.
+
+
+About this pip-installable source distribution
+----------------------------------------------
+
+This pip-installable source distribution ``sagemath-flint`` provides
+Cython interfaces to the ``MPFI`` and ``FLINT`` libraries.
+
+It also ships the implementation of number fields.
+
+
+What is included
+----------------
+
+* see https://github.com/passagemath/passagemath/blob/main/pkgs/sagemath-flint/MANIFEST.in
+
+
+Examples
+--------
+
+A quick way to try it out interactively::
+
+    $ pipx run --pip-args="--prefer-binary" --spec "passagemath-flint[test]" ipython
+    In [1]: from sage.all__sagemath_flint import *
+
+    In [2]: RealBallField(128).pi()
+    Out[2]: [3.1415926535897932384626433832795028842 +/- 1.06e-38]
+
+
+Development
+-----------
+
+::
+
+    $ git clone --origin passagemath https://github.com/passagemath/passagemath.git
+    $ cd passagemath
+    passagemath $ ./bootstrap
+    passagemath $ python3 -m venv flint-venv
+    passagemath $ source flint-venv/bin/activate
+    (flint-venv) passagemath $ pip install -v -e pkgs/sagemath-flint
