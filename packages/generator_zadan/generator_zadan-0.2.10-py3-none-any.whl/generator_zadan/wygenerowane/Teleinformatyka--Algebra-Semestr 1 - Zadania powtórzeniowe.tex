@@ -1,0 +1,1141 @@
+% !TeX spellcheck = pl_PL-Polish
+\documentclass[a4paper,12pt]{article}
+\linespread{1.3} %odstepy miedzy liniami
+\usepackage[a4paper, lmargin=2cm, rmargin=2cm, tmargin=2cm, bmargin=2cm]{geometry}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{ocgx}
+\usepackage{polski}
+\usepackage{tcolorbox}
+\tcbuselibrary{most}
+\tcbuselibrary{skins}
+\tcbuselibrary{raster}
+% brak - bez odpowiedzi i bez miejsca, white - bez odpowiedzi z miejscem, red = odpowiedzi ukryte ale dostepne
+\newcommand{\kolorodpowiedzi}{blue}
+\renewcommand{\footrulewidth}{0.4pt}% linia pozioma na końcu strony - default is 0pt
+\DeclareFontShape{OMX}{cmex}{m}{n}
+    {<-7.5> cmex7
+    <7.5-8.5> cmex8
+    <8.5-9.5> cmex9
+    <9.5-> cmex10}{}
+\DeclareSymbolFont{largesymbols}{OMX}{cmex}{m}{n}
+
+
+\newcommand{\ukryte}{1}  % domyślnie odpowiedzi są do pokazywania po kliknięciu
+\ifthenelse{\equal{\kolorodpowiedzi}{red}}  % ukrywamy od pokazywania gdy kolor jest red
+	{\renewcommand{\ukryte}{0}}{}
+
+\newcommand{\zOdpowiedziami}[3]{
+	\ifthenelse{\equal{#1}{brak}}{}{
+		\ifthenelse{\equal{#1}{white}}{\vphantom{#3}}{
+			\switchocg{#2}{\textcolor{\kolorodpowiedzi}{\\Rozwiązanie: }}
+				\begin{ocg}{Warstwa odpowiedzi}{#2}{\ukryte}
+					\textcolor{\kolorodpowiedzi}{#3}
+				\end{ocg}}}}
+
+\begin{document}
+    \pagestyle{fancy}
+    \setlength{\headheight}{27.29453pt}
+    \fancyhead{}
+    \fancyhead[L]{\textbf{Teleinformatyka\\Algebra - }}
+    \fancyhead[R]{\textbf{Zadania powtórzeniowe\\ 15 listopada 2024}}
+    \fancyfoot{}
+    \fancyfoot[R]{\tiny\textbf{15 listopada 2024, 12:59}}
+%    \hspace{1cm}%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 1}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				-5 + 7i+\left(5 + 3i\right)z = \left(4 - 3i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg0}
+				{$z=-1 - i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z^{2} - \overline{z} - 2 = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg1}
+				{$- x + i y + \left(x + i y\right)^{2} - 2 = 0,$ \\ 
+			$x^{2} + 2 i x y - x - y^{2} + i y - 2 = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					x^{2} - x - y^{2} - 2 = 0\\
+					2 x y + y = 0
+				\end{array}
+			\right.$ \\
+			$z = \left[ \left\{ x : -1, \  y : 0\right\}, \  \left\{ x : 2, \  y : 0\right\}\right].$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 - i\right)z^2 + \left(-3 + 13 i\right) z + \left(-10 - 28 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg2}
+				{$\Delta = -8-6i, \quad \sqrt{\Delta}=\pm( 1 - 3 i), \quad z_{1}=3 - 2 i, \quad z_{2}=5 - 3 i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{\left(-2 + 2 \sqrt{2} i \right) \left(- \frac{4 \sqrt{6}}{3} + \frac{4}{3} + i \left(\frac{4 \sqrt{2}}{3} + \frac{4 \sqrt{3}}{3}\right) \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg3}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{-8 - 8 \sqrt{3} i}=
+				\]
+				\[
+					 = \left\{ -1 - \sqrt{3} i, \  1 + \sqrt{3} i, \  - \sqrt{3} + i, \  \sqrt{3} - i\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow3}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}x + 1 & 4 & x + 1\\x + 1 & x - 1 & -1\\-1 & -2 & -1\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg4}
+				{$\det A=- 2 x^{2} - 2 x + 4 \neq 0, \quad x\neq -2, \ x\neq 1, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}3 & x - 2 & x + 3\\x - 2 & 4 & x + 1\\0 & -2 & -4\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=-2.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg5}
+				{$\det A=2 x^{2} - 12 x - 14\neq 0, \quad 
+				x\neq -1\ \textnormal{oraz} \ x\neq 7,$\\
+				$A(-2)= \left[\begin{matrix}3 & -4 & 1\\-4 & 4 & -1\\0 & -2 & -4\end{matrix}\right],\ 
+				\det A(-2)=18,\ 
+				A^{-1}=\frac{1}{18}\left[\begin{matrix}-18 & -18 & 0\\-16 & -12 & -1\\8 & 6 & -4\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}-1 & 0 & 1 & 1 & 0\\-1 & 2 & -1 & 1 & 0\end{matrix}\right]\cdot 
+				\left[\begin{matrix}-2 & -1 & -2 & -2 & -2\\0 & -1 & -2 & -1 & -2\end{matrix}\right]^T + 
+				3X=
+				\left[\begin{matrix}-1 & -1\\1 & 0\\0 & 2\\0 & 2\\2 & -1\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}-1 & -1\\0 & -2\\0 & -1\\-1 & 1\\-2 & -2\end{matrix}\right] \cdot X
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg6}
+				{$ \left[\begin{matrix}-2 & -3\\0 & -1\end{matrix}\right] + 
+				3X=
+				\left[\begin{matrix}-3 & -5\\1 & 3\end{matrix}\right] \cdot X, \quad 
+				\left[\begin{matrix}-2 & -3\\0 & -1\end{matrix}\right] = 
+				\left[\begin{matrix}-6 & -5\\1 & 0\end{matrix}\right] \cdot X $ \\ 
+				$X=\frac{1}{5}\left[\begin{matrix}0 & -5\\2 & 9\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(-4,-4),\  (1,0),\  (-1,1),\  (-5,-1),\  (-3,-2).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg7}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}-4 & 1\\1 & 1\\-1 & 1\\-5 & 1\\-3 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}-4\\0\\1\\-1\\-2\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} \frac{1}{2} \\ 0 \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja7}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 2}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				\left(3 + 6i\right)z = 9 + 3i+\left(4 + 7i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg8}
+				{$z=-6 + 3i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z \left(2 - 6 i\right) + \left(-4 + 2 i\right) \overline{z} - 2 + 6 i = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg9}
+				{$\left(-4 + 2 i\right) \left(x - i y\right) + \left(2 - 6 i\right) \left(x + i y\right) - 2 + 6 i = 0,$ \\ 
+			$\left(-2 - 4 i\right) \left(x + y \left(-2 + i\right) - 1 - i\right) = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					- 2 x + 8 y - 2 = 0\\
+					- 4 x + 6 y + 6 = 0
+				\end{array}
+			\right.$ \\
+			$z = \left\{ x : 3, \  y : 1\right\}.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 + 2 i\right)z^2 + \left(12 - i\right) z + \left(5 - 15 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg10}
+				{$\Delta = 3-4i, \quad \sqrt{\Delta}=\pm( 2 - i), \quad z_{1}=-1 + 2 i, \quad z_{2}=-1 + 3 i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{3}]{\left(1 - \sqrt{5} i \right) \left(\frac{32 \sqrt{5}}{81} - \frac{32 i}{81} \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg11}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{3}]{- \frac{64 i}{27}}=
+				\]
+				\[
+					 = \left\{ \frac{4 i}{3}, \  - \frac{2 \sqrt{3}}{3} - \frac{2 i}{3}, \  \frac{2 \sqrt{3}}{3} - \frac{2 i}{3}\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow11}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}-4 & 4 & x - 1\\3 & -3 & -3\\x & -1 & 2 x - 2\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg12}
+				{$\det A=3 x^{2} - 18 x + 15 \neq 0, \quad x\neq 1, \ x\neq 5, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}-4 & 4 & x\\2 x + 2 & 2 & -4\\-1 & 3 & x + 2\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=-2.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg13}
+				{$\det A=- 2 x^{2} - 24 x - 64\neq 0, \quad 
+				x\neq -8\ \textnormal{oraz} \ x\neq -4,$\\
+				$A(-2)= \left[\begin{matrix}-4 & 4 & -2\\-2 & 2 & -4\\-1 & 3 & 0\end{matrix}\right],\ 
+				\det A(-2)=-24,\ 
+				A^{-1}=- \frac{1}{24}\left[\begin{matrix}12 & -6 & -12\\4 & -2 & -12\\-4 & 8 & 0\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}0 & -1 & 0 & 2 & 2\\2 & -1 & 0 & 0 & -1\end{matrix}\right]\cdot 
+				\left[\begin{matrix}-2 & 1 & 1 & -1 & -1\\-1 & 0 & -2 & 1 & -1\end{matrix}\right]^T + 
+				4X=
+				X \cdot \left[\begin{matrix}1 & 1\\0 & -1\\1 & 0\\-1 & 0\\1 & -1\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}1 & -1\\0 & 1\\1 & -1\\0 & 0\\1 & -2\end{matrix}\right] 
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg14}
+				{$ \left[\begin{matrix}-5 & 0\\-4 & -1\end{matrix}\right] + 
+				4X=
+				X \cdot \left[\begin{matrix}3 & -4\\0 & 0\end{matrix}\right] , \quad 
+				\left[\begin{matrix}-5 & 0\\-4 & -1\end{matrix}\right] = 
+				X \cdot \left[\begin{matrix}-1 & -4\\0 & -4\end{matrix}\right] $ \\ 
+				$X=\frac{1}{4}\left[\begin{matrix}20 & -20\\16 & -15\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(-5,0),\  (0,3),\  (-2,2),\  (-1,1),\  (3,4).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg15}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}-5 & 1\\0 & 1\\-2 & 1\\-1 & 1\\3 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}0\\3\\2\\1\\4\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} \frac{1}{2} \\ \frac{5}{2} \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja15}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 3}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				6 - 6i+\left(8 - 3i\right)z = \left(8 - 2i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg16}
+				{$z=-6 - 6i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z^{2} - 2 \overline{z} - 3 = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg17}
+				{$- 2 x + 2 i y + \left(x + i y\right)^{2} - 3 = 0,$ \\ 
+			$x^{2} + 2 i x y - 2 x - y^{2} + 2 i y - 3 = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					x^{2} - 2 x - y^{2} - 3 = 0\\
+					2 x y + 2 y = 0
+				\end{array}
+			\right.$ \\
+			$z = \left[ \left\{ x : -1, \  y : 0\right\}, \  \left\{ x : 3, \  y : 0\right\}\right].$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 - 2 i\right)z^2 + \left(-8 - 9 i\right) z + \left(-15 + 5 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg18}
+				{$\Delta = 3+4i, \quad \sqrt{\Delta}=\pm( 2 + i), \quad z_{1}=-1 + 2 i, \quad z_{2}=-1 + 3 i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{\left(-2 + 2 \sqrt{2} i \right) \left(\frac{4}{3} + \frac{4 \sqrt{6}}{3} + i \left(- \frac{4 \sqrt{3}}{3} + \frac{4 \sqrt{2}}{3}\right) \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg19}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{-8 + 8 \sqrt{3} i}=
+				\]
+				\[
+					 = \left\{ -1 + \sqrt{3} i, \  1 - \sqrt{3} i, \  - \sqrt{3} - i, \  \sqrt{3} + i\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow19}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}x - 3 & 0 & 1\\-3 & x + 3 & 4\\2 x - 4 & -4 & 1\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg20}
+				{$\det A=- x^{2} + 14 x - 33 \neq 0, \quad x\neq 3, \ x\neq 11, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}2 x + 4 & 2 & 2\\-3 & 1 & 4\\x + 2 & 1 & x\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=-2.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg21}
+				{$\det A=2 x^{2} + 8 x - 10\neq 0, \quad 
+				x\neq -5\ \textnormal{oraz} \ x\neq 1,$\\
+				$A(-2)= \left[\begin{matrix}0 & 2 & 2\\-3 & 1 & 4\\0 & 1 & -2\end{matrix}\right],\ 
+				\det A(-2)=-18,\ 
+				A^{-1}=- \frac{1}{18}\left[\begin{matrix}-6 & 6 & 6\\-6 & 0 & -6\\-3 & 0 & 6\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}1 & -1 & 0 & 0 & -1\\0 & 1 & 0 & 0 & 2\end{matrix}\right]\cdot 
+				\left[\begin{matrix}1 & 1 & -1 & -1 & 0\\-2 & 1 & -2 & 0 & -1\end{matrix}\right]^T + 
+				2X=
+				\left[\begin{matrix}0 & 0\\2 & 2\\-1 & -1\\1 & 2\\2 & 2\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}1 & -1\\1 & -2\\-2 & -1\\-1 & -2\\0 & -2\end{matrix}\right] \cdot X
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg22}
+				{$ \left[\begin{matrix}0 & -2\\1 & -1\end{matrix}\right] + 
+				2X=
+				\left[\begin{matrix}3 & -9\\2 & -11\end{matrix}\right] \cdot X, \quad 
+				\left[\begin{matrix}0 & -2\\1 & -1\end{matrix}\right] = 
+				\left[\begin{matrix}1 & -9\\2 & -13\end{matrix}\right] \cdot X $ \\ 
+				$X=\frac{1}{5}\left[\begin{matrix}9 & 17\\1 & 3\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(-4,2),\  (-3,3),\  (0,-2),\  (-1,1),\  (2,-3).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg23}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}-4 & 1\\-3 & 1\\0 & 1\\-1 & 1\\2 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}2\\3\\-2\\1\\-3\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} -1 \\ -1 \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja23}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 4}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				\left(4 + 7i\right)z = 9 + 9i+\left(4 + 8i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg24}
+				{$z=-9 + 9i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z \left(2 + 5 i\right) + \left(7 + i\right) \overline{z} + 6 - 3 i = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg25}
+				{$\left(7 + i\right) \left(x - i y\right) + \left(2 + 5 i\right) \left(x + i y\right) + 6 - 3 i = 0,$ \\ 
+			$i \left(x \left(6 - 9 i\right) + y \left(-5 + 4 i\right) - 3 - 6 i\right) = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					9 x - 4 y + 6 = 0\\
+					6 x - 5 y - 3 = 0
+				\end{array}
+			\right.$ \\
+			$z = \left\{ x : -2, \  y : -3\right\}.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 - i\right)z^2 + \left(-1 - 11 i\right) z + \left(-18 - 14 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg26}
+				{$\Delta = 8+6i, \quad \sqrt{\Delta}=\pm( 3 + i), \quad z_{1}=-3 + 2 i, \quad z_{2}=-2 + 4 i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{\left(-1 + \sqrt{5} i \right) \left(\frac{2}{3} + \frac{2 \sqrt{5} i}{3} \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg27}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{-4}=
+				\]
+				\[
+					 = \left\{ -1 - i, \  -1 + i, \  1 - i, \  1 + i\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow27}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}2 & -2 & x + 2\\-2 & -4 & x + 2\\x + 3 & x + 2 & -2\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg28}
+				{$\det A=- 2 x^{2} - 6 x + 20 \neq 0, \quad x\neq -5, \ x\neq 2, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}x + 3 & 1 & 2 x + 3\\-3 & x + 1 & -1\\-3 & -1 & -4\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=-1.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg29}
+				{$\det A=2 x^{2} + 4 x - 6\neq 0, \quad 
+				x\neq -3\ \textnormal{oraz} \ x\neq 1,$\\
+				$A(-1)= \left[\begin{matrix}2 & 1 & 1\\-3 & 0 & -1\\-3 & -1 & -4\end{matrix}\right],\ 
+				\det A(-1)=-8,\ 
+				A^{-1}=- \frac{1}{8}\left[\begin{matrix}-1 & 3 & -1\\-9 & -5 & -1\\3 & -1 & 3\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}1 & 1 & 1 & 1 & -1\\1 & 0 & 1 & 1 & 1\end{matrix}\right]\cdot 
+				\left[\begin{matrix}-1 & 0 & 0 & -1 & 1\\0 & -1 & 1 & -2 & -1\end{matrix}\right]^T + 
+				4X=
+				\left[\begin{matrix}1 & 1\\2 & 0\\0 & 1\\2 & 0\\2 & 0\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}-1 & 0\\1 & -1\\1 & 1\\0 & -1\\1 & 0\end{matrix}\right] \cdot X
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg30}
+				{$ \left[\begin{matrix}-3 & -1\\-1 & -2\end{matrix}\right] + 
+				4X=
+				\left[\begin{matrix}3 & -4\\0 & 1\end{matrix}\right] \cdot X, \quad 
+				\left[\begin{matrix}-3 & -1\\-1 & -2\end{matrix}\right] = 
+				\left[\begin{matrix}-1 & -4\\0 & -3\end{matrix}\right] \cdot X $ \\ 
+				$X=\frac{1}{3}\left[\begin{matrix}5 & -5\\1 & 2\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(3,1),\  (2,-1),\  (4,4),\  (0,-3),\  (-1,-4).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg31}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}3 & 1\\2 & 1\\4 & 1\\0 & 1\\-1 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}1\\-1\\4\\-3\\-4\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} \frac{3}{2} \\ -3 \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja31}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 5}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				-4 - 2i+\left(8 - i\right)z = \left(9 + 2i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg32}
+				{$z=-1 + i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z^{2} + 2 \overline{z} + 6 = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg33}
+				{$2 x - 2 i y + \left(x + i y\right)^{2} + 6 = 0,$ \\ 
+			$x^{2} + 2 i x y + 2 x - y^{2} - 2 i y + 6 = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					x^{2} + 2 x - y^{2} + 6 = 0\\
+					2 x y - 2 y = 0
+				\end{array}
+			\right.$ \\
+			$z = \left[ \left\{ x : 1, \  y : -3\right\}, \  \left\{ x : 1, \  y : 3\right\}\right].$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 - i\right)z^2 + \left(-1 - 9 i\right) z + \left(-14 - 8 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg34}
+				{$\Delta = 8-6i, \quad \sqrt{\Delta}=\pm( 3 - i), \quad z_{1}=-3 + 2 i, \quad z_{2}=-1 + 3 i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{\left(-2 + \sqrt{5} i \right) \left(\frac{16}{9} + \frac{8 \sqrt{15}}{9} + i \left(- \frac{16 \sqrt{3}}{9} + \frac{8 \sqrt{5}}{9}\right) \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg35}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{-8 + 8 \sqrt{3} i}=
+				\]
+				\[
+					 = \left\{ -1 + \sqrt{3} i, \  1 - \sqrt{3} i, \  - \sqrt{3} - i, \  \sqrt{3} + i\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow35}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}2 & x - 1 & -2\\x + 1 & 0 & x + 4\\-2 & x - 1 & -4\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg36}
+				{$\det A=- 2 x^{2} - 12 x + 14 \neq 0, \quad x\neq -7, \ x\neq 1, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}x + 3 & x + 1 & 4\\-3 & 3 & -4\\x - 3 & 3 & x - 4\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=-1.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg37}
+				{$\det A=2 x^{2} - 4 x\neq 0, \quad 
+				x\neq 0\ \textnormal{oraz} \ x\neq 2,$\\
+				$A(-1)= \left[\begin{matrix}2 & 0 & 4\\-3 & 3 & -4\\-4 & 3 & -5\end{matrix}\right],\ 
+				\det A(-1)=6,\ 
+				A^{-1}=\frac{1}{6}\left[\begin{matrix}-3 & 12 & -12\\1 & 6 & -4\\3 & -6 & 6\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}2 & 2 & 0 & 0 & 2\\0 & 0 & 0 & -1 & 2\end{matrix}\right]\cdot 
+				\left[\begin{matrix}-1 & -1 & -2 & 0 & 1\\-2 & 1 & -2 & 1 & 0\end{matrix}\right]^T + 
+				4X=
+				\left[\begin{matrix}1 & 0\\0 & -1\\2 & 0\\-1 & 0\\2 & -1\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}0 & -1\\1 & -1\\-1 & -2\\-2 & -1\\0 & -1\end{matrix}\right] \cdot X
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg38}
+				{$ \left[\begin{matrix}-2 & -2\\2 & -1\end{matrix}\right] + 
+				4X=
+				\left[\begin{matrix}0 & -6\\-1 & 2\end{matrix}\right] \cdot X, \quad 
+				\left[\begin{matrix}-2 & -2\\2 & -1\end{matrix}\right] = 
+				\left[\begin{matrix}-4 & -6\\-1 & -2\end{matrix}\right] \cdot X $ \\ 
+				$X=\frac{1}{2}\left[\begin{matrix}16 & -2\\-10 & 2\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(-4,3),\  (-2,4),\  (3,0),\  (2,-1),\  (-3,1).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg39}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}-4 & 1\\-2 & 1\\3 & 1\\2 & 1\\-3 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}3\\4\\0\\-1\\1\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} - \frac{1}{2} \\ 1 \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja39}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 6}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				6 - 6i+\left(9 - 6i\right)z = \left(9 - 3i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg40}
+				{$z=-2 - 2i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z \left(7 + 5 i\right) + \left(-6 + 6 i\right) \overline{z} - 1 + 5 i = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg41}
+				{$\left(-6 + 6 i\right) \left(x - i y\right) + \left(7 + 5 i\right) \left(x + i y\right) - 1 + 5 i = 0,$ \\ 
+			$\left(-1 + i\right) \left(x \left(5 - 6 i\right) + y \left(6 - 7 i\right) + 3 - 2 i\right) = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					x + y - 1 = 0\\
+					11 x + 13 y + 5 = 0
+				\end{array}
+			\right.$ \\
+			$z = \left\{ x : 9, \  y : -8\right\}.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 - i\right)z^2 + \left(13 - i\right) z + \left(24 + 16 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg42}
+				{$\Delta = 8+6i, \quad \sqrt{\Delta}=\pm( 3 + i), \quad z_{1}=-4 - 4 i, \quad z_{2}=-3 - 2 i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{\left(1 - \sqrt{2} i \right) \left(- \frac{8}{3} + \frac{8 \sqrt{6}}{3} + i \left(- \frac{8 \sqrt{3}}{3} - \frac{8 \sqrt{2}}{3}\right) \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg43}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{-8 - 8 \sqrt{3} i}=
+				\]
+				\[
+					 = \left\{ -1 - \sqrt{3} i, \  1 + \sqrt{3} i, \  - \sqrt{3} + i, \  \sqrt{3} - i\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow43}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}x - 2 & 1 & 1\\2 & 2 & -2\\2 x - 3 & x & 4\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg44}
+				{$\det A=2 x^{2} - 2 x - 12 \neq 0, \quad x\neq -2, \ x\neq 3, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}2 x + 4 & x + 2 & 0\\-2 & 2 & x + 2\\2 & 2 & 2\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=2.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg45}
+				{$\det A=- 2 x^{2} + 4 x + 16\neq 0, \quad 
+				x\neq -2\ \textnormal{oraz} \ x\neq 4,$\\
+				$A(2)= \left[\begin{matrix}8 & 4 & 0\\-2 & 2 & 4\\2 & 2 & 2\end{matrix}\right],\ 
+				\det A(2)=16,\ 
+				A^{-1}=\frac{1}{16}\left[\begin{matrix}-4 & -8 & 16\\12 & 16 & -32\\-8 & -8 & 24\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}0 & 1 & 2 & 1 & -1\\1 & 0 & -1 & 2 & 2\end{matrix}\right]\cdot 
+				\left[\begin{matrix}1 & -1 & -1 & 0 & 1\\-1 & 1 & 0 & 0 & -1\end{matrix}\right]^T + 
+				3X=
+				X \cdot \left[\begin{matrix}0 & 2\\1 & -1\\0 & 2\\-1 & 0\\-1 & 2\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}-2 & 0\\-1 & -1\\-1 & -1\\-1 & -1\\-2 & 0\end{matrix}\right] 
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg46}
+				{$ \left[\begin{matrix}-4 & 2\\4 & -3\end{matrix}\right] + 
+				3X=
+				X \cdot \left[\begin{matrix}2 & 0\\-9 & -1\end{matrix}\right] , \quad 
+				\left[\begin{matrix}-4 & 2\\4 & -3\end{matrix}\right] = 
+				X \cdot \left[\begin{matrix}-1 & 0\\-9 & -4\end{matrix}\right] $ \\ 
+				$X=\frac{1}{4}\left[\begin{matrix}34 & -2\\-43 & 3\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(-1,-2),\  (1,-3),\  (3,2),\  (2,0),\  (5,3).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg47}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}-1 & 1\\1 & 1\\3 & 1\\2 & 1\\5 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}-2\\-3\\2\\0\\3\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} 1 \\ -2 \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja47}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 7}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				-1 + 2i+\left(5 - 5i\right)z = \left(5 - 6i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg48}
+				{$z=-2 - i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z \left(-2 - 6 i\right) + \left(5 + 3 i\right) \overline{z} - 6 + 4 i = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg49}
+				{$\left(5 + 3 i\right) \left(x - i y\right) + \left(-2 - 6 i\right) \left(x + i y\right) - 6 + 4 i = 0,$ \\ 
+			$\left(1 - i\right) \left(3 x + y \left(8 + i\right) - 5 - i\right) = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					3 x + 9 y - 6 = 0\\
+					- 3 x - 7 y + 4 = 0
+				\end{array}
+			\right.$ \\
+			$z = \left\{ x : -1, \  y : 1\right\}.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 - i\right)z^2 + \left(-1 - 13 i\right) z + \left(-24 - 16 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg50}
+				{$\Delta = -8-6i, \quad \sqrt{\Delta}=\pm( 1 - 3 i), \quad z_{1}=-4 + 4 i, \quad z_{2}=-2 + 3 i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{\left(-2 - \sqrt{5} i \right) \left(- \frac{8 \sqrt{15}}{9} + \frac{16}{9} + i \left(- \frac{16 \sqrt{3}}{9} - \frac{8 \sqrt{5}}{9}\right) \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg51}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{-8 + 8 \sqrt{3} i}=
+				\]
+				\[
+					 = \left\{ -1 + \sqrt{3} i, \  1 - \sqrt{3} i, \  - \sqrt{3} - i, \  \sqrt{3} + i\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow51}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}2 & x + 3 & 2 x + 3\\4 & 3 & 3\\x - 1 & 1 & -4\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg52}
+				{$\det A=- 3 x^{2} + 27 x + 30 \neq 0, \quad x\neq -1, \ x\neq 10, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}x - 2 & -4 & -2\\x + 3 & x - 1 & x + 3\\3 & 1 & 3\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=2.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg53}
+				{$\det A=2 x^{2} - 6 x\neq 0, \quad 
+				x\neq 0\ \textnormal{oraz} \ x\neq 3,$\\
+				$A(2)= \left[\begin{matrix}0 & -4 & -2\\5 & 1 & 5\\3 & 1 & 3\end{matrix}\right],\ 
+				\det A(2)=-4,\ 
+				A^{-1}=- \frac{1}{4}\left[\begin{matrix}-2 & 10 & -18\\0 & 6 & -10\\2 & -12 & 20\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}1 & 1 & 2 & 2 & -1\\1 & -1 & 0 & 1 & 0\end{matrix}\right]\cdot 
+				\left[\begin{matrix}-1 & -2 & -1 & -1 & -1\\0 & -1 & 1 & -2 & 0\end{matrix}\right]^T + 
+				2X=
+				\left[\begin{matrix}0 & 1\\0 & 1\\1 & 2\\0 & 0\\0 & 2\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}0 & 1\\-1 & -2\\1 & -2\\-1 & 0\\-1 & 1\end{matrix}\right] \cdot X
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg54}
+				{$ \left[\begin{matrix}-6 & -3\\0 & -1\end{matrix}\right] + 
+				2X=
+				\left[\begin{matrix}1 & -2\\-1 & -3\end{matrix}\right] \cdot X, \quad 
+				\left[\begin{matrix}-6 & -3\\0 & -1\end{matrix}\right] = 
+				\left[\begin{matrix}-1 & -2\\-1 & -5\end{matrix}\right] \cdot X $ \\ 
+				$X=\frac{1}{3}\left[\begin{matrix}30 & 13\\-6 & -2\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(-4,1),\  (1,-2),\  (5,-1),\  (-5,3),\  (4,-4).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg55}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}-4 & 1\\1 & 1\\5 & 1\\-5 & 1\\4 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}1\\-2\\-1\\3\\-4\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} - \frac{1}{2} \\ - \frac{1}{2} \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja55}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 8}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				8 + 4i+\left(5 + 9i\right)z = \left(6 + 8i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg56}
+				{$z=2 + 6i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z \left(-1 - 6 i\right) + \left(-5 + 5 i\right) \overline{z} + 6 + i = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg57}
+				{$\left(-5 + 5 i\right) \left(x - i y\right) + \left(-1 - 6 i\right) \left(x + i y\right) + 6 + i = 0,$ \\ 
+			$- i \left(x \left(1 - 6 i\right) + y \left(-4 + 11 i\right) - 1 + 6 i\right) = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					- 6 x + 11 y + 6 = 0\\
+					- x + 4 y + 1 = 0
+				\end{array}
+			\right.$ \\
+			$z = \left\{ x : 1, \  y : 0\right\}.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 - 2 i\right)z^2 + \left(11 - 7 i\right) z + \left(18 - i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg58}
+				{$\Delta = 8-6i, \quad \sqrt{\Delta}=\pm( 3 - i), \quad z_{1}=-3 - 2 i, \quad z_{2}=-2 - i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{\left(2 + \sqrt{2} i \right) \left(- \frac{8}{3} + \frac{4 \sqrt{6}}{3} + i \left(\frac{4 \sqrt{2}}{3} + \frac{8 \sqrt{3}}{3}\right) \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg59}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{-8 + 8 \sqrt{3} i}=
+				\]
+				\[
+					 = \left\{ -1 + \sqrt{3} i, \  1 - \sqrt{3} i, \  - \sqrt{3} - i, \  \sqrt{3} + i\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow59}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}x - 3 & 2 & -2\\3 & 2 x - 4 & x - 4\\-3 & 0 & -1\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg60}
+				{$\det A=- 2 x^{2} - 8 x + 42 \neq 0, \quad x\neq -7, \ x\neq 3, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}-1 & 0 & 2\\1 & -3 & 2 x + 4\\x - 1 & x + 3 & -4\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=-1.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg61}
+				{$\det A=2 x^{2} + 18 x\neq 0, \quad 
+				x\neq -9\ \textnormal{oraz} \ x\neq 0,$\\
+				$A(-1)= \left[\begin{matrix}-1 & 0 & 2\\1 & -3 & 2\\-2 & 2 & -4\end{matrix}\right],\ 
+				\det A(-1)=-16,\ 
+				A^{-1}=- \frac{1}{16}\left[\begin{matrix}8 & 4 & 6\\0 & 8 & 4\\-4 & 2 & 3\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}1 & 0 & 1 & 1 & 0\\2 & 1 & -1 & 1 & 1\end{matrix}\right]\cdot 
+				\left[\begin{matrix}1 & -1 & -2 & -1 & -1\\0 & 1 & 1 & -1 & -2\end{matrix}\right]^T + 
+				2X=
+				\left[\begin{matrix}2 & 0\\1 & -1\\-1 & -1\\-1 & 0\\2 & 0\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}-1 & 1\\0 & -2\\-2 & 1\\-1 & -1\\0 & -1\end{matrix}\right] \cdot X
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg62}
+				{$ \left[\begin{matrix}-2 & 0\\1 & -3\end{matrix}\right] + 
+				2X=
+				\left[\begin{matrix}1 & -2\\2 & 1\end{matrix}\right] \cdot X, \quad 
+				\left[\begin{matrix}-2 & 0\\1 & -3\end{matrix}\right] = 
+				\left[\begin{matrix}-1 & -2\\2 & -1\end{matrix}\right] \cdot X $ \\ 
+				$X=\frac{1}{5}\left[\begin{matrix}4 & -6\\3 & 3\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(-5,4),\  (4,-4),\  (1,-3),\  (3,-5),\  (0,0).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg63}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}-5 & 1\\4 & 1\\1 & 1\\3 & 1\\0 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}4\\-4\\-3\\-5\\0\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} -1 \\ -1 \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja63}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 9}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				-1 + 9i+\left(3 + 6i\right)z = \left(4 + 7i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg64}
+				{$z=4 + 5i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z^{2} - 2 \overline{z} - 3 = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg65}
+				{$- 2 x + 2 i y + \left(x + i y\right)^{2} - 3 = 0,$ \\ 
+			$x^{2} + 2 i x y - 2 x - y^{2} + 2 i y - 3 = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					x^{2} - 2 x - y^{2} - 3 = 0\\
+					2 x y + 2 y = 0
+				\end{array}
+			\right.$ \\
+			$z = \left[ \left\{ x : -1, \  y : 0\right\}, \  \left\{ x : 3, \  y : 0\right\}\right].$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 + 2 i\right)z^2 + \left(-3 + 14 i\right) z + \left(-18 + 14 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg66}
+				{$\Delta = -3+4i, \quad \sqrt{\Delta}=\pm( 1 + 2 i), \quad z_{1}=-3 - 2 i, \quad z_{2}=-2 - 2 i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{3}]{\left(\frac{9}{128} + \frac{9 \sqrt{5} i}{128} \right) \left(-1 + \sqrt{5} i \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg67}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{3}]{- \frac{27}{64}}=
+				\]
+				\[
+					 = \left\{ - \frac{3}{4}, \  \frac{3}{8} - \frac{3 \sqrt{3} i}{8}, \  \frac{3}{8} + \frac{3 \sqrt{3} i}{8}\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow67}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}-4 & 0 & x - 2\\2 & 1 & -2\\-2 & x + 2 & 2 x - 3\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg68}
+				{$\det A=2 x^{2} - 14 x - 16 \neq 0, \quad x\neq -1, \ x\neq 8, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}x + 3 & 1 & 2\\x + 3 & -1 & 0\\x + 3 & 3 & x + 4\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=-2.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg69}
+				{$\det A=- 2 x^{2} - 6 x\neq 0, \quad 
+				x\neq -3\ \textnormal{oraz} \ x\neq 0,$\\
+				$A(-2)= \left[\begin{matrix}1 & 1 & 2\\1 & -1 & 0\\1 & 3 & 2\end{matrix}\right],\ 
+				\det A(-2)=4,\ 
+				A^{-1}=\frac{1}{4}\left[\begin{matrix}-2 & 4 & 2\\-2 & 0 & 2\\4 & -2 & -2\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}0 & 1 & -1 & 2 & -1\\1 & 2 & -1 & 1 & -1\end{matrix}\right]\cdot 
+				\left[\begin{matrix}-1 & -1 & -1 & -1 & 0\\1 & 1 & -2 & 1 & -1\end{matrix}\right]^T + 
+				3X=
+				\left[\begin{matrix}-1 & 1\\-1 & 2\\2 & 2\\2 & 1\\-1 & 0\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}-1 & 1\\0 & -1\\-1 & -2\\0 & -1\\-2 & -1\end{matrix}\right] \cdot X
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg70}
+				{$ \left[\begin{matrix}-2 & 6\\-3 & 7\end{matrix}\right] + 
+				3X=
+				\left[\begin{matrix}1 & -5\\-3 & -6\end{matrix}\right] \cdot X, \quad 
+				\left[\begin{matrix}-2 & 6\\-3 & 7\end{matrix}\right] = 
+				\left[\begin{matrix}-2 & -5\\-3 & -9\end{matrix}\right] \cdot X $ \\ 
+				$X=\frac{1}{3}\left[\begin{matrix}3 & -19\\0 & 4\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(0,1),\  (-5,0),\  (3,5),\  (1,3),\  (-2,-1).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg71}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}0 & 1\\-5 & 1\\3 & 1\\1 & 1\\-2 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}1\\0\\5\\3\\-1\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} \frac{2}{3} \\ 2 \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja71}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\newpage % \hspace{1cm}
+%--------------------------------------------------------------------------------
+    \fancyhead[C]{\textbf{Zestaw nr 10}}
+    \begin{enumerate}[label= \textbf{Zadanie \arabic*. }, leftmargin=1cm, align=left, itemsep=0pt]
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić rozwiązanie.
+			\[
+				6 - 3i+\left(2 + 6i\right)z = \left(2 + 3i\right)z
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg72}
+				{$z=1 + 2i.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych
+			\[
+				z \left(-6 + 5 i\right) + \left(-6 - 4 i\right) \overline{z} + 3 - i = 0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg73}
+				{$\left(-6 - 4 i\right) \left(x - i y\right) + \left(-6 + 5 i\right) \left(x + i y\right) + 3 - i = 0,$ \\ 
+			$- x \left(12 - i\right) - 9 y + 3 - i = 0,$\\
+			$\left\{
+				\begin{array}{c}
+					- 12 x - 9 y + 3 = 0\\
+					x - 1 = 0
+				\end{array}
+			\right.$ \\
+			$z = \left\{ x : 1, \  y : -1\right\}.$}
+
+		\item Rozwiązać równanie w zbiorze liczb zespolonych.\ Sprawdzić jedno z rozwiązań.
+			\[
+				\left(1 + 2 i\right)z^2 + \left(1 + 12 i\right) z + \left(-5 + 15 i\right)=0
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg74}
+				{$\Delta = -3+4i, \quad \sqrt{\Delta}=\pm( 1 + 2 i), \quad z_{1}=-3 - i, \quad z_{2}=-2 - i$}
+
+		\item Wyznaczyć wszystkie zadane pierwiastki zespolone i zaznaczyć je na płaszczyźnie zespolonej
+			\[
+				\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{\left(2 - \sqrt{3} i \right) \left(- \frac{8}{7} - \frac{4 \sqrt{3} i}{7} \right)}
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg75}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\[
+					\sqrt[\leftroot{2}\uproot{-4} \displaystyle ^{4}]{-4}=
+				\]
+				\[
+					 = \left\{ -1 - i, \  -1 + i, \  1 - i, \  1 + i\right\}.
+				\]
+				&
+					\raisebox{-3cm}{\resizebox{5.1cm}{!}{\includegraphics{../pics/rozklad_pierwiastkow75}}}
+				\end{tabular}
+			}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ wyznacznik macierzy $A$ jest różny od zera?
+			\[
+				\textnormal{A=}
+				\left[\begin{matrix}x - 4 & x - 1\\x + 4 & -3\end{matrix}\right]
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg76}
+				{$\det A=- x^{2} - 6 x + 16 \neq 0, \quad x\neq -8, \ x\neq 2, \ $}
+
+		\item Dla jakich rzeczywistych wartości parametru $x$ macierz $A$ posiada odwrotność?
+			\[
+				\textnormal{A=}\left[\begin{matrix}2 x + 1 & -3 & x - 3\\3 & -3 & -2\\x - 1 & 0 & -1\end{matrix}\right]
+			\]
+		Wyznaczyć macierz odwrotną dla $x=-2.$ Wykonać sprawdzenie.\\
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg77}
+				{$\det A=3 x^{2} - 3\neq 0, \quad 
+				x\neq -1\ \textnormal{oraz} \ x\neq 1,$\\
+				$A(-2)= \left[\begin{matrix}-3 & -3 & -5\\3 & -3 & -2\\-3 & 0 & -1\end{matrix}\right],\ 
+				\det A(-2)=9,\ 
+				A^{-1}=\frac{1}{9}\left[\begin{matrix}3 & -3 & -9\\9 & -12 & -21\\-9 & 9 & 18\end{matrix}\right].$}
+
+		\item Rozwiązać równanie:
+			\[
+				\left[\begin{matrix}0 & -1 & -1 & 0 & 0\\0 & -1 & 0 & -1 & -1\end{matrix}\right]\cdot 
+				\left[\begin{matrix}-1 & -1 & 0 & -1 & -2\\1 & -2 & 0 & -2 & -1\end{matrix}\right]^T + 
+				2X=
+				X \cdot \left[\begin{matrix}-1 & -1\\2 & -1\\0 & 1\\1 & 1\\1 & 2\end{matrix}\right]^T \cdot
+				\left[\begin{matrix}-2 & 0\\-1 & -2\\-2 & -1\\1 & -1\\-2 & -2\end{matrix}\right] 
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg78}
+				{$ \left[\begin{matrix}1 & 2\\4 & 5\end{matrix}\right] + 
+				2X=
+				X \cdot \left[\begin{matrix}-1 & -7\\-2 & -4\end{matrix}\right] , \quad 
+				\left[\begin{matrix}1 & 2\\4 & 5\end{matrix}\right] = 
+				X \cdot \left[\begin{matrix}-3 & -7\\-2 & -6\end{matrix}\right] $ \\ 
+				$X=\frac{1}{4}\left[\begin{matrix}-2 & 1\\-14 & 13\end{matrix}\right].$}
+
+		\item Wyznaczyć prostą regresji dla punktów 
+			\[
+				(4,5),\  (1,0),\  (-5,-4),\  (-2,-3),\  (3,3).
+			\]
+			\zOdpowiedziami{\kolorodpowiedzi}{ocg79}
+				{	\begin{tabular}{p{0.5\textwidth}p{0.3\textwidth}}
+				\vspace{0pt}
+				\[
+					\left[\begin{matrix}4 & 1\\1 & 1\\-5 & 1\\-2 & 1\\3 & 1\end{matrix}\right]
+					\cdot \left[\begin{matrix} a \\ b \end{matrix}\right]
+					= \left[\begin{matrix}5\\0\\-4\\-3\\3\end{matrix}\right]
+					\quad \Biggm/ \cdot \left(\left(A^T A \right)^{-1} A^T \right)_L
+				\]
+				\[
+					 \left[\begin{matrix} a \\ b \end{matrix}\right] = 
+					 \left[\begin{matrix} 1 \\ 0 \end{matrix}\right]
+				\]
+				&
+					\raisebox{-4.9cm}{\resizebox{5.2cm}{!}{\includegraphics{../pics/regresja79}}}
+				\end{tabular}
+			}
+
+    \end{enumerate}
+\end{document}
