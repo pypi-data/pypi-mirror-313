@@ -1,0 +1,41 @@
+[build-system]
+# 3.4 이상이어야 pip install -e 가 가능하다
+requires = ["flit_core >=3.7"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "analyser_hj3415"
+version = "2.9.8"
+description = "Stock analyser and database processing programs"
+readme = "README.md"
+requires-python = ">=3.6"
+#license = {text = "MIT"}
+#authors = [
+#    {name = "Hyungjin Kim", email = "hj3415@gmail.com"}
+#]
+#keywords = ["keyword1", "keyword2", "keyword3"]
+#classifiers = [
+#    "Programming Language :: Python :: 3",
+#    "License :: OSI Approved :: MIT License",
+#    "Operating System :: OS Independent"
+#]
+dependencies = [
+    "utils-hj3415>=2.9.2",
+    "db-hj3415>=4.0.3",
+    "scikit-learn>=1.5.2",
+    "plotly>=5.24.1",
+    "yfinance>=0.2.44",
+    "prophet>=1.1.6",
+    "kaleido>=0.2.1",   #plotly로 이미지출력위해
+    "matplotlib>=3.9.2",
+    "tensorflow>=2.18.0",
+]
+
+[project.scripts]
+analyser = "analyser_hj3415.cli:analyser_manager"
+
+[tool.flit.sdist]
+exclude = [
+    'tests/',
+    'analyser_hj3415/settings.json'
+]
