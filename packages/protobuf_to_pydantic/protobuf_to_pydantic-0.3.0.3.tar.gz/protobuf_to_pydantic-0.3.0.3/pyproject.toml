@@ -1,0 +1,140 @@
+[tool.poetry]
+name = "protobuf_to_pydantic"
+version = "v0.3.0.3"
+description = "Generate the `pydantic.BaseModel` class (and the corresponding source code) with parameter verification function through the Protobuf file"
+authors = ["So1n <so1n897046026@gmail.com>"]
+license = "Apache Software License"
+readme = "./README.md"
+repository = "https://github.com/so1n/protobuf_to_pydantic"
+homepage = "https://github.com/so1n/protobuf_to_pydantic"
+packages = [
+    { include = "protobuf_to_pydantic" },
+]
+
+[tool.poetry.scripts]
+protoc-gen-protobuf-to-pydantic = "protobuf_to_pydantic.plugin.main:main"
+
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pydantic = ">=1.9.2, <3.0.0"
+protobuf = ">=3.20.3"
+
+toml = {version = "^0.10.2", optional = true}
+lark = { version = "^1.1.2", optional = true }
+mypy-protobuf = { version = "^3.2.0", optional = true }
+
+[tool.poetry.extras]
+lark = ["lark"]
+mypy-protobuf = ["mypy-protobuf"]
+toml = ["toml"]
+all = ["lark", "mypy-protobuf", "toml"]
+
+[tool.poetry.dev-dependencies]
+black = "^23.3.0"
+mypy = "1.0.0"
+pytest = "6.2.5"
+isort = "5.6.4"
+coverage = "5.5"
+pre-commit = "2.14.0"
+autoflake = "1.4"
+flake8 = "3.9.2"
+# if pydantic version >= 2.0.0, email-validator version must >= 2.0.0
+email-validator = "2.0.0"
+# fix flake8 run bug: https://stackoverflow.com/questions/73929564/entrypoints-object-has-no-attribute-get-digital-ocean
+importlib-metadata = "4.11.4"
+grpcio-tools = ">=1.40.0"
+mypy-protobuf = "3.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "6.2.5"
+
+[tool.protobuf-to-pydantic.format]
+black = true
+isort = true
+autoflake = true
+
+[tool.black]
+line-length = 120
+target-version = ['py37', 'py38', 'py39', 'py310']
+
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+line_length = 120
+
+[tool.autoflake]
+in-place = true
+remove-all-unused-imports = true
+remove-unused-variables = true
+
+[tool.mypy]
+disallow_untyped_defs = true
+python_executable = ".venv/bin/python"
+exclude = [
+    "^example/python_example_proto_code/example_proto",
+    "^protobuf_to_pydantic/_pydantic_adapter.py",
+    "^protobuf_to_pydantic/customer_validator/__init__.py",
+    "^protobuf_to_pydantic/customer_validator/v1.py",
+    "^protobuf_to_pydantic/customer_validator/v2.py",
+    "^protobuf_to_pydantic/customer_con_type/__init__.py",
+    "^protobuf_to_pydantic/customer_con_type/v1.py",
+    "^protobuf_to_pydantic/customer_con_type/v2.py",
+]
+
+
+[tool.pytest]
+testpaths = "tests"
+
+[tool.coverage.run]
+branch = true
+source = ["protobuf_to_pydantic"]
+omit = [
+    "protobuf_to_pydantic/contrib/proto_parser.py",
+    # The plugin cannot be tested,
+    # only by checking the running result of the generated code to judge whether the plugin is executed successfully
+    "protobuf_to_pydantic/plugin/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "continue",
+
+    # type hints
+    "if TYPE_CHECKING:",
+    "pass",
+
+    # error
+    "except ImportError:",
+    "except ModuleNotFoundError:"
+]
+
+
+[tool.poetry-dynamic-versioning]
+enable = false
+metadata=false
+vcs = "git"
+# format = "v{base}-{stage}.{revision}"
+format = "v{base}"
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
