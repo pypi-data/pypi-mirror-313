@@ -1,0 +1,101 @@
+[workspace]
+resolver = "2"
+
+[package]
+name = "aqora"
+version = "0.10.0"
+edition = "2021"
+default-run = "aqora"
+publish = false
+
+[lib]
+name = "aqora_cli"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "aqora"
+
+[features]
+default = []
+extension-module = ["pyo3/extension-module", "pyo3/abi3-py39", "pyo3/abi3"]
+
+[dependencies]
+aqora-archiver = { path = "archiver", features = ["indicatif", "tokio", "tracing"] }
+aqora-config = { path = "config" }
+aqora-runner = { path = "runner", features = ["clap"] }
+aqora-template = { path = "template" }
+async-tempfile = "0.6"
+axum = "0.7"
+base32 = "0.5"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4.4", features = ["derive", "cargo", "color", "env"] }
+dialoguer = "0.11.0"
+dirs = "5.0"
+dunce = "1.0"
+fs4 = { version = "0.8", features = ["tokio"] }
+futures = "0.3"
+graphql_client = { version = "0.14", features = ["reqwest-rustls"] }
+hostname = "0.4"
+human-errors = "0.1"
+ignore = "0.4"
+indicatif = "0.17"
+lazy_static = "1.4"
+mime = "0.3"
+open = "5.0"
+owo-colors = { version = "4.0", features = ["supports-colors"] }
+passterm = "2.0"
+pyo3 = { version = "0.20", features = ["serde"] }
+pyo3-asyncio = { version = "0.20", features = ["attributes", "tokio-runtime"] }
+rand = "0.8"
+reqwest = { version = "0.11", default-features = false, features = [
+  "stream",
+  "rustls-tls",
+] }
+rmp-serde = "1.1.2"
+sentry = { version = "0.32", default-features = false, features = [
+  "backtrace",
+  "contexts",
+  "debug-images",
+  "panic",
+  "reqwest",
+  "rustls",
+  "tower",
+  "tracing",
+] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = [
+  "preserve_order",
+  "arbitrary_precision",
+] }
+supports-color = "3.0"
+tempfile = "3.9"
+thiserror = "1.0"
+tokio = { version = "1", features = [
+  "macros",
+  "rt",
+  "rt-multi-thread",
+  "sync",
+  "signal",
+  "fs",
+  "process",
+  "io-util",
+] }
+tokio-stream = { version = "0.1", features = ["io-util"] }
+tokio-util = { version = "0.7", features = ["io"] }
+toml = "0.8"
+toml_edit = "0.22"
+tracing = "0.1"
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+url = { version = "2.5", features = ["serde"] }
+uuid = "1.7"
+which = "6.0"
+git2 = { version = "0.19.0" , default-features = false }
+
+[build-dependencies]
+toml_edit = "0.22"
+sentry-types = "0.32"
+
+[dev-dependencies]
+pretty_assertions = "1.4.0"
