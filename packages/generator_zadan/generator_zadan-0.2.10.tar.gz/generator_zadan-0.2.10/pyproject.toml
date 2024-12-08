@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "generator_zadan"
+version = "0.2.10"
+description = "Generuje losowo roznego typu zadania"
+authors = ["Adam Bohonos"]
+license = "MIT"
+readme = "README.md"
+
+exclude = [
+    "requirements.txt",
+    "runtime.txt",
+    "apt.txt",
+    "src/generator_zadan/generuj_algebra.py",
+    "src/generator_zadan/generuj_analiza.py",
+    "src/generator_zadan/generuj_test_nowego_zadania.py",
+    "src/generator_zadan/sprawdz_roznorodnosc.py",
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+babel = "^2.16.0"
+jupyter = "^1.0.0"
+matplotlib = "<=3.7"
+numpy = "^1.26.1"
+pandas = "^2.1.1"
+scipy = "^1.11.3"
+sympy = "^1.12"
+sympy-plot-backends = "^3.0.1"
+tqdm = "^4.65.0"
+pdf2image = "^1.17.0"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.group.dev.dependencies]
+myst-nb = {version = "^1.1.1", python = "^3.11"}
+sphinx-autoapi = "^3.3.1"
+sphinx-rtd-theme = "^2.0.0"
+python-semantic-release = "^9.8.8"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.semantic_release]
+version_variable = "pyproject.toml:version"
+version_source = "commit"
+
+version_toml = [
+    "pyproject.toml:tool.poetry.version",
+]                                                     # version location
+branch = "main"                                       # branch to make releases of
+changelog_file = "CHANGELOG.md"                       # changelog file
+build_command = "pip install poetry && poetry build"  # build dists
+
