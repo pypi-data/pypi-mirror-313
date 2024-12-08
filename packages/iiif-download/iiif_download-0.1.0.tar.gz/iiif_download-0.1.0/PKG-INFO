@@ -1,0 +1,95 @@
+Metadata-Version: 2.1
+Name: iiif-download
+Version: 0.1.0
+Summary: A Python package to download images from IIIF manifests
+Home-page: https://github.com/Segolene-Albouy/iiif-download
+Author: Segolene-Albouy
+Author-email: segolene.albouy@gmail.com
+Project-URL: Bug Tracker, https://github.com/Segolene-Albouy/iiif-download/issues
+Project-URL: Documentation, https://github.com/Segolene-Albouy/iiif-download#readme
+Project-URL: Source Code, https://github.com/Segolene-Albouy/iiif-download
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Multimedia :: Graphics
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: Pillow>=11.0.0
+Requires-Dist: requests>=2.32.0
+Requires-Dist: tqdm>=4.66.0
+Requires-Dist: urllib3>=2.2.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=6.0.0; extra == "dev"
+Requires-Dist: flake8>=7.0.0; extra == "dev"
+Requires-Dist: black>=24.0.0; extra == "dev"
+
+# Download images from IIIF manifests
+
+[![PyPI - Version](https://img.shields.io/pypi/v/iiif-download.svg)](https://pypi.org/project/iiif-download)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/iiif-download.svg)](https://pypi.org/project/iiif-download)
+
+This repository contains code to download images from IIIF manifests.
+It takes into account limitations and data specificities from various institutions.
+
+## Basic usage
+
+The configuration is stored in `iiif_download/config.py` and can be overriden by setting environment variables.
+
+### Inside a script
+
+```python
+from iiif_download import IIIFDownloader, config 
+
+# Override the default configuration
+config.max_size = 2500
+config.img_dir = "custom/path/to/images"
+
+# Use downloader with global config
+downloader = IIIFDownloader()
+
+# or override the global config for a specific downloader
+downloader = IIIFDownloader(
+    max_dim=2000,  # surcharge config.max_size
+    img_path="path/to/dir"  # surcharge config.img_dir
+)
+
+manifest = "https://example.org/manifest"
+
+# Download images from a manifest inside img_path/dir_name
+downloader.download_manifest(manifest, save_dir="dir_name")
+```
+
+### Command line
+
+```bash
+# override specific variables
+export IIIF_BASE_DIR=custom/path/to/images
+export IIIF_MAX_SIZE=4000
+# or use .env 
+source .env
+
+venv/bin/python run.py -f test-manifests.txt
+```
+
+## Metadata extraction
+
+```python
+from iiif_download import IIIFManifest
+
+manifest = IIIFManifest("https://example.org/manifest")
+manifest.load()
+lic = manifest.licence
+author = manifest.get_meta("author")
+images = manifest.get_images()
+```
