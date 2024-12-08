@@ -1,0 +1,36 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "ECU-Client",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/base:noble",
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"runArgs": [
+        "--network=host"
+    ],
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {}
+	},
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "python3 -m venv .venv && . .venv/bin/activate && python3 -m pip install -r requirements.txt && python3 -m pip install -r requirements.txt && pip install -e . && pip install zur-ecu-client",
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"python.defaultInterpreterPath": "/workspaces/ECU-Client/.venv/bin/python3",
+				"python.selectInterpreter": "/workspaces/ECU-Client/.venv/bin/python3",
+				"[python]": {
+					"editor.defaultFormatter": "ms-python.black-formatter",
+					"editor.formatOnSave": true
+				}
+			},
+			"extensions": [
+				"ms-python.python",
+				"ms-python.black-formatter"
+			]
+		}
+	},
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+	"remoteUser": "vscode"
+}

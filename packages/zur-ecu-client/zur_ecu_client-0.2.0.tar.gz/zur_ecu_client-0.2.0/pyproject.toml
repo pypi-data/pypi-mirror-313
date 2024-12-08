@@ -1,0 +1,81 @@
+# Based on https://github.com/pypa/sampleproject/blob/main/pyproject.toml
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "zur_ecu_client" 
+dynamic = [
+  "version"
+]
+description = "Internal Python library which provides an interface to the ECU"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE.txt"}
+keywords = ["sample", "setuptools", "development"]
+authors = [
+    {name = "ZUR Driverless", email = "driverless@zurichuasracing.ch" },
+    {name = "Finn Scheller", email = "finn.scheller@zurichuasracing.ch" },
+    {name = "Cèline Brun", email = "bruncel1@students.zhaw.ch"}
+]
+maintainers = [
+    {name = "ZUR Driverless", email = "driverless@zurichuasracing.ch" }
+]
+classifiers = [
+  # How mature is this project? Common values are
+  #   3 - Alpha
+  #   4 - Beta
+  #   5 - Production/Stable
+  "Development Status :: 3 - Alpha",
+
+  # Indicate who your project is intended for
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Build Tools",
+
+  # Pick your license as you wish
+  "License :: OSI Approved :: MIT License",
+
+  # Specify the Python versions you support here. In particular, ensure
+  # that you indicate you support Python 3. These classifiers are *not*
+  # checked by "pip install". See instead "requires-python" key in this file.
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = ["PyYAML"]
+
+
+[project.optional-dependencies]
+dev = ["check-manifest"]
+test = ["coverage"]
+
+
+[project.urls]
+"Homepage" = "https://zurichuasracing.ch"
+"Bug Reports" = "https://github.com/zurich-uas-racing/issues"
+"Source" = "https://github.com/zurich-uas-racing/ecu-client"
+
+
+[project.scripts]
+sample = "sample:main"
+
+
+[tool.setuptools]
+
+[tool.hatch.version]
+path = "__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/zur_ecu_client"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [
+  "src"
+]
