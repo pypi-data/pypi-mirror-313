@@ -1,0 +1,124 @@
+name: CI
+on:
+  push:
+    paths-ignore:
+      - 'CHANGELOG.md'
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 11 * * 4'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python, javascript
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  pytest:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9, "3.10", "3.11", "3.12", "3.13"]
+        pandas-version: [latest]
+        numpy-version: [latest]
+        include:
+          - python-version: 3.7
+            pandas-version: '<1.0'
+          - python-version: 3.9
+            pandas-version: '<2.0'
+            numpy-version: '<2.0'
+          - python-version: "3.13"
+            pandas-version: pre
+            polars: true
+          - python-version: "3.13"
+            uninstall_jinja2: true
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install a development version of 'itables'
+        run: pip install -e .[test]
+
+      - name: Install pandas latest
+        if: matrix.pandas-version == 'latest'
+        run: pip install pandas
+      - name: Install pandas pre-release
+        if: matrix.pandas-version == 'pre'
+        run: pip install pandas --pre
+      - name: Install pandas ${{ matrix.pandas-version }}
+        if: matrix.pandas-version != 'pre' && matrix.pandas-version != 'latest'
+        run: pip install 'pandas${{ matrix.pandas-version }}'
+      - name: Install numpy ${{ matrix.numpy-version }}
+        if: matrix.numpy-version != 'latest'
+        run: pip install 'numpy${{ matrix.numpy-version }}'
+
+      - name: Install polars
+        if: matrix.polars
+        run: pip install -e .[polars]
+
+      - name: Install shiny
+        if: matrix.python-version != '3.7'
+        run: pip install "shiny>=1.0"
+
+      - name: Uninstall jinja2
+        if: matrix.uninstall_jinja2
+        run: pip uninstall jinja2 -y
+
+      - name: Install a Jupyter Kernel
+        run: python -m ipykernel install --name itables --user
+
+      - name: Test with pytest
+        run: pytest --cov=./ --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          verbose: true
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Install hatch
+        run : pip install hatch
+      - name: Build package
+        run: hatch build
