@@ -1,0 +1,183 @@
+[build-system]
+requires = ["hatchling","hatch-requirements-txt"]
+build-backend = "hatchling.build"
+
+#Project
+[project]
+name = "esxport"
+dynamic = ["version","dependencies","optional-dependencies"]
+description = "An adept Python CLI utility designed for querying Elasticsearch and exporting result as a CSV file."
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.8"
+License-File = "LICENSE"
+authors = [
+    { name = "Nikhil Badyal", email = "nikhill773384@gmail.com" },
+]
+keywords = [
+    "bulk",
+    "csv",
+    "elasticsearch",
+    "es",
+    "export",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+    "Topic :: Database",
+    "Topic :: Internet",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Text Processing",
+    "Topic :: Utilities",
+]
+[project.urls]
+Homepage = "https://github.com/nikhilbadyal/esxport"
+"Bug Tracker"="https://github.com/nikhilbadyal/esxport/issues"
+Repository = "https://github.com/nikhilbadyal/esxport.git"
+[project.scripts]
+esxport = "esxport.cli:cli"
+
+#Hatch
+[tool.hatch.metadata]
+allow-direct-references = true
+core-metadata-version = "2.4"
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+[tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
+dev = ["requirements.dev.txt"]
+[tool.hatch.version]
+path = "esxport/__init__.py"
+[tool.hatch.build.targets.sdist]
+only-include = ["esxport"]
+core-metadata-version = "2.4"
+[tool.hatch.build.targets.wheel]
+only-include = ["esxport"]
+core-metadata-version = "2.4"
+
+
+
+
+[tool.ruff]
+line-length = 120
+select = ["ALL"]
+ignore = [
+    "ANN401", #Disallow Any
+    "D401", #Imperative mood
+    "RUF012", #ignore till https://github.com/astral-sh/ruff/issues/5243
+    "UP004" #useless-object-inheritance
+]
+target-version = "py38"
+fix = true
+show-fixes = true
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.per-file-ignores]
+"**test.py" = ["S101","SLF001","PT019","S311"]
+
+
+[tool.docformatter]
+recursive = true
+wrap-summaries = 120
+wrap-descriptions = 120
+
+[tool.black]
+line-length = 120
+
+[pycodestyle]
+max-line-length = 120
+exclude = ["venv"]
+
+
+[tool.mypy]
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+[tools.pytest]
+pythonpath = ["esxport"]
+
+[tool.pytest.ini_options]
+addopts = "--cov=. --cov-report=xml --cov-report=term-missing --junitxml=junit.xml --ff -x --no-cov-on-fail --emoji --dist loadgroup --tx=4*popen"
+[tool.coverage.run]
+#branch = true #https://github.com/nedbat/coveragepy/issues/605
+parallel = true
+
+[tool.coverage.report]
+skip_covered = true
+skip_empty = true
+show_missing=true
+sort="-Stmts"
+omit = ["test/**"]
+exclude_lines = [
+    'if TYPE_CHECKING:',
+    'if __name__ == "__main__":'
+    ]
+
+
+
+[tool.pyright]
+include = ["."]
+typeCheckingMode = "strict"
+exclude = ["**/test",]
+reportMissingTypeStubs = false
+[tool.tbump]
+# Uncomment this if your project is hosted on GitHub:
+# github_url = "https://github.com/<user or organization>/<project>/"
+
+[tool.tbump.version]
+current = "8.16.0"
+
+# Example of a semver regexp.
+# Make sure this matches current_version before
+# using tbump
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  '''
+
+[tool.tbump.git]
+message_template = "⬆️ Bump to {new_version}"
+tag_template = "v{new_version}"
+
+# For each file to patch, add a [[tool.tbump.file]] config
+# section containing the path of the file, relative to the
+# tbump.toml location.
+[[tool.tbump.file]]
+src = "pyproject.toml"
+
+[[tool.tbump.file]]
+src = "esxport/__init__.py"
+
+[[tool.tbump.file]]
+src = "test/.env"
+search = 'STACK_VERSION={current_version}'
+[[tool.tbump.file]]
+src = "requirements.txt"
+search = 'elasticsearch=={current_version}'
+# You can specify a list of commands to
+# run after the files have been patched
+# and before the git commit is made
+
+#  [[tool.tbump.before_commit]]
+#  name = "check changelog"
+#  cmd = "grep -q {new_version} Changelog.rst"
+
+# Or run some commands after the git tag and the branch
+# have been pushed:
+#  [[tool.tbump.after_push]]
+#  name = "publish"
+#  cmd = "./publish.sh"
