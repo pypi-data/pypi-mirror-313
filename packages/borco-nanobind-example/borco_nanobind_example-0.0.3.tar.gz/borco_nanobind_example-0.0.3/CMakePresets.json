@@ -1,0 +1,58 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default Config",
+            "description": "Default build using Ninja generator",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        },
+        {
+            "inherits": "default",
+            "name": "venv",
+            "description": "Use Python3 installed in .venv with `uv sync`"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "venv",
+            "configurePreset": "venv"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "venv",
+            "configurePreset": "venv",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": true
+            }
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "venv",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "venv"
+                },
+                {
+                    "type": "build",
+                    "name": "venv"
+                },
+                {
+                    "type": "test",
+                    "name": "venv"
+                }
+            ]
+        }
+    ]
+}
