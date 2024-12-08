@@ -1,0 +1,18 @@
+task: object_detection
+data_type: image
+actions:
+  train:
+    dataset: dataset
+    entrypoint: plugin.train.train
+    metrics:
+      epoch:
+        - loss
+        - miou
+  deployment:
+    entrypoint: plugin.inference.MockNetInference
+  inference:
+    method: restapi
+    endpoints:
+      - method: get
+  test:
+    entrypoint: plugin.test.test
