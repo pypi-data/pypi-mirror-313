@@ -1,0 +1,46 @@
+[tool.black]
+line-length = 88  # Default line length that works well with Flake8
+target-version = ['py311']  # Set to the version of Python you are using
+skip-string-normalization = false
+
+[tool.isort]
+profile = "black"
+line_length = 88  # Ensure the line length matches Black and Flake8
+multi_line_output = 3  # Ensure similar line breaks for imports as Black
+include_trailing_comma = true  # Matches Black's default style
+
+[tool.poetry]
+name = "aws-cdk-common"
+version = "0.1.23"
+description = "A shared package for common modules and constants for AWS Lambda applications"
+authors = ["LARS AI"]
+license = "MIT License"
+readme = "README.md"
+packages = [
+    { include = "app_common" },   # This includes your app_common folder
+    { include = "app_scripts" }   # This includes your app_scripts folder
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.11"
+resend = "2.4.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+pytest-cov = "^5.0.0"
+black = "^24.10.0"
+isort = "^5.13.2"
+pre-commit = "^4.0.1"
+boto3 = "^1.35.44"
+moto = {version = "^5.0.18", extras = ["all"]}
+pytest-env = "^1.1.5"
+flake8 = "^7.1.1"
+bump2version = "^1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
