@@ -1,0 +1,219 @@
+builds:
+  arise-bitcoind:
+    instructions: &baseInstructions
+      0: FROM debian:stable-slim AS builder
+      1: RUN apt-get update
+      2: RUN apt-get install -y autoconf bsdmainutils build-essential ccache clang git libboost-all-dev libtool pkg-config
+      3: WORKDIR /usr
+      4: RUN mkdir ~/.ccache && echo "max_size = 50.0G\nbase_dir = /usr/bitcoin\n" > ~/.ccache/ccache.conf
+      5: RUN git clone --depth 1 https://github.com/bitcoin/bitcoin.git
+      6: RUN cd bitcoin && git fetch origin --tags && git checkout tags/v27.1
+      7: RUN cd bitcoin && ./autogen.sh
+      8: RUN cd bitcoin && ./configure CC="clang" CXX="clang++"
+      9: RUN cd bitcoin && make -j"$(($(nproc)+1))" src/bitcoind src/bitcoin-cli
+      10: FROM debian:stable-slim AS runner
+      11: WORKDIR /usr/app
+      12: RUN apt-get update
+      13: RUN apt-get install -y libevent-dev
+      14: COPY --from=builder /usr/bitcoin/src/bitcoind /usr/app/bitcoind
+      15: COPY --from=builder /usr/bitcoin/src/bitcoin-cli /usr/app/bitcoin-cli
+      16: ENV PATH=$PATH:/usr/app
+      17: RUN mkdir -p /home/bitcoin/.bitcoin
+      18: VOLUME ["/home/bitcoin/.bitcoin"]
+  arise-electrs:
+    instructions:
+      0: FROM debian:stable-slim AS builder
+      1: RUN apt-get update
+      2: RUN apt-get install -y bsdmainutils build-essential cargo clang git lld
+      3: WORKDIR /usr/src
+      4: RUN git clone --depth 1 https://github.com/romanz/electrs.git
+      5: ENV RUSTFLAGS="-C link-args=-fuse-ld=lld"
+      6: RUN cd electrs && cargo fetch --config net.git-fetch-with-cli=true -Z sparse-registry
+      7: RUN cd electrs && cargo install --locked --path . -Z sparse-registry
+      8: FROM debian:stable-slim AS runner
+      9: WORKDIR /usr/app
+      10: RUN apt-get update
+      11: RUN apt-get install -y librocksdb-dev
+      12: COPY --from=builder /root/.cargo/bin/electrs /usr/app/electrs
+      13: ENTRYPOINT ["/usr/app/electrs"]
+  arise-mainnet:
+    instructions:
+      <<: *baseInstructions
+      19: EXPOSE 8332 8333
+      20: ENTRYPOINT ["/usr/app/bitcoind"]
+  arise-mariadb:
+    instructions:
+      0: FROM mariadb:10.5.21
+      1: VOLUME ["/var/lib/mysql"]
+      2: EXPOSE 3306
+      3: ENTRYPOINT ["docker-entrypoint.sh"]
+  arise-mempool:
+    instructions:
+      0: FROM node:20.15.0-buster-slim AS builder
+      1: ARG commitHash
+      2: ENV MEMPOOL_COMMIT_HASH=${commitHash}
+      3: WORKDIR /usr/src
+      4: RUN apt-get update
+      5: RUN apt-get install -y build-essential ca-certificates curl git pkg-config python3
+      6: RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#\/bin\/sh#g' | sh -s -- -y --default-toolchain stable
+      7: ENV PATH="/root/.cargo/bin:$PATH"
+      8: RUN git clone --depth 1 https://github.com/mempool/mempool.git
+      9: RUN mv mempool/backend build
+      10: RUN mv mempool/docker/backend/mempool-config.json mempool-config.json
+      11: RUN mv mempool/docker/backend/start.sh start.sh
+      12: RUN mv mempool/docker/backend/wait-for-it.sh wait-for-it.sh
+      13: RUN mkdir rust && mv mempool/rust/gbt rust/gbt
+      14: ENV FD=/usr/src/build/rust-gbt
+      15: RUN cd build && npm install --omit=dev --omit=optional
+      16: RUN cd build && npm run package
+      17: FROM node:20.15.0-buster-slim AS runner
+      18: RUN apt-get update
+      19: RUN apt-get install -y curl
+      20: WORKDIR /usr/app
+      21: COPY --from=builder /usr/src/build/package /usr/app/package
+      22: COPY --from=builder /usr/src/mempool-config.json /usr/app/mempool-config.json
+      23: COPY --from=builder /usr/src/start.sh /usr/app/start.sh
+      24: COPY --from=builder /usr/src/wait-for-it.sh /usr/app/wait-for-it.sh
+      25: RUN sed -i 's#/backend/package/index.js#\/usr\/app\/package\/index.js#' /usr/app/start.sh
+      26: ENTRYPOINT ["/usr/app/start.sh"]
+  arise-mutiny-web:
+    instructions:
+      0: FROM node:20-slim AS builder
+      1: WORKDIR /usr/src
+      2: ENV PNPM_HOME="/pnpm"
+      3: ENV PATH="$PNPM_HOME:$PATH"
+      4: RUN corepack enable
+      5: RUN apt update
+      6: RUN apt install -y build-essential git make python3
+      7: RUN git clone --depth 1 https://github.com/MutinyWallet/mutiny-web.git
+      8: ARG VITE_NETWORK="bitcoin"
+      9: ARG VITE_PROXY="/_services/proxy"
+      10: ARG VITE_PRIMAL
+      11: ARG VITE_ESPLORA="arise-mempool:8999/api"
+      12: ARG VITE_SCORER
+      13: ARG VITE_LSP
+      14: ARG VITE_RGS
+      15: ARG VITE_AUTH
+      16: ARG VITE_STORAGE="/_services/vss/v2"
+      17: ARG VITE_SELFHOSTED="true"
+      18: RUN cd mutiny-web && pnpm install --frozen-lockfile
+      19: RUN cd mutiny-web && git config --global --add safe.directory /usr/src
+      20: RUN cd mutiny-web && pnpm run build
+      21: FROM nginx:alpine
+      22: COPY --from=builder /usr/src/mutiny-web/dist/public /usr/share/nginx/html
+      23: COPY --from=builder /usr/src/mutiny-web/default.conf /etc/nginx/conf.d/default.conf
+      24: RUN sed -i 's#listen 80#listen 8000#' /etc/nginx/conf.d/default.conf
+      25: EXPOSE 8000
+  arise-signet:
+    instructions:
+      <<: *baseInstructions
+      19: EXPOSE 38332 38333
+      20: ENTRYPOINT ["/usr/app/bitcoind"]
+  arise-testnet:
+    instructions:
+      <<: *baseInstructions
+      19: EXPOSE 18332 18333
+      20: ENTRYPOINT ["/usr/app/bitcoind"]
+network: arise
+services:
+  arise-bitcoind:
+    command: &baseCommand
+      0: -blockfilterindex=1
+      1: -datadir=/home/bitcoin/.bitcoin
+      2: -dnsseed=0
+      3: -listen=1
+      4: -listenonion=1
+      5: -rest=1
+      6: -rpcallowip=0.0.0.0/0
+      7: -rpcbind=0.0.0.0
+      8: -rpccookiefile=/home/bitcoin/.bitcoin/.cookie
+      9: -rpcservertimeout=120
+      10: -rpcuser=${ARISE_AUTH_RPCUSER:-"arise"}
+      11: -rpcworkqueue=128
+      12: -server=1
+      13: -txindex=1
+      14: -upnp=0
+    image: arise-bitcoind
+    ports:
+      - 0:0
+    type: abstract
+  arise-electrs:
+    command:
+      0: --daemon-dir=/home/bitcoin/.bitcoin
+      1: --electrum-rpc-addr=0.0.0.0:50001
+      2: --log-filters=INFO
+      3: --network=bitcoin
+    image: arise-electrs
+    ports:
+      - 4224:4224
+      - 50001:50001
+    type: peripheral
+  arise-mainnet:
+    command:
+      <<: *baseCommand
+      14: -port=8333
+      15: -rpcport=8332
+    image: arise-mainnet
+    ports:
+      - 8332:8332
+      - 8333:8333
+    type: node
+  arise-mariadb:
+    command:
+      0: mysqld
+    env_vars:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_DATABASE=arise
+      - MYSQL_PASSWORD=${ARISE_AUTH_DBPASS:-"arise"}
+      - MYSQL_USER=${ARISE_AUTH_DBUSER:-"arise"}
+    image: arise-mariadb
+    ports:
+      - 3306:3306
+    type: middleware
+  arise-mempool:
+    command: {}
+    env_vars:
+      - CORE_RPC_COOKIE=true
+      - CORE_RPC_COOKIE_PATH=/home/bitcoin/.bitcoin/.cookie
+      - CORE_RPC_USERNAME=${ARISE_AUTH_RPCUSER:-"arise"}
+      - DATABASE_DATABASE=arise
+      - DATABASE_HOST=arise-mariadb
+      - DATABASE_PASSWORD=${ARISE_AUTH_DBPASS:-"arise"}
+      - DATABASE_USERNAME=${ARISE_AUTH_DBUSER:-"arise"}
+      - ELECTRUM_HOST=arise-electrs
+      - ELECTRUM_PORT=50001
+    image: arise-mempool
+    ports:
+      - 8999:8999
+    type: peripheral
+  arise-mutiny-web:
+    command:
+      0: nginx
+      1: -g
+      2: daemon off;
+    image: arise-mutiny-web
+    ports:
+      - 8000:8000
+    type: peripheral
+  arise-signet:
+    command:
+      <<: *baseCommand
+      15: -port=38333
+      16: -rpcport=38332
+      17: -signet
+    image: arise-signet
+    ports:
+      - 38332:38332
+      - 38333:38333
+    type: node
+  arise-testnet:
+    command:
+      <<: *baseCommand
+      15: -port=18333
+      16: -rpcport=18332
+      17: -testnet
+    image: arise-testnet
+    ports:
+      - 18332:18332
+      - 18333:18333
+    type: node
