@@ -1,0 +1,117 @@
+Metadata-Version: 2.1
+Name: passagemath-nauty
+Version: 10.5.2
+Summary: passagemath: Find automorphism groups of graphs, generate non-isomorphic graphs with nauty
+Author-email: The Sage Developers <sage-support@googlegroups.com>
+Maintainer: Matthias Köppe, passagemath contributors
+License: GNU General Public License (GPL) v2 or later
+Project-URL: release notes, https://github.com/passagemath/passagemath/releases
+Project-URL: repo (upstream), https://github.com/sagemath/sage
+Project-URL: repo, https://github.com/passagemath/passagemath
+Project-URL: documentation, https://doc.sagemath.org
+Project-URL: homepage (upstream), https://www.sagemath.org
+Project-URL: discourse, https://passagemath.discourse.group
+Project-URL: tracker (upstream), https://github.com/sagemath/sage/issues
+Project-URL: tracker, https://github.com/passagemath/passagemath/issues
+Classifier: Development Status :: 6 - Mature
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: Implementation :: CPython
+Classifier: Topic :: Scientific/Engineering :: Mathematics
+Requires-Python: <3.13,>=3.9
+Description-Content-Type: text/x-rst
+Requires-Dist: cysignals>=1.10.2
+Requires-Dist: cysignals<1.12,>=1.10.2
+Requires-Dist: passagemath-environment~=10.5.2.0
+Requires-Dist: passagemath-graphs~=10.5.2.0
+Provides-Extra: test
+Requires-Dist: passagemath-repl; extra == "test"
+
+==========================================================================================
+passagemath: Find automorphism groups of graphs, generate non-isomorphic graphs with nauty
+==========================================================================================
+
+About SageMath
+--------------
+
+   "Creating a Viable Open Source Alternative to
+    Magma, Maple, Mathematica, and MATLAB"
+
+   Copyright (C) 2005-2024 The Sage Development Team
+
+   https://www.sagemath.org
+
+SageMath fully supports all major Linux distributions, recent versions of
+macOS, and Windows (Windows Subsystem for Linux).
+
+See https://doc.sagemath.org/html/en/installation/index.html
+for general installation instructions.
+
+
+About this pip-installable distribution package
+-----------------------------------------------
+
+This pip-installable distribution ``passagemath-nauty`` provides an interface to
+`nauty and traces <https://pallini.di.uniroma1.it/>`_, the programs for computing
+automorphism groups of graphs and digraphs by Brendan McKay and Adolfo Piperno.
+
+
+What is included
+----------------
+
+- Graph generators `graphs.nauty_genbg <https://doc.sagemath.org/html/en/reference/graphs/sage/graphs/graph_generators.html#sage.graphs.graph_generators.GraphGenerators.nauty_genbg>`_, `graphs.nauty_geng <https://doc.sagemath.org/html/en/reference/graphs/sage/graphs/graph_generators.html#sage.graphs.graph_generators.GraphGenerators.nauty_geng>`_, `graphs.nauty_genktreeg <https://doc.sagemath.org/html/en/reference/graphs/sage/graphs/graph_generators.html#sage.graphs.graph_generators.GraphGenerators.nauty_genktreeg>`_
+
+- Hypergraph generator `hypergraphs.nauty <https://doc.sagemath.org/html/en/reference/graphs/sage/graphs/hypergraph_generators.html#sage.graphs.hypergraph_generators.HypergraphGenerators.nauty>`_
+
+- Raw access to all gtools from Python
+
+- The binary wheels published on PyPI include a prebuilt copy of nauty and traces.
+
+
+Examples
+--------
+
+Using the gtools on the command line::
+
+    $ pipx run --pip-args="--prefer-binary" --spec "passagemath-nauty" sage -sh -c 'geng 4'
+    >A geng -d0D3 n=4 e=0-6
+    C?
+    CC
+    CE
+    CF
+    CQ
+    CU
+    CT
+    CV
+    C]
+    C^
+    C~
+    >Z 11 graphs generated in 0.00 sec
+
+Finding the installation location of a gtools program::
+
+    $ pipx run --pip-args="--prefer-binary" --spec "passagemath-nauty[test]" ipython
+
+    In [1]: from sage.features.nauty import NautyExecutable
+
+    In [2]: NautyExecutable('geng').absolute_filename()
+    Out[2]: '/Users/mkoeppe/.local/pipx/.cache/535c90a22321f64/lib/python3.11/site-packages/sage_wheels/bin/geng'
+
+Use with sage.graphs::
+
+    $ pipx run --pip-args="--prefer-binary" --spec "passagemath-nauty[test]" ipython
+
+    In [1]: from sage.all__sagemath_graphs import *
+
+    In [2]: gen = graphs.nauty_geng("7 -c")  # connected graphs on 7 vertices
+
+    In [3]: len(list(gen))
+    Out[3]: 853
