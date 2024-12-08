@@ -1,0 +1,70 @@
+# Copyright (c) 2023-2024 Datalayer, Inc.
+#
+# Datalayer License
+
+[build-system]
+requires = ["hatchling==1.21.1"]
+build-backend = "hatchling.build"
+
+[project]
+name = "datalayer_iam"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "connexion==3.0.6",
+    "cryptography",
+    "datalayer_addons",
+    "datalayer_common",
+    "datalayer_solr",
+    "importlib_metadata",
+    "httpx",
+    "pulsar-client==3.5.0",
+    "pyjwt==2.8.0",
+    "starlette",
+    "tldextract",
+    "werkzeug",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+cli = [
+    "datalayer_core",
+]
+test = [
+    "coverage",
+    "jupyter_server~=2.0",
+    "pyjwt[crypto]",
+    "pytest",
+    "pytest-cov",
+    "pytest-jupyter[server]>=0.4",
+    "ruff",
+    "uvicorn"
+]
+server=[
+    "connexion[uvicorn]==3.0.6",
+    "uvicorn[standard]"
+]
+swagger-ui = [
+    "connexion[swagger-ui]==3.0.6",
+]
+
+[project.scripts]
+datalayer-iam = "datalayer_iam.application:main"
+
+[project.entry-points."datalayer_iam.addons_credits_v1"]
+test = "datalayer_iam.addons.test:get_test"
+
+[tool.hatch.version]
+path = "datalayer_iam/__init__.py"

@@ -1,0 +1,2796 @@
+openapi: "3.0.2"
+info:
+  title: Datalayer IAM
+  version: "1.0.0"
+  contact:
+    name: Datalayer
+    url: https://datalayer.io
+servers:
+  - url: /api/iam/v1
+    description: Relative base URL
+paths:
+  /support/email:
+    post:
+      tags:
+        - support
+      summary: Send outbound email communication
+      operationId: send_email_endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accountHandle:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                message:
+                  type: string
+              anyOf:
+                - required:
+                    - firstName
+                    - lastName
+                    - email
+                    - message
+              additionalProperties: false
+      responses:
+        401:
+          description: Message sending failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        201:
+          description: Message is sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  user:
+                    $ref: "#/components/schemas/user"
+                  token:
+                    type: string
+  /waitinglist:
+    post:
+      tags:
+        - tiers
+      summary: Register to the waiting list
+      operationId: register_waitinglist_endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                affiliation:
+                  type: string
+              anyOf:
+                - required:
+                    - firstName
+                    - lastName
+                    - email
+                    - affiliation
+              additionalProperties: false
+      responses:
+        401:
+          description: Message sending failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        201:
+          description: Message is sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  user:
+                    $ref: "#/components/schemas/user"
+                  token:
+                    type: string
+  /proxy/request:
+    post:
+      tags:
+        - proxy
+      summary: Proxy
+      operationId: proxy_request_endpoint
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                request_method:
+                  type: string
+                  enum:
+                    - GET
+                    - POST
+                    - PUT
+                request_url:
+                  type: string
+                request_token:
+                  type: string
+                request_body:
+                  type: object
+      responses:
+        200:
+          description: Proxy requested
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /login:
+    post:
+      tags:
+        - authentication
+      summary: Login
+      operationId: login_endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                handle:
+                  type: string
+                password:
+                  type: string
+                token:
+                  type: string
+              anyOf:
+                - required:
+                    - handle
+                    - password
+                - required:
+                    - token
+              additionalProperties: false
+      responses:
+        401:
+          description: Login failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        201:
+          description: Login succeeded
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  user:
+                    $ref: "#/components/schemas/user"
+                  token:
+                    type: string
+  /logout:
+    get:
+      tags:
+        - authentication
+      summary: Logout
+      operationId: logout_endpoint
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: Logout user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /join/request:
+    post:
+      tags:
+        - join
+      summary: Create a request for a new user to join
+      operationId: request_to_join_endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                handle:
+                  type: string
+                email:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                password:
+                  type: string
+                passwordConfirm:
+                  type: string
+      responses:
+        201:
+          description: Join request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        400:
+          description: Incorrect information
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+# /join/request/token:
+#   post:
+#     tags:
+#       - join
+#     summary: Request a token for a user to join
+#     operationId: request_token_to_join_endpoint
+#     requestBody:
+#       required: true
+#       content:
+#         application/json:
+#           schema:
+#             $ref: "#/components/schemas/user_form"
+#     responses:
+#       201:
+#         description: Join request accepted
+#         content:
+#           application/json:
+#             schema:
+#               $ref: "#/components/schemas/baseResponse"
+#       400:
+#         description: Incorrect information
+#         content:
+#           application/json:
+#             schema:
+#               allOf:
+#                 - $ref: "#/components/schemas/baseResponse"
+#               properties:
+#                 errors:
+#                   type: array
+#                   minItems: 1
+#                   items:
+#                     type: string
+# /join/confirm/users/{handle}/tokens/{token}:
+#   get:
+#     x-authz:
+#       user: user:*
+#       relation: join_confirm
+#       object: invite:any
+#     tags:
+#       - join
+#     summary: Confirm a user join based on a token
+#     operationId: join_user_with_token_endpoint
+#     parameters:
+#       - name: handle
+#         in: path
+#         required: true
+#         schema:
+#           type: string
+#           minLength: 1
+#       - name: token
+#         in: path
+#         required: true
+#         schema:
+#           type: string
+#           minLength: 1
+#     responses:
+#       200:
+#         description: Subscription confirmed
+#         content:
+#           application/json:
+#             schema:
+#               $ref: "#/components/schemas/baseResponse"
+#       404:
+#         description: Check the user handle and token.
+#         content:
+#           application/json:
+#             schema:
+#               $ref: "#/components/schemas/baseResponse"
+  /invites/tokens/{token}:
+    get:
+      summary: Get the invite linked to the provided token
+      operationId: get_invite_by_token_endpoint
+      tags:
+        - invites
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        200:
+          description: Invite
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  invite:
+                    type: string
+  /invites/join:
+    post:
+      summary: Join further to an invite
+      operationId: join_user_with_invite_endpoint
+      tags:
+        - invites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/user_form"
+              properties:
+                token:
+                  type: string
+              required:
+                - token
+      responses:
+        201:
+          description: Join invite accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        400:
+          description: Incorrect information or user exists already
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+  /oauth2/authz/url:
+    get:
+      tags:
+        - oauth2
+      summary: Get the OAuth2 authorization URL
+      operationId: oauth2_authz_url_endpoint
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - github
+              - linkedin
+              - x
+        - name: callback_uri
+          description: Server endpoint to call with the authz token
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+        - name: nonce
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: The authz URL for the given provider
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  loginURL:
+                    type: string
+  /oauth2/authz/url/link:
+    get:
+      tags:
+        - oauth2
+      summary: Get the OAuth2 authorization URL to link
+      operationId: oauth2_authz_url_link_endpoint
+      security:
+        - jwt: []
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - github
+              - linkedin
+              - x
+        - name: callback_uri
+          description: Server endpoint to call with the authz token
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+      responses:
+        200:
+          description: The authz URL for the given provider
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  loginURL:
+                    type: string
+  /oauth2/github/callback:
+    get:
+      tags:
+        - oauth2
+      summary: Callback for GitHub OAuth2 flow
+      operationId: oauth2_github_callback_endpoint
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: error
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: error_description
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: error_uri
+          in: query
+          schema:
+            type: string
+            default: ""
+      responses:
+        200:
+          description: Callback from GitHub App
+          content:
+            text/html:
+              schema:
+                type: string
+        403:
+          description: Unauthorized
+  /oauth2/linkedin/callback:
+    get:
+      tags:
+        - oauth2
+      summary: Callback for LinkedIn OAuth2 flow
+      operationId: oauth2_linkedin_callback_endpoint
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: error
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: error_description
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: error_uri
+          in: query
+          schema:
+            type: string
+            default: ""
+      responses:
+        200:
+          description: Callback from LinkedIn App
+          content:
+            text/html:
+              schema:
+                type: string
+        403:
+          description: Unauthorized
+  /password:
+    put:
+      tags:
+        - password
+      summary: Request a URL to set a new password
+      operationId: request_url_for_new_password_endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                handle:
+                  type: string
+                password:
+                  type: string
+                passwordConfirm:
+                  type: string
+              required:
+                - handle
+                - password
+                - passwordConfirm
+      responses:
+        200:
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        400:
+          description: Incorrect information
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+  /password/token:
+    post:
+      tags:
+        - password
+      summary: Request a token to set a new password
+      operationId: request_token_for_new_password_endpoint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                handle:
+                  type: string
+                password:
+                  type: string
+                passwordConfirm:
+                  type: string
+              required:
+                - handle
+                - password
+                - passwordConfirm
+      responses:
+        201:
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        400:
+          description: Incorrect information
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+  /password/confirm/users/{handle}/tokens/{token}:
+    put:
+      tags:
+        - password
+      summary: Confirm the password change
+      operationId: confirm_new_password_endpoint
+      parameters:
+        - name: handle
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        200:
+          description: Password change or not
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+        404:
+          description: Check the user handle and token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /news/users/{id}:
+    delete:
+      tags:
+        - news
+      summary: Unsubscribe a user from news
+      operationId: unsubscribe_user_news_endpoint
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        400:
+          description: Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /news/invites/{token}:
+    delete:
+      tags:
+        - news
+      summary: Unsubscribe a user from news by an invite token
+      operationId: unsubscribe_from_news_by_token_endpoint
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        400:
+          description: Failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /me:
+    get:
+      tags:
+        - profile
+      summary: Get the profile of the current authenticated user account
+      operationId: get_me_endpoint
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: Get the logged user user
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  me:
+                    type: object
+                    properties:
+                      display_name:
+                        type: string
+                      email:
+                        type: string
+                      first_name:
+                        type: string
+                      handle:
+                        type: string
+                      last_name:
+                        type: string
+                      uid:
+                        type: string
+                      roles:
+                        type: array
+                        items:
+                          type: string
+    put:
+      description: Update the profile of the current authenticated user account
+      operationId: update_authn_profile_endpoint
+      tags:
+        - profile
+      summary: Update the profile of the current authenticated user account
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  title: New user email
+                  description: |
+                    The email can only be updated if the user does not have one.
+                    And if it is not login using a password.
+              required:
+                - firstName
+                - lastName
+      responses:
+        200:
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+# One should not be able to delete him self...
+#    delete:
+#      tags:
+#        - profile
+#      summary: Delete the current authenticated user account
+#      operationId: delete_authn_account_endpoint
+#      security:
+#        - jwt: []
+#      responses:
+#        204:
+#          description: User account removed
+  /whoami:
+    get:
+      tags:
+        - profile
+      summary: Get the details of the current authenticated user account
+      operationId: get_authn_user_endpoint
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: Get user profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  profile:
+                    $ref: "#/components/schemas/user"
+  /accounts/{handle}:
+    get:
+      tags:
+        - accounts
+      summary: Get the details of an account (`user` or `organization`) based on a handle
+      description: This is sometimes needed as the API consumer just has an handle and needs the details of the related account.
+      operationId: get_account_by_handle_endpoint
+      parameters:
+        - name: handle
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Account details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    # FIXME
+                    type: object
+                  organization:
+                    # FIXME
+                    type: object
+  /users/{id}:
+    get:
+      tags:
+        - users
+      summary: Get the details of a user
+      operationId: get_user_by_uid_endpoint
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Get user detail by uid
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  user:
+                    $ref: "#/components/schemas/user"
+  /users/search:
+    post:
+      tags:
+        - users
+      summary: Search for users
+      operationId: search_users_endpoint
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                namingPattern:
+                  type: string
+              required:
+                - namingPattern
+      responses:
+        200:
+          description: Succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/user"
+                required:
+                  - success
+                  - users
+  /users/{id}/roles/{role}:
+    get:
+      tags:
+        - user_roles
+      summary: Check a role for a user
+      operationId: check_user_role_endpoint
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Role presence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+    post:
+      x-authz:
+        roles:
+          - platform_admin
+      tags:
+        - user_roles
+      summary: Assign a role to a user
+      operationId: add_user_role_endpoint
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: Role added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+    delete:
+      x-authz:
+        roles:
+          - platform_admin
+      tags:
+        - user_roles
+      summary: Remove a role from a user
+      operationId: remove_user_role_endpoint
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Role removed
+  /invites:
+    post:
+      x-authz:
+        roles:
+          - platform_admin
+      summary: Send an invite to the platform
+      operationId: send_invite_endpoint
+      tags:
+        - invites
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                message:
+                  type: string
+              required:
+                - firstName
+                - lastName
+                - email
+                - message
+      responses:
+        201:
+          description: Invite sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  invite:
+                    type: string
+        400:
+          description: Information incorrect
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                      minItems: 1
+  /invites/bulk:
+    post:
+      x-authz:
+        roles:
+          - platform_admin
+      summary: Send bulk invites to the platform
+      operationId: send_bulk_invites_endpoint
+      tags:
+        - invites
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        201:
+          description: Invite sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  invite:
+                    type: string
+        400:
+          description: Information incorrect
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                      minItems: 1
+  /invites/users/{id}:
+    get:
+      summary: Get the invites sent by a user
+      operationId: get_invites_sent_by_user_endpoint
+      tags:
+        - invites
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Invites
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  invites:
+                    type: array
+                required:
+                  - success
+                  - invites
+  /usage/credits:
+    get:
+      summary: Get current credits balance for the authenticated user
+      operationId: get_credits_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: User credits
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  credits:
+                    $ref: "#/components/schemas/credits"
+                  reservations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/reservation"
+  /usage/credits/users/{id}:
+    get:
+      x-authz:
+        roles:
+          - platform_admin
+      summary: Get credits for a user
+      operationId: get_user_credits_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: User UID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User credits
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  credits:
+                    $ref: "#/components/schemas/credits"
+    put:
+      x-authz:
+        roles:
+          - platform_admin
+      summary: Update (add/remove) credits for (to/from) a user
+      operationId: update_user_credits_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: User UID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                credits:
+                  title: Credits
+                  description: Number of credits to add (if negative, the credits will be lowered)
+                  type: number
+              required:
+                - credits
+      responses:
+        200:
+          description: User credits
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  credits:
+                    $ref: "#/components/schemas/credits"
+  /usage/quota:
+    get:
+      summary: Get user quota
+      operationId: get_quota_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+      parameters:
+        - name: user_uid
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: User quota
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  credits:
+                    $ref: "#/components/schemas/credits"
+    put:
+      summary: Update user quota
+      operationId: update_quota_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quota:
+                  title: User quota
+                  description: Set to negative value to remove the user quota
+                  type: number
+                user_uid:
+                  type: string
+                reset:
+                  title: Whether to reset the user credits?
+                  description: |
+                    "1" [default] will reset the user credits
+                    "0" won't reset the user credits
+                  type: string
+                  enum:
+                    - "0"
+                    - "1"
+              required:
+                - quota
+      responses:
+        200:
+          description: Quota updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  credits:
+                    type: number
+                  quota:
+                    type: number
+                required:
+                  - credits
+                  - quota
+        400:
+          description: Failed to add credits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /usage/reservations:
+    get:
+      summary: Get the reservations of the current authenticated user account
+      operationId: get_reservations_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+        - apiKey: []
+      parameters:
+        - name: type
+          in: query
+          description: Type of the resources to list
+          schema:
+            type: string
+      responses:
+        200:
+          description: User reservations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  reservations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/reservation"
+    post:
+      summary: Create a reservation
+      operationId: create_reservation_endpoint
+      tags:
+        - usage
+      security:
+        - apiKey: []
+      parameters:
+        - name: "X-Forwarded-User"
+          description: User UID
+          required: true
+          in: header
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                burning_rate:
+                  type: number
+                pod_resources:
+                  $ref: "#/components/schemas/resources"
+                reservation:
+                  type: number
+                resource_given_name:
+                  type: string
+                resource_type:
+                  type: string
+                resource_uid:
+                  type: string
+                resource_state:
+                  type: string
+                  enum:
+                    - "running"
+                    - "not_available_error"
+                    - "out_of_credits_error"
+              required:
+                - burning_rate
+                - resource_type
+      responses:
+        201:
+          description: Reservation started
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  reservation:
+                    $ref: "#/components/schemas/reservation"
+  /usage/reservations/{id}:
+    get:
+      summary: Get a reservation
+      operationId: get_reservation_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Reservation ID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: User credits
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  reservation:
+                    $ref: "#/components/schemas/reservation"
+    delete:
+      summary: Delete a reservation
+      operationId: delete_reservation_endpoint
+      tags:
+        - usage
+      security:
+        - apiKey: []
+      parameters:
+        - name: id
+          description: Resource UID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: event
+          description: Why is the reservation deleted?
+          in: query
+          schema:
+            type: string
+            enum:
+              - expired
+              - culled
+              - deleted
+              - anomaly
+        - name: "X-Forwarded-User"
+          description: User UID
+          required: true
+          in: header
+          schema:
+            type: string
+      responses:
+        204:
+          description: Reservation stopped
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /usage/user:
+    get:
+      summary: Get user usage
+      operationId: get_user_usage_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: User usage
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  usages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/usage"
+                      
+  /usage/platform:
+    get:
+      summary: Get platform usage
+      operationId: get_platform_usage_endpoint
+      tags:
+        - usage
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: Platform usage
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  usages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/usage"
+  /checkout/portal:
+    post:
+      security:
+        - jwt: []
+      summary: Create a Checkout Portal
+      tags:
+        - checkout
+      description: |
+        Endpoint to create a checkout portal session, where the user can view their
+        invoice and upgrade/downgrade (if they used an eligible checkout method).
+      operationId: create_checkout_portal_endpoint
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/checkoutPortalRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  portal:
+                    $ref: "#/components/schemas/checkoutPortal"
+          description: Successful Response
+  /organizations:
+    get:
+      summary: Get organizations for the current authenticated user account
+      operationId: get_organizations_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: Fetched organization
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  organizations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/organization"
+    post:
+      summary: Create an organization
+      operationId: create_organization_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                handle:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        201:
+          description: Organization created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  organization:
+                    $ref: "#/components/schemas/organization"
+        400:
+          description: Failed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+  /organizations/{id}:
+    get:
+      summary: Get an organization
+      operationId: get_organization_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Organization UID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Fetched organization
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  organization:
+                    $ref: "#/components/schemas/organization"
+    put:
+      summary: Update an organization
+      operationId: update_organization_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Organization UID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        200:
+          description: Organization updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /organizations/types/{type}:
+    get:
+      summary: Get organizations by type
+      operationId: get_organizations_by_type_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Fetched organization
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  organizations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/organization"
+  /organizations/{id}/members/{user_id}:
+    post:
+      summary: Add a user as member to an organization
+      operationId: add_member_to_organization_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+    delete:
+      summary: Remove a member from the organization
+      operationId: remove_member_from_organization_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /organizations/{id}/members/{user_id}/roles/{role}:
+    post:
+      summary: Add a role to a member of an organization
+      operationId: add_member_role_to_organization_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+    delete:
+      summary: Remove a role from a member of an organization
+      operationId: remove_member_role_from_organization_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /organizations/{id}/teams:
+    get:
+      summary: Get the teams of an organization
+      operationId: get_organization_teams_endpoint
+      tags:
+        - organizations
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Fetched teams
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  organizations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/team"
+  /teams:
+    post:
+      summary: Create a team
+      operationId: create_team_endpoint
+      tags:
+        - teams
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                handle:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+                organizationId:
+                  type: string
+      responses:
+        201:
+          description: team created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  team:
+                    $ref: "#/components/schemas/team"
+        400:
+          description: Failed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+  /teams/{id}:
+    get:
+      summary: Get a team
+      operationId: get_team_endpoint
+      tags:
+        - teams
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: team UID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Fetched team
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  team:
+                    $ref: "#/components/schemas/team"
+    put:
+      summary: Update a team
+      operationId: update_team_endpoint
+      tags:
+        - teams
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: team UID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        200:
+          description: team updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /teams/{id}/members/{user_id}:
+    post:
+      summary: Add a user as member to a team
+      operationId: add_member_to_team_endpoint
+      tags:
+        - teams
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+    delete:
+      summary: Remove a member from the team
+      operationId: remove_member_from_team_endpoint
+      tags:
+        - teams
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /teams/{id}/members/{user_id}/roles/{role}:
+    post:
+      summary: Add a role to a member of a team
+      operationId: add_member_role_to_team_endpoint
+      tags:
+        - teams
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+    delete:
+      summary: Remove a role from a member of a team
+      operationId: remove_member_role_from_team_endpoint
+      tags:
+        - teams
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Member removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /auth:
+    get:
+      summary: Check authentication, useful for reverse proxy
+      operationId: proxy_auth_endpoint
+      tags:
+        - authentication
+      # security:
+      #   - jwt: []
+      responses:
+        200:
+          description: Authenticated
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+  /support/contact:
+    post:
+      summary: Contact the platform support by email
+      operationId: contact_endpoint
+      tags:
+        - support
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject:
+                  type: string
+                body:
+                  type: string
+                email:
+                  type: string
+              required:
+                - subject
+                - body
+      responses:
+        201:
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /ping:
+    get:
+      x-authz: public
+      summary: Healthz ping
+      operationId: ping_endpoint
+      tags:
+        - healthz
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_count:
+                    type: integer
+                    minimum: 0
+  /datasources:
+    get:
+      summary: Get the datasources
+      operationId: get_datasources_endpoint
+      tags:
+        - datasources
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: Fetched datasources
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  datasources:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/datasource"
+    post:
+      summary: Create a datasource
+      operationId: create_datasource_endpoint
+      tags:
+        - datasources
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                variant:
+                  type: string
+                database:
+                  type: string
+                outputBucket:
+                  type: string
+      responses:
+        201:
+          description: datasource created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  datasource:
+                    $ref: "#/components/schemas/datasource"
+        400:
+          description: Failed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+  /datasources/{id}:
+    get:
+      summary: Get a datasource
+      operationId: get_datasource_endpoint
+      tags:
+        - datasources
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Data Source UID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Fetched datasource
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  datasource:
+                    $ref: "#/components/schemas/datasource"
+    put:
+      summary: Update a datasource
+      operationId: update_datasource_endpoint
+      tags:
+        - datasources
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Data Source UID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                database:
+                  type: string
+                output_bucket:
+                  type: string
+      responses:
+        200:
+          description: Data Source updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /secrets:
+    get:
+      summary: Get the secrets
+      operationId: get_secrets_endpoint
+      tags:
+        - secrets
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: Fetched secrets
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  secrets:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/secret"
+    post:
+      summary: Create a secret
+      operationId: create_secret_endpoint
+      tags:
+        - secrets
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                variant:
+                  type: string
+                value:
+                  type: string
+      responses:
+        201:
+          description: secret created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  secret:
+                    $ref: "#/components/schemas/secret"
+        400:
+          description: Failed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+  /secrets/{id}:
+    get:
+      summary: Get a secret
+      operationId: get_secret_endpoint
+      tags:
+        - secrets
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Secret UID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Fetched secret
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  secret:
+                    $ref: "#/components/schemas/secret"
+    put:
+      summary: Update a secret
+      operationId: update_secret_endpoint
+      tags:
+        - secrets
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Secret UID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                value:
+                  type: string
+      responses:
+        200:
+          description: Secret deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+    delete:
+      summary: Delete a secret
+      operationId: delete_secret_endpoint
+      tags:
+        - secrets
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Secret UID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Secret deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+  /tokens:
+    get:
+      summary: Get the tokens
+      operationId: get_tokens_endpoint
+      tags:
+        - tokens
+      security:
+        - jwt: []
+      responses:
+        200:
+          description: Fetched tokens
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  tokens:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/token"
+    post:
+      summary: Create a token
+      operationId: create_token_endpoint
+      tags:
+        - tokens
+      security:
+        - jwt: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                variant:
+                  type: string
+                expirationDate:
+                  type: number
+      responses:
+        201:
+          description: token created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  token:
+                    $ref: "#/components/schemas/token"
+        400:
+          description: Failed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  errors:
+                    type: array
+                    minItems: 1
+                    items:
+                      type: string
+  /tokens/{id}:
+    get:
+      summary: Get a token
+      operationId: get_token_endpoint
+      tags:
+        - tokens
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Token UID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Fetched token
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/baseResponse"
+                properties:
+                  token:
+                    $ref: "#/components/schemas/token"
+    put:
+      summary: Update a token
+      operationId: update_token_endpoint
+      tags:
+        - tokens
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          description: Token UID
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+      responses:
+        200:
+          description: token updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/baseResponse"
+components:
+  schemas:
+    baseResponse:
+      type: object
+      title: Base Response
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+    reservation:
+      type: object
+      title: Reservation
+      properties:
+        id:
+          type: string
+        account_uid:
+          type: string
+        credits:
+          type: number
+        resource:
+          type: string
+        resource_type:
+          type: string
+        last_update:
+          type: string
+          format: date-time
+        burning_rate:
+          type: number
+        start_date:
+          type: string
+          format: date-time
+      required:
+        - id
+        - credits
+        - resource
+        - last_update
+        - burning_rate
+    credits:
+      type: object
+      title: Credits
+      properties:
+        credits:
+          type: number
+        quota:
+          type: number
+        last_update:
+          type: string
+          format: date-time
+      required:
+        - credits
+        - quota
+        - last_update
+    usage:
+      type: object
+      title: Usage
+      properties:
+        account_uid:
+          type: string
+        resource_uid:
+          type: string
+        resource_type:
+          type: string
+        resource_given_name:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        pod_resources:
+          $ref: "#/components/schemas/resources"
+        burning_rate:
+          title: Resource credits burning rate per second
+          type: number
+        credits_limit:
+          type: number
+        credits:
+          type: number
+        metadata:
+          type: object
+      required:
+        - account_uid
+        - resource_uid
+        - resource_type
+        - resource_given_name
+        - start_date
+        - updated_at
+        - burning_rate
+        - credits_limit
+    user_form:
+      type: object
+      title: User Form
+      properties:
+        handle:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        password:
+          type: string
+        passwordConfirm:
+          type: string
+      required:
+        - handle
+        - email
+        - firstName
+        - lastName
+        - password
+        - passwordConfirm
+    organizationMember:
+      type: object
+      title: Organization Member
+      properties:
+        id:
+          type: string
+        uid:
+          type: string
+        type_s:
+          type: string
+        handle_s:
+          type: string
+        first_name_t:
+          type: string
+        last_name_t:
+          type: string
+        email_s:
+          type: string
+        roles_ss:
+          type: array
+          items:
+            type: string
+    organization:
+      type: object
+      title: Organization
+      properties:
+        id:
+          type: string
+        uid:
+          type: string
+        type_s:
+          type: string
+        handle_s:
+          type: string
+        name_t:
+          type: string
+        description_t:
+          type: string
+        public_b:
+          type: boolean
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/organizationMember"
+    teamMember:
+      type: object
+      title: Team Member
+      properties:
+        id:
+          type: string
+        uid:
+          type: string
+        type_s:
+          type: string
+        handle_s:
+          type: string
+        first_name_t:
+          type: string
+        last_name_t:
+          type: string
+        email_s:
+          type: string
+        roles_ss:
+          type: array
+          items:
+            type: string
+    user:
+      type: object
+      title: User
+      properties:
+        creation_ts_dt:
+          type: string
+        id:
+          type: string
+        join_request_ts_dt:
+          type: string
+        join_ts_dt:
+          type: string
+        last_update_ts_dt:
+          type: string
+        origin_s:
+          type: string
+        type_s:
+          type: string
+        uid:
+          type: string
+        email_s:
+          type: string
+        first_name_t:
+          type: string
+        handle_s:
+          type: string
+        last_name_t:
+          type: string
+    team:
+      type: object
+      title: Team
+      properties:
+        id:
+          type: string
+        uid:
+          type: string
+        handle_s:
+          type: string
+        name_t:
+          type: string
+        description_t:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/teamMember"
+    datasource:
+      type: object
+      title: Secret
+      properties:
+        id:
+          type: string
+        uid:
+          type: string
+        variant_s:
+          type: string
+        name_s:
+          type: string
+        description_t:
+          type: string
+        database_s:
+          type: string
+        output_bucket_s:
+          type: string
+    secret:
+      type: object
+      title: Secret
+      properties:
+        id:
+          type: string
+        uid:
+          type: string
+        variant_s:
+          type: string
+        name_s:
+          type: string
+        description_t:
+          type: string
+        value_s:
+          type: string
+    token:
+      type: object
+      title: Token
+      properties:
+        id:
+          type: string
+        uid:
+          type: string
+        variant_s:
+          type: string
+        name_s:
+          type: string
+        description_t:
+          type: string
+        description_t:
+          type: string
+        expiration_ts_dt:
+          type: string
+    checkoutPortal:
+      type: object
+      title: Checkout Portal
+      properties:
+        url:
+          title: Checkout Portal URL
+          type: string
+        route:
+          title: Internal frontend client route to redirect the user to
+          type: string
+        is_modal:
+          title: Whether the route will open a modal (true) or a page (false)
+          type: boolean
+          default: false
+        metadata:
+          title: JSON-serializable metadata
+          type: object
+    checkoutPortalRequest:
+      title: Checkout Portal Request
+      properties:
+        return_url:
+          title: Return Url
+          type: string
+      type: object
+    resources:
+      title: Resources (for a Kubernetes Pod)
+      type: object
+      properties:
+        cpu:
+          type: string
+          nullable: true
+        memory:
+          type: string
+          nullable: true
+        nvidia.com/gpu:
+          type: string
+          nullable: true
+      required:
+        - cpu
+        - memory
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      # /!\ This path does not use the resolver
+      x-bearerInfoFunc: datalayer_iam.authn.authn
+    apiKey:
+      type: apiKey
+      name: X-API-Key
+      in: header
+      # /!\ This path does not use the resolver
+      x-apikeyInfoFunc: datalayer_iam.authn.api_key_auth
