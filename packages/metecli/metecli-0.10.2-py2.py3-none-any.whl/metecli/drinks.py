@@ -1,0 +1,239 @@
+from .utils import (
+    true_false_to_yes_no, fuzzy_search, print_table, show_edit, yn, connect,
+    Question,
+)
+from .config import Config
+from .connection.connection import Connection
+from .connection.models import Drink
+
+from typing import Callable, Iterator
+import argparse
+import logging
+log = logging.getLogger(__name__)
+
+
+def setup_cmdline(global_subparsers: argparse._SubParsersAction) -> None:
+    parser = global_subparsers.add_parser(
+        "drinks", help="show or modify drinks",
+    )
+    subparsers = parser.add_subparsers(help="action")
+    parser_list = subparsers.add_parser("list", help="lists all drinks")
+    parser_list.set_defaults(func=list_drinks)
+    parser_add = subparsers.add_parser("add", help="creates a new drink")
+    parser_add.set_defaults(func=add_drink)
+    parser_show = subparsers.add_parser(
+        "show", help="display detailed information about a drink",
+    )
+    parser_show.add_argument("drink", help="the drink to display")
+    parser_show.set_defaults(func=show)
+    parser_modify = subparsers.add_parser("modify", help="edits a drink")
+    parser_modify.add_argument("drink", help="the drink to modify")
+    parser_modify.set_defaults(func=modify)
+    parser_barcodes = subparsers.add_parser(
+        "barcodes", help="manage barcodes for this drink",
+    )
+    parser_barcodes.add_argument("drink", help="the drink")
+    parser_barcodes.set_defaults(func=barcodes_list)
+    subparsers_barcodes = parser_barcodes.add_subparsers(help="action")
+    parser_barcodes_list = subparsers_barcodes.add_parser(
+        "list", help="list all barcodes for this drink",
+    )
+    parser_barcodes_list.set_defaults(func=barcodes_list)
+    parser_barcodes_add = subparsers_barcodes.add_parser(
+        "add", help="add a barcode for this drink",
+    )
+    parser_barcodes_add.add_argument("barcode", help="the barcode to add")
+    parser_barcodes_add.set_defaults(func=barcodes_add)
+    parser_barcodes_delete = subparsers_barcodes.add_parser(
+        "delete", help="deletes a barcode for this drink",
+    )
+    parser_barcodes_delete.add_argument(
+        "barcode", help="the barcode to delete",
+    )
+    parser_barcodes_delete.set_defaults(func=barcodes_delete)
+    parser_delete = subparsers.add_parser("delete", help="deletes a drink")
+    parser_delete.add_argument("drink", help="the drink to delete")
+    parser_delete.add_argument(
+        "--force", action="store_true", help="don't confirm the deletion",
+    )
+    parser_delete.set_defaults(func=delete)
+    parser.set_defaults(func=list_drinks)
+
+
+def list_drinks(args: argparse.Namespace, config: Config) -> None:
+    conn = connect(config)
+    drinks = conn.drinks()
+    print("All drinks:")
+    print_table(config,
+        sorted([(
+            drink.id,
+            drink.name,
+            drink.bottle_size,
+            drink.caffeine,
+            "{:.2f} €".format(drink.price),
+            true_false_to_yes_no(drink.active),
+        ) for drink in drinks], key=lambda entry: entry[0]),
+        headers=(
+            "ID",
+            "name",
+            "bottle size",
+            "caffeine",
+            "price",
+            "active?"
+        ),
+    )
+
+
+def with_drink(
+    func: Callable[[argparse.Namespace, Config, Connection, Drink], None]
+) -> Callable[[argparse.Namespace, Config], None]:
+    def new_func(args: argparse.Namespace, config: Config) -> None:
+        conn = connect(config)
+        drink = fuzzy_search(conn.drinks(), args.drink)
+        if not drink:
+            return
+        func(args, config, conn, drink)
+    return new_func
+
+
+@with_drink
+def show(
+    args: argparse.Namespace, config: Config, conn: Connection, drink: Drink
+) -> None:
+    print_drink(drink, config)
+
+
+def print_drink(drink: Drink, config: Config) -> None:
+    print_table(config, [
+            ("ID", drink.id),
+            ("name", drink.name),
+            ("price", "{:.2f} €".format(drink.price)),
+            ("bottle size", drink.bottle_size),
+            ("caffeine", drink.caffeine),
+            ("active?", true_false_to_yes_no(drink.active)),
+    ])
+
+
+def edit_drink(data: Drink) -> None:
+    show_edit(data, [
+        Question(
+            attribute="name",
+            message="Name",
+            description="the label says...",
+            required=True,
+        ),
+        Question(
+            attribute="price",
+            message="Price",
+            description="e.g. 1.50",
+            type=float,
+        ),
+        Question(
+            attribute="bottle_size",
+            message="Bottle size",
+            description="0.5 or 0.33?",
+            type=float,
+        ),
+        Question(
+            attribute="caffeine",
+            message="Caffeine",
+            description="in mg/100 ml",
+            type=float,
+        ),
+        Question(
+            attribute="active",
+            message="Active",
+            type=bool,
+        ),
+    ])
+
+
+def add_drink(args: argparse.Namespace, config: Config) -> None:
+    conn = connect(config)
+    data = conn.get_drink_defaults()
+    log.debug("Creating a new drink. Default data: %s", data)
+    edit_drink(data)
+    log.debug("Creating a new drink. Data: %s", data)
+    data = conn.create_drink(data)
+    log.info("Created a new drink. Data: %s", data)
+
+
+@with_drink
+def modify(
+    args: argparse.Namespace, config: Config, conn: Connection, data: Drink
+) -> None:
+    log.debug("Editing drink. Old data: %s", data)
+    edit_drink(data)
+    log.info("Editing drink. New data: %s", data)
+    conn.modify_drink(data)
+
+
+def _get_barcodes_for_drink(conn: Connection, drink: Drink) -> Iterator[str]:
+    all_barcodes = conn.barcodes()
+    for barcode in all_barcodes:
+        if barcode.drink == drink.id:
+            log.debug("Found barcode: %s", barcode.id)
+            yield barcode.id
+
+
+@with_drink
+def barcodes_list(
+    args: argparse.Namespace, config: Config, conn: Connection, drink: Drink
+) -> None:
+    barcodes = _get_barcodes_for_drink(conn, drink)
+    print_table(config, [(barcode,) for barcode in barcodes])
+
+
+@with_drink
+def barcodes_add(
+    args: argparse.Namespace, config: Config, conn: Connection, drink: Drink
+) -> None:
+    barcode = conn.get_barcode_defaults()
+    barcode.drink = drink.id
+    barcode.id = args.barcode
+    log.debug(
+        "Creating new barcode '%s' for drink '%s'.", barcode.id, drink.name,
+    )
+    barcode = conn.create_barcode(barcode)
+    log.info(
+        "Created new barcode '%s' for drink '%s'.", barcode.id, drink.name,
+    )
+
+
+@with_drink
+def barcodes_delete(
+    args: argparse.Namespace, config: Config, conn: Connection, drink: Drink
+) -> None:
+    barcodes = _get_barcodes_for_drink(conn, drink)
+    if args.barcode not in list(barcodes):
+        print("This barcode doesn't exist for this drink.")
+        return
+    conn.delete_barcode(args.barcode)
+    log.info("Deleted barcode '%s'.", args.barcode)
+
+
+@with_drink
+def delete(
+    args: argparse.Namespace, config: Config, conn: Connection, drink: Drink
+) -> None:
+    if not args.force:
+        log.debug("About to delete drink %s.", drink.name)
+        print("You are about to delete the drink '{}'.".format(drink.name))
+        if not yn("Are you sure about this?"):
+            log.debug("Deletion cancelled.")
+            return
+        given = input(
+            "Then please enter the name of the drink you want to delete: "
+        )
+        if given != drink.name:
+            log.debug("Deletion cancelled.")
+            print("This was not correct. Cancelling deletion.")
+            return
+        print("You are about to delete this drink:")
+        print_drink(drink, config)
+        print("This cannot be undone.")
+        if not yn("Are you really sure about this?"):
+            log.debug("Deletion cancelled.")
+            return
+    conn.delete_drink(drink.id)
+    log.info("Deleted drink '%s'.", drink.name)
