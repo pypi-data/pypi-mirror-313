@@ -1,0 +1,1 @@
+from .washingtonpost import WashingtonPostPlugin

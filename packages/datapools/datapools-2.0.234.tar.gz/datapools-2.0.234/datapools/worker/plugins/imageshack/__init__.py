@@ -1,0 +1,1 @@
+from .imageshack import ImageshackPlugin
