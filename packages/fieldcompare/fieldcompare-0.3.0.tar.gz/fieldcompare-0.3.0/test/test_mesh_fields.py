@@ -1,0 +1,144 @@
+# SPDX-FileCopyrightText: 2023 Dennis Gläser <dennis.glaeser@iws.uni-stuttgart.de>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+from os import remove
+from numpy import array, isnan
+from pytest import approx
+
+try:
+    import meshio
+    from fieldcompare.mesh import meshio_utils
+    _HAVE_MESHIO = True
+except ImportError:
+    _HAVE_MESHIO = False
+
+from fieldcompare import FieldDataComparator
+from fieldcompare.mesh import Mesh, MeshFields, CellTypes
+from fieldcompare.mesh import sort_points, merge
+from fieldcompare.predicates import ExactEquality
+
+from fieldcompare.mesh._permuted_mesh import PermutedMesh
+from fieldcompare.mesh._mesh_fields import TransformedMeshFields
+
+
+def test_mesh_fields():
+    mesh = Mesh(
+        points=[[float(i), 0.0] for i in range(3)],
+        connectivity=([(CellTypes.line, [[0, 1], [1, 2]])])
+    )
+    mesh_fields = MeshFields(
+        mesh=mesh,
+        point_data={"pd": [42.0, 43.0, 44.0]},
+        cell_data={"cd": [[42.0, 43.0]]}
+    )
+
+    assert sum(1 for _ in mesh_fields) == 2
+    for field in mesh_fields:
+        if "pd" in field.name:
+            assert ExactEquality()(field.values, [42.0, 43.0, 44.0])
+        if "cd" in field.name:
+            assert ExactEquality()(field.values, [42.0, 43.0])
+
+
+def test_permuted_point_mesh_field():
+    mesh = Mesh(
+        points=[[4.0 - float(i), 0.0] for i in range(3)],
+        connectivity=([(CellTypes.line, [[0, 1], [1, 2]])])
+    )
+    mesh_fields = MeshFields(
+        mesh=mesh,
+        point_data={"pd": [42.0, 43.0, 44.0]}
+    )
+    for field in sort_points(mesh_fields):
+        assert "pd" in field.name
+        assert ExactEquality()(field.values, [44.0, 43.0, 42.0])
+
+
+def test_permuted_cell_mesh_field():
+    mesh = Mesh(
+        points=[[4.0 - float(i), 0.0, 0.0] for i in range(3)],
+        connectivity=([(CellTypes.line, [[0, 1], [1, 2]])])
+    )
+    mesh_fields = MeshFields(
+        mesh=mesh,
+        cell_data={"cd": [[42.0, 43.0]]}
+    )
+
+    def _permutation(mesh):
+        return PermutedMesh(
+            mesh=mesh,
+            cell_permutations={CellTypes.line: [1, 0]}
+        )
+
+    for field in TransformedMeshFields(mesh_fields, _permutation):
+        assert "cd" in field.name
+        assert ExactEquality()(field.values, [43.0, 42.0])
+
+
+def test_merge_mesh_fields():
+    cell_type = CellTypes.line
+    point_data = array([42.0, 43.0, 44.0])
+    cell_data = array([42.0, 43.0])
+    mesh = Mesh(
+        points=[[4.0 - float(i), 0.0, 0.0] for i in range(3)],
+        connectivity=([(cell_type, array([[0, 1], [1, 2]]))])
+    )
+    mesh_fields = MeshFields(
+        mesh=mesh,
+        point_data={"pd": point_data},
+        cell_data={"cd": [cell_data]}
+    )
+
+    result = merge(mesh_fields, mesh_fields)
+    for i in range(len(result.domain.points)):
+        assert all(a == b for a, b in zip(
+            result.domain.points[i],
+            mesh.points[i % 3]
+        ))
+    assert list(result.domain.cell_types) == [cell_type]
+    for i in range(len(result.domain.connectivity(cell_type))):
+        mesh_corners = mesh.connectivity(cell_type)[i % 2]
+        result_corners = result.domain.connectivity(cell_type)[i]
+        offset = 0 if i < 2 else 3
+        assert [c for c in mesh_corners] == [c - offset for c in result_corners]
+
+    for field in result.point_fields:
+        for i, value in enumerate(field.values):
+            assert value == point_data[i % 3]
+
+    for field, _ in result.cell_fields_types:
+        for i, value in enumerate(field.values):
+            assert value == cell_data[i % 2]
+
+    if _HAVE_MESHIO:
+        tmp_file_name = "test_merge_mesh_fields_to_meshio.vtu"
+        as_meshio = meshio_utils.to_meshio(result)
+        as_meshio.write(tmp_file_name)
+        as_meshio = meshio.read(tmp_file_name)
+        as_fields = meshio_utils.from_meshio(as_meshio)
+        comparator = FieldDataComparator(as_fields, result)
+        assert comparator()
+        remove(tmp_file_name)
+
+
+def test_mesh_fields_diff():
+    mesh = Mesh(
+        points=[[float(i), 0.0] for i in range(3)],
+        connectivity=([(CellTypes.line, [[0, 1], [1, 2]])])
+    )
+    mesh_fields1 = MeshFields(
+        mesh=mesh,
+        point_data={"pd": [42.0, 43.0, 44.0]},
+        cell_data={"cd": [[42.0, 43.0]]}
+    )
+    mesh_fields2 = MeshFields(
+        mesh=mesh,
+        point_data={"pd": [41.0, 43.0, 44.0]}
+    )
+    diff_fields = mesh_fields1.diff_to(mesh_fields2)
+    point_fields = {f.name: f.values for f in diff_fields.point_fields}
+    cell_fields = {f.name: f.values for f in diff_fields.cell_fields}
+    assert len(point_fields) == 1
+    assert len(cell_fields) == 1
+    assert list(point_fields.values())[0] == approx([-1.0, 0.0, 0.0])
+    assert all(isnan(value) for value in list(cell_fields.values())[0])

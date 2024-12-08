@@ -1,0 +1,90 @@
+# SPDX-FileCopyrightText: 2023 Dennis Gläser <dennis.glaeser@iws.uni-stuttgart.de>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[project]
+name = "fieldcompare"
+description = "Read and compare numerical data against reference data using exact, fuzzy or custom comparison operations. Simplify your regression testing pipeline."
+version = "0.3.0"
+readme = "README.md"
+license = {file = "LICENSES/GPL-3.0-or-later.txt"}
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.26,<3;python_version>='3.12'",
+    "numpy>=1.24,<3;python_version<'3.12'",
+    "colorama>=0.4.3,<1"
+]
+authors = [
+  {name = "Dennis Gläser", email = "dennis.glaeser@iws.uni-stuttgart.de"}
+]
+maintainers = [
+  {name = "Dennis Gläser", email = "dennis.glaeser@iws.uni-stuttgart.de"}
+]
+keywords = [
+  "numerical data comparison",
+  "regression test",
+  "numerical simulation",
+  "finite elements",
+  "finite volumes"
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python"
+]
+
+[project.optional-dependencies]
+all = ["meshio[all]>=5.3,<6", "lz4<5"]
+
+[project.urls]
+homepage = "https://gitlab.com/dglaeser/fieldcompare"
+repository = "https://gitlab.com/dglaeser/fieldcompare"
+
+[project.scripts]
+fieldcompare = "fieldcompare._cli:main"
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+[[tool.mypy.overrides]]
+    module = ["colorama", "meshio", "meshio.xdmf"]
+    ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+junit_family = "xunit2"
+python_classes = "*Test"
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E","F","W","N","PL","NPY","PERF","RET","PT","B","SIM"]
+
+[tool.tox]
+legacy_tox_ini = """
+
+[tox]
+envlist = py38,py39,py310,py311,py312
+isolated_build = True
+
+[testenv]
+deps = -rrequirements.txt
+commands =
+  black --check --verbose -- fieldcompare
+  ruff check -- fieldcompare
+  pytest --verbose --junit-xml test_report.xml
+  mypy fieldcompare
+
+[testenv:coverage]
+deps =
+  -rrequirements.txt
+  pytest-cov
+commands =
+  pytest --cov={envsitepackagesdir}/fieldcompare \
+         --cov-report xml:coverage.xml \
+         --cov-report html:cov_report \
+         --cov-report term
+"""

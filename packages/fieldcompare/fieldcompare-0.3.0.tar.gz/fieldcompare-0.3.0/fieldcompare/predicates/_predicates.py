@@ -1,0 +1,287 @@
+# SPDX-FileCopyrightText: 2023 Dennis Gläser <dennis.glaeser@iws.uni-stuttgart.de>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+"""Predicate classes for comparing arrays"""
+
+from __future__ import annotations
+from dataclasses import dataclass
+
+from .._common import _default_base_tolerance
+from ..protocols import DynamicTolerance
+
+from .._format import as_warning
+from .._numpy_utils import ArrayTolerance, ArrayLike, Array, as_array, as_string, has_floats
+from .._numpy_utils import find_first_unequal
+from .._numpy_utils import find_first_fuzzy_unequal
+from .._numpy_utils import rel_diff, abs_diff
+from .._numpy_utils import max_column_elements, max_abs_element, max_abs_value, select_max_values
+
+
+_DEFAULT_BASE_TOLERANCE_FUNCTOR = _default_base_tolerance()
+
+
+class PredicateError(Exception):
+    """Exception raised for errors during predicate evaluation"""
+
+    pass
+
+
+class ScaledTolerance(DynamicTolerance):
+    """
+    Implementation of a :class:`.DynamicTolerance` that takes the maximum ocurring value in the
+    two fields to be compared (as an estimate for their magnitude), and scales it with the given
+    `base_tolerance`.
+
+    Args:
+        base_tolerance: The value with which to scale the magnitude.
+        use_component_magnitudes: If true, the magnitudes are determined separately for each component,
+                                  and if per-component tolerances are given, they are scaled individually
+    """
+
+    def __init__(
+        self,
+        base_tolerance: ArrayTolerance | None = None,
+        use_component_magnitudes: bool | None = False,
+    ) -> None:
+        self._base_tol = as_array(base_tolerance) if base_tolerance is not None else base_tolerance
+        self._use_component_magnitudes = use_component_magnitudes
+
+    def __call__(self, first: Array, second: Array) -> ArrayTolerance:
+        """Return an estimate for the absolute tolerance for comparing the given fields."""
+        if self._use_component_magnitudes:
+            return select_max_values(max_abs_element(first), max_abs_element(second)) * self._base_tol
+        return self._get_base_tol(first, second) * max(max_abs_value(first), max_abs_value(second))
+
+    def __str__(self) -> str:
+        return f"ScaledTolerance (base_tolerance={self._base_tol})"
+
+    def _get_base_tol(self, first: Array, second: Array) -> ArrayTolerance:
+        if self._base_tol is not None:
+            return self._base_tol
+        return as_array(_DEFAULT_BASE_TOLERANCE_FUNCTOR(first, second))
+
+
+@dataclass
+class PredicateResult:
+    """Contains the result of a predicate evaluation."""
+
+    value: bool
+    report: str = ""
+
+    def __bool__(self) -> bool:
+        """Return true if the predicate evaluation is considered successful"""
+        return self.value
+
+
+class ExactEquality:
+    """Compares arrays for exact equality"""
+
+    def __call__(self, first: ArrayLike, second: ArrayLike) -> PredicateResult:
+        """
+        Evaluate the predicate for the two given arrays:
+
+        Args:
+            first: The first array.
+            second: The second array.
+        """
+        try:
+            return self._check(first, second)
+        except Exception as e:
+            raise PredicateError(f"Exact equality check failed with exception: {e}\n") from None
+
+    def __str__(self) -> str:
+        return "ExactEquality"
+
+    def _check(self, first: ArrayLike, second: ArrayLike) -> PredicateResult:
+        first, second = _reshape(first, second)
+        shape_check = _check_shapes(first, second)
+        if not shape_check:
+            return shape_check
+
+        unequals = find_first_unequal(first, second)
+        if unequals is not None:
+            val1, val2 = unequals
+            return PredicateResult(
+                value=False,
+                report=_get_equality_fail_report(val1, val2),
+            )
+        return _success_result(first, second)
+
+
+class FuzzyEquality:
+    """
+    Compares arrays for fuzzy equality.
+    Arrays are considered fuzzy equal if for each pair of scalars the following relation holds:
+    `abs(a - b) <= max(_rtol*max(a, b), _atol)`. Note that tolerances can either be given directly as
+    `float` or `ndarray`, in which case `_rtol = rel_tol` and `_atol = abs_tol`, or,
+    as instances of :class:`.DynamicTolerance`, in which case the values actually used are determined
+    from the fields to be compared.
+
+    Args:
+        rel_tol: The relative tolerance to be used.
+        abs_tol: The absolute tolerance to be used.
+    """
+
+    def __init__(
+        self,
+        rel_tol: DynamicTolerance | ArrayTolerance = _DEFAULT_BASE_TOLERANCE_FUNCTOR,
+        abs_tol: DynamicTolerance | ArrayTolerance = 0.0,
+    ) -> None:
+        self._rel_tol = rel_tol
+        self._abs_tol = abs_tol
+        self._last_used_rel_tol: ArrayTolerance | None = None
+        self._last_used_abs_tol: ArrayTolerance | None = None
+
+    @property
+    def relative_tolerance(self) -> DynamicTolerance | ArrayTolerance:
+        """Return the relative tolerance used for fuzzy comparisons."""
+        return self._rel_tol
+
+    @relative_tolerance.setter
+    def relative_tolerance(self, value: DynamicTolerance | ArrayTolerance) -> None:
+        """
+        Set the relative tolerance to be used for fuzzy comparisons.
+
+        Args:
+            value: The relative tolerance to be used.
+        """
+        self._rel_tol = value
+
+    @property
+    def absolute_tolerance(self) -> DynamicTolerance | ArrayTolerance:
+        """Return the absolute tolerance used for fuzzy comparisons."""
+        return self._abs_tol
+
+    @absolute_tolerance.setter
+    def absolute_tolerance(self, value: DynamicTolerance | ArrayTolerance) -> None:
+        """
+        Set the absolute tolerance to be used for fuzzy comparisons.
+
+        Args:
+            value: The absolute tolerance to be used.
+        """
+        self._abs_tol = value
+
+    def __call__(self, first: ArrayLike, second: ArrayLike) -> PredicateResult:
+        """
+        Evaluate the predicate for the two given arrays:
+
+        Args:
+            first: The first array.
+            second: The second array.
+        """
+        try:
+            return self._check(first, second)
+        except Exception as e:
+            raise PredicateError(f"Fuzzy comparison failed with exception: {e}") from None
+
+    def __str__(self) -> str:
+        return f"FuzzyEquality ({self._tolerance_info()})"
+
+    def _tolerance_info(self) -> str:
+        def _tolinfo(tol, last_used) -> str:
+            if isinstance(tol, DynamicTolerance):
+                return f"dynamic (last used: {as_string(last_used) if last_used is not None else None})"
+            return f"{as_string(tol)}"
+
+        return (
+            f"abs_tol: {_tolinfo(self._abs_tol, self._last_used_abs_tol)}, "
+            f"rel_tol: {_tolinfo(self._rel_tol, self._last_used_rel_tol)}"
+        )
+
+    def _get_tol(self, tol: ArrayTolerance | DynamicTolerance, first: Array, second: Array) -> ArrayTolerance:
+        if isinstance(tol, DynamicTolerance):
+            return tol(first, second)
+        return tol
+
+    def _check(self, first: ArrayLike, second: ArrayLike) -> PredicateResult:
+        first, second = _reshape(first, second)
+        shape_check = _check_shapes(first, second)
+        if not shape_check:
+            return shape_check
+
+        self._last_used_rel_tol = self._get_tol(self._rel_tol, first, second)
+        self._last_used_abs_tol = self._get_tol(self._abs_tol, first, second)
+        unequals = find_first_fuzzy_unequal(first, second, self._last_used_rel_tol, self._last_used_abs_tol)
+        if unequals is not None:
+            val1, val2 = unequals
+            deviation_in_percent = _compute_deviation_in_percent(val1, val2)
+            return PredicateResult(value=False, report=_get_equality_fail_report(val1, val2, deviation_in_percent))
+        max_abs_diffs = _compute_max_abs_diffs(first, second)
+        if max_abs_diffs is not None:
+            max_abs_diff_str = as_string(max_abs_diffs)
+            max_abs_diff_str = max_abs_diff_str.replace("\n", " ")
+            return PredicateResult(value=True, report="Maximum absolute difference: {}".format(max_abs_diff_str))
+        return _success_result(first, second)
+
+
+class DefaultEquality(FuzzyEquality):
+    """Default choice for equality predicates. Checks fuzzy or exact depending on the data type."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    def __call__(self, first, second) -> PredicateResult:
+        """
+        Evaluate the predicate for the two given arrays:
+
+        Args:
+            first: The first array.
+            second: The second array.
+        """
+        first = as_array(first)
+        second = as_array(second)
+        if has_floats(first) or has_floats(second):
+            return FuzzyEquality.__call__(self, first, second)
+        return ExactEquality()(first, second)
+
+    def __str__(self) -> str:
+        return f"DefaultEquality ({self._tolerance_info()})"
+
+
+def _get_equality_fail_report(val1, val2, deviation_in_percent=None) -> str:
+    result = f"Deviation above tolerance detected -> {as_string(val1)} vs. {as_string(val2)}"
+    if deviation_in_percent is not None:
+        result += f" ({as_string(deviation_in_percent, digits=2)} %)"
+    return result
+
+
+def _compute_deviation_in_percent(val1, val2):
+    try:
+        return rel_diff(val1, val2) * 100.0
+    except Exception:
+        return None
+
+
+def _compute_max_abs_diffs(first, second):
+    try:
+        return max_column_elements(abs_diff(first, second))
+    except Exception:
+        return None
+
+
+def _success_result(first: Array, second: Array) -> PredicateResult:
+    if first.size == 0 and second.size == 0:
+        return PredicateResult(True, report=as_warning("Arrays are empty"))
+    return PredicateResult(True, report="All values have compared equal")
+
+
+def _reshape(arr1: ArrayLike, arr2: ArrayLike) -> tuple[Array, Array]:
+    arr1 = as_array(arr1)
+    arr2 = as_array(arr2)
+    dim1 = len(arr1.shape)
+    dim2 = len(arr2.shape)
+
+    # reshape the arrays in case scalars are compared against 1d vectors
+    if dim1 == dim2 + 1 and arr1.shape[-1] == 1:
+        arr2 = arr2.reshape(*arr2.shape, 1)
+    if dim2 == dim1 + 1 and arr2.shape[-1] == 1:
+        arr1 = arr1.reshape(*arr1.shape, 1)
+
+    return arr1, arr2
+
+
+def _check_shapes(arr1: Array, arr2: Array) -> PredicateResult:
+    if arr1.shape != arr2.shape:
+        return PredicateResult(value=False, report=f"Array shapes not equal: {arr1.shape} / {arr2.shape}")
+    return PredicateResult(True)
