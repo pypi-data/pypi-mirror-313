@@ -1,0 +1,90 @@
+Metadata-Version: 2.3
+Name: kiln-ai
+Version: 0.7.0
+Summary: Kiln AI
+Project-URL: Homepage, https://getkiln.ai
+Project-URL: Repository, https://github.com/Kiln-AI/kiln
+Project-URL: Documentation, https://kiln-ai.github.io/Kiln/kiln_core_docs/kiln_ai.html
+Project-URL: Issues, https://github.com/Kiln-AI/kiln/issues
+Author-email: "Steve Cosman, Chesterfield Laboratories Inc" <scosman@users.noreply.github.com>
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: >=3.10
+Requires-Dist: coverage>=7.6.4
+Requires-Dist: jsonschema>=4.23.0
+Requires-Dist: langchain-aws>=0.2.4
+Requires-Dist: langchain-fireworks>=0.2.5
+Requires-Dist: langchain-groq>=0.2.0
+Requires-Dist: langchain-ollama>=0.2.0
+Requires-Dist: langchain-openai>=0.2.4
+Requires-Dist: langchain>=0.3.5
+Requires-Dist: openai>=1.53.0
+Requires-Dist: pdoc>=15.0.0
+Requires-Dist: pydantic>=2.9.2
+Requires-Dist: pytest-cov>=6.0.0
+Requires-Dist: pyyaml>=6.0.2
+Requires-Dist: typing-extensions>=4.12.2
+Description-Content-Type: text/markdown
+
+# Kiln AI Core Library
+
+<p align="center">
+    <picture>
+        <img width="205" alt="Kiln AI Logo" src="https://github.com/user-attachments/assets/5fbcbdf7-1feb-45c9-bd73-99a46dd0a47f">
+    </picture>
+</p>
+
+[![PyPI - Version](https://img.shields.io/pypi/v/kiln-ai.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/kiln-ai)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kiln-ai.svg)](https://pypi.org/project/kiln-ai)
+[![Docs](https://img.shields.io/badge/docs-pdoc-blue)](https://kiln-ai.github.io/Kiln/kiln_core_docs/index.html)
+
+---
+
+## Installation
+
+```console
+pip install kiln_ai
+```
+
+## About
+
+This package is the Kiln AI core library. There is also a separate desktop application and server package. Learn more about Kiln AI at [getkiln.ai](https://getkiln.ai)
+
+- Github: [github.com/Kiln-AI/kiln](https://github.com/Kiln-AI/kiln)
+- Core Library Docs: [https://kiln-ai.github.io/Kiln/kiln_core_docs/index.html](https://kiln-ai.github.io/Kiln/kiln_core_docs/index.html)
+
+## Quick Start
+
+```python
+from kiln_ai.datamodel import Project
+
+print("Reading Kiln project")
+project = Project.load_from_file("path/to/project.kiln")
+print("Project: ", project.name, " - ", project.description)
+
+task = project.tasks()[0]
+print("Task: ", task.name, " - ", task.description)
+print("Total dataset size:", len(task.runs()))
+
+# ... app specific code using the typed kiln datamodel
+
+# Alternatively, load data into pandas or a similar tool:
+import glob
+import json
+import pandas as pd
+from pathlib import Path
+
+dataitem_glob = str(task.path.parent) + "/runs/*/task_run.kiln"
+
+dfs = []
+for file in glob.glob(dataitem_glob):
+    js = json.loads(Path(file).read_text())
+    df = pd.json_normalize(js)
+    dfs.append(df)
+final_df = pd.concat(dfs, ignore_index=True)
+print(final_df)
+```
