@@ -1,0 +1,54 @@
+[project]
+name = "wpiformat"
+description = "Linters and formatters for ensuring WPILib's source code conforms to its style guide"
+dynamic = [ "version" ]
+readme = "README.rst"
+dependencies = [
+  "autoflake==2.3.1",
+  "black==24.3.0",
+  "clang-format==18.1.1",
+  "clang-tidy==18.1.1",
+  "gersemi==0.11.0",
+  "isort==5.11.2",
+  "regex==2024.9.11"
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "License :: OSI Approved :: BSD License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering",
+  "Programming Language :: Python :: 3"
+]
+
+  [project.license]
+  text = "BSD-3-Clause"
+
+  [[project.maintainers]]
+  name = "Tyler Veness"
+  email = "calcmogul@gmail.com"
+
+  [project.urls]
+  Homepage = "https://github.com/wpilibsuite/styleguide"
+
+[project.scripts]
+wpiformat = "wpiformat:main"
+
+[build-system]
+requires = [
+  "clang-format==18.1.1",
+  "clang-tidy==18.1.1",
+  "regex==2024.9.11",
+  "setuptools>=61.0",
+  "setuptools-git-versioning"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools-git-versioning]
+enabled = true
+version_callback = "wpiformat.version:get_version"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [ "wpiformat/test" ]
