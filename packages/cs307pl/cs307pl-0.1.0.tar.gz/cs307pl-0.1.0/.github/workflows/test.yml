@@ -1,0 +1,16 @@
+on: [push]
+name: Test Package
+jobs:
+  test-package:
+    name: test-package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: setup uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: setup python
+        run: uv python install
+      - name: install project
+        run: uv sync --all-extras --dev
+      - name: test package
+        run: uv run pytest
